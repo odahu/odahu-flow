@@ -1,0 +1,311 @@
+import java.text.SimpleDateFormat
+
+class Globals {
+    static String rootCommit = null
+    static String buildVersion = null
+    static String dockerLabels = null
+    static String dockerCacheArg = null
+}
+
+pipeline {
+    agent { label 'ec2builder'}
+
+    options{
+        buildDiscarder(logRotator(numToKeepStr: '35', artifactNumToKeepStr: '35'))
+    }
+    environment {
+        /// Input parameters
+        //Enable docker cache parameter
+        param_enable_docker_cache = "${params.EnableDockerCache}"
+        //Build major version release and optionally push it to public repositories
+        param_stable_release = "${params.StableRelease}"
+        //Release version to tag all artifacts to
+        param_release_version = "${params.ReleaseVersion}"
+        //Git Branch to build package from
+        param_git_branch = "${params.GitBranch}"
+        //Legion CICD repo url (for pipeline methods import)
+        param_legion_cicd_repo = "${params.LegionCicdRepo}"
+        //Legion repo branch (tag or branch name)
+        param_legion_cicd_branch = "${params.LegionCicdBranch}"
+        //Push release git tag
+        param_push_git_tag = "${params.PushGitTag}"
+        //Rewrite git tag i exists
+        param_force_tag_push = "${params.ForceTagPush}"
+        //Push release to master bransh
+        param_update_master = "${params.UpdateMaster}"
+        //Upload legion python package to pypi
+        param_upload_legion_package = "${params.UploadLegionPackage}"
+        //Set next releases version explicitly
+        param_next_version = "${params.NextVersion}"
+        // Update version string
+        param_update_version_string = "${params.UpdateVersionString}"
+        // Release version to be used as docker cache source
+        param_docker_cache_source = "${params.DockerCacheSource}"
+        //Artifacts storage parameters
+        param_helm_repo_git_url = "${params.HelmRepoGitUrl}"
+        param_helm_repo_git_branch = "${params.HelmRepoGitBranch}"
+        param_helm_repository = "${params.HelmRepository}"
+        param_pypi_repository = "${params.PyPiRepository}"  // TODO: remove
+        param_local_pypi_distribution_target_name = "${params.LocalPyPiDistributionTargetName}" // TODO: remove
+        param_test_pypi_distribution_target_name = "${params.testPyPiDistributionTargetName}" // TODO: remove
+        param_public_pypi_distribution_target_name = "${params.PublicPyPiDistributionTargetName}" // TODO: remove
+        param_pypi_distribution_target_name = "${params.PyPiDistributionTargetName}" // TODO: remove
+        param_jenkins_plugins_repository_store = "${params.JenkinsPluginsRepositoryStore}"
+        param_jenkins_plugins_repository = "${params.JenkinsPluginsRepository}"
+        param_docker_registry = "${params.DockerRegistry}"
+        param_docker_hub_registry = "${params.DockerHubRegistry}"
+        param_git_deploy_key = "${params.GitDeployKey}"
+        legionCicdGitlabKey = "${params.legionCicdGitlabKey}"
+        ///Job parameters
+        sharedLibPath = "legion-cicd/pipelines/legionPipeline.groovy"
+        pathToCharts= "${WORKSPACE}/helms"
+        gcpCredential = "${params.GCPCredential}"
+        documentationLocation = "${params.DocumentationGCS}"
+
+        // NPM
+        param_npm_public_url = "${params.NpmPublicUrl}"
+        param_npm_public_creds = "npm_public_cred"
+        param_npm_private_url = "${params.NpmPrivateUrl}"
+        param_npm_private_creds = "nexus-local-repository"
+        param_npm_publishing_enabled = "${NpmPublishingEnabled}"
+
+        // PyPi
+        param_pypi_public_url = "${params.PyPiPublicUrl}"
+        param_pypi_public_creds = "pypi_public_cred"
+        param_pypi_private_url = "${params.PyPiPrivateUrl}"
+        param_pypi_private_creds = "nexus-local-repository"
+        param_pypi_publishing_enabled = "${PyPiPublishingEnabled}"
+
+        param_dockerhub_publishing_enabled = "${params.DockerHubPublishingEnabled}"
+    }
+
+    stages {
+        stage('Checkout and set build vars') {
+            steps {
+                cleanWs()
+                checkout scm
+                script {
+                    sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
+
+                    // import Legion components
+                    sshagent(["${env.legionCicdGitlabKey}"]) {
+                        print ("Checkout Legion-cicd repo")
+                        sh"""#!/bin/bash -ex
+                        mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
+                        if [ ! -d "legion-cicd" ]; then
+                            git clone ${env.param_legion_cicd_repo} legion-cicd
+                        fi
+                        cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
+                        """
+
+                        print ("Load odahuflow pipeline common library")
+                        cicdLibrary = load "${env.sharedLibPath}"
+                    }
+
+                    verFiles = [
+                            'odahuFlow/cli/odahuflow/cli/version.py',
+                            'odahuFlow/sdk/odahuflow/sdk/version.py',
+                            'odahuFlow/robot/odahuflow/robot/version.py',
+                    ]
+                    cicdLibrary.setBuildMeta(verFiles)
+                }
+            }
+        }
+
+        // Set Git Tag in case of stable release
+        stage('Set GIT release Tag'){
+            steps {
+                script {
+                    print (env.param_stable_release)
+                    if (env.param_stable_release.toBoolean() && env.param_push_git_tag.toBoolean()){
+                        cicdLibrary.setGitReleaseTag("${env.param_git_deploy_key}")
+                    }
+                    else {
+                        print("Skipping release git tag push")
+                    }
+                }
+            }
+        }
+
+        stage("Build Docker images & Run Tests") {
+            parallel {
+                stage('Build pipeline Docker agent') {
+                    steps {
+                        script {
+                            cicdLibrary.buildLegionImage('odahuflow-pipeline-agent', '.', 'containers/pipeline-agent/Dockerfile')
+                            cicdLibrary.uploadDockerImage('odahuflow-pipeline-agent', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Build Fluentd Docker image") {
+                    steps {
+                        script {
+                            cicdLibrary.buildLegionImage('odahuflow-fluentd', 'containers/fluentd')
+                        }
+                    }
+                }
+                stage("Build model trainer and operator images") {
+                    steps {
+                        script {
+                            cicdLibrary.buildLegionImage('odahuflow-operator-dependencies', ".", "containers/operator/Dockerfile", "--target builder")
+                            cicdLibrary.buildLegionImage('odahuflow-operator', ".", "containers/operator/Dockerfile", "--target operator --cache-from odahu/odahuflow-operator-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildLegionImage('odahuflow-edi', ".", "containers/operator/Dockerfile", "--target edi --cache-from odahu/odahuflow-operator-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildLegionImage('odahuflow-service-catalog', ".", "containers/operator/Dockerfile", "--target service-catalog --cache-from odahu/odahuflow-operator-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildLegionImage('odahuflow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahuflow-operator-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildLegionImage('odahuflow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahuflow-operator-dependencies:${Globals.buildVersion}")
+                        }
+                    }
+                }
+                stage("Build feedback images") {
+                    steps {
+                        script {
+                            cicdLibrary.buildLegionImage('odahuflow-feedback-dependencies', ".", "containers/feedback-aggregator/Dockerfile", "--target builder")
+                            cicdLibrary.buildLegionImage('odahuflow-feedback-aggregator', ".", "containers/feedback-aggregator/Dockerfile", "--target aggregator --cache-from odahu/odahuflow-feedback-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildLegionImage('odahuflow-feedback-collector', ".", "containers/feedback-aggregator/Dockerfile", "--target collector --cache-from odahu/odahuflow-feedback-dependencies:${Globals.buildVersion}")
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Upload artifacts'){
+            parallel {
+                stage("Upload PyPi Legion packages") {
+                    steps {
+                        script {
+                            cicdLibrary.publishPythonPackage("odahuFlow/cli", env.param_pypi_private_creds, env.param_pypi_private_url, env.param_pypi_publishing_enabled, env.param_pypi_public_creds, env.param_pypi_public_url)
+                            cicdLibrary.publishPythonPackage("odahuFlow/sdk", env.param_pypi_private_creds, env.param_pypi_private_url, env.param_pypi_publishing_enabled, env.param_pypi_public_creds, env.param_pypi_public_url)
+                        }
+                    }
+                }
+                stage('Package and upload helm charts'){
+                    steps {
+                        script {
+                            cicdLibrary.uploadHelmCharts(env.pathToCharts)
+                        }
+                    }
+                }
+                stage("Upload model trainer image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-model-trainer', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Upload model packager image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-model-packager', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Upload model service catalog image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-service-catalog', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Upload operator image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-operator', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Upload feedback aggregator image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-feedback-aggregator', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Upload feedback collector image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-feedback-collector', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage('Upload Edi Docker image') {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-edi', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage('Upload Fluentd Docker image') {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-fluentd', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage('Upload Operator dependencies') {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-operator-dependencies', false)
+                        }
+                    }
+                }
+                stage('Upload Feedback dependencies') {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-feedback-dependencies', false)
+                        }
+                    }
+                }
+            }
+        }
+
+        stage("Update Legion version string") {
+            steps {
+                script {
+                    if (env.param_stable_release.toBoolean() && env.param_update_version_string.toBoolean()) {
+                        cicdLibrary.updateVersionString(env.versionFile)
+                    }
+                    else {
+                        print("Skipping version string update")
+                    }
+                }
+            }
+        }
+
+        stage('Update Master branch'){
+            steps {
+                script {
+                    if (env.param_update_master.toBoolean()){
+                        cicdLibrary.updateMasterBranch()
+                    }
+                    else {
+                        print("Skipping Master branch update")
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                // import Legion components
+                sshagent(["${env.legionCicdGitlabKey}"]) {
+                    print ("Checkout Legion-cicd repo")
+                    sh"""#!/bin/bash -ex
+                      mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
+                      if [ ! -d "legion-cicd" ]; then
+                      git clone ${env.param_legion_cicd_repo} legion-cicd
+                      fi
+                      cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
+                    """
+                    print ("Load legion pipeline common library")
+                    legion = load "${env.sharedLibPath}"
+                }
+                dir("${WORKSPACE}/legion-cicd") {
+                    cicdLibrary.notifyBuild(currentBuild.currentResult)
+                }
+            }
+            deleteDir()
+        }
+    }
+}

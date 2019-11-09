@@ -1,0 +1,2808 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is an API Gateway server.",
+        "title": "API Gateway",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/v1/configuration": {
+            "get": {
+                "description": "Get the Odahuflow service configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Configuration"
+                ],
+                "summary": "Get the Odahuflow service configuration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Configuration"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a Configuration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Configuration"
+                ],
+                "summary": "Update a Odahuflow service configuration",
+                "parameters": [
+                    {
+                        "description": "Create a Configuration",
+                        "name": "configuration",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/Configuration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/connection": {
+            "get": {
+                "description": "Get list of Connections",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Connection"
+                ],
+                "summary": "Get list of Connections",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Toolchain",
+                        "name": "type",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Connection"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a Connection. Results is updated Connection.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Connection"
+                ],
+                "summary": "Update a Connection",
+                "parameters": [
+                    {
+                        "description": "Update a Connection",
+                        "name": "connection",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/Connection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a Connection. Results is created Connection.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Connection"
+                ],
+                "summary": "Create a Connection",
+                "parameters": [
+                    {
+                        "description": "Create a Connection",
+                        "name": "connection",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/Connection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Connection"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/connection/{id}": {
+            "get": {
+                "description": "Get a Connection by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Connection"
+                ],
+                "summary": "Get a Connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Connection"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a Connection by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Connection"
+                ],
+                "summary": "Delete a Connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/connection/{id}/decrypted": {
+            "get": {
+                "description": "Get a decrypted Connection by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Connection"
+                ],
+                "summary": "Get a decrypted Connection",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Connection id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Decrypt token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Connection"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/feedback": {
+            "post": {
+                "description": "Send feedback about previously made prediction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Feedback"
+                ],
+                "summary": "Send feedback about previously made prediction",
+                "parameters": [
+                    {
+                        "description": "Feedback Request",
+                        "name": "feedback",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/feedback.ModelFeedbackRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model name",
+                        "name": "model-name",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model version",
+                        "name": "model-version",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Request ID",
+                        "name": "request-id",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/feedback.ModelFeedbackResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/deployment": {
+            "get": {
+                "description": "Get list of Model deployments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Get list of Model deployments",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ModelDeployment"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a Model  Results is updated Model",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Update a Model deployment",
+                "parameters": [
+                    {
+                        "description": "Update a Model deployment",
+                        "name": "md",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelDeployment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelDeployment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a Model  Results is created Model",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Create a Model deployment",
+                "parameters": [
+                    {
+                        "description": "Create a Model deployment",
+                        "name": "md",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelDeployment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ModelDeployment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/deployment/{id}": {
+            "get": {
+                "description": "Get a Model deployment by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Get a Model deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model deployment id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelDeployment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a Model deployment by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Delete a Model deployment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model deployment id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/packaging": {
+            "get": {
+                "description": "Get list of Model Packagings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Get list of Model Packagings",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ModelPackaging"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a Model Packaging. Results is updated Model Packaging.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Update a Model Packaging",
+                "parameters": [
+                    {
+                        "description": "Update a Model Packaging",
+                        "name": "MP",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelPackaging"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelPackaging"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a Model Packaging. Results is created Model Packaging.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Create a Model Packaging",
+                "parameters": [
+                    {
+                        "description": "Create a Model Packaging",
+                        "name": "MP",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelPackaging"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ModelPackaging"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/packaging/{id}": {
+            "get": {
+                "description": "Get a Model Packaging by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Get a Model Packaging",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model Packaging id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelPackaging"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a Model Packaging by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Delete a Model Packaging",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model Packaging id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/packaging/{id}/log": {
+            "get": {
+                "description": "Stream logs from model packaging pod",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Stream logs from model packaging pod",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "follow logs",
+                        "name": "follow",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Packaging id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/packaging/{id}/result": {
+            "put": {
+                "description": "Save a Model Packaging by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packaging"
+                ],
+                "summary": "Save a Model Packaging result",
+                "parameters": [
+                    {
+                        "description": "Model Packaging result",
+                        "name": "MP",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelPackagingResult"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Packaging id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ModelPackagingResult"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/route": {
+            "get": {
+                "description": "Get list of Model routes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Get list of Model routes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ModelRoute"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a Model route. Results is updated Model route.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Update a Model route",
+                "parameters": [
+                    {
+                        "description": "Update a Model route",
+                        "name": "mr",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelRoute"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelRoute"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a Model route. Results is created Model route.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Create a Model route",
+                "parameters": [
+                    {
+                        "description": "Create a Model route",
+                        "name": "mr",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelRoute"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ModelRoute"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/route/{id}": {
+            "get": {
+                "description": "Get a Model route by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Get a Model route",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model route id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelRoute"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a Model route by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Delete a Model route",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model route id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/training": {
+            "get": {
+                "description": "Get list of Model Trainings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Get list of Model Trainings",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Model name",
+                        "name": "model_name",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Model version",
+                        "name": "model_version",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Toolchain name",
+                        "name": "toolchain",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ModelTraining"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a Model Training. Results is updated Model Training.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Update a Model Training",
+                "parameters": [
+                    {
+                        "description": "Update a Model Training",
+                        "name": "mt",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelTraining"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelTraining"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a Model Training. Results is created Model Training.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Create a Model Training",
+                "parameters": [
+                    {
+                        "description": "Create a Model Training",
+                        "name": "mt",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ModelTraining"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ModelTraining"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/training/{id}": {
+            "get": {
+                "description": "Get a Model Training by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Get a Model Training",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model Training id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelTraining"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Get a Model Training by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Get a Model Training",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model Training id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/training/{id}/log": {
+            "get": {
+                "description": "Stream logs from model training pod",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Stream logs from model training pod",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "follow logs",
+                        "name": "follow",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Training id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/training/{id}/result": {
+            "put": {
+                "description": "Save a Model Training by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Training"
+                ],
+                "summary": "Save a Model Training result",
+                "parameters": [
+                    {
+                        "description": "Model Training result",
+                        "name": "MP",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/TrainingResult"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Model Training id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TrainingResult"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/packaging/integration": {
+            "get": {
+                "description": "Get list of PackagingIntegrations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packager"
+                ],
+                "summary": "Get list of PackagingIntegrations",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PackagingIntegration"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a PackagingIntegration. Results is updated PackagingIntegration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packager"
+                ],
+                "summary": "Update a PackagingIntegration",
+                "parameters": [
+                    {
+                        "description": "Update a PackagingIntegration",
+                        "name": "pi",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/PackagingIntegration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/PackagingIntegration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a PackagingIntegration. Results is created PackagingIntegration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packager"
+                ],
+                "summary": "Create a PackagingIntegration",
+                "parameters": [
+                    {
+                        "description": "Create a PackagingIntegration",
+                        "name": "ti",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/PackagingIntegration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/PackagingIntegration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/packaging/integration/{id}": {
+            "get": {
+                "description": "Get a PackagingIntegration by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packager"
+                ],
+                "summary": "Get a PackagingIntegration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PackagingIntegration id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/PackagingIntegration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a PackagingIntegration by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Packager"
+                ],
+                "summary": "Delete a PackagingIntegration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "PackagingIntegration id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/toolchain/integration": {
+            "get": {
+                "description": "Get list of ToolchainIntegrations",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Toolchain"
+                ],
+                "summary": "Get list of ToolchainIntegrations",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ToolchainIntegration"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a ToolchainIntegration. Results is updated ToolchainIntegration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Toolchain"
+                ],
+                "summary": "Update a ToolchainIntegration",
+                "parameters": [
+                    {
+                        "description": "Update a ToolchainIntegration",
+                        "name": "ti",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ToolchainIntegration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ToolchainIntegration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a ToolchainIntegration. Results is created ToolchainIntegration.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Toolchain"
+                ],
+                "summary": "Create a ToolchainIntegration",
+                "parameters": [
+                    {
+                        "description": "Create a ToolchainIntegration",
+                        "name": "ti",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/ToolchainIntegration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/ToolchainIntegration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/toolchain/integration/{id}": {
+            "get": {
+                "description": "Get a ToolchainIntegration by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Toolchain"
+                ],
+                "summary": "Get a ToolchainIntegration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ToolchainIntegration id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ToolchainIntegration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a ToolchainIntegration by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Toolchain"
+                ],
+                "summary": "Delete a ToolchainIntegration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ToolchainIntegration id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "CommonConfiguration": {
+            "type": "object",
+            "properties": {
+                "externalUrls": {
+                    "description": "The collection of external urls, for example: metrics, edge, service catalog and so on",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ExternalUrl"
+                    }
+                }
+            }
+        },
+        "Configuration": {
+            "type": "object",
+            "properties": {
+                "common": {
+                    "description": "Common secretion of configuration",
+                    "type": "object",
+                    "$ref": "#/definitions/CommonConfiguration"
+                },
+                "training": {
+                    "description": "Configuration describe training process",
+                    "type": "object",
+                    "$ref": "#/definitions/TrainingConfiguration"
+                }
+            }
+        },
+        "ExternalUrl": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Human readable name",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Link to a resource",
+                    "type": "string"
+                }
+            }
+        },
+        "TrainingConfiguration": {
+            "type": "object",
+            "properties": {
+                "metricUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "Connection": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Connection id",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Connection specification",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionSpec"
+                },
+                "status": {
+                    "description": "Connection status",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionStatus"
+                }
+            }
+        },
+        "ModelDeployment": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Model deployment id",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Model deployment specification",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeploymentSpec"
+                },
+                "status": {
+                    "description": "Model deployment status",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeploymentStatus"
+                }
+            }
+        },
+        "ModelRoute": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Model route id",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Model route specification",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelRouteSpec"
+                },
+                "status": {
+                    "description": "Model route status",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelRouteStatus"
+                }
+            }
+        },
+        "feedback.ModelFeedbackRequest": {
+            "type": "object"
+        },
+        "feedback.ModelFeedbackResponse": {
+            "type": "object"
+        },
+        "JsonSchema": {
+            "type": "object",
+            "properties": {
+                "properties": {
+                    "description": "Properties configuration",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Property"
+                    }
+                },
+                "required": {
+                    "description": "List of required properties",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "K8sPackager": {
+            "type": "object",
+            "properties": {
+                "modelHolder": {
+                    "description": "Connection where a trained model artifact is stored",
+                    "type": "object",
+                    "$ref": "#/definitions/Connection"
+                },
+                "modelPackaging": {
+                    "description": "Model Packaging",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelPackaging"
+                },
+                "packagingIntegration": {
+                    "description": "Packaging integration",
+                    "type": "object",
+                    "$ref": "#/definitions/PackagingIntegration"
+                },
+                "targets": {
+                    "description": "List of targets with appropriate connections",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PackagerTarget"
+                    }
+                },
+                "trainingZipName": {
+                    "description": "Name of trained model artifact name",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelPackaging": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Model packaging id",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Model packaging specification",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelPackagingSpec"
+                },
+                "status": {
+                    "description": "Model packaging status",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelPackagingStatus"
+                }
+            }
+        },
+        "ModelPackagingSpec": {
+            "type": "object",
+            "properties": {
+                "arguments": {
+                    "description": "List of arguments. This parameter depends on the specific packaging integration",
+                    "type": "object"
+                },
+                "artifactName": {
+                    "description": "Training output artifact name",
+                    "type": "string"
+                },
+                "image": {
+                    "description": "Image name. Packaging integration image will be used if this parameters is missed",
+                    "type": "string"
+                },
+                "integrationName": {
+                    "description": "Packaging integration ID",
+                    "type": "string"
+                },
+                "resources": {
+                    "description": "Resources for packager container\nThe same format like k8s uses for pod resources.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
+                "targets": {
+                    "description": "List of targets. This parameter depends on the specific packaging integration",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Target"
+                    }
+                }
+            }
+        },
+        "PackagerTarget": {
+            "type": "object",
+            "properties": {
+                "connection": {
+                    "description": "A Connection for this target",
+                    "type": "object",
+                    "$ref": "#/definitions/Connection"
+                },
+                "name": {
+                    "description": "Target name",
+                    "type": "string"
+                }
+            }
+        },
+        "PackagingIntegration": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Packaging integration id",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Packaging integration specification",
+                    "type": "object",
+                    "$ref": "#/definitions/PackagingIntegrationSpec"
+                },
+                "status": {
+                    "description": "Packaging integration status",
+                    "type": "object",
+                    "$ref": "#/definitions/PackagingIntegrationStatus"
+                }
+            }
+        },
+        "PackagingIntegrationSpec": {
+            "type": "object",
+            "properties": {
+                "defaultImage": {
+                    "description": "Default packaging Docker image",
+                    "type": "string"
+                },
+                "entrypoint": {
+                    "description": "Path to binary which starts a packaging process",
+                    "type": "string"
+                },
+                "privileged": {
+                    "description": "Enable docker privileged flag",
+                    "type": "boolean"
+                },
+                "schema": {
+                    "description": "Schema which describes targets and arguments for specific packaging integration",
+                    "type": "object",
+                    "$ref": "#/definitions/Schema"
+                }
+            }
+        },
+        "Parameter": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Parameter name",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Parameter value",
+                    "type": "object"
+                }
+            }
+        },
+        "Property": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Property name",
+                    "type": "string"
+                },
+                "parameters": {
+                    "description": "List of property parameters",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Parameter"
+                    }
+                }
+            }
+        },
+        "Schema": {
+            "type": "object",
+            "properties": {
+                "arguments": {
+                    "description": "Arguments schema",
+                    "type": "object",
+                    "$ref": "#/definitions/JsonSchema"
+                },
+                "targets": {
+                    "description": "Targets schema",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TargetSchema"
+                    }
+                }
+            }
+        },
+        "HTTPResult": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Success of error message",
+                    "type": "string"
+                }
+            }
+        },
+        "InputDataBindingDir": {
+            "type": "object",
+            "properties": {
+                "dataBinding": {
+                    "description": "Connection specific for data",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionSpec"
+                },
+                "localPath": {
+                    "description": "Local path",
+                    "type": "string"
+                },
+                "remotePath": {
+                    "description": "Remote path",
+                    "type": "string"
+                }
+            }
+        },
+        "K8sTrainer": {
+            "type": "object",
+            "properties": {
+                "inputData": {
+                    "description": "Connection for training data",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/InputDataBindingDir"
+                    }
+                },
+                "modelTraining": {
+                    "description": "Model training",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelTraining"
+                },
+                "outputConn": {
+                    "description": "Connection for trained model artifact",
+                    "type": "object",
+                    "$ref": "#/definitions/Connection"
+                },
+                "toolchainIntegration": {
+                    "description": "Toolchain integration",
+                    "type": "object",
+                    "$ref": "#/definitions/ToolchainIntegration"
+                },
+                "vcs": {
+                    "description": "Connection for source code",
+                    "type": "object",
+                    "$ref": "#/definitions/Connection"
+                }
+            }
+        },
+        "ModelTraining": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Model training ID",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Model training specification",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelTrainingSpec"
+                },
+                "status": {
+                    "description": "Model training status",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelTrainingStatus"
+                }
+            }
+        },
+        "ToolchainIntegration": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Toolchain integration id",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Toolchain integration specification",
+                    "type": "object",
+                    "$ref": "#/definitions/ToolchainIntegrationSpec"
+                },
+                "status": {
+                    "description": "Toolchain integration status",
+                    "type": "object",
+                    "$ref": "#/definitions/ToolchainIntegrationStatus"
+                }
+            }
+        },
+        "ConnectionSpec": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "Custom description",
+                    "type": "string"
+                },
+                "keyID": {
+                    "description": "Key ID",
+                    "type": "string"
+                },
+                "keySecret": {
+                    "description": "SSH or service account secret",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Password",
+                    "type": "string"
+                },
+                "publicKey": {
+                    "description": "SSH public key",
+                    "type": "string"
+                },
+                "reference": {
+                    "description": "VCS reference",
+                    "type": "string"
+                },
+                "region": {
+                    "description": "AWS region or GCP project",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "Service account role",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Required value. Available values:\n  * s3\n  * gcs\n  * azureblob\n  * git\n  * docker",
+                    "type": "string"
+                },
+                "uri": {
+                    "description": "URI. It is required value",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Username",
+                    "type": "string"
+                },
+                "webUILink": {
+                    "description": "Custom web UI link",
+                    "type": "string"
+                }
+            }
+        },
+        "ConnectionStatus": {
+            "type": "object",
+            "properties": {
+                "secretName": {
+                    "description": "Kubernetes secret name",
+                    "type": "string"
+                },
+                "serviceAccount": {
+                    "description": "Kubernetes service account",
+                    "type": "string"
+                }
+            }
+        },
+        "DataBindingDir": {
+            "type": "object",
+            "properties": {
+                "connName": {
+                    "description": "Connection name for data",
+                    "type": "string"
+                },
+                "localPath": {
+                    "description": "Local training path",
+                    "type": "string"
+                },
+                "remotePath": {
+                    "description": "Overwrite remote data path in connection",
+                    "type": "string"
+                }
+            }
+        },
+        "EnvironmentVariable": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of an environment variable",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Value of an environment variable",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelDeploymentSpec": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "description": "Annotations for model pods.",
+                    "type": "object"
+                },
+                "image": {
+                    "description": "Model Docker image",
+                    "type": "string"
+                },
+                "imagePullConnID": {
+                    "description": "If pulling of your image requires authorization, then you should specify the connection id",
+                    "type": "string"
+                },
+                "livenessProbeInitialDelay": {
+                    "description": "Initial delay for liveness probe of model pod",
+                    "type": "integer"
+                },
+                "maxReplicas": {
+                    "description": "Maximum number of pods for model. By default the max replicas parameter equals 1.",
+                    "type": "integer"
+                },
+                "minReplicas": {
+                    "description": "Minimum number of pods for model. By default the min replicas parameter equals 0.",
+                    "type": "integer"
+                },
+                "readinessProbeInitialDelay": {
+                    "description": "Initial delay for readiness probe of model pod",
+                    "type": "integer"
+                },
+                "resources": {
+                    "description": "Resources for model deployment\nThe same format like k8s uses for pod resources.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
+                "roleName": {
+                    "description": "Initial delay for readiness probe of model pod",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelDeploymentStatus": {
+            "type": "object",
+            "properties": {
+                "availableReplicas": {
+                    "description": "Number of available pods",
+                    "type": "integer"
+                },
+                "deployment": {
+                    "description": "The model k8s deployment name",
+                    "type": "string"
+                },
+                "lastRevisionName": {
+                    "description": "Last applied ready knative revision",
+                    "type": "string"
+                },
+                "lastUpdatedTime": {
+                    "description": "Time when credentials was updated",
+                    "type": "string"
+                },
+                "replicas": {
+                    "description": "Expected number of pods under current load",
+                    "type": "integer"
+                },
+                "service": {
+                    "description": "The model k8s service name",
+                    "type": "string"
+                },
+                "serviceURL": {
+                    "description": "The model k8s service name",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "The state of a model \n  \"Processing\" - A model was not deployed. Because some parameters of the\n                 custom resource are wrong. For example, there is not a model\n                 image in a Docker registry.\n  \"Ready\" - A model was deployed successfully.",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelDeploymentTarget": {
+            "type": "object",
+            "properties": {
+                "mdName": {
+                    "description": "Model Deployment name",
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "The proportion of traffic to be forwarded to the Model Deployment.",
+                    "type": "integer"
+                }
+            }
+        },
+        "ModelIdentity": {
+            "type": "object",
+            "properties": {
+                "artifactNameTemplate": {
+                    "description": "Template of output artifact name",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Model name",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "Model version",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelPackagingResult": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of a result. It can be docker image, path to s3 artifact and so on",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Specific value",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelPackagingStatus": {
+            "type": "object",
+            "properties": {
+                "exitCode": {
+                    "description": "Pod exit code",
+                    "type": "integer"
+                },
+                "message": {
+                    "description": "Pod last log",
+                    "type": "string"
+                },
+                "podName": {
+                    "description": "Pod package for name",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Pod reason",
+                    "type": "string"
+                },
+                "results": {
+                    "description": "List of packaing results",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ModelPackagingResult"
+                    }
+                },
+                "state": {
+                    "description": "Model Packaging State",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelRouteSpec": {
+            "type": "object",
+            "properties": {
+                "mirror": {
+                    "description": "Mirror HTTP traffic to a another Model deployment in addition to forwarding\nthe requests to the model deployments.",
+                    "type": "string"
+                },
+                "modelDeployments": {
+                    "description": "A http rule can forward traffic to Model Deployments.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ModelDeploymentTarget"
+                    }
+                },
+                "urlPrefix": {
+                    "description": "URL prefix for model  For example: /custom/test\nPrefix must start with slash\n\"/feedback\" and \"/model\" are reserved for internal usage",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelRouteStatus": {
+            "type": "object",
+            "properties": {
+                "edgeUrl": {
+                    "description": "Full url with prefix to a model deployment service",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "State of Model Route",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelTrainingSpec": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "data": {
+                    "description": "Input data for a training",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DataBindingDir"
+                    }
+                },
+                "entrypoint": {
+                    "description": "Model training file. It can be python\\bash script or jupiter notebook",
+                    "type": "string"
+                },
+                "envs": {
+                    "description": "Custom environment variables that should be set before entrypoint invocation.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/EnvironmentVariable"
+                    }
+                },
+                "hyperParameters": {
+                    "description": "Model training hyperParameters in parameter:value format",
+                    "type": "object"
+                },
+                "image": {
+                    "description": "Train image",
+                    "type": "string"
+                },
+                "model": {
+                    "description": "Model Identity",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelIdentity"
+                },
+                "reference": {
+                    "description": "VCS Reference",
+                    "type": "string"
+                },
+                "resources": {
+                    "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
+                "toolchain": {
+                    "description": "IntegrationName of toolchain",
+                    "type": "string"
+                },
+                "vcsName": {
+                    "description": "Name of Connection resource. Must exists",
+                    "type": "string"
+                },
+                "workDir": {
+                    "description": "Directory with model scripts/files in a git repository",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelTrainingStatus": {
+            "type": "object",
+            "properties": {
+                "artifacts": {
+                    "description": "List of training results",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TrainingResult"
+                    }
+                },
+                "exitCode": {
+                    "description": "Pod exit code",
+                    "type": "integer"
+                },
+                "message": {
+                    "description": "Pod last log",
+                    "type": "string"
+                },
+                "podName": {
+                    "description": "Pod package for name",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Pod reason",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "Model Packaging State",
+                    "type": "string"
+                }
+            }
+        },
+        "PackagingIntegrationStatus": {
+            "type": "object"
+        },
+        "ResourceList": {
+            "type": "object",
+            "properties": {
+                "cpu": {
+                    "description": "Read more about CPU resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu",
+                    "type": "string"
+                },
+                "gpu": {
+                    "description": "Read more about GPU resource here https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins",
+                    "type": "string"
+                },
+                "memory": {
+                    "description": "Read more about memory resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory",
+                    "type": "string"
+                }
+            }
+        },
+        "ResourceRequirements": {
+            "type": "object",
+            "properties": {
+                "limits": {
+                    "description": "Limits describes the maximum amount of compute resources allowed.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceList"
+                },
+                "requests": {
+                    "description": "Requests describes the minimum amount of compute resources required.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceList"
+                }
+            }
+        },
+        "Target": {
+            "type": "object",
+            "properties": {
+                "connectionName": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "TargetSchema": {
+            "type": "object",
+            "properties": {
+                "connectionTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "required": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "ToolchainIntegrationSpec": {
+            "type": "object",
+            "properties": {
+                "additionalEnvironments": {
+                    "description": "Additional environments for a training process",
+                    "type": "object"
+                },
+                "defaultImage": {
+                    "description": "Default training Docker image",
+                    "type": "string"
+                },
+                "entrypoint": {
+                    "description": "Path to binary which starts a training process",
+                    "type": "string"
+                }
+            }
+        },
+        "ToolchainIntegrationStatus": {
+            "type": "object"
+        },
+        "TrainingResult": {
+            "type": "object",
+            "properties": {
+                "artifactName": {
+                    "description": "Trained artifact name",
+                    "type": "string"
+                },
+                "commitID": {
+                    "description": "VCS commit",
+                    "type": "string"
+                },
+                "runId": {
+                    "description": "Mlflow run ID",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

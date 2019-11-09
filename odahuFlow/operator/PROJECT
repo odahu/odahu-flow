@@ -1,0 +1,3 @@
+version: "1"
+domain: odahu.org
+repo: github.com/odahu/odahu-flow/odahuFlow/operator

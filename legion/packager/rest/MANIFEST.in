@@ -1,3 +1,0 @@
-include Pipfile*
-include requirements.txt
-include README.md

@@ -19,7 +19,7 @@ cover/
 *.whl
 
 legion-activate.sh
-legion/legion/data/Pipfile.lock
+odahuFlow/legion/data/Pipfile.lock
 docs/out/
 .doctrees/
 
@@ -31,7 +31,7 @@ cover.out
 *.tmp.out
 
 # Chart dependencies
-/helms/legion/charts/
+/helms/odahuFlow/charts/
 /helms/legion-core/charts/
 
 # Created by .ignore support plugin (hsz.mobi)
@@ -149,7 +149,7 @@ tests/robot/*.html
 tests/robot/*.xml
 tests/python/cover/*
 
-legion/tests/__init__\.py
+odahuFlow/tests/__init__\.py
 
 .git
 
@@ -159,8 +159,8 @@ log.html
 output.xml
 report.html
 
-legion/operator/vendor/
-legion/operator/config/
-legion/feedback-aggregator/vendor/
+odahuFlow/operator/vendor/
+odahuFlow/operator/config/
+odahuFlow/feedback-aggregator/vendor/
 /.hiera_keys/
 /.secrets/

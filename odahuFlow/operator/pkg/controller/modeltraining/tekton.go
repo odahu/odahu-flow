@@ -1,0 +1,168 @@
+/*
+ * Copyright 2019 EPAM Systems
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package modeltraining
+
+import (
+	"path"
+
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/odahuFlow/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/odahuFlow/operator/pkg/apis/training"
+	operator_conf "github.com/odahu/odahu-flow/odahuFlow/operator/pkg/config/operator"
+	training_conf "github.com/odahu/odahu-flow/odahuFlow/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/odahuFlow/operator/pkg/odahuflow"
+	"github.com/odahu/odahu-flow/odahuFlow/operator/pkg/repository/util/kubernetes"
+	"github.com/spf13/viper"
+	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+)
+
+const (
+	pathToTrainerBin = "/opt/odahuFlow/trainer"
+	workspacePath    = "/workspace"
+	outputDir        = "output"
+	configVolumeName = "config"
+	configDir        = "/etc/odahuflow/"
+	configFileName   = "config.yaml"
+	configSecretName = "odahuflow-training-config" //nolint:gosec
+)
+
+func generateTrainerTaskSpec(
+	trainingCR *odahuflowv1alpha1.ModelTraining,
+	toolchainIntegration *training.ToolchainIntegration,
+) (*tektonv1alpha1.TaskSpec, error) {
+	mainTrainerStep, err := createMainTrainerStep(trainingCR, toolchainIntegration)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tektonv1alpha1.TaskSpec{
+		Steps: []tektonv1alpha1.Step{
+			createInitTrainerStep(trainingCR.Name),
+			mainTrainerStep,
+			createResultTrainerStep(trainingCR.Name),
+		},
+		Volumes: []corev1.Volume{
+			{
+				Name: configVolumeName,
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: configSecretName,
+					},
+				},
+			},
+		},
+	}, nil
+}
+
+func createInitTrainerStep(mtID string) tektonv1alpha1.Step {
+	return tektonv1alpha1.Step{
+		Container: corev1.Container{
+			Name:    odahuflow.TrainerSetupStep,
+			Image:   viper.GetString(training_conf.ModelBuilderImage),
+			Command: []string{pathToTrainerBin},
+			Args: []string{
+				"setup",
+				"--mt-file",
+				path.Join(workspacePath, mtConfig),
+				"--mt-id",
+				mtID,
+				"--output-connection-name",
+				viper.GetString(training_conf.OutputConnectionName),
+				"--edi-url",
+				viper.GetString(operator_conf.EdiURL),
+				"--config",
+				path.Join(configDir, configFileName),
+			},
+			Resources: trainerResources,
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      configVolumeName,
+					MountPath: configDir,
+				},
+			},
+		},
+	}
+}
+
+func createMainTrainerStep(
+	train *odahuflowv1alpha1.ModelTraining,
+	trainingIntegration *training.ToolchainIntegration) (tektonv1alpha1.Step, error) {
+	trainResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(train.Spec.Resources)
+	if err != nil {
+		log.Error(err, "The training resources is not valid",
+			"mt_id", train.Name, "resources", trainResources)
+
+		return tektonv1alpha1.Step{}, err
+	}
+
+	envs := make([]corev1.EnvVar, 0, len(trainingIntegration.Spec.AdditionalEnvironments))
+	for name, value := range trainingIntegration.Spec.AdditionalEnvironments {
+		envs = append(envs, corev1.EnvVar{
+			Name:  name,
+			Value: value,
+		})
+	}
+
+	return tektonv1alpha1.Step{
+		Container: corev1.Container{
+			Name:    odahuflow.TrainerTrainStep,
+			Image:   train.Spec.Image,
+			Command: []string{trainingIntegration.Spec.Entrypoint},
+			Env:     envs,
+			Args: []string{
+				"--verbose",
+				"--mt",
+				path.Join(workspacePath, mtConfig),
+				"--target",
+				path.Join(workspacePath, outputDir),
+			},
+			Resources: trainResources,
+		},
+	}, nil
+}
+
+func createResultTrainerStep(mtID string) tektonv1alpha1.Step {
+	return tektonv1alpha1.Step{
+		Container: corev1.Container{
+			Name:    odahuflow.TrainerResultStep,
+			Image:   viper.GetString(training_conf.ModelBuilderImage),
+			Command: []string{pathToTrainerBin},
+			Args: []string{
+				"result",
+				"--mt-file",
+				path.Join(workspacePath, mtConfig),
+				"--mt-id",
+				mtID,
+				"--output-connection-name",
+				viper.GetString(training_conf.OutputConnectionName),
+				"--edi-url",
+				viper.GetString(operator_conf.EdiURL),
+				"--output-dir",
+				path.Join(workspacePath, outputDir),
+				"--config",
+				path.Join(configDir, configFileName),
+			},
+			Resources: trainerResources,
+			VolumeMounts: []corev1.VolumeMount{
+				{
+					Name:      configVolumeName,
+					MountPath: configDir,
+				},
+			},
+		},
+	}
+}

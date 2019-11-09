@@ -16,22 +16,19 @@
 
 FROM golang:1.11.6-alpine3.9 as builder
 
-ENV FEEDBACK_DIR="/go/src/github.com/legion-platform/legion/legion/feedback-aggregator"
+ENV FEEDBACK_DIR="/go/src/github.com/odahu/odahu-flow/odahuFlow/feedback-aggregator"
 WORKDIR "${FEEDBACK_DIR}"
 
 RUN apk add -u ca-certificates git gcc musl-dev make && \
     wget https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep && \
-    chmod +x /usr/local/bin/dep && \
-    wget https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz && \
-    tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/ && mv /usr/local/gotestsum* /usr/bin/gotestsum && \
-    go get github.com/t-yuki/gocover-cobertura
+    chmod +x /usr/local/bin/dep
 
-COPY legion/feedback-aggregator/Gopkg.toml legion/feedback-aggregator/Gopkg.lock ./
+COPY odahuFlow/feedback-aggregator/Gopkg.toml odahuFlow/feedback-aggregator/Gopkg.lock ./
 RUN dep ensure -vendor-only
 
-COPY legion/feedback-aggregator/ ./
+COPY odahuFlow/feedback-aggregator/ ./
 
-RUN GOOS=linux GOARCH=amd64 make build-all && (make test || true)
+RUN GOOS=linux GOARCH=amd64 make build-all
 
 #########################################################
 #########################################################
@@ -39,10 +36,10 @@ RUN GOOS=linux GOARCH=amd64 make build-all && (make test || true)
 
 FROM alpine:3.9 as aggregator
 
-ENV LEGION_DIR="/opt/legion"
+ENV ODAHUFLOW_DIR="/opt/odahuFlow"
 
-WORKDIR "${LEGION_DIR}"
-COPY --from=builder /go/src/github.com/legion-platform/legion/legion/feedback-aggregator/aggregator ./
+WORKDIR "${ODAHUFLOW_DIR}"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/feedback-aggregator/aggregator ./
 CMD ["./aggregator"]
 
 #########################################################
@@ -51,8 +48,8 @@ CMD ["./aggregator"]
 
 FROM alpine:3.9 as collector
 
-ENV LEGION_DIR="/opt/legion"
+ENV ODAHUFLOW_DIR="/opt/odahuFlow"
 
-WORKDIR "${LEGION_DIR}"
-COPY --from=builder /go/src/github.com/legion-platform/legion/legion/feedback-aggregator/collector ./
+WORKDIR "${ODAHUFLOW_DIR}"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/feedback-aggregator/collector ./
 CMD ["./collector"]
