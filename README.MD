@@ -1,6 +1,6 @@
 ![LegionLogo](docs/images/legion-logo-h.png)
 
-The Legion is an open source project dedicated to simplify automation of AI/ML products life cycle for small and large-scale enterprise systems.
+The ODAHU is an open source project dedicated to simplify automation of data analytics and AI/ML products life cycle for small and large-scale enterprise systems.
 
 ## Overview
 
@@ -30,11 +30,11 @@ The Legion is an open source project dedicated to simplify automation of AI/ML p
 Please find it here [CHANGELOG](CHANGELOG.md)
 
 ## Backlog and Kanban Board
-* [Backlog](https://github.com/legion-platform/legion/issues)
-* [Kanban Board](https://github.com/orgs/legion-platform/projects/1)
+* [Backlog](https://github.com/odahu/odahu/issues)
+* [Kanban Board](https://github.com/orgs/odahu/projects/1)
 
 ## License
 [Apache 2.0](LICENSE)
 
 ## Contribution
-If you are interested in contribution to project feel free to create an issue in [backlog](https://github.com/legion-platform/legion/issues), create a pull request.
+If you are interested in contribution to project feel free to create an issue in [backlog](https://github.com/odahu/odahu/issues), create a pull request.
