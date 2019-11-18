@@ -1,0 +1,37 @@
+{{- if .Values.rbac -}}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ .Release.Name }}-model-packager"
+  namespace: {{ .Values.config.packaging.namespace | quote }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "update"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ .Release.Name }}-model-packager"
+  namespace: {{ .Values.config.packaging.namespace | quote }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ .Values.config.packaging.namespace | quote }}
+    name: "{{ .Release.Name }}-model-packager"
+roleRef:
+  kind: Role
+  name: "{{ .Release.Name }}-model-packager"
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ .Release.Name }}-model-packager"
+  namespace: {{ .Values.config.packaging.namespace | quote }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+{{-  end  }}

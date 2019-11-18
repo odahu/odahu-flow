@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-PROJECTS="legion/sdk legion/cli legion/robot legion/packager/rest containers/pipeline-agent legion/jupyterlab-plugin"
+PROJECTS="odahuFlow/sdk odahuFlow/cli odahuFlow/robot containers/pipeline-agent"
 ROOT_DIR="$(pwd)"
 
 for project in ${PROJECTS}

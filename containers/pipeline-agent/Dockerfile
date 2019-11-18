@@ -45,23 +45,18 @@ RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSI
     mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm
 
 # Install python dependecies
-COPY containers/pipeline-agent/Pipfile containers/pipeline-agent/Pipfile.lock /opt/legion/legion/
-RUN  cd /opt/legion/legion && pipenv install --system --three --dev
-COPY legion/sdk/Pipfile legion/sdk/Pipfile.lock /opt/legion/legion/sdk/
-RUN  cd /opt/legion/legion/sdk && pipenv install --system --three --dev
-COPY legion/cli/Pipfile legion/cli/Pipfile.lock /opt/legion/legion/cli/
-RUN  cd /opt/legion/legion/cli && pipenv install --system --three --dev
-COPY legion/packager/rest/Pipfile legion/packager/rest/Pipfile.lock /opt/legion/legion/packager/rest/
-RUN  cd /opt/legion/legion/packager/rest && pipenv install --system --three --dev
-COPY legion/robot/Pipfile legion/robot/Pipfile.lock /opt/legion/legion/robot/
-RUN  cd /opt/legion/legion/robot && pipenv install --system --three --dev
-COPY legion/jupyterlab-plugin/Pipfile legion/jupyterlab-plugin/Pipfile.lock /opt/legion/legion/jupyterlab-plugin/
-RUN  cd /opt/legion/legion/jupyterlab-plugin && pipenv install --system --three --dev
+COPY containers/pipeline-agent/Pipfile containers/pipeline-agent/Pipfile.lock /opt/odahuFlow/odahuFlow/
+RUN  cd /opt/odahuFlow/odahuFlow && pipenv install --system --three --dev
+COPY odahuFlow/sdk/Pipfile odahuFlow/sdk/Pipfile.lock /opt/odahuFlow/odahuFlow/sdk/
+RUN  cd /opt/odahuFlow/odahuFlow/sdk && pipenv install --system --three --dev
+COPY odahuFlow/cli/Pipfile odahuFlow/cli/Pipfile.lock /opt/odahuFlow/odahuFlow/cli/
+RUN  cd /opt/odahuFlow/odahuFlow/cli && pipenv install --system --three --dev
+COPY odahuFlow/robot/Pipfile odahuFlow/robot/Pipfile.lock /opt/odahuFlow/odahuFlow/robot/
+RUN  cd /opt/odahuFlow/odahuFlow/robot && pipenv install --system --three --dev
 
-COPY scripts /opt/legion/scripts
-RUN chmod -R a+x /opt/legion/scripts/*
-COPY Makefile /opt/legion/Makefile
-COPY docs /opt/legion/docs
-COPY legion /opt/legion/legion
+COPY scripts /opt/odahuFlow/scripts
+RUN chmod -R a+x /opt/odahuFlow/scripts/*
+COPY Makefile /opt/odahuFlow/Makefile
+COPY odahuFlow /opt/odahuFlow/odahuFlow
 
-RUN cd /opt/legion/ && make BUILD_PARAMS="--no-deps" install-all
+RUN cd /opt/odahuFlow/ && make BUILD_PARAMS="--no-deps" install-all

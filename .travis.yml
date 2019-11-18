@@ -1,0 +1,107 @@
+language: python
+dist: bionic
+python: 3.6
+services:
+  - docker
+install: skip
+
+matrix:
+  include:
+    ################
+    ### SECURITY ###
+    ################
+    - language: bash
+      sudo: true
+      before_script:
+        - sudo make install-vulnerabilities-checker
+      script:
+        - make check-vulnerabilities
+    ###################
+    ### PYTHON LIBS ###
+    ###################
+    - language: python
+      python: 3.6
+      before_script:
+        - make install-all
+        - make install-python-tests
+      script:
+        - make python-unittests
+    - language: python
+      python: 3.6
+      before_script:
+        - make install-all
+        - make install-python-linter
+      script:
+        - make python-lint
+    #####################
+    ### DOCKER IMAGES ###
+    #####################
+    - language: bash
+      script:
+        - make docker-build-pipeline-agent
+    - language: bash
+      script:
+        - make docker-build-feedback-aggregator
+        - make docker-build-feedback-collector
+    - language: bash
+      script:
+        - make docker-build-fluentd
+    - language: bash
+      script:
+        - make docker-build-edi
+        - make docker-build-operator
+        - make docker-build-model-trainer
+        - make docker-build-model-packager
+        - make docker-build-service-catalog
+    ################
+    ### OPERATOR ###
+    ################
+    - language: go
+      go: 1.12.x
+      sudo: true
+      before_script:
+        - sudo apt-get update -qq
+        - sudo apt-get install wget make gcc
+        - wget -q https://github.com/golangci/golangci-lint/releases/download/v1.21.0/golangci-lint-1.21.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
+        - sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
+        - sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
+        - sudo wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep
+        - sudo chmod +x /usr/local/bin/dep
+        - wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
+        - sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
+        - sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
+        - wget -q https://github.com/swaggo/swag/releases/download/v1.6.3/swag_1.6.3_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
+        - sudo tar -zxvf /tmp/swag.tar.gz -C /usr/local/
+        - sudo mv /usr/local/swag /usr/bin/
+        - wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+        - sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+        - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+        - go get github.com/t-yuki/gocover-cobertura
+      script:
+        - cd odahuFlow/operator
+        - dep ensure -v -vendor-only
+        - make test
+        - make lint
+    ###########################
+    ### FEEDBACK AGGREGATOR ###
+    ###########################
+    - language: go
+      go: 1.12.x
+      sudo: true
+      before_script:
+        - sudo apt-get update -qq
+        - sudo apt-get install wget make gcc
+        - wget -q https://github.com/golangci/golangci-lint/releases/download/v1.21.0/golangci-lint-1.21.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
+        - sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
+        - sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
+        - sudo wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep
+        - sudo chmod +x /usr/local/bin/dep
+        - wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+        - sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+        - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+        - go get github.com/t-yuki/gocover-cobertura
+      script:
+        - cd odahuFlow/feedback-aggregator
+        - dep ensure -v -vendor-only
+        - make test
+        - make lint

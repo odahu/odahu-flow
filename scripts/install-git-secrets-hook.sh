@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
 VERSION="1.2.1"
-BIN_DIRECTORY=$(dirname $(which git))
+BIN_DIRECTORY=$(dirname "$(command -v git)")
 BIN_PATH="$BIN_DIRECTORY/git-secrets"
 DOWNLOAD_URL="https://raw.githubusercontent.com/awslabs/git-secrets/$VERSION/git-secrets"
-ME="tools/$(basename "$0")"
+ME="scripts/$(basename "$0")"
 
 install_binaries()
 {
-    wget $DOWNLOAD_URL -O $BIN_PATH
+    wget "${DOWNLOAD_URL}" -O "${BIN_PATH}"
     RETCODE=$?
     if [ "$RETCODE" -ne "0" ]; then
-        echo "Please run this script in privileged mode or install git-secrets v. $VERSION manually"
-        echo "wget $DOWNLOAD_URL -O $BIN_PATH"
-        echo "chmod a+x $BIN_PATH"
+        echo "Please run this script in privileged mode or install git-secrets v. ${VERSION} manually"
+        echo "wget ${DOWNLOAD_URL} -O ${BIN_PATH}"
+        echo "chmod a+x ${BIN_PATH}"
         exit 1
     fi
-    chmod a+x $BIN_PATH
+    chmod a+x "${BIN_PATH}"
 }
 
 install_hooks()
@@ -37,21 +37,21 @@ install_hooks()
     echo "Flushing git-secrets configuration"
     git config --remove-section secrets || true
 
-    cat "$DIR/.gitforbidden" | while read line
+    while read -r line
     do
         if [[ ! "$line" =~ ^#.* ]]; then
             echo "Adding forbidden regex pattern: $line"
             git secrets --add "$line"
         fi
-    done
+    done < "$DIR/.gitforbidden"
 
-    cat "$DIR/.gitwhitelisted" | while read line
+    while read -r line
     do
         if [[ ! "$line" =~ ^#.* ]]; then
             echo "Adding allowed regex pattern: $line"
             git secrets --add -a "$line"
         fi
-    done
+    done < "$DIR/.gitwhitelisted"
 
     echo "Adding aws patterns"
     git secrets --register-aws

@@ -1,0 +1,63 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: "edge"
+  namespace: {{ .Values.edge.knative_namespace }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: "edge"
+  namespace: {{ .Values.config.deployment.namespace | quote }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{- include "odahuflow.ingress-default-root-annotations" . | nindent 4 }}
+    {{- range $key, $value := .Values.edge.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- include "odahuflow.ingress-auth-token-annotations" . | nindent 4 }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
+  name: "{{ .Release.Name }}-edge"
+  namespace: {{ .Values.feedback.istio_namespace }}
+spec:
+  rules:
+    - host: {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") }}
+      http:
+        paths:
+          - backend:
+              serviceName: "istio-ingressgateway"
+              servicePort: 80
+    {{- if (ternary $.Values.edge.ingress.tlsEnabled $.Values.ingress.tlsEnabled (hasKey $.Values.edge.ingress "tlsEnabled")) }}
+  tls:
+    - hosts:
+        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") | quote }}
+      secretName: {{ include "odahuflow.ingress-tls-secret-name" (dict "local" .Values.edge.ingress "root" . ) | quote }}
+      {{- end }}

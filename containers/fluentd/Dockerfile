@@ -18,7 +18,7 @@ FROM fluent/fluentd:v1.7
 
 USER root
 
-ARG REPO_URL=https://github.com/legion-platform/fluent-plugin-azure-storage-append-blob.git
+ARG REPO_URL=https://github.com/odahu/fluent-plugin-azure-storage-append-blob.git
 ARG GIT_PARAMS="-c advice.detachedHead=false clone --branch 0.1.1"
 
 # Install required fluentd plugins
