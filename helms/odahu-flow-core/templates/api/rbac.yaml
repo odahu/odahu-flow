@@ -1,0 +1,276 @@
+{{ if .Values.api.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: "{{ .Release.Name }}-api"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - pods/log
+    verbs:
+      - get
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - connections
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - connections/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - apps
+    resources:
+      - deployments/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modeldeployments
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modeldeployments/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modelpackagings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modelpackagings/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - connecitons
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modelroutes
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modelroutes/status
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modeltrainings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modeltrainings/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modelpackagings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modelpackagings/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - packagingintegrations
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - packagingintegrations/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - toolchainintegrations
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - toolchainintegrations/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: "{{ .Release.Name }}-api"
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ .Release.Namespace }}
+    name: "{{ .Release.Name }}-api"
+roleRef:
+  kind: ClusterRole
+  name: "{{ .Release.Name }}-api"
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ .Release.Name }}-api"
+{{- end }}
+
+
+

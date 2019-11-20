@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ .Release.Name }}-operator"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+spec:
+  serviceName: "odahu-flow-operator"
+  replicas: {{ .Values.operator.server.replicas }}
+  selector:
+    matchLabels:
+      {{- include "odahuflow.helm-labels-for-search" (dict "component" "operator" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 8 }}
+    spec:
+      {{- if .Values.rbac }}
+      serviceAccountName: "{{ .Release.Name }}-operator"
+      {{- end }}
+      volumes:
+        - name: config
+          secret:
+            secretName: "{{ .Release.Name }}-operator-config"
+      containers:
+      - image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.operator.server "tpl" "%sodahu-flow-operator:%s") }}"
+        imagePullPolicy: Always
+        name: operator
+        env:
+          - name: PACKAGING_MODEL_PACKAGER_IMAGE
+            value: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.config.packaging.model_packager "tpl" "%sodahu-flow-model-packager:%s") }}"
+          - name: TRAINING_MODEL_TRAINER_IMAGE
+            value: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.config.training.model_trainer "tpl" "%sodahu-flow-model-trainer:%s") }}"
+          - name: TRAINING_MODEL_VALIDATOR_IMAGE
+            value: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.config.training.model_validator "tpl" "%sodahu-flow-cli:%s") }}"
+        resources:
+          {{- toYaml .Values.operator.server.resources | nindent 10 }}
+        command:
+          - ./operator
+        args:
+          - --config
+          - /etc/odahu-flow/config.yaml
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/odahu-flow"
+            readOnly: true
+        ports:
+        - containerPort: 7777
+          name: metrics
+          protocol: TCP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ .Release.Name }}-operator-config"
+  labels:
+    {{ include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+data:
+  "config.yaml": |
+    {{ toYaml .Values.config | b64enc }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-operator"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "odahuflow.helm-labels-for-search" (dict "component" "operator" "root" .) | nindent 4 }}
+  ports:
+  - name: metrics
+    targetPort: 7777
+    port: 7777
+    protocol: TCP

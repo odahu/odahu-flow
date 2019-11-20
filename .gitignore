@@ -19,7 +19,7 @@ cover/
 *.whl
 
 legion-activate.sh
-odahuFlow/legion/data/Pipfile.lock
+packages/legion/data/Pipfile.lock
 docs/out/
 .doctrees/
 
@@ -149,7 +149,7 @@ tests/robot/*.html
 tests/robot/*.xml
 tests/python/cover/*
 
-odahuFlow/tests/__init__\.py
+packages/tests/__init__\.py
 
 .git
 
@@ -159,8 +159,8 @@ log.html
 output.xml
 report.html
 
-odahuFlow/operator/vendor/
-odahuFlow/operator/config/
-odahuFlow/feedback-aggregator/vendor/
+packages/operator/vendor/
+packages/operator/config/
+packages/feedback/vendor/
 /.hiera_keys/
 /.secrets/

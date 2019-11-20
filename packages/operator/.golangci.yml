@@ -1,0 +1,66 @@
+run:
+  timeout: 5m
+linters:
+  enable-all: true
+  disable:
+    - dupl
+    - gochecknoinits
+    - gochecknoglobals
+    - maligned
+    # TODO: enable later
+    - funlen
+    # TODO: enable later
+    - wsl
+    # TODO: enable later
+    - whitespace
+    # TODO: enable later
+    - gocognit
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - errcheck
+        - funlen
+    - text: "Suite` is unused"
+      linters:
+        - unused
+    - text: "Line contains TODO/BUG/FIXME"
+      linters:
+        - godox
+    - linters:
+        - staticcheck
+      text: "SA1019:"
+    # TODO: need to fix it
+    - linters:
+        - gosec
+      text: "G305:"
+    - linters:
+        - gofmt
+      text: "File is not `gofmt`-ed with `-s`"
+    - linters:
+        - goimports
+      text: "File is not `goimports`-ed"
+    # Exclude comments with an URL
+    - linters:
+        - lll
+      source: "https"
+    # Exclude lll issues for long lines with go:generate
+    - linters:
+        - lll
+      source: "kubebuilder:rbac"
+    - linters:
+        - lll
+      source: "^//go:generate"
+    - linters:
+        - golint
+        - stylecheck
+      text: "type name will be used as packaging.Packaging"
+    - linters:
+        - golint
+        - stylecheck
+      text: "JSONSchema"
+    - linters:
+        - golint
+        - stylecheck
+      text: "ExternalUrl"

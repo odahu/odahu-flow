@@ -12,7 +12,7 @@ function pylint_cmd() {
 
     pylint --output-format=parseable \
            ${additional_pylint_args} \
-           --reports=no "odahuFlow/${package_dir}" 2>&1 | tee "${PYLINT_FOLDER}/odahuflow-${output_name}.log" &
+           --reports=no "packages/${package_dir}" 2>&1 | tee "${PYLINT_FOLDER}/odahu-flow-${output_name}.log" &
 }
 
 rm -rf "${PYLINT_FOLDER}"
@@ -29,7 +29,7 @@ function pydocstyle_cmd() {
 
     pydocstyle --ignore D301 \
                --match-dir '^(?!models).*' \
-               --source "odahuFlow/${package_dir}" 2>&1 | tee "${PYDOCSTYLE_FOLDER}/odahuflow-${output_name}.log" &
+               --source "packages/${package_dir}" 2>&1 | tee "${PYDOCSTYLE_FOLDER}/odahu-flow-${output_name}.log" &
 }
 
 rm -rf "${PYDOCSTYLE_FOLDER}"

@@ -1,0 +1,83 @@
+{{ if .Values.config.deployment.enabled }}
+{{- if .Values.service_catalog.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-service-catalog"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "service-catalog" "root" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.service_catalog.replicas }}
+  selector:
+    matchLabels:
+      {{- include "odahuflow.helm-labels-for-search" (dict "component" "service-catalog" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        {{- include "odahuflow.helm-labels" (dict "component" "service-catalog" "root" .) | nindent 8 }}
+    spec:
+      {{- if .Values.rbac}}
+      serviceAccountName: "{{ .Release.Name }}-service-catalog"
+      {{- end}}
+      volumes:
+        - name: config
+          secret:
+            secretName: "{{ .Release.Name }}-service-catalog-config"
+      containers:
+      - name: service-catalog
+        image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.service_catalog "tpl" "%sodahu-flow-service-catalog:%s") }}"
+        resources:
+          {{- toYaml .Values.service_catalog.resources | nindent 10 }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/odahu-flow"
+            readOnly: true
+        command:
+          - ./service-catalog
+        args:
+          - --config
+          - /etc/odahu-flow/config.yaml
+        ports:
+          - containerPort: 5000
+            name: api
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 120
+          timeoutSeconds: 8
+          failureThreshold: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-service-catalog"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "service-catalog" "root" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "odahuflow.helm-labels-for-search" (dict "component" "service-catalog" "root" .) | nindent 4 }}
+  ports:
+  - name: api
+    targetPort: 5000
+    port: 5000
+    protocol: TCP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ .Release.Name }}-service-catalog-config"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "service-catalog" "root" .) | nindent 4 }}
+data:
+  "config.yaml": |
+    {{ toYaml .Values.config | b64enc }}
+{{- end }}
+{{- end }}

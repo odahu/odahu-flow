@@ -22,6 +22,12 @@ matrix:
     - language: python
       python: 3.6
       before_script:
+        # Install conda
+        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+        - bash miniconda.sh -b -p $HOME/miniconda
+        - source "$HOME/miniconda/etc/profile.d/conda.sh"
+        - conda --version
+        # Install other dependencies
         - make install-all
         - make install-python-tests
       script:
@@ -38,17 +44,14 @@ matrix:
     #####################
     - language: bash
       script:
-        - make docker-build-pipeline-agent
+        - make docker-build-robot-tests
     - language: bash
       script:
-        - make docker-build-feedback-aggregator
         - make docker-build-feedback-collector
+        - make docker-build-feedback-rq-catcher
     - language: bash
       script:
-        - make docker-build-fluentd
-    - language: bash
-      script:
-        - make docker-build-edi
+        - make docker-build-api
         - make docker-build-operator
         - make docker-build-model-trainer
         - make docker-build-model-packager
@@ -78,7 +81,7 @@ matrix:
         - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
         - go get github.com/t-yuki/gocover-cobertura
       script:
-        - cd odahuFlow/operator
+        - cd packages/operator
         - dep ensure -v -vendor-only
         - make test
         - make lint
@@ -101,7 +104,7 @@ matrix:
         - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
         - go get github.com/t-yuki/gocover-cobertura
       script:
-        - cd odahuFlow/feedback-aggregator
+        - cd packages/feedback
         - dep ensure -v -vendor-only
         - make test
         - make lint
