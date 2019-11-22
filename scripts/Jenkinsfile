@@ -156,6 +156,13 @@ pipeline {
                         }
                     }
                 }
+                stage('Build odahuflowctl image') {
+                    steps {
+                        script {
+                            cicdLibrary.buildLegionImage('odahuflow-cli', '.', 'containers/odahuflow-cli/Dockerfile')
+                        }
+                    }
+                }
                 stage("Build feedback images") {
                     steps {
                         script {
@@ -189,6 +196,13 @@ pipeline {
                     steps {
                         script {
                             cicdLibrary.uploadDockerImage('odahuflow-model-trainer', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage("Upload odahuflowctl image") {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahuflow-cli', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                         }
                     }
                 }

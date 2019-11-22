@@ -642,6 +642,11 @@ config:
       # Required value
       # Type: string
       image: "odahuflow-model-trainer:latest"
+    model_validator:
+      # Model training base image
+      # Required value
+      # Type: string
+      image: "odahuflow-сli:latest"
 
   # Packaging configuration
   packaging:

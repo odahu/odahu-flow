@@ -33,6 +33,7 @@ const (
 	PackagerResultStep        = "result"
 	TrainerSetupStep          = "setup"
 	TrainerTrainStep          = "trainer"
+	TrainerValidationStep     = "validation"
 	TrainerResultStep         = "result"
 )
 

@@ -8,6 +8,7 @@ ${TRAIN_ID}  test-downloading-training-data
 *** Settings ***
 Documentation       Check downloading of a training data
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
+Variables           ../../variables.py
 Resource            ../../resources/keywords.robot
 Library             Collections
 Library             odahuflow.robot.libraries.utils.Utils
@@ -25,15 +26,15 @@ Force Tags          training  training-data
 Cleanup resources
     StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_ID} --ignore-not-found
 
-Train valid model
+Train model with valid data section
     [Arguments]  ${training_file}
     Cleanup resources
 
-    StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${TRAIN_ID}
-    ${res}=  StrictShell  odahuflowctl train get --id ${TRAIN_ID} -o 'jsonpath=$[0].status.artifacts[0].runId'
-    should be equal  ${RUN_ID}  ${res.stdout}
+    ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${TRAIN_ID}
+    should not be equal  ${0}  ${res.rc}
+    Should contain  ${res.stdout}  ${GPPI_VALIDATION_FAIL}
 
-Train invalid model
+Train model with invalid data section
     [Arguments]  ${training_file}
     Cleanup resources
 
@@ -43,7 +44,7 @@ Train invalid model
 *** Test Cases ***
 Vaild data downloading parameters
     [Documentation]  Verify various valid combination of connection uri, remote path and local path parameters
-    [Template]  Train valid model
+    [Template]  Train model with valid data section
     dir_to_dir.training.odahuflow.yaml
     remote_dir_to_dir.training.odahuflow.yaml
     file_to_file.training.odahuflow.yaml
@@ -51,7 +52,7 @@ Vaild data downloading parameters
 
 Invaild data downloading parameters
     [Documentation]  Verify various invalid combination of connection uri, remote path and local path parameters
-    [Template]  Train invalid model
+    [Template]  Train model with invalid data section
     not_found_file.training.odahuflow.yaml
     not_found_remote_file.training.odahuflow.yaml
     not_valid_dir_path.training.odahuflow.yaml
