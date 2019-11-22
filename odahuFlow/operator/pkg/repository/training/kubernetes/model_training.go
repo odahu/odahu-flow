@@ -45,6 +45,7 @@ var (
 	trainerContainerNames = []string{
 		utils.TektonContainerName(odahuflow.TrainerSetupStep),
 		utils.TektonContainerName(odahuflow.TrainerTrainStep),
+		utils.TektonContainerName(odahuflow.TrainerValidationStep),
 		utils.TektonContainerName(odahuflow.TrainerResultStep),
 	}
 	resultConfigKey = "result"

@@ -18,13 +18,14 @@ CLI entrypoint
 """
 
 import click
+from odahuflow.cli.parsers.bulk import bulk
 from odahuflow.cli.parsers.config import config_group
 from odahuflow.cli.parsers.connection import connection
 from odahuflow.cli.parsers.deployment import deployment
+from odahuflow.cli.parsers.gppi import gppi
 from odahuflow.cli.parsers.model import model
 from odahuflow.cli.parsers.packaging import packaging
 from odahuflow.cli.parsers.packaging_integration import packaging_integration
-from odahuflow.cli.parsers.bulk import bulk
 from odahuflow.cli.parsers.route import route
 from odahuflow.cli.parsers.sandbox import sandbox
 from odahuflow.cli.parsers.security import login, logout
@@ -54,6 +55,7 @@ main.add_command(bulk)
 main.add_command(route)
 main.add_command(sandbox)
 main.add_command(template)
+main.add_command(gppi)
 main.add_command(toolchain_integration)
 main.add_command(training)
 main.add_command(login)

@@ -81,6 +81,10 @@ install-robot:
 		python setup.py sdist && \
     	python setup.py bdist_wheel
 
+## docker-build-odahuflow-cli: Build image with odahuflow cli
+docker-build-odahuflow-cli:
+	docker build -t odahu/odahuflow-cli:${BUILD_TAG} -f containers/odahuflow-cli/Dockerfile .
+
 ## docker-build-pipeline-agent: Build pipeline agent docker image
 docker-build-pipeline-agent:
 	docker build -t odahu/odahuflow-pipeline-agent:${BUILD_TAG} -f containers/pipeline-agent/Dockerfile .

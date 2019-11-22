@@ -17,6 +17,7 @@
 package modeltraining
 
 import (
+	"k8s.io/apimachinery/pkg/api/resource"
 	"path"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/odahuFlow/operator/pkg/apis/odahuflow/v1alpha1"
@@ -31,28 +32,42 @@ import (
 )
 
 const (
-	pathToTrainerBin = "/opt/odahuFlow/trainer"
-	workspacePath    = "/workspace"
-	outputDir        = "output"
-	configVolumeName = "config"
-	configDir        = "/etc/odahuflow/"
-	configFileName   = "config.yaml"
-	configSecretName = "odahuflow-training-config" //nolint:gosec
+	pathToTrainerBin  = "/opt/odahuFlow/trainer"
+	modelValidatorBin = "odahuflowctl"
+	workspacePath     = "/workspace"
+	outputDir         = "output"
+	configVolumeName  = "config"
+	configDir         = "/etc/odahuflow/"
+	configFileName    = "config.yaml"
+	configSecretName  = "odahuflow-training-config" //nolint:gosec
 )
 
 func generateTrainerTaskSpec(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 	toolchainIntegration *training.ToolchainIntegration,
 ) (*tektonv1alpha1.TaskSpec, error) {
-	mainTrainerStep, err := createMainTrainerStep(trainingCR, toolchainIntegration)
+
+	trainResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources)
 	if err != nil {
+		log.Error(err, "The training resources is not valid",
+			"mt_id", trainingCR.Name, "resources", trainResources)
+
 		return nil, err
+	}
+
+	validatorResource := corev1.ResourceRequirements{
+		Limits: trainResources.Limits,
+		Requests: corev1.ResourceList{
+			corev1.ResourceMemory: *resource.NewQuantity(0, resource.DecimalSI),
+			corev1.ResourceCPU:    *resource.NewQuantity(0, resource.DecimalSI),
+		},
 	}
 
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
 			createInitTrainerStep(trainingCR.Name),
-			mainTrainerStep,
+			createMainTrainerStep(trainingCR, toolchainIntegration, &trainResources),
+			createArtifactValidationStep(&validatorResource),
 			createResultTrainerStep(trainingCR.Name),
 		},
 		Volumes: []corev1.Volume{
@@ -100,14 +115,8 @@ func createInitTrainerStep(mtID string) tektonv1alpha1.Step {
 
 func createMainTrainerStep(
 	train *odahuflowv1alpha1.ModelTraining,
-	trainingIntegration *training.ToolchainIntegration) (tektonv1alpha1.Step, error) {
-	trainResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(train.Spec.Resources)
-	if err != nil {
-		log.Error(err, "The training resources is not valid",
-			"mt_id", train.Name, "resources", trainResources)
-
-		return tektonv1alpha1.Step{}, err
-	}
+	trainingIntegration *training.ToolchainIntegration,
+	trainResources *corev1.ResourceRequirements) tektonv1alpha1.Step {
 
 	envs := make([]corev1.EnvVar, 0, len(trainingIntegration.Spec.AdditionalEnvironments))
 	for name, value := range trainingIntegration.Spec.AdditionalEnvironments {
@@ -130,9 +139,25 @@ func createMainTrainerStep(
 				"--target",
 				path.Join(workspacePath, outputDir),
 			},
-			Resources: trainResources,
+			Resources: *trainResources,
 		},
-	}, nil
+	}
+}
+
+func createArtifactValidationStep(validatorResources *corev1.ResourceRequirements) tektonv1alpha1.Step {
+	return tektonv1alpha1.Step{
+		Container: corev1.Container{
+			Name:    odahuflow.TrainerValidationStep,
+			Image:   viper.GetString(training_conf.ModelValidatorImage),
+			Command: []string{modelValidatorBin},
+			Args: []string{
+				"gppi",
+				"test",
+				path.Join(workspacePath, outputDir),
+			},
+			Resources: *validatorResources,
+		},
+	}
 }
 
 func createResultTrainerStep(mtID string) tektonv1alpha1.Step {

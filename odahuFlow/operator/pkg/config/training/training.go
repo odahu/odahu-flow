@@ -29,6 +29,7 @@ const (
 	TrainingServiceAccount        = "training.service_account"
 	OutputConnectionName          = "training.output_connection"
 	ModelBuilderImage             = "training.model_trainer.image"
+	ModelValidatorImage           = "training.model_validator.image"
 	NodeSelector                  = "training.node_selector"
 	Toleration                    = "training.toleration"
 	MetricURL                     = "training.metric_url"
@@ -52,6 +53,8 @@ func init() {
 	viper.SetDefault(ToolchainIntegrationNamespace, "odahuflow")
 
 	config.PanicIfError(viper.BindEnv(ModelBuilderImage))
+
+	config.PanicIfError(viper.BindEnv(ModelValidatorImage))
 
 	viper.SetDefault(NodeSelector, map[string]string{
 		"mode": "odahuflow-training",
