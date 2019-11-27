@@ -23,9 +23,9 @@ import os
 import typing
 
 import yaml
+from odahuflow.sdk.clients.api import RemoteAPIClient, WrongHttpStatusCode, AsyncRemoteAPIClient
 from odahuflow.sdk.clients.connection import ConnectionClient, AsyncConnectionClient
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient, ModelDeployment, AsyncModelDeploymentClient
-from odahuflow.sdk.clients.api import RemoteAPIClient, WrongHttpStatusCode, AsyncRemoteAPIClient
 from odahuflow.sdk.clients.packaging import ModelPackagingClient, AsyncModelPackagingClient
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient, AsyncPackagingIntegrationClient
 from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, AsyncModelRouteClient
@@ -168,29 +168,23 @@ def build_resource(declaration: dict) -> OdahuflowCloudResourceUpdatePair:
     )
 
 
-def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
+def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateList:
     """
-    Parse file (YAML/JSON) for Odahuflow resources
+    Parse YAML/JSON TextIO for Odahuflow resources
 
-    :param path: path to file (local)
-    :type path: str
+    :param data_stream: text stream with yaml/json data
     :raises Exception: if parsing of file is impossible
     :raises ValueError: if invalid Odahuflow resource detected
     :return: :py:class:OdahuflowCloudResourcesUpdateList -- parsed resources
     """
-    if not os.path.exists(path):
-        raise FileNotFoundError('Resource file {!r} not found'.format(path))
 
-    with open(path, 'r') as data_stream:
-        items = None
-
+    try:
+        items = tuple(yaml.load_all(data_stream, Loader=yaml.SafeLoader))
+    except yaml.YAMLError:
         try:
-            items = tuple(yaml.load_all(data_stream, Loader=yaml.SafeLoader))
-        except yaml.YAMLError:
-            try:
-                items = json.load(data_stream)
-            except json.JSONDecodeError:
-                raise Exception('{!r} is not valid JSON or YAML file')
+            items = json.load(data_stream)
+        except json.JSONDecodeError:
+            raise Exception('{!r} is not valid JSON or YAML')
 
     if not isinstance(items, (list, tuple)):
         items = [items]
@@ -209,6 +203,22 @@ def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
     return OdahuflowCloudResourcesUpdateList(
         changes=tuple(result)
     )
+
+
+def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
+    """
+    Parse file (YAML/JSON) for Odahuflow resources
+
+    :param path: path to file (local)
+    :raises Exception: if parsing of file is impossible
+    :raises ValueError: if invalid Odahuflow resource detected
+    :return: :py:class:OdahuflowCloudResourcesUpdateList -- parsed resources
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError('Resource file {!r} not found'.format(path))
+
+    with open(path, 'r') as data_stream:
+        return parse_stream(data_stream)
 
 
 def parse_resources_file_with_one_item(path: str) -> OdahuflowCloudResourceUpdatePair:
