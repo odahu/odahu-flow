@@ -1,0 +1,27 @@
+{{- if .Values.api.enabled -}}
+{{- if (ternary $.Values.api.ingress.enabled $.Values.ingress.enabled (hasKey $.Values.api.ingress "enabled")) }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+  {{- include "odahuflow.ingress-aggregated-annotations" (dict "local" .Values.api.ingress "root" .) | nindent 4 }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 4 }}
+  name: "{{ .Release.Name }}-api"
+spec:
+  rules:
+    - host: {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.api.ingress "root" . "tpl" "%s") }}
+      http:
+        paths:
+          - backend:
+              serviceName: "{{ .Release.Name }}-api"
+              servicePort: {{ .Values.api.port }}
+  {{- if (ternary $.Values.api.ingress.tlsEnabled $.Values.ingress.tlsEnabled (hasKey $.Values.api.ingress "tlsEnabled")) }}
+  tls:
+  - hosts:
+    - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.api.ingress "root" . "tpl" "%s") | quote }}
+    secretName: {{ include "odahuflow.ingress-tls-secret-name" (dict "local" .Values.api.ingress "root" . ) | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}

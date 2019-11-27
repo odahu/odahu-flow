@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-PROJECTS="odahuFlow/sdk odahuFlow/cli odahuFlow/robot containers/pipeline-agent"
+PROJECTS="packages/sdk packages/cli packages/robot"
 ROOT_DIR="$(pwd)"
 
 for project in ${PROJECTS}

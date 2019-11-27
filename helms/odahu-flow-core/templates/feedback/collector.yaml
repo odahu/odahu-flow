@@ -1,0 +1,85 @@
+{{ if .Values.config.deployment.enabled }}
+{{ if .Values.feedback.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-feedback-collector"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "feedback-collector" "root" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.feedback.collector.replicas }}
+  selector:
+    matchLabels:
+      {{- include "odahuflow.helm-labels-for-search" (dict "component" "feedback-collector" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        {{- include "odahuflow.helm-labels" (dict "component" "feedback-collector" "root" .) | nindent 8 }}
+    spec:
+      volumes:
+      - name: config
+        configMap:
+          name: "{{ .Release.Name }}-feedback-collector"
+      containers:
+      - name: server
+        image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.feedback.collector "tpl" "%sodahu-flow-feedback-collector:%s") }}"
+        resources:
+          {{- toYaml .Values.feedback.collector.resources | nindent 10 }}
+        env:
+        - name: GIN_MODE
+          value: "release"
+        ports:
+        - containerPort: 8080
+          name: api
+          protocol: TCP
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/odahu-flow"
+            readOnly: true
+        command:
+          - ./collector
+        args:
+          - "--config"
+          - "/etc/odahu-flow/config.yaml"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 8
+          failureThreshold: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}-feedback-collector"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "feedback-collector" "root" .) | nindent 4 }}
+spec:
+  selector:
+    {{- include "odahuflow.helm-labels-for-search" (dict "component" "feedback-collector" "root" .) | nindent 4 }}
+  ports:
+  - name: api
+    targetPort: 8080
+    port: {{ .Values.feedback.collector.port }}
+    protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-feedback-collector"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+        {{- include "odahuflow.helm-labels" (dict "component" "feedback-collector" "root" .) | nindent 4 }}
+data:
+  config.yaml: |-
+    fluentd:
+      host: {{ .Values.feedback.fluentd.host | quote }}
+      port: {{ .Values.feedback.fluentd.port }}
+{{- end }}
+{{- end }}

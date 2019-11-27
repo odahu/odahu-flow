@@ -24,8 +24,8 @@ HELM_ADDITIONAL_PARAMS=
 # Specify gcp auth keys
 GOOGLE_APPLICATION_CREDENTIALS=
 MOCKS_DIR=target/mocks
-SWAGGER_FILE=odahuFlow/operator/docs/swagger.yaml
-PYTHON_MODEL_DIR=odahuFlow/sdk/odahuflow/sdk/models
+SWAGGER_FILE=packages/operator/docs/swagger.yaml
+PYTHON_MODEL_DIR=packages/sdk/odahuflow/sdk/models
 SWAGGER_CODEGEN_BIN=java -jar swagger-codegen-cli.jar
 
 HIERA_KEYS_DIR=
@@ -59,108 +59,90 @@ install-all: install-sdk install-cli install-robot
 
 ## install-sdk: Install sdk python package
 install-sdk:
-	cd odahuFlow/sdk && \
-		rm -rf build dist *.egg-info && \
-		pip3 install ${BUILD_PARAMS} -e . && \
-		python setup.py sdist && \
-    	python setup.py bdist_wheel
+	cd packages/sdk && \
+		pip3 install ${BUILD_PARAMS} -e .
 
 ## install-cli: Install cli python package
 install-cli:
-	cd odahuFlow/cli && \
-		rm -rf build dist *.egg-info && \
-		pip3 install ${BUILD_PARAMS} -e . && \
-		python setup.py sdist && \
-    	python setup.py bdist_wheel
+	cd packages/cli && \
+		pip3 install ${BUILD_PARAMS} -e .
 
 ## install-robot: Install robot tests
 install-robot:
-	cd odahuFlow/robot && \
-		rm -rf build dist *.egg-info && \
-		pip3 install ${BUILD_PARAMS} -e . && \
-		python setup.py sdist && \
-    	python setup.py bdist_wheel
+	cd packages/robot && \
+		pip3 install ${BUILD_PARAMS} -e .
 
-## docker-build-odahuflow-cli: Build image with odahuflow cli
-docker-build-odahuflow-cli:
-	docker build -t odahu/odahuflow-cli:${BUILD_TAG} -f containers/odahuflow-cli/Dockerfile .
+## docker-build-odahu-flow-cli: Build image with odahuflow cli
+docker-build-odahu-flow-cli:
+	docker build -t odahu/odahu-flow-cli:${BUILD_TAG} -f containers/odahu-flow-cli/Dockerfile .
 
-## docker-build-pipeline-agent: Build pipeline agent docker image
-docker-build-pipeline-agent:
-	docker build -t odahu/odahuflow-pipeline-agent:${BUILD_TAG} -f containers/pipeline-agent/Dockerfile .
+## docker-build-robot-tests: Build pipeline agent docker image
+docker-build-robot-tests:
+	docker build -t odahu/odahu-flow-robot-tests:${BUILD_TAG} -f containers/robot-tests/Dockerfile .
 
-## docker-build-edi: Build edi docker image
-docker-build-edi:
-	docker build --target edi -t odahu/odahuflow-edi:${BUILD_TAG} -f containers/operator/Dockerfile .
+## docker-build-api: Build api docker image
+docker-build-api:
+	docker build --target api -t odahu/odahu-flow-api:${BUILD_TAG} -f containers/operator/Dockerfile .
 
 ## docker-build-model-trainer: Build model builder docker image
 docker-build-model-trainer:
-	docker build --target model-trainer -t odahu/odahuflow-model-trainer:${BUILD_TAG} -f containers/operator/Dockerfile .
+	docker build --target model-trainer -t odahu/odahu-flow-model-trainer:${BUILD_TAG} -f containers/operator/Dockerfile .
 
 ## docker-build-model-packager: Build model packager docker image
 docker-build-model-packager:
-	docker build --target model-packager -t odahu/odahuflow-model-packager:${BUILD_TAG} -f containers/operator/Dockerfile .
+	docker build --target model-packager -t odahu/odahu-flow-model-packager:${BUILD_TAG} -f containers/operator/Dockerfile .
 
 ## docker-build-operator: Build operator docker image
 docker-build-operator:
-	docker build --target operator -t odahu/odahuflow-operator:${BUILD_TAG} -f containers/operator/Dockerfile .
+	docker build --target operator -t odahu/odahu-flow-operator:${BUILD_TAG} -f containers/operator/Dockerfile .
 
 ## docker-build-service-catalog: Build service catalog docker image
 docker-build-service-catalog:
-	docker build --target service-catalog -t odahu/odahuflow-service-catalog:${BUILD_TAG} -f containers/operator/Dockerfile .
-
-## docker-build-feedback-aggregator: Build feedback aggregator image
-docker-build-feedback-aggregator:
-	docker build --target aggregator -t odahu/odahuflow-feedback-aggregator:${BUILD_TAG} -f containers/feedback-aggregator/Dockerfile .
+	docker build --target service-catalog -t odahu/odahu-flow-service-catalog:${BUILD_TAG} -f containers/operator/Dockerfile .
 
 ## docker-build-feedback-collector: Build feedback collector image
 docker-build-feedback-collector:
-	docker build --target collector -t odahu/odahuflow-feedback-aggregator:${BUILD_TAG} -f containers/feedback-aggregator/Dockerfile .
+	docker build --target collector -t odahu/odahu-flow-feedback-collector:${BUILD_TAG} -f containers/feedback/Dockerfile .
 
-## docker-build-fluentd: Build fluentd image
-docker-build-fluentd:
-	docker build -t odahu/fluentd:${BUILD_TAG} -f containers/fluentd/Dockerfile .
+## docker-build-feedback-rq-catcher: Build feedback rq-catcher image
+docker-build-feedback-rq-catcher:
+	docker build --target rq-catcher -t odahu/odahu-flow-feedback-rq-catcher:${BUILD_TAG} -f containers/feedback/Dockerfile .
 
 ## docker-build-all: Build all docker images
-docker-build-all:  docker-build-pipeline-agent docker-build-edi  docker-build-model-trainer  docker-build-operator  docker-build-feedback-aggregator docker-build-fluentd docker-build-service-catalog
+docker-build-all:  docker-build-robot-tests docker-build-api  docker-build-model-trainer  docker-build-operator  docker-build-feedback-collector docker-build-service-catalog
 
-## docker-push-pipeline-agent: Push pipeline agent docker image
-docker-push-pipeline-agent:
-	docker tag odahu/odahuflow-pipeline-agent:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahuflow-pipeline-agent:${TAG}
-	docker push ${DOCKER_REGISTRY}/odahu/odahuflow-pipeline-agent:${TAG}
+## docker-push-robot-tests: Push pipeline agent docker image
+docker-push-robot-tests:
+	docker tag odahu/odahu-flow-robot-tests:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-robot-tests:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-robot-tests:${TAG}
 
-## docker-push-edi: Push edi docker image
-docker-push-edi:  check-tag
-	docker tag odahu/odahuflow-edi:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahuflow-edi:${TAG}
-	docker push ${DOCKER_REGISTRY}/odahu/odahuflow-edi:${TAG}
+## docker-push-api: Push api docker image
+docker-push-api:  check-tag
+	docker tag odahu/odahu-flow-api:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-api:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-api:${TAG}
 
 ## docker-push-model-trainer: Push model builder docker image
 docker-push-model-trainer:  check-tag
-	docker tag odahu/odahuflow-model-trainer:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/model-trainer:${TAG}
-	docker push ${DOCKER_REGISTRY}/odahu/odahuflow-model-trainer:${TAG}
+	docker tag odahu/odahu-flow-model-trainer:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/model-trainer:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-model-trainer:${TAG}
 
 ## docker-push-operator: Push operator docker image
 docker-push-operator:  check-tag
-	docker tag odahu/odahuflow-operator:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahuflow-operator:${TAG}
-	docker push ${DOCKER_REGISTRY}/odahu/odahuflow-operator:${TAG}
+	docker tag odahu/odahu-flow-operator:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-operator:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-operator:${TAG}
 
 ## docker-push-service-catalog: Push service catalog docker image
 docker-push-service-catalog:  check-tag
-	docker tag odahu/odahuflow-service-catalog:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahuflow-service-catalog:${TAG}
+	docker tag odahu/odahu-flow-service-catalog:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-service-catalog:${TAG}
 	docker push ${DOCKER_REGISTRY}/odahu/service-catalog:${TAG}
 
-## docker-push-feedback-aggregator: Push feedback aggregator docker image
-docker-push-feedback-aggregator:  check-tag
-	docker tag odahu/odahuflow-feedback-aggregator:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/odahuflow-feedback-aggregator:${TAG}
-	docker push ${DOCKER_REGISTRY}odahu/odahuflow-feedback-aggregator:${TAG}
-
-## docker-push-fluentd: Push fluentd docker image
-docker-push-fluentd:  check-tag
-	docker tag odahu/fluentd:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
-	docker push ${DOCKER_REGISTRY}odahu/fluentd:${TAG}
+## docker-push-feedback-collector: Push feedback collector docker image
+docker-push-feedback-collector:  check-tag
+	docker tag odahu/odahu-flow-feedback-collector:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/odahu-flow-feedback-collector:${TAG}
+	docker push ${DOCKER_REGISTRY}odahu/odahu-flow-feedback-collector:${TAG}
 
 ## docker-push-all: Push all docker images
-docker-push-all:  docker-push-pipeline-agent docker-push-edi  docker-push-model-trainer  docker-push-operator  docker-push-feedback-aggregator docker-push-fluentd docker-push-service-catalog
+docker-push-all:  docker-push-robot-tests docker-push-api  docker-push-model-trainer  docker-push-operator  docker-push-feedback-collector docker-push-service-catalog
 
 ## helm-install: Install the odahuflow helm chart from source code
 helm-install: helm-delete
@@ -172,8 +154,8 @@ helm-delete:
 
 ## install-python-linter: Install python test dependencies
 install-python-linter:
-	pip install pipenv
-	cd containers/pipeline-agent && pipenv install --system --three --dev
+	pip install pipenv pylint
+	cd containers/robot-tests && pipenv install --system --three --dev
 
 ## python-lint: Lints python source code
 python-lint:
@@ -204,37 +186,37 @@ generate-python-client:
 ## install-python-tests: Install python test dependencies
 install-python-tests:
 	pip install pipenv
-	cd odahuFlow/cli && pipenv install --system --three --dev
+	cd packages/cli && pipenv install --system --three --dev
 
 ## python-unittests: Run pythoon unit tests
 python-unittests:
-	DEBUG=true VERBOSE=true pytest \
-	          odahuFlow/cli
+	DEBUG=true VERBOSE=true pytest -s \
+	          packages/cli packages/sdk
 
 ## setup-e2e-robot: Prepare a test data for the e2e robot tests
 setup-e2e-robot:
-	odahuflow-authenticate-test-user ${CLUSTER_PROFILE}
+	odahu-flow-authenticate-test-user ${CLUSTER_PROFILE}
 
-	./odahuFlow/tests/stuff/training_stuff.sh setup
+	./packages/tests/stuff/training_stuff.sh setup
 
 ## cleanup-e2e-robot: Delete a test data after the e2e robot tests
 cleanup-e2e-robot:
-	odahuflow-authenticate-test-user ${CLUSTER_PROFILE}
+	odahu-flow-authenticate-test-user ${CLUSTER_PROFILE}
 
-	./odahuFlow/tests/stuff/training_stuff.sh cleanup
+	./packages/tests/stuff/training_stuff.sh cleanup
 
 ## e2e-robot: Run e2e robot tests
 e2e-robot:
 	pabot --verbose --processes ${ROBOT_THREADS} \
 	      -v CLUSTER_PROFILE:${CLUSTER_PROFILE} \
 	      --listener odahuflow.robot.process_reporter \
-	      --outputdir target odahuFlow/tests/e2e/robot/tests/${ROBOT_FILES}
+	      --outputdir target packages/tests/e2e/robot/tests/${ROBOT_FILES}
 
 ## update-python-deps: Update all python dependecies in the Pipfiles
 update-python-deps:
 	scripts/update_python_deps.sh
 
-## install-vulnerabilities-checker: Install the vulnerabilities-checker
+## install-vulnerabilities-checker: Install the vulnerabilities checker
 install-vulnerabilities-checker:
 	./scripts/install-git-secrets-hook.sh install_binaries
 

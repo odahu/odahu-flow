@@ -1,0 +1,19 @@
+name: odahu-flow-core
+version: 0.0.1
+appVersion: 1.7.1
+description: OdahuFlow stack
+keywords:
+- ML
+maintainers:
+  - name: Dmitrii Suslov
+    email: suslov.dimitriy@gmail.com
+  - name: Dmitriy Karbyshev
+    email: karbyshevds@gmail.com
+  - name: Max Kochubey
+    email: maxkochubey@gmail.com
+  - name: Vlad Tokarev
+    email: vlad.tokarev.94@gmail.com
+  - name: Kirill Makhonin
+    email: kirill@makhonin.biz
+  - name: Vitalik Solodilov
+    email: mcdkr@yandex.ru

@@ -16,7 +16,7 @@
 
 FROM ubuntu:18.04 as builder
 
-ENV OPERATOR_DIR="/go/src/github.com/odahu/odahu-flow/odahuFlow/operator" \
+ENV OPERATOR_DIR="/go/src/github.com/odahu/odahu-flow/packages/operator" \
     PATH="$PATH:/go/bin:/usr/lib/go-1.12/bin" \
     GOPATH="/go"
 
@@ -30,10 +30,10 @@ RUN apt-get update -qq && \
     wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep && \
     chmod +x /usr/local/bin/dep
 
-COPY odahuFlow/operator/Gopkg.toml odahuFlow/operator/Gopkg.lock ./
+COPY packages/operator/Gopkg.toml packages/operator/Gopkg.lock ./
 RUN dep ensure -v -vendor-only
 
-COPY odahuFlow/operator/ ./
+COPY packages/operator/ ./
 
 RUN GOOS=linux GOARCH=amd64 make build-all
 
@@ -43,11 +43,11 @@ RUN GOOS=linux GOARCH=amd64 make build-all
 
 FROM ubuntu:18.04 as operator
 
-ENV ODAHUFLOW_DIR="/opt/odahuFlow"
+ENV ODAHUFLOW_DIR="/opt/odahu-flow"
 RUN  apt-get -yq update && \
      apt-get -yqq install ca-certificates
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/operator/operator "${ODAHUFLOW_DIR}/"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/operator "${ODAHUFLOW_DIR}/"
 WORKDIR "${ODAHUFLOW_DIR}"
 CMD ["./operator"]
 
@@ -55,19 +55,17 @@ CMD ["./operator"]
 #########################################################
 #########################################################
 
-FROM ubuntu:18.04 as edi
+FROM ubuntu:18.04 as api
 
-ENV ODAHUFLOW_DIR="/opt/odahuFlow" \
-    TEMPLATE_FOLDER="/opt/odahuFlow/templates" \
+ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
     GIN_MODE="release"
 RUN  apt-get -yq update && \
      apt-get -yqq install openssh-client ca-certificates
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/operator/edi "${ODAHUFLOW_DIR}/"
-COPY odahuFlow/operator/templates "${TEMPLATE_FOLDER}/"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/api "${ODAHUFLOW_DIR}/"
 
 WORKDIR "${ODAHUFLOW_DIR}"
-CMD ["./edi"]
+CMD ["./api"]
 
 #########################################################
 #########################################################
@@ -75,18 +73,16 @@ CMD ["./edi"]
 
 FROM ubuntu:18.04 as service-catalog
 
-ENV ODAHUFLOW_DIR="/opt/odahuFlow" \
-    TEMPLATE_FOLDER="/opt/odahuFlow/templates" \
+ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
     GIN_MODE="release"
 
 RUN  apt-get -yq update && \
      apt-get -yqq install ca-certificates
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/operator/service-catalog "${ODAHUFLOW_DIR}/"
-COPY odahuFlow/operator/templates "${TEMPLATE_FOLDER}/"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/service-catalog "${ODAHUFLOW_DIR}/"
 
 WORKDIR "${ODAHUFLOW_DIR}"
-CMD ["./edi"]
+CMD ["./service-catalog"]
 
 #########################################################
 #########################################################
@@ -96,14 +92,14 @@ FROM ubuntu:18.04 as model-trainer
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 \
-    WORK_DIR="/opt/odahuFlow"
+    WORK_DIR="/opt/odahu-flow"
 
 WORKDIR "${WORK_DIR}/"
 
 RUN  apt-get -yq update && \
      apt-get -yqq install ca-certificates
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/operator/trainer "${WORK_DIR}/"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/trainer "${WORK_DIR}/"
 
 CMD ["./trainer"]
 
@@ -115,13 +111,13 @@ FROM ubuntu:18.04 as model-packager
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 \
-    WORK_DIR="/opt/odahuFlow"
+    WORK_DIR="/opt/odahu-flow"
 
 RUN  apt-get -yq update && \
      apt-get -yqq install ca-certificates
 
 WORKDIR "${WORK_DIR}/"
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/odahuFlow/operator/packager "${WORK_DIR}/"
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/packager "${WORK_DIR}/"
 
 CMD ["./packager"]

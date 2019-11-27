@@ -1,0 +1,32 @@
+{{ if .Values.config.deployment.enabled }}
+{{ if .Values.feedback.enabled -}}
+{{- if .Values.api.enabled -}}
+{{- if (ternary $.Values.api.ingress.enabled $.Values.ingress.enabled (hasKey $.Values.api.ingress "enabled")) }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{- include "odahuflow.ingress-aggregated-annotations" (dict "local" .Values.api.ingress "root" .) | nindent 4 }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 4 }}
+  name: "{{ .Release.Name }}-feedback-collector"
+spec:
+  rules:
+    - host: {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.api.ingress "root" . "tpl" "%s") }}
+      http:
+        paths:
+          - path: /api/v1/feedback
+            backend:
+              serviceName: "{{ .Release.Name }}-feedback-collector"
+              servicePort: 8080
+  {{- if (ternary $.Values.api.ingress.tlsEnabled $.Values.ingress.tlsEnabled (hasKey $.Values.api.ingress "tlsEnabled")) }}
+  tls:
+    - hosts:
+        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.api.ingress "root" . "tpl" "%s") | quote }}
+      secretName: {{ include "odahuflow.ingress-tls-secret-name" (dict "local" .Values.api.ingress "root" . ) | quote }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
