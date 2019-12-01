@@ -45,11 +45,6 @@ def pi() -> PackagingIntegration:
     )
 
 
-@pytest.fixture
-def cli_runner() -> CliRunner:
-    return CliRunner()
-
-
 def test_get(mocker, cli_runner: CliRunner, pi_client: PackagingIntegrationClient, pi: PackagingIntegration):
     client_mock = mocker.patch.object(PackagingIntegrationClient, 'get', return_value=pi)
 

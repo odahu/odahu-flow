@@ -19,13 +19,16 @@ List of templates
 import os
 import typing
 
-TEMPLATES = {}
-
 _TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'examples')
-_EXAMPLE_SUFFIX = ".odahuflow.yaml"
+_EXAMPLE_SUFFIX = ".odahu.yaml"
 
 
 def get_odahuflow_template_names() -> typing.Set[str]:
+    """
+    The SDK package contains prebuilt examples of odahuflow entities
+    This function return their names
+    :return: template names
+    """
     return {
         # Remove suffix from name
         f[:-len(_EXAMPLE_SUFFIX)] for _, _, filenames in os.walk(_TEMPLATE_DIR) for f in filenames
@@ -33,6 +36,11 @@ def get_odahuflow_template_names() -> typing.Set[str]:
 
 
 def get_odahuflow_template_content(template_name: str) -> str:
+    """
+    Returns content of a template by name
+    :param template_name: template name
+    :return: template content
+    """
     full_file_name = os.path.join(_TEMPLATE_DIR, template_name + _EXAMPLE_SUFFIX)
     if not os.path.exists(full_file_name):
         raise ValueError(f'Cannot find {template_name} template')

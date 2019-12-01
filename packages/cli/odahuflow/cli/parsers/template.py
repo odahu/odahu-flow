@@ -13,9 +13,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-
-import typing
-
+"""
+Template CLI commands
+"""
 import click
 from odahuflow.sdk.clients.templates import get_odahuflow_template_content
 from odahuflow.sdk.clients.templates import get_odahuflow_template_names
@@ -34,8 +34,7 @@ def template_all():
     """
     Get all template names.\n
     Usage example:\n
-        odahuflowctl template all\n
-    \f
+        * odahuflowctl template all\n
     """
     nl = "\n * "
     click.echo(f'Templates:{nl}{nl.join(get_odahuflow_template_names())}')
@@ -43,16 +42,13 @@ def template_all():
 
 @template.command()
 @click.option('--name', help='Template name', required=True)
-@click.option('--file', '-f', help='Path to the result file', type=click.File('w'))
-def generate(name: str, file: typing.TextIO):
+def generate(name: str):
     """
-    Generate a template by name.\n
+    Generate a template by name.
+    Format of templates is YAML.\n
+    To find all templates execute the following command:\n
+        * odahuflowctl template all\n
     Usage example:\n
         * odahuflowctl template generate --name deployment
-    \f
-    :param name: Template name
-    :param file: Path to the file with only one connection
     """
-    file.write(get_odahuflow_template_content(name))
-
-    click.echo(f"{name} template was generated")
+    click.echo(get_odahuflow_template_content(name))

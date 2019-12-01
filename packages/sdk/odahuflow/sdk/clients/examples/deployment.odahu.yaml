@@ -5,15 +5,15 @@ spec:
   # Model image is required value. Change it
   image: <model/image:tag>
 
-  # Resources
+  # Compute resources
   # For example:
   # resources:
   #   limits:
-  #     cpu: 1024m
-  #     memory: 1024Mi
+  #     cpu: 1
+  #     memory: 1Gi
   #   requests:
-  #     cpu: 1024m
-  #     memory: 1024Mi
+  #     cpu: 1
+  #     memory: 1Gi
 
   # Minimum number of replicas
   minReplicas: 1

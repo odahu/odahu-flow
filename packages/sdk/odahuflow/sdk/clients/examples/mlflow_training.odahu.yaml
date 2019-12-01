@@ -29,10 +29,10 @@ spec:
   # For example:
   # resources:
   #   limits:
-  #     cpu: 1024m
-  #     memory: 1024Mi
+  #     cpu: 1
+  #     memory: 1Gi
   #   requests:
-  #     cpu: 1024m
-  #     memory: 1024Mi
+  #     cpu: 1
+  #     memory: 1Gi
   # You can find list of all available connections on the left sidebar. You should specify one with git type
   vcsName: <git-connection>
