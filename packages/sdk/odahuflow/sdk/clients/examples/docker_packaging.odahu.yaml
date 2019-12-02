@@ -1,0 +1,27 @@
+kind: ModelPackaging
+# Some unique value
+id: <fill in>
+spec:
+  # You can find list of all available packaging integrations on the left sidebar
+  integrationName: docker-rest
+  # training artifact name
+  artifactName: <artifact-name>
+  # List of targets. Depends of a Model Packaging type
+  targets:
+    # Name of connections
+    name: docker-push
+    connectionName: <connection name>
+  # List of arguments for the rest packager. For example: template of result image name and base Docker image
+  # arguments:
+  #  imageName: "{{ Name }}/{{ Version }}:{{ RandomUUID }}"
+  #  dockerfileBaseImage: python:3.6
+
+  # Compute resources
+  # For example:
+  # resources:
+  #   limits:
+  #     cpu: 1
+  #     memory: 1Gi
+  #   requests:
+  #     cpu: 1
+  #     memory: 1Gi

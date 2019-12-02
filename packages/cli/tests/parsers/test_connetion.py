@@ -45,11 +45,6 @@ def conn() -> Connection:
     )
 
 
-@pytest.fixture
-def cli_runner() -> CliRunner:
-    return CliRunner()
-
-
 def test_get(mocker, cli_runner: CliRunner, conn_client: ConnectionClient, conn: Connection):
     client_mock = mocker.patch.object(ConnectionClient, 'get', return_value=conn)
 

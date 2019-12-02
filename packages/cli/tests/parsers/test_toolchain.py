@@ -44,12 +44,6 @@ def ti() -> ToolchainIntegration:
         ),
     )
 
-
-@pytest.fixture
-def cli_runner() -> CliRunner:
-    return CliRunner()
-
-
 def test_get(mocker, cli_runner: CliRunner, ti_client: ToolchainIntegrationClient, ti: ToolchainIntegration):
     client_mock = mocker.patch.object(ToolchainIntegrationClient, 'get', return_value=ti)
 
