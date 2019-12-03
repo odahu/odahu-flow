@@ -70,6 +70,16 @@ def _get_activate_conda_command(conda_env_name):
     return ' && '.join(activate_conda_env)
 
 
+def _check_conda():
+    conda_path = _get_conda_bin_executable("conda")
+    try:
+        run(conda_path, "--help")
+    except Exception as exc_info:
+        raise Exception("Could not find Conda executable at {0}. "
+                        "Ensure Conda is installed as per the instructions "
+                        "at https://conda.io/docs/user-guide/install/index.html") from exc_info
+
+
 def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
     """
     Extract model manifest from file to object
@@ -103,6 +113,8 @@ class ExecutionEnvironment:
 
     def __init__(self, name: str, binaries: OdahuflowProjectManifestBinaries, manifest_path: str, skip_deps=False):
 
+        self.check_environment_executables()
+
         if not name:
             name = str(uuid.uuid4())
 
@@ -134,8 +146,15 @@ class ExecutionEnvironment:
     def create_env(self):
         raise NotImplementedError
 
+    def check_environment_executables(self):
+        raise NotImplementedError
+
 
 class CondaExecutionEnvironment(ExecutionEnvironment):
+
+    def check_environment_executables(self):
+        _check_conda()
+        _logger.info('Conda environment executables are detected')
 
     def env_created(self):
         conda_exec = _get_conda_bin_executable('conda')
@@ -206,35 +225,71 @@ class GPPITrainedModelBinary:
     def execute(self, command: str, cwd: str = None, stream_output: bool = True):
         if self.use_current_env:
             _logger.info(f'use_current_env flag = True. Start to execute command without changing environment')
-            return run('bash', '-c', command, cwd=cwd, stream_output=stream_output)
+            exit_code, output, err_ = run('bash', '-c', command, cwd=cwd, stream_output=stream_output)
         else:
             _logger.info(f'use_current_env flag = False. Start to execute command in {self.exec_env}')
-            return self.exec_env.execute(command, cwd=cwd, stream_output=stream_output)
+            exit_code, output, err_ = self.exec_env.execute(command, cwd=cwd, stream_output=stream_output)
+
+        _logger.info('Subprocess result: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======' %
+                     (exit_code, output, err_))
+
+        return output
 
     def self_check(self):
         """
         Try to invoke public API of GPPI
-        1) Invoke entrypoint.info()
-        2) If input samples is found in package run entrypoint.predict_on_matrix()
+        1) Invoke entrypoint.init()
+        2) Invoke entrypoint.info()
+        3) If input samples is found in package run entrypoint.predict_on_matrix()
         :return:
         """
+
         _logger.info('Start procedure of self checking for GPPI')
-        _logger.info('GPPI will be unpacked and tested for GPPI API')
-
-        os.environ['MODEL_LOCATION'] = self.model_dir
-        _logger.info(f'Set "MODEL_LOCATION" env var = {self.model_dir}')
-
         try:
-            exit_code, output, err_ = self.execute(
-                f'python  {entrypoint_invoke.__file__} {self.manifest.model.entrypoint}',
+            self.execute(
+                f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
+                f'{self.manifest.model.entrypoint} self_check',
                 stream_output=False
             )
         except Exception as e:
             raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
 
-        _logger.info('Non-zero exit code: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======' %
-                     (exit_code, output, err_))
         _logger.info('Self check is successful. GPPI model is packed as expected.')
+
+    def predict(self, input_file: str, output_dir: str, output_file_name):
+        """
+        Do predictions
+        :param input_file: JSON file with data for predictions
+        :param output_dir: output directory where results will be saved
+        :return:
+        """
+        try:
+            self.execute(
+                f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
+                f'{self.manifest.model.entrypoint} predict {input_file} {output_dir} '
+                f'{"--output_file_name "+output_file_name if output_file_name else ""}',
+                stream_output=False
+            )
+        except Exception as e:
+            raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
+
+        _logger.info('Prediction successfully completed')
+
+    def info(self) -> str:
+        """
+        Show input/output model schema
+        :return:
+        """
+        try:
+            out = self.execute(
+                f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
+                f'{self.manifest.model.entrypoint} info',
+                stream_output=False
+            )
+        except Exception as e:
+            raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
+
+        return out
 
     def _init_exec_env(self, env_name: str) -> ExecutionEnvironment:
         if self.manifest.binaries.dependencies == 'conda':
