@@ -1,3 +1,5 @@
 include Pipfile*
 include requirements.txt
+include odahuflow/sdk/clients/examples/*
+include odahuflow/sdk/templates/*
 recursive-exclude tests *
