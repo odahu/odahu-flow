@@ -16,4 +16,7 @@
 """
 Odahuflow CI package version
 """
-__version__ = '1.0.0'
+__version__ = '1.0.0-rc30'
+__build_id__ = '11'
+__git_revision__ = '42faa354'
+__build_user__ = 'null'
