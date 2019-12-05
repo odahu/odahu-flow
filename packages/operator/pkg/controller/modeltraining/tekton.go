@@ -152,8 +152,9 @@ func createArtifactValidationStep(validatorResources *corev1.ResourceRequirement
 			Command: []string{modelValidatorBin},
 			Args: []string{
 				"gppi",
-				"test",
+				"-m",
 				path.Join(workspacePath, outputDir),
+				"test",
 			},
 			Resources: *validatorResources,
 		},
