@@ -1,4 +1,3 @@
-#
 #    Copyright 2019 EPAM Systems
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +36,9 @@ from typing import Any, List, Union, Dict
 _logger = logging.getLogger(__name__)
 
 ODAHUFLOW_MODEL_LOCATION_ENV_VAR = 'MODEL_LOCATION'
+MODEL_ENTRYPOINT_ENV = 'MODEL_ENTRYPOINT'
+
+args = None
 
 
 class CliError(Exception):
@@ -257,12 +259,13 @@ def _configure_logging(verbose: bool):
 
 
 def _configure_arg_parser() -> argparse.ArgumentParser:
+
     _parser = argparse.ArgumentParser(description="""
     Provide CLI to invoke GPPI entrypoint API.
     This module has only stdlib dependencies so it could be executed from any GPPI environment
     """)
-    _parser.add_argument('entrypoint', help='Name of entrypoint GPPI module inside $MODEL_LOCATION path')
     _parser.add_argument('-v', help='Verbosity logs', action='store_true')
+    _parser.add_argument('--entrypoint', help='Name of entrypoint GPPI module')
     _parser.add_argument('--model', help="""
     Override $MODEL_LOCATION environment variable before entrypoint import.
     Clean overridden value after script execution (success or fail).
@@ -325,11 +328,19 @@ def model_location(model):
             _logger.debug(f'{model_location_for_use} is removed from sys.path')
 
 
-if __name__ == '__main__':
+def main():
+
+    global args
 
     parser = _configure_arg_parser()
 
     args = parser.parse_args()
+
+    if not args.entrypoint:
+        args.entrypoint = os.environ.get(MODEL_ENTRYPOINT_ENV)
+    if not args.entrypoint:
+        raise RuntimeError(f'Either ${MODEL_ENTRYPOINT_ENV} env var or --entrypoint option '
+                           f'MUST be specified')
 
     _configure_logging(args.v)
 
@@ -342,3 +353,7 @@ if __name__ == '__main__':
                 'Please see your Training Toolchain documentation to get more info about packing your '
                 'model script dependencies'
             ) from exc_info
+
+
+if __name__ == '__main__':
+    main()
