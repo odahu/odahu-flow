@@ -248,7 +248,7 @@ class GPPITrainedModelBinary:
         try:
             self.execute(
                 f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
-                f'{self.manifest.model.entrypoint} self_check',
+                f'--entrypoint {self.manifest.model.entrypoint} self_check',
                 stream_output=False
             )
         except Exception as e:
@@ -266,7 +266,7 @@ class GPPITrainedModelBinary:
         try:
             self.execute(
                 f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
-                f'{self.manifest.model.entrypoint} predict {input_file} {output_dir} '
+                f'--entrypoint {self.manifest.model.entrypoint} predict {input_file} {output_dir} '
                 f'{"--output_file_name "+output_file_name if output_file_name else ""}',
                 stream_output=False
             )
@@ -283,7 +283,7 @@ class GPPITrainedModelBinary:
         try:
             out = self.execute(
                 f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
-                f'{self.manifest.model.entrypoint} info',
+                f'--entrypoint {self.manifest.model.entrypoint} info',
                 stream_output=False
             )
         except Exception as e:
