@@ -44,7 +44,7 @@ with open('requirements.txt') as f:
 setup(
     name='odahu-flow-cli',
     version=extract_version(),
-    description='Odahuflow CLI',
+    description='Odahu-flow CLI',
     packages=find_namespace_packages(),
     url='https://github.com/odahu/odahu-flow',
     author='Vlad Tokarev, Vitalik Solodilov',
