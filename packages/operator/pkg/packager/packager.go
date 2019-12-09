@@ -18,7 +18,6 @@ package packager
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
@@ -126,7 +125,6 @@ func (p *Packager) SaveResult() error {
 }
 
 func (p *Packager) downloadData(packaging *packaging.K8sPackager) (err error) {
-	fmt.Println(packaging)
 	storage, err := rclone.NewObjectStorage(&packaging.ModelHolder.Spec)
 	if err != nil {
 		p.log.Error(err, "repository creation")
