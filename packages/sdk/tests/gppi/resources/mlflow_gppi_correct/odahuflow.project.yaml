@@ -2,14 +2,14 @@ binaries:
   conda_path: odahuflow_model/conda.yaml
   dependencies: conda
   type: python
-legionVersion: '1.0'
+odahuflowVersion: '1.0'
 model:
   entrypoint: entrypoint
-  name: some-project
-  version: '1.0'
+  name: simple-model
+  version: '1.2'
   workDir: odahuflow_model
 output:
-  run_id: 2502153828224c5dbbc2b94ce2012e0b
+  run_id: fbf90f87da2d42c18afd4fc68aaac363
 toolchain:
   name: mlflow
-  version: 1.3.0
+  version: 1.0.0
