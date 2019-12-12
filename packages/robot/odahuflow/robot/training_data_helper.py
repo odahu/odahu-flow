@@ -19,7 +19,7 @@ This module helps to test a downloading of a training data
 import json
 import os
 from os.path import join
-from shutil import copyfile
+from shutil import copyfile, copytree
 from typing import Dict
 
 import click
@@ -28,6 +28,9 @@ from odahuflow.sdk.models import K8sTrainer
 
 INPUT_FILE_LOCATION = "input-file-location"
 TARGET_FILE_LOCATION = "target-file-location"
+
+INPUT_MODEL_LOCATION = "input-model-location"
+TARGET_MODEL_LOCATION = "target-model-location"
 
 
 def parse_model_training_entity(source_file: str) -> K8sTrainer:
@@ -74,5 +77,6 @@ def main(verbose: str, mt_file: str, target: str) -> None:  # pylint: disable=W0
         os.makedirs(target)
 
     copyfile(parameters[INPUT_FILE_LOCATION], join(target, parameters[TARGET_FILE_LOCATION]))
+    copytree(parameters[INPUT_MODEL_LOCATION], join(target, parameters[TARGET_MODEL_LOCATION]))
 
     click.echo("Files were copied!")

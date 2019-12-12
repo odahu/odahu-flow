@@ -8,13 +8,19 @@ TRAINED_ARTIFACTS_DIR="${DIR}/trained_artifacts"
 ODAHUFLOW_RESOURCES="${DIR}/odahuflow_resources"
 TEST_DATA="${DIR}/data"
 COMMAND=setup
-# Test connection points to the test data directory
-TEST_DATA_DIR_CONNECTION_ID=test-data-dir
-# Test connection points to the test data file
-TEST_DATA_FILE_CONNECTION_ID=test-data-file
+
+# Test connection points to the valid gppi archive
+TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
+# Test connection points to the odahu file inside valid gppi archive
+TEST_VALID_GPPI_ODAHU_FILE_ID=test-valid-gppi-odahu-file
+# Test connection points to the invalid gppi archive
+TEST_INVALID_GPPI_DIR_ID=test-invalid-gppi-dir
+# Test connection points to the odahu file inside invalid gppi archive
+TEST_INVALID_GPPI_ODAHU_FILE_ID=test-invalid-gppi-odahu-file
+
 TEST_DATA_TI_ID=training-data-helper
 # TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-ODAHUFLOW_CONNECTION_DECTYPT_TOKEN=$(jq '.odahuflow_connection_decrypt_token' -r "${CLUSTER_PROFILE}")
+ODAHUFLOW_CONNECTION_DECRYPT_TOKEN=$(jq '.odahuflow_connection_decrypt_token' -r "${CLUSTER_PROFILE}")
 
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
 # Arguments:
@@ -97,7 +103,7 @@ function create_test_data_connection() {
 
   # Replaced the uri with the test data directory and added the kind field
   # TODO: Remove the token after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-  odahuflowctl conn get --id models-output --decrypted "${ODAHUFLOW_CONNECTION_DECTYPT_TOKEN}" -o json |
+  odahuflowctl conn get --id models-output --decrypted "${ODAHUFLOW_CONNECTION_DECRYPT_TOKEN}" -o json |
     conn_uri="${conn_uri}" jq '.[0].spec.uri = env.conn_uri | .[] | .kind = "Connection"' \
       >"${conn_file}"
 
@@ -146,8 +152,10 @@ function setup() {
   esac
 
   # Update test-data connections
-  create_test_data_connection "${TEST_DATA_FILE_CONNECTION_ID}" "${remote_dir}/data/odahuflow.project.yaml"
-  create_test_data_connection "${TEST_DATA_DIR_CONNECTION_ID}" "${remote_dir}/data/"
+  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "${remote_dir}/data/valid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "${remote_dir}/data/valid_gppi/"
+  create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "${remote_dir}/data/invalid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "${remote_dir}/data/invalid_gppi/"
 
   wait_all_background_task
 }
@@ -160,8 +168,10 @@ function cleanup() {
   done
 
   odahuflowctl ti delete --id ${TEST_DATA_TI_ID} --ignore-not-found
-  odahuflowctl conn delete --id ${TEST_DATA_DIR_CONNECTION_ID} --ignore-not-found
-  odahuflowctl conn delete --id ${TEST_DATA_FILE_CONNECTION_ID} --ignore-not-found
+  odahuflowctl conn delete --id ${TEST_VALID_GPPI_DIR_ID} --ignore-not-found
+  odahuflowctl conn delete --id ${TEST_VALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
+  odahuflowctl conn delete --id ${TEST_INVALID_GPPI_DIR_ID} --ignore-not-found
+  odahuflowctl conn delete --id ${TEST_INVALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
 }
 
 # Prints the help message

@@ -1,0 +1,15 @@
+binaries:
+  conda_path: odahuflow_model/conda.yaml
+  dependencies: conda
+  type: python
+odahuflowVersion: '1.0'
+model:
+  entrypoint: entrypoint
+  name: simple-model
+  version: '1.2'
+  workDir: odahuflow_model
+output:
+  run_id: training_data_test
+toolchain:
+  name: mlflow
+  version: 1.0.0

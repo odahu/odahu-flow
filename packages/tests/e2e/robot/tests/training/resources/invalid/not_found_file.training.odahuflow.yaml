@@ -11,8 +11,10 @@ spec:
   hyperParameters:
     input-file-location: "local/odahuflow.project.yaml"
     target-file-location: "odahuflow.project.yaml"
+    input-model-location: "local/odahuflow_model"
+    target-model-location: "odahuflow_model"
   data:
     # Connection name from TEST_DATA_FILE_CONNECTION_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
-    - connName: test-data-file
+    - connName: test-valid-gppi-odahu-file
       localPath: local/not-found.yaml
   vcsName: odahu-flow-examples

@@ -15,6 +15,6 @@ spec:
     target-model-location: "odahuflow_model"
   data:
     # Connection name from TEST_DATA_DIR_CONNECTION_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
-    - connName: test-valid-gppi-dir
+    - connName: test-invalid-gppi-dir
       localPath: local/
   vcsName: odahu-flow-examples
