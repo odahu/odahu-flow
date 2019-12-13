@@ -17,7 +17,7 @@ class ModelPackagingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, arguments: object=None, artifact_name: str=None, image: str=None, integration_name: str=None, resources: ResourceRequirements=None, targets: List[Target]=None):  # noqa: E501
+    def __init__(self, arguments: object=None, artifact_name: str=None, image: str=None, integration_name: str=None, output_connection: str=None, resources: ResourceRequirements=None, targets: List[Target]=None):  # noqa: E501
         """ModelPackagingSpec - a model defined in Swagger
 
         :param arguments: The arguments of this ModelPackagingSpec.  # noqa: E501
@@ -28,6 +28,8 @@ class ModelPackagingSpec(Model):
         :type image: str
         :param integration_name: The integration_name of this ModelPackagingSpec.  # noqa: E501
         :type integration_name: str
+        :param output_connection: The output_connection of this ModelPackagingSpec.  # noqa: E501
+        :type output_connection: str
         :param resources: The resources of this ModelPackagingSpec.  # noqa: E501
         :type resources: ResourceRequirements
         :param targets: The targets of this ModelPackagingSpec.  # noqa: E501
@@ -38,6 +40,7 @@ class ModelPackagingSpec(Model):
             'artifact_name': str,
             'image': str,
             'integration_name': str,
+            'output_connection': str,
             'resources': ResourceRequirements,
             'targets': List[Target]
         }
@@ -47,6 +50,7 @@ class ModelPackagingSpec(Model):
             'artifact_name': 'artifactName',
             'image': 'image',
             'integration_name': 'integrationName',
+            'output_connection': 'outputConnection',
             'resources': 'resources',
             'targets': 'targets'
         }
@@ -55,6 +59,7 @@ class ModelPackagingSpec(Model):
         self._artifact_name = artifact_name
         self._image = image
         self._integration_name = integration_name
+        self._output_connection = output_connection
         self._resources = resources
         self._targets = targets
 
@@ -160,6 +165,29 @@ class ModelPackagingSpec(Model):
         """
 
         self._integration_name = integration_name
+
+    @property
+    def output_connection(self) -> str:
+        """Gets the output_connection of this ModelPackagingSpec.
+
+        Name of Connection to storage where packaging output artifact will be stored. Permitted connection types are defined by specific PackagingIntegration  # noqa: E501
+
+        :return: The output_connection of this ModelPackagingSpec.
+        :rtype: str
+        """
+        return self._output_connection
+
+    @output_connection.setter
+    def output_connection(self, output_connection: str):
+        """Sets the output_connection of this ModelPackagingSpec.
+
+        Name of Connection to storage where packaging output artifact will be stored. Permitted connection types are defined by specific PackagingIntegration  # noqa: E501
+
+        :param output_connection: The output_connection of this ModelPackagingSpec.
+        :type output_connection: str
+        """
+
+        self._output_connection = output_connection
 
     @property
     def resources(self) -> ResourceRequirements:

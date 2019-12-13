@@ -19,7 +19,7 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: object=None, image: str=None, model: ModelIdentity=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: object=None, image: str=None, model: ModelIdentity=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
         :param args: The args of this ModelTrainingSpec.  # noqa: E501
@@ -36,6 +36,8 @@ class ModelTrainingSpec(Model):
         :type image: str
         :param model: The model of this ModelTrainingSpec.  # noqa: E501
         :type model: ModelIdentity
+        :param output_connection: The output_connection of this ModelTrainingSpec.  # noqa: E501
+        :type output_connection: str
         :param reference: The reference of this ModelTrainingSpec.  # noqa: E501
         :type reference: str
         :param resources: The resources of this ModelTrainingSpec.  # noqa: E501
@@ -55,6 +57,7 @@ class ModelTrainingSpec(Model):
             'hyper_parameters': object,
             'image': str,
             'model': ModelIdentity,
+            'output_connection': str,
             'reference': str,
             'resources': ResourceRequirements,
             'toolchain': str,
@@ -70,6 +73,7 @@ class ModelTrainingSpec(Model):
             'hyper_parameters': 'hyperParameters',
             'image': 'image',
             'model': 'model',
+            'output_connection': 'outputConnection',
             'reference': 'reference',
             'resources': 'resources',
             'toolchain': 'toolchain',
@@ -84,6 +88,7 @@ class ModelTrainingSpec(Model):
         self._hyper_parameters = hyper_parameters
         self._image = image
         self._model = model
+        self._output_connection = output_connection
         self._reference = reference
         self._resources = resources
         self._toolchain = toolchain
@@ -259,6 +264,29 @@ class ModelTrainingSpec(Model):
         """
 
         self._model = model
+
+    @property
+    def output_connection(self) -> str:
+        """Gets the output_connection of this ModelTrainingSpec.
+
+        Name of Connection to storage where training output artifact will be stored. Permitted connection types are defined by specific toolchain  # noqa: E501
+
+        :return: The output_connection of this ModelTrainingSpec.
+        :rtype: str
+        """
+        return self._output_connection
+
+    @output_connection.setter
+    def output_connection(self, output_connection: str):
+        """Sets the output_connection of this ModelTrainingSpec.
+
+        Name of Connection to storage where training output artifact will be stored. Permitted connection types are defined by specific toolchain  # noqa: E501
+
+        :param output_connection: The output_connection of this ModelTrainingSpec.
+        :type output_connection: str
+        """
+
+        self._output_connection = output_connection
 
     @property
     def reference(self) -> str:

@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -59,11 +61,18 @@ var (
 	piImageMpRoute      = "test:image"
 )
 
+const (
+	testOutConn         = "some-output-connection"
+	testOutConnDefault  = "default-output-connection"
+	testOutConnNotFound = "out-conn-not-found"
+)
+
 type ModelPackagingRouteSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	server         *gin.Engine
 	mpRepository   mp_repository.Repository
+	connRepository conn_repository.Repository
 	k8sClient      client.Client
 	k8sEnvironment *envtest.Environment
 }
@@ -109,6 +118,30 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	if err != nil {
 		panic(err)
 	}
+
+	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient, "")
+	// Create the connection that will be used as the outputConnection param for a training.
+	if err := s.connRepository.CreateConnection(&connection.Connection{
+		ID: testOutConn,
+		Spec: odahuflowv1alpha1.ConnectionSpec{
+			Type: connection.GcsType,
+		},
+	}); err != nil {
+		// If we get a panic that we have a test configuration problem
+		panic(err)
+	}
+
+	// Create the connection that will be used as the default outputConnection param for a training.
+	if err := s.connRepository.CreateConnection(&connection.Connection{
+		ID: testOutConnDefault,
+		Spec: odahuflowv1alpha1.ConnectionSpec{
+			Type: connection.GcsType,
+		},
+	}); err != nil {
+		// If we get a panic that we have a test configuration problem
+		panic(err)
+	}
+
 }
 
 func (s *ModelPackagingRouteSuite) TearDownSuite() {
@@ -141,10 +174,11 @@ func newModelPackaging() *packaging.ModelPackaging {
 	return &packaging.ModelPackaging{
 		ID: mpIDRoute,
 		Spec: packaging.ModelPackagingSpec{
-			ArtifactName:    mpArtifactName,
-			IntegrationName: piIDMpRoute,
-			Image:           mpImage,
-			Resources:       pack_route.DefaultPackagingResources,
+			ArtifactName:     mpArtifactName,
+			IntegrationName:  piIDMpRoute,
+			Image:            mpImage,
+			Resources:        pack_route.DefaultPackagingResources,
+			OutputConnection: testOutConn,
 		},
 	}
 }

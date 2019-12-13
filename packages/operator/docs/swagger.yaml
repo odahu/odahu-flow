@@ -145,6 +145,11 @@ definitions:
       integrationName:
         description: Packaging integration ID
         type: string
+      outputConnection:
+        description: |-
+          Name of Connection to storage where packaging output artifact will be stored.
+          Permitted connection types are defined by specific PackagingIntegration
+        type: string
       resources:
         $ref: '#/definitions/ResourceRequirements'
         description: |-
@@ -558,6 +563,11 @@ definitions:
         $ref: '#/definitions/ModelIdentity'
         description: Model Identity
         type: object
+      outputConnection:
+        description: |-
+          Name of Connection to storage where training output artifact will be stored.
+          Permitted connection types are defined by specific toolchain
+        type: string
       reference:
         description: VCS Reference
         type: string
@@ -705,7 +715,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/Configuration'
-          type: object
       produces:
       - application/json
       responses:
@@ -761,7 +770,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/Connection'
-          type: object
       produces:
       - application/json
       responses:
@@ -787,7 +795,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/Connection'
-          type: object
       produces:
       - application/json
       responses:
@@ -909,7 +916,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/feedback.ModelFeedbackRequest'
-          type: object
       - description: Model name
         in: header
         name: model-name
@@ -976,7 +982,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelDeployment'
-          type: object
       produces:
       - application/json
       responses:
@@ -1002,7 +1007,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelDeployment'
-          type: object
       produces:
       - application/json
       responses:
@@ -1119,7 +1123,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelPackaging'
-          type: object
       produces:
       - application/json
       responses:
@@ -1145,7 +1148,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelPackaging'
-          type: object
       produces:
       - application/json
       responses:
@@ -1262,7 +1264,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelPackagingResult'
-          type: object
       - description: Model Packaging id
         in: path
         name: id
@@ -1329,7 +1330,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelRoute'
-          type: object
       produces:
       - application/json
       responses:
@@ -1355,7 +1355,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelRoute'
-          type: object
       produces:
       - application/json
       responses:
@@ -1484,7 +1483,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelTraining'
-          type: object
       produces:
       - application/json
       responses:
@@ -1510,7 +1508,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ModelTraining'
-          type: object
       produces:
       - application/json
       responses:
@@ -1627,7 +1624,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/TrainingResult'
-          type: object
       - description: Model Training id
         in: path
         name: id
@@ -1694,7 +1690,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/PackagingIntegration'
-          type: object
       produces:
       - application/json
       responses:
@@ -1720,7 +1715,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/PackagingIntegration'
-          type: object
       produces:
       - application/json
       responses:
@@ -1837,7 +1831,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ToolchainIntegration'
-          type: object
       produces:
       - application/json
       responses:
@@ -1863,7 +1856,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/ToolchainIntegration'
-          type: object
       produces:
       - application/json
       responses:

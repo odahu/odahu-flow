@@ -18,6 +18,9 @@ TEST_INVALID_GPPI_DIR_ID=test-invalid-gppi-dir
 # Test connection points to the odahu file inside invalid gppi archive
 TEST_INVALID_GPPI_ODAHU_FILE_ID=test-invalid-gppi-odahu-file
 
+# Test connection to custom output model folder
+TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
+
 TEST_DATA_TI_ID=training-data-helper
 # TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
 ODAHUFLOW_CONNECTION_DECRYPT_TOKEN=$(jq '.odahuflow_connection_decrypt_token' -r "${CLUSTER_PROFILE}")
@@ -156,6 +159,7 @@ function setup() {
   create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "${remote_dir}/data/valid_gppi/"
   create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "${remote_dir}/data/invalid_gppi/odahuflow.project.yaml"
   create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "${remote_dir}/data/invalid_gppi/"
+  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "${remote_dir}/data/custom_output/"
 
   wait_all_background_task
 }

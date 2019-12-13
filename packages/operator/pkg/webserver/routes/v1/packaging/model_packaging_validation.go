@@ -19,6 +19,9 @@ package packaging
 import (
 	"errors"
 	"fmt"
+	pack_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
+	"github.com/spf13/viper"
 
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -84,6 +87,8 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 		}
 
 	}
+
+	err = multierr.Append(err, mpv.validateOutputConnection(mp))
 
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMpErrorMessage, err.Error())
@@ -220,4 +225,34 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 	}
 
 	return err
+}
+
+func (mpv *MpValidator) validateOutputConnection(mp *packaging.ModelPackaging) (err error) {
+
+	defaultOutConName := viper.GetString(pack_conf.OutputConnectionName)
+
+	if len(mp.Spec.OutputConnection) == 0 {
+		if len(defaultOutConName) > 0 {
+			mp.Spec.OutputConnection = defaultOutConName
+			logMP.Info("OutputConnection is empty. Use connection from configuration")
+		} else {
+			logMP.Info("OutputConnection is empty. Configuration doesn't contain default value")
+		}
+	}
+
+	emptyErr := validation.ValidateEmpty("OutputConnection", mp.Spec.OutputConnection)
+	if emptyErr != nil {
+		err = multierr.Append(err, emptyErr)
+	}
+
+	notExistsErr := validation.ValidateExistsInRepository(mp.Spec.OutputConnection, mpv.connRepository)
+	if notExistsErr != nil {
+		err = multierr.Append(err, notExistsErr)
+	}
+
+	if err != nil {
+		return fmt.Errorf(validation.SpecSectionValidationFailedMessage, "OutputConnection", err.Error())
+	}
+
+	return
 }

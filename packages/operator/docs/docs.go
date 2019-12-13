@@ -70,7 +70,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/Configuration"
                         }
                     }
@@ -155,7 +154,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/Connection"
                         }
                     }
@@ -200,7 +198,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/Connection"
                         }
                     }
@@ -378,7 +375,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/feedback.ModelFeedbackRequest"
                         }
                     },
@@ -478,7 +474,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelDeployment"
                         }
                     }
@@ -523,7 +518,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelDeployment"
                         }
                     }
@@ -694,7 +688,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelPackaging"
                         }
                     }
@@ -739,7 +732,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelPackaging"
                         }
                     }
@@ -910,7 +902,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelPackagingResult"
                         }
                     },
@@ -1011,7 +1002,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelRoute"
                         }
                     }
@@ -1056,7 +1046,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelRoute"
                         }
                     }
@@ -1245,7 +1234,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelTraining"
                         }
                     }
@@ -1290,7 +1278,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelTraining"
                         }
                     }
@@ -1461,7 +1448,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/TrainingResult"
                         }
                     },
@@ -1562,7 +1548,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/PackagingIntegration"
                         }
                     }
@@ -1607,7 +1592,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/PackagingIntegration"
                         }
                     }
@@ -1778,7 +1762,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ToolchainIntegration"
                         }
                     }
@@ -1823,7 +1806,6 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ToolchainIntegration"
                         }
                     }
@@ -2129,6 +2111,10 @@ var doc = `{
                 },
                 "integrationName": {
                     "description": "Packaging integration ID",
+                    "type": "string"
+                },
+                "outputConnection": {
+                    "description": "Name of Connection to storage where packaging output artifact will be stored.\nPermitted connection types are defined by specific PackagingIntegration",
                     "type": "string"
                 },
                 "resources": {
@@ -2665,6 +2651,10 @@ var doc = `{
                     "description": "Model Identity",
                     "type": "object",
                     "$ref": "#/definitions/ModelIdentity"
+                },
+                "outputConnection": {
+                    "description": "Name of Connection to storage where training output artifact will be stored.\nPermitted connection types are defined by specific toolchain",
+                    "type": "string"
                 },
                 "reference": {
                     "description": "VCS Reference",

@@ -50,7 +50,7 @@ func generatePackagerTaskSpec(
 
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
-			createInitPackagerStep(packagingCR.Name),
+			createInitPackagerStep(packagingCR),
 			mainPackagerStep,
 			createResultPackagerStep(packagingCR.Name),
 		},
@@ -67,7 +67,7 @@ func generatePackagerTaskSpec(
 	}, nil
 }
 
-func createInitPackagerStep(mpID string) tektonv1alpha1.Step {
+func createInitPackagerStep(packagingCR *odahuflowv1alpha1.ModelPackaging) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerSetupStep,
@@ -78,9 +78,9 @@ func createInitPackagerStep(mpID string) tektonv1alpha1.Step {
 				"--mp-file",
 				path.Join(workspacePath, mpContentFile),
 				"--mp-id",
-				mpID,
+				packagingCR.Name,
 				"--output-connection-name",
-				viper.GetString(packaging_conf.OutputConnectionName),
+				packagingCR.Spec.OutputConnection,
 				"--api-url",
 				viper.GetString(operator_conf.APIURL),
 				"--config",

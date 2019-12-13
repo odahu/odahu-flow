@@ -16,10 +16,14 @@
 
 package errors
 
-type NotFoundError struct{}
+import "fmt"
+
+type NotFoundError struct {
+	Entity string
+}
 
 func (nfe NotFoundError) Error() string {
-	return "entity is not found"
+	return fmt.Sprintf("entity %q is not found", nfe.Entity)
 }
 
 func IsNotFoundError(err error) bool {
@@ -38,10 +42,12 @@ func IsSerializationError(err error) bool {
 	return ok
 }
 
-type AlreadyExistError struct{}
+type AlreadyExistError struct {
+	Entity string
+}
 
 func (aee AlreadyExistError) Error() string {
-	return "entity already exists"
+	return fmt.Sprintf("entity %q already exists", aee.Entity)
 }
 
 func IsAlreadyExistError(err error) bool {

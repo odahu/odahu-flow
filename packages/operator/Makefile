@@ -1,4 +1,4 @@
-ODAHUFLOW_OPERATOR_GENERATED_ENTITIES = ../../helms/odahuflow/templates/operator/generated
+ODAHUFLOW_OPERATOR_GENERATED_ENTITIES = ../../helms/odahu-flow-core/templates/operator/generated
 LINTER_ADDITIONAL_ARGS =
 KUBEBUILDER_CONTROLPLANE_START_TIMEOUT=600s
 

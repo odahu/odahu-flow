@@ -170,7 +170,7 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) er
 		// If err is not nil, then the connection already exists.
 		return vcr.createOrUpdateConnection(conn)
 	case odahuflow_errors.IsNotFoundError(err):
-		return odahuflow_errors.NotFoundError{}
+		return odahuflow_errors.NotFoundError{Entity: conn.ID}
 	default:
 		return err
 	}
@@ -209,12 +209,12 @@ func (vcr *vaultConnRepository) getConnectionFromVault(connID string) (*connecti
 
 	// The vaultEntity is nil when binaryData is not located by specific connectionVaultPath
 	if vaultEntity == nil {
-		return nil, odahuflow_errors.NotFoundError{}
+		return nil, odahuflow_errors.NotFoundError{Entity: connID}
 	}
 
 	binaryData, ok := vaultEntity.Data[ConnKey]
 	if !ok {
-		return nil, odahuflow_errors.NotFoundError{}
+		return nil, odahuflow_errors.NotFoundError{Entity: connID}
 	}
 
 	connData, err := json.Marshal(binaryData)

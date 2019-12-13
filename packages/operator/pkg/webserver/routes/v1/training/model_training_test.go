@@ -94,6 +94,31 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 		// If we get a panic that we have a test configuration problem
 		panic(err)
 	}
+
+	// Create the connection that will be used as the outputConnection param for a training.
+	if err := s.connRepository.CreateConnection(&connection.Connection{
+		ID: testMtOutConn,
+		Spec: odahuflowv1alpha1.ConnectionSpec{
+			Type: connection.GcsType,
+		},
+	}); err != nil {
+		// If we get a panic that we have a test configuration problem
+		panic(err)
+	}
+
+	// Create the connection that will be used as the default outputConnection param for a training.
+	if err := s.connRepository.CreateConnection(&connection.Connection{
+		ID: testMtOutConnDefault,
+		Spec: odahuflowv1alpha1.ConnectionSpec{
+			Type: connection.GcsType,
+		},
+	}); err != nil {
+		// If we get a panic that we have a test configuration problem
+		panic(err)
+	}
+
+	// Define output connection in configuration to not require this from user requests
+	viper.Set(train_config.OutputConnectionName, testMtOutConnDefault)
 }
 
 func (s *ModelTrainingRouteSuite) TearDownSuite() {
@@ -147,12 +172,13 @@ func newMtStub() *training.ModelTraining {
 				Version:              testModelVersion1,
 				ArtifactNameTemplate: train_route.DefaultArtifactOutputTemplate,
 			},
-			Toolchain:  testToolchainIntegrationID,
-			Entrypoint: testMtEntrypoint,
-			VCSName:    testMtVCSID,
-			Image:      testMtImage,
-			Reference:  testMtReference,
-			Resources:  &train_route.DefaultTrainingResources,
+			Toolchain:        testToolchainIntegrationID,
+			Entrypoint:       testMtEntrypoint,
+			VCSName:          testMtVCSID,
+			Image:            testMtImage,
+			Reference:        testMtReference,
+			Resources:        &train_route.DefaultTrainingResources,
+			OutputConnection: testMtOutConn,
 		},
 	}
 }

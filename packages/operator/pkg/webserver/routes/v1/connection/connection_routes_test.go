@@ -702,7 +702,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPICreateConnection() {
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 
 	_, err = s.connRepository.GetConnection(connID)
-	s.g.Expect(err).Should(Equal(odahuflow_errors.NotFoundError{}))
+	s.g.Expect(err).Should(Equal(odahuflow_errors.NotFoundError{Entity: connID}))
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIUpdateConnection() {
@@ -726,7 +726,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIUpdateConnection() {
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 
 	_, err = s.connRepository.GetConnection(connID)
-	s.g.Expect(err).Should(Equal(odahuflow_errors.NotFoundError{}))
+	s.g.Expect(err).Should(Equal(odahuflow_errors.NotFoundError{Entity: connID}))
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIDeleteConnection() {
