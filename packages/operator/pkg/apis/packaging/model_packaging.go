@@ -42,7 +42,7 @@ type ModelPackagingSpec struct {
 	// Resources for packager container
 	// The same format like k8s uses for pod resources.
 	Resources *v1alpha1.ResourceRequirements `json:"resources,omitempty"`
-	// Name of Connection to storage where packaging output artifact will be stored.
+	// Name of Connection to storage where a packager obtain a model trained artifact.
 	// Permitted connection types are defined by specific PackagingIntegration
 	OutputConnection string `json:"outputConnection,omitempty"`
 }

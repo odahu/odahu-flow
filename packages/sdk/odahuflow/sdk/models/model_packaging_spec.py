@@ -170,7 +170,7 @@ class ModelPackagingSpec(Model):
     def output_connection(self) -> str:
         """Gets the output_connection of this ModelPackagingSpec.
 
-        Name of Connection to storage where packaging output artifact will be stored. Permitted connection types are defined by specific PackagingIntegration  # noqa: E501
+        Name of Connection to storage where a packager obtain a model trained artifact. Permitted connection types are defined by specific PackagingIntegration  # noqa: E501
 
         :return: The output_connection of this ModelPackagingSpec.
         :rtype: str
@@ -181,7 +181,7 @@ class ModelPackagingSpec(Model):
     def output_connection(self, output_connection: str):
         """Sets the output_connection of this ModelPackagingSpec.
 
-        Name of Connection to storage where packaging output artifact will be stored. Permitted connection types are defined by specific PackagingIntegration  # noqa: E501
+        Name of Connection to storage where a packager obtain a model trained artifact. Permitted connection types are defined by specific PackagingIntegration  # noqa: E501
 
         :param output_connection: The output_connection of this ModelPackagingSpec.
         :type output_connection: str

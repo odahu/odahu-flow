@@ -2097,7 +2097,7 @@
                     "type": "string"
                 },
                 "outputConnection": {
-                    "description": "Name of Connection to storage where packaging output artifact will be stored.\nPermitted connection types are defined by specific PackagingIntegration",
+                    "description": "Name of Connection to storage where a packager obtain a model trained artifact.\nPermitted connection types are defined by specific PackagingIntegration",
                     "type": "string"
                 },
                 "resources": {
