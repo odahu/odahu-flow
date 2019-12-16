@@ -19,3 +19,8 @@ spec:
       localPath: local/
       remotePath: /test
   vcsName: odahu-flow-examples
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      memory: 512Mi

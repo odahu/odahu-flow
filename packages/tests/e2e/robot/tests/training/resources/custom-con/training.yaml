@@ -19,3 +19,8 @@ spec:
       localPath: local/
   vcsName: odahu-flow-examples
   outputConnection: test-custom-output-folder
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      memory: 512Mi
