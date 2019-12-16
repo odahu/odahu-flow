@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	MtVcsNotExistsErrorMessage    = "cannot find VCS Credential"
+	MtVcsNotExistsErrorMessage    = "cannot find VCS Connection"
 	EmptyModelNameErrorMessage    = "model name must be no empty"
 	EmptyModelVersionErrorMessage = "model version must be no empty"
 	EmptyVcsNameMessageError      = "VCS name is empty"
