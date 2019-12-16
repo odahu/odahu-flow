@@ -133,6 +133,7 @@ func (s *ModelTrainingRouteSuite) TearDownSuite() {
 
 func (s *ModelTrainingRouteSuite) TearDownTest() {
 	viper.Set(train_config.Enabled, true)
+	viper.Set(train_config.OutputConnectionName, nil)
 
 	for _, mpID := range []string{testMtID, testMtID1, testMtID2} {
 		if err := s.mtRepository.DeleteModelTraining(mpID); err != nil && !errors.IsNotFound(err) {

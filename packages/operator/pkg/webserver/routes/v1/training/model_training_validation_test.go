@@ -94,6 +94,10 @@ func (s *ModelTrainingValidationSuite) TearDownSuite() {
 	}
 }
 
+func (s *ModelTrainingValidationSuite) TearDownTest() {
+	viper.Set(train_config.OutputConnectionName, nil)
+}
+
 func TestModelTrainingValidationSuite(t *testing.T) {
 	suite.Run(t, new(ModelTrainingValidationSuite))
 }
