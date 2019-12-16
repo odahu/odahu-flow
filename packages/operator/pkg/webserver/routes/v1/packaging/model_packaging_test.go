@@ -96,7 +96,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 
 	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
 	if err != nil {
-		panic(err)
+		s.T().Fatalf("Cannot create new k8s client: %v", err)
 	}
 
 	s.server = gin.Default()
@@ -116,7 +116,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 		},
 	})
 	if err != nil {
-		panic(err)
+		s.T().Fatalf("Cannot create PackagingIntegration: %v", err)
 	}
 
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient, "")
@@ -127,8 +127,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 			Type: connection.GcsType,
 		},
 	}); err != nil {
-		// If we get a panic that we have a test configuration problem
-		panic(err)
+		s.T().Fatalf("Cannot create Connection: %v", err)
 	}
 
 	// Create the connection that will be used as the default outputConnection param for a training.
@@ -138,8 +137,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 			Type: connection.GcsType,
 		},
 	}); err != nil {
-		// If we get a panic that we have a test configuration problem
-		panic(err)
+		s.T().Fatalf("Cannot create Connection: %v", err)
 	}
 
 }
@@ -164,8 +162,7 @@ func (s *ModelPackagingRouteSuite) TearDownTest() {
 	for _, mpID := range []string{mpIDRoute, testMpID1, testMpID2} {
 		if err := s.mpRepository.DeleteModelPackaging(mpID); err != nil && !errors.IsNotFound(err) {
 			// If a model packaging is not found then it was not created during a test case
-			// All other errors propagate as a panic
-			panic(err)
+			s.T().Fatalf("Cannot delete ModelPackaging: %v", err)
 		}
 	}
 }
