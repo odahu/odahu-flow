@@ -68,7 +68,7 @@ func generateTrainerTaskSpec(
 			createInitTrainerStep(trainingCR.Name),
 			createMainTrainerStep(trainingCR, toolchainIntegration, &trainResources),
 			createArtifactValidationStep(&validatorResource),
-			createResultTrainerStep(trainingCR.Name),
+			createResultTrainerStep(trainingCR),
 		},
 		Volumes: []corev1.Volume{
 			{
@@ -161,7 +161,7 @@ func createArtifactValidationStep(validatorResources *corev1.ResourceRequirement
 	}
 }
 
-func createResultTrainerStep(mtID string) tektonv1alpha1.Step {
+func createResultTrainerStep(mt *odahuflowv1alpha1.ModelTraining) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerResultStep,
@@ -172,9 +172,9 @@ func createResultTrainerStep(mtID string) tektonv1alpha1.Step {
 				"--mt-file",
 				path.Join(workspacePath, mtConfig),
 				"--mt-id",
-				mtID,
+				mt.Name,
 				"--output-connection-name",
-				viper.GetString(training_conf.OutputConnectionName),
+				mt.Spec.OutputConnection,
 				"--api-url",
 				viper.GetString(operator_conf.APIURL),
 				"--output-dir",

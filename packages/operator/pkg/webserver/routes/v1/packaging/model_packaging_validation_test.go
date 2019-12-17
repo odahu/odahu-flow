@@ -18,6 +18,9 @@ package packaging_test
 
 import (
 	"fmt"
+	packaging_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
+	"github.com/spf13/viper"
 	"path/filepath"
 	"testing"
 
@@ -464,4 +467,44 @@ func (s *ModelPackagingValidationSuite) TestMpResourcesValidation() {
 		"validation of cpu limit is failed: quantities must match the regular expression"))
 	s.g.Expect(errorMessage).Should(ContainSubstring(
 		"validation of gpu limit is failed: quantities must match the regular expression"))
+}
+
+func (s *ModelPackagingValidationSuite) TestOutputConnection() {
+
+	validator := pack_route.NewMpValidator(s.mpRepository, s.connRepository)
+
+	testMpOutConnDefault := testOutConnDefault
+	testMpOutConn := testOutConn
+	testMpOutConnNotFound := testOutConnNotFound
+
+	mp := &packaging.ModelPackaging{
+		Spec: packaging.ModelPackagingSpec{},
+	}
+
+	// If configuration output connection is not set then user must specify it as ModelTraining parameter
+	viper.Set(packaging_config.OutputConnectionName, nil)
+	err := validator.ValidateAndSetDefaults(mp)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
+
+	// If configuration output connection is set and user has not passed output connection as training
+	// parameter then output connection value from configuration will be used as default
+	viper.Set(packaging_config.OutputConnectionName, testMpOutConnDefault)
+	_ = validator.ValidateAndSetDefaults(mp)
+	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConnDefault))
+
+	// If configuration output connection is set but user also has passed output connection as training
+	// parameter then user value is used
+	mp.Spec.OutputConnection = testMpOutConn
+	_ = validator.ValidateAndSetDefaults(mp)
+	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConn))
+
+	// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
+	mp = &packaging.ModelPackaging{
+		Spec: packaging.ModelPackagingSpec{OutputConnection: testMpOutConnNotFound},
+	}
+	err = validator.ValidateAndSetDefaults(mp)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
+
 }

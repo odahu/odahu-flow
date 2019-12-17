@@ -73,7 +73,7 @@ def _get_activate_conda_command(conda_env_name):
 def _check_conda():
     conda_path = _get_conda_bin_executable("conda")
     try:
-        run(conda_path, "--help")
+        run(conda_path, "--help", stream_output=False)
     except Exception as exc_info:
         raise Exception("Could not find Conda executable at {0}. "
                         "Ensure Conda is installed as per the instructions "
@@ -170,7 +170,7 @@ class CondaExecutionEnvironment(ExecutionEnvironment):
             _logger.info(f'Conda env with name {env_id!r} already exists. Creating step is skipped')
         else:
             _logger.info(f'Creating conda env with name {env_id!r}')
-            run(conda_exec, 'create', '--yes', '--name', env_id)
+            run(conda_exec, 'create', '--yes', '--name', env_id, stream_output=False)
 
     def install_dependencies(self):
 
@@ -180,7 +180,7 @@ class CondaExecutionEnvironment(ExecutionEnvironment):
         # Install requirements from dep. list
         conda_dep_list = os.path.join(self._manifest_path, self.binaries.conda_path)
         _logger.info(f'Installing mandatory requirements from {conda_dep_list} to {env_id!r}')
-        run(conda_exec, 'env', 'update', f'--name={env_id}', f'--file={conda_dep_list}')
+        run(conda_exec, 'env', 'update', f'--name={env_id}', f'--file={conda_dep_list}', stream_output=False)
 
     def execute(self, command: str, cwd: str = None, stream_output: bool = True):
         activate_cmd = _get_activate_conda_command(self._name)

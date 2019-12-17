@@ -39,11 +39,11 @@ func (s *ToolchainIntegrationValidationSuite) SetupSuite() {
 	s.validator = train_route.NewTiValidator()
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestToolchainIntegrationValidationSuite(t *testing.T) {
+func TestToolchainIntegrationValidationSuite(t *testing.T) {
 	suite.Run(t, new(ToolchainIntegrationValidationSuite))
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestTiIDGeneration(t *testing.T) {
+func (s *ToolchainIntegrationValidationSuite) TestTiIDGeneration() {
 	ti := &training.ToolchainIntegration{
 		Spec: v1alpha1.ToolchainIntegrationSpec{},
 	}
@@ -52,7 +52,7 @@ func (s *ToolchainIntegrationValidationSuite) TestTiIDGeneration(t *testing.T) {
 	s.g.Expect(ti.ID).ShouldNot(BeEmpty())
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestTiEntrypointEmpty(t *testing.T) {
+func (s *ToolchainIntegrationValidationSuite) TestTiEntrypointEmpty() {
 	ti := &training.ToolchainIntegration{
 		Spec: v1alpha1.ToolchainIntegrationSpec{},
 	}
@@ -62,7 +62,7 @@ func (s *ToolchainIntegrationValidationSuite) TestTiEntrypointEmpty(t *testing.T
 	s.g.Expect(err.Error()).Should(ContainSubstring(train_route.EmptyEntrypointErrorMessage))
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestTiDefaultImageEmpty(t *testing.T) {
+func (s *ToolchainIntegrationValidationSuite) TestTiDefaultImageEmpty() {
 	ti := &training.ToolchainIntegration{
 		Spec: v1alpha1.ToolchainIntegrationSpec{},
 	}

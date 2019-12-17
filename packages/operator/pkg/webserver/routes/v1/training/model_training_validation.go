@@ -23,15 +23,18 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
+	"github.com/spf13/viper"
 	"go.uber.org/multierr"
 	"reflect"
 )
 
 const (
-	mtVcsNotExistsErrorMessage    = "cannot find VCS Credential"
+	MtVcsNotExistsErrorMessage    = "cannot find VCS Connection"
 	EmptyModelNameErrorMessage    = "model name must be no empty"
 	EmptyModelVersionErrorMessage = "model version must be no empty"
 	EmptyVcsNameMessageError      = "VCS name is empty"
@@ -90,6 +93,8 @@ func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err
 	err = multierr.Append(err, mtv.validateMtData(mt))
 
 	err = multierr.Append(err, mtv.validateToolchain(mt))
+
+	err = multierr.Append(err, mtv.validateOutputConnection(mt))
 
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMtErrorMessage, err.Error())
@@ -165,10 +170,10 @@ func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
 		return
 	}
 
-	if vcs, k8sErr := mtv.connRepository.GetConnection(mt.Spec.VCSName); k8sErr != nil {
-		logMT.Error(err, mtVcsNotExistsErrorMessage)
+	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.VCSName); odahuErr != nil {
+		logMT.Error(err, MtVcsNotExistsErrorMessage)
 
-		err = multierr.Append(err, k8sErr)
+		err = multierr.Append(err, odahuErr)
 	} else if len(mt.Spec.Reference) == 0 {
 		switch {
 		case vcs.Spec.Type != connection.GITType:
@@ -214,4 +219,35 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 	}
 
 	return
+}
+
+func (mtv *MtValidator) validateOutputConnection(mt *training.ModelTraining) (err error) {
+
+	defaultOutConName := viper.GetString(train_conf.OutputConnectionName)
+
+	if len(mt.Spec.OutputConnection) == 0 {
+		if len(defaultOutConName) > 0 {
+			mt.Spec.OutputConnection = defaultOutConName
+			logMT.Info("OutputConnection is empty. Use connection from configuration")
+		} else {
+			logMT.Info("OutputConnection is empty. Configuration doesn't contain default value")
+		}
+	}
+
+	emptyErr := validation.ValidateEmpty("OutputConnection", mt.Spec.OutputConnection)
+	if emptyErr != nil {
+		err = multierr.Append(err, emptyErr)
+	}
+
+	notExistsErr := validation.ValidateExistsInRepository(mt.Spec.OutputConnection, mtv.connRepository)
+	if notExistsErr != nil {
+		err = multierr.Append(err, notExistsErr)
+	}
+
+	if err != nil {
+		return fmt.Errorf(validation.SpecSectionValidationFailedMessage, "OutputConnection", err.Error())
+	}
+
+	return
+
 }

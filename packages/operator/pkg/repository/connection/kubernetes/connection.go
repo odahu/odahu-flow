@@ -222,9 +222,9 @@ func convertK8sErrToOdahuflowErr(err error) error {
 	if ok {
 		switch errStatus.Status().Code {
 		case http.StatusNotFound:
-			return odahuflow_errors.NotFoundError{}
+			return odahuflow_errors.NotFoundError{Entity: errStatus.ErrStatus.Details.Name}
 		case http.StatusConflict:
-			return odahuflow_errors.AlreadyExistError{}
+			return odahuflow_errors.AlreadyExistError{Entity: errStatus.ErrStatus.Details.Name}
 		}
 	}
 

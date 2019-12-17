@@ -21,13 +21,16 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	train_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
@@ -91,7 +94,11 @@ func (s *ModelTrainingValidationSuite) TearDownSuite() {
 	}
 }
 
-func (s *ModelTrainingValidationSuite) TestModelTrainingValidationSuite(t *testing.T) {
+func (s *ModelTrainingValidationSuite) TearDownTest() {
+	viper.Set(train_config.OutputConnectionName, nil)
+}
+
+func TestModelTrainingValidationSuite(t *testing.T) {
 	suite.Run(t, new(ModelTrainingValidationSuite))
 }
 
@@ -243,7 +250,7 @@ func (s *ModelTrainingValidationSuite) TestMtVcsNotExists() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(
-		"connections.odahuflow.odahu.org \"not-exists\" not found"))
+		"entity \"not-exists\" is not found"))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtVcsEmptyName() {
@@ -370,7 +377,7 @@ func (s *ModelTrainingValidationSuite) TestMtNotFoundData() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"connections.odahuflow.odahu.org \"not-present\" not found"))
+		"entity \"not-present\" is not found"))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtResourcesValidation() {
@@ -408,4 +415,37 @@ func (s *ModelTrainingValidationSuite) TestMtResourcesValidation() {
 		"validation of cpu limit is failed: quantities must match the regular expression"))
 	s.g.Expect(errorMessage).Should(ContainSubstring(
 		"validation of gpu limit is failed: quantities must match the regular expression"))
+}
+
+func (s *ModelTrainingValidationSuite) TestOutputConnection() {
+
+	// If configuration output connection is not set then user must specify it as ModelTraining parameter
+	viper.Set(train_config.OutputConnectionName, nil)
+	mt := &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{},
+	}
+	err := s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
+
+	// If configuration output connection is set and user has not passed output connection as training
+	// parameter then output connection value from configuration will be used as default
+	viper.Set(train_config.OutputConnectionName, testMtOutConnDefault)
+	_ = s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConnDefault))
+
+	// If configuration output connection is set but user also has passed output connection as training
+	// parameter then user value is used
+	mt.Spec.OutputConnection = testMtOutConn
+	_ = s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConn))
+
+	// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
+	mt = &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{OutputConnection: testMpOutConnNotFound},
+	}
+	err = s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
+
 }

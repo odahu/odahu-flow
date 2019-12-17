@@ -1,0 +1,10 @@
+id: test-custom-output-connection-pack
+kind: ModelPackaging
+spec:
+  artifactName: "<fill-in>"
+  targets:
+    - connectionName: docker-ci
+      name: docker-push
+  integrationName: docker-rest
+  outputConnection: test-custom-output-folder
+

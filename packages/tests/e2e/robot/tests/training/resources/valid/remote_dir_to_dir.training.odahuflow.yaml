@@ -19,3 +19,8 @@ spec:
       localPath: local/
       remotePath: /test-data/data/valid_gppi/
   vcsName: odahu-flow-examples
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      memory: 512Mi

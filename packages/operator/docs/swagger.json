@@ -53,7 +53,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/Configuration"
                         }
                     }
@@ -138,7 +137,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/Connection"
                         }
                     }
@@ -183,7 +181,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/Connection"
                         }
                     }
@@ -361,7 +358,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/feedback.ModelFeedbackRequest"
                         }
                     },
@@ -461,7 +457,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelDeployment"
                         }
                     }
@@ -506,7 +501,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelDeployment"
                         }
                     }
@@ -677,7 +671,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelPackaging"
                         }
                     }
@@ -722,7 +715,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelPackaging"
                         }
                     }
@@ -893,7 +885,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelPackagingResult"
                         }
                     },
@@ -994,7 +985,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelRoute"
                         }
                     }
@@ -1039,7 +1029,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelRoute"
                         }
                     }
@@ -1228,7 +1217,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelTraining"
                         }
                     }
@@ -1273,7 +1261,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ModelTraining"
                         }
                     }
@@ -1444,7 +1431,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/TrainingResult"
                         }
                     },
@@ -1545,7 +1531,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/PackagingIntegration"
                         }
                     }
@@ -1590,7 +1575,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/PackagingIntegration"
                         }
                     }
@@ -1761,7 +1745,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ToolchainIntegration"
                         }
                     }
@@ -1806,7 +1789,6 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
                             "$ref": "#/definitions/ToolchainIntegration"
                         }
                     }
@@ -2112,6 +2094,10 @@
                 },
                 "integrationName": {
                     "description": "Packaging integration ID",
+                    "type": "string"
+                },
+                "outputConnection": {
+                    "description": "Name of Connection to storage where a packager obtain a model trained artifact.\nPermitted connection types are defined by specific PackagingIntegration",
                     "type": "string"
                 },
                 "resources": {
@@ -2648,6 +2634,10 @@
                     "description": "Model Identity",
                     "type": "object",
                     "$ref": "#/definitions/ModelIdentity"
+                },
+                "outputConnection": {
+                    "description": "Name of Connection to storage where training output artifact will be stored.\nPermitted connection types are defined by specific toolchain",
+                    "type": "string"
                 },
                 "reference": {
                     "description": "VCS Reference",

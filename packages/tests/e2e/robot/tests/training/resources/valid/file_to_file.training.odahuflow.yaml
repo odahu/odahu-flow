@@ -22,3 +22,8 @@ spec:
       localPath: local/odahuflow_model/
       remotePath: /test-data/data/valid_gppi/odahuflow_model/
   vcsName: odahu-flow-examples
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      memory: 512Mi

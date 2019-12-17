@@ -27,12 +27,13 @@ type Target struct {
 
 // ModelPackagingSpec defines the desired state of ModelPackaging
 type ModelPackagingSpec struct {
-	ArtifactName *string               `json:"artifactName,omitempty"`
-	Type         string                `json:"type"`
-	Image        string                `json:"image,omitempty"`
-	Arguments    string                `json:"arguments,omitempty"`
-	Targets      []Target              `json:"targets,omitempty"`
-	Resources    *ResourceRequirements `json:"resources,omitempty"`
+	ArtifactName     *string               `json:"artifactName,omitempty"`
+	Type             string                `json:"type"`
+	Image            string                `json:"image,omitempty"`
+	Arguments        string                `json:"arguments,omitempty"`
+	Targets          []Target              `json:"targets,omitempty"`
+	Resources        *ResourceRequirements `json:"resources,omitempty"`
+	OutputConnection string                `json:"outputConnection,omitempty"`
 }
 
 type ModelPackagingResult struct {

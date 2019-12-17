@@ -82,7 +82,7 @@ func (s *VaultConnRepoSuite) TestGetNotFound() {
 
 	s.g.Expect(err).Should(And(
 		HaveOccurred(),
-		MatchError(odahuflow_errors.NotFoundError{}),
+		MatchError(odahuflow_errors.NotFoundError{Entity: notFoundConnID}),
 	))
 }
 

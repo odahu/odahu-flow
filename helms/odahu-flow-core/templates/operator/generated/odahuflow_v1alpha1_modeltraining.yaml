@@ -116,6 +116,11 @@ spec:
               - name
               - version
               type: object
+            outputConnection:
+              description: Name of Connection to storage where training output artifact
+                will be stored. Permitted connection types are defined by specific
+                toolchain
+              type: string
             reference:
               description: VCS Reference
               type: string

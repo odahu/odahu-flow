@@ -47,6 +47,9 @@ const (
 	testModelNameFilter         = "model_name"
 	testModelVersionFilter      = "model_version"
 	testMtDataPath              = "data/path"
+	testMtOutConn               = "some-output-connection"
+	testMtOutConnDefault        = "default-output-connection"
+	testMpOutConnNotFound       = "out-conn-not-found"
 )
 
 var (
