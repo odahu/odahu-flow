@@ -19,3 +19,8 @@ spec:
       localPath: local/odahuflow.project.yaml
       remotePath: /test-data/data/not-found.yaml
   vcsName: odahu-flow-examples
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      memory: 512Mi
