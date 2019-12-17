@@ -8,21 +8,30 @@ spec:
     # Human-readable model version
     version: <1.0>
     # Optionally, you can specify template for output artifact
+    # The default value is {{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip
+    # where:
+    #   Name - spec.model.name
+    #   Version - spec.model.version
+    #   RandomUUID - a random UUID v4, for example be17d12d-df43-4588-99e7-56a0db3cad77
+    artifactNameTemplate: {{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip
   # You can find list of all available toolchains on the left sidebar
   toolchain: mlflow
   # Every mlflow MLProject file contains the list of entrypoint. You should choose one
   entrypoint: main
   # Working dir with your module
   workDir: work/dir
-  # Optionally
+  # The training data for a ML script.
   data:
-    # You can specify connection name
-    connName: wine
-    # Local path with file or dir
-    localPath: mlflow/wine-quality/wine-quality.csv
+      # You can specify a connection name
+      - connName: wine
+        # Local path with file or dir
+        localPath: mlflow/wine-quality/
+        # Path to the dir or file in a bucket
+        # Optional. If it is missing then the path from connection will be used.
+        remotePath: training-data/
   # You can specify the map of hyperparameters
   # For example
-  # hyperparameters:
+  # hyperParameters:
   #   key: value
   #   var2: test
   # Resources
@@ -34,5 +43,11 @@ spec:
   #   requests:
   #     cpu: 1
   #     memory: 1Gi
+  # Custom environment variables that should be set before entrypoint invocation.
+  envs:
+    # The name of variable
+    - name: TEST_ENV_KEY
+      # The value of variable
+      value: TEST_ENV_VALUE
   # You can find list of all available connections on the left sidebar. You should specify one with git type
   vcsName: <git-connection>
