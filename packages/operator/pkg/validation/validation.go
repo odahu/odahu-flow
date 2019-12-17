@@ -18,7 +18,13 @@ package validation
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
 	connection "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	"gopkg.in/go-playground/validator.v9"
+	en_translations "gopkg.in/go-playground/validator.v9/translations/en"
+	"log"
 )
 
 const (
@@ -40,4 +46,33 @@ func ValidateExistsInRepository(name string, repository connection.Repository) e
 		}
 	}
 	return nil
+}
+
+func InitValidator() {
+
+	translator := en.New()
+	uni := ut.New(translator, translator)
+
+	// this is usually known or extracted from http 'Accept-Language' header
+	// also see uni.FindTranslator(...)
+	trans, found := uni.GetTranslator("en")
+	if !found {
+		log.Fatal("translator not found")
+	}
+
+	v := validator.New()
+
+	if err := en_translations.RegisterDefaultTranslations(v, trans); err != nil {
+		log.Fatal(err)
+	}
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterTranslation("required", trans, func(ut ut.Translator) error {
+			return ut.Add("required", "{0} is a required field", true) // see universal-translator for details
+		}, func(ut ut.Translator, fe validator.FieldError) string {
+			t, _ := ut.T("required", fe.Field())
+			return t
+		})
+
+	}
 }

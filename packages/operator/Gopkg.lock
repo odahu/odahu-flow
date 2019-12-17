@@ -277,17 +277,17 @@
   revision = "5545eab6dad3bbbd6c5ae9186383c2a9d23c0dae"
 
 [[projects]]
-  digest = "1:a46c0549dc5facece0e543f3eeb9986f49d62920b385b84f54df7578915b939d"
+  digest = "1:8fd9992c7a6b0ca9d1238d8a5c58c025cb44ab2b9785300c91d8f655054a146f"
   name = "github.com/gin-gonic/gin"
   packages = [
     ".",
     "binding",
-    "json",
+    "internal/json",
     "render",
   ]
   pruneopts = "T"
-  revision = "b869fe1415e4b9eb52f247441830d502aece2d4d"
-  version = "v1.3.0"
+  revision = "15ced05c5316609bce5b43389f8e3f06102a8b18"
+  version = "v1.5.0"
 
 [[projects]]
   digest = "1:65587005c6fa4293c0b8a2e457e689df7fda48cc5e1f5449ea2c1e7784551558"
@@ -355,14 +355,6 @@
   pruneopts = "T"
   revision = "f87b1403479a348651dbf5f07f5cc6e5fcf07008"
   version = "v0.17.0"
-
-[[projects]]
-  digest = "1:c909d08f72c7dc89faf1c7d5b624d7260453c042273ba18ede61027fd10f6655"
-  name = "github.com/go-playground/validator"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "691a5f5f25701d0a22785c982db4f22bfac47931"
-  version = "v10.0.1"
 
 [[projects]]
   digest = "1:92d9d8d25bbab74ef8a3c546c121e24542ac984ccdc4f99678e06042a45e71f8"
@@ -1820,12 +1812,12 @@
   version = "v1.4.7"
 
 [[projects]]
-  digest = "1:02714116710abce990f3fa478f52c8e7029590ef13f35aab723beecdf829f136"
-  name = "gopkg.in/go-playground/validator.v8"
+  digest = "1:7e7349278119f5bb11f09739af55e54dacb2fb102edaec3e27beecede5a31627"
+  name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
   pruneopts = "T"
-  revision = "5f1438d3fca68893a817e4a66806cea46a9e4ebf"
-  version = "v8.18.2"
+  revision = "bde478f9466b5371375581708adf1b77acd08b72"
+  version = "v9.30.2"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -2380,7 +2372,6 @@
     "github.com/emicklei/go-restful",
     "github.com/gin-gonic/gin",
     "github.com/go-logr/logr",
-    "github.com/go-playground/validator",
     "github.com/gogo/protobuf/types",
     "github.com/hashicorp/vault/api",
     "github.com/hashicorp/vault/http",

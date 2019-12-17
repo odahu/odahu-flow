@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -66,6 +67,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	}
 
 	s.server = gin.Default()
+	validation.InitValidator()
 	v1Group := s.server.Group("")
 	s.k8sClient = mgr.GetClient()
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, s.k8sClient, nil)
@@ -508,6 +510,32 @@ func (s *ModelTrainingRouteSuite) TestUpdateMTCheckValidation() {
 
 func (s *ModelTrainingRouteSuite) TestUpdateMTNotFound() {
 	newMt := newMtStub()
+
+	mtEntityBody, err := json.Marshal(newMt)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPut, train_route.UpdateModelTrainingURL, bytes.NewReader(mtEntityBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusNotFound))
+	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
+}
+
+func (s *ModelTrainingRouteSuite) TestUpdateMTEmptyLocalPath() {
+	newMt := newMtStub()
+	newMt.ID = ""
+	newMt.Spec.Data = []odahuflowv1alpha1.DataBindingDir{
+		{
+			Connection: testMtVCSID,
+			LocalPath:  "",
+		},
+	}
 
 	mtEntityBody, err := json.Marshal(newMt)
 	s.g.Expect(err).NotTo(HaveOccurred())

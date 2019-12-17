@@ -19,6 +19,7 @@ package webserver
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1"
 	"github.com/rakyll/statik/fs"
@@ -44,6 +45,7 @@ func SetUPMainServer() (*gin.Engine, error) {
 		return nil, err
 	}
 
+	validation.InitValidator()
 	routes.SetUpHealthCheck(server)
 	routes.SetUpSwagger(server.Group(""), staticFS)
 	routes.SetUpPrometheus(server)

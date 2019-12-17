@@ -75,6 +75,3 @@ version="v1.4.7"
   branch = "master"
   name = "github.com/aspenmesh/istio-client-go"
 
-[[constraint]]
-  name = "github.com/go-playground/validator"
-  version = "10.0.1"

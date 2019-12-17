@@ -24,7 +24,7 @@ type DataBindingDir struct {
 	// Connection name for data
 	Connection string `json:"connName"`
 	// Local training path
-	LocalPath string `json:"localPath"`
+	LocalPath string `json:"localPath" binding:"required"`
 	// Overwrite remote data path in connection
 	RemotePath string `json:"remotePath,omitempty"`
 }
@@ -66,7 +66,7 @@ type ModelTrainingSpec struct {
 	// The same format like k8s uses for pod resources.
 	Resources *ResourceRequirements `json:"resources,omitempty"`
 	// Input data for a training
-	Data []DataBindingDir `json:"data,omitempty"`
+	Data []DataBindingDir `json:"data,omitempty" binding:"dive,required"`
 }
 
 // ModelTrainingState defines current state
