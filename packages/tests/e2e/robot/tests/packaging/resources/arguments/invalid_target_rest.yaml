@@ -1,0 +1,9 @@
+id: test-custom-arguments-pack
+kind: ModelPackaging
+spec:
+  artifactName: "simple-model.zip"
+  targets:
+    - connectionName: docker-ci
+      name: not-valid-target
+  integrationName: docker-rest
+
