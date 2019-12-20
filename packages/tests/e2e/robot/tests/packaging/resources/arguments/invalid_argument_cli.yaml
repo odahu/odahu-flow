@@ -1,0 +1,11 @@
+id: test-custom-arguments-pack
+kind: ModelPackaging
+spec:
+  artifactName: "simple-model.zip"
+  targets:
+    - connectionName: docker-ci
+      name: docker-push
+  arguments:
+    dockerfileAddCondaInstallation: "must be boolean"
+  integrationName: docker-cli
+
