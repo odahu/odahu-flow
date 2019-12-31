@@ -13,9 +13,10 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
         {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 8 }}
+        odahu-flow-authorization: enabled
     spec:
       {{- if .Values.rbac}}
       serviceAccountName: "{{ .Release.Name }}-api"
@@ -74,7 +75,7 @@ spec:
   selector:
     {{- include "odahuflow.helm-labels-for-search" (dict "component" "api" "root" .) | nindent 4 }}
   ports:
-  - name: api
+  - name: http
     targetPort: 5000
     port: {{ .Values.api.port }}
     protocol: TCP
