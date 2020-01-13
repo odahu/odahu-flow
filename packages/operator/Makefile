@@ -4,10 +4,13 @@ KUBEBUILDER_CONTROLPLANE_START_TIMEOUT=600s
 
 ODAHUFLOW_NAMESPACE=odahu-flow
 ODAHUFLOW_SECRET_CONFIG=odahu-flow-operator-config
+# Name of a sed binary
+SED_BIN=sed
 
 # Hardcoded vault token for local development
 TEST_VAULT_ROOT_TOKEN=test_root_token
 
+-include .env
 .EXPORT_ALL_VARIABLES:
 
 all: help
@@ -68,15 +71,15 @@ manifests:  swag
 	# We cannot add, for example, a custom label during the generation process.
 	# That's why we add them using sed tool after generation.
 
-	sed -i '/^  name:.*$$/a \ \ labels:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
-	sed -i '/^  name:.*$$/a \ \ annotations:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
+	"${SED_BIN}" -i '/^  name:.*$$/a \ \ labels:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
+	"${SED_BIN}" -i '/^  name:.*$$/a \ \ annotations:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
 
-	sed -i '/^  labels:$$/a \ \ \ \ {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*.yaml
-	sed -i '/^  annotations:$$/a \ \ \ \ "helm.sh/hook": "crd-install"' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
+	"${SED_BIN}" -i '/^  labels:$$/a \ \ \ \ {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*.yaml
+	"${SED_BIN}" -i '/^  annotations:$$/a \ \ \ \ "helm.sh/hook": "crd-install"' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
 
-	sed -i 's/manager-role/"{{ .Release.Name }}-operator"/g' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
-	sed -i '1i{{- if .Values.rbac }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
-	sed -i '$$a{{- end }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
+	"${SED_BIN}" -i 's/manager-role/"{{ .Release.Name }}-operator"/g' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
+	"${SED_BIN}" -i '1i{{- if .Values.rbac }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
+	"${SED_BIN}" -i '$$a{{- end }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
 
 ## fmt: Run go fmt against code
 fmt:
@@ -94,14 +97,14 @@ run-value:
 swag:
 	swag init -g pkg/webserver/server.go
 	# Remove the line with generated timestamp
-	sed -i '3d' docs/docs.go
-	sed -i 's/connection\.//g' docs/*
-	sed -i 's/routes\.//g' docs/*
-	sed -i 's/deployment\.//g' docs/*
-	sed -i 's/training\.//g' docs/*
-	sed -i 's/packaging\.//g' docs/*
-	sed -i 's/configuration\.//g' docs/*
-	sed -i 's/v1alpha1\.//g' docs/*
+	"${SED_BIN}" -i '3d' docs/docs.go
+	"${SED_BIN}" -i 's/connection\.//g' docs/*
+	"${SED_BIN}" -i 's/routes\.//g' docs/*
+	"${SED_BIN}" -i 's/deployment\.//g' docs/*
+	"${SED_BIN}" -i 's/training\.//g' docs/*
+	"${SED_BIN}" -i 's/packaging\.//g' docs/*
+	"${SED_BIN}" -i 's/configuration\.//g' docs/*
+	"${SED_BIN}" -i 's/v1alpha1\.//g' docs/*
 
 ## apply-crds: Apply all odahuflow crds
 apply-crds:

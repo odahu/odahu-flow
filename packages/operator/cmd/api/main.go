@@ -17,8 +17,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	api_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/api"
+	"github.com/spf13/viper"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
@@ -32,17 +39,38 @@ import (
 
 var log = logf.Log.WithName("api")
 
+const (
+	BackendTypeParam = "backend-type"
+	CRDPathParam     = "crd-path"
+)
+
 var mainCmd = &cobra.Command{
 	Use:   "api",
 	Short: "odahu-flow API server",
 	Run: func(cmd *cobra.Command, args []string) {
-		mainServer, err := webserver.SetUPMainServer()
+		apiServer, err := webserver.NewAPIServer()
 		if err != nil {
 			log.Error(err, "Can't set up api server")
 			os.Exit(1)
 		}
 
-		if err := mainServer.Run(":5000"); err != nil {
+		go func() {
+			if err := apiServer.Run(); err != nil && err != http.ErrServerClosed {
+				log.Error(err, "Closing of api server")
+				os.Exit(1)
+			}
+		}()
+
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+
+		log.Info("Shutdown Server ...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := apiServer.Close(ctx); err != nil {
 			log.Error(err, "Server shutdowns")
 			os.Exit(1)
 		}
@@ -51,6 +79,12 @@ var mainCmd = &cobra.Command{
 
 func init() {
 	config.InitBasicParams(mainCmd)
+
+	mainCmd.PersistentFlags().String(BackendTypeParam, "", "Backend type")
+	config.PanicIfError(viper.BindPFlag(api_config.BackendType, mainCmd.PersistentFlags().Lookup(BackendTypeParam)))
+
+	mainCmd.PersistentFlags().String(CRDPathParam, "", "Path to a directory with Odahu-flow CRDs")
+	config.PanicIfError(viper.BindPFlag(api_config.LocalBackendCRDPath, mainCmd.PersistentFlags().Lookup(CRDPathParam)))
 }
 
 func main() {

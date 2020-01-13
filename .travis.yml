@@ -73,7 +73,7 @@ matrix:
         - wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
         - sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
         - sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
-        - wget -q https://github.com/swaggo/swag/releases/download/v1.6.3/swag_1.6.3_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
+        - wget -q https://github.com/swaggo/swag/releases/download/v1.6.5/swag_1.6.5_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
         - sudo tar -zxvf /tmp/swag.tar.gz -C /usr/local/
         - sudo mv /usr/local/swag /usr/bin/
         - wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
