@@ -338,33 +338,6 @@
   version = "v0.19.0"
 
 [[projects]]
-  digest = "1:892aa5ecfd3280a3917757429de2a6ae1efa9b7b9051eac747a09f1bc5cad6f8"
-  name = "github.com/go-playground/locales"
-  packages = [
-    ".",
-    "currency",
-  ]
-  pruneopts = "T"
-  revision = "9f105231d3a5f6877a2bf8321dfa15ea6f844b1b"
-  version = "v0.13.0"
-
-[[projects]]
-  digest = "1:4f627e839d131e88ba872745ad9dab8d0902405f4d0ffba4ea051a6f351949d7"
-  name = "github.com/go-playground/universal-translator"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "f87b1403479a348651dbf5f07f5cc6e5fcf07008"
-  version = "v0.17.0"
-
-[[projects]]
-  digest = "1:c909d08f72c7dc89faf1c7d5b624d7260453c042273ba18ede61027fd10f6655"
-  name = "github.com/go-playground/validator"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "691a5f5f25701d0a22785c982db4f22bfac47931"
-  version = "v10.0.1"
-
-[[projects]]
   digest = "1:92d9d8d25bbab74ef8a3c546c121e24542ac984ccdc4f99678e06042a45e71f8"
   name = "github.com/go-sql-driver/mysql"
   packages = ["."]
@@ -880,14 +853,6 @@
   pruneopts = "T"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
-
-[[projects]]
-  digest = "1:cd82b1cb0ad386ce7be27c3009fb352762d2b710d4d04f90be15bac31dd45618"
-  name = "github.com/leodido/go-urn"
-  packages = ["."]
-  pruneopts = "T"
-  revision = "a0f5013415294bb94553821ace21a1a74c0298cc"
-  version = "v1.2.0"
 
 [[projects]]
   digest = "1:de9cc7a0102d0ccc5fbfba2336a0621cb6815581ceab488a30e4a7dbc3286b53"
@@ -2380,7 +2345,6 @@
     "github.com/emicklei/go-restful",
     "github.com/gin-gonic/gin",
     "github.com/go-logr/logr",
-    "github.com/go-playground/validator",
     "github.com/gogo/protobuf/types",
     "github.com/hashicorp/vault/api",
     "github.com/hashicorp/vault/http",

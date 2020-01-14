@@ -17,21 +17,24 @@
 package webserver
 
 import (
+	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	api_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/api"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1"
 	"github.com/rakyll/statik/fs"
+	"github.com/spf13/viper"
+	"net/http"
 )
 
-// @title API Gateway
-// @version 1.0
-// @description This is an API Gateway server.
-// @termsOfService http://swagger.io/terms/
+type Server struct {
+	manager utils.ManagerCloser
+	server  *http.Server
+}
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-func SetUPMainServer() (*gin.Engine, error) {
+func NewAPIServer() (*Server, error) {
 	staticFS, err := fs.New()
 	if err != nil {
 		return nil, err
@@ -55,9 +58,29 @@ func SetUPMainServer() (*gin.Engine, error) {
 	v1Group := server.Group("/api/v1")
 	err = v1Routes.SetupV1Routes(v1Group, mgr.GetClient(), mgr.GetConfig())
 
-	if err != nil {
-		return nil, err
+	// TODO: make the port configurable
+	return &Server{manager: mgr, server: &http.Server{
+		Addr:    fmt.Sprintf(":%s", viper.GetString(api_config.Port)),
+		Handler: server,
+	}}, err
+}
+
+// @title API Gateway
+// @version 1.0
+// @description This is an API Gateway server.
+// @termsOfService http://swagger.io/terms/
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+func (s *Server) Run() error {
+	return s.server.ListenAndServe()
+}
+
+// Shutdown gracefully
+func (s *Server) Close(ctx context.Context) error {
+	if err := s.manager.Close(); err != nil {
+		return err
 	}
 
-	return server, nil
+	return s.server.Shutdown(ctx)
 }

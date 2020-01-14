@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
+	"runtime"
 	"testing"
 )
 
@@ -58,6 +59,8 @@ func (s *PrometheusSuite) TestMonitoring() {
 	s.g.Expect(responseBody).Should(ContainSubstring("gin_request_duration_seconds"))
 	// Golang metrics
 	s.g.Expect(responseBody).Should(ContainSubstring("go_memstats_stack_inuse_bytes"))
-	// System metrics
-	s.g.Expect(responseBody).Should(ContainSubstring("process_open_fds"))
+	// a Linux specific metric
+	if runtime.GOOS == "linux" {
+		s.g.Expect(responseBody).Should(ContainSubstring("process_open_fds"))
+	}
 }
