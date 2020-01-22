@@ -25,6 +25,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/spf13/viper"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -254,8 +255,10 @@ func (r *ReconcileModelTraining) getToolchainIntegration(trainingCR *odahuflowv1
 // The function returns true if one of the GPU resources is set up.
 func isGPUResourceSet(trainingCR *odahuflowv1alpha1.ModelTraining) bool {
 	return trainingCR.Spec.Resources != nil && (
-		(trainingCR.Spec.Resources.Limits != nil && trainingCR.Spec.Resources.Limits.GPU != nil) ||
-		(trainingCR.Spec.Resources.Requests != nil && trainingCR.Spec.Resources.Requests.GPU != nil))
+		(trainingCR.Spec.Resources.Limits != nil &&
+			kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Limits.GPU)) ||
+			(trainingCR.Spec.Resources.Requests != nil &&
+				kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Requests.GPU)))
 }
 
 func getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {

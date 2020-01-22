@@ -26,7 +26,6 @@ const (
 	DockerType        = v1alpha1.ConnectionType("docker")
 	EcrType           = v1alpha1.ConnectionType("ecr")
 	decryptedDataMask = "*****"
-	ResourceTypeName  = "connection"
 )
 
 var (
@@ -53,9 +52,17 @@ type Connection struct {
 
 // Replace sensitive data with mask in the connection
 func (c *Connection) DeleteSensitiveData() *Connection {
-	c.Spec.Password = decryptedDataMask
-	c.Spec.KeySecret = decryptedDataMask
-	c.Spec.KeyID = decryptedDataMask
+	if len(c.Spec.Password) != 0 {
+		c.Spec.Password = decryptedDataMask
+	}
+
+	if len(c.Spec.KeySecret) != 0 {
+		c.Spec.KeySecret = decryptedDataMask
+	}
+
+	if len(c.Spec.KeyID) != 0 {
+		c.Spec.KeyID = decryptedDataMask
+	}
 
 	return c
 }

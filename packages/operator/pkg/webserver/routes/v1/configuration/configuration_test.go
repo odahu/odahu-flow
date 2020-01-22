@@ -33,9 +33,10 @@ import (
 )
 
 const (
-	urlName   = "Training Api"
-	urlValue  = "https://training.odahu.org"
-	metricURL = "https://metrics.odahu.org"
+	urlName       = "Training Api"
+	urlValue      = "https://training.odahu.org"
+	imageURLValue = "https://training.odahu.org/link/to/the/odahu/logo"
+	metricURL     = "https://metrics.odahu.org"
 )
 
 type ConfigurationRouteSuite struct {
@@ -52,6 +53,7 @@ func (s *ConfigurationRouteSuite) SetupSuite() {
 
 func (s *ConfigurationRouteSuite) TearDownTest() {
 	viper.Set(common_conf.ExternalURLs, []interface{}{})
+	viper.Set(training.MetricURL, []interface{}{})
 }
 
 func (s *ConfigurationRouteSuite) SetupTest() {
@@ -62,10 +64,10 @@ func TestConnectionRouteSuite(t *testing.T) {
 	suite.Run(t, new(ConfigurationRouteSuite))
 }
 
-func (s *ConfigurationRouteSuite) TestGetConfiguration() {
-	externalURLs := []interface{}{}
-	externalURLs = append(externalURLs, map[interface{}]interface{}{"name": urlName, "url": urlValue})
-	viper.Set(common_conf.ExternalURLs, externalURLs)
+func (s *ConfigurationRouteSuite) getConfigurationTestTemplate(
+	rawExternalURLs []interface{}, expectedExternalURLs []configuration.ExternalUrl,
+) {
+	viper.Set(common_conf.ExternalURLs, rawExternalURLs)
 
 	viper.Set(training.MetricURL, metricURL)
 
@@ -84,15 +86,42 @@ func (s *ConfigurationRouteSuite) TestGetConfiguration() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result).Should(Equal(configuration.Configuration{
 		CommonConfiguration: configuration.CommonConfiguration{
-			ExternalURLs: []configuration.ExternalUrl{
-				{
-					Name: urlName,
-					URL:  urlValue,
-				},
-			},
+			ExternalURLs: expectedExternalURLs,
 		},
 		TrainingConfiguration: configuration.TrainingConfiguration{MetricURL: metricURL},
 	}))
+}
+
+func (s *ConfigurationRouteSuite) TestGetConfiguration() {
+	rawExternalURLs := []interface{}{}
+	rawExternalURLs = append(rawExternalURLs, map[interface{}]interface{}{
+		"name": urlName, "url": urlValue, "image_url": imageURLValue,
+	})
+
+	expectedExternalURLs := []configuration.ExternalUrl{
+		{
+			Name:     urlName,
+			URL:      urlValue,
+			ImageURL: imageURLValue,
+		},
+	}
+
+	s.getConfigurationTestTemplate(rawExternalURLs, expectedExternalURLs)
+}
+
+func (s *ConfigurationRouteSuite) TestGetConfigurationWithoutImageLink() {
+	rawExternalURLs := []interface{}{}
+	rawExternalURLs = append(rawExternalURLs, map[interface{}]interface{}{"name": urlName, "url": urlValue})
+
+	expectedExternalURLs := []configuration.ExternalUrl{
+		{
+			Name:     urlName,
+			URL:      urlValue,
+			ImageURL: "",
+		},
+	}
+
+	s.getConfigurationTestTemplate(rawExternalURLs, expectedExternalURLs)
 }
 
 func (s *ConfigurationRouteSuite) TestGetEmptyListOfURLsConfiguration() {

@@ -57,7 +57,7 @@ func generateTrainerTaskSpec(
 	// Resources of validator container are copy of trainer resources, but
 	// limit doesn't contain GPU part and all requests res are zeroes.
 	validatorResource := mtResources.DeepCopy()
-	delete(validatorResource.Limits, kubernetes.ResourceGPU)
+	delete(validatorResource.Limits, corev1.ResourceName(viper.GetString(training_conf.ResourceGPUName)))
 	validatorResource.Requests = corev1.ResourceList{
 		corev1.ResourceMemory: *resource.NewQuantity(0, resource.DecimalSI),
 		corev1.ResourceCPU:    *resource.NewQuantity(0, resource.DecimalSI),

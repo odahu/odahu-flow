@@ -50,15 +50,10 @@ func NewAPIServer() (*Server, error) {
 	routes.SetUpHealthCheck(server)
 	routes.SetUpSwagger(server.Group(""), staticFS)
 	routes.SetUpPrometheus(server)
-	err = routes.SetUpIndexPage(server.Group(""), staticFS)
-	if err != nil {
-		return nil, err
-	}
 
 	v1Group := server.Group("/api/v1")
 	err = v1Routes.SetupV1Routes(v1Group, mgr.GetClient(), mgr.GetConfig())
 
-	// TODO: make the port configurable
 	return &Server{manager: mgr, server: &http.Server{
 		Addr:    fmt.Sprintf(":%s", viper.GetString(api_config.Port)),
 		Handler: server,

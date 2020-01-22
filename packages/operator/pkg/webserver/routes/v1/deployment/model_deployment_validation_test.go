@@ -223,8 +223,6 @@ func (s *ModelDeploymentValidationSuite) TestMdResourcesValidation() {
 	s.g.Expect(errorMessage).Should(ContainSubstring(
 		"validation of cpu request is failed: quantities must match the regular expression"))
 	s.g.Expect(errorMessage).Should(ContainSubstring(
-		"validation of gpu request is failed: quantities must match the regular expression"))
-	s.g.Expect(errorMessage).Should(ContainSubstring(
 		"validation of memory limit is failed: quantities must match the regular expression"))
 	s.g.Expect(errorMessage).Should(ContainSubstring(
 		"validation of cpu limit is failed: quantities must match the regular expression"))

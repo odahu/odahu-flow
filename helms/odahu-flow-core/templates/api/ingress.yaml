@@ -14,7 +14,17 @@ spec:
     - host: {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.api.ingress "root" . "tpl" "%s") }}
       http:
         paths:
-          - backend:
+          # TODO: need to remove later
+          - path: /health
+            backend:
+              serviceName: "{{ .Release.Name }}-api"
+              servicePort: {{ .Values.api.port }}
+          - path: /api
+            backend:
+              serviceName: "{{ .Release.Name }}-api"
+              servicePort: {{ .Values.api.port }}
+          - path: /swagger
+            backend:
               serviceName: "{{ .Release.Name }}-api"
               servicePort: {{ .Values.api.port }}
   {{- if (ternary $.Values.api.ingress.tlsEnabled $.Values.ingress.tlsEnabled (hasKey $.Values.api.ingress "tlsEnabled")) }}

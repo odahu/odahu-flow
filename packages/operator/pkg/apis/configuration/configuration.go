@@ -42,6 +42,8 @@ type ExternalUrl struct {
 	Name string `json:"name"`
 	// Link to a resource
 	URL string `json:"url"`
+	// Optional link to an image which represents a type of the resource, for example the logo of Grafana
+	ImageURL string `json:"imageUrl"`
 }
 
 type TrainingConfiguration struct {
@@ -58,9 +60,15 @@ func ExportExternalUrlsFromConfig() []ExternalUrl {
 
 		name := externalURL["name"].(string)
 		url := externalURL["url"].(string)
+
+		var imageURL string
+		if externalURL["image_url"] != nil {
+			imageURL = externalURL["image_url"].(string)
+		}
 		externalURLs = append(externalURLs, ExternalUrl{
-			Name: name,
-			URL:  url,
+			Name:     name,
+			URL:      url,
+			ImageURL: imageURL,
 		})
 	}
 
