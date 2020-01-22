@@ -16,27 +16,27 @@ TEST_VAULT_ROOT_TOKEN=test_root_token
 all: help
 
 ## help: Run unit tests
-test: generate fmt vet manifests
+test: generate manifests
 	gotestsum --junitfile operator-report.xml -- -coverprofile=operator-cover.out ./pkg/...
 
 ## build-operator: Build operator executable binary
-build-operator: generate  fmt vet
+build-operator: generate
 	go build -o operator github.com/odahu/odahu-flow/packages/operator/cmd/operator
 
 ## build-api: Build api executable binary
-build-api: fmt vet
+build-api:
 	go build -o api github.com/odahu/odahu-flow/packages/operator/cmd/api
 
 ## build-model-trainer: Build model trainer executable binary
-build-model-trainer: fmt vet
+build-model-trainer:
 	go build -o trainer github.com/odahu/odahu-flow/packages/operator/cmd/trainer
 
 ## build-model-packager: Build model packager executable binary
-build-model-packager: fmt vet
+build-model-packager:
 	go build -o packager github.com/odahu/odahu-flow/packages/operator/cmd/packager
 
 ## build-model-packager: Build model packager executable binary
-build-service-catalog: fmt vet
+build-service-catalog:
 	go build -o service-catalog github.com/odahu/odahu-flow/packages/operator/cmd/service_catalog
 
 ## build-all: Build all executable binyries
@@ -80,14 +80,6 @@ manifests:  swag
 	"${SED_BIN}" -i 's/manager-role/"{{ .Release.Name }}-operator"/g' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
 	"${SED_BIN}" -i '1i{{- if .Values.rbac }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
 	"${SED_BIN}" -i '$$a{{- end }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
-
-## fmt: Run go fmt against code
-fmt:
-	go fmt ./pkg/... ./cmd/...
-
-## vet: Run go vet against code
-vet:
-	go vet ./pkg/... ./cmd/...
 
 ## run-vault: Start vault in dev model for local development
 run-value:

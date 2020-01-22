@@ -46,28 +46,28 @@ func generateTrainerTaskSpec(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 	toolchainIntegration *training.ToolchainIntegration,
 ) (*tektonv1alpha1.TaskSpec, error) {
-
-	trainResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources)
+	mtResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources)
 	if err != nil {
 		log.Error(err, "The training resources is not valid",
-			"mt_id", trainingCR.Name, "resources", trainResources)
+			"mt_id", trainingCR.Name, "resources", mtResources)
 
 		return nil, err
 	}
 
-	validatorResource := corev1.ResourceRequirements{
-		Limits: trainResources.Limits,
-		Requests: corev1.ResourceList{
-			corev1.ResourceMemory: *resource.NewQuantity(0, resource.DecimalSI),
-			corev1.ResourceCPU:    *resource.NewQuantity(0, resource.DecimalSI),
-		},
+	// Resources of validator container are copy of trainer resources, but
+	// limit doesn't contain GPU part and all requests res are zeroes.
+	validatorResource := mtResources.DeepCopy()
+	delete(validatorResource.Limits, kubernetes.ResourceGPU)
+	validatorResource.Requests = corev1.ResourceList{
+		corev1.ResourceMemory: *resource.NewQuantity(0, resource.DecimalSI),
+		corev1.ResourceCPU:    *resource.NewQuantity(0, resource.DecimalSI),
 	}
 
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
 			createInitTrainerStep(trainingCR.Name),
-			createMainTrainerStep(trainingCR, toolchainIntegration, &trainResources),
-			createArtifactValidationStep(&validatorResource),
+			createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
+			createArtifactValidationStep(validatorResource),
 			createResultTrainerStep(trainingCR),
 		},
 		Volumes: []corev1.Volume{
