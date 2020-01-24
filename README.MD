@@ -1,9 +1,9 @@
 ## Documentation
 
-[Documentation sources](https://docs.odahu.org/about.html)
+Latest version of [documentation](https://docs.odahu.org/about.html)
 
 ## Changelog
-Please find it here [CHANGELOG](CHANGELOG.md)
+Latest updates in [CHANGELOG](CHANGELOG.md)
 
 ## Backlog and Kanban Board
 * [Backlog](https://github.com/odahu/odahu/issues)
