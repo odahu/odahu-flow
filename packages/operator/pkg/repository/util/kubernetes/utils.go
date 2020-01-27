@@ -94,6 +94,7 @@ func Size(size int) ListOption {
 	}
 }
 
+// TODO: refactor this function.
 func ConvertOdahuflowResourcesToK8s(requirements *v1alpha1.ResourceRequirements) (
 	depResources corev1.ResourceRequirements, err error,
 ) {
@@ -138,7 +139,7 @@ func ConvertOdahuflowResourcesToK8s(requirements *v1alpha1.ResourceRequirements)
 		}
 
 		reqRequests := requirements.Requests
-		if reqLimits != nil {
+		if reqRequests != nil {
 			depResources.Requests = corev1.ResourceList{}
 
 			if reqRequests.Memory != nil {
@@ -168,7 +169,7 @@ func ConvertOdahuflowResourcesToK8s(requirements *v1alpha1.ResourceRequirements)
 			if reqRequests.GPU != nil {
 				// TODO: remove hardcode
 				var validationErr error
-				depResources.Limits[ResourceGPU], validationErr = resource.ParseQuantity(*reqRequests.GPU)
+				depResources.Requests[ResourceGPU], validationErr = resource.ParseQuantity(*reqRequests.GPU)
 
 				if validationErr != nil {
 					err = multierr.Append(err, fmt.Errorf(

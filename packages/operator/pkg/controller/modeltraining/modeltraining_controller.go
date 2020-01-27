@@ -251,6 +251,43 @@ func (r *ReconcileModelTraining) getToolchainIntegration(trainingCR *odahuflowv1
 	return &training.ToolchainIntegration{Spec: ti.Spec}, nil
 }
 
+// The function returns true if one of the GPU resources is set up.
+func isGPUResourceSet(trainingCR *odahuflowv1alpha1.ModelTraining) bool {
+	return trainingCR.Spec.Resources != nil && (
+		(trainingCR.Spec.Resources.Limits != nil && trainingCR.Spec.Resources.Limits.GPU != nil) ||
+		(trainingCR.Spec.Resources.Requests != nil && trainingCR.Spec.Resources.Requests.GPU != nil))
+}
+
+func getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {
+	if isGPUResourceSet(trainingCR) {
+		return viper.GetStringMapString(train_conf.GPUNodeSelector)
+	}
+
+	return viper.GetStringMapString(train_conf.NodeSelector)
+}
+
+func getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
+	tolerations := []corev1.Toleration{}
+
+	var tolerationConf map[string]string
+	if isGPUResourceSet(trainingCR) {
+		tolerationConf = viper.GetStringMapString(train_conf.GPUToleration)
+	} else {
+		tolerationConf = viper.GetStringMapString(train_conf.Toleration)
+	}
+
+	if len(tolerationConf) != 0 {
+		tolerations = append(tolerations, corev1.Toleration{
+			Key:      tolerationConf[train_conf.TolerationKey],
+			Operator: corev1.TolerationOperator(tolerationConf[train_conf.TolerationOperator]),
+			Value:    tolerationConf[train_conf.TolerationValue],
+			Effect:   corev1.TaintEffect(tolerationConf[train_conf.TolerationEffect]),
+		})
+	}
+
+	return tolerations
+}
+
 func (r *ReconcileModelTraining) reconcileTaskRun(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 ) (*tektonv1alpha1.TaskRun, error) {
@@ -273,17 +310,6 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 		return nil, err
 	}
 
-	tolerations := []corev1.Toleration{}
-	tolerationConf := viper.GetStringMapString(train_conf.Toleration)
-	if len(tolerationConf) != 0 {
-		tolerations = append(tolerations, corev1.Toleration{
-			Key:      tolerationConf[train_conf.TolerationKey],
-			Operator: corev1.TolerationOperator(tolerationConf[train_conf.TolerationOperator]),
-			Value:    tolerationConf[train_conf.TolerationValue],
-			Effect:   corev1.TaintEffect(tolerationConf[train_conf.TolerationEffect]),
-		})
-	}
-
 	taskSpec, err := generateTrainerTaskSpec(trainingCR, toolchainIntegration)
 	if err != nil {
 		return nil, err
@@ -298,8 +324,8 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 			TaskSpec: taskSpec,
 			Timeout:  &metav1.Duration{Duration: viper.GetDuration(train_conf.Timeout)},
 			PodTemplate: tektonv1alpha1.PodTemplate{
-				NodeSelector: viper.GetStringMapString(train_conf.NodeSelector),
-				Tolerations:  tolerations,
+				NodeSelector: getNodeSelector(trainingCR),
+				Tolerations:  getTolerations(trainingCR),
 			},
 		},
 	}

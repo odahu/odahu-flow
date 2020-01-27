@@ -32,6 +32,8 @@ const (
 	ModelValidatorImage           = "training.model_validator.image"
 	NodeSelector                  = "training.node_selector"
 	Toleration                    = "training.toleration"
+	GPUNodeSelector               = "training.gpu_node_selector"
+	GPUToleration                 = "training.gpu_toleration"
 	MetricURL                     = "training.metric_url"
 	Timeout                       = "packaging.timeout"
 )
@@ -53,4 +55,6 @@ func init() {
 	viper.SetDefault(ToolchainIntegrationNamespace, "odahu-flow")
 
 	viper.SetDefault(MetricURL, "")
+
+	viper.Set(Timeout, "2h")
 }
