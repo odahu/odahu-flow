@@ -44,8 +44,9 @@ RUN GOOS=linux GOARCH=amd64 make build-all
 FROM ubuntu:18.04 as operator
 
 ENV ODAHUFLOW_DIR="/opt/odahu-flow"
-RUN  apt-get -yq update && \
-     apt-get -yqq install ca-certificates
+RUN apt-get -yq update && \
+    apt-get -yqq install ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/operator "${ODAHUFLOW_DIR}/"
 WORKDIR "${ODAHUFLOW_DIR}"
@@ -59,8 +60,9 @@ FROM ubuntu:18.04 as api
 
 ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
     GIN_MODE="release"
-RUN  apt-get -yq update && \
-     apt-get -yqq install openssh-client ca-certificates
+RUN apt-get -yq update && \
+    apt-get -yqq install openssh-client ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/api "${ODAHUFLOW_DIR}/"
 
@@ -76,8 +78,9 @@ FROM ubuntu:18.04 as service-catalog
 ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
     GIN_MODE="release"
 
-RUN  apt-get -yq update && \
-     apt-get -yqq install ca-certificates
+RUN apt-get -yq update && \
+    apt-get -yqq install ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/service-catalog "${ODAHUFLOW_DIR}/"
 
@@ -96,8 +99,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 WORKDIR "${WORK_DIR}/"
 
-RUN  apt-get -yq update && \
-     apt-get -yqq install ca-certificates
+RUN apt-get -yq update && \
+    apt-get -yqq install ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/trainer "${WORK_DIR}/"
 
@@ -113,8 +117,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 \
     WORK_DIR="/opt/odahu-flow"
 
-RUN  apt-get -yq update && \
-     apt-get -yqq install ca-certificates
+RUN apt-get -yq update && \
+    apt-get -yqq install ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR "${WORK_DIR}/"
 
