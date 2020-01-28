@@ -57,6 +57,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'CLUSTER_NAME': data.get('cluster_name'),
                 'CLUSTER_CONTEXT': data.get('cluster_context'),
                 'FEEDBACK_BUCKET': data.get('data_bucket'),
+                'EXAMPLES_VERSION': data.get('examples_version'),
                 'CLOUD_TYPE': data.get('cloud_type'),
                 'EDGE_URL': os.getenv('EDGE_URL', f'https://{host_base_domain}'),
                 API_URL_PARAM_NAME: os.getenv(API_URL_PARAM_NAME, f'https://{host_base_domain}'),
@@ -67,6 +68,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'MLFLOW_URL': os.getenv('MLFLOW_URL', f'https://{host_base_domain}/mlflow'),
                 # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
                 'CONN_DECRYPT_TOKEN': data.get('odahuflow_connection_decrypt_token'),
+                'IS_GPU_ENABLED': 'training_gpu' in data['node_pools'],
             }
         except Exception as err:
             raise Exception("Can\'t get variable from cluster profile: {}".format(err))

@@ -123,3 +123,25 @@ Login to the api and edge
     Should be equal  ${res.rc}  ${0}
     ${res}=  Shell  odahuflowctl config set MODEL_HOST ${EDGE_URL}
     Should be equal  ${res.rc}  ${0}
+
+Cleanup example resources
+    [Arguments]  ${example_id}
+    StrictShell  odahuflowctl --verbose train delete --id ${example_id} --ignore-not-found
+    StrictShell  odahuflowctl --verbose pack delete --id ${example_id} --ignore-not-found
+    StrictShell  odahuflowctl --verbose dep delete --id ${example_id} --ignore-not-found
+
+Run example model
+    [Arguments]  ${example_id}  ${manifests_dir}
+    StrictShell  odahuflowctl --verbose train create -f ${manifests_dir}/training.odahuflow.yaml --id ${example_id}
+    ${res}=  StrictShell  odahuflowctl train get --id ${example_id} -o 'jsonpath=$[0].status.artifacts[0].artifactName'
+
+    StrictShell  odahuflowctl --verbose pack create -f ${manifests_dir}/packaging.odahuflow.yaml --artifact-name ${res.stdout} --id ${example_id}
+    ${res}=  StrictShell  odahuflowctl pack get --id ${example_id} -o 'jsonpath=$[0].status.results[0].value'
+
+    StrictShell  odahuflowctl --verbose dep create -f ${manifests_dir}/deployment.odahuflow.yaml --image ${res.stdout} --id ${example_id}
+
+    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --mr ${example_id}
+    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --mr ${example_id} --json-file ${manifests_dir}/request.json
+
+    ${res}=  Shell  odahuflowctl model invoke --mr ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
+    should not be equal  ${res.rc}  0

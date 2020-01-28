@@ -1,5 +1,0 @@
-id: test-e2e-tensorflow
-kind: ModelDeployment
-spec:
-  image: "<fill-in>"
-  minReplicas: 1

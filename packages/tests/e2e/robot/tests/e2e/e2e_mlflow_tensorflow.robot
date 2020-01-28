@@ -1,44 +1,31 @@
 *** Variables ***
-${RES_DIR}              ${CURDIR}/resources
+${RES_DIR}              ${CURDIR}/resources/tensorflow
 ${LOCAL_CONFIG}         odahuflow/config_e2e_mlflow_tensorflow
 ${TENSORFLOW_ID}        test-e2e-tensorflow
 
 *** Settings ***
 Documentation       Check tensorflow model
-Test Timeout        60 minutes
+Test Timeout        120 minutes
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Resource            ../../resources/keywords.robot
 Library             Collections
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.model.Model
+Library             odahuflow.robot.libraries.examples_loader.ExamplesLoader  https://raw.githubusercontent.com/odahu/odahu-examples  ${EXAMPLES_VERSION}
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
-...                 Cleanup resources
+...                 Cleanup example resources  ${TENSORFLOW_ID}
 Suite Teardown      Run Keywords
-...                 Cleanup resources  AND
+...                 Cleanup example resources  ${TENSORFLOW_ID}  AND
 ...                 Remove file  ${LOCAL_CONFIG}
 Force Tags          e2e  tensorflow  api
 
-*** Keywords ***
-Cleanup resources
-    StrictShell  odahuflowctl --verbose train delete --id ${TENSORFLOW_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose pack delete --id ${TENSORFLOW_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose dep delete --id ${TENSORFLOW_ID} --ignore-not-found
-
 *** Test Cases ***
-Tensorflow model
-    StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/tensorflow/training.odahuflow.yaml
-    ${res}=  StrictShell  odahuflowctl train get --id ${TENSORFLOW_ID} -o 'jsonpath=$[0].status.artifacts[0].artifactName'
+Tensorflow example model
+    Download file  mlflow/tensorflow/example/odahuflow/training.odahuflow.yaml  ${RES_DIR}/training.odahuflow.yaml
+    Download file  mlflow/tensorflow/example/odahuflow/packaging.odahuflow.yaml  ${RES_DIR}/packaging.odahuflow.yaml
+    Download file  mlflow/tensorflow/example/odahuflow/deployment.odahuflow.yaml  ${RES_DIR}/deployment.odahuflow.yaml
+    Download file  mlflow/tensorflow/example/odahuflow/request.json  ${RES_DIR}/request.json
 
-    StrictShell  odahuflowctl --verbose pack create -f ${RES_DIR}/tensorflow/packaging.odahuflow.yaml --artifact-name ${res.stdout}
-    ${res}=  StrictShell  odahuflowctl pack get --id ${TENSORFLOW_ID} -o 'jsonpath=$[0].status.results[0].value'
-
-    StrictShell  odahuflowctl --verbose dep create -f ${RES_DIR}/tensorflow/deployment.odahuflow.yaml --image ${res.stdout}
-
-    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl --verbose model info --mr ${TENSORFLOW_ID}
-
-    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl --verbose model invoke --mr ${TENSORFLOW_ID} --json-file ${RES_DIR}/tensorflow/request.json
-
-    ${res}=  Shell  odahuflowctl model invoke --mr ${TENSORFLOW_ID} --json-file ${RES_DIR}/tensorflow/request.json --jwt wrong-token
-    should not be equal  ${res.rc}  0
+    Run example model  ${TENSORFLOW_ID}  ${RES_DIR}
