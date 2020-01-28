@@ -12,3 +12,4 @@ google-cloud-storage>=1.18.0
 azure-storage-blob<=2.1.0
 azure-cli-core>=2.0.75
 azure-mgmt-storage==2.0.0
+azure-core>=1.1.0
