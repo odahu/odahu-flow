@@ -270,7 +270,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: "{{ .Release.Name }}-api"
+{{- if .Values.dockerSecret }}
+imagePullSecrets:
+- name: "{{ .Values.dockerSecret }}"
 {{- end }}
-
-
-
+{{- end }}

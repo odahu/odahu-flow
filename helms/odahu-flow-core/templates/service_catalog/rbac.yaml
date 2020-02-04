@@ -252,6 +252,10 @@ kind: ServiceAccount
 metadata:
   name: "{{ .Release.Name }}-service-catalog"
   namespace: "{{ .Release.Namespace }}"
+{{- if .Values.dockerSecret }}
+imagePullSecrets:
+- name: "{{ .Values.dockerSecret }}"
+{{- end }}
 {{- end }}
 {{- end }}
 

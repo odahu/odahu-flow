@@ -20,4 +20,7 @@ metadata:
   name: "{{ .Release.Name }}-operator"
   labels:
     {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+imagePullSecrets:
+- name: "{{ .Values.dockerSecret }}"
 {{- end }}
+
