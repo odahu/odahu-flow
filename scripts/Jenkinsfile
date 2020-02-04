@@ -39,13 +39,13 @@ pipeline {
         param_stable_release = "${params.StableRelease}"
 
         /*
-        CICD repository
+        CI/CD repository
         */
         legionCicdGitlabKey = "${params.legionCicdGitlabKey}"
         param_git_deploy_key = "${params.GitDeployKey}"
-        //Legion CICD repo url (for pipeline methods import)
+        // CI/CD repo url (for pipeline methods import)
         param_legion_cicd_repo = "${params.LegionCicdRepo}"
-        //Legion repo branch (tag or branch name)
+        // CI/CD repo branch (tag or branch name)
         param_legion_cicd_branch = "${params.LegionCicdBranch}"
 
         /*
@@ -80,11 +80,9 @@ pipeline {
                 cleanWs()
                 checkout scm
                 script {
-                    sh 'echo RunningOn: $(curl http://checkip.amazonaws.com/)'
-
-                    // import Legion components
+                    // import CI/CD components
                     sshagent(["${env.legionCicdGitlabKey}"]) {
-                        print ("Checkout Legion-cicd repo")
+                        print ("Checkout CI/CD repo")
                         sh"""#!/bin/bash -ex
                         mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
                         if [ ! -d "legion-cicd" ]; then
@@ -93,7 +91,7 @@ pipeline {
                         cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
                         """
 
-                        print ("Load odahuflow pipeline common library")
+                        print ("Load ODAHU pipeline common library")
                         cicdLibrary = load "${env.sharedLibPath}"
                     }
 

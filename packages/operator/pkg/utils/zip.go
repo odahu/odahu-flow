@@ -18,6 +18,7 @@ package utils
 
 import (
 	"archive/zip"
+	"compress/flate"
 	"fmt"
 	"io"
 	"os"
@@ -34,6 +35,10 @@ func ZipDir(source, target string) error {
 
 	archive := zip.NewWriter(zipfile)
 	defer archive.Close()
+
+	archive.RegisterCompressor(zip.Deflate, func(out io.Writer) (io.WriteCloser, error) {
+		return flate.NewWriter(out, flate.BestSpeed)
+	})
 
 	info, err := os.Stat(source)
 	if err != nil {
