@@ -17,6 +17,8 @@ TEST_VALID_GPPI_ODAHU_FILE_ID=test-valid-gppi-odahu-file
 TEST_INVALID_GPPI_DIR_ID=test-invalid-gppi-dir
 # Test connection points to the odahu file inside invalid gppi archive
 TEST_INVALID_GPPI_ODAHU_FILE_ID=test-invalid-gppi-odahu-file
+# Wine data connection
+TEST_WINE_CONN_ID=wine
 
 # Test connection to custom output model folder
 TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
@@ -24,6 +26,7 @@ TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 TEST_DATA_TI_ID=training-data-helper
 # TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
 ODAHUFLOW_CONNECTION_DECRYPT_TOKEN=$(jq '.odahuflow_connection_decrypt_token' -r "${CLUSTER_PROFILE}")
+EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
 
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
 # Arguments:
@@ -128,6 +131,9 @@ function setup() {
   odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
 
+  # Download training data for the wine model
+  wget -O "${TEST_DATA}/wine-quality.csv" "https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}/mlflow/sklearn/wine/data/wine-quality.csv"
+
   # Pushes a test data to the bucket and create a file with the connection
   case "${CLOUD_PROVIDER}" in
   aws)
@@ -160,6 +166,7 @@ function setup() {
   create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "${remote_dir}/data/invalid_gppi/odahuflow.project.yaml"
   create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "${remote_dir}/data/invalid_gppi/"
   create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "${remote_dir}/data/custom_output/"
+  create_test_data_connection "${TEST_WINE_CONN_ID}" "${remote_dir}/data/wine-quality.csv"
 
   wait_all_background_task
 }
