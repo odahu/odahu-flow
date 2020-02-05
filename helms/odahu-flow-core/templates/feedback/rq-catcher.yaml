@@ -136,6 +136,10 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation
   labels:
       {{- include "odahuflow.helm-labels" (dict "component" "feedback-rq-catcher-patcher" "root" .) | nindent 4 }}
+{{- if .Values.dockerSecret }}
+imagePullSecrets:
+- name: "{{ .Values.dockerSecret }}"
+{{- end }}
 ---
 apiVersion: batch/v1
 kind: Job

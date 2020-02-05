@@ -13,6 +13,10 @@ rbac: true
 # Type: string
 imagesRegistry: odahu/
 
+# Docker credentials secret name
+# Type: string
+dockerSecret: ""
+
 # Verbosity of logging features in components
 # Valid values are:
 # - info
