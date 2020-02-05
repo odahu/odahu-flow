@@ -26,8 +26,11 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
-      restartPolicy: Never
+      restartPolicy: OnFailure
       volumes:
         - name: resources
           configMap:
