@@ -33,6 +33,12 @@ const (
 	ModelPackagingID = "packager.model_packaging_id"
 	// It is a connection ID, which specifies where a artifact trained artifact is stored.
 	OutputConnectionName = "packager.output_connection"
+	// OpenID client_id credential for service account
+	ClientID = "packager.client_id"
+	// OpenID client_secret credential for service account
+	ClientSecret = "packager.client_secret"
+	// OpenID token url
+	OAuthOIDCTokenEndpoint = "packager.oauth_oidc_token_endpoint"  // #nosec
 )
 
 func init() {
@@ -41,4 +47,7 @@ func init() {
 	viper.SetDefault(APIURL, "http://localhost:5000")
 	viper.SetDefault(APIToken, "")
 	viper.SetDefault(OutputConnectionName, "")
+	viper.SetDefault(ClientID, "")
+	viper.SetDefault(ClientSecret, "")
+	viper.SetDefault(OAuthOIDCTokenEndpoint, "")
 }

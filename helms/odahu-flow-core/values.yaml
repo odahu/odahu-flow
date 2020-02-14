@@ -126,6 +126,9 @@ security:
     # Type: string
     cookieName: _oauth2_proxy
 
+  # If true – authentication inside cluster is required
+  mesh_authn: false
+
 # Components metrics measurement
 # Measures components performance through prometheus protocol
 metrics:
@@ -349,6 +352,9 @@ config:
     # The in-cluster API url
     # Type: string->string
     api_url: http://odahu-flow-api.odahu-flow.svc.cluster.local
+    # OpenId Provider token url
+    # oauth_oidc_token_endpoint: https://oauth2.googleapis.com/token
+
   # Connection configuration
   connection:
     # Enable connection API/operator
@@ -456,3 +462,13 @@ config:
     # Base URL prefix for the model deployment swagger UI
     # Type: string
     base_url: /service-catalog
+
+
+# Service account used to upload odahu resources via odahuflowctl
+resource_uploader_sa: {}
+#resource_uploader_sa:
+#  client_id: some-client-id
+#  client_secret: client-secret
+
+# OpenID provider url
+oauth_oidc_issuer_url: ""

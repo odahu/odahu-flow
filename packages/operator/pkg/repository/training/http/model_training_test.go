@@ -90,7 +90,7 @@ func (s *mtSuite) SetupSuite() {
 		}
 	}))
 
-	s.mtHTTPClient = training_http_repository.NewRepository(s.ts.URL, "")
+	s.mtHTTPClient = training_http_repository.NewRepository(s.ts.URL, "", "", "", "")
 }
 
 func (s *mtSuite) TearDownSuite() {

@@ -27,10 +27,19 @@ const (
 	APIURL = "operator.api_url"
 	// It is a mock for the future. Currently, it is always empty.
 	APIToken = "operator.api_token"
+	// OpenID client_id credential for service account
+	ClientID = "operator.client_id"
+	// OpenID client_secret credential for service account
+	ClientSecret = "operator.client_secret"
+	// OpenID token url
+	OAuthOIDCTokenEndpoint = "operator.oauth_oidc_token_endpoint" // #nosec
 )
 
 func init() {
 	viper.SetDefault(MonitoringPort, 7777)
 	viper.SetDefault(APIURL, "http://localhost:5000")
 	viper.SetDefault(APIToken, "")
+	viper.SetDefault(ClientID, "")
+	viper.SetDefault(ClientSecret, "")
+	viper.SetDefault(OAuthOIDCTokenEndpoint, "")
 }

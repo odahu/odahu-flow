@@ -34,6 +34,12 @@ const (
 	OutputConnectionName = "trainer.output_connection"
 	// ID of the model training
 	ModelTrainingID = "trainer.model_training_id"
+	// OpenID client_id credential for service account
+	ClientID = "trainer.client_id"
+	// OpenID client_secret credential for service account
+	ClientSecret = "trainer.client_secret"
+	// OpenID token url
+	OAuthOIDCTokenEndpoint = "trainer.oauth_oidc_token_endpoint" // #nosec
 )
 
 func init() {
@@ -48,4 +54,7 @@ func init() {
 	viper.SetDefault(APIURL, "http://localhost:5000")
 	viper.SetDefault(APIToken, "")
 	viper.SetDefault(OutputConnectionName, "")
+	viper.SetDefault(ClientID, "")
+	viper.SetDefault(ClientSecret, "")
+	viper.SetDefault(OAuthOIDCTokenEndpoint, "")
 }

@@ -17,6 +17,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	trainer_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/trainer"
 	conn_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
@@ -105,11 +106,16 @@ func init() {
 }
 
 func newTrainerWithHTTPRepositories() *trainer.ModelTrainer {
+	log.Info(fmt.Sprintf("OAuthOIDCTokenEndpoint: %s", viper.GetString(trainer_conf.OAuthOIDCTokenEndpoint)))
 	trainRepo := train_http_storage.NewRepository(
 		viper.GetString(trainer_conf.APIURL), viper.GetString(trainer_conf.APIToken),
+		viper.GetString(trainer_conf.ClientID), viper.GetString(trainer_conf.ClientSecret),
+		viper.GetString(trainer_conf.OAuthOIDCTokenEndpoint),
 	)
 	connRepo := conn_http_storage.NewRepository(
 		viper.GetString(trainer_conf.APIURL), viper.GetString(trainer_conf.APIToken),
+		viper.GetString(trainer_conf.ClientID), viper.GetString(trainer_conf.ClientSecret),
+		viper.GetString(trainer_conf.OAuthOIDCTokenEndpoint),
 	)
 
 	return trainer.NewModelTrainer(trainRepo, connRepo, viper.GetString(trainer_conf.ModelTrainingID))

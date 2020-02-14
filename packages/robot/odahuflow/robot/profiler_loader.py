@@ -29,6 +29,24 @@ AUTH_TOKEN_PARAM_NAME = 'AUTH_TOKEN'
 
 CLUSTER_PROFILE = 'CLUSTER_PROFILE'
 
+# Key in cluster_profile.json that contain creds for
+TEST_SA_PROFILE_KEY = 'test'
+
+
+class ServiceAccount:
+
+    def __init__(self, profile_json, service_account_key):
+        self._client_id = profile_json['service_accounts'][service_account_key]['client_id']
+        self._client_secret = profile_json['service_accounts'][service_account_key]['client_secret']
+
+    @property
+    def client_id(self):
+        return self._client_id
+
+    @property
+    def client_secret(self):
+        return self._client_secret
+
 
 def get_variables(profile=None) -> typing.Dict[str, str]:
     """
@@ -52,6 +70,9 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
         variables = {}
 
         try:
+
+            test_sa = ServiceAccount(data, TEST_SA_PROFILE_KEY)
+
             host_base_domain = data['dns']['domain']
             variables = {
                 'HOST_BASE_DOMAIN': host_base_domain,
@@ -70,16 +91,16 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
                 'CONN_DECRYPT_TOKEN': data.get('odahuflow_connection_decrypt_token'),
                 'IS_GPU_ENABLED': 'training_gpu' in data['node_pools'],
-                'SA_CLIENT_ID': data.get('test_service_account_client_id'),
-                'SA_CLIENT_SECRET': data.get('test_service_account_client_secret'),
+                'SA_CLIENT_ID': test_sa.client_id,
+                'SA_CLIENT_SECRET': test_sa.client_secret,
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:
             raise Exception("Can\'t get variable from cluster profile: {}".format(err))
 
         try:
-            client_id = data['test_service_account_client_id']
-            client_secret = data['test_service_account_client_secret']
+            client_id = test_sa.client_id
+            client_secret = test_sa.client_secret
             issuer = data['oauth_oidc_issuer_url']
             conf = OpenIdProviderConfiguration(issuer)
             conf.fetch_configuration()

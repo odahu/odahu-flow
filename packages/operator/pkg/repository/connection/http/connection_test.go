@@ -80,7 +80,7 @@ func (s *Suite) SetupSuite() {
 		}
 	}))
 
-	s.connHTTPClient = conn_http_repository.NewRepository(s.ts.URL, testDecryptToken)
+	s.connHTTPClient = conn_http_repository.NewRepository(s.ts.URL, testDecryptToken, "", "", "")
 }
 
 func (s *Suite) processGetConnection(r *http.Request, w http.ResponseWriter, conn *connection.Connection) {

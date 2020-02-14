@@ -42,11 +42,15 @@ type httpPackagingRepository struct {
 }
 
 // todo: doc
-func NewRepository(apiURL string, token string) packaging_repository.Repository {
+func NewRepository(apiURL string, token string, clientID string,
+	clientSecret string, tokenURL string) packaging_repository.Repository {
 	return &httpPackagingRepository{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
 			token,
+			clientID,
+			clientSecret,
+			tokenURL,
 			v1Routes.OdahuflowV1ApiVersion,
 		),
 	}
