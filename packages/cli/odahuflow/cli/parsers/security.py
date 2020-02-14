@@ -20,25 +20,87 @@ import logging
 import sys
 
 import click
+from click import UsageError
+
+import odahuflow.sdk.config as config
 from odahuflow.sdk.clients import api
+from odahuflow.sdk.clients.oidc import OpenIdProviderConfiguration
 from odahuflow.sdk.config import update_config_file
 
 LOG = logging.getLogger(__name__)
 
 
+def _reset_credentials():
+    """
+    Clean credentials from config file
+    :return:
+    """
+    update_config_file(API_URL=None,
+                       API_TOKEN=None,
+                       API_REFRESH_TOKEN=None,
+                       API_ACCESS_TOKEN=None,
+                       API_ISSUING_URL=None,
+                       ODAHUFLOWCTL_OAUTH_CLIENT_ID=None,
+                       ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=None,
+                       ISSUER_URL=None)
+
+
+def fetch_openid_conf(issuer: str) -> None:
+    conf = OpenIdProviderConfiguration(issuer)
+    conf.fetch_configuration()
+
+    config.API_ISSUING_URL = conf.token_endpoint
+
+
 @click.command()
-@click.option('--url', 'api_host', help='API server host')
+@click.option('--url', 'api_host', help='API server host', required=True)
 @click.option('--token', help='API server jwt token')
-def login(api_host: str, token: str):
+@click.option('--client_id', help='client_id for OAuth2 Client Credentials flow')
+@click.option('--client_secret', help='client_secret for OAuth2 Client Credentials flow')
+@click.option('--issuer', help='OIDC Issuer URL')
+def login(api_host: str, token: str, client_id: str, client_secret: str, issuer: str):
     """
     Authorize on API endpoint.
     Check that credentials is correct and save to the config
     """
-    try:
-        api_clint = api.RemoteAPIClient(api_host, token, non_interactive=bool(token))
 
-        api_clint.info()
-        update_config_file(API_URL=api_host, API_TOKEN=token)
+    # clean config from previous credentials
+    _reset_credentials()
+
+    # update config
+    update_config_file(
+        API_URL=api_host,
+        ODAHUFLOWCTL_OAUTH_CLIENT_ID=client_id,
+        ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=client_secret,
+        API_TOKEN=token,
+        ISSUER_URL=issuer
+    )
+
+    # set predicates
+    is_token_login = bool(token)
+    is_client_cred_login = bool(client_id) or bool(client_secret)
+    is_interactive_login = not (is_token_login or is_client_cred_login)
+
+    # validate
+    if is_token_login and is_client_cred_login:
+        raise UsageError('You should use either --token or --client_id/--client_secret to login. '
+                         'Otherwise skipp all options to launch interactive login mode')
+    if is_client_cred_login and (not client_id or not client_secret):
+        raise UsageError('You must pass both client_id and client_secret to client_credentials login')
+    if is_client_cred_login and not config.ISSUER_URL:
+        raise UsageError('You must provide --issuer parameter to do client_credentials login. '
+                         'Or set ISSUER_URL option in config file')
+
+    # fetch openid configuration
+    if config.ISSUER_URL:
+        fetch_openid_conf(config.ISSUER_URL)
+
+    # login
+    try:
+        api_client = api.RemoteAPIClient(api_host, token, client_id, client_secret,
+                                         non_interactive=not is_interactive_login)
+
+        api_client.info()
 
         print('Success! Credentials have been saved.')
     except api.IncorrectAuthorizationToken as wrong_token:
@@ -51,10 +113,5 @@ def logout():
     """
     Remove all authorization data from the configuration file
     """
-    update_config_file(API_URL=None,
-                       API_TOKEN=None,
-                       API_REFRESH_TOKEN=None,
-                       API_ACCESS_TOKEN=None,
-                       API_ISSUING_URL=None)
-
-    print('All authorization credentials have been removed')
+    _reset_credentials()
+    click.echo('All authorization credentials have been removed')

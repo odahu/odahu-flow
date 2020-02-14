@@ -16,4 +16,16 @@
 """
 Version file
 """
+import click
+from odahuflow.sdk.version import __version__ as __sdk_version__
+
 __version__ = '1.1.0-rc7'
+
+
+@click.command()
+def version():
+    """
+    Show version of cli and sdk
+    """
+    click.echo(f'cli version: {__version__}\n'
+               f'sdk version: {__sdk_version__}')

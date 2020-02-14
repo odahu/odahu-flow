@@ -33,6 +33,8 @@ from odahuflow.sdk.utils import render_template
 
 LOGGER = logging.getLogger()
 
+SA_SCOPE = 'openid profile offline_access groups'
+
 
 class OAuthLoginResult(typing.NamedTuple):
     """
@@ -171,7 +173,31 @@ def do_refresh_token(refresh_token: str, issue_token_url: str) -> typing.Optiona
     payload = {
         'grant_type': 'refresh_token',
         'client_id': config.ODAHUFLOWCTL_OAUTH_CLIENT_ID,
+        'client_secret': config.ODAHUFLOWCTL_OAUTH_CLIENT_SECRET,
         'refresh_token': refresh_token
+    }
+    return _ask_token_endpoint(issue_token_url, payload)
+
+
+def do_client_cred_authentication(
+        client_id: str = config.ODAHUFLOWCTL_OAUTH_CLIENT_ID,
+        client_secret: str = config.ODAHUFLOWCTL_OAUTH_CLIENT_SECRET,
+        issue_token_url: str = config.API_ISSUING_URL
+):
+    """
+    Get access and id token using oauth2 client credentials fow
+    :param client_id:
+    :param client_secret:
+    :param issue_token_url:
+    :return:
+    """
+    LOGGER.debug('Trying to get ID token via Client Credentials Flow using %s', issue_token_url)
+
+    payload = {
+        'grant_type': 'client_credentials',
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'scope': SA_SCOPE
     }
     return _ask_token_endpoint(issue_token_url, payload)
 

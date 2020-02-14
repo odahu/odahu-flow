@@ -433,6 +433,8 @@ API_ISSUING_URL = ConfigVariableDeclaration('API_ISSUING_URL', None, str,
                                             'URL for refreshing and issuing tokens',
                                             True)
 
+ISSUER_URL = ConfigVariableDeclaration('ISSUER_URL', None, str, 'OIDC Issuer URL', True)
+
 LOCAL_DEFAULT_RESOURCE_PREFIX = ConfigVariableDeclaration('LOCAL_DEFAULT_RESOURCE_PREFIX', None, str,
                                                           'Prefix for building local model binary storage path',
                                                           False)
@@ -540,7 +542,7 @@ ODAHUFLOWCTL_OAUTH_LOOPBACK_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_
 ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL',
                                                               '', str,
                                                               'OAuth2 token issuing URL',
-                                                              True)
+                                                                 True)
 
 ODAHUFLOWCTL_OAUTH_AUTH_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_AUTH_URL',
                                                      '',

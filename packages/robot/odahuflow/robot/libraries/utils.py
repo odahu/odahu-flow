@@ -32,15 +32,16 @@ class Utils:
     """
 
     @staticmethod
-    def request_as_authorized_user(service_url):
+    def request_as_authorized_user(service_url, token=None):
         """
         Request resource as authorized user
 
         :param service_url: target URL
+        :param token: JWT bearer token
         :type service_url: str
         :return: final response - Response
         """
-        return requests.get(service_url, headers=get_authorization_headers())
+        return requests.get(service_url, headers=get_authorization_headers(token))
 
     @staticmethod
     def request_as_unauthorized_user(service_url):
