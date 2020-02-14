@@ -73,15 +73,15 @@ def init_token(login: str, password: str, auth_url: str, client_id: str, client_
     return _auth_jwt
 
 
-def get_authorization_headers():
+def get_authorization_headers(token=None):
     """
     Get authorization headers that can be used inside Request.
 
     :return: headers dict or empty dict if Session ID wasn't found
     """
     return {
-        'Authorization': f'Bearer {_auth_jwt}'
-    } if _auth_jwt else {}
+        'Authorization': f'Bearer {token or _auth_jwt}'
+    } if token or _auth_jwt else {}
 
 
 def get_token():

@@ -34,6 +34,7 @@ from odahuflow.cli.parsers.toolchain_integration import toolchain_integration
 from odahuflow.cli.parsers.training import training
 from odahuflow.cli.utils.abbr import AbbreviationGroup
 from odahuflow.cli.utils.logger import configure_logging
+from odahuflow.cli.version import version
 
 
 @click.group(cls=AbbreviationGroup)
@@ -60,6 +61,7 @@ main.add_command(toolchain_integration)
 main.add_command(training)
 main.add_command(login)
 main.add_command(logout)
+main.add_command(version)
 
 if __name__ == '__main__':
     main()

@@ -17,11 +17,12 @@
 Variables loader from json Cluster Profile
 """
 
-import os
 import json
-
+import os
 import typing
-from odahuflow.robot.libraries import auth_client
+
+from odahuflow.sdk.clients.oauth_handler import do_client_cred_authentication
+from odahuflow.sdk.clients.oidc import OpenIdProviderConfiguration
 
 API_URL_PARAM_NAME = 'API_URL'
 AUTH_TOKEN_PARAM_NAME = 'AUTH_TOKEN'
@@ -69,20 +70,26 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
                 'CONN_DECRYPT_TOKEN': data.get('odahuflow_connection_decrypt_token'),
                 'IS_GPU_ENABLED': 'training_gpu' in data['node_pools'],
+                'SA_CLIENT_ID': data.get('test_service_account_client_id'),
+                'SA_CLIENT_SECRET': data.get('test_service_account_client_secret'),
+                'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:
             raise Exception("Can\'t get variable from cluster profile: {}".format(err))
 
         try:
-            if data.get('test_user_email') and data.get('test_user_password'):
-                variables[AUTH_TOKEN_PARAM_NAME] = auth_client.init_token(
-                    data['test_user_email'],
-                    data['test_user_password'],
-                    data['test_oauth_auth_url'],
-                    data['test_oauth_client_id'],
-                    data['test_oauth_client_secret'],
-                    data['test_oauth_scope']
-                )
+            client_id = data['test_service_account_client_id']
+            client_secret = data['test_service_account_client_secret']
+            issuer = data['oauth_oidc_issuer_url']
+            conf = OpenIdProviderConfiguration(issuer)
+            conf.fetch_configuration()
+
+            login_result = do_client_cred_authentication(
+                issue_token_url=conf.token_endpoint, client_id=client_id, client_secret=client_secret
+            )
+
+            if login_result:
+                variables[AUTH_TOKEN_PARAM_NAME] = login_result.id_token
             else:
                 variables[AUTH_TOKEN_PARAM_NAME] = ''
         except Exception as err:

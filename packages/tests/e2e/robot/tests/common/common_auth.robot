@@ -8,7 +8,7 @@ Force Tags          common  security
 *** Keywords ***
 Url stay the same after log in
     [Arguments]  ${service_url}
-    ${resp}=  Wait Until Keyword Succeeds  2m  5 sec  Wait Until Keyword Succeeds  2m  5 sec  Request as authorized user  ${service_url}
+    ${resp}=  Wait Until Keyword Succeeds  2m  5 sec  Wait Until Keyword Succeeds  2m  5 sec  Request as authorized user  ${service_url}  ${AUTH_TOKEN}
     should be equal  ${service_url}  ${resp.url}
 
 Authorization should raise auth error if user is not authorized

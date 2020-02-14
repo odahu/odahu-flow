@@ -31,7 +31,8 @@ import requests
 import requests.exceptions
 
 import odahuflow.sdk.config
-from odahuflow.sdk.clients.oauth_handler import start_oauth2_callback_handler, OAuthLoginResult, do_refresh_token
+from odahuflow.sdk.clients.oauth_handler import start_oauth2_callback_handler, OAuthLoginResult, do_refresh_token, \
+    do_client_cred_authentication
 from odahuflow.sdk.config import update_config_file
 from odahuflow.sdk.definitions import API_VERSION
 
@@ -66,6 +67,14 @@ class APIConnectionException(Exception):
 
 
 class IncorrectAuthorizationToken(APIConnectionException):
+    """
+    Exception that says that provided API authorization token is incorrect
+    """
+
+    pass
+
+
+class IncorrectClientCredentials(APIConnectionException):
     """
     Exception that says that provided API authorization token is incorrect
     """
@@ -113,6 +122,8 @@ class RemoteAPIClient:
     def __init__(self,
                  base_url: str = odahuflow.sdk.config.API_URL,
                  token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+                 client_id: Optional[str] = '',
+                 client_secret: Optional[str] = '',
                  retries: Optional[int] = 3,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
                  non_interactive: Optional[bool] = True):
@@ -121,12 +132,16 @@ class RemoteAPIClient:
 
         :param base_url: base url, for example: http://api.example.com
         :param token: token for token based auth
+        :param client_id: client_id for Client Credentials OAuth2 flow
+        :param client_secret: client_secret for Client Credentials OAuth2 flow
         :param retries: command retries or less then 2 if disabled
         :param timeout: timeout for connection in seconds. 0 for disabling
         :param non_interactive: disable any interaction
         """
         self._base_url = base_url
         self._token = token
+        self._client_id = client_id
+        self._client_secret = client_secret
         self._version = API_VERSION
         self._retries = retries
         self._non_interactive = non_interactive
@@ -372,6 +387,8 @@ class RemoteAPIClient:
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
             self._login_with_refresh_token()
+        elif self._client_id and self._client_secret and odahuflow.sdk.config.API_ISSUING_URL:
+            self._login_with_client_credentials()
         elif self._interactive_mode_enabled:
             # Start interactive flow
             self._login_interactive_mode(url)
@@ -391,6 +408,19 @@ class RemoteAPIClient:
         else:
             self._update_config_with_new_oauth_config(login_result)
 
+    def _login_with_client_credentials(self):
+        login_result = do_client_cred_authentication(
+            issue_token_url=odahuflow.sdk.config.API_ISSUING_URL, client_id=self._client_id,
+            client_secret=self._client_secret
+        )
+        if not login_result:
+            raise IncorrectClientCredentials(
+                'Client credentials in not correct. \n'
+                'Please login again'
+            )
+        else:
+            self._update_config_with_new_oauth_config(login_result)
+
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()
         target_url = get_authorization_redirect(url, self.after_login)
@@ -400,6 +430,11 @@ class RemoteAPIClient:
     @property
     def _refresh_token_exists(self):
         return odahuflow.sdk.config.API_REFRESH_TOKEN and odahuflow.sdk.config.API_ISSUING_URL
+
+    @property
+    def _client_credentials_exists(self):
+        return odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_CLIENT_ID and \
+               odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_CLIENT_SECRET
 
     @property
     def _interactive_mode_enabled(self):
