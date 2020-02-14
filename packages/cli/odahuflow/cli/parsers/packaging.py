@@ -32,7 +32,8 @@ from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_i
 from odahuflow.sdk.clients.packaging import ModelPackaging, ModelPackagingClient, SUCCEEDED_STATE, FAILED_STATE
 
 DEFAULT_WAIT_TIMEOUT = 3
-DEFAULT_PACKAGING_TIMEOUT = 2400
+# 1 hour
+DEFAULT_PACKAGING_TIMEOUT = 60 * 60
 LOG_READ_TIMEOUT_SECONDS = 60
 
 LOGGER = logging.getLogger(__name__)

@@ -33,6 +33,7 @@ const (
 	ModelPackagerImage            = "packaging.model_packager.image"
 	NodeSelector                  = "packaging.node_selector"
 	Toleration                    = "packaging.toleration"
+	// Timeout for full packaging process
 	Timeout                       = "packaging.timeout"
 )
 
@@ -52,5 +53,5 @@ func init() {
 
 	viper.SetDefault(ServiceAccount, "odahu-flow-model-packager")
 
-	viper.SetDefault(Timeout, 60*time.Minute)
+	viper.SetDefault(Timeout, 4 * time.Hour)
 }

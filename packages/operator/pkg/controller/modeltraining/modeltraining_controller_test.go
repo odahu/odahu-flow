@@ -411,7 +411,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 }
 
 func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
-	viper.Set(train_conf.Timeout, "3h")
+	viper.Set(train_conf.Timeout, 3 * time.Hour)
 
 	mt := &odahuflowv1alpha1.ModelTraining{
 		ObjectMeta: metav1.ObjectMeta{

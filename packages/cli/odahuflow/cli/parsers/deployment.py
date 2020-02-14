@@ -30,7 +30,8 @@ from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 
 DEFAULT_WAIT_TIMEOUT = 5
-DEFAULT_DEPLOYMENT_TIMEOUT = 1200
+# 20 minutes
+DEFAULT_DEPLOYMENT_TIMEOUT = 20 * 60
 
 DEFAULT_WIDTH = 120
 MD_HEADER = ["Name", "State", "Min/Current/Max Replicas", "Service URL"]

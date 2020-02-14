@@ -33,7 +33,8 @@ from odahuflow.sdk.clients.training import ModelTraining, ModelTrainingClient, T
     TRAINING_FAILED_STATE
 
 DEFAULT_WAIT_TIMEOUT = 3
-DEFAULT_TRAINING_TIMEOUT = 2400
+# 1 hour
+DEFAULT_TRAINING_TIMEOUT = 60 * 60
 LOG_READ_TIMEOUT_SECONDS = 60
 
 LOGGER = logging.getLogger(__name__)
