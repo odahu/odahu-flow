@@ -19,6 +19,7 @@ package training
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/spf13/viper"
+	"time"
 )
 
 const (
@@ -35,7 +36,8 @@ const (
 	GPUNodeSelector               = "training.gpu_node_selector"
 	GPUToleration                 = "training.gpu_toleration"
 	MetricURL                     = "training.metric_url"
-	Timeout                       = "packaging.timeout"
+	// Timeout for full training process
+	Timeout                       = "training.timeout"
 )
 
 const (
@@ -56,5 +58,5 @@ func init() {
 
 	viper.SetDefault(MetricURL, "")
 
-	viper.Set(Timeout, "2h")
+	viper.Set(Timeout, 4 * time.Hour)
 }
