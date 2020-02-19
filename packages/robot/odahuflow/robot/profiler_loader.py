@@ -52,7 +52,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
         variables = {}
 
         try:
-            host_base_domain = "odahu.{}.{}".format(data.get('cluster_name'), data.get('root_domain'))
+            host_base_domain = data['dns']['domain']
             variables = {
                 'HOST_BASE_DOMAIN': host_base_domain,
                 'CLUSTER_NAME': data.get('cluster_name'),
