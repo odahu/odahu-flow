@@ -102,6 +102,9 @@ func newConfigurableReconciler(mgr manager.Manager) reconcile.Reconciler {
 		connRepo: conn_http_repository.NewRepository(
 			viper.GetString(operator_conf.APIURL),
 			viper.GetString(operator_conf.APIToken),
+			viper.GetString(operator_conf.ClientID),
+			viper.GetString(operator_conf.ClientSecret),
+			viper.GetString(operator_conf.OAuthOIDCTokenEndpoint),
 		),
 	}
 }

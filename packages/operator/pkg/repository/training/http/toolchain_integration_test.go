@@ -75,7 +75,7 @@ func (s *tiSuite) SetupSuite() {
 		}
 	}))
 
-	s.tiHTTPClient = training_http_repository.NewRepository(s.ts.URL, "")
+	s.tiHTTPClient = training_http_repository.NewRepository(s.ts.URL, "", "", "", "")
 }
 
 func (s *tiSuite) TearDownSuite() {

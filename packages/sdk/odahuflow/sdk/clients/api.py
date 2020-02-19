@@ -53,7 +53,7 @@ class WrongHttpStatusCode(Exception):
         """
         if http_result is None:
             http_result = {}
-        super().__init__(f'Got error from server: {http_result.get("message")}')
+        super().__init__(f'Got error from server: {http_result.get("message")} (status: {status_code})')
 
         self.status_code = status_code
 
@@ -316,8 +316,8 @@ class RemoteAPIClient:
             answer = json.loads(text)
             LOGGER.debug('Got answer: {!r} with code {} for URL {!r}'
                          .format(answer, status_code, payload))
-        except ValueError as json_decode_exception:
-            raise ValueError('Invalid JSON structure {!r}: {}'.format(text, json_decode_exception))
+        except ValueError:
+            answer = {}
 
         if 400 <= status_code < 600:
             raise WrongHttpStatusCode(status_code, answer)
@@ -366,7 +366,15 @@ class RemoteAPIClient:
         :return:
         """
         # We assume if there were redirects then credentials are out of date and we can refresh or build auth url
-        return bool(response.history)
+
+        def not_authorized_resp_code():
+            if hasattr(response, 'status_code'):
+                return response.status_code == 401
+            elif hasattr(response, 'status'):
+                return response.status == 401
+            return False
+
+        return bool(response.history) or not_authorized_resp_code()
 
     def _login(self, url: str, limit_stack=False):
         """

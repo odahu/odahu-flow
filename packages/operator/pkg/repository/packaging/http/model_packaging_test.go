@@ -104,7 +104,7 @@ func (s *mpSuite) SetupSuite() {
 		}
 	}))
 
-	s.mpHTTPClient = packaging_http_repository.NewRepository(s.ts.URL, "")
+	s.mpHTTPClient = packaging_http_repository.NewRepository(s.ts.URL, "", "", "", "")
 }
 
 func (s *mpSuite) TearDownSuite() {

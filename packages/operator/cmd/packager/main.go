@@ -92,9 +92,13 @@ func init() {
 func newPackagerWithHTTPRepositories() *packager.Packager {
 	packRepo := packaging_http_repository.NewRepository(
 		viper.GetString(packager_conf.APIURL), viper.GetString(packager_conf.APIToken),
+		viper.GetString(packager_conf.ClientID), viper.GetString(packager_conf.ClientSecret),
+		viper.GetString(packager_conf.OAuthOIDCTokenEndpoint),
 	)
 	connRepo := connection_http_repository.NewRepository(
 		viper.GetString(packager_conf.APIURL), viper.GetString(packager_conf.APIToken),
+		viper.GetString(packager_conf.ClientID), viper.GetString(packager_conf.ClientSecret),
+		viper.GetString(packager_conf.OAuthOIDCTokenEndpoint),
 	)
 
 	return packager.NewPackager(packRepo, connRepo, viper.GetString(packager_conf.ModelPackagingID))

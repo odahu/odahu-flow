@@ -43,11 +43,16 @@ type httpTrainingRepository struct {
 }
 
 // todo: doc
-func NewRepository(apiURL string, token string) training_repository.Repository {
+func NewRepository(
+	apiURL string, token string, clientID string,
+	clientSecret string, tokenURL string) training_repository.Repository {
 	return &httpTrainingRepository{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
 			token,
+			clientID,
+			clientSecret,
+			tokenURL,
 			v1Routes.OdahuflowV1ApiVersion,
 		),
 	}

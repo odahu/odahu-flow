@@ -74,7 +74,7 @@ func (s *piSuite) SetupSuite() {
 		}
 	}))
 
-	s.piHTTPClient = packaging_http_repository.NewRepository(s.ts.URL, "")
+	s.piHTTPClient = packaging_http_repository.NewRepository(s.ts.URL, "", "", "", "")
 }
 
 func (s *piSuite) TearDownSuite() {

@@ -24,15 +24,18 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"time"
-
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"strings"
+	"time"
 )
 
 const (
 	defaultAPIRequestTimeout = 10 * time.Second
 	authorizationHeaderName  = "Authorization"
 	authorizationHeaderValue = "Bearer %s"
+	serviceAccountScopes = "openid profile offline_access groups"
+	clientCredentialsGrant = "client_credentials"
+
 )
 
 var log = logf.Log.WithName("connection-controller")
@@ -44,13 +47,28 @@ type BaseAPIClient struct {
 	token string
 	// todo: doc
 	apiVersion string
+	// tokenURL refers to OpenID Provider Token URL
+	tokenURL string
+	// OpenID client id
+	clientID string
+	// OpenID client secret
+	clientSecret string
 }
 
-func NewBaseAPIClient(apiURL string, token string, apiVersion string) BaseAPIClient {
+type OAuthTokenResponse struct {
+	IDToken string `json:"id_token"`
+}
+
+func NewBaseAPIClient(
+	apiURL string, token string, clientID string,
+	clientSecret string, tokenURL string, apiVersion string) BaseAPIClient {
 	return BaseAPIClient{
-		apiURL:     apiURL,
-		token:      token,
-		apiVersion: apiVersion,
+		apiURL:       apiURL,
+		token:        token,
+		clientID:     clientID,
+		clientSecret: clientSecret,
+		tokenURL:     tokenURL,
+		apiVersion:   apiVersion,
 	}
 }
 
@@ -81,7 +99,82 @@ func (bec *BaseAPIClient) Do(req *http.Request) (*http.Response, error) {
 		Timeout: defaultAPIRequestTimeout,
 	}
 
-	return apiHTTPClient.Do(req)
+	resp, err := apiHTTPClient.Do(req)
+
+	// First attempt could finished by 401 response
+	if resp != nil && loginRequired(resp){
+
+		// If login required (401) let's login
+		loginErr := bec.Login()
+		if loginErr != nil{
+			log.Error(loginErr,"Login attempt is failed")
+			return resp, loginErr
+		}
+
+		// Update authorization header
+		req.Header[authorizationHeaderName] = []string{
+			fmt.Sprintf(authorizationHeaderValue, bec.token),
+		}
+
+		// Try again
+		return apiHTTPClient.Do(req)
+	}
+
+	return resp, err
+}
+
+func loginRequired(response *http.Response) bool{
+	log.Info("Client not authorized")
+	return response.StatusCode == http.StatusUnauthorized
+}
+
+func(bec *BaseAPIClient) Login() error{
+
+	data := url.Values{}
+	data.Set("grant_type",clientCredentialsGrant)
+	data.Set("client_id", bec.clientID)
+	data.Set("client_secret", bec.clientSecret)
+	data.Set("scope", serviceAccountScopes)
+
+	body := strings.NewReader(data.Encode())
+
+	request, err := http.NewRequest(http.MethodPost, bec.tokenURL, body)
+
+	if err != nil{
+		return err
+	}
+
+	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	apiHTTPClient := http.Client{
+		Timeout: defaultAPIRequestTimeout,
+	}
+	resp, err := apiHTTPClient.Do(request)
+	if err != nil{
+		return err
+	}
+
+	bodyBytes, errRead := ioutil.ReadAll(resp.Body)
+	if errRead != nil{
+		return errRead
+	}
+	var OAuthResp OAuthTokenResponse
+	errJSONParse := json.Unmarshal(bodyBytes, &OAuthResp)
+	if errJSONParse != nil {
+		return errJSONParse
+	}
+
+	bec.token = OAuthResp.IDToken
+
+	defer func() {
+		bodyCloseError := resp.Body.Close()
+		if bodyCloseError != nil {
+			log.Error(err, "Closing model packaging response body")
+		}
+	}()
+
+	return nil
+
 }
 
 func (bec *BaseAPIClient) DoRequest(httpMethod, path string, body interface{}) (*http.Response, error) {
