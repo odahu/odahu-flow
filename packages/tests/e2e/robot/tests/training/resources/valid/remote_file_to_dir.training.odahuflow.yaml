@@ -1,0 +1,30 @@
+kind: ModelTraining
+id: test-downloading-training-data
+spec:
+  model:
+    name: test-training-data
+    version: 1.0
+  # Toolchain integration name from TEST_DATA_TI_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
+  toolchain: training-data-helper
+  entrypoint: main
+  workDir: "."
+  hyperParameters:
+    input-file-location: "local/odahuflow.project.yaml"
+    target-file-location: "odahuflow.project.yaml"
+    input-model-location: "local/odahuflow_model"
+    target-model-location: "odahuflow_model"
+  data:
+    # Connection name from TEST_DATA_DIR_CONNECTION_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
+    - connName: test-valid-gppi-dir
+      localPath: local/
+      remotePath: /test-data/data/valid_gppi/odahuflow.project.yaml
+    # We need also to add a model folder to pass gppi validation step further (beyond this test scope)
+    - connName: test-valid-gppi-dir
+      localPath: local/odahuflow_model/
+      remotePath: /test-data/data/valid_gppi/odahuflow_model/
+  vcsName: odahu-flow-examples
+  resources:
+    limits:
+      memory: 1024Mi
+    requests:
+      memory: 512Mi
