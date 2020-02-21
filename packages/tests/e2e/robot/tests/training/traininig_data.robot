@@ -58,6 +58,8 @@ Vaild data downloading parameters
     remote_dir_to_dir.training.odahuflow.yaml
     file_to_file.training.odahuflow.yaml
     remote_file_to_file.training.odahuflow.yaml
+    file_to_dir.training.odahuflow.yaml
+    remote_file_to_dir.training.odahuflow.yaml
 
 Invaild data downloading parameters
     [Documentation]  Verify various invalid combination of connection uri, remote path and local path parameters
