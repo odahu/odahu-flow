@@ -35,9 +35,12 @@ const (
 	Toleration                    = "training.toleration"
 	GPUNodeSelector               = "training.gpu_node_selector"
 	GPUToleration                 = "training.gpu_toleration"
-	MetricURL                     = "training.metric_url"
+	// Kubernetes can consume the GPU resource in the <vendor>.com/gpu format.
+	// For example, amd.com/gpu or nvidia.com/gpu.
+	ResourceGPUName = "training.gpu_resource_name"
+	MetricURL       = "training.metric_url"
 	// Timeout for full training process
-	Timeout                       = "training.timeout"
+	Timeout = "training.timeout"
 )
 
 const (
@@ -58,5 +61,7 @@ func init() {
 
 	viper.SetDefault(MetricURL, "")
 
-	viper.Set(Timeout, 4 * time.Hour)
+	viper.Set(Timeout, 4*time.Hour)
+
+	viper.Set(ResourceGPUName, "nvidia.com/gpu")
 }

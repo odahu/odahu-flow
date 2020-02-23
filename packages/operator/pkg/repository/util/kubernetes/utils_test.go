@@ -18,7 +18,9 @@ package kubernetes
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	. "github.com/onsi/gomega"
+	"github.com/spf13/viper"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"reflect"
@@ -26,15 +28,18 @@ import (
 )
 
 var (
-	reqGPU   = "1"
-	reqCPU   = "2"
-	reqMem   = "3"
-	limitGPU = "4"
-	limitCPU = "5"
-	limitMem = "6"
+	reqGPU        = "1"
+	reqCPU        = "2"
+	reqMem        = "3"
+	limitGPU      = "4"
+	limitCPU      = "5"
+	limitMem      = "6"
+	emptyResource = ""
 )
 
 func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
+	var ResourceGPU = v1.ResourceName(viper.GetString(train_conf.ResourceGPUName))
+
 	g := NewGomegaWithT(t)
 	wantReqGPU, err := resource.ParseQuantity(reqGPU)
 	g.Expect(err).Should(BeNil())
@@ -66,9 +71,11 @@ func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
 			},
 			wantDepResources: v1.ResourceRequirements{
 				Requests: v1.ResourceList{
-					ResourceGPU:       wantReqGPU,
 					v1.ResourceCPU:    wantReqCPU,
 					v1.ResourceMemory: wantReqMem,
+				},
+				Limits: v1.ResourceList{
+					ResourceGPU: wantReqGPU,
 				},
 			},
 		},
@@ -105,7 +112,6 @@ func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
 			},
 			wantDepResources: v1.ResourceRequirements{
 				Requests: v1.ResourceList{
-					ResourceGPU:       wantReqGPU,
 					v1.ResourceCPU:    wantReqCPU,
 					v1.ResourceMemory: wantReqMem,
 				},
@@ -113,6 +119,20 @@ func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
 					ResourceGPU:       wantLimitGPU,
 					v1.ResourceCPU:    wantLimitCPU,
 					v1.ResourceMemory: wantLimitMem,
+				},
+			},
+		},
+		{
+			name: "If GPU limits is nill then apply GPU requests",
+			requirements: &v1alpha1.ResourceRequirements{
+				Requests: &v1alpha1.ResourceList{
+					GPU: &reqGPU,
+				},
+			},
+			wantDepResources: v1.ResourceRequirements{
+				Requests: v1.ResourceList{},
+				Limits: v1.ResourceList{
+					ResourceGPU: wantReqGPU,
 				},
 			},
 		},
@@ -143,9 +163,49 @@ func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
 			},
 		},
 		{
+			name: "Only GPU requests",
+			requirements: &v1alpha1.ResourceRequirements{
+				Requests: &v1alpha1.ResourceList{
+					GPU: &reqGPU,
+				},
+			},
+			wantDepResources: v1.ResourceRequirements{
+				Requests: v1.ResourceList{},
+				Limits: v1.ResourceList{
+					ResourceGPU: wantReqGPU,
+				},
+			},
+		},
+		{
 			name:             "Empty resources",
 			requirements:     &v1alpha1.ResourceRequirements{},
 			wantDepResources: v1.ResourceRequirements{},
+		},
+		{
+			name: "Every resources is empty string",
+			requirements: &v1alpha1.ResourceRequirements{
+				Limits: &v1alpha1.ResourceList{
+					GPU:    &emptyResource,
+					CPU:    &emptyResource,
+					Memory: &emptyResource,
+				},
+			},
+			wantDepResources: v1.ResourceRequirements{
+				Limits: v1.ResourceList{},
+			},
+		},
+		{
+			name: "Every resources is nil",
+			requirements: &v1alpha1.ResourceRequirements{
+				Requests: &v1alpha1.ResourceList{
+					GPU:    nil,
+					CPU:    nil,
+					Memory: nil,
+				},
+			},
+			wantDepResources: v1.ResourceRequirements{
+				Requests: v1.ResourceList{},
+			},
 		},
 	}
 	for _, tt := range tests {

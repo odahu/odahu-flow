@@ -74,6 +74,7 @@ var (
 	}
 	mtNamespacedName         = types.NamespacedName{Name: mtName, Namespace: testNamespace}
 	testResValue             = "5"
+	emptyValue               = ""
 	testToolchainIntegration = &odahuflowv1alpha1.ToolchainIntegration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      testToolchainIntegrationID,
@@ -231,6 +232,34 @@ func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
 				GPU: &testResValue,
+			},
+		},
+		nil,
+		nil,
+	)
+}
+
+func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
+	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
+	viper.Set(train_conf.GPUToleration, gpuToleration)
+	s.templateNodeSelectorTest(
+		&odahuflowv1alpha1.ResourceRequirements{
+			Limits: &odahuflowv1alpha1.ResourceList{
+				GPU: &emptyValue,
+			},
+		},
+		nil,
+		nil,
+	)
+}
+
+func (s *ModelTrainingControllerSuite) TestNillGPUValue() {
+	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
+	viper.Set(train_conf.GPUToleration, gpuToleration)
+	s.templateNodeSelectorTest(
+		&odahuflowv1alpha1.ResourceRequirements{
+			Limits: &odahuflowv1alpha1.ResourceList{
+				GPU: nil,
 			},
 		},
 		nil,
@@ -411,7 +440,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 }
 
 func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
-	viper.Set(train_conf.Timeout, 3 * time.Hour)
+	viper.Set(train_conf.Timeout, 3*time.Hour)
 
 	mt := &odahuflowv1alpha1.ModelTraining{
 		ObjectMeta: metav1.ObjectMeta{

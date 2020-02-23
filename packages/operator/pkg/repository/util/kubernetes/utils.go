@@ -18,9 +18,11 @@ package kubernetes
 
 import (
 	"fmt"
+	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/spf13/viper"
 	"reflect"
 
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -29,7 +31,8 @@ import (
 )
 
 const (
-	ResourceGPU = "nvidia.com/gpu"
+	resLisRequestName = "request"
+	resLisLimitName   = "limit"
 )
 
 func TransformFilter(filter interface{}, tagKey string) (selector labels.Selector, err error) {
@@ -94,91 +97,83 @@ func Size(size int) ListOption {
 	}
 }
 
-// TODO: refactor this function.
-func ConvertOdahuflowResourcesToK8s(requirements *v1alpha1.ResourceRequirements) (
-	depResources corev1.ResourceRequirements, err error,
+func IsResourcePresent(value *string) bool {
+	return value != nil && *value != ""
+}
+
+func ConvertOdahuflowResourcesToK8s(odahuResources *odahuv1alpha1.ResourceRequirements) (
+	k8sResources corev1.ResourceRequirements, err error,
 ) {
-	if requirements != nil {
-		reqLimits := requirements.Limits
-		if reqLimits != nil {
-			depResources.Limits = corev1.ResourceList{}
+	if odahuResources == nil {
+		return k8sResources, err
+	}
 
-			if reqLimits.Memory != nil {
-				var validationErr error
-				depResources.Limits[corev1.ResourceMemory], validationErr = resource.ParseQuantity(*reqLimits.Memory)
+	var validationError error
+	k8sResources.Requests, validationError = convertResourceList(odahuResources.Requests, resLisRequestName)
+	err = multierr.Append(err, validationError)
+	k8sResources.Limits, validationError = convertResourceList(odahuResources.Limits, resLisLimitName)
+	err = multierr.Append(err, validationError)
 
-				if validationErr != nil {
-					err = multierr.Append(err, fmt.Errorf(
-						"validation of memory request is failed: %s", validationErr.Error(),
-					))
-				}
-			}
-
-			if reqLimits.CPU != nil {
-				var validationErr error
-				depResources.Limits[corev1.ResourceCPU], validationErr = resource.ParseQuantity(*reqLimits.CPU)
-
-				if validationErr != nil {
-					err = multierr.Append(err, fmt.Errorf(
-						"validation of cpu request is failed: %s", validationErr.Error(),
-					))
-				}
-			}
-
-			if reqLimits.GPU != nil {
-				// TODO: remove hardcode
-				var validationErr error
-				depResources.Limits[ResourceGPU], validationErr = resource.ParseQuantity(*reqLimits.GPU)
-
-				if validationErr != nil {
-					err = multierr.Append(err, fmt.Errorf(
-						"validation of gpu request is failed: %s", validationErr.Error(),
-					))
-				}
-			}
+	// Read more about GPU resources https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins
+	// From the link above:
+	//   * You can specify GPU limits without specifying requests because Kubernetes
+	//     will use the limit as the request value by default.
+	//   * You can specify GPU in both limits and requests but these two values must be equal.
+	//   * You cannot specify GPU requests without specifying limits.
+	// So we required from user to specify limits or requests. Limits has priority over requests.
+	// We fill in only GPU limits in the k8s resource struct.
+	if odahuResources.Limits != nil && IsResourcePresent(odahuResources.Limits.GPU) {
+		err = multierr.Append(err, convertResource(
+			odahuResources.Limits.GPU, k8sResources.Limits,
+			corev1.ResourceName(viper.GetString(train_conf.ResourceGPUName)),
+			"gpu", resLisLimitName,
+		))
+	} else if odahuResources.Requests != nil && IsResourcePresent(odahuResources.Requests.GPU) {
+		if odahuResources.Limits == nil {
+			k8sResources.Limits = corev1.ResourceList{}
 		}
 
-		reqRequests := requirements.Requests
-		if reqRequests != nil {
-			depResources.Requests = corev1.ResourceList{}
+		err = multierr.Append(err, convertResource(
+			odahuResources.Requests.GPU, k8sResources.Limits,
+			corev1.ResourceName(viper.GetString(train_conf.ResourceGPUName)),
+			"gpu", resLisRequestName,
+		))
+	}
 
-			if reqRequests.Memory != nil {
-				var validationErr error
-				depResources.Requests[corev1.ResourceMemory], validationErr = resource.ParseQuantity(
-					*reqRequests.Memory,
-				)
+	return k8sResources, err
+}
 
-				if validationErr != nil {
-					err = multierr.Append(err, fmt.Errorf(
-						"validation of memory limit is failed: %s", validationErr.Error(),
-					))
-				}
-			}
+func convertResourceList(odahuResourceList *odahuv1alpha1.ResourceList, resourceListType string) (
+	k8sResourcesList corev1.ResourceList, err error,
+) {
+	if odahuResourceList != nil {
+		k8sResourcesList = corev1.ResourceList{}
+		err = multierr.Append(
+			err, convertResource(odahuResourceList.CPU, k8sResourcesList, corev1.ResourceCPU,
+				"cpu", resourceListType,
+			))
+		err = multierr.Append(err, convertResource(
+			odahuResourceList.Memory, k8sResourcesList, corev1.ResourceMemory,
+			"memory", resourceListType,
+		))
+	}
 
-			if reqRequests.CPU != nil {
-				var validationErr error
-				depResources.Requests[corev1.ResourceCPU], validationErr = resource.ParseQuantity(*reqRequests.CPU)
+	return k8sResourcesList, err
+}
 
-				if validationErr != nil {
-					err = multierr.Append(err, fmt.Errorf(
-						"validation of cpu limit is failed: %s", validationErr.Error(),
-					))
-				}
-			}
+func convertResource(odahuResource *string, k8sResource corev1.ResourceList,
+	resourceName corev1.ResourceName, resourceType string, resourceListType string) (err error) {
+	if IsResourcePresent(odahuResource) {
+		var validationErr error
+		k8sResource[resourceName], validationErr = resource.ParseQuantity(*odahuResource)
 
-			if reqRequests.GPU != nil {
-				// TODO: remove hardcode
-				var validationErr error
-				depResources.Requests[ResourceGPU], validationErr = resource.ParseQuantity(*reqRequests.GPU)
-
-				if validationErr != nil {
-					err = multierr.Append(err, fmt.Errorf(
-						"validation of gpu limit is failed: %s", validationErr.Error(),
-					))
-				}
-			}
+		if validationErr != nil {
+			err = multierr.Append(err, fmt.Errorf(
+				"validation of %s %s is failed: %s",
+				resourceType, resourceListType, validationErr.Error(),
+			))
 		}
 	}
 
-	return depResources, err
+	return err
 }
