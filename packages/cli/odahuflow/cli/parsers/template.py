@@ -24,7 +24,8 @@ from odahuflow.sdk.clients.templates import get_odahuflow_template_names
 @click.group()
 def template():
     """
-    Allow you to perform actions on odahuflow template files
+    Allow you to perform actions on odahuflow template files.\n
+    Alias for the command is temp.
     """
     pass
 

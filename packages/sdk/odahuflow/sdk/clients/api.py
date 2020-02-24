@@ -22,7 +22,7 @@ import random
 import string
 import sys
 import threading
-from collections import AsyncIterable
+from collections.abc import AsyncIterable
 from typing import Mapping, Any, Optional, Iterator, Tuple, Union, Dict, Callable
 from urllib.parse import urlparse, urlencode
 

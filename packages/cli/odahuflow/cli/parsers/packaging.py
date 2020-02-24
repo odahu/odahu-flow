@@ -45,7 +45,8 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def packaging(ctx: click.core.Context, url: str, token: str):
     """
-    Allow you to perform actions on packagings
+    Allow you to perform actions on packagings.\n
+    Alias for the command is pack.
     """
     ctx.obj = ModelPackagingClient(url, token)
 

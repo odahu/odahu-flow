@@ -16,7 +16,7 @@
 """
 API client
 """
-from collections import AsyncIterable
+from collections.abc import AsyncIterable
 import logging
 from typing import List, Iterator
 

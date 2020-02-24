@@ -34,7 +34,8 @@ ID_AND_FILE_MISSED_ERROR_MESSAGE = f'You should provide a toolchain ID or file p
 @click.pass_context
 def toolchain_integration(ctx: click.core.Context, url: str, token: str):
     """
-    Allow you to perform actions on toolchain integration
+    Allow you to perform actions on toolchain integration.\n
+    Alias for the command is ti.
     """
     ctx.obj = ToolchainIntegrationClient(url, token)
 

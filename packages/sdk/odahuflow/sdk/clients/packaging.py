@@ -16,7 +16,7 @@
 """
 API client
 """
-from collections import AsyncIterable
+from collections.abc import AsyncIterable
 from typing import List, Iterator
 
 from odahuflow.sdk.clients.api import RemoteAPIClient, AsyncRemoteAPIClient

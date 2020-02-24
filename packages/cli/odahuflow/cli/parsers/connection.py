@@ -34,7 +34,8 @@ ID_AND_FILE_MISSED_ERROR_MESSAGE = f'You should provide a connection ID or file 
 @click.pass_context
 def connection(ctx: click.core.Context, url: str, token: str):
     """
-    Allow you to perform actions on connections
+    Allow you to perform actions on connections.\n
+    Alias for the command is conn.
     """
     ctx.obj = ConnectionClient(url, token)
 
