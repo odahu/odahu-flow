@@ -34,7 +34,8 @@ ID_AND_FILE_MISSED_ERROR_MESSAGE = f'You should provide a packaging integration 
 @click.pass_context
 def packaging_integration(ctx: click.core.Context, url: str, token: str):
     """
-    Allow you to perform actions on packaging integration
+    Allow you to perform actions on packaging integration.\n
+    Alias for the command is pi.
     """
     ctx.obj = PackagingIntegrationClient(url, token)
 

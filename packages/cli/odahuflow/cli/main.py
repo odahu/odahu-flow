@@ -18,7 +18,9 @@ CLI entrypoint
 """
 
 import click
+import click_completion
 from odahuflow.cli.parsers.bulk import bulk
+from odahuflow.cli.parsers.completion import completion
 from odahuflow.cli.parsers.config import config_group
 from odahuflow.cli.parsers.connection import connection
 from odahuflow.cli.parsers.deployment import deployment
@@ -27,41 +29,59 @@ from odahuflow.cli.parsers.model import model
 from odahuflow.cli.parsers.packaging import packaging
 from odahuflow.cli.parsers.packaging_integration import packaging_integration
 from odahuflow.cli.parsers.route import route
-from odahuflow.cli.parsers.sandbox import sandbox
 from odahuflow.cli.parsers.security import login, logout
 from odahuflow.cli.parsers.template import template
 from odahuflow.cli.parsers.toolchain_integration import toolchain_integration
 from odahuflow.cli.parsers.training import training
 from odahuflow.cli.utils.abbr import AbbreviationGroup
+from odahuflow.cli.utils.error_handler import cli_error_handler
 from odahuflow.cli.utils.logger import configure_logging
 from odahuflow.cli.version import version
 
+COMMAND_GROUPS = [
+    config_group,
+    connection,
+    deployment,
+    model,
+    packaging,
+    packaging_integration,
+    bulk,
+    route,
+    template,
+    gppi,
+    toolchain_integration,
+    training,
+    login,
+    logout,
+    version,
+    completion,
+]
+
+# Initialize shell completion
+click_completion.init()
+
 
 @click.group(cls=AbbreviationGroup)
-@click.option('--verbose/--no-verbose', default=False)
-def main(verbose=False):
+@click.option('--verbose/--non-verbose', default=False)
+def base(verbose=False):
     """
     Odahuflow CLI
     """
     configure_logging(verbose)
 
 
-main.add_command(config_group)
-main.add_command(connection)
-main.add_command(deployment)
-main.add_command(model)
-main.add_command(packaging)
-main.add_command(packaging_integration)
-main.add_command(bulk)
-main.add_command(route)
-main.add_command(sandbox)
-main.add_command(template)
-main.add_command(gppi)
-main.add_command(toolchain_integration)
-main.add_command(training)
-main.add_command(login)
-main.add_command(logout)
-main.add_command(version)
+# Initialize all commands
+for group in COMMAND_GROUPS:
+    base.add_command(group)
+
+
+def main():
+    """
+    Main CLI entrypoint
+    """
+    with cli_error_handler():
+        base()
+
 
 if __name__ == '__main__':
-    main()
+    base()

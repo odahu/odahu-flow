@@ -49,7 +49,8 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def deployment(ctx: click.core.Context, url: str, token: str):
     """
-    Allow you to perform actions on deployments
+    Allow you to perform actions on deployments.\n
+    Alias for the command is dep.
     """
     ctx.obj = ModelDeploymentClient(url, token)
 

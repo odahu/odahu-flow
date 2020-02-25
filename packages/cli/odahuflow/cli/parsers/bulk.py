@@ -46,7 +46,7 @@ def bulk(ctx: click.core.Context, url: str, token: str):
 @pass_obj
 def apply(client: RemoteAPIClient, file: str):
     """
-    Create/Update Odahuflow resources on a API.\n
+    Create/Update Odahuflow resources on an API.\n
     You should specify a path to file with resources.
     For now, CLI supports yaml and JSON file formats.
     Usage example:\n
@@ -63,7 +63,7 @@ def apply(client: RemoteAPIClient, file: str):
 @pass_obj
 def delete(client: RemoteAPIClient, file: str):
     """
-    Remove Odahuflow resources from a API.\n
+    Remove Odahuflow resources from an API.\n
     You should specify a path to file with resources.
     For now, CLI supports yaml and JSON file formats.
     Usage example:\n

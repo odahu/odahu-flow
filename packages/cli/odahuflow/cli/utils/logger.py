@@ -21,6 +21,9 @@ import sys
 
 from odahuflow.sdk import config
 
+ENABLED_VERBOSE_LOG_LEVEL = logging.DEBUG
+DISABLED_VERBOSE_LOG_LEVEL = logging.CRITICAL
+
 
 def configure_logging(verbose: bool):
     """
@@ -29,10 +32,18 @@ def configure_logging(verbose: bool):
     :param verbose: logging level
     """
     if verbose or config.DEBUG:
-        log_level = logging.DEBUG
+        log_level = ENABLED_VERBOSE_LOG_LEVEL
     else:
-        log_level = logging.ERROR
+        log_level = DISABLED_VERBOSE_LOG_LEVEL
 
     logging.basicConfig(level=log_level,
                         format='%(asctime)s - %(levelname)s - %(message)s',
                         stream=sys.stderr)
+
+
+def is_verbose_enabled() -> bool:
+    """
+    Determine verbose flag by logging level
+    @return: true if verbose flag is provided
+    """
+    return logging.root.level == ENABLED_VERBOSE_LOG_LEVEL

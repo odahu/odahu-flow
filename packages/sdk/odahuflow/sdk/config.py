@@ -484,18 +484,6 @@ K8S_API_RETRY_DELAY_SEC = ConfigVariableDeclaration('K8S_API_RETRY_DELAY_SEC', 3
                                                     'Time wait before next retry to call K8S API',
                                                     False)
 
-# Sandbox mode
-SANDBOX_PYTHON_TOOLCHAIN_IMAGE = ConfigVariableDeclaration('SANDBOX_PYTHON_TOOLCHAIN_IMAGE',
-                                                           'odahu/jupyterlab:latest',
-                                                           str, 'Default image for sandbox mode using python toolchain',
-                                                           True)
-
-SANDBOX_CREATE_SELF_REMOVING_CONTAINER = ConfigVariableDeclaration('SANDBOX_CREATE_SELF_REMOVING_CONTAINER', True,
-                                                                   bool, 'Remove sandbox container after exit', True)
-
-SANDBOX_DOCKER_MOUNT_PATH = ConfigVariableDeclaration('SANDBOX_DOCKER_MOUNT_PATH', '/var/run/docker.sock', str,
-                                                      'Path to docker engine socket on host machine', True)
-
 LOCAL_DEPLOY_HOSTNAME = ConfigVariableDeclaration('LOCAL_DEPLOY_HOSTNAME', 'http://localhost', str,
                                                   'Name of host on which local deployed models will be accessable',
                                                   True)

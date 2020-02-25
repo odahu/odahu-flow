@@ -23,13 +23,13 @@ Config path
     should contain  ${res.stdout}  ${LOCAL_CONFIG}
 
 Set config value
-    ${res}=  Shell  odahuflowctl --verbose config get SANDBOX_DOCKER_MOUNT_PATH
+    ${res}=  Shell  odahuflowctl --verbose config get ODAHUFLOWCTL_OAUTH_AUTH_URL
     Should be equal  ${res.rc}  ${0}
     should not contain  ${res.stdout}  ${TEST_VALUE}
 
-    ${res}=  Shell  odahuflowctl --verbose config set SANDBOX_DOCKER_MOUNT_PATH test
+    ${res}=  Shell  odahuflowctl --verbose config set ODAHUFLOWCTL_OAUTH_AUTH_URL test
     Should be equal  ${res.rc}  ${0}
 
-    ${res}=  Shell  odahuflowctl --verbose config get SANDBOX_DOCKER_MOUNT_PATH
+    ${res}=  Shell  odahuflowctl --verbose config get ODAHUFLOWCTL_OAUTH_AUTH_URL
     Should be equal  ${res.rc}  ${0}
     should contain  ${res.stdout}  ${TEST_VALUE}

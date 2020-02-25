@@ -46,7 +46,8 @@ LOGGER = logging.getLogger(__name__)
 @click.pass_context
 def training(ctx: click.core.Context, url: str, token: str):
     """
-    Allow you to perform actions on trainings
+    Allow you to perform actions on trainings.\n
+    Alias for the command is train.
     """
     ctx.obj = ModelTrainingClient(url, token)
 

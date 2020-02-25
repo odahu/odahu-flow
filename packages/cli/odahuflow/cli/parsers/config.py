@@ -25,7 +25,8 @@ from odahuflow.sdk import config
 @click.group(name='config')
 def config_group():
     """
-    Odahuflow CLI config manipulation
+    Odahuflow CLI config manipulation.\n
+    Alias for the command is conf.
     """
     pass
 
