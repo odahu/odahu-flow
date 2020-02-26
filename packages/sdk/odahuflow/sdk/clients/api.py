@@ -175,8 +175,8 @@ class RemoteAPIClient:
         """
         self._interactive_login_finished.set()
         self._update_config_with_new_oauth_config(login_result)
-        LOGGER.info('You has been authorized on endpoint %s as %s / %s',
-                    self._base_url, login_result.user_name, login_result.user_email)
+        print('You has been authorized on endpoint %s as %s / %s' %
+                    (self._base_url, login_result.user_name, login_result.user_email))
         sys.exit(0)
 
     @classmethod
@@ -432,7 +432,7 @@ class RemoteAPIClient:
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()
         target_url = get_authorization_redirect(url, self.after_login)
-        LOGGER.error('%s. \nPlease open %s', self._credentials_error_status, target_url)
+        print('%s. \nPlease open %s' % (self._credentials_error_status, target_url))
         self._interactive_login_finished.wait()
 
     @property
