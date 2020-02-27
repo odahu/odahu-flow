@@ -44,7 +44,7 @@ def gppi(ctx, gppi_model_path: str, use_current_env: bool = False, env_name: str
     """
 
     if not gppi_model_path:
-        click.echo(f'--gppi-model-path OR ${ODAHUFLOW_GPPI_MODEL_PATH_ENV_NAME} env var must be provided')
+        click.echo(f'--gppi-model-path OR {ODAHUFLOW_GPPI_MODEL_PATH_ENV_NAME} env var must be provided')
         sys.exit(1)
 
     mb = GPPITrainedModelBinary(gppi_model_path, use_current_env, env_name, skip_deps)

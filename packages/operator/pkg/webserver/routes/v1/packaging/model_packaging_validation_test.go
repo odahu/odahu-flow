@@ -44,13 +44,14 @@ import (
 )
 
 var (
-	piIDMpValid           = "pi-id"
-	piEntrypointMpValid   = "/usr/bin/test"
-	piImageMpValid        = "test:image"
-	piArtifactNameMpValid = "some-artifact-name.zip"
-	connDockerTypeMpValid = "docker-conn"
-	connS3TypeMpValid     = "s3-conn"
-	piArgumentsMpValid    = packaging.JsonSchema{
+	piIDMpValid                      = "pi-id"
+	piEntrypointMpValid              = "/usr/bin/test"
+	piImageMpValid                   = "test:image"
+	piArtifactNameMpValid            = "some-artifact-name.zip"
+	connDockerTypeMpValid            = "docker-conn"
+	connS3TypeMpValid                = "s3-conn"
+	defaultTargetArgument1Connection = "default-conn-id"
+	piArgumentsMpValid               = packaging.JsonSchema{
 		Properties: []packaging.Property{
 			{
 				Name: "argument-1",
@@ -85,6 +86,7 @@ var (
 				string(connection.GcsType),
 				string(connection.AzureBlobType),
 			},
+			Default:  defaultTargetArgument1Connection,
 			Required: false,
 		},
 		{
@@ -358,6 +360,33 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(ti)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("[target-2] are required targets"))
+}
+
+func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
+	ti := &packaging.ModelPackaging{
+		Spec: packaging.ModelPackagingSpec{
+			IntegrationName: piIDMpValid,
+			ArtifactName:    "test",
+			OutputConnection: connS3TypeMpValid,
+			Arguments: map[string]interface{}{
+				"argument-1": 5,
+			},
+			Targets: []v1alpha1.Target{
+				{
+					Name:           "target-2",
+					ConnectionName: connDockerTypeMpValid,
+				},
+			},
+		},
+	}
+
+	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(ti)
+	s.g.Expect(err).ShouldNot(HaveOccurred())
+	s.g.Expect(ti.Spec.Targets).Should(HaveLen(2))
+	s.g.Expect(ti.Spec.Targets[0].Name).Should(Equal("target-2"))
+	s.g.Expect(ti.Spec.Targets[0].ConnectionName).Should(Equal(connDockerTypeMpValid))
+	s.g.Expect(ti.Spec.Targets[1].Name).Should(Equal("target-1"))
+	s.g.Expect(ti.Spec.Targets[1].ConnectionName).Should(Equal(defaultTargetArgument1Connection))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpNotFoundTargets() {

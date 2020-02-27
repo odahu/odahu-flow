@@ -179,14 +179,14 @@ func (mpv *MpValidator) validateArguments(pi *packaging.PackagingIntegration, mp
 }
 
 func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *packaging.ModelPackaging) (err error) {
-	requiredTargets := make(map[string]interface{})
+	requiredTargets := make(map[string]v1alpha1.TargetSchema)
 	allTargets := make(map[string]v1alpha1.TargetSchema)
 
 	for _, target := range pi.Spec.Schema.Targets {
 		allTargets[target.Name] = target
 
 		if target.Required {
-			requiredTargets[target.Name] = nil
+			requiredTargets[target.Name] = target
 		}
 	}
 
@@ -196,6 +196,7 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 		if targetSchema, ok := allTargets[target.Name]; !ok {
 			err = multierr.Append(err, fmt.Errorf(TargetNotFoundErrorMessage, target.Name, pi.ID))
 		} else {
+			delete(allTargets, target.Name)
 			if conn, k8sErr := mpv.connRepository.GetConnection(target.ConnectionName); k8sErr != nil {
 				err = multierr.Append(err, k8sErr)
 			} else {
@@ -212,6 +213,18 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 					err = multierr.Append(err, fmt.Errorf(NotValidConnTypeErrorMessage, target.Name, conn.Spec.Type, pi.ID))
 				}
 			}
+		}
+	}
+
+	// Propagate default values for the remaining targets
+	for _, target := range allTargets {
+		if len(target.Default) != 0 {
+			delete(requiredTargets, target.Name)
+
+			mp.Spec.Targets = append(mp.Spec.Targets, v1alpha1.Target{
+				Name:           target.Name,
+				ConnectionName: target.Default,
+			})
 		}
 	}
 

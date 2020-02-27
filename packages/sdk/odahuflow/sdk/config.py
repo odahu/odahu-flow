@@ -17,9 +17,9 @@
 odahuflow env names
 """
 import configparser
+import logging
 import os
 from pathlib import Path
-import logging
 
 # Get list of all variables
 ALL_VARIABLES = {}
@@ -545,3 +545,9 @@ JUPYTER_REDIRECT_URL = ConfigVariableDeclaration('JUPYTER_REDIRECT_URL',
 
 ODAHUFLOWCTL_NONINTERACTIVE = ConfigVariableDeclaration('ODAHUFLOWCTL_NONINTERACTIVE', False,
                                                      bool, 'Disable any interaction (e.g. authorization)', True)
+
+# Local
+
+LOCAL_MODEL_OUTPUT_DIR = ConfigVariableDeclaration('LOCAL_MODEL_OUTPUT_DIR',
+                                                   Path.home().joinpath(".odahuflow", "training_output"),
+                                                   str, 'Directory where model artifacts will be saved', True)

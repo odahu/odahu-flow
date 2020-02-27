@@ -21,6 +21,8 @@ import json
 import logging
 import os
 import typing
+from os import listdir
+from os.path import isdir, join, isfile
 
 import yaml
 from odahuflow.sdk.clients.api import RemoteAPIClient, WrongHttpStatusCode, AsyncRemoteAPIClient
@@ -32,6 +34,16 @@ from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, AsyncModel
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient, AsyncToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient, ModelTraining, AsyncModelTrainingClient
 from odahuflow.sdk.models import Connection, ToolchainIntegration, ModelPackaging, PackagingIntegration
+
+TARGET_CLASSES = {
+    'ModelTraining': ModelTraining,
+    'ToolchainIntegration': ToolchainIntegration,
+    'ModelDeployment': ModelDeployment,
+    'ModelRoute': ModelRoute,
+    'Connection': Connection,
+    'ModelPackaging': ModelPackaging,
+    'PackagingIntegration': PackagingIntegration,
+}
 
 LOGGER = logging.getLogger(__name__)
 
@@ -78,10 +90,8 @@ def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteA
     Build client for particular resource (e.g. it builds ModelTrainingClient for ModelTraining resource)
 
     :param resource: target resource
-    :type resource: :py:class:OdahuflowCloudResourceUpdatePair
     :param api_client: base API client to extract connection options from
-    :type api_client: :py:class:RemoteEdiClient
-    :return: typing.Optional[object] -- remote client or None
+    :return: remote client or None
     """
     if isinstance(resource.resource, ModelTraining):
         return ModelTrainingClient.construct_from_other(api_client)
@@ -109,10 +119,8 @@ def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
     Build client for particular resource (e.g. it builds ModelTrainingClient for ModelTraining resource)
 
     :param resource: target resource
-    :type resource: :py:class:OdahuflowCloudResourceUpdatePair
     :param async_api_client: base async API client to extract connection options from
-    :type async_api_client: :py:class:AsyncRemoteEdiClient
-    :return: typing.Optional[object] -- remote client or None
+    :return: remote client or None
     """
     if isinstance(resource.resource, ModelTraining):
         return AsyncModelTrainingClient.construct_from_other(async_api_client)
@@ -137,30 +145,19 @@ def build_resource(declaration: dict) -> OdahuflowCloudResourceUpdatePair:
     Build resource from it's declaration
 
     :param declaration: declaration of resource
-    :type declaration: dict
-    :return: object -- built resource
+    :return: built resource
     """
     resource_type = declaration.get('kind')
     if resource_type is None:
-        raise Exception('Kind of object {!r} must be not null'.format(declaration))
+        raise Exception(f'Kind of object {declaration} must be not null')
 
     if not isinstance(resource_type, str):
-        raise Exception('Kind of object {!r} should be string'.format(declaration))
+        raise Exception(f'Kind of object {declaration} should be string')
 
-    target_classes = {
-        'ModelTraining': ModelTraining,
-        'ToolchainIntegration': ToolchainIntegration,
-        'ModelDeployment': ModelDeployment,
-        'ModelRoute': ModelRoute,
-        'Connection': Connection,
-        'ModelPackaging': ModelPackaging,
-        'PackagingIntegration': PackagingIntegration,
-    }
+    if resource_type not in TARGET_CLASSES:
+        raise Exception(f'Unknown kind of object: \'{resource_type}\'')
 
-    if resource_type not in target_classes:
-        raise Exception('Unknown kind of object: {!r}'.format(resource_type))
-
-    resource = target_classes[resource_type].from_dict(declaration)
+    resource = TARGET_CLASSES[resource_type].from_dict(declaration)
 
     return OdahuflowCloudResourceUpdatePair(
         resource_id=resource.id,
@@ -175,34 +172,71 @@ def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateLis
     :param data_stream: text stream with yaml/json data
     :raises Exception: if parsing of file is impossible
     :raises ValueError: if invalid Odahuflow resource detected
-    :return: :py:class:OdahuflowCloudResourcesUpdateList -- parsed resources
+    :return: parsed resources
     """
-
     try:
-        items = tuple(yaml.load_all(data_stream, Loader=yaml.SafeLoader))
-    except yaml.YAMLError:
+        # Technically YAML is a superset of JSON.
+        # So we have to try parse as json first.
+        items = json.load(data_stream)
+
+        LOGGER.debug('Successfully parsed as JSON format')
+    except json.JSONDecodeError:
         try:
-            items = json.load(data_stream)
-        except json.JSONDecodeError:
-            raise Exception('{!r} is not valid JSON or YAML')
+            # Return to the beginning of the stream
+            data_stream.seek(0)
+
+            items = tuple(yaml.load_all(data_stream, Loader=yaml.SafeLoader))
+
+            LOGGER.debug('Successfully parsed as YAML format')
+        except yaml.YAMLError:
+            raise Exception('not valid JSON or YAML')
 
     if not isinstance(items, (list, tuple)):
         items = [items]
 
-    if isinstance(items[0], (list, tuple)):
-        items = items[0]
-
-    result = []  # type: typing.List[OdahuflowCloudResourceUpdatePair]
+    result: typing.List[OdahuflowCloudResourceUpdatePair] = []
 
     for item in items:
+        if item is None:
+            continue
+
         if not isinstance(item, dict):
-            raise ValueError('Invalid Odahuflow resource in file: {!r}'.format(item))
+            raise ValueError(f'Invalid Odahuflow resource in file: {item}')
 
         result.append(build_resource(item))
 
     return OdahuflowCloudResourcesUpdateList(
         changes=tuple(result)
     )
+
+
+def parse_resources_dir(path: str) -> typing.List[OdahuflowCloudResourceUpdatePair]:
+    """
+    Parse dir with YAML/JSON files for Odahuflow resources
+
+    :param path: path to file (local)
+    :raises Exception: if parsing of file is impossible
+    :raises ValueError: if invalid Odahuflow resource detected
+    :return: parsed resources
+    """
+    if not os.path.exists(path):
+        raise FileNotFoundError(f'Resource directory {path} not found')
+
+    if not isdir(path):
+        raise FileNotFoundError(f'{path} is not a directory')
+
+    resource_files = [join(path, f) for f in listdir(path) if
+                      isfile(join(path, f))]
+
+    entities: typing.List[OdahuflowCloudResourceUpdatePair] = []
+    for file in resource_files:
+        try:
+            LOGGER.debug(f'Parsing the {file} file')
+            entities.extend(parse_resources_file(file).changes)
+        except Exception:
+            LOGGER.exception('parse error')
+
+    return entities
 
 
 def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
@@ -212,10 +246,10 @@ def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
     :param path: path to file (local)
     :raises Exception: if parsing of file is impossible
     :raises ValueError: if invalid Odahuflow resource detected
-    :return: :py:class:OdahuflowCloudResourcesUpdateList -- parsed resources
+    :return: parsed resources
     """
     if not os.path.exists(path):
-        raise FileNotFoundError('Resource file {!r} not found'.format(path))
+        raise FileNotFoundError(f'Resource file \'{path}\' not found')
 
     with open(path, 'r') as data_stream:
         return parse_stream(data_stream)
@@ -226,11 +260,10 @@ def parse_resources_file_with_one_item(path: str) -> OdahuflowCloudResourceUpdat
     Parse file (YAML/JSON) for Odahuflow resource. Raise exception if it is more then one resource
 
     :param path: path to file (local)
-    :type path: str
     :raises Exception: if parsing of file is impossible
     :raises Exception: if more then one resource found
     :raises ValueError: if invalid Odahuflow resource detected
-    :return: :py:class:OdahuflowCloudResourceUpdatePair -- parsed resource
+    :return: parsed resource
     """
     resources = parse_resources_file(path)
     if len(resources.changes) != 1:
@@ -245,12 +278,9 @@ async def async_apply(updates: OdahuflowCloudResourcesUpdateList,
     Apply changes on Odahuflow cloud
 
     :param updates: changes to apply
-    :type updates: :py:class:OdahuflowCloudResourcesUpdateList
     :param async_api_client: client to extract connection properties from
-    :type async_api_client: RemoteAPIClient
     :param is_removal: is it removal?
-    :type is_removal: bool
-    :return: :py:class:ApplyResult -- result of applying
+    :return: result of applying
     """
     created = []
     removed = []
@@ -318,12 +348,9 @@ def apply(updates: OdahuflowCloudResourcesUpdateList,
     Apply changes on Odahuflow cloud (wrapper for async_apply). Used for not async client (For backward compatibility)
 
     :param updates: changes to apply
-    :type updates: :py:class:OdahuflowCloudResourcesUpdateList
     :param api_client: client to extract connection properties from
-    :type api_client: RemoteAPIClient or AsyncRemoteAPIClient
     :param is_removal: is it removal?
-    :type is_removal: bool
-    :return: :py:class:ApplyResult -- result of applying
+    :return:  result of applying
     """
     loop = asyncio.get_event_loop()
 

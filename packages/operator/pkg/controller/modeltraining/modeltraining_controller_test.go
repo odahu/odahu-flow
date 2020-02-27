@@ -61,7 +61,6 @@ const (
 	tolerationEffect   = "effect"
 
 	modelBuildImage     = "model-image:builder"
-	modelValidatorImage = "model-image:validator"
 	toolchainImage      = "model-image:toolchain"
 )
 
@@ -178,7 +177,6 @@ func (s *ModelTrainingControllerSuite) TearDownTest() {
 	viper.Set(train_conf.NodeSelector, nil)
 	viper.Set(train_conf.Toleration, nil)
 	viper.Set(train_conf.ModelBuilderImage, nil)
-	viper.Set(train_conf.ModelValidatorImage, nil)
 
 	if err := s.k8sClient.Delete(context.TODO(), testToolchainIntegration); err != nil {
 		s.T().Fatal(err)
@@ -371,7 +369,6 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
 	viper.Set(train_conf.GPUToleration, gpuToleration)
 	viper.Set(train_conf.ModelBuilderImage, modelBuildImage)
-	viper.Set(train_conf.ModelValidatorImage, modelValidatorImage)
 
 	trainResources := &odahuflowv1alpha1.ResourceRequirements{
 		Limits: &odahuflowv1alpha1.ResourceList{
@@ -420,7 +417,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 			s.g.Expect(step.Image).Should(Equal(toolchainImage))
 			s.g.Expect(step.Resources).Should(Equal(k8sTrainerResources))
 		case odahuflow.TrainerValidationStep:
-			s.g.Expect(step.Image).Should(Equal(modelValidatorImage))
+			s.g.Expect(step.Image).Should(Equal(toolchainImage))
 			s.g.Expect(step.Resources).Should(Equal(corev1.ResourceRequirements{
 				Limits: corev1.ResourceList{
 					corev1.ResourceCPU: *k8sTrainerResources.Limits.Cpu(),

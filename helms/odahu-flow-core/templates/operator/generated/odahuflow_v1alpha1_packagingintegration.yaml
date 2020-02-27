@@ -57,6 +57,8 @@ spec:
                         items:
                           type: string
                         type: array
+                      default:
+                        type: string
                       name:
                         type: string
                       required:
@@ -64,6 +66,7 @@ spec:
                     required:
                     - name
                     - connectionTypes
+                    - default
                     - required
                     type: object
                   type: array
