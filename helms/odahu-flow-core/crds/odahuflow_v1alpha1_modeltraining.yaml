@@ -3,7 +3,10 @@ kind: CustomResourceDefinition
 metadata:
   creationTimestamp: null
   labels:
-    {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
+    app: operator
+    app.kubernetes.io/component: operator
+    app.kubernetes.io/instance: odahu-flow
+    app.kubernetes.io/name: odahuflow
     controller-tools.k8s.io: "1.0"
   name: modeltrainings.odahuflow.odahu.org
   annotations:
