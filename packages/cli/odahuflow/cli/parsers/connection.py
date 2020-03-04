@@ -17,15 +17,14 @@ import http
 
 import click
 from odahuflow.cli.utils.client import pass_obj
+from odahuflow.cli.utils.error_handler import ID_AND_FILE_MISSED_ERROR_MESSAGE, \
+    IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.connection import ConnectionClient
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.models import Connection
-
-IGNORE_NOT_FOUND_ERROR_MESSAGE = 'Connection {} was not found. Ignore'
-ID_AND_FILE_MISSED_ERROR_MESSAGE = f'You should provide a connection ID or file parameter, not both.'
 
 
 @click.group()

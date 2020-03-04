@@ -16,14 +16,30 @@
 import logging
 import sys
 from contextlib import contextmanager
+from typing import Optional
 
 import click
 from odahuflow.sdk.logger import is_verbose_enabled
 
 LOG = logging.getLogger(__name__)
 
-CLI_ERROR_MESSAGE = 'Error: {}.\nFor more information rerun command with' \
-                    ' --verbose flag'
+TIMEOUT_ERROR_MESSAGE = 'Time out: operation has not been confirmed'
+IGNORE_NOT_FOUND_ERROR_MESSAGE = '{} was not found. Ignore'
+ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide a ID or ' \
+                                   'file parameter, not both.'
+
+
+def check_id_or_file_params_present(
+        entity_id: Optional[str], file: Optional[str]
+) -> None:
+    """
+    Verify that only one parameter is None or empty
+    """
+    if not entity_id and not file:
+        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
+
+    if entity_id and file:
+        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
 
 
 @contextmanager
