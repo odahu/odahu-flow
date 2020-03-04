@@ -25,6 +25,7 @@ from odahuflow.cli.parsers.config import config_group
 from odahuflow.cli.parsers.connection import connection
 from odahuflow.cli.parsers.deployment import deployment
 from odahuflow.cli.parsers.gppi import gppi
+from odahuflow.cli.parsers.local import local
 from odahuflow.cli.parsers.model import model
 from odahuflow.cli.parsers.packaging import packaging
 from odahuflow.cli.parsers.packaging_integration import packaging_integration
@@ -35,7 +36,7 @@ from odahuflow.cli.parsers.toolchain_integration import toolchain_integration
 from odahuflow.cli.parsers.training import training
 from odahuflow.cli.utils.abbr import AbbreviationGroup
 from odahuflow.cli.utils.error_handler import cli_error_handler
-from odahuflow.cli.utils.logger import configure_logging
+from odahuflow.sdk.logger import configure_logging
 from odahuflow.cli.version import version
 
 COMMAND_GROUPS = [
@@ -55,6 +56,7 @@ COMMAND_GROUPS = [
     logout,
     version,
     completion,
+    local,
 ]
 
 # Initialize shell completion

@@ -15,11 +15,13 @@ class TargetSchema(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, connection_types: List[str]=None, name: str=None, required: bool=None):  # noqa: E501
+    def __init__(self, connection_types: List[str]=None, default: str=None, name: str=None, required: bool=None):  # noqa: E501
         """TargetSchema - a model defined in Swagger
 
         :param connection_types: The connection_types of this TargetSchema.  # noqa: E501
         :type connection_types: List[str]
+        :param default: The default of this TargetSchema.  # noqa: E501
+        :type default: str
         :param name: The name of this TargetSchema.  # noqa: E501
         :type name: str
         :param required: The required of this TargetSchema.  # noqa: E501
@@ -27,17 +29,20 @@ class TargetSchema(Model):
         """
         self.swagger_types = {
             'connection_types': List[str],
+            'default': str,
             'name': str,
             'required': bool
         }
 
         self.attribute_map = {
             'connection_types': 'connectionTypes',
+            'default': 'default',
             'name': 'name',
             'required': 'required'
         }
 
         self._connection_types = connection_types
+        self._default = default
         self._name = name
         self._required = required
 
@@ -72,6 +77,27 @@ class TargetSchema(Model):
         """
 
         self._connection_types = connection_types
+
+    @property
+    def default(self) -> str:
+        """Gets the default of this TargetSchema.
+
+
+        :return: The default of this TargetSchema.
+        :rtype: str
+        """
+        return self._default
+
+    @default.setter
+    def default(self, default: str):
+        """Sets the default of this TargetSchema.
+
+
+        :param default: The default of this TargetSchema.
+        :type default: str
+        """
+
+        self._default = default
 
     @property
     def name(self) -> str:

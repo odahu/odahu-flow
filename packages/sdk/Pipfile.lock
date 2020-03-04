@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "77e1fd85373849aff94c9cb22d2a36db20e21ce2a3688ebb7f5b8602fbdf2139"
+            "sha256": "ef25ded5e46471f3502e0b0aa5070f732d9b03c8cdc75777979b619a7777205a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -69,6 +69,14 @@
             ],
             "index": "pypi",
             "version": "==0.6"
+        },
+        "docker": {
+            "hashes": [
+                "sha256:1c2ddb7a047b2599d1faec00889561316c674f7099427b9c51e8cb804114b553",
+                "sha256:ddae66620ab5f4bce769f64bcd7934f880c8abe6aa50986298db56735d0f722e"
+            ],
+            "index": "pypi",
+            "version": "==4.2.0"
         },
         "idna": {
             "hashes": [
@@ -197,6 +205,13 @@
             "index": "pypi",
             "version": "==2.23.0"
         },
+        "six": {
+            "hashes": [
+                "sha256:236bdbdce46e6e6a3d61a337c0f8b763ca1e8717c03b369e87a7ec7ce1319c0a",
+                "sha256:8f3cd2e254d8f793e7f3d6d9df77b92252b52637291d0f0da013c76ea2724b6c"
+            ],
+            "version": "==1.14.0"
+        },
         "typing-extensions": {
             "hashes": [
                 "sha256:091ecc894d5e908ac75209f10d5b4f118fbdb2eb1ede6a63544054bb1edb41f2",
@@ -213,6 +228,13 @@
             ],
             "index": "pypi",
             "version": "==1.25.8"
+        },
+        "websocket-client": {
+            "hashes": [
+                "sha256:0fc45c961324d79c781bab301359d5a1b00b13ad1b10415a4780229ef71a5549",
+                "sha256:d735b91d6d1692a6a181f2a8c9e0238e5f6373356f561bb9dc4c7af36f452010"
+            ],
+            "version": "==0.57.0"
         },
         "yarl": {
             "hashes": [

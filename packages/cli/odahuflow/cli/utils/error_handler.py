@@ -18,7 +18,7 @@ import sys
 from contextlib import contextmanager
 
 import click
-from odahuflow.cli.utils.logger import is_verbose_enabled
+from odahuflow.sdk.logger import is_verbose_enabled
 
 LOG = logging.getLogger(__name__)
 

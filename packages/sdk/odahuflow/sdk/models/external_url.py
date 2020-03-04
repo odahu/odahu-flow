@@ -15,24 +15,29 @@ class ExternalUrl(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name: str=None, url: str=None):  # noqa: E501
+    def __init__(self, image_url: str=None, name: str=None, url: str=None):  # noqa: E501
         """ExternalUrl - a model defined in Swagger
 
+        :param image_url: The image_url of this ExternalUrl.  # noqa: E501
+        :type image_url: str
         :param name: The name of this ExternalUrl.  # noqa: E501
         :type name: str
         :param url: The url of this ExternalUrl.  # noqa: E501
         :type url: str
         """
         self.swagger_types = {
+            'image_url': str,
             'name': str,
             'url': str
         }
 
         self.attribute_map = {
+            'image_url': 'imageUrl',
             'name': 'name',
             'url': 'url'
         }
 
+        self._image_url = image_url
         self._name = name
         self._url = url
 
@@ -46,6 +51,29 @@ class ExternalUrl(Model):
         :rtype: ExternalUrl
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def image_url(self) -> str:
+        """Gets the image_url of this ExternalUrl.
+
+        Optional link to an image which represents a type of the resource, for example the logo of Grafana  # noqa: E501
+
+        :return: The image_url of this ExternalUrl.
+        :rtype: str
+        """
+        return self._image_url
+
+    @image_url.setter
+    def image_url(self, image_url: str):
+        """Sets the image_url of this ExternalUrl.
+
+        Optional link to an image which represents a type of the resource, for example the logo of Grafana  # noqa: E501
+
+        :param image_url: The image_url of this ExternalUrl.
+        :type image_url: str
+        """
+
+        self._image_url = image_url
 
     @property
     def name(self) -> str:

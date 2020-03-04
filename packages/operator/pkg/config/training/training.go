@@ -30,7 +30,6 @@ const (
 	TrainingServiceAccount        = "training.service_account"
 	OutputConnectionName          = "training.output_connection"
 	ModelBuilderImage             = "training.model_trainer.image"
-	ModelValidatorImage           = "training.model_validator.image"
 	NodeSelector                  = "training.node_selector"
 	Toleration                    = "training.toleration"
 	GPUNodeSelector               = "training.gpu_node_selector"

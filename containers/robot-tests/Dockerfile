@@ -16,9 +16,6 @@
 
 FROM python:3.6.8
 
-ENV KUBECTL_VERSION=v1.13.8 \
-    HELM_VERSION=v2.14.3
-
 # Install python package dependencies and cloud CLI tools
 RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common \
     make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 && \
@@ -33,16 +30,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
 
 RUN pip install --disable-pip-version-check --upgrade pip==18.1 pipenv==2018.10.13 awscli
 
-# Install kubectl
-RUN curl -fsSLO https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
-    mv kubectl /usr/local/bin/kubectl && \
-    chmod a+x /usr/local/bin/kubectl
+ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86_64.sh
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+    PATH="${PATH}:/opt/conda/bin" \
+    ODAHU_CONDA_ENV_NAME=odahu_model
 
-# Install Helm
-RUN curl -fsSLO https://kubernetes-helm.storage.googleapis.com/helm-${HELM_VERSION}-linux-amd64.tar.gz && \
-    mkdir -p /tmp/helm && mv helm-${HELM_VERSION}-linux-amd64.tar.gz /tmp/helm && \
-    tar xzf /tmp/helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -C /tmp/helm && \
-    mv /tmp/helm/linux-amd64/helm /usr/local/bin/helm && rm -rf /tmp/helm
+# Install conda
+RUN wget --quiet ${MINICONDA_URL} -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh && \
+    conda clean -tipsy && \
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    conda create --name ${ODAHU_CONDA_ENV_NAME} python --no-default-packages
 
 # Install python dependecies
 COPY packages/sdk/Pipfile packages/sdk/Pipfile.lock /opt/odahu-flow/packages/sdk/

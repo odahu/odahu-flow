@@ -301,18 +301,18 @@ def model_location(model):
     """
     model_location_for_use = original_model_location = os.environ.get(ODAHUFLOW_MODEL_LOCATION_ENV_VAR, "")
     if original_model_location:
-        _logger.debug(f'${ODAHUFLOW_MODEL_LOCATION_ENV_VAR} env var is set in a system '
-                      f'(${ODAHUFLOW_MODEL_LOCATION_ENV_VAR}={original_model_location})')
+        _logger.debug(f'{ODAHUFLOW_MODEL_LOCATION_ENV_VAR} env var is set in a system '
+                      f'({ODAHUFLOW_MODEL_LOCATION_ENV_VAR}={original_model_location})')
     else:
-        _logger.debug(f'${ODAHUFLOW_MODEL_LOCATION_ENV_VAR} env is not set in a system')
+        _logger.debug(f'{ODAHUFLOW_MODEL_LOCATION_ENV_VAR} env is not set in a system')
 
     if model:
-        _logger.debug(f'--model option is passed. ${ODAHUFLOW_MODEL_LOCATION_ENV_VAR} will be replaced '
+        _logger.debug(f'--model option is passed. {ODAHUFLOW_MODEL_LOCATION_ENV_VAR} will be replaced '
                       f'with {model}')
         model_location_for_use = os.environ[ODAHUFLOW_MODEL_LOCATION_ENV_VAR] = model
 
     if not model_location_for_use:
-        raise RuntimeError(f'Either ${ODAHUFLOW_MODEL_LOCATION_ENV_VAR} env var or --model option MUST be specified')
+        raise RuntimeError(f'Either {ODAHUFLOW_MODEL_LOCATION_ENV_VAR} env var or --model option MUST be specified')
 
     sys.path.append(model_location_for_use)
     _logger.debug(f'{model_location_for_use} is added to sys.path')
@@ -339,7 +339,7 @@ def main():
     if not args.entrypoint:
         args.entrypoint = os.environ.get(MODEL_ENTRYPOINT_ENV)
     if not args.entrypoint:
-        raise RuntimeError(f'Either ${MODEL_ENTRYPOINT_ENV} env var or --entrypoint option '
+        raise RuntimeError(f'Either {MODEL_ENTRYPOINT_ENV} env var or --entrypoint option '
                            f'MUST be specified')
 
     _configure_logging(args.v)

@@ -2777,6 +2777,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "default": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

@@ -67,7 +67,7 @@ func generateTrainerTaskSpec(
 		Steps: []tektonv1alpha1.Step{
 			createInitTrainerStep(trainingCR.Name),
 			createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
-			createArtifactValidationStep(validatorResource),
+			createArtifactValidationStep(validatorResource, trainingCR),
 			createResultTrainerStep(trainingCR),
 		},
 		Volumes: []corev1.Volume{
@@ -144,11 +144,13 @@ func createMainTrainerStep(
 	}
 }
 
-func createArtifactValidationStep(validatorResources *corev1.ResourceRequirements) tektonv1alpha1.Step {
+func createArtifactValidationStep(
+	validatorResources *corev1.ResourceRequirements, trainingCR *odahuflowv1alpha1.ModelTraining,
+) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerValidationStep,
-			Image:   viper.GetString(training_conf.ModelValidatorImage),
+			Image:   trainingCR.Spec.Image,
 			Command: []string{modelValidatorBin},
 			Args: []string{
 				"gppi",

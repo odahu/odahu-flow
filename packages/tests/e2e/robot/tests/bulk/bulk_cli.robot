@@ -162,7 +162,7 @@ Try to apply profile with incorrect order
 Try to apply profile with syntax error
     [Documentation]  Try to apply profile with resources in incorrect order
     [Teardown]  Cleanup resources
-    Apply bulk file and check parse errors  corrupted.odahuflow.yaml  is not valid JSON or YAML
+    Apply bulk file and check parse errors  corrupted.odahuflow.yaml  not valid JSON or YAML
 
 Try to apply profile with wrong kind
     [Documentation]  Try to apply profile with resources with wong kind

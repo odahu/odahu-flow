@@ -23,6 +23,7 @@ import (
 type TargetSchema struct {
 	Name            string   `json:"name"`
 	ConnectionTypes []string `json:"connectionTypes"`
+	Default         string   `json:"default"`
 	Required        bool     `json:"required"`
 }
 

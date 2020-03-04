@@ -107,7 +107,7 @@ pipeline {
 
         stage("Build Docker images & Run Tests") {
             parallel {
-                stage('Build pipeline Docker agent') {
+                stage('Build robot test Docker image') {
                     steps {
                         script {
                             cicdLibrary.buildDockerImage('odahu-flow-robot-tests', '.', 'containers/robot-tests/Dockerfile')
