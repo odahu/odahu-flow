@@ -21,7 +21,8 @@ import time
 
 import click
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.cli.utils.verifiers import positive_number
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.deployment import ModelDeployment, ModelDeploymentClient, READY_STATE, \
@@ -58,7 +59,7 @@ def deployment(ctx: click.core.Context, url: str, token: str):
 @deployment.command()
 @click.option('--md-id', '--id', help='Model deployment ID')
 @click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT)
+              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelDeploymentClient, md_id: str, output_format: str):
     """
@@ -193,11 +194,7 @@ def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_foun
     :param file: Path to the file with only one deployment
     :param ignore_not_found: ignore if Model Deployment is not found
     """
-    if not md_id and not file:
-        raise ValueError(f'You should provide a deployment ID or file parameter, not both.')
-
-    if md_id and file:
-        raise ValueError(f'You should provide a deployment ID or file parameter, not both.')
+    check_id_or_file_params_present(md_id, file)
 
     if file:
         md = parse_resources_file_with_one_item(file).resource
@@ -274,7 +271,7 @@ def wait_deployment_finish(timeout: int, wait: bool, md_id: str, md_client: Mode
     while True:
         elapsed = time.time() - start
         if elapsed > timeout:
-            raise Exception('Time out: operation has not been confirmed')
+            raise Exception(TIMEOUT_ERROR_MESSAGE)
 
         try:
             md: ModelDeployment = md_client.get(md_id)

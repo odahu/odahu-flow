@@ -21,7 +21,8 @@ import time
 
 import click
 from click import pass_obj
-from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
@@ -45,7 +46,7 @@ def route(ctx: click.core.Context, url: str, token: str):
 @route.command()
 @click.option('--mr-id', '--id', 'mr_id', help='ModelRoute ID')
 @click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT)
+              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelRouteClient, mr_id: str, output_format: str):
     """
@@ -107,8 +108,12 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
 @route.command()
 @click.option('--route-id', '--id', 'mr_id', help='ModelRoute ID')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with model route')
+@click.option('--wait/--no-wait', default=True,
+              help='no wait until scale will be finished')
+@click.option('--timeout', default=600, type=int,
+              help='timeout in seconds. for wait (if no-wait is off)')
 @pass_obj
-def edit(client: ModelRouteClient, mr_id: str, file: str):
+def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: int):
     """
     Update a model route.\n
     You should specify a path to file with a model route. The file must contain only one model route.
@@ -118,6 +123,8 @@ def edit(client: ModelRouteClient, mr_id: str, file: str):
     Usage example:\n
         * odahuflowctl conn update -f conn.yaml --id examples-git
     \f
+    :param timeout: timeout in seconds. for wait (if no-wait is off)
+    :param wait: no wait until operation will be finished
     :param client: Model route HTTP client
     :param mr_id: Model route ID
     :param file: Path to the file with only one model route
@@ -130,6 +137,8 @@ def edit(client: ModelRouteClient, mr_id: str, file: str):
         conn.id = mr_id
 
     click.echo(client.edit(conn))
+
+    wait_operation_finish(timeout, wait, mr_id, client)
 
 
 @route.command()
@@ -155,11 +164,7 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
     :param file: Path to the file with only one model route
     :param ignore_not_found: ignore if Model Deployment is not found
     """
-    if not mr_id and not file:
-        raise ValueError(f'You should provide a model route ID or file parameter, not both.')
-
-    if mr_id and file:
-        raise ValueError(f'You should provide a model route ID or file parameter, not both.')
+    check_id_or_file_params_present(mr_id, file)
 
     if file:
         conn = parse_resources_file_with_one_item(file).resource
@@ -198,7 +203,7 @@ def wait_operation_finish(timeout: int, wait: bool, mr_id: str, mr_client: Model
     while True:
         elapsed = time.time() - start
         if elapsed > timeout:
-            raise Exception('Time out: operation has not been confirmed')
+            raise Exception(TIMEOUT_ERROR_MESSAGE)
 
         try:
             mr = mr_client.get(mr_id)

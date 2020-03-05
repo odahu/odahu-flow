@@ -22,14 +22,18 @@ from http.client import HTTPException
 
 import click
 from requests import RequestException
-
 from odahuflow.cli.utils.client import pass_obj
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
 from odahuflow.cli.utils.logs import print_logs
-from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT
+from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, \
+    validate_output_format
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import WrongHttpStatusCode, APIConnectionException
-from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
-from odahuflow.sdk.clients.training import ModelTraining, ModelTrainingClient, TRAINING_SUCCESS_STATE, \
+from odahuflow.sdk.clients.api import WrongHttpStatusCode, \
+    APIConnectionException
+from odahuflow.sdk.clients.api_aggregated import \
+    parse_resources_file_with_one_item
+from odahuflow.sdk.clients.training import ModelTraining, ModelTrainingClient, \
+    TRAINING_SUCCESS_STATE, \
     TRAINING_FAILED_STATE
 
 DEFAULT_WAIT_TIMEOUT = 3
@@ -55,7 +59,7 @@ def training(ctx: click.core.Context, url: str, token: str):
 @training.command()
 @click.option('--train-id', '--id', help='Model training ID')
 @click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT)
+              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelTrainingClient, train_id: str, output_format: str):
     """
@@ -80,13 +84,15 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
 
 @training.command()
 @click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with training')
+@click.option('--file', '-f', type=click.Path(), required=True,
+              help='Path to the file with training')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')
 @click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
               help='timeout in seconds. for wait (if no-wait is off)')
 @pass_obj
-def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool, timeout: int):
+def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
+           timeout: int):
     """
     Create a training.\n
     You should specify a path to file with a training. The file must contain only one training.
@@ -104,7 +110,7 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool, ti
     """
     train = parse_resources_file_with_one_item(file).resource
     if not isinstance(train, ModelTraining):
-        raise ValueError(f'Model training expected, but {type(train)} provided')
+        raise ValueError(f'ModelTraining expected, but {type(train)} provided')
 
     if train_id:
         train.id = train_id
@@ -117,13 +123,15 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool, ti
 
 @training.command()
 @click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with training')
+@click.option('--file', '-f', type=click.Path(), required=True,
+              help='Path to the file with training')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')
 @click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
               help='timeout in seconds. for wait (if no-wait is off)')
 @pass_obj
-def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool, timeout: int):
+def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
+         timeout: int):
     """
     Rerun a training.\n
     You should specify a path to file with a training. The file must contain only one training.
@@ -154,11 +162,13 @@ def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool, time
 
 @training.command()
 @click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with training')
+@click.option('--file', '-f', type=click.Path(),
+              help='Path to the file with training')
 @click.option('--ignore-not-found/--not-ignore-not-found', default=False,
               help='ignore if Model Training is not found')
 @pass_obj
-def delete(client: ModelTrainingClient, train_id: str, file: str, ignore_not_found: bool):
+def delete(client: ModelTrainingClient, train_id: str, file: str,
+           ignore_not_found: bool):
     """
     Delete a training.\n
     For this command, you must provide a training ID or path to file with one training.
@@ -175,16 +185,13 @@ def delete(client: ModelTrainingClient, train_id: str, file: str, ignore_not_fou
     :param file: Path to the file with only one training
     :param ignore_not_found: ignore if Model Training is not found
     """
-    if not train_id and not file:
-        raise ValueError(f'You should provide a training ID or file parameter, not both.')
-
-    if train_id and file:
-        raise ValueError(f'You should provide a training ID or file parameter, not both.')
+    check_id_or_file_params_present(train_id, file)
 
     if file:
         train = parse_resources_file_with_one_item(file).resource
         if not isinstance(train, ModelTraining):
-            raise ValueError(f'Model training expected, but {type(train)} provided')
+            raise ValueError(
+                f'Model training expected, but {type(train)} provided')
 
         train_id = train.id
 
@@ -200,7 +207,8 @@ def delete(client: ModelTrainingClient, train_id: str, file: str, ignore_not_fou
 
 @training.command()
 @click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with training')
+@click.option('--file', '-f', type=click.Path(),
+              help='Path to the file with training')
 @click.option('--follow/--not-follow', default=True,
               help='Follow logs stream')
 @pass_obj
@@ -221,16 +229,13 @@ def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
     :param train_id: Model training ID
     :param file: Path to the file with only one training
     """
-    if not train_id and not file:
-        raise ValueError(f'You should provide a training ID or file parameter, not both.')
-
-    if train_id and file:
-        raise ValueError(f'You should provide a training ID or file parameter, not both.')
+    check_id_or_file_params_present(train_id, file)
 
     if file:
         train = parse_resources_file_with_one_item(file).resource
         if not isinstance(train, ModelTraining):
-            raise ValueError(f'Model training expected, but {type(train)} provided')
+            raise ValueError(
+                f'Model training expected, but {type(train)} provided')
 
         train_id = train.id
 
@@ -238,7 +243,8 @@ def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
         print_logs(msg)
 
 
-def wait_training_finish(timeout: int, wait: bool, mt_id: str, mt_client: ModelTrainingClient):
+def wait_training_finish(timeout: int, wait: bool, mt_id: str,
+                         mt_client: ModelTrainingClient):
     """
     Wait training to finish according command line arguments
 
@@ -252,7 +258,8 @@ def wait_training_finish(timeout: int, wait: bool, mt_id: str, mt_client: ModelT
 
     start = time.time()
     if timeout <= 0:
-        raise Exception('Invalid --timeout argument: should be positive integer')
+        raise Exception(
+            'Invalid --timeout argument: should be positive integer')
 
     # We create a separate client for logs because it has the different timeout settings
     log_mt_client = ModelTrainingClient.construct_from_other(mt_client)
@@ -263,12 +270,13 @@ def wait_training_finish(timeout: int, wait: bool, mt_id: str, mt_client: ModelT
     while True:
         elapsed = time.time() - start
         if elapsed > timeout:
-            raise Exception('Time out: operation has not been confirmed')
+            raise Exception(TIMEOUT_ERROR_MESSAGE)
 
         try:
             mt = mt_client.get(mt_id)
             if mt.status.state == TRAINING_SUCCESS_STATE:
-                click.echo(f'Model {mt_id} was trained. Training took {round(time.time() - start)} seconds')
+                click.echo(
+                    f'Model {mt_id} was trained. Training took {round(time.time() - start)} seconds')
                 return
             elif mt.status.state == TRAINING_FAILED_STATE:
                 raise Exception(f'Model training {mt_id} was failed.')
@@ -278,8 +286,11 @@ def wait_training_finish(timeout: int, wait: bool, mt_id: str, mt_client: ModelT
                 for msg in log_mt_client.log(mt.id, follow=True):
                     print_logs(msg)
 
-        except (WrongHttpStatusCode, HTTPException, RequestException, APIConnectionException) as e:
-            LOGGER.info('Callback have not confirmed completion of the operation. Exception: %s', str(e))
+        except (WrongHttpStatusCode, HTTPException, RequestException,
+                APIConnectionException) as e:
+            LOGGER.info(
+                'Callback have not confirmed completion of the operation. Exception: %s',
+                str(e))
 
         LOGGER.debug('Sleep before next request')
         time.sleep(DEFAULT_WAIT_TIMEOUT)

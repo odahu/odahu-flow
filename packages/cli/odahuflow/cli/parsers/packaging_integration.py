@@ -17,6 +17,7 @@ import http
 
 import click
 from odahuflow.cli.utils.client import pass_obj
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
@@ -153,11 +154,7 @@ def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not
     :param file: Path to the file with only one packaging integration
     :param ignore_not_found: ignore if toolchain integration is not found
     """
-    if not pi_id and not file:
-        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
-
-    if pi_id and file:
-        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
+    check_id_or_file_params_present(pi_id, file)
 
     if file:
         pi = parse_resources_file_with_one_item(file).resource

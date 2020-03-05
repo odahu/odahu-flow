@@ -22,10 +22,10 @@ from http.client import HTTPException
 
 import click
 from requests import RequestException
-
 from odahuflow.cli.utils.client import pass_obj
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
 from odahuflow.cli.utils.logs import print_logs
-from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT
+from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode, APIConnectionException
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
@@ -54,7 +54,7 @@ def packaging(ctx: click.core.Context, url: str, token: str):
 @packaging.command()
 @click.option('--pack-id', '--id', help='Model packaging ID')
 @click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT)
+              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelPackagingClient, pack_id: str, output_format: str):
     """
@@ -186,11 +186,7 @@ def delete(client: ModelPackagingClient, pack_id: str, file: str, ignore_not_fou
     :param file: Path to the file with only one packaging
     :param ignore_not_found: ignore if Model Packaging is not found
     """
-    if not pack_id and not file:
-        raise ValueError(f'You should provide a packaging ID or file parameter, not both.')
-
-    if pack_id and file:
-        raise ValueError(f'You should provide a packaging ID or file parameter, not both.')
+    check_id_or_file_params_present(pack_id, file)
 
     if file:
         pack = parse_resources_file_with_one_item(file).resource
@@ -274,7 +270,7 @@ def wait_packaging_finish(timeout: int, wait: bool, mp_id: str, mp_client: Model
     while True:
         elapsed = time.time() - start
         if elapsed > timeout:
-            raise Exception('Time out: operation has not been confirmed')
+            raise Exception(TIMEOUT_ERROR_MESSAGE)
 
         try:
             mp = mp_client.get(mp_id)
