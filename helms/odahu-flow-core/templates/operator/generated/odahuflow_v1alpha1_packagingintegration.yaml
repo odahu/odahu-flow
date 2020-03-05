@@ -6,8 +6,6 @@ metadata:
     {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}
     controller-tools.k8s.io: "1.0"
   name: packagingintegrations.odahuflow.odahu.org
-  annotations:
-    "helm.sh/hook": "crd-install"
 spec:
   group: odahuflow.odahu.org
   names:

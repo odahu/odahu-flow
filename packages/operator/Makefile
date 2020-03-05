@@ -75,7 +75,6 @@ manifests:  swag
 	"${SED_BIN}" -i '/^  name:.*$$/a \ \ annotations:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
 
 	"${SED_BIN}" -i '/^  labels:$$/a \ \ \ \ {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*.yaml
-	"${SED_BIN}" -i '/^  annotations:$$/a \ \ \ \ "helm.sh/hook": "crd-install"' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
 
 	"${SED_BIN}" -i 's/manager-role/"{{ .Release.Name }}-operator"/g' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
 	"${SED_BIN}" -i '1i{{- if .Values.rbac }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
