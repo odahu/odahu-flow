@@ -16,4 +16,4 @@
 """
 Version file
 """
-__version__ = '1.1.0-rc12'
+__version__ = '1.1.0-rc13'
