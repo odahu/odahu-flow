@@ -22,6 +22,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"github.com/spf13/viper"
 	"go.uber.org/multierr"
 )
@@ -30,8 +31,8 @@ const (
 	EmptyImageErrorMessage             = "the image parameter is empty"
 	NegativeMinReplicasErrorMessage    = "minimum number of replicas parameter must not be less than 0"
 	NegativeMaxReplicasErrorMessage    = "maximum number of replicas parameter must not be less than 1"
-	MinMoreThanMinReplicasErrorMessage = "minimum number of replicas parameter must not be less than maximum" +
-		" number of replicas parameter"
+	MaxMoreThanMinReplicasErrorMessage = "maximum number of replicas parameter must not be less than minimum number " +
+		"of replicas parameter"
 	ReadinessProbeErrorMessage = "readiness probe must be positive number"
 	LivenessProbeErrorMessage  = "liveness probe parameter must be positive number"
 )
@@ -58,6 +59,8 @@ var (
 )
 
 func ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
+	err = multierr.Append(err, validation.ValidateID(md.ID))
+
 	if len(md.Spec.Image) == 0 {
 		err = multierr.Append(err, errors.New(EmptyImageErrorMessage))
 	}
@@ -91,7 +94,7 @@ func ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
 	}
 
 	if md.Spec.MaxReplicas != nil && md.Spec.MinReplicas != nil && *md.Spec.MinReplicas > *md.Spec.MaxReplicas {
-		err = multierr.Append(errors.New(MinMoreThanMinReplicasErrorMessage), err)
+		err = multierr.Append(errors.New(MaxMoreThanMinReplicasErrorMessage), err)
 	}
 
 	if md.Spec.Resources == nil {

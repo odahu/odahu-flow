@@ -533,5 +533,14 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 	err = validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
+}
 
+func (s *ModelPackagingValidationSuite) TestValidateID() {
+	mp := &packaging.ModelPackaging{
+		ID: "not-VALID-id-",
+	}
+
+	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

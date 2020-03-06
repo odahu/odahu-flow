@@ -23,6 +23,7 @@ import (
 	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
 )
 
@@ -76,6 +77,8 @@ func (cv *ConnValidator) ValidatesAndSetDefaults(conn *connection.Connection) (e
 			logC.Info("Connection id is empty. Generate a default value", "id", conn.ID)
 		}
 	}
+
+	err = multierr.Append(validation.ValidateID(conn.ID), err)
 
 	if len(conn.Spec.URI) == 0 {
 		err = multierr.Append(err, errors.New(EmptyURIErrorMessage))

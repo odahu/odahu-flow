@@ -182,7 +182,7 @@ func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) er
 	switch {
 	case err == nil:
 		// If err is nil, then the connection already exists.
-		return odahuflow_errors.AlreadyExistError{}
+		return odahuflow_errors.AlreadyExistError{Entity: conn.ID}
 	case odahuflow_errors.IsNotFoundError(err):
 		return vcr.createOrUpdateConnection(conn)
 	default:

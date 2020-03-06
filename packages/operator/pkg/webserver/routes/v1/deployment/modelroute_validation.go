@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
 	"strings"
 )
@@ -55,6 +56,8 @@ func NewMrValidator(mdRepository md_repository.Repository) *MrValidator {
 }
 
 func (mrv *MrValidator) ValidatesAndSetDefaults(mr *deployment.ModelRoute) (err error) {
+	err = multierr.Append(err, validation.ValidateID(mr.ID))
+
 	err = multierr.Append(err, mrv.validateMainParameters(mr))
 
 	err = multierr.Append(err, mrv.validateModelDeploymentTargets(mr))

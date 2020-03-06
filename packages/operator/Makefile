@@ -72,7 +72,6 @@ manifests:  swag
 	# That's why we add them using sed tool after generation.
 
 	"${SED_BIN}" -i '/^  name:.*$$/a \ \ labels:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/operator-rbac-role.yaml
-	"${SED_BIN}" -i '/^  name:.*$$/a \ \ annotations:' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*v1alpha1*.yaml
 
 	"${SED_BIN}" -i '/^  labels:$$/a \ \ \ \ {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 4 }}' ${ODAHUFLOW_OPERATOR_GENERATED_ENTITIES}/*.yaml
 

@@ -23,6 +23,7 @@ import (
 	dep_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	dep_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
 	"github.com/stretchr/testify/suite"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -245,4 +246,14 @@ func (s *ModelRouteValidationSuite) TestAllowForbiddenPrefixes() {
 		s.g.Expect(err).To(HaveOccurred())
 		s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(dep_route.ForbiddenPrefix, prefix)))
 	}
+}
+
+func (s *ModelRouteValidationSuite) TestValidateID() {
+	mr := &deployment.ModelRoute{
+		ID: "not-VALID-id-",
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(mr)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

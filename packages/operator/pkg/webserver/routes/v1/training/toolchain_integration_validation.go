@@ -21,6 +21,7 @@ import (
 	"fmt"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
 )
 
@@ -46,8 +47,9 @@ func (tiv *TiValidator) ValidatesAndSetDefaults(ti *training.ToolchainIntegratio
 			ti.ID = u4.String()
 			logTI.Info("Toolchain integration id is empty. Generate a default value", "id", ti.ID)
 		}
-
 	}
+
+	err = multierr.Append(err, validation.ValidateID(ti.ID))
 
 	if len(ti.Spec.Entrypoint) == 0 {
 		err = multierr.Append(err, errors.New(EmptyEntrypointErrorMessage))
