@@ -15,15 +15,26 @@ class PackagingIntegrationStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self):  # noqa: E501
+    def __init__(self, created_at: str=None, updated_at: str=None):  # noqa: E501
         """PackagingIntegrationStatus - a model defined in Swagger
 
+        :param created_at: The created_at of this PackagingIntegrationStatus.  # noqa: E501
+        :type created_at: str
+        :param updated_at: The updated_at of this PackagingIntegrationStatus.  # noqa: E501
+        :type updated_at: str
         """
         self.swagger_types = {
+            'created_at': str,
+            'updated_at': str
         }
 
         self.attribute_map = {
+            'created_at': 'createdAt',
+            'updated_at': 'updatedAt'
         }
+
+        self._created_at = created_at
+        self._updated_at = updated_at
 
     @classmethod
     def from_dict(cls, dikt) -> 'PackagingIntegrationStatus':
@@ -35,3 +46,45 @@ class PackagingIntegrationStatus(Model):
         :rtype: PackagingIntegrationStatus
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def created_at(self) -> str:
+        """Gets the created_at of this PackagingIntegrationStatus.
+
+
+        :return: The created_at of this PackagingIntegrationStatus.
+        :rtype: str
+        """
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, created_at: str):
+        """Sets the created_at of this PackagingIntegrationStatus.
+
+
+        :param created_at: The created_at of this PackagingIntegrationStatus.
+        :type created_at: str
+        """
+
+        self._created_at = created_at
+
+    @property
+    def updated_at(self) -> str:
+        """Gets the updated_at of this PackagingIntegrationStatus.
+
+
+        :return: The updated_at of this PackagingIntegrationStatus.
+        :rtype: str
+        """
+        return self._updated_at
+
+    @updated_at.setter
+    def updated_at(self, updated_at: str):
+        """Sets the updated_at of this PackagingIntegrationStatus.
+
+
+        :param updated_at: The updated_at of this PackagingIntegrationStatus.
+        :type updated_at: str
+        """
+
+        self._updated_at = updated_at

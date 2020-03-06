@@ -26,5 +26,5 @@ type ModelRoute struct {
 	// Model route specification
 	Spec v1alpha1.ModelRouteSpec `json:"spec,omitempty"`
 	// Model route status
-	Status *v1alpha1.ModelRouteStatus `json:"status,omitempty"`
+	Status v1alpha1.ModelRouteStatus `json:"status,omitempty"`
 }

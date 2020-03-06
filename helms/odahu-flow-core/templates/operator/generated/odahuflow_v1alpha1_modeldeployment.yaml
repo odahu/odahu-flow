@@ -117,6 +117,9 @@ spec:
               description: Number of available pods
               format: int32
               type: integer
+            createdAt:
+              format: date-time
+              type: string
             deployment:
               description: The model k8s deployment name
               type: string
@@ -142,6 +145,9 @@ spec:
                 was not deployed. Because some parameters of the                  custom
                 resource are wrong. For example, there is not a model                  image
                 in a Docker registry.   "Ready" - A model was deployed successfully.
+              type: string
+            updatedAt:
+              format: date-time
               type: string
           required:
           - availableReplicas

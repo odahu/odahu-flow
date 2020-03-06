@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"time"
 )
 
 var (
@@ -37,7 +38,7 @@ func transform(mr *v1alpha1.ToolchainIntegration) *training.ToolchainIntegration
 	return &training.ToolchainIntegration{
 		ID:     mr.Name,
 		Spec:   mr.Spec,
-		Status: &mr.Status,
+		Status: mr.Status,
 	}
 }
 
@@ -100,7 +101,7 @@ func (tkr *trainingK8sRepository) GetToolchainIntegrationList(options ...kuberne
 	for i := 0; i < len(k8sMRList.Items); i++ {
 		currentTI := k8sMRList.Items[i]
 
-		tis[i] = training.ToolchainIntegration{ID: currentTI.Name, Spec: currentTI.Spec, Status: &currentTI.Status}
+		tis[i] = training.ToolchainIntegration{ID: currentTI.Name, Spec: currentTI.Spec, Status: currentTI.Status}
 	}
 
 	return tis, nil
@@ -138,12 +139,15 @@ func (tkr *trainingK8sRepository) UpdateToolchainIntegration(ti *training.Toolch
 
 	// TODO: think about update, not replacing as for now
 	k8sTi.Spec = ti.Spec
+	k8sTi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := tkr.k8sClient.Update(context.TODO(), &k8sTi); err != nil {
 		logC.Error(err, "Creation of the toolchain integration", "name", ti.ID)
 
 		return err
 	}
+
+	ti.Status = k8sTi.Status
 
 	return nil
 }
@@ -157,11 +161,16 @@ func (tkr *trainingK8sRepository) CreateToolchainIntegration(ti *training.Toolch
 		Spec: ti.Spec,
 	}
 
+	k8sTi.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	k8sTi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+
 	if err := tkr.k8sClient.Create(context.TODO(), k8sTi); err != nil {
 		logC.Error(err, "Toolchain integration creation error from k8s", "name", ti.ID)
 
 		return err
 	}
+
+	ti.Status = k8sTi.Status
 
 	return nil
 }

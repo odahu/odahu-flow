@@ -2,8 +2,10 @@ package vault
 
 import (
 	"encoding/json"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"path"
+	"time"
 
 	bank_vaults "github.com/banzaicloud/bank-vaults/pkg/vault"
 	vaultapi "github.com/hashicorp/vault/api"
@@ -163,12 +165,18 @@ func (vcr *vaultConnRepository) DeleteConnection(connID string) error {
 }
 
 func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) error {
-	_, err := vcr.GetConnection(conn.ID)
+	existedConn, err := vcr.GetConnection(conn.ID)
 
 	switch {
 	case err == nil:
 		// If err is not nil, then the connection already exists.
-		return vcr.createOrUpdateConnection(conn)
+		existedConn.Spec = conn.Spec
+		existedConn.Status.UpdatedAt =  &metav1.Time{Time: time.Now()}
+		err = vcr.createOrUpdateConnection(existedConn)
+		if err != nil{
+			conn.Status = existedConn.Status
+		}
+		return err
 	case odahuflow_errors.IsNotFoundError(err):
 		return odahuflow_errors.NotFoundError{Entity: conn.ID}
 	default:
@@ -184,6 +192,8 @@ func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) er
 		// If err is nil, then the connection already exists.
 		return odahuflow_errors.AlreadyExistError{Entity: conn.ID}
 	case odahuflow_errors.IsNotFoundError(err):
+		conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+		conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 		return vcr.createOrUpdateConnection(conn)
 	default:
 		return err

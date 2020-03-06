@@ -24,6 +24,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis"
@@ -228,6 +229,34 @@ func (s *mpiValidationSuite) TestCreatePackagingIntegration() {
 	s.g.Expect(pi.Spec).To(Equal(piEntity.Spec))
 }
 
+// CreatedAt and UpdatedAt field should automatically be updated after create request
+func (s *mpiValidationSuite) TestCreatePackagingIntegrationModifiable(){
+	newResource := newPackagingIntegration()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodPost, pack_route.CreatePackagingIntegrationURL, bytes.NewReader(newResourceBody),
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var resp packaging.ModelPackaging
+	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
+	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
 func (s *mpiValidationSuite) TestCreateDuplicatePackagingIntegration() {
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
@@ -274,6 +303,37 @@ func (s *mpiValidationSuite) TestUpdatePackagingIntegration() {
 	pi, err = s.mpRepository.GetPackagingIntegration(piID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(pi.Spec).To(Equal(piEntity.Spec))
+}
+
+// UpdatedAt field should automatically be updated after update request
+func (s *mpiValidationSuite) TestUpdatePackagingIntegrationModifiable(){
+	resource := newPackagingIntegration()
+	s.g.Expect(s.mpRepository.CreatePackagingIntegration(resource)).NotTo(HaveOccurred())
+
+	time.Sleep(1 * time.Second)
+
+	newResource := newPackagingIntegration()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPut, pack_route.UpdatePackagingIntegrationURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var respResource packaging.ModelPackaging
+	err = json.Unmarshal(w.Body.Bytes(), &respResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(respResource.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.After(respResource.Status.CreatedAt.Time)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
 func (s *mpiValidationSuite) TestUpdatePackagingIntegrationNotFound() {

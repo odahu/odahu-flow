@@ -43,6 +43,13 @@ spec:
           - defaultImage
           type: object
         status:
+          properties:
+            createdAt:
+              format: date-time
+              type: string
+            updatedAt:
+              format: date-time
+              type: string
           type: object
   version: v1alpha1
 status:

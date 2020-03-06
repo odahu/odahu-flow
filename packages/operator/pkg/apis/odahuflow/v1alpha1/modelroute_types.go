@@ -54,6 +54,10 @@ type ModelRouteStatus struct {
 	EdgeURL string `json:"edgeUrl"`
 	// State of Model Route
 	State ModelRouteState `json:"state"`
+	// Info about create and update
+	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
+	Modifiable `json:",inline"`
 }
 
 // +genclient

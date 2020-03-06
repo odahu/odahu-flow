@@ -29,6 +29,7 @@ import (
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"time"
 )
 
 var (
@@ -62,7 +63,7 @@ func transform(conn *v1alpha1.Connection) *connection.Connection {
 	return &connection.Connection{
 		ID:     conn.Name,
 		Spec:   conn.Spec,
-		Status: &conn.Status,
+		Status: conn.Status,
 	}
 }
 
@@ -147,7 +148,7 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 		conn := connection.Connection{
 			ID:     currentConn.Name,
 			Spec:   currentConn.Spec,
-			Status: &currentConn.Status,
+			Status: currentConn.Status,
 		}
 		conns[i] = *conn.DeleteSensitiveData()
 	}
@@ -187,6 +188,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 
 	// TODO: think about update, not replacing as for now
 	k8sConn.Spec = conn.Spec
+	k8sConn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sConn.ObjectMeta.Labels = transformToLabels(conn)
 
 	if err := kc.k8sClient.Update(context.TODO(), &k8sConn); err != nil {
@@ -194,6 +196,8 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 
 		return convertK8sErrToOdahuflowErr(err)
 	}
+
+	conn.Status = k8sConn.Status
 
 	return nil
 }
@@ -208,11 +212,16 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 		Spec: connection.Spec,
 	}
 
+	conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+
 	if err := kc.k8sClient.Create(context.TODO(), conn); err != nil {
 		logC.Error(err, "ConnectionName creation error from k8s", "name", connection.ID)
 
 		return convertK8sErrToOdahuflowErr(err)
 	}
+
+	connection.Status = conn.Status
 
 	return nil
 }

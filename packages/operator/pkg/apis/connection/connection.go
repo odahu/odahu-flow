@@ -47,7 +47,7 @@ type Connection struct {
 	// Connection specification
 	Spec v1alpha1.ConnectionSpec `json:"spec"`
 	// Connection status
-	Status *v1alpha1.ConnectionStatus `json:"status,omitempty"`
+	Status v1alpha1.ConnectionStatus `json:"status,omitempty"`
 }
 
 // Replace sensitive data with mask in the connection

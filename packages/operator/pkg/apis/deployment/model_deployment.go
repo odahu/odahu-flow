@@ -26,5 +26,5 @@ type ModelDeployment struct {
 	// Model deployment specification
 	Spec v1alpha1.ModelDeploymentSpec `json:"spec,omitempty"`
 	// Model deployment status
-	Status *v1alpha1.ModelDeploymentStatus `json:"status,omitempty"`
+	Status v1alpha1.ModelDeploymentStatus `json:"status,omitempty"`
 }

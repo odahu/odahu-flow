@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"time"
 )
 
 var (
@@ -57,16 +58,12 @@ func TransformPackagingIntegrationFromK8s(pi *v1alpha1.PackagingIntegration) (*p
 				},
 			},
 		},
-		Status: &pi.Status,
+		Status: pi.Status,
 	}, nil
 }
 
 // Take a look to the documentation of TransformPackagingIntegrationFromK8s
 func TransformPiToK8s(pi *packaging.PackagingIntegration, k8sNamespace string) (*v1alpha1.PackagingIntegration, error) {
-	var piStatus v1alpha1.PackagingIntegrationStatus
-	if pi.Status != nil {
-		piStatus = *pi.Status
-	}
 
 	argumentsValidationBytes, err := json.Marshal(pi.Spec.Schema.Arguments.Properties)
 	if err != nil {
@@ -90,7 +87,6 @@ func TransformPiToK8s(pi *packaging.PackagingIntegration, k8sNamespace string) (
 				},
 			},
 		},
-		Status: piStatus,
 	}, nil
 }
 
@@ -199,12 +195,15 @@ func (pkr *packagingK8sRepository) UpdatePackagingIntegration(pi *packaging.Pack
 	}
 
 	k8sPi.Spec = updateK8sPi.Spec
+	k8sPi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := pkr.k8sClient.Update(context.TODO(), &k8sPi); err != nil {
 		logPI.Error(err, "Creation of the packaging integration", "name", pi.ID)
 
 		return err
 	}
+
+	pi.Status = k8sPi.Status
 
 	return nil
 }
@@ -215,11 +214,16 @@ func (pkr *packagingK8sRepository) CreatePackagingIntegration(pi *packaging.Pack
 		return err
 	}
 
+	k8sPi.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	k8sPi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+
 	if err := pkr.k8sClient.Create(context.TODO(), k8sPi); err != nil {
 		logPI.Error(err, "Packaging integration creation error from k8s", "name", pi.ID)
 
 		return err
 	}
+
+	pi.Status = k8sPi.Status
 
 	return nil
 }

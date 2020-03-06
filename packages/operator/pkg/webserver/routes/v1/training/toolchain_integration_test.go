@@ -23,6 +23,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -290,6 +291,34 @@ func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegration() {
 	s.g.Expect(ti.Spec).To(Equal(tiEntity.Spec))
 }
 
+// CreatedAt and UpdatedAt field should automatically be updated after create request
+func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationModifiable(){
+	newResource := newTiStub()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodPost, train_route.CreateToolchainIntegrationURL, bytes.NewReader(newResourceBody),
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var resp training.ToolchainIntegration
+	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
+	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
 func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationValidation() {
 	tiEntity := newTiStub()
 	tiEntity.Spec.Entrypoint = ""
@@ -364,6 +393,40 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(ti.Spec).To(Equal(updatedTi.Spec))
 }
+
+// UpdatedAt field should automatically be updated after update request
+func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationModifiable(){
+	resource := newTiStub()
+	s.g.Expect(s.mtRepository.CreateToolchainIntegration(resource)).NotTo(HaveOccurred())
+
+	time.Sleep(1 * time.Second)
+
+	newResource := newTiStub()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodPut, train_route.CreateToolchainIntegrationURL, bytes.NewReader(newResourceBody),
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var respResource training.ToolchainIntegration
+	err = json.Unmarshal(w.Body.Bytes(), &respResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(respResource.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.After(respResource.Status.CreatedAt.Time)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
 
 func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationValidation() {
 	ti := newTiStub()

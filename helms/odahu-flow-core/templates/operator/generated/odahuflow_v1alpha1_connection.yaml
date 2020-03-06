@@ -72,11 +72,17 @@ spec:
           type: object
         status:
           properties:
+            createdAt:
+              format: date-time
+              type: string
             secretName:
               description: Kubernetes secret name
               type: string
             serviceAccount:
               description: Kubernetes service account
+              type: string
+            updatedAt:
+              format: date-time
               type: string
           type: object
   version: v1alpha1

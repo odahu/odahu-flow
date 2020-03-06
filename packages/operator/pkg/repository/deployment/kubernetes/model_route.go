@@ -18,6 +18,7 @@ package kubernetes
 
 import (
 	"context"
+	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -38,7 +39,7 @@ func transform(mr *v1alpha1.ModelRoute) *deployment.ModelRoute {
 	return &deployment.ModelRoute{
 		ID:     mr.Name,
 		Spec:   mr.Spec,
-		Status: &mr.Status,
+		Status: mr.Status,
 	}
 }
 
@@ -103,7 +104,7 @@ func (kc *deploymentK8sRepository) GetModelRouteList(options ...kubernetes.ListO
 	for i := 0; i < len(k8sMRList.Items); i++ {
 		currentMR := k8sMRList.Items[i]
 
-		conns[i] = deployment.ModelRoute{ID: currentMR.Name, Spec: currentMR.Spec, Status: &currentMR.Status}
+		conns[i] = deployment.ModelRoute{ID: currentMR.Name, Spec: currentMR.Spec, Status: currentMR.Status}
 	}
 
 	return conns, nil
@@ -128,43 +129,51 @@ func (kc *deploymentK8sRepository) DeleteModelRoute(name string) error {
 	return nil
 }
 
-func (kc *deploymentK8sRepository) UpdateModelRoute(connection *deployment.ModelRoute) error {
+func (kc *deploymentK8sRepository) UpdateModelRoute(route *deployment.ModelRoute) error {
 	var k8sMR v1alpha1.ModelRoute
 	if err := kc.k8sClient.Get(context.TODO(),
-		types.NamespacedName{Name: connection.ID, Namespace: kc.namespace},
+		types.NamespacedName{Name: route.ID, Namespace: kc.namespace},
 		&k8sMR,
 	); err != nil {
-		logC.Error(err, "Get connection from k8s", "name", connection.ID)
+		logC.Error(err, "Get route from k8s", "name", route.ID)
 
 		return err
 	}
 
 	// TODO: think about update, not replacing as for now
-	k8sMR.Spec = connection.Spec
+	k8sMR.Spec = route.Spec
+	k8sMR.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := kc.k8sClient.Update(context.TODO(), &k8sMR); err != nil {
-		logC.Error(err, "Creation of the connection", "name", connection.ID)
+		logC.Error(err, "Creation of the route", "name", route.ID)
 
 		return err
 	}
+
+	route.Status = k8sMR.Status
 
 	return nil
 }
 
-func (kc *deploymentK8sRepository) CreateModelRoute(connection *deployment.ModelRoute) error {
-	conn := &v1alpha1.ModelRoute{
+func (kc *deploymentK8sRepository) CreateModelRoute(route *deployment.ModelRoute) error {
+	k8sRoute := &v1alpha1.ModelRoute{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      connection.ID,
+			Name:      route.ID,
 			Namespace: kc.namespace,
 		},
-		Spec: connection.Spec,
+		Spec:   route.Spec,
 	}
 
-	if err := kc.k8sClient.Create(context.TODO(), conn); err != nil {
-		logC.Error(err, "DataBinding creation error from k8s", "name", connection.ID)
+	k8sRoute.Status.CreatedAt =  &metav1.Time{Time: time.Now()}
+	k8sRoute.Status.UpdatedAt =  &metav1.Time{Time: time.Now()}
+
+	if err := kc.k8sClient.Create(context.TODO(), k8sRoute); err != nil {
+		logC.Error(err, "DataBinding creation error from k8s", "name", route.ID)
 
 		return err
 	}
+
+	route.Status = k8sRoute.Status
 
 	return nil
 }

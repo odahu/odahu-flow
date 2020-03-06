@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
@@ -67,16 +68,12 @@ func TransformMpFromK8s(mp *v1alpha1.ModelPackaging) (*packaging.ModelPackaging,
 			Resources:        mp.Spec.Resources,
 			OutputConnection: mp.Spec.OutputConnection,
 		},
-		Status: &mp.Status,
+		Status: mp.Status,
 	}, nil
 }
 
 // Take a look to the documentation of TransformPackagingIntegrationFromK8s
 func TransformMpToK8s(mp *packaging.ModelPackaging, k8sNamespace string) (*v1alpha1.ModelPackaging, error) {
-	var mpStatus v1alpha1.ModelPackagingStatus
-	if mp.Status != nil {
-		mpStatus = *mp.Status
-	}
 
 	argumentsBytes, err := json.Marshal(mp.Spec.Arguments)
 	if err != nil {
@@ -100,7 +97,6 @@ func TransformMpToK8s(mp *packaging.ModelPackaging, k8sNamespace string) (*v1alp
 			Resources:        mp.Spec.Resources,
 			OutputConnection: mp.Spec.OutputConnection,
 		},
-		Status: mpStatus,
 	}, nil
 }
 
@@ -214,6 +210,7 @@ func (pkr *packagingK8sRepository) UpdateModelPackaging(mp *packaging.ModelPacka
 	k8sMp.Status.Reason = nil
 	k8sMp.Status.Message = nil
 	k8sMp.Status.Results = []v1alpha1.ModelPackagingResult{}
+	k8sMp.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sMp.ObjectMeta.Labels = updatedK8sMpSpec.Labels
 
 	if err := pkr.k8sClient.Update(context.TODO(), &k8sMp); err != nil {
@@ -221,6 +218,8 @@ func (pkr *packagingK8sRepository) UpdateModelPackaging(mp *packaging.ModelPacka
 
 		return err
 	}
+
+	mp.Status = k8sMp.Status
 
 	return nil
 }
@@ -231,11 +230,16 @@ func (pkr *packagingK8sRepository) CreateModelPackaging(mp *packaging.ModelPacka
 		return err
 	}
 
+	k8sMp.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	k8sMp.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+
 	if err := pkr.k8sClient.Create(context.TODO(), k8sMp); err != nil {
 		logMP.Error(err, "Model packaging creation error from k8s", "id", mp.ID)
 
 		return err
 	}
+
+	mp.Status = k8sMp.Status
 
 	return nil
 }

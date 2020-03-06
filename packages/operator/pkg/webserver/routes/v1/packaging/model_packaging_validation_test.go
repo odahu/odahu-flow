@@ -156,7 +156,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.DockerType,
 		},
-		Status: nil,
+		Status: v1alpha1.ConnectionStatus{},
 	})
 	if err != nil {
 		s.T().Fatal(err)
@@ -167,7 +167,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.S3Type,
 		},
-		Status: nil,
+		Status: v1alpha1.ConnectionStatus{},
 	})
 	if err != nil {
 		s.T().Fatal(err)

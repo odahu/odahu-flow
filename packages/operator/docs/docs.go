@@ -2103,8 +2103,7 @@ var doc = `{
             "properties": {
                 "arguments": {
                     "description": "List of arguments. This parameter depends on the specific packaging integration",
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                 },
                 "artifactName": {
                     "description": "Training output artifact name",
@@ -2390,12 +2389,18 @@ var doc = `{
         "ConnectionStatus": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "secretName": {
                     "description": "Kubernetes secret name",
                     "type": "string"
                 },
                 "serviceAccount": {
                     "description": "Kubernetes service account",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -2435,10 +2440,7 @@ var doc = `{
             "properties": {
                 "annotations": {
                     "description": "Annotations for model pods.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "image": {
                     "description": "Model Docker image",
@@ -2482,6 +2484,9 @@ var doc = `{
                     "description": "Number of available pods",
                     "type": "integer"
                 },
+                "createdAt": {
+                    "type": "string"
+                },
                 "deployment": {
                     "description": "The model k8s deployment name",
                     "type": "string"
@@ -2508,6 +2513,9 @@ var doc = `{
                 },
                 "state": {
                     "description": "The state of a model \n  \"Processing\" - A model was not deployed. Because some parameters of the\n                 custom resource are wrong. For example, there is not a model\n                 image in a Docker registry.\n  \"Ready\" - A model was deployed successfully.",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -2558,6 +2566,9 @@ var doc = `{
         "ModelPackagingStatus": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "exitCode": {
                     "description": "Pod exit code",
                     "type": "integer"
@@ -2583,6 +2594,9 @@ var doc = `{
                 },
                 "state": {
                     "description": "Model Packaging State",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -2610,12 +2624,18 @@ var doc = `{
         "ModelRouteStatus": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
                 "edgeUrl": {
                     "description": "Full url with prefix to a model deployment service",
                     "type": "string"
                 },
                 "state": {
                     "description": "State of Model Route",
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -2649,10 +2669,7 @@ var doc = `{
                 },
                 "hyperParameters": {
                     "description": "Model training hyperParameters in parameter:value format",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "image": {
                     "description": "Train image",
@@ -2700,6 +2717,9 @@ var doc = `{
                         "$ref": "#/definitions/TrainingResult"
                     }
                 },
+                "createdAt": {
+                    "type": "string"
+                },
                 "exitCode": {
                     "description": "Pod exit code",
                     "type": "integer"
@@ -2719,11 +2739,22 @@ var doc = `{
                 "state": {
                     "description": "Model Packaging State",
                     "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
         "PackagingIntegrationStatus": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
         },
         "ResourceList": {
             "type": "object",
@@ -2793,10 +2824,7 @@ var doc = `{
             "properties": {
                 "additionalEnvironments": {
                     "description": "Additional environments for a training process",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "defaultImage": {
                     "description": "Default training Docker image",
@@ -2809,7 +2837,15 @@ var doc = `{
             }
         },
         "ToolchainIntegrationStatus": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
         },
         "TrainingResult": {
             "type": "object",

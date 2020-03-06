@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
@@ -30,6 +29,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -63,7 +63,7 @@ func mtTransform(k8sMT *v1alpha1.ModelTraining) *training.ModelTraining {
 	return &training.ModelTraining{
 		ID:     k8sMT.Name,
 		Spec:   k8sMT.Spec,
-		Status: &k8sMT.Status,
+		Status: k8sMT.Status,
 	}
 }
 
@@ -188,7 +188,7 @@ func (tkr *trainingK8sRepository) GetModelTrainingList(options ...kubernetes.Lis
 	for i := 0; i < len(k8sMDList.Items); i++ {
 		currentMT := k8sMDList.Items[i]
 
-		mts[i] = training.ModelTraining{ID: currentMT.Name, Spec: currentMT.Spec, Status: &currentMT.Status}
+		mts[i] = training.ModelTraining{ID: currentMT.Name, Spec: currentMT.Spec, Status: currentMT.Status}
 	}
 
 	return mts, nil
@@ -228,6 +228,7 @@ func (tkr *trainingK8sRepository) UpdateModelTraining(mt *training.ModelTraining
 	k8sMD.Status.ExitCode = nil
 	k8sMD.Status.Reason = nil
 	k8sMD.Status.Message = nil
+	k8sMD.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sMD.ObjectMeta.Labels = mtTransformToLabels(mt)
 
 	if err := tkr.k8sClient.Update(context.TODO(), &k8sMD); err != nil {
@@ -235,6 +236,8 @@ func (tkr *trainingK8sRepository) UpdateModelTraining(mt *training.ModelTraining
 
 		return err
 	}
+
+	mt.Status = k8sMD.Status
 
 	return nil
 }
@@ -249,11 +252,16 @@ func (tkr *trainingK8sRepository) CreateModelTraining(mt *training.ModelTraining
 		Spec: mt.Spec,
 	}
 
+	k8sMd.Status.CreatedAt =  &metav1.Time{Time: time.Now()}
+	k8sMd.Status.UpdatedAt =  &metav1.Time{Time: time.Now()}
+
 	if err := tkr.k8sClient.Create(context.TODO(), k8sMd); err != nil {
 		logMT.Error(err, "ModelTraining creation error from k8s", "name", mt.ID)
 
 		return err
 	}
+
+	mt.Status = k8sMd.Status
 
 	return nil
 }

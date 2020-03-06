@@ -364,6 +364,33 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnection() {
 	s.g.Expect(conn.Spec).To(Equal(connEntity.DeleteSensitiveData().Spec))
 }
 
+// CreatedAt and UpdatedAt field should automatically be updated after create request
+func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable(){
+	newResource := newConnStub()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, conn_route.CreateConnectionURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var resp connection.Connection
+	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
+	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
+
 func (s *ConnectionRouteGenericSuite) TestCreateDuplicateConnection() {
 	conn := newConnStub()
 
