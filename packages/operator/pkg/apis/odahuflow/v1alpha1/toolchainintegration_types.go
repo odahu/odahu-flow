@@ -32,6 +32,10 @@ type ToolchainIntegrationSpec struct {
 
 // ToolchainIntegrationStatus defines the observed state of ToolchainIntegration
 type ToolchainIntegrationStatus struct {
+	// Info about create and update
+	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
+	Modifiable `json:",inline"`
 }
 
 // +genclient

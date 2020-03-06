@@ -24,5 +24,5 @@ type ToolchainIntegration struct {
 	// Toolchain integration specification
 	Spec v1alpha1.ToolchainIntegrationSpec `json:"spec,omitempty"`
 	// Toolchain integration status
-	Status *v1alpha1.ToolchainIntegrationStatus `json:"status,omitempty"`
+	Status v1alpha1.ToolchainIntegrationStatus `json:"status,omitempty"`
 }

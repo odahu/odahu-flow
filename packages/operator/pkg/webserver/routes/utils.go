@@ -23,9 +23,11 @@ import (
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/spf13/viper"
 	k8_serror "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 const (
@@ -107,4 +109,12 @@ func DisableAPIMiddleware(enabledAPIViperConfigKey string) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusBadRequest, HTTPResult{Message: DisabledAPIErrorMessage})
 		}
 	}
+}
+
+// Because k8s has only "seconds" precision therefore we should operate the same precision in tests to
+// compare timings in appropriate way
+func GetTimeNowTruncatedToSeconds() metav1.Time{
+	t1 := time.Now()
+	t2 := t1.Truncate(time.Second)
+	return metav1.Time{Time: t2}
 }

@@ -24,5 +24,5 @@ type ModelTraining struct {
 	// Model training specification
 	Spec v1alpha1.ModelTrainingSpec `json:"spec,omitempty"`
 	// Model training status
-	Status *v1alpha1.ModelTrainingStatus `json:"status,omitempty"`
+	Status v1alpha1.ModelTrainingStatus `json:"status,omitempty"`
 }

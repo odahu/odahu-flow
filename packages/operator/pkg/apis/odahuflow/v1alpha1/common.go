@@ -16,6 +16,8 @@
 
 package v1alpha1
 
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 type ResourceList struct {
 	// Read more about GPU resource here https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins
 	GPU *string `json:"gpu,omitempty"`
@@ -37,4 +39,9 @@ type EnvironmentVariable struct {
 	Name string `json:"name"`
 	// Value of an environment variable
 	Value string `json:"value"`
+}
+
+type Modifiable struct {
+	CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 }

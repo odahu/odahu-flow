@@ -136,7 +136,6 @@ definitions:
   ModelPackagingSpec:
     properties:
       arguments:
-        additionalProperties: true
         description: List of arguments. This parameter depends on the specific packaging
           integration
         type: object
@@ -359,11 +358,15 @@ definitions:
     type: object
   ConnectionStatus:
     properties:
+      createdAt:
+        type: string
       secretName:
         description: Kubernetes secret name
         type: string
       serviceAccount:
         description: Kubernetes service account
+        type: string
+      updatedAt:
         type: string
     type: object
   DataBindingDir:
@@ -390,8 +393,6 @@ definitions:
   ModelDeploymentSpec:
     properties:
       annotations:
-        additionalProperties:
-          type: string
         description: Annotations for model pods.
         type: object
       image:
@@ -430,6 +431,8 @@ definitions:
       availableReplicas:
         description: Number of available pods
         type: integer
+      createdAt:
+        type: string
       deployment:
         description: The model k8s deployment name
         type: string
@@ -455,6 +458,8 @@ definitions:
                            custom resource are wrong. For example, there is not a model
                            image in a Docker registry.
             "Ready" - A model was deployed successfully.
+        type: string
+      updatedAt:
         type: string
     type: object
   ModelDeploymentTarget:
@@ -490,6 +495,8 @@ definitions:
     type: object
   ModelPackagingStatus:
     properties:
+      createdAt:
+        type: string
       exitCode:
         description: Pod exit code
         type: integer
@@ -509,6 +516,8 @@ definitions:
         type: array
       state:
         description: Model Packaging State
+        type: string
+      updatedAt:
         type: string
     type: object
   ModelRouteSpec:
@@ -532,11 +541,15 @@ definitions:
     type: object
   ModelRouteStatus:
     properties:
+      createdAt:
+        type: string
       edgeUrl:
         description: Full url with prefix to a model deployment service
         type: string
       state:
         description: State of Model Route
+        type: string
+      updatedAt:
         type: string
     type: object
   ModelTrainingSpec:
@@ -561,8 +574,6 @@ definitions:
           $ref: '#/definitions/EnvironmentVariable'
         type: array
       hyperParameters:
-        additionalProperties:
-          type: string
         description: Model training hyperParameters in parameter:value format
         type: object
       image:
@@ -603,6 +614,8 @@ definitions:
         items:
           $ref: '#/definitions/TrainingResult'
         type: array
+      createdAt:
+        type: string
       exitCode:
         description: Pod exit code
         type: integer
@@ -618,8 +631,15 @@ definitions:
       state:
         description: Model Packaging State
         type: string
+      updatedAt:
+        type: string
     type: object
   PackagingIntegrationStatus:
+    properties:
+      createdAt:
+        type: string
+      updatedAt:
+        type: string
     type: object
   ResourceList:
     properties:
@@ -667,8 +687,6 @@ definitions:
   ToolchainIntegrationSpec:
     properties:
       additionalEnvironments:
-        additionalProperties:
-          type: string
         description: Additional environments for a training process
         type: object
       defaultImage:
@@ -679,6 +697,11 @@ definitions:
         type: string
     type: object
   ToolchainIntegrationStatus:
+    properties:
+      createdAt:
+        type: string
+      updatedAt:
+        type: string
     type: object
   TrainingResult:
     properties:

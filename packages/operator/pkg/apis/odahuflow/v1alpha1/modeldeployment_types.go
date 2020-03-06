@@ -74,6 +74,10 @@ type ModelDeploymentStatus struct {
 	LastRevisionName string `json:"lastRevisionName,omitempty"`
 	// Time when credentials was updated
 	LastCredsUpdatedTime *metav1.Time `json:"lastUpdatedTime,omitempty"`
+	// Info about create and update
+	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
+	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
+	Modifiable `json:",inline"`
 }
 
 // +genclient

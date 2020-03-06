@@ -191,6 +191,9 @@ spec:
                 - commitID
                 type: object
               type: array
+            createdAt:
+              format: date-time
+              type: string
             exitCode:
               description: Pod exit code
               format: int32
@@ -206,6 +209,9 @@ spec:
               type: string
             state:
               description: Model Packaging State
+              type: string
+            updatedAt:
+              format: date-time
               type: string
           type: object
   version: v1alpha1

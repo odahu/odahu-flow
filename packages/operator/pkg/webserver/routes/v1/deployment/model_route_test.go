@@ -23,6 +23,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
@@ -322,6 +323,33 @@ func (s *ModelRouteSuite) TestCreateMR() {
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
 }
 
+// CreatedAt and UpdatedAt field should automatically be updated after create request
+func (s *ModelRouteSuite) TestCreateMRModifiable(){
+	newResource := newStubMr()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, dep_route.CreateModelRouteURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var resp deployment.ModelRoute
+	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
+	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
+
 func (s *ModelRouteSuite) TestCreateDuplicateMR() {
 	mr := newStubMr()
 	s.g.Expect(s.mdRepository.CreateModelRoute(mr)).NotTo(HaveOccurred())
@@ -391,6 +419,38 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 	s.g.Expect(mr.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
 }
+
+// UpdatedAt field should automatically be updated after update request
+func (s *ModelRouteSuite) TestUpdateMRModifiable(){
+	resource := newStubMr()
+	s.g.Expect(s.mdRepository.CreateModelRoute(resource)).NotTo(HaveOccurred())
+
+	time.Sleep(1 * time.Second)
+
+	newResource := newStubMr()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPut, dep_route.UpdateModelRouteURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var respResource deployment.ModelRoute
+	err = json.Unmarshal(w.Body.Bytes(), &respResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(respResource.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.After(respResource.Status.CreatedAt.Time)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
 
 func (s *ModelRouteSuite) TestUpdateMRNotFound() {
 	mrEntity := newStubMr()

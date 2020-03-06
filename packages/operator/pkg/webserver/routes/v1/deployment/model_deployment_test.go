@@ -19,11 +19,6 @@ package deployment_test
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -38,7 +33,12 @@ import (
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/http"
+	"net/http/httptest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"strings"
+	"testing"
+	"time"
 )
 
 var (
@@ -160,9 +160,17 @@ func (s *ModelDeploymentRouteSuite) TestGetMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(Equal(deployment.ModelDeployment{
-		ID: md.ID, Spec: md.Spec, Status: &odahuflowv1alpha1.ModelDeploymentStatus{},
-	}))
+	s.g.Expect(result.ID).Should(Equal(md.ID))
+	s.g.Expect(result.Spec).Should(Equal(md.Spec))
+
+	s.g.Expect(result.Status.AvailableReplicas).Should(Equal(md.Status.AvailableReplicas))
+	s.g.Expect(result.Status.Deployment).Should(Equal(md.Status.Deployment))
+	s.g.Expect(result.Status.LastCredsUpdatedTime).Should(Equal(md.Status.LastCredsUpdatedTime))
+	s.g.Expect(result.Status.LastRevisionName).Should(Equal(md.Status.LastRevisionName))
+	s.g.Expect(result.Status.Replicas).Should(Equal(md.Status.Replicas))
+	s.g.Expect(result.Status.Service).Should(Equal(md.Status.Service))
+	s.g.Expect(result.Status.ServiceURL).Should(Equal(md.Status.ServiceURL))
+	s.g.Expect(result.Status.State).Should(Equal(md.Status.State))
 }
 
 func (s *ModelDeploymentRouteSuite) TestGetMDNotFound() {
@@ -354,6 +362,32 @@ func (s *ModelDeploymentRouteSuite) TestCreateMD() {
 	s.g.Expect(md.Spec).To(Equal(mdEntity.Spec))
 }
 
+// CreatedAt and UpdatedAt field should automatically be updated after create request
+func (s *ModelDeploymentRouteSuite) TestCreateMDModifiable(){
+	newResource := newStubMd()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, dep_route.CreateModelDeploymentURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var resp deployment.ModelDeployment
+	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
+	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
 func (s *ModelDeploymentRouteSuite) TestCreateMDValidation() {
 	mdEntity := newStubMd()
 	mdEntity.Spec.Image = ""
@@ -427,6 +461,37 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mdEntity.ID).To(Equal(md.ID))
 	s.g.Expect(mdEntity.Spec).To(Equal(md.Spec))
+}
+
+// UpdatedAt field should automatically be updated after update request
+func (s *ModelDeploymentRouteSuite) TestUpdateMDModifiable(){
+	resource := newStubMd()
+	s.g.Expect(s.mdRepository.CreateModelDeployment(resource)).NotTo(HaveOccurred())
+
+	time.Sleep(1 * time.Second)
+
+	newResource := newStubMd()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPut, dep_route.UpdateModelDeploymentURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var respResource deployment.ModelDeployment
+	err = json.Unmarshal(w.Body.Bytes(), &respResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(respResource.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.After(respResource.Status.CreatedAt.Time)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
+ 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
 func (s *ModelDeploymentRouteSuite) TestUpdateMDValidation() {
@@ -534,9 +599,17 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(Equal(deployment.ModelDeployment{
-		ID: md.ID, Spec: md.Spec, Status: &odahuflowv1alpha1.ModelDeploymentStatus{},
-	}))
+	s.g.Expect(result.ID).Should(Equal(md.ID))
+	s.g.Expect(result.Spec).Should(Equal(md.Spec))
+
+	s.g.Expect(result.Status.AvailableReplicas).Should(Equal(md.Status.AvailableReplicas))
+	s.g.Expect(result.Status.Deployment).Should(Equal(md.Status.Deployment))
+	s.g.Expect(result.Status.LastCredsUpdatedTime).Should(Equal(md.Status.LastCredsUpdatedTime))
+	s.g.Expect(result.Status.LastRevisionName).Should(Equal(md.Status.LastRevisionName))
+	s.g.Expect(result.Status.Replicas).Should(Equal(md.Status.Replicas))
+	s.g.Expect(result.Status.Service).Should(Equal(md.Status.Service))
+	s.g.Expect(result.Status.ServiceURL).Should(Equal(md.Status.ServiceURL))
+	s.g.Expect(result.Status.State).Should(Equal(md.Status.State))
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetAllMD() {

@@ -24,7 +24,7 @@ type ModelPackaging struct {
 	// Model packaging specification
 	Spec ModelPackagingSpec `json:"spec,omitempty"`
 	// Model packaging status
-	Status *v1alpha1.ModelPackagingStatus `json:"status,omitempty"`
+	Status v1alpha1.ModelPackagingStatus `json:"status,omitempty"`
 }
 
 // ModelPackagingSpec defines the desired state of ModelPackaging

@@ -24,7 +24,7 @@ type PackagingIntegration struct {
 	// Packaging integration specification
 	Spec PackagingIntegrationSpec `json:"spec,omitempty"`
 	// Packaging integration status
-	Status *v1alpha1.PackagingIntegrationStatus `json:"status,omitempty"`
+	Status v1alpha1.PackagingIntegrationStatus `json:"status,omitempty"`
 }
 
 type PackagingIntegrationSpec struct {

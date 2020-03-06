@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
@@ -408,6 +409,32 @@ func (s *ModelTrainingRouteSuite) TestCreateMT() {
 	s.g.Expect(mt.Spec).Should(Equal(initialMT.Spec))
 }
 
+// CreatedAt and UpdatedAt field should automatically be updated after create request
+func (s *ModelTrainingRouteSuite) TestCreateMTModifiable(){
+	newResource := newMtStub()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, train_route.CreateModelTrainingURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var resp training.ModelTraining
+	err = json.Unmarshal(w.Body.Bytes(), &resp)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
+	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+}
+
 func (s *ModelTrainingRouteSuite) TestCreateMTCheckValidation() {
 	initialMT := training.ModelTraining{
 		ID: testModelName,
@@ -479,6 +506,37 @@ func (s *ModelTrainingRouteSuite) TestUpdateMT() {
 	mt, err = s.mtRepository.GetModelTraining(testMtID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mt.Spec).To(Equal(newMt.Spec))
+}
+
+// UpdatedAt field should automatically be updated after update request
+func (s *ModelTrainingRouteSuite) TestUpdateMDModifiable(){
+	resource := newMtStub()
+	s.g.Expect(s.mtRepository.CreateModelTraining(resource)).NotTo(HaveOccurred())
+
+	time.Sleep(1 * time.Second)
+
+	newResource := newMtStub()
+
+	newResourceBody, err := json.Marshal(newResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPut, train_route.CreateModelTrainingURL, bytes.NewReader(newResourceBody))
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var respResource training.ModelTraining
+	err = json.Unmarshal(w.Body.Bytes(), &respResource)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(respResource.Status.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.After(respResource.Status.CreatedAt.Time)
+	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
+	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
 func (s *ModelTrainingRouteSuite) TestUpdateMTCheckValidation() {

@@ -72,11 +72,17 @@ spec:
           type: object
         status:
           properties:
+            createdAt:
+              format: date-time
+              type: string
             edgeUrl:
               description: Full url with prefix to a model deployment service
               type: string
             state:
               description: State of Model Route
+              type: string
+            updatedAt:
+              format: date-time
               type: string
           required:
           - edgeUrl
