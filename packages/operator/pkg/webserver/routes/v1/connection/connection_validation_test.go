@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	conn_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/connection"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -434,4 +435,14 @@ func (s *ConnectionValidationSuite) TestECRTypeValidParameters() {
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
+}
+
+func (s *ConnectionValidationSuite) TestValidateID() {
+	conn := &connection.Connection{
+		ID: "not-VALID-id-",
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

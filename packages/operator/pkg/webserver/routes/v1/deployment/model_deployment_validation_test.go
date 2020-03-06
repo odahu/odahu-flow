@@ -20,6 +20,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
@@ -141,7 +142,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateMinLessMaxReplicas() {
 
 	err := md_routes.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.MinMoreThanMinReplicasErrorMessage))
+	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.MaxMoreThanMinReplicasErrorMessage))
 }
 
 func (s *ModelDeploymentValidationSuite) TestValidateMinModelThanDefaultMax() {
@@ -154,7 +155,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateMinModelThanDefaultMax() {
 
 	err := md_routes.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).ToNot(ContainSubstring(md_routes.MinMoreThanMinReplicasErrorMessage))
+	s.g.Expect(err.Error()).ToNot(ContainSubstring(md_routes.MaxMoreThanMinReplicasErrorMessage))
 	s.g.Expect(*md.Spec.MinReplicas).To(Equal(minReplicas))
 	s.g.Expect(*md.Spec.MaxReplicas).To(Equal(minReplicas))
 }
@@ -255,4 +256,14 @@ func (s *ModelDeploymentValidationSuite) TestValidateDockerPullConnectionName() 
 	_ = md_routes.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(md.Spec.ImagePullConnectionID).ShouldNot(BeNil())
 	s.g.Expect(*md.Spec.ImagePullConnectionID).Should(Equal(dockerPullConnectionName))
+}
+
+func (s *ModelDeploymentValidationSuite) TestValidateID() {
+	md := &deployment.ModelDeployment{
+		ID: "not-VALID-id-",
+	}
+
+	err := md_routes.ValidatesMDAndSetDefaults(md)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

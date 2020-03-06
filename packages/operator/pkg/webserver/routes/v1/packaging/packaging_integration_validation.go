@@ -22,6 +22,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/multierr"
 )
@@ -103,6 +104,8 @@ func (mpv *PiValidator) validateMainParameters(pi *packaging.PackagingIntegratio
 	if len(pi.ID) == 0 {
 		err = multierr.Append(err, errors.New(EmptyIDErrorMessage))
 	}
+
+	err = multierr.Append(err, validation.ValidateID(pi.ID))
 
 	if len(pi.Spec.Entrypoint) == 0 {
 		err = multierr.Append(err, errors.New(EmptyEntrypointErrorMessage))

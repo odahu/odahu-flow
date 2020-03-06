@@ -19,6 +19,7 @@ package training_test
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -70,4 +71,14 @@ func (s *ToolchainIntegrationValidationSuite) TestTiDefaultImageEmpty() {
 	err := s.validator.ValidatesAndSetDefaults(ti)
 	s.g.Expect(err).ShouldNot(BeNil())
 	s.g.Expect(err.Error()).Should(ContainSubstring(train_route.EmptyDefaultImageErrorMessage))
+}
+
+func (s *ToolchainIntegrationValidationSuite) TestValidateID() {
+	ti := &training.ToolchainIntegration{
+		ID: "not-VALID-id-",
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(ti)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

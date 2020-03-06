@@ -122,6 +122,8 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 		}
 	}
 
+	err = multierr.Append(err, validation.ValidateID(mt.ID))
+
 	if len(mt.Spec.Model.ArtifactNameTemplate) == 0 {
 		logMT.Info("Artifact output template is empty. Set the default value",
 			"name", mt.ID, "artifact ame", DefaultArtifactOutputTemplate)

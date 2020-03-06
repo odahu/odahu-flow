@@ -108,6 +108,8 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 		}
 	}
 
+	err = multierr.Append(err, validation.ValidateID(mp.ID))
+
 	if len(mp.Spec.Image) == 0 {
 		packagingIntegration, k8sErr := mpv.mpRepository.GetPackagingIntegration(mp.Spec.IntegrationName)
 		if k8sErr != nil {
@@ -241,7 +243,6 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 }
 
 func (mpv *MpValidator) validateOutputConnection(mp *packaging.ModelPackaging) (err error) {
-
 	defaultOutConName := viper.GetString(pack_conf.OutputConnectionName)
 
 	if len(mp.Spec.OutputConnection) == 0 {

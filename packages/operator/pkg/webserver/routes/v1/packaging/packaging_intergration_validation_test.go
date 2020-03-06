@@ -18,6 +18,7 @@ package packaging_test
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"testing"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -205,4 +206,14 @@ func (s *modelPackagingIntegrationSuite) TestPiNotValidJsonSchema() {
 	err := pack_route.NewPiValidator().ValidateAndSetDefaults(pi)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("given: /bool/ Expected valid values are"))
+}
+
+func (s *modelPackagingIntegrationSuite) TestValidateID() {
+	pi := &packaging.PackagingIntegration{
+		ID: "not-VALID-id-",
+	}
+
+	err := pack_route.NewPiValidator().ValidateAndSetDefaults(pi)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

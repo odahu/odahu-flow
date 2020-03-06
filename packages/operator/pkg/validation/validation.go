@@ -17,8 +17,10 @@
 package validation
 
 import (
+	"errors"
 	"fmt"
 	connection "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	"regexp"
 )
 
 const (
@@ -40,4 +42,20 @@ func ValidateExistsInRepository(name string, repository connection.Repository) e
 		}
 	}
 	return nil
+}
+
+var idRegex = regexp.MustCompile("^([a-z0-9]|[a-z0-9][a-z0-9-]{0,61}[a-z0-9])$")
+var ErrIDValidation = errors.New("ID is not valid")
+
+// Id restrictions:
+//  * contain at most 63 characters
+//  * contain only lowercase alphanumeric characters or ‘-’
+//  * start with an alphanumeric character
+//  * end with an alphanumeric character
+func ValidateID(id string) error {
+	if idRegex.MatchString(id) {
+		return nil
+	}
+
+	return ErrIDValidation
 }

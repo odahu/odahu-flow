@@ -447,3 +447,13 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection() {
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
 
 }
+
+func (s *ModelTrainingValidationSuite) TestValidateID() {
+	mt := &training.ModelTraining{
+		ID: "not-VALID-id-",
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
