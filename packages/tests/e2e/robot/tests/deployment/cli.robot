@@ -72,4 +72,4 @@ Deploy fails when validation fails
     [Documentation]  Deploy fails when memory resource is incorect
     ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/validation-fail.deployment.odahuflow.yaml
              Should not be equal  ${res.rc}  ${0}
-             Should contain       ${res.stderr}  minimum number of replicas parameter must not be less than maximum number of replicas parameter
+             Should contain       ${res.stderr}  maximum number of replicas parameter must not be less than minimum number of replicas parameter
