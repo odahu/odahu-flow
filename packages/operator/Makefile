@@ -94,6 +94,7 @@ swag:
 	"${SED_BIN}" -i 's/training\.//g' docs/*
 	"${SED_BIN}" -i 's/packaging\.//g' docs/*
 	"${SED_BIN}" -i 's/configuration\.//g' docs/*
+	"${SED_BIN}" -i 's/user\.//g' docs/*
 	"${SED_BIN}" -i 's/v1alpha1\.//g' docs/*
 
 ## apply-crds: Apply all odahuflow crds
