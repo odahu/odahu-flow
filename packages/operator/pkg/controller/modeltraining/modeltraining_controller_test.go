@@ -22,6 +22,7 @@ import (
 	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
@@ -60,8 +61,8 @@ const (
 	tolerationOperator = "operator"
 	tolerationEffect   = "effect"
 
-	modelBuildImage     = "model-image:builder"
-	toolchainImage      = "model-image:toolchain"
+	modelBuildImage = "model-image:builder"
+	toolchainImage  = "model-image:toolchain"
 )
 
 var (
@@ -408,28 +409,31 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
+	expectedHelperContainerResources := corev1.ResourceRequirements{
+		Limits:   corev1.ResourceList{
+			corev1.ResourceCPU: *k8sTrainerResources.Limits.Cpu(),
+			corev1.ResourceMemory: *utils.DefaultHelperLimits.Memory(),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceMemory: resource.MustParse("0"),
+			corev1.ResourceCPU:    resource.MustParse("0"),
+		},
+	}
+
 	for _, step := range tr.Spec.TaskSpec.Steps {
 		switch step.Name {
 		case odahuflow.TrainerSetupStep:
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
-			s.g.Expect(step.Resources).Should(Equal(trainerResources))
+			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		case odahuflow.TrainerTrainStep:
 			s.g.Expect(step.Image).Should(Equal(toolchainImage))
 			s.g.Expect(step.Resources).Should(Equal(k8sTrainerResources))
 		case odahuflow.TrainerValidationStep:
 			s.g.Expect(step.Image).Should(Equal(toolchainImage))
-			s.g.Expect(step.Resources).Should(Equal(corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					corev1.ResourceCPU: *k8sTrainerResources.Limits.Cpu(),
-				},
-				Requests: corev1.ResourceList{
-					corev1.ResourceMemory: resource.MustParse("0"),
-					corev1.ResourceCPU:    resource.MustParse("0"),
-				},
-			}))
+			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		case odahuflow.TrainerResultStep:
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
-			s.g.Expect(step.Resources).Should(Equal(trainerResources))
+			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		default:
 			s.T().Errorf("Unexpected spep name: %s", step.Name)
 		}
