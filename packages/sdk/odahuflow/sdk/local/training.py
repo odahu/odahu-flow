@@ -102,7 +102,6 @@ def start_train(trainer: K8sTrainer, output_dir: str):
     if not output_dir:
         # For example, 01-Mar-2020-17-38-04
         suffix = datetime.datetime.now().strftime("%d-%b-%Y-%H-%M-%S")
-        suffix = 'wine-1.0-01-Mar-2020-18-33-35'
         output_dir = join(
             config.LOCAL_MODEL_OUTPUT_DIR,
             f'{trainer.model_training.spec.model.name}-{trainer.model_training.spec.model.version}-{suffix}'
