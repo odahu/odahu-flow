@@ -18,7 +18,6 @@ package packager
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	conn_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
 	packager_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packager"
 	"github.com/spf13/viper"
 )
@@ -36,10 +35,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 
 	targets := make([]packaging.PackagerTarget, 0, len(modelPackaging.Spec.Targets))
 	for _, target := range modelPackaging.Spec.Targets {
-		conn, err := p.connRepo.GetDecryptedConnection(
-			target.ConnectionName,
-			viper.GetString(conn_conf.DecryptToken),
-		)
+		conn, err := p.connRepo.GetDecryptedConnection(target.ConnectionName, )
 		if err != nil {
 			return nil, err
 		}
@@ -50,10 +46,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 		})
 	}
 
-	modelHolder, err := p.connRepo.GetDecryptedConnection(
-		viper.GetString(packager_conf.OutputConnectionName),
-		viper.GetString(conn_conf.DecryptToken),
-	)
+	modelHolder, err := p.connRepo.GetDecryptedConnection(viper.GetString(packager_conf.OutputConnectionName), )
 	if err != nil {
 		return nil, err
 	}

@@ -21,7 +21,6 @@ import (
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	. "github.com/onsi/gomega"
 )
 
@@ -43,11 +42,7 @@ func TestConnectionRepository(t *testing.T) {
 
 	g.Expect(c.CreateConnection(created)).NotTo(HaveOccurred())
 
-	_, err := c.GetDecryptedConnection(connID, "wrong-token")
-	g.Expect(err).To(HaveOccurred())
-	g.Expect(err).To(Equal(odahuflow_errors.ForbiddenError{}))
-
-	fetched, err := c.GetDecryptedConnection(connID, connDecryptToken)
+	fetched, err := c.GetDecryptedConnection(connID)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(fetched.ID).To(Equal(created.ID))
 	g.Expect(fetched.Spec).To(Equal(created.Spec))

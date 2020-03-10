@@ -58,20 +58,13 @@ func wrapConnLogger(id string) logr.Logger {
 	return log.WithValues("conn_id", id)
 }
 
-func (hcr *httpConnectionRepository) GetDecryptedConnection(
-	id string, decryptToken string,
-) (*connection.Connection, error) {
+func (hcr *httpConnectionRepository) GetDecryptedConnection(id string) (*connection.Connection, error) {
 	connLogger := wrapConnLogger(id)
-
-	query := url.Values{}
-	// TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-	query.Set(conn_routes.ConnDecryptTokenQueryParam, decryptToken)
 
 	return hcr.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
 			Path:     strings.Replace(conn_routes.GetDecryptedConnectionURL, ":id", id, 1),
-			RawQuery: query.Encode(),
 		},
 	})
 }

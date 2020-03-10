@@ -29,8 +29,6 @@ const (
 	//   * kubernetes
 	//   * vault
 	RepositoryType = "connection.repository_type"
-	// TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-	DecryptToken = "connection.decrypt_token"
 	// Vault URL
 	VaultURL = "connection.vault.url"
 	// Vault secret engine path where connection will be stored

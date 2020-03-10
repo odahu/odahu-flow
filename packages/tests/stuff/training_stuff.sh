@@ -24,8 +24,6 @@ TEST_WINE_CONN_ID=wine
 TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 
 TEST_DATA_TI_ID=training-data-helper
-# TODO: Remove after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-ODAHUFLOW_CONNECTION_DECRYPT_TOKEN=$(jq '.odahuflow_connection_decrypt_token' -r "${CLUSTER_PROFILE}")
 EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
 
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
@@ -108,8 +106,7 @@ function create_test_data_connection() {
   local conn_file="test-data-connection.yaml"
 
   # Replaced the uri with the test data directory and added the kind field
-  # TODO: Remove the token after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-  odahuflowctl conn get --id models-output --decrypted "${ODAHUFLOW_CONNECTION_DECRYPT_TOKEN}" -o json |
+  odahuflowctl conn get --id models-output --decrypted  -o json |
     conn_uri="${conn_uri}" jq '.[0].spec.uri = env.conn_uri | .[] | .kind = "Connection"' \
       >"${conn_file}"
 

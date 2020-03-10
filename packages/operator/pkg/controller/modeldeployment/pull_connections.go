@@ -23,7 +23,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	conn_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
 	dep_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/aws"
@@ -67,10 +66,7 @@ func (r *ReconcileModelDeployment) reconcileDeploymentPullConnection(
 
 	log = log.WithValues(odahuflow.ConnectionIDLogPrefix, mdConnID)
 
-	mdConn, err := r.connRepo.GetDecryptedConnection(
-		mdConnID,
-		viper.GetString(conn_conf.DecryptToken),
-	)
+	mdConn, err := r.connRepo.GetDecryptedConnection(mdConnID, )
 	if err != nil {
 		log.Error(err, "Cannot retrieve connection")
 

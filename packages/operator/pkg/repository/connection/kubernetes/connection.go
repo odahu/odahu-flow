@@ -41,15 +41,12 @@ var (
 type k8sConnectionRepository struct {
 	k8sClient        client.Client
 	namespace        string
-	connDecryptToken string
 }
 
-// TODO: Remove the token after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
-func NewRepository(namespace string, k8sClient client.Client, connDecryptToken string) conn_repository.Repository {
+func NewRepository(namespace string, k8sClient client.Client) conn_repository.Repository {
 	return &k8sConnectionRepository{
 		namespace:        namespace,
 		k8sClient:        k8sClient,
-		connDecryptToken: connDecryptToken,
 	}
 }
 
@@ -76,14 +73,7 @@ func (kc *k8sConnectionRepository) GetConnection(id string) (*connection.Connect
 	return connectionFromK8s.DeleteSensitiveData(), err
 }
 
-func (kc *k8sConnectionRepository) GetDecryptedConnection(
-	id string, connDecryptToken string,
-) (*connection.Connection, error) {
-	// TODO: comment
-	if connDecryptToken != kc.connDecryptToken {
-		return nil, odahuflow_errors.ForbiddenError{}
-	}
-
+func (kc *k8sConnectionRepository) GetDecryptedConnection(id string) (*connection.Connection, error) {
 	return kc.getConnectionFromK8s(id)
 }
 

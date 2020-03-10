@@ -324,13 +324,6 @@ var doc = `{
                         "name": "id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Decrypt token",
-                        "name": "token",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -2103,8 +2096,7 @@ var doc = `{
             "properties": {
                 "arguments": {
                     "description": "List of arguments. This parameter depends on the specific packaging integration",
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                 },
                 "artifactName": {
                     "description": "Training output artifact name",
@@ -2441,10 +2433,7 @@ var doc = `{
             "properties": {
                 "annotations": {
                     "description": "Annotations for model pods.",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "image": {
                     "description": "Model Docker image",
@@ -2673,10 +2662,7 @@ var doc = `{
                 },
                 "hyperParameters": {
                     "description": "Model training hyperParameters in parameter:value format",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "image": {
                     "description": "Train image",
@@ -2831,10 +2817,7 @@ var doc = `{
             "properties": {
                 "additionalEnvironments": {
                     "description": "Additional environments for a training process",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "defaultImage": {
                     "description": "Default training Docker image",

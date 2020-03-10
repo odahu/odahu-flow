@@ -570,32 +570,6 @@ func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnection() {
 	s.g.Expect(result.Spec).Should(Equal(conn.Spec))
 }
 
-func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnectionWrongToken() {
-	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
-
-	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
-		http.MethodGet,
-		strings.Replace(conn_route.GetDecryptedConnectionURL, ":id", connID, -1),
-		nil,
-	)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	query := req.URL.Query()
-	query.Set(conn_route.ConnDecryptTokenQueryParam, "wrong-token")
-	req.URL.RawQuery = query.Encode()
-
-	s.server.ServeHTTP(w, req)
-
-	var result routes.HTTPResult
-	err = json.Unmarshal(w.Body.Bytes(), &result)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	s.g.Expect(w.Code).Should(Equal(http.StatusForbidden))
-	s.g.Expect(result.Message).Should(ContainSubstring("access forbidden"))
-}
-
 func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnectionNotFound() {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -617,25 +591,6 @@ func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnectionNotFound() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusNotFound))
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
-}
-
-func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnectionMissedToken() {
-	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
-		http.MethodGet,
-		strings.Replace(conn_route.GetDecryptedConnectionURL, ":id", "12345", -1),
-		nil,
-	)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	s.server.ServeHTTP(w, req)
-
-	var result routes.HTTPResult
-	err = json.Unmarshal(w.Body.Bytes(), &result)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
-	s.g.Expect(result.Message).Should(ContainSubstring(conn_route.MissedTokenErrorMessage))
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetConnection() {

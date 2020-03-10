@@ -42,7 +42,7 @@ func (s *ConnectionRouteVaultBackendSuite) SetupSuite() {
 		testSecretMountEngine,
 	)
 
-	s.connRepository = conn_vault_repository.NewRepository(vaultClient, testSecretMountPath, testDecryptToken)
+	s.connRepository = conn_vault_repository.NewRepository(vaultClient, testSecretMountPath)
 	s.vaultServer = vaultServer
 	s.connDecryptToken = testDecryptToken
 

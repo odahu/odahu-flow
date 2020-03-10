@@ -51,7 +51,7 @@ func (s *VaultConnRepoSuite) SetupSuite() {
 		testSecretMountEngine,
 	)
 
-	s.connRepo = conn_vault_repo.NewRepository(vaultClient, testSecretMountPath, testDecryptToken)
+	s.connRepo = conn_vault_repo.NewRepository(vaultClient, testSecretMountPath)
 	s.vaultServer = vaultServer
 }
 
@@ -101,11 +101,7 @@ func (s *VaultConnRepoSuite) TestConnectionRepository() {
 
 	s.g.Expect(s.connRepo.CreateConnection(created)).NotTo(HaveOccurred())
 
-	_, err := s.connRepo.GetDecryptedConnection(connID, "wrong-token")
-	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err).To(Equal(odahuflow_errors.ForbiddenError{}))
-
-	fetched, err := s.connRepo.GetDecryptedConnection(connID, testDecryptToken)
+	fetched, err := s.connRepo.GetDecryptedConnection(connID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(fetched.ID).To(Equal(created.ID))
 	s.g.Expect(fetched.Spec).To(Equal(created.Spec))

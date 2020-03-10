@@ -40,18 +40,15 @@ class ConnectionClient(RemoteAPIClient):
         """
         return Connection.from_dict(self.query(f'{CONNECTION_URL}/{conn_id}'))
 
-    # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-    def get_decrypted(self, conn_id: str, decrypt_token: str) -> Connection:
+    def get_decrypted(self, conn_id: str) -> Connection:
         """
         Get decrypted connection from API server
 
-        :param decrypt_token: Token for getting a decrypted connection
         :param conn_id: Connection ID
         :return: Connection
         """
         return Connection.from_dict(self.query(
-            f'{CONNECTION_URL}/{conn_id}/decrypted',
-            payload={'token': decrypt_token}
+            f'{CONNECTION_URL}/{conn_id}/decrypted'
         ))
 
     def get_all(self) -> typing.List[Connection]:
@@ -104,18 +101,15 @@ class AsyncConnectionClient(AsyncRemoteAPIClient):
         """
         return Connection.from_dict(await self.query(f'{CONNECTION_URL}/{conn_id}'))
 
-    # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-    async def get_decrypted(self, conn_id: str, decrypt_token: str) -> Connection:
+    async def get_decrypted(self, conn_id: str) -> Connection:
         """
         Get decrypted connection from API server
 
-        :param decrypt_token: Token for getting a decrypted connection
         :param conn_id: Connection ID
         :return: Connection
         """
         return Connection.from_dict(await self.query(
-            f'{CONNECTION_URL}/{conn_id}/decrypted',
-            payload={'token': decrypt_token}
+            f'{CONNECTION_URL}/{conn_id}/decrypted'
         ))
 
     async def get_all(self) -> typing.List[Connection]:

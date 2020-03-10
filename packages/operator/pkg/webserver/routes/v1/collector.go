@@ -53,7 +53,6 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, k8sClient client.Client, k8sConf
 		connRepository = k8s_connection_repository.NewRepository(
 			viper.GetString(connection_config.Namespace),
 			k8sClient,
-			viper.GetString(connection_config.DecryptToken),
 		)
 	case connection_config.RepositoryVaultType:
 		connRepository, err = vault_connection_repository.NewRepositoryFromConfig()

@@ -136,7 +136,6 @@ definitions:
   ModelPackagingSpec:
     properties:
       arguments:
-        additionalProperties: true
         description: List of arguments. This parameter depends on the specific packaging
           integration
         type: object
@@ -394,8 +393,6 @@ definitions:
   ModelDeploymentSpec:
     properties:
       annotations:
-        additionalProperties:
-          type: string
         description: Annotations for model pods.
         type: object
       image:
@@ -577,8 +574,6 @@ definitions:
           $ref: '#/definitions/EnvironmentVariable'
         type: array
       hyperParameters:
-        additionalProperties:
-          type: string
         description: Model training hyperParameters in parameter:value format
         type: object
       image:
@@ -692,8 +687,6 @@ definitions:
   ToolchainIntegrationSpec:
     properties:
       additionalEnvironments:
-        additionalProperties:
-          type: string
         description: Additional environments for a training process
         type: object
       defaultImage:
@@ -922,11 +915,6 @@ paths:
       - description: Connection id
         in: path
         name: id
-        required: true
-        type: string
-      - description: Decrypt token
-        in: query
-        name: token
         required: true
         type: string
       produces:
