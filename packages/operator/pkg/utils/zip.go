@@ -17,130 +17,50 @@
 package utils
 
 import (
-	"archive/zip"
-	"compress/flate"
-	"fmt"
-	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
-	"strings"
 )
 
 func ZipDir(source, target string) error {
-	zipfile, err := os.Create(target)
+	target, err := filepath.Abs(target)
 	if err != nil {
 		return err
 	}
-	defer zipfile.Close()
 
-	archive := zip.NewWriter(zipfile)
-	defer archive.Close()
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		emptyFile, err := os.Create(target)
+		if err != nil {
+			return err
+		}
 
-	archive.RegisterCompressor(zip.Deflate, func(out io.Writer) (io.WriteCloser, error) {
-		return flate.NewWriter(out, flate.BestSpeed)
-	})
-
-	info, err := os.Stat(source)
-	if err != nil {
-		return nil
+		if err := emptyFile.Close(); err != nil {
+			return err
+		}
 	}
 
-	var baseDir string
-	if info.IsDir() {
-		baseDir = filepath.Base(source)
-	}
+	cmd := exec.Command(
+		"tar", "--exclude", target,
+		"-cv", "--use-compress-program=pigz", "-f", target, ".",
+	)
+	cmd.Dir = source
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		if baseDir != "" {
-			header.Name = strings.TrimPrefix(path, source)
-		}
-
-		if info.IsDir() {
-			header.Name += "/"
-		} else {
-			header.Method = zip.Deflate
-		}
-
-		writer, err := archive.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		file, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-		_, err = io.Copy(writer, file)
-		return err
-	})
-
-	return err
+	return cmd.Run()
 }
 
 func Unzip(src string, dest string) error {
-	r, err := zip.OpenReader(src)
+	src, err := filepath.Abs(src)
 	if err != nil {
 		return err
 	}
 
-	defer r.Close()
 
-	for _, f := range r.File {
-		if f.Name == "/" {
-			continue
-		}
+	cmd := exec.Command("tar", "-xvf", src, "-C", ".")
+	cmd.Dir = dest
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-		fpath := filepath.Join(dest, f.Name)
-
-		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: illegal file path", fpath)
-		}
-
-		if f.FileInfo().IsDir() {
-			err := os.MkdirAll(fpath, os.ModePerm)
-			if err != nil {
-				return err
-			}
-
-			continue
-		}
-
-		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-			return err
-		}
-
-		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-		if err != nil {
-			return err
-		}
-
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(outFile, rc)
-
-		outFile.Close()
-		rc.Close()
-
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return cmd.Run()
 }

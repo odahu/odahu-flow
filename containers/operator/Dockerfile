@@ -100,7 +100,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 WORKDIR "${WORK_DIR}/"
 
 RUN apt-get -yq update && \
-    apt-get -yqq install ca-certificates && \
+    apt-get -yqq install ca-certificates pigz && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/trainer "${WORK_DIR}/"
@@ -118,7 +118,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     WORK_DIR="/opt/odahu-flow"
 
 RUN apt-get -yq update && \
-    apt-get -yqq install ca-certificates && \
+    apt-get -yqq install ca-certificates pigz && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR "${WORK_DIR}/"

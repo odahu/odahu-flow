@@ -25,12 +25,14 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	pi_kubernetes "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -56,19 +58,19 @@ const (
 	tolerationOperator = "operator"
 	tolerationEffect   = "effect"
 
-	modelBuildImage     = "model-image:builder"
-	integrationImage      = "model-image:packaging"
+	modelBuildImage  = "model-image:builder"
+	integrationImage = "model-image:packaging"
 )
 
 var (
-	nodeSelector    = map[string]string{"node-key": "node-value"}
+	nodeSelector = map[string]string{"node-key": "node-value"}
 
 	expectedRequest = reconcile.Request{
 		NamespacedName: types.NamespacedName{Name: mpName, Namespace: testNamespace},
 	}
-	mpNamespacedName         = types.NamespacedName{Name: mpName, Namespace: testNamespace}
-	testResValue             = "5"
-	toleration = map[string]string{
+	mpNamespacedName = types.NamespacedName{Name: mpName, Namespace: testNamespace}
+	testResValue     = "5"
+	toleration       = map[string]string{
 		pack_conf.TolerationKey:      tolerationKey,
 		pack_conf.TolerationValue:    tolerationValue,
 		pack_conf.TolerationOperator: tolerationOperator,
@@ -94,7 +96,7 @@ func (s *ModelPackagingControllerSuite) createPackagingIntegration() *odahuflowv
 		Spec: packaging.PackagingIntegrationSpec{
 			DefaultImage: integrationImage,
 			Schema: packaging.Schema{
-				Targets:  []odahuflowv1alpha1.TargetSchema{
+				Targets: []odahuflowv1alpha1.TargetSchema{
 					{
 						Name: "target-1",
 						ConnectionTypes: []string{
@@ -220,7 +222,7 @@ func (s *ModelPackagingControllerSuite) templateNodeSelectorTest(
 		},
 		Spec: odahuflowv1alpha1.ModelPackagingSpec{
 			Resources: mpResources,
-			Type: testPackagingIntegrationID,
+			Type:      testPackagingIntegrationID,
 		},
 	}
 
@@ -326,17 +328,28 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
+	expectedHelperContainerResources := v1.ResourceRequirements{
+		Limits: v1.ResourceList{
+			v1.ResourceCPU:    *k8sPackagingResources.Limits.Cpu(),
+			v1.ResourceMemory: *utils.DefaultHelperLimits.Memory(),
+		},
+		Requests: v1.ResourceList{
+			v1.ResourceMemory: resource.MustParse("0"),
+			v1.ResourceCPU:    resource.MustParse("0"),
+		},
+	}
+
 	for _, step := range tr.Spec.TaskSpec.Steps {
 		switch step.Name {
 		case odahuflow.PackagerSetupStep:
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
-			s.g.Expect(step.Resources).Should(Equal(packagerResources))
+			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		case odahuflow.PackagerPackageStep:
 			s.g.Expect(step.Image).Should(Equal(integrationImage))
 			s.g.Expect(step.Resources).Should(Equal(k8sPackagingResources))
 		case odahuflow.PackagerResultStep:
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
-			s.g.Expect(step.Resources).Should(Equal(packagerResources))
+			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		default:
 			s.T().Errorf("Unexpected spep name: %s", step.Name)
 		}
@@ -344,7 +357,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 }
 
 func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
-	viper.Set(pack_conf.Timeout, 3 * time.Hour)
+	viper.Set(pack_conf.Timeout, 3*time.Hour)
 
 	mp := &odahuflowv1alpha1.ModelPackaging{
 		ObjectMeta: metav1.ObjectMeta{

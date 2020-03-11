@@ -23,6 +23,7 @@ import (
 	packaging_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/spf13/viper"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -48,11 +49,12 @@ func generatePackagerTaskSpec(
 		return nil, err
 	}
 
+	helperContainerResources := utils.CalculateHelperContainerResources(mainPackagerStep.Resources)
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
-			createInitPackagerStep(packagingCR),
+			createInitPackagerStep(helperContainerResources, packagingCR),
 			mainPackagerStep,
-			createResultPackagerStep(packagingCR.Name),
+			createResultPackagerStep(helperContainerResources, packagingCR.Name),
 		},
 		Volumes: []corev1.Volume{
 			{
@@ -67,7 +69,9 @@ func generatePackagerTaskSpec(
 	}, nil
 }
 
-func createInitPackagerStep(packagingCR *odahuflowv1alpha1.ModelPackaging) tektonv1alpha1.Step {
+func createInitPackagerStep(
+	res corev1.ResourceRequirements, packagingCR *odahuflowv1alpha1.ModelPackaging,
+) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerSetupStep,
@@ -86,7 +90,7 @@ func createInitPackagerStep(packagingCR *odahuflowv1alpha1.ModelPackaging) tekto
 				"--config",
 				path.Join(configDir, configFileName),
 			},
-			Resources: packagerResources,
+			Resources: res,
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      configVolumeName,
@@ -126,7 +130,7 @@ func createMainPackagerStep(
 	}, nil
 }
 
-func createResultPackagerStep(mpID string) tektonv1alpha1.Step {
+func createResultPackagerStep(res corev1.ResourceRequirements, mpID string) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerResultStep,
@@ -145,7 +149,7 @@ func createResultPackagerStep(mpID string) tektonv1alpha1.Step {
 				"--config",
 				path.Join(configDir, configFileName),
 			},
-			Resources: packagerResources,
+			Resources: res,
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      configVolumeName,

@@ -17,7 +17,7 @@
 package modeltraining
 
 import (
-	"k8s.io/apimachinery/pkg/api/resource"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"path"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -54,21 +54,13 @@ func generateTrainerTaskSpec(
 		return nil, err
 	}
 
-	// Resources of validator container are copy of trainer resources, but
-	// limit doesn't contain GPU part and all requests res are zeroes.
-	validatorResource := mtResources.DeepCopy()
-	delete(validatorResource.Limits, corev1.ResourceName(viper.GetString(training_conf.ResourceGPUName)))
-	validatorResource.Requests = corev1.ResourceList{
-		corev1.ResourceMemory: *resource.NewQuantity(0, resource.DecimalSI),
-		corev1.ResourceCPU:    *resource.NewQuantity(0, resource.DecimalSI),
-	}
-
+	helperContainerResources := utils.CalculateHelperContainerResources(mtResources)
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
-			createInitTrainerStep(trainingCR.Name),
+			createInitTrainerStep(helperContainerResources, trainingCR.Name),
 			createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
-			createArtifactValidationStep(validatorResource, trainingCR),
-			createResultTrainerStep(trainingCR),
+			createArtifactValidationStep(helperContainerResources, trainingCR),
+			createResultTrainerStep(helperContainerResources, trainingCR),
 		},
 		Volumes: []corev1.Volume{
 			{
@@ -83,7 +75,7 @@ func generateTrainerTaskSpec(
 	}, nil
 }
 
-func createInitTrainerStep(mtID string) tektonv1alpha1.Step {
+func createInitTrainerStep(res corev1.ResourceRequirements, mtID string) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerSetupStep,
@@ -102,7 +94,7 @@ func createInitTrainerStep(mtID string) tektonv1alpha1.Step {
 				"--config",
 				path.Join(configDir, configFileName),
 			},
-			Resources: trainerResources,
+			Resources: res,
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      configVolumeName,
@@ -145,7 +137,7 @@ func createMainTrainerStep(
 }
 
 func createArtifactValidationStep(
-	validatorResources *corev1.ResourceRequirements, trainingCR *odahuflowv1alpha1.ModelTraining,
+	validatorResources corev1.ResourceRequirements, trainingCR *odahuflowv1alpha1.ModelTraining,
 ) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
@@ -158,12 +150,14 @@ func createArtifactValidationStep(
 				path.Join(workspacePath, outputDir),
 				"test",
 			},
-			Resources: *validatorResources,
+			Resources: validatorResources,
 		},
 	}
 }
 
-func createResultTrainerStep(mt *odahuflowv1alpha1.ModelTraining) tektonv1alpha1.Step {
+func createResultTrainerStep(
+	res corev1.ResourceRequirements, mt *odahuflowv1alpha1.ModelTraining,
+) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerResultStep,
@@ -184,7 +178,7 @@ func createResultTrainerStep(mt *odahuflowv1alpha1.ModelTraining) tektonv1alpha1
 				"--config",
 				path.Join(configDir, configFileName),
 			},
-			Resources: trainerResources,
+			Resources: res,
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      configVolumeName,

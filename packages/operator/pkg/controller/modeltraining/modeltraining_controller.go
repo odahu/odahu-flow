@@ -30,7 +30,6 @@ import (
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -132,19 +131,6 @@ type BuilderConf struct {
 
 const (
 	mtConfig = "mt.json"
-)
-
-var (
-	trainerResources = corev1.ResourceRequirements{
-		Limits: corev1.ResourceList{
-			"cpu":    resource.MustParse("128m"),
-			"memory": resource.MustParse("128Mi"),
-		},
-		Requests: corev1.ResourceList{
-			"cpu":    resource.MustParse("128m"),
-			"memory": resource.MustParse("128Mi"),
-		},
-	}
 )
 
 // Determine crd state by child pod.

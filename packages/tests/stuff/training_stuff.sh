@@ -52,7 +52,7 @@ function pack_model() {
 
   # Creates trained zip artifact
   cd "${TRAINED_ARTIFACTS_DIR}/${mp_id}"
-  zip -r "../${mp_id}.zip" -u ./
+  tar -cvzf "../${mp_id}.zip" "."
   cd -
 
   # Pushes trained zip artifact to the bucket

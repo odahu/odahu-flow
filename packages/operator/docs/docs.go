@@ -2103,7 +2103,8 @@ var doc = `{
             "properties": {
                 "arguments": {
                     "description": "List of arguments. This parameter depends on the specific packaging integration",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "artifactName": {
                     "description": "Training output artifact name",
@@ -2440,7 +2441,10 @@ var doc = `{
             "properties": {
                 "annotations": {
                     "description": "Annotations for model pods.",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "description": "Model Docker image",
@@ -2669,7 +2673,10 @@ var doc = `{
                 },
                 "hyperParameters": {
                     "description": "Model training hyperParameters in parameter:value format",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "description": "Train image",
@@ -2824,7 +2831,10 @@ var doc = `{
             "properties": {
                 "additionalEnvironments": {
                     "description": "Additional environments for a training process",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "defaultImage": {
                     "description": "Default training Docker image",
