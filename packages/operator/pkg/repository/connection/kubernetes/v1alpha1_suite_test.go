@@ -39,7 +39,6 @@ var (
 
 const (
 	testNamespace    = "default"
-	connDecryptToken = "test-token"
 )
 
 func TestMain(m *testing.M) {
@@ -62,7 +61,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	c = conn_k8s_repository.NewRepository(testNamespace, k8sClient, connDecryptToken)
+	c = conn_k8s_repository.NewRepository(testNamespace, k8sClient)
 
 	code := m.Run()
 	_ = t.Stop()

@@ -61,7 +61,7 @@ func (s *ConnectionRouteK8sBackendSuite) SetupSuite() {
 	}
 
 	s.connDecryptToken = "some-token"
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient(), s.connDecryptToken)
+	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
 
 	s.ConnectionRouteGenericSuite.SetupSuite()
 }

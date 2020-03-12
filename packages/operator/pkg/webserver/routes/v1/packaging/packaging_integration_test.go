@@ -132,7 +132,7 @@ func (s *mpiValidationSuite) SetupSuite() {
 	s.server = gin.Default()
 	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
 	pack_route.ConfigureRoutes(s.server.Group(""), s.mpRepository, conn_k8s_repository.NewRepository(
-		testNamespace, mgr.GetClient(), "",
+		testNamespace, mgr.GetClient(),
 	))
 }
 

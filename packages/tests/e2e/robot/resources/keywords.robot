@@ -119,7 +119,9 @@ Secured component domain should be accessible by valid credentials
     Should not contain   ${auth_page}    Invalid Email Address and password
 
 Login to the api and edge
-    ${res}=  Shell  odahuflowctl --verbose login --url ${API_URL} --client_id "${SA_CLIENT_ID}" --client_secret "${SA_CLIENT_SECRET}" --issuer "${ISSUER}"
+    [Arguments]  ${service_account}=${SA_ADMIN}
+    [Documentation]  Login into API using odahuflowctl. ${service_account} should be object with .client_id and .client_secret attributes
+    ${res}=  Shell  odahuflowctl --verbose login --url ${API_URL} --client_id "${service_account.client_id}" --client_secret "${service_account.client_secret}" --issuer "${ISSUER}"
     Should be equal  ${res.rc}  ${0}
     ${res}=  Shell  odahuflowctl config set MODEL_HOST ${EDGE_URL}
     Should be equal  ${res.rc}  ${0}

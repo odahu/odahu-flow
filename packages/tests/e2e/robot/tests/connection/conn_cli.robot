@@ -39,8 +39,7 @@ Check conn
     should be equal  ${conn['spec']['reference']}  ${reference}
     should be equal  ${conn['spec']['keySecret']}  ${CONN_DECRYPTED_MASK}
 
-    # TODO: Remove the token after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-    ${res}=  Shell  odahuflowctl --verbose conn get --id ${id} -o json --decrypted ${CONN_DECRYPT_TOKEN}
+    ${res}=  Shell  odahuflowctl --verbose conn get --id ${id} -o json --decrypted
     Should be equal  ${res.rc}      ${0}
     ${conn}=    Evaluate     json.loads("""${res.stdout}""")[0]    json
 
@@ -165,3 +164,16 @@ File with entitiy not found
     command=create
     command=edit
     command=delete
+
+Data scientist have no permissions to decrypt connection
+    [tags]            security
+    [Documentation]   Data scientist have no permissions to get decrypt token
+    [Setup]           Run Keywords  Shell  odahuflowctl --verbose conn create -f ${RES_DIR}/git.json
+    ...               AND           Login to the api and edge  ${SA_DATA_SCIENTIST}
+    [Teardown]        Run Keywords  Shell  odahuflowctl --verbose conn delete --id ${CONN_MAIN_ID} --ignore-not-found
+    ...               AND           Login to the api and edge
+    ${res}=  Shell  odahuflowctl --verbose conn get --id ${CONN_MAIN_ID}
+             Should be equal  ${res.rc}  ${0}
+    ${res}=  Shell  odahuflowctl --verbose conn get --id ${CONN_MAIN_ID} --decrypted
+             Should contain   ${res.stderr}  403
+

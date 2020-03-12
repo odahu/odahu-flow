@@ -19,7 +19,6 @@ package trainer
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	conn_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
 	trainer_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/trainer"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/spf13/viper"
@@ -32,10 +31,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
-	vcs, err := mt.connRepo.GetDecryptedConnection(
-		modelTraining.Spec.VCSName,
-		viper.GetString(conn_conf.DecryptToken),
-	)
+	vcs, err := mt.connRepo.GetDecryptedConnection(modelTraining.Spec.VCSName, )
 	if err != nil {
 		return nil, err
 	}
@@ -44,10 +40,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	for _, trainData := range modelTraining.Spec.Data {
 		var trainDataConnSpec odahuflowv1alpha1.ConnectionSpec
 
-		trainDataConn, err := mt.connRepo.GetDecryptedConnection(
-			trainData.Connection,
-			viper.GetString(conn_conf.DecryptToken),
-		)
+		trainDataConn, err := mt.connRepo.GetDecryptedConnection(trainData.Connection, )
 		if err != nil {
 			mt.log.Error(err, "Get train data", odahuflow.ConnectionIDLogPrefix, trainData.Connection)
 
@@ -63,10 +56,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		})
 	}
 
-	outputConn, err := mt.connRepo.GetDecryptedConnection(
-		viper.GetString(trainer_conf.OutputConnectionName),
-		viper.GetString(conn_conf.DecryptToken),
-	)
+	outputConn, err := mt.connRepo.GetDecryptedConnection(viper.GetString(trainer_conf.OutputConnectionName), )
 	if err != nil {
 		return nil, err
 	}

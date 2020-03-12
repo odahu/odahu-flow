@@ -40,7 +40,6 @@ const (
 	DeleteConnectionURL        = "/connection/:id"
 	IDConnURLParam             = "id"
 	ConnDecryptTokenQueryParam = "token"
-	MissedTokenErrorMessage    = "missed the token URL param"
 )
 
 var (
@@ -110,21 +109,14 @@ func (cc *controller) getConnection(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Connection id"
-// @Param token query string true "Decrypt token"
 // @Success 200 {object} connection.Connection
 // @Failure 404 {object} routes.HTTPResult
 // @Failure 400 {object} routes.HTTPResult
 // @Router /api/v1/connection/{id}/decrypted [get]
 func (cc *controller) getDecryptedConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
-	token := c.Query(ConnDecryptTokenQueryParam)
 
-	if len(token) == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: MissedTokenErrorMessage})
-		return
-	}
-
-	conn, err := cc.connRepository.GetDecryptedConnection(connID, token)
+	conn, err := cc.connRepository.GetDecryptedConnection(connID)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Retrieving %s connection", connID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})

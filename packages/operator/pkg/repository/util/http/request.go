@@ -124,7 +124,6 @@ func (bec *BaseAPIClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func loginRequired(response *http.Response) bool{
-	log.Info("Client not authorized")
 	return response.StatusCode == http.StatusUnauthorized
 }
 

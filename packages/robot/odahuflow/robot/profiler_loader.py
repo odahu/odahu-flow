@@ -30,7 +30,8 @@ AUTH_TOKEN_PARAM_NAME = 'AUTH_TOKEN'
 CLUSTER_PROFILE = 'CLUSTER_PROFILE'
 
 # Key in cluster_profile.json that contain creds for
-TEST_SA_PROFILE_KEY = 'test'
+TEST_SA_ADMIN = 'test'
+TEST_SA_DS = 'test_data_scientist'
 
 
 class ServiceAccount:
@@ -71,7 +72,8 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
 
         try:
 
-            test_sa = ServiceAccount(data, TEST_SA_PROFILE_KEY)
+            test_sa_admin = ServiceAccount(data, TEST_SA_ADMIN)
+            test_sa_ds = ServiceAccount(data, TEST_SA_DS)
 
             host_base_domain = data['dns']['domain']
             variables = {
@@ -88,19 +90,19 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'ALERTMANAGER_URL': os.getenv('ALERTMANAGER_URL', f'https://{host_base_domain}/alertmanager'),
                 'JUPYTERLAB_URL': os.getenv('JUPITERLAB_URL', f'https://{host_base_domain}/jupyterlab'),
                 'MLFLOW_URL': os.getenv('MLFLOW_URL', f'https://{host_base_domain}/mlflow'),
-                # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
-                'CONN_DECRYPT_TOKEN': data.get('odahuflow_connection_decrypt_token'),
                 'IS_GPU_ENABLED': 'training_gpu' in data['node_pools'],
-                'SA_CLIENT_ID': test_sa.client_id,
-                'SA_CLIENT_SECRET': test_sa.client_secret,
+                'SA_CLIENT_ID': test_sa_admin.client_id,
+                'SA_CLIENT_SECRET': test_sa_admin.client_secret,
+                'SA_ADMIN': test_sa_admin,
+                'SA_DATA_SCIENTIST': test_sa_ds,
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:
             raise Exception("Can\'t get variable from cluster profile: {}".format(err))
 
         try:
-            client_id = test_sa.client_id
-            client_secret = test_sa.client_secret
+            client_id = test_sa_admin.client_id
+            client_secret = test_sa_admin.client_secret
             issuer = data['oauth_oidc_issuer_url']
             conf = OpenIdProviderConfiguration(issuer)
             conf.fetch_configuration()

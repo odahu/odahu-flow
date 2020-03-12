@@ -27,22 +27,18 @@ var (
 )
 
 // Could be used for storing sensitive data
-// TODO: Remove the token after implementation of the issue https://github.com/odahuflow-platform/odahuflow/issues/1008
 type vaultConnRepository struct {
 	vaultClient         *vaultapi.Client
 	connectionVaultPath string
-	connDecryptToken    string
 }
 
 func NewRepository(
 	vaultClient *vaultapi.Client,
 	connectionVaultPath string,
-	connDecryptToken string,
 ) conn_repository.Repository {
 	return &vaultConnRepository{
 		vaultClient:         vaultClient,
 		connectionVaultPath: connectionVaultPath,
-		connDecryptToken:    connDecryptToken,
 	}
 }
 
@@ -64,7 +60,6 @@ func NewRepositoryFromConfig() (conn_repository.Repository, error) {
 	return NewRepository(
 		vClient,
 		viper.GetString(conn_config.VaultSecretEnginePath),
-		viper.GetString(conn_config.DecryptToken),
 	), err
 }
 
@@ -77,13 +72,7 @@ func (vcr *vaultConnRepository) GetConnection(connID string) (*connection.Connec
 	return conn.DeleteSensitiveData(), nil
 }
 
-func (vcr *vaultConnRepository) GetDecryptedConnection(
-	connID string, connDecryptToken string,
-) (*connection.Connection, error) {
-	if connDecryptToken != vcr.connDecryptToken {
-		return nil, odahuflow_errors.ForbiddenError{}
-	}
-
+func (vcr *vaultConnRepository) GetDecryptedConnection(connID string) (*connection.Connection, error) {
 	return vcr.getConnectionFromVault(connID)
 }
 

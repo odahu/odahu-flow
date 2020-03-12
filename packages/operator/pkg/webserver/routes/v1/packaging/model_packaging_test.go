@@ -105,7 +105,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	s.k8sClient = mgr.GetClient()
 	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, s.k8sClient, nil)
 	pack_route.ConfigureRoutes(v1Group, s.mpRepository, conn_k8s_repository.NewRepository(
-		testNamespace, mgr.GetClient(), "",
+		testNamespace, mgr.GetClient(),
 	))
 
 	err = s.mpRepository.CreatePackagingIntegration(&packaging.PackagingIntegration{
@@ -120,7 +120,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 		s.T().Fatalf("Cannot create PackagingIntegration: %v", err)
 	}
 
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient, "")
+	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient)
 	// Create the connection that will be used as the outputConnection param for a training.
 	if err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testOutConn,

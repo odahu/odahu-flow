@@ -27,7 +27,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
-	conn_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/connection"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 )
@@ -70,11 +69,7 @@ func (s *Suite) SetupSuite() {
 		case "/api/v1/connection/test-conn-id":
 			s.processGetConnection(r, w, newStubConn().DeleteSensitiveData())
 		case "/api/v1/connection/test-conn-id/decrypted":
-			if testDecryptToken != r.URL.Query().Get(conn_routes.ConnDecryptTokenQueryParam) {
-				w.WriteHeader(http.StatusBadRequest)
-			} else {
-				s.processGetConnection(r, w, newStubConn())
-			}
+			s.processGetConnection(r, w, newStubConn())
 		default:
 			NotFound(w, r)
 		}
@@ -127,18 +122,13 @@ func (s *Suite) TestConnectionNotFound() {
 }
 
 func (s *Suite) TestDecryptedConnectionGet() {
-	connResult, err := s.connHTTPClient.GetDecryptedConnection(connID, testDecryptToken)
+	connResult, err := s.connHTTPClient.GetDecryptedConnection(connID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(newStubConn()).Should(Equal(connResult))
 }
 
-func (s *Suite) TestDecryptedConnectionGetWrongToken() {
-	_, err := s.connHTTPClient.GetDecryptedConnection(connID, "wrong-token")
-	s.g.Expect(err).Should(HaveOccurred())
-}
-
 func (s *Suite) TestDecryptedConnectionGetNotFound() {
-	_, err := s.connHTTPClient.GetDecryptedConnection("conn-not-found", testDecryptToken)
+	_, err := s.connHTTPClient.GetDecryptedConnection("conn-not-found")
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }

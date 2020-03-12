@@ -15,7 +15,8 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        odahu-flow-authorization: enabled
       labels:
         {{- include "odahuflow.helm-labels" (dict "component" "feedback-collector" "root" .) | nindent 8 }}
     spec:
@@ -64,7 +65,7 @@ spec:
   selector:
     {{- include "odahuflow.helm-labels-for-search" (dict "component" "feedback-collector" "root" .) | nindent 4 }}
   ports:
-  - name: api
+  - name: http
     targetPort: 8080
     port: {{ .Values.feedback.collector.port }}
     protocol: TCP

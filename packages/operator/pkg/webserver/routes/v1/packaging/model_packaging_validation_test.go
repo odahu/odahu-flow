@@ -134,7 +134,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 	}
 
 	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient(), "")
+	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
 
 	err = s.mpRepository.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpValid,
