@@ -312,6 +312,13 @@ definitions:
         description: Toolchain integration status
         type: object
     type: object
+  UserInfo:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    type: object
   ConnectionSpec:
     properties:
       description:
@@ -1974,4 +1981,19 @@ paths:
       summary: Get a ToolchainIntegration
       tags:
       - Toolchain
+  /api/v1/user/info:
+    get:
+      consumes:
+      - application/json
+      description: Get the user information(email, name and so on)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/UserInfo'
+      summary: Get the user information
+      tags:
+      - User
 swagger: "2.0"

@@ -35,6 +35,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
+	userinfo "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/user"
 	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -83,6 +84,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, k8sClient client.Client, k8sConf
 	packaging.ConfigureRoutes(routeGroup, packRepository, connRepository)
 	training.ConfigureRoutes(routeGroup, trainRepository, connRepository)
 	configuration.ConfigureRoutes(routeGroup)
+	userinfo.ConfigureRoutes(routeGroup)
 
 	return err
 }

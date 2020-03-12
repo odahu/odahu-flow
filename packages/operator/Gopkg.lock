@@ -211,6 +211,14 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:6b014c67cb522566c30ef02116f9acb50cd60954708cf92c6654e2985696db18"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:044b2f1eea2f5cfb0d3678baf60892734f59d5c2ea3932cb6ed894a97ccba15c"
   name = "github.com/elazarl/go-bindata-assetfs"
   packages = ["."]
@@ -2342,6 +2350,7 @@
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api",
     "github.com/banzaicloud/bank-vaults/pkg/vault",
+    "github.com/dgrijalva/jwt-go",
     "github.com/emicklei/go-restful",
     "github.com/gin-gonic/gin",
     "github.com/go-logr/logr",

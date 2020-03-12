@@ -1911,6 +1911,29 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/api/v1/user/info": {
+            "get": {
+                "description": "Get the user information(email, name and so on)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get the user information",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/UserInfo"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2331,6 +2354,17 @@ var doc = `{
                     "description": "Toolchain integration status",
                     "type": "object",
                     "$ref": "#/definitions/ToolchainIntegrationStatus"
+                }
+            }
+        },
+        "UserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
