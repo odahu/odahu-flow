@@ -16,18 +16,20 @@
 """
 odahuflow env names
 """
+from typing import Callable, TypeVar, Any, Type, Union, Generic, Optional, Dict
+
 import configparser
 import logging
 import os
 from pathlib import Path
 
 # Get list of all variables
-ALL_VARIABLES = {}
+ALL_VARIABLES: Dict[str, Any] = {}
 
 _LOGGER = logging.getLogger()
 
 _INI_FILE_TRIED_TO_BE_LOADED = False
-_INI_FILE_CONTENT: configparser.ConfigParser = None
+_INI_FILE_CONTENT: Optional[configparser.ConfigParser] = None
 _INI_FILE_DEFAULT_CONFIG_PATH = Path.home().joinpath('.odahuflow/config')
 _DEFAULT_INI_SECTION = 'general'
 
@@ -273,7 +275,7 @@ class ConfigVariableInformation:
         return self._configurable_manually
 
 
-def cast_bool(value):
+def cast_bool(value) -> Optional[bool]:
     """
     Convert string to bool
 
@@ -305,12 +307,16 @@ def reinitialize_variables():
         globals()[value_information.name] = value
 
 
-class ConfigVariableDeclaration:
+T = TypeVar('T')
+
+
+class ConfigVariableDeclaration(Generic[T]):
     """
     Class that builds declaration of variable (and returns it's value as an instance)
     """
-
-    def __new__(cls, name, default=None, cast_func=str, description=None, configurable_manually=True):
+    def __new__(cls, name, default: T = None,
+                cast_func: Union[Callable[[str], Optional[T]], Type[T]] = str,  # type: ignore
+                description=None, configurable_manually=True):
         """
         Create new instance
 
@@ -336,8 +342,8 @@ class ConfigVariableDeclaration:
 
 # Verbose tracing
 DEBUG = ConfigVariableDeclaration('DEBUG', False, cast_bool,
-                                  'Enable verbose program output',
-                                  True)
+                                       'Enable verbose program output',
+                                       True)
 
 
 # Model invocation testing

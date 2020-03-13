@@ -88,7 +88,7 @@ def _try_to_extract_issuing_url_from_well_known_metadata(well_known_address: str
     token_endpoint = data.get('token_endpoint')
     if not token_endpoint:
         LOGGER.debug('well-known information does not contain token_endpoint (%s)', well_known_address)
-        return
+        return None
 
     return token_endpoint
 

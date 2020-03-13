@@ -17,3 +17,6 @@ docker = ">=4.2.0"
 
 [requires]
 python_version = "3.6"
+
+[dev-packages]
+mypy = "~=0.770"
