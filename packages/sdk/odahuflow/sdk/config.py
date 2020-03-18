@@ -30,7 +30,6 @@ _INI_FILE_TRIED_TO_BE_LOADED = False
 _INI_FILE_CONTENT: configparser.ConfigParser = None
 _INI_FILE_DEFAULT_CONFIG_PATH = Path.home().joinpath('.odahuflow/config')
 _DEFAULT_INI_SECTION = 'general'
-MODEL_JWT_TOKEN_SECTION = 'model_tokens'
 
 
 def reset_context():
@@ -340,38 +339,9 @@ DEBUG = ConfigVariableDeclaration('DEBUG', False, cast_bool,
                                   'Enable verbose program output',
                                   True)
 
-# Model building information
-BUILD_NUMBER = ConfigVariableDeclaration('BUILD_NUMBER', 0, int,
-                                         'Number of current build. It is used in model saving (during training)',
-                                         False)
-BUILD_ID = ConfigVariableDeclaration('BUILD_ID', None, str,
-                                     'ID of current build. It is used in model saving (during training)',
-                                     False)
-BUILD_URL = ConfigVariableDeclaration('BUILD_URL', None, str,
-                                      'URL of current build. It is used in model saving (during training)',
-                                      False)
-BUILD_TAG = ConfigVariableDeclaration('BUILD_TAG', None, str,
-                                      'TAG of current build. It is used in model saving (during training)',
-                                      False)
-
-GIT_COMMIT = ConfigVariableDeclaration('GIT_COMMIT', None, str,
-                                       'Git commit of source code. It is used in model saving (during training)',
-                                       False)
-GIT_BRANCH = ConfigVariableDeclaration('GIT_BRANCH', None, str,
-                                       'Git branch of source code. It is used in model saving (during training)',
-                                       False)
-
-JOB_NAME = ConfigVariableDeclaration('JOB_NAME', None, str,
-                                     'Name of train job [Jenkins]. It is used in model saving (during training)',
-                                     False)
-NODE_NAME = ConfigVariableDeclaration('NODE_NAME', None, str,
-                                      'Name of node [Jenkins]. It is used in model saving (during training)',
-                                      False)
 
 # Model invocation testing
 MODEL_SERVER_URL = ConfigVariableDeclaration('MODEL_SERVER_URL', '', str, 'Default url of model server', True)
-
-MODEL_PREFIX_URL = ConfigVariableDeclaration('MODEL_PREFIX_URL', '', str, 'Default prefix url of model server', True)
 
 MODEL_HOST = ConfigVariableDeclaration('MODEL_HOST', '', str, 'Default host of model server', True)
 
@@ -379,42 +349,6 @@ MODEL_DEPLOYMENT_NAME = ConfigVariableDeclaration('MODEL_DEPLOYMENT_NAME', '', s
 
 MODEL_ROUTE_NAME = ConfigVariableDeclaration('MODEL_ROUTE_NAME', '', str, 'Model deployment name', True)
 
-MODEL_JWT_TOKEN = ConfigVariableDeclaration('MODEL_JWT_TOKEN', '', str,
-                                            'Model jwt token for access to the model', True)
-
-# Building and serving
-MODEL_FILE = ConfigVariableDeclaration('MODEL_FILE', None, str,
-                                       'Binary model file location. It is used in model building',
-                                       False)
-
-# Training metrics
-MODEL_CLUSTER_TRAIN_METRICS_ENABLED = ConfigVariableDeclaration(
-    'MODEL_CLUSTER_TRAIN_METRICS_ENABLED', False, cast_bool, 'Send model metrics on train', False
-)
-MODEL_LOCAL_METRIC_STORE = ConfigVariableDeclaration(
-    'MODEL_LOCAL_METRIC_STORE', '.odahuflow/build_metric_store.json', str,
-    'File name where model build metric are saved', True
-)
-METRICS_HOST = ConfigVariableDeclaration('METRICS_HOST', 'graphite', str,
-                                         'Host that gets train metrics. It is used during model training', False)
-METRICS_PORT = ConfigVariableDeclaration('METRICS_PORT', 9125, int,
-                                         'Port that gets train metrics. It is used during model training', False)
-
-# API for models
-ODAHUFLOW_ADDR = ConfigVariableDeclaration('ODAHUFLOW_ADDR', '0.0.0.0', str,
-                                        'Address to listen Odahuflow model endpoint',
-                                        False)
-ODAHUFLOW_PORT = ConfigVariableDeclaration('ODAHUFLOW_PORT', 5000, str,
-                                        'Port to listen Odahuflow model endpoint',
-                                        False)
-
-# API for services
-ODAHUFLOW_API_ADDR = ConfigVariableDeclaration('ODAHUFLOW_API_ADDR', '0.0.0.0', str,
-                                            'Address to listen Odahuflow service endpoint',
-                                            False)
-ODAHUFLOW_API_PORT = ConfigVariableDeclaration('ODAHUFLOW_API_PORT', 5001, int,
-                                            'Port to listen Odahuflow service endpoint',
-                                            False)
 
 # API endpoint
 API_URL = ConfigVariableDeclaration('API_URL', 'http://localhost:5000', str,
@@ -426,82 +360,11 @@ API_TOKEN = ConfigVariableDeclaration('API_TOKEN', None, str,
 API_REFRESH_TOKEN = ConfigVariableDeclaration('API_REFRESH_TOKEN', None, str,
                                               'Refresh token',
                                               True)
-API_ACCESS_TOKEN = ConfigVariableDeclaration('API_ACCESS_TOKEN', None, str,
-                                             'Access token',
-                                             True)
 API_ISSUING_URL = ConfigVariableDeclaration('API_ISSUING_URL', None, str,
                                             'URL for refreshing and issuing tokens',
                                             True)
 
 ISSUER_URL = ConfigVariableDeclaration('ISSUER_URL', None, str, 'OIDC Issuer URL', True)
-
-LOCAL_DEFAULT_RESOURCE_PREFIX = ConfigVariableDeclaration('LOCAL_DEFAULT_RESOURCE_PREFIX', None, str,
-                                                          'Prefix for building local model binary storage path',
-                                                          False)
-
-# Images registry
-MODEL_IMAGES_REGISTRY_HOST = ConfigVariableDeclaration('MODEL_IMAGES_REGISTRY_HOST', None, str,
-                                                       'Default registry for API server',
-                                                       False)
-
-# API server configuration
-CLUSTER_CONFIG_PATH = ConfigVariableDeclaration('CLUSTER_CONFIG_PATH', None, str,
-                                                'Path to cluster config file for API service',
-                                                False)
-CLUSTER_SECRETS_PATH = ConfigVariableDeclaration('CLUSTER_SECRETS_PATH', None, str,
-                                                 'Path to cluster secrets folder for API service',
-                                                 False)
-JWT_CONFIG_PATH = ConfigVariableDeclaration('JWT_CONFIG_PATH', None, str,
-                                            'Path to JWT config folder',
-                                            False)
-
-# API and Model invocation configuration control
-FLASK_APP_SETTINGS_FILES = ConfigVariableDeclaration('FLASK_APP_SETTINGS_FILES', None, str,
-                                                     'Path to flask\'s configuration file',
-                                                     False)
-
-# Model deploying configuration
-MODEL_INSTANCE_SERVICE_ACCOUNT_NAME = ConfigVariableDeclaration('MODEL_INSTANCE_SERVICE_ACCOUNT_NAME', 'model', str,
-                                                                'Name of K8S ServiceAccount for model instances',
-                                                                False)
-
-# Model execution control
-MODEL_PROPERTIES_CACHE_TTL = ConfigVariableDeclaration('MODEL_PROPERTIES_CACHE_TTL', 10, int,
-                                                       'TTL of in-memory model properties cache',
-                                                       False)
-
-# Kubernetes API
-NAMESPACE = ConfigVariableDeclaration('NAMESPACE', 'odahuflow', str,
-                                      'Name of kubernetes namespace inside Pod',
-                                      False)
-
-POD_NAME = ConfigVariableDeclaration('POD_NAME', None, str, 'Current pod name', False)
-
-K8S_API_RETRY_NUMBER_MAX_LIMIT = ConfigVariableDeclaration('K8S_API_RETRY_NUMBER_MAX_LIMIT', 5, int,
-                                                           'Count of retries for K8S API calls',
-                                                           False)
-K8S_API_RETRY_DELAY_SEC = ConfigVariableDeclaration('K8S_API_RETRY_DELAY_SEC', 3, int,
-                                                    'Time wait before next retry to call K8S API',
-                                                    False)
-
-LOCAL_DEPLOY_HOSTNAME = ConfigVariableDeclaration('LOCAL_DEPLOY_HOSTNAME', 'http://localhost', str,
-                                                  'Name of host on which local deployed models will be accessable',
-                                                  True)
-
-# Utils
-TEMP_DIRECTORY = ConfigVariableDeclaration('TEMP_DIRECTORY', None, str,
-                                           'Override system folder for temporary files',
-                                           True)
-
-# For using in tests scenarios
-MODEL_NAME = ConfigVariableDeclaration('MODEL_NAME', None, str, 'Name of current model', False)
-
-MODEL_VERSION = ConfigVariableDeclaration('MODEL_VERSION', None, str, 'Version of current model', False)
-
-MODEL_K8S_MEMORY = ConfigVariableDeclaration('MODEL_K8S_MEMORY', '256Mi', str, 'Default k8s memory for a model', True)
-MODEL_K8S_CPU = ConfigVariableDeclaration('MODEL_K8S_CPU', '256m', str, 'Default k8s cpu for a model', True)
-REDUCE_MODEL_REQUESTS_BY = ConfigVariableDeclaration('REDUCE_MODEL_REQUESTS_BY', 33, int,
-                                                     'Reduce k8s resource for model by specific percent', True)
 
 # Auth
 ODAHUFLOWCTL_OAUTH_CLIENT_ID = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLIENT_ID', 'legion-cli', str,
@@ -528,15 +391,15 @@ ODAHUFLOWCTL_OAUTH_LOOPBACK_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_
                                                          True)
 
 ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL',
-                                                              '', str,
-                                                              'OAuth2 token issuing URL',
+                                                                 '', str,
+                                                                 'OAuth2 token issuing URL',
                                                                  True)
 
 ODAHUFLOWCTL_OAUTH_AUTH_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_AUTH_URL',
-                                                     '',
-                                                     str,
-                                                     'OAuth2 token issuing URL',
-                                                     True)
+                                                        '',
+                                                        str,
+                                                        'OAuth2 token issuing URL',
+                                                        True)
 
 JUPYTER_REDIRECT_URL = ConfigVariableDeclaration('JUPYTER_REDIRECT_URL',
                                                  '', str,

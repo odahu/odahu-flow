@@ -18,38 +18,14 @@ Model HTTP API client and utils
 """
 import json
 import logging
-
-import requests
-from requests.compat import urlencode
-from requests.utils import to_key_val_list
 from urllib3.exceptions import HTTPError
 
-from odahuflow.sdk import config
+import requests
+
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.utils import ensure_function_succeed
 
 LOGGER = logging.getLogger(__name__)
-
-
-def encode_http_params(data):
-    """
-    Encode HTTP parameters to URL query string
-
-    :param data: data as text or tuple/list
-    :type data: str or bytes or tuple or list
-    :return: str -- encoded data
-    """
-    if isinstance(data, (str, bytes)):
-        return urlencode(data)
-    elif hasattr(data, '__iter__'):
-        result = []
-        for key, value in to_key_val_list(data):
-            if value is not None:
-                result.append(
-                    (key.encode('utf-8') if isinstance(key, str) else key,
-                     value.encode('utf-8') if isinstance(value, str) else value))
-        return urlencode(result, doseq=True)
-    raise ValueError('Invalid argument')
 
 
 def calculate_url(host: str, url: str = None, model_route: str = None, model_deployment: str = None,
@@ -82,16 +58,6 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
         return model_route.status.edge_url
 
     raise NotImplementedError("Cannot create a model url")
-
-
-def calculate_url_from_config():
-    """
-    Calculate url for model with config values
-
-    :return: model url
-    """
-    return calculate_url(config.MODEL_HOST, config.MODEL_SERVER_URL, config.MODEL_ROUTE_NAME,
-                         config.MODEL_DEPLOYMENT_NAME, config.MODEL_PREFIX_URL)
 
 
 class ModelClient:
@@ -131,17 +97,6 @@ class ModelClient:
         """
         return '{host}/api/model'.format(host=self._url)
 
-    def build_batch_url(self, endpoint=None):
-        """
-        Build API batch invoke URL
-
-        :param endpoint: (Optional) target endpoint
-        :type endpoint: str
-        :return: str -- batch invoke url
-        """
-        if endpoint:
-            return '{}/batch/{}'.format(self.api_url, endpoint)
-        return '{}/batch'.format(self.api_url)
 
     @property
     def info_url(self):

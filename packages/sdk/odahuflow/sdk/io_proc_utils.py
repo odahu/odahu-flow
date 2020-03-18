@@ -20,19 +20,6 @@ import subprocess
 LOGGER = logging.getLogger(__name__)
 
 
-def setup_logging(verbose: bool = False) -> None:
-    """
-    Setup logging instance
-
-    :param verbose: use verbose output
-    :type verbose: bool
-    """
-    log_level = logging.DEBUG if verbose else logging.INFO
-
-    logging.basicConfig(format='[odahuflow][%(levelname)5s] %(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
-                        level=log_level)
-
-
 def run(*args: str, cwd=None, stream_output: bool = True):
     """
     Run system command and stream / capture stdout and stderr
