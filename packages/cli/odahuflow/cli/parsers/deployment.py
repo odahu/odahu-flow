@@ -34,12 +34,6 @@ DEFAULT_WAIT_TIMEOUT = 5
 # 20 minutes
 DEFAULT_DEPLOYMENT_TIMEOUT = 20 * 60
 
-DEFAULT_WIDTH = 120
-MD_HEADER = ["Name", "State", "Min/Current/Max Replicas", "Service URL"]
-
-DEFAULT_WIDTH_LOCAL = 160
-DELETION_TIMEOUT = 60
-MD_LOCAL_HEADER = ["Name", "Image", "Port", "Model Name", "Model Version"]
 
 LOGGER = logging.getLogger(__name__)
 

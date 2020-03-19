@@ -214,17 +214,6 @@ class RemoteAPIClient:
         }
         return request_kwargs
 
-    def _build_request(self,
-                       url_template: str,
-                       payload: Mapping[Any, Any] = None,
-                       action: str = 'GET',
-                       stream: bool = False) -> requests.PreparedRequest:
-
-        request_kwargs = self._build_request_kwargs(url_template, payload, action, stream)
-        request = requests.PreparedRequest()
-        request.prepare(**request_kwargs)
-        return request
-
     def _get_conn_timeout(self, timeout=None):
         connection_timeout = timeout if timeout is not None else self.timeout
 
@@ -438,11 +427,6 @@ class RemoteAPIClient:
     @property
     def _refresh_token_exists(self):
         return odahuflow.sdk.config.API_REFRESH_TOKEN and odahuflow.sdk.config.API_ISSUING_URL
-
-    @property
-    def _client_credentials_exists(self):
-        return odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_CLIENT_ID and \
-               odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_CLIENT_SECRET
 
     @property
     def _interactive_mode_enabled(self):

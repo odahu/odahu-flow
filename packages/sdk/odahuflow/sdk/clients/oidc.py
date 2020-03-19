@@ -23,8 +23,6 @@ WELL_KNOWN_CONFIGURATION_URL = '.well-known/openid-configuration'
 
 # Some OpenID Provider configuration keys
 # (defined at https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata)
-ISSUER = 'issuer'
-AUTHORIZATION_ENDPOINT = 'authorization_endpoint'
 TOKEN_ENDPOINT = 'token_endpoint'
 
 
@@ -62,24 +60,9 @@ class OpenIdProviderConfiguration:
         else:
             raise RuntimeError(f'Not expected status code: {response.status_code}')
 
-    async def async_fetch_configuration(self) -> None:
-        """
-        Fetch OpenID Provider configuration making HTTP request
-        :return:
-        """
-        raise NotImplementedError
-
     @property
     def configuration_url(self) -> str:
         return f'{self._issuer}/{WELL_KNOWN_CONFIGURATION_URL}'
-
-    @property
-    def issuer(self) -> str:
-        return self.extract_value(ISSUER)
-
-    @property
-    def authorization_endpoint(self) -> str:
-        return self.extract_value(AUTHORIZATION_ENDPOINT)
 
     @property
     def token_endpoint(self) -> str:
