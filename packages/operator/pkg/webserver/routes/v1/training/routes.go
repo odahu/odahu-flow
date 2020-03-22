@@ -18,19 +18,24 @@ package training
 
 import (
 	"github.com/gin-gonic/gin"
-	train_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, mtRepository mt_repository.Repository,
-	connRepository conn_repository.Repository) {
+func ConfigureRoutes(
+	routeGroup *gin.RouterGroup,
+	mtRepository mt_repository.Repository,
+	connRepository conn_repository.Repository,
+	config config.ModelTrainingConfig,
+	gpuResourceName string,
+) {
 	mtController := ModelTrainingController{
 		mtRepository: mtRepository,
-		validator:    NewMtValidator(mtRepository, connRepository),
+		validator:    NewMtValidator(mtRepository, connRepository, config.OutputConnectionID, gpuResourceName),
 	}
-	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(train_config.Enabled))
+	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(config.Enabled))
 
 	routeGroup.GET(GetModelTrainingURL, mtController.getMT)
 	routeGroup.GET(GetAllModelTrainingURL, mtController.getAllMTs)

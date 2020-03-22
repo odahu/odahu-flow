@@ -21,13 +21,12 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	pack_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	pi_kubernetes "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
@@ -58,8 +57,8 @@ const (
 	tolerationOperator = "operator"
 	tolerationEffect   = "effect"
 
-	modelBuildImage  = "model-image:builder"
-	integrationImage = "model-image:packaging"
+	modelPackageImage = "model-image:packager"
+	integrationImage  = "model-image:packaging"
 )
 
 var (
@@ -71,10 +70,10 @@ var (
 	mpNamespacedName = types.NamespacedName{Name: mpName, Namespace: testNamespace}
 	testResValue     = "5"
 	toleration       = map[string]string{
-		pack_conf.TolerationKey:      tolerationKey,
-		pack_conf.TolerationValue:    tolerationValue,
-		pack_conf.TolerationOperator: tolerationOperator,
-		pack_conf.TolerationEffect:   tolerationEffect,
+		config.TolerationKey:      tolerationKey,
+		config.TolerationValue:    tolerationValue,
+		config.TolerationOperator: tolerationOperator,
+		config.TolerationEffect:   tolerationEffect,
 	}
 )
 
@@ -85,6 +84,7 @@ type ModelPackagingControllerSuite struct {
 	cfg             *rest.Config
 
 	k8sClient  client.Client
+	k8sManager manager.Manager
 	stopMgr    chan struct{}
 	mgrStopped *sync.WaitGroup
 	requests   chan reconcile.Request
@@ -133,9 +133,6 @@ func (s *ModelPackagingControllerSuite) createPackagingIntegration() *odahuflowv
 }
 
 func (s *ModelPackagingControllerSuite) SetupSuite() {
-	viper.Set(pack_conf.PackagingIntegrationNamespace, testNamespace)
-	viper.Set(pack_conf.Namespace, testNamespace)
-
 	s.testEnvironment = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "config", "crds"),
@@ -168,16 +165,9 @@ func (s *ModelPackagingControllerSuite) SetupTest() {
 	mgr, err := manager.New(s.cfg, manager.Options{})
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.k8sClient = mgr.GetClient()
+	s.k8sManager = mgr
 
 	s.requests = make(chan reconcile.Request)
-	mpReconciler := &ReconcileModelPackaging{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
-	recFn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
-		result, err := mpReconciler.Reconcile(req)
-		s.requests <- req
-		return result, err
-	})
-
-	s.g.Expect(add(mgr, recFn)).NotTo(HaveOccurred())
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}
@@ -192,12 +182,23 @@ func (s *ModelPackagingControllerSuite) SetupTest() {
 	}
 }
 
-func (s *ModelPackagingControllerSuite) TearDownTest() {
-	// Cleanup configuration
-	viper.Set(pack_conf.NodeSelector, nil)
-	viper.Set(pack_conf.Toleration, nil)
-	viper.Set(pack_conf.ModelPackagerImage, nil)
+func (s *ModelPackagingControllerSuite) initReconciler(packagingConfig config.ModelPackagingConfig) {
+	packagingConfig.PackagingIntegrationNamespace = testNamespace
+	packagingConfig.Namespace = testNamespace
 
+	mpReconciler := newReconciler(
+		s.k8sManager, packagingConfig, config.NewDefaultOperatorConfig(), config.NvidiaResourceName,
+	)
+	recFn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
+		result, err := mpReconciler.Reconcile(req)
+		s.requests <- req
+		return result, err
+	})
+
+	s.g.Expect(add(s.k8sManager, recFn)).NotTo(HaveOccurred())
+}
+
+func (s *ModelPackagingControllerSuite) TearDownTest() {
 	if err := s.k8sClient.Delete(context.TODO(), s.createPackagingIntegration()); err != nil {
 		s.T().Fatal(err)
 	}
@@ -244,6 +245,9 @@ func (s *ModelPackagingControllerSuite) templateNodeSelectorTest(
 }
 
 func (s *ModelPackagingControllerSuite) TestEmptyNodePools() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	s.initReconciler(packagingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -256,8 +260,11 @@ func (s *ModelPackagingControllerSuite) TestEmptyNodePools() {
 }
 
 func (s *ModelPackagingControllerSuite) TestNodePools() {
-	viper.Set(pack_conf.NodeSelector, nodeSelector)
-	viper.Set(pack_conf.Toleration, toleration)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.NodeSelector = nodeSelector
+	packagingConfig.Toleration = toleration
+	s.initReconciler(packagingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -275,7 +282,10 @@ func (s *ModelPackagingControllerSuite) TestNodePools() {
 }
 
 func (s *ModelPackagingControllerSuite) TestOnlyNodeSelector() {
-	viper.Set(pack_conf.NodeSelector, nodeSelector)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.NodeSelector = nodeSelector
+	s.initReconciler(packagingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -288,7 +298,9 @@ func (s *ModelPackagingControllerSuite) TestOnlyNodeSelector() {
 }
 
 func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
-	viper.Set(pack_conf.ModelPackagerImage, modelBuildImage)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.ModelPackagerImage = modelPackageImage
+	s.initReconciler(packagingConfig)
 
 	packResources := &odahuflowv1alpha1.ResourceRequirements{
 		Limits: &odahuflowv1alpha1.ResourceList{
@@ -300,7 +312,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 			GPU: &testResValue,
 		},
 	}
-	k8sPackagingResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(packResources)
+	k8sPackagingResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(packResources, config.NvidiaResourceName)
 	s.g.Expect(err).Should(BeNil())
 
 	mp := &odahuflowv1alpha1.ModelPackaging{
@@ -342,13 +354,13 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 	for _, step := range tr.Spec.TaskSpec.Steps {
 		switch step.Name {
 		case odahuflow.PackagerSetupStep:
-			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
+			s.g.Expect(step.Image).Should(Equal(modelPackageImage))
 			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		case odahuflow.PackagerPackageStep:
 			s.g.Expect(step.Image).Should(Equal(integrationImage))
 			s.g.Expect(step.Resources).Should(Equal(k8sPackagingResources))
 		case odahuflow.PackagerResultStep:
-			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
+			s.g.Expect(step.Image).Should(Equal(modelPackageImage))
 			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		default:
 			s.T().Errorf("Unexpected spep name: %s", step.Name)
@@ -357,7 +369,9 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 }
 
 func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
-	viper.Set(pack_conf.Timeout, 3*time.Hour)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Timeout = 3 * time.Hour
+	s.initReconciler(packagingConfig)
 
 	mp := &odahuflowv1alpha1.ModelPackaging{
 		ObjectMeta: metav1.ObjectMeta{

@@ -18,16 +18,22 @@ package deployment
 
 import (
 	"github.com/gin-gonic/gin"
-	md_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, repository md_repository.Repository) {
+func ConfigureRoutes(
+	routeGroup *gin.RouterGroup,
+	repository md_repository.Repository,
+	deploymentConfig config.ModelDeploymentConfig,
+	gpuResourceName string,
+) {
 	mdController := ModelDeploymentController{
 		mdRepository: repository,
+		mdValidator:  NewModelDeploymentValidator(deploymentConfig, gpuResourceName),
 	}
-	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(md_config.Enabled))
+	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(deploymentConfig.Enabled))
 
 	routeGroup.GET(GetModelDeploymentURL, mdController.getMD)
 	routeGroup.GET(GetAllModelDeploymentURL, mdController.getAllMDs)

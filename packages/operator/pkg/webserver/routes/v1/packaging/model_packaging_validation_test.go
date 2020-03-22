@@ -18,9 +18,8 @@ package packaging_test
 
 import (
 	"fmt"
-	packaging_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	"github.com/spf13/viper"
 	"path/filepath"
 	"testing"
 
@@ -105,6 +104,7 @@ type ModelPackagingValidationSuite struct {
 	mpRepository   mp_repository.Repository
 	connRepository conn_repository.Repository
 	k8sEnvironment *envtest.Environment
+	validator      *pack_route.MpValidator
 }
 
 func (s *ModelPackagingValidationSuite) SetupTest() {
@@ -135,6 +135,9 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 
 	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
+	s.validator = pack_route.NewMpValidator(
+		s.mpRepository, s.connRepository, "conn-id", config.NvidiaResourceName,
+	)
 
 	err = s.mpRepository.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpValid,
@@ -201,7 +204,7 @@ func (s *ModelPackagingValidationSuite) TestMpIDGeneration() {
 		Spec: packaging.ModelPackagingSpec{},
 	}
 
-	_ = pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(ti)
+	_ = s.validator.ValidateAndSetDefaults(ti)
 	s.g.Expect(ti.ID).ShouldNot(BeEmpty())
 }
 
@@ -212,7 +215,7 @@ func (s *ModelPackagingValidationSuite) TestMpIDExplicitly() {
 		Spec: packaging.ModelPackagingSpec{},
 	}
 
-	_ = pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	_ = s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.ID).Should(Equal(id))
 }
 
@@ -223,7 +226,7 @@ func (s *ModelPackagingValidationSuite) TestMpImage() {
 		},
 	}
 
-	_ = pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	_ = s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.Image).ShouldNot(BeEmpty())
 	s.g.Expect(mp.Spec.Image).Should(Equal(piImageMpValid))
 }
@@ -237,7 +240,7 @@ func (s *ModelPackagingValidationSuite) TestMpImageExplicitly() {
 		},
 	}
 
-	_ = pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	_ = s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.Image).Should(Equal(image))
 }
 
@@ -248,7 +251,7 @@ func (s *ModelPackagingValidationSuite) TestMpImageNotFound() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
 		"packagingintegrations.odahuflow.odahu.org \"not found\" not found"))
@@ -261,7 +264,7 @@ func (s *ModelPackagingValidationSuite) TestMpArtifactName() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).ShouldNot(ContainSubstring(pack_route.TrainingIDOrArtifactNameErrorMessage))
 }
@@ -271,7 +274,7 @@ func (s *ModelPackagingValidationSuite) TestMpArtifactNameMissed() {
 		Spec: packaging.ModelPackagingSpec{},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.TrainingIDOrArtifactNameErrorMessage))
 }
@@ -281,7 +284,7 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNameEmpty() {
 		Spec: packaging.ModelPackagingSpec{},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyIntegrationNameErrorMessage))
 }
@@ -293,7 +296,7 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
 		"packagingintegrations.odahuflow.odahu.org \"some-packaging-name\" not found"))
@@ -309,7 +312,7 @@ func (s *ModelPackagingValidationSuite) TestMpNotValidArgumentsSchema() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("argument-1: Must be greater than or equal to 5"))
 }
@@ -324,7 +327,7 @@ func (s *ModelPackagingValidationSuite) TestMpAdditionalArguments() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("Additional property argument-3 is not allowed"))
 }
@@ -339,7 +342,7 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredArguments() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("argument-1 is required"))
 }
@@ -357,7 +360,7 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(ti)
+	err := s.validator.ValidateAndSetDefaults(ti)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("[target-2] are required targets"))
 }
@@ -365,8 +368,8 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
 	ti := &packaging.ModelPackaging{
 		Spec: packaging.ModelPackagingSpec{
-			IntegrationName: piIDMpValid,
-			ArtifactName:    "test",
+			IntegrationName:  piIDMpValid,
+			ArtifactName:     "test",
 			OutputConnection: connS3TypeMpValid,
 			Arguments: map[string]interface{}{
 				"argument-1": 5,
@@ -380,7 +383,7 @@ func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(ti)
+	err := s.validator.ValidateAndSetDefaults(ti)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(ti.Spec.Targets).Should(HaveLen(2))
 	s.g.Expect(ti.Spec.Targets[0].Name).Should(Equal("target-2"))
@@ -403,7 +406,7 @@ func (s *ModelPackagingValidationSuite) TestMpNotFoundTargets() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf(
 		pack_route.TargetNotFoundErrorMessage, targetNotFoundName, piIDMpValid,
@@ -423,7 +426,7 @@ func (s *ModelPackagingValidationSuite) TestMpTargetConnNotFound() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }
@@ -441,7 +444,7 @@ func (s *ModelPackagingValidationSuite) TestMpTargetConnWrongType() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf(
 		pack_route.NotValidConnTypeErrorMessage, "target-1", connection.DockerType, piIDMpValid,
@@ -455,7 +458,7 @@ func (s *ModelPackagingValidationSuite) TestMpGenerateDefaultResources() {
 		},
 	}
 
-	_ = pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	_ = s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.Resources).ShouldNot(BeNil())
 	s.g.Expect(mp.Spec.Resources).Should(Equal(pack_route.DefaultPackagingResources))
 }
@@ -480,7 +483,7 @@ func (s *ModelPackagingValidationSuite) TestMpResourcesValidation() {
 		},
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 
 	errorMessage := err.Error()
@@ -497,9 +500,6 @@ func (s *ModelPackagingValidationSuite) TestMpResourcesValidation() {
 }
 
 func (s *ModelPackagingValidationSuite) TestOutputConnection() {
-
-	validator := pack_route.NewMpValidator(s.mpRepository, s.connRepository)
-
 	testMpOutConnDefault := testOutConnDefault
 	testMpOutConn := testOutConn
 	testMpOutConnNotFound := testOutConnNotFound
@@ -509,28 +509,46 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 	}
 
 	// If configuration output connection is not set then user must specify it as ModelTraining parameter
-	viper.Set(packaging_config.OutputConnectionName, nil)
-	err := validator.ValidateAndSetDefaults(mp)
+	err := pack_route.NewMpValidator(
+		s.mpRepository,
+		s.connRepository,
+		"",
+		config.NvidiaResourceName,
+	).ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
 
 	// If configuration output connection is set and user has not passed output connection as training
 	// parameter then output connection value from configuration will be used as default
-	viper.Set(packaging_config.OutputConnectionName, testMpOutConnDefault)
-	_ = validator.ValidateAndSetDefaults(mp)
+	_ = pack_route.NewMpValidator(
+		s.mpRepository,
+		s.connRepository,
+		testMpOutConnDefault,
+		config.NvidiaResourceName,
+	).ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConnDefault))
 
 	// If configuration output connection is set but user also has passed output connection as training
 	// parameter then user value is used
 	mp.Spec.OutputConnection = testMpOutConn
-	_ = validator.ValidateAndSetDefaults(mp)
+	_ = pack_route.NewMpValidator(
+		s.mpRepository,
+		s.connRepository,
+		testMpOutConn,
+		config.NvidiaResourceName,
+	).ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConn))
 
 	// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
 	mp = &packaging.ModelPackaging{
 		Spec: packaging.ModelPackagingSpec{OutputConnection: testMpOutConnNotFound},
 	}
-	err = validator.ValidateAndSetDefaults(mp)
+	err = pack_route.NewMpValidator(
+		s.mpRepository,
+		s.connRepository,
+		testMpOutConn,
+		config.NvidiaResourceName,
+	).ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
 }
@@ -540,7 +558,7 @@ func (s *ModelPackagingValidationSuite) TestValidateID() {
 		ID: "not-VALID-id-",
 	}
 
-	err := pack_route.NewMpValidator(s.mpRepository, s.connRepository).ValidateAndSetDefaults(mp)
+	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

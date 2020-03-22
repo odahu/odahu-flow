@@ -19,7 +19,7 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: object=None, image: str=None, model: ModelIdentity=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
         :param args: The args of this ModelTrainingSpec.  # noqa: E501
@@ -31,7 +31,7 @@ class ModelTrainingSpec(Model):
         :param envs: The envs of this ModelTrainingSpec.  # noqa: E501
         :type envs: List[EnvironmentVariable]
         :param hyper_parameters: The hyper_parameters of this ModelTrainingSpec.  # noqa: E501
-        :type hyper_parameters: object
+        :type hyper_parameters: Dict[str, str]
         :param image: The image of this ModelTrainingSpec.  # noqa: E501
         :type image: str
         :param model: The model of this ModelTrainingSpec.  # noqa: E501
@@ -54,7 +54,7 @@ class ModelTrainingSpec(Model):
             'data': List[DataBindingDir],
             'entrypoint': str,
             'envs': List[EnvironmentVariable],
-            'hyper_parameters': object,
+            'hyper_parameters': Dict[str, str],
             'image': str,
             'model': ModelIdentity,
             'output_connection': str,
@@ -197,24 +197,24 @@ class ModelTrainingSpec(Model):
         self._envs = envs
 
     @property
-    def hyper_parameters(self) -> object:
+    def hyper_parameters(self) -> Dict[str, str]:
         """Gets the hyper_parameters of this ModelTrainingSpec.
 
         Model training hyperParameters in parameter:value format  # noqa: E501
 
         :return: The hyper_parameters of this ModelTrainingSpec.
-        :rtype: object
+        :rtype: Dict[str, str]
         """
         return self._hyper_parameters
 
     @hyper_parameters.setter
-    def hyper_parameters(self, hyper_parameters: object):
+    def hyper_parameters(self, hyper_parameters: Dict[str, str]):
         """Sets the hyper_parameters of this ModelTrainingSpec.
 
         Model training hyperParameters in parameter:value format  # noqa: E501
 
         :param hyper_parameters: The hyper_parameters of this ModelTrainingSpec.
-        :type hyper_parameters: object
+        :type hyper_parameters: Dict[str, str]
         """
 
         self._hyper_parameters = hyper_parameters

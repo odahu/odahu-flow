@@ -24,13 +24,12 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	trainer_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/trainer"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -50,21 +49,23 @@ type ModelTrainer struct {
 	connRepo        conn_repository.Repository
 	modelTrainingID string
 	log             logr.Logger
+	trainerConfig   config.TrainerConfig
 }
 
 func NewModelTrainer(
 	trainRepo train_repository.Repository,
 	connRepo conn_repository.Repository,
-	modelTrainingID string,
+	trainerConfig config.TrainerConfig,
 ) *ModelTrainer {
 	trainingLogger := logf.Log.WithName("trainer").
-		WithValues(odahuflow.ModelTrainingIDLogPrefix, modelTrainingID)
+		WithValues(odahuflow.ModelTrainingIDLogPrefix, trainerConfig.ModelTrainingID)
 
 	return &ModelTrainer{
 		trainRepo:       trainRepo,
 		connRepo:        connRepo,
-		modelTrainingID: modelTrainingID,
+		modelTrainingID: trainerConfig.ModelTrainingID,
 		log:             trainingLogger,
+		trainerConfig:   trainerConfig,
 	}
 }
 
@@ -89,7 +90,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 	// Downloads a source code
 	switch k8sTraining.VCS.Spec.Type {
 	case connection.GITType:
-		commitID, err = mt.cloneUserRepo(k8sTraining, viper.GetString(trainer_conf.OutputTrainingDir))
+		commitID, err = mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
 		if err != nil {
 			mt.log.Error(err, "Error occurs during cloning project")
 
@@ -101,7 +102,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 
 	mt.log.Info(
 		"The model source code was downloaded",
-		"dir", viper.GetString(trainer_conf.OutputTrainingDir),
+		"dir", mt.trainerConfig.OutputDir,
 	)
 
 	// Saves some data before starting a training
@@ -118,7 +119,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 
 	mt.log.Info("The commit ID was saved", "commit_id", commitID)
 
-	workDir := viper.GetString(trainer_conf.OutputTrainingDir)
+	workDir := mt.trainerConfig.OutputDir
 	if len(workDir) != 0 {
 		mt.log.Info("Change current working dir", "new worker dir", workDir)
 
@@ -178,7 +179,7 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
-	outputTrainingDir := viper.GetString(trainer_conf.OutputTrainingDir)
+	outputTrainingDir := mt.trainerConfig.OutputDir
 	mt.log.Info("Start to zip the dir", "dir", outputTrainingDir, "archive_name",
 		outputZipName)
 

@@ -19,9 +19,7 @@ package trainer
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	trainer_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/trainer"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	"github.com/spf13/viper"
 )
 
 // The function extracts data from a repository and creates the training entity.
@@ -56,7 +54,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		})
 	}
 
-	outputConn, err := mt.connRepo.GetDecryptedConnection(viper.GetString(trainer_conf.OutputConnectionName), )
+	outputConn, err := mt.connRepo.GetDecryptedConnection(modelTraining.Spec.OutputConnection)
 	if err != nil {
 		return nil, err
 	}

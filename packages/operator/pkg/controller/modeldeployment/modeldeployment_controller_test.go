@@ -20,6 +20,7 @@ import (
 	"context"
 	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,7 +87,9 @@ func TestReconcile(t *testing.T) {
 	g.Expect(err).NotTo(HaveOccurred())
 	c = mgr.GetClient()
 
-	recFn, requests := SetupTestReconcile(newConfigurableReconciler(mgr))
+	recFn, requests := SetupTestReconcile(newConfigurableReconciler(
+		mgr, config.NewDefaultModelDeploymentConfig(), config.NewDefaultOperatorConfig(), config.NvidiaResourceName,
+	))
 	g.Expect(add(mgr, recFn)).NotTo(HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)
@@ -136,7 +139,7 @@ func TestReconcile(t *testing.T) {
 
 	containerSpec := podSpec.Containers[0]
 
-	mdResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources)
+	mdResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources, config.NvidiaResourceName)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(containerSpec.Resources).To(Equal(mdResources))
 

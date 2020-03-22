@@ -19,12 +19,9 @@ package modelpackaging
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	operator_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/operator"
-	packaging_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/spf13/viper"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"path"
@@ -40,21 +37,21 @@ const (
 	configSecretName  = "odahu-flow-packaging-config" //nolint:gosec
 )
 
-func generatePackagerTaskSpec(
+func (r *ReconcileModelPackaging) generatePackagerTaskSpec(
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
 	packagingIntegration *packaging.PackagingIntegration,
 ) (*tektonv1alpha1.TaskSpec, error) {
-	mainPackagerStep, err := createMainPackagerStep(packagingCR, packagingIntegration)
+	mainPackagerStep, err := r.createMainPackagerStep(packagingCR, packagingIntegration)
 	if err != nil {
 		return nil, err
 	}
 
-	helperContainerResources := utils.CalculateHelperContainerResources(mainPackagerStep.Resources)
+	helperContainerResources := utils.CalculateHelperContainerResources(mainPackagerStep.Resources, r.gpuResourceName)
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
-			createInitPackagerStep(helperContainerResources, packagingCR),
+			r.createInitPackagerStep(helperContainerResources, packagingCR),
 			mainPackagerStep,
-			createResultPackagerStep(helperContainerResources, packagingCR.Name),
+			r.createResultPackagerStep(helperContainerResources, packagingCR.Name),
 		},
 		Volumes: []corev1.Volume{
 			{
@@ -69,13 +66,13 @@ func generatePackagerTaskSpec(
 	}, nil
 }
 
-func createInitPackagerStep(
+func (r *ReconcileModelPackaging) createInitPackagerStep(
 	res corev1.ResourceRequirements, packagingCR *odahuflowv1alpha1.ModelPackaging,
 ) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerSetupStep,
-			Image:   viper.GetString(packaging_conf.ModelPackagerImage),
+			Image:   r.packagingConfig.ModelPackagerImage,
 			Command: []string{pathToPackagerBin},
 			Args: []string{
 				"setup",
@@ -83,10 +80,8 @@ func createInitPackagerStep(
 				path.Join(workspacePath, mpContentFile),
 				"--mp-id",
 				packagingCR.Name,
-				"--output-connection-name",
-				packagingCR.Spec.OutputConnection,
 				"--api-url",
-				viper.GetString(operator_conf.APIURL),
+				r.operatorConfig.Auth.APIURL,
 				"--config",
 				path.Join(configDir, configFileName),
 			},
@@ -101,10 +96,10 @@ func createInitPackagerStep(
 	}
 }
 
-func createMainPackagerStep(
+func (r *ReconcileModelPackaging) createMainPackagerStep(
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
 	packagingIntegration *packaging.PackagingIntegration) (tektonv1alpha1.Step, error) {
-	packResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(packagingCR.Spec.Resources)
+	packResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(packagingCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
 		log.Error(err, "The packaging resources is not valid",
 			"mp id", packagingCR.Name, "resources", packagingCR.Namespace)
@@ -130,11 +125,13 @@ func createMainPackagerStep(
 	}, nil
 }
 
-func createResultPackagerStep(res corev1.ResourceRequirements, mpID string) tektonv1alpha1.Step {
+func (r *ReconcileModelPackaging) createResultPackagerStep(
+	res corev1.ResourceRequirements, mpID string,
+) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerResultStep,
-			Image:   viper.GetString(packaging_conf.ModelPackagerImage),
+			Image:   r.packagingConfig.ModelPackagerImage,
 			Command: []string{pathToPackagerBin},
 			Args: []string{
 				"result",
@@ -142,10 +139,8 @@ func createResultPackagerStep(res corev1.ResourceRequirements, mpID string) tekt
 				path.Join(workspacePath, mpContentFile),
 				"--mp-id",
 				mpID,
-				"--output-connection-name",
-				viper.GetString(packaging_conf.OutputConnectionName),
 				"--api-url",
-				viper.GetString(operator_conf.APIURL),
+				r.operatorConfig.Auth.APIURL,
 				"--config",
 				path.Join(configDir, configFileName),
 			},

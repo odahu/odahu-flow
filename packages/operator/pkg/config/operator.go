@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package common
+package config
 
-import (
-	"github.com/spf13/viper"
-)
+type OperatorConfig struct {
+	Auth           AuthConfig `json:"auth"`
+	// Operator HTTP monitoring port
+	MonitoringPort int        `json:"monitoringPort"`
+}
 
-const (
-	// The collection of external urls, for example: metrics, edge, service catalog and so on
-	ExternalURLs = "common.external_urls"
-)
-
-func init() {
-	viper.SetDefault(ExternalURLs, []interface{}{})
+func NewDefaultOperatorConfig() OperatorConfig {
+	return OperatorConfig{
+		MonitoringPort: 7777,
+	}
 }

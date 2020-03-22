@@ -19,12 +19,11 @@ import (
 	"context"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
@@ -85,16 +84,16 @@ var (
 		},
 	}
 	toleration = map[string]string{
-		train_conf.TolerationKey:      tolerationKey,
-		train_conf.TolerationValue:    tolerationValue,
-		train_conf.TolerationOperator: tolerationOperator,
-		train_conf.TolerationEffect:   tolerationEffect,
+		config.TolerationKey:      tolerationKey,
+		config.TolerationValue:    tolerationValue,
+		config.TolerationOperator: tolerationOperator,
+		config.TolerationEffect:   tolerationEffect,
 	}
 	gpuToleration = map[string]string{
-		train_conf.TolerationKey:      gpuTolerationKey,
-		train_conf.TolerationValue:    gpuTolerationValue,
-		train_conf.TolerationOperator: gpuTolerationOperator,
-		train_conf.TolerationEffect:   gpuTolerationEffect,
+		config.TolerationKey:      gpuTolerationKey,
+		config.TolerationValue:    gpuTolerationValue,
+		config.TolerationOperator: gpuTolerationOperator,
+		config.TolerationEffect:   gpuTolerationEffect,
 	}
 )
 
@@ -105,15 +104,13 @@ type ModelTrainingControllerSuite struct {
 	cfg             *rest.Config
 
 	k8sClient  client.Client
+	k8sManager manager.Manager
 	stopMgr    chan struct{}
 	mgrStopped *sync.WaitGroup
 	requests   chan reconcile.Request
 }
 
 func (s *ModelTrainingControllerSuite) SetupSuite() {
-	viper.Set(train_conf.ToolchainIntegrationNamespace, testNamespace)
-	viper.Set(train_conf.Namespace, testNamespace)
-
 	s.testEnvironment = &envtest.Environment{
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "config", "crds"),
@@ -146,16 +143,9 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 	mgr, err := manager.New(s.cfg, manager.Options{})
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.k8sClient = mgr.GetClient()
+	s.k8sManager = mgr
 
 	s.requests = make(chan reconcile.Request)
-	mtReconciler := &ReconcileModelTraining{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
-	recFn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
-		result, err := mtReconciler.Reconcile(req)
-		s.requests <- req
-		return result, err
-	})
-
-	s.g.Expect(add(mgr, recFn)).NotTo(HaveOccurred())
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}
@@ -171,14 +161,23 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 	}
 }
 
-func (s *ModelTrainingControllerSuite) TearDownTest() {
-	// Cleanup configuration
-	viper.Set(train_conf.GPUNodeSelector, nil)
-	viper.Set(train_conf.GPUToleration, nil)
-	viper.Set(train_conf.NodeSelector, nil)
-	viper.Set(train_conf.Toleration, nil)
-	viper.Set(train_conf.ModelBuilderImage, nil)
+func (s *ModelTrainingControllerSuite) initReconciler(trainingConfig config.ModelTrainingConfig) {
+	trainingConfig.ToolchainIntegrationNamespace = testNamespace
+	trainingConfig.Namespace = testNamespace
 
+	mpReconciler := newReconciler(
+		s.k8sManager, trainingConfig, config.NewDefaultOperatorConfig(), config.NvidiaResourceName,
+	)
+	recFn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
+		result, err := mpReconciler.Reconcile(req)
+		s.requests <- req
+		return result, err
+	})
+
+	s.g.Expect(add(s.k8sManager, recFn)).NotTo(HaveOccurred())
+}
+
+func (s *ModelTrainingControllerSuite) TearDownTest() {
 	if err := s.k8sClient.Delete(context.TODO(), testToolchainIntegration); err != nil {
 		s.T().Fatal(err)
 	}
@@ -227,6 +226,9 @@ func (s *ModelTrainingControllerSuite) templateNodeSelectorTest(
 }
 
 func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -239,8 +241,11 @@ func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
 }
 
 func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
-	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
-	viper.Set(train_conf.GPUToleration, gpuToleration)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.GPUNodeSelector = map[string]string{}
+	trainingConfig.GPUToleration = map[string]string{}
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -252,23 +257,12 @@ func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
 	)
 }
 
-func (s *ModelTrainingControllerSuite) TestNillGPUValue() {
-	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
-	viper.Set(train_conf.GPUToleration, gpuToleration)
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: nil,
-			},
-		},
-		nil,
-		nil,
-	)
-}
-
 func (s *ModelTrainingControllerSuite) TestGPUNodePools() {
-	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
-	viper.Set(train_conf.GPUToleration, gpuToleration)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.GPUNodeSelector = gpuNodeSelector
+	trainingConfig.GPUToleration = gpuToleration
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -286,7 +280,10 @@ func (s *ModelTrainingControllerSuite) TestGPUNodePools() {
 }
 
 func (s *ModelTrainingControllerSuite) TestOnlyGPUNodeSelector() {
-	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.GPUNodeSelector = gpuNodeSelector
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -299,6 +296,9 @@ func (s *ModelTrainingControllerSuite) TestOnlyGPUNodeSelector() {
 }
 
 func (s *ModelTrainingControllerSuite) TestEmptyNodePools() {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -311,8 +311,11 @@ func (s *ModelTrainingControllerSuite) TestEmptyNodePools() {
 }
 
 func (s *ModelTrainingControllerSuite) TestNodePools() {
-	viper.Set(train_conf.NodeSelector, nodeSelector)
-	viper.Set(train_conf.Toleration, toleration)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodeSelector = nodeSelector
+	trainingConfig.Toleration = toleration
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -330,7 +333,10 @@ func (s *ModelTrainingControllerSuite) TestNodePools() {
 }
 
 func (s *ModelTrainingControllerSuite) TestOnlyNodeSelector() {
-	viper.Set(train_conf.NodeSelector, nodeSelector)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodeSelector = nodeSelector
+	s.initReconciler(trainingConfig)
+
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
 			Limits: &odahuflowv1alpha1.ResourceList{
@@ -344,10 +350,12 @@ func (s *ModelTrainingControllerSuite) TestOnlyNodeSelector() {
 
 // If GPU and CPU resources setup on a one training, GPU node selector must be used
 func (s *ModelTrainingControllerSuite) TestGPUandCPUNodePools() {
-	viper.Set(train_conf.NodeSelector, nodeSelector)
-	viper.Set(train_conf.Toleration, toleration)
-	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
-	viper.Set(train_conf.GPUToleration, gpuToleration)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodeSelector = nodeSelector
+	trainingConfig.GPUNodeSelector = gpuNodeSelector
+	trainingConfig.Toleration = toleration
+	trainingConfig.GPUToleration = gpuToleration
+	s.initReconciler(trainingConfig)
 
 	s.templateNodeSelectorTest(
 		&odahuflowv1alpha1.ResourceRequirements{
@@ -367,9 +375,11 @@ func (s *ModelTrainingControllerSuite) TestGPUandCPUNodePools() {
 }
 
 func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
-	viper.Set(train_conf.GPUNodeSelector, gpuNodeSelector)
-	viper.Set(train_conf.GPUToleration, gpuToleration)
-	viper.Set(train_conf.ModelBuilderImage, modelBuildImage)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodeSelector = nodeSelector
+	trainingConfig.GPUNodeSelector = gpuNodeSelector
+	trainingConfig.ModelTrainerImage = modelBuildImage
+	s.initReconciler(trainingConfig)
 
 	trainResources := &odahuflowv1alpha1.ResourceRequirements{
 		Limits: &odahuflowv1alpha1.ResourceList{
@@ -381,7 +391,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 			GPU: &testResValue,
 		},
 	}
-	k8sTrainerResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainResources)
+	k8sTrainerResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainResources, config.NvidiaResourceName)
 	s.g.Expect(err).Should(BeNil())
 
 	mt := &odahuflowv1alpha1.ModelTraining{
@@ -410,8 +420,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
 	expectedHelperContainerResources := corev1.ResourceRequirements{
-		Limits:   corev1.ResourceList{
-			corev1.ResourceCPU: *k8sTrainerResources.Limits.Cpu(),
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    *k8sTrainerResources.Limits.Cpu(),
 			corev1.ResourceMemory: *utils.DefaultHelperLimits.Memory(),
 		},
 		Requests: corev1.ResourceList{
@@ -441,7 +451,9 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 }
 
 func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
-	viper.Set(train_conf.Timeout, 3*time.Hour)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Timeout = 3 * time.Hour
+	s.initReconciler(trainingConfig)
 
 	mt := &odahuflowv1alpha1.ModelTraining{
 		ObjectMeta: metav1.ObjectMeta{

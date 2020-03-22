@@ -18,9 +18,8 @@ package kubernetes
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	"reflect"
@@ -38,7 +37,7 @@ var (
 )
 
 func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
-	var ResourceGPU = v1.ResourceName(viper.GetString(train_conf.ResourceGPUName))
+	var ResourceGPU = v1.ResourceName(config.NvidiaResourceName)
 
 	g := NewGomegaWithT(t)
 	wantReqGPU, err := resource.ParseQuantity(reqGPU)
@@ -212,7 +211,7 @@ func TestConvertOdahuflowResourcesToK8s(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
-			gotDepResources, err := ConvertOdahuflowResourcesToK8s(tt.requirements)
+			gotDepResources, err := ConvertOdahuflowResourcesToK8s(tt.requirements, config.NvidiaResourceName)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ConvertOdahuflowResourcesToK8s() error = %v, wantErr %v", err, tt.wantErr)
 				return

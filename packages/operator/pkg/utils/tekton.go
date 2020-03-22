@@ -17,8 +17,6 @@
 package utils
 
 import (
-	training_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
-	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	k8s_resource "k8s.io/apimachinery/pkg/api/resource"
 )
@@ -46,9 +44,11 @@ func TektonContainerName(stepName string) string {
 // Resources of helper containers are copy of main trainer/packager resources, but
 // limit doesn't contain GPU part and all requests res are zeroes.
 // If core limit resources is nill then defaultHelperLimits will be used.
-func CalculateHelperContainerResources(res corev1.ResourceRequirements) corev1.ResourceRequirements {
+func CalculateHelperContainerResources(
+	res corev1.ResourceRequirements, gpuResourceName string,
+) corev1.ResourceRequirements {
 	clippedResources := res.DeepCopy()
-	delete(clippedResources.Limits, corev1.ResourceName(viper.GetString(training_conf.ResourceGPUName)))
+	delete(clippedResources.Limits, corev1.ResourceName(gpuResourceName))
 
 	if clippedResources.Limits == nil {
 		clippedResources.Limits = DefaultHelperLimits.DeepCopy()

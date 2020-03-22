@@ -19,10 +19,7 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	connection_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
-	deployment_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
-	packaging_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
-	training_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	k8s_connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	vault_connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
@@ -36,7 +33,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	userinfo "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/user"
-	"github.com/spf13/viper"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -45,18 +41,22 @@ const (
 	OdahuflowV1ApiVersion = "api/v1"
 )
 
-func SetupV1Routes(routeGroup *gin.RouterGroup, k8sClient client.Client, k8sConfig *rest.Config) (err error) {
+func SetupV1Routes(
+	routeGroup *gin.RouterGroup,
+	k8sClient client.Client,
+	k8sConfig *rest.Config,
+	odahuConfig config.Config) (err error) {
 	var connRepository connection_repository.Repository
 
 	// Setup the connection repository
-	switch viper.GetString(connection_config.RepositoryType) {
-	case connection_config.RepositoryKubernetesType:
+	switch odahuConfig.Connection.RepositoryType {
+	case config.RepositoryKubernetesType:
 		connRepository = k8s_connection_repository.NewRepository(
-			viper.GetString(connection_config.Namespace),
+			odahuConfig.Connection.Namespace,
 			k8sClient,
 		)
-	case connection_config.RepositoryVaultType:
-		connRepository, err = vault_connection_repository.NewRepositoryFromConfig()
+	case config.RepositoryVaultType:
+		connRepository, err = vault_connection_repository.NewRepositoryFromConfig(odahuConfig.Connection.Vault)
 		if err != nil {
 			return err
 		}
@@ -64,26 +64,32 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, k8sClient client.Client, k8sConf
 		return errors.New("unexpect connection repository type")
 	}
 
-	depRepository := deployment_repository.NewRepository(viper.GetString(deployment_config.Namespace), k8sClient)
+	depRepository := deployment_repository.NewRepository(odahuConfig.Deployment.Namespace, k8sClient)
 	packRepository := packaging_repository.NewRepository(
-		viper.GetString(packaging_config.Namespace),
-		viper.GetString(packaging_config.PackagingIntegrationNamespace),
+		odahuConfig.Packaging.Namespace,
+		odahuConfig.Packaging.PackagingIntegrationNamespace,
 		k8sClient,
 		k8sConfig,
 	)
 	trainRepository := training_repository.NewRepository(
-		viper.GetString(training_config.Namespace),
-		viper.GetString(training_config.ToolchainIntegrationNamespace),
+		odahuConfig.Training.Namespace,
+		odahuConfig.Training.ToolchainIntegrationNamespace,
 		k8sClient,
 		k8sConfig,
 	)
 
-	connection.ConfigureRoutes(routeGroup, connRepository, utils.EvaluatePublicKey)
-	deployment.ConfigureRoutes(routeGroup, depRepository)
-	packaging.ConfigureRoutes(routeGroup, packRepository, connRepository)
-	training.ConfigureRoutes(routeGroup, trainRepository, connRepository)
-	configuration.ConfigureRoutes(routeGroup)
-	userinfo.ConfigureRoutes(routeGroup)
+	connection.ConfigureRoutes(routeGroup, connRepository, utils.EvaluatePublicKey, odahuConfig.Connection)
+	deployment.ConfigureRoutes(
+		routeGroup, depRepository, odahuConfig.Deployment, odahuConfig.Common.ResourceGPUName,
+	)
+	packaging.ConfigureRoutes(
+		routeGroup, packRepository, connRepository, odahuConfig.Packaging, odahuConfig.Common.ResourceGPUName,
+	)
+	training.ConfigureRoutes(
+		routeGroup, trainRepository, connRepository, odahuConfig.Training, odahuConfig.Common.ResourceGPUName,
+	)
+	configuration.ConfigureRoutes(routeGroup, odahuConfig)
+	userinfo.ConfigureRoutes(routeGroup, odahuConfig.User.Claims)
 
 	return err
 }

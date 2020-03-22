@@ -17,6 +17,7 @@
 package controller
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/modelpackaging"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -27,12 +28,19 @@ func init() {
 }
 
 // AddToManagerPackagingFuncs is a list of functions to add all Controllers to the Manager
-var AddToManagerPackagingFuncs []func(manager.Manager) error
+var AddToManagerPackagingFuncs []func(
+	manager.Manager, config.ModelPackagingConfig, config.OperatorConfig, string,
+) error
 
 // AddToManager adds all Controllers to the Manager
-func AddPackagingToManager(m manager.Manager) error {
+func AddPackagingToManager(
+	m manager.Manager,
+	packagingConfig config.ModelPackagingConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) error {
 	for _, f := range AddToManagerPackagingFuncs {
-		if err := f(m); err != nil {
+		if err := f(m, packagingConfig, operatorConfig, gpuResourceName); err != nil {
 			return err
 		}
 	}

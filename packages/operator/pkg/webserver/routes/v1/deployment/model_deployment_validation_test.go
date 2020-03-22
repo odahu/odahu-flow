@@ -19,10 +19,9 @@ package deployment_test
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"testing"
 
@@ -35,11 +34,15 @@ var (
 
 type ModelDeploymentValidationSuite struct {
 	suite.Suite
-	g *GomegaWithT
+	g                     *GomegaWithT
+	defaultModelValidator *md_routes.ModelDeploymentValidator
 }
 
 func (s *ModelDeploymentValidationSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+	s.defaultModelValidator = md_routes.NewModelDeploymentValidator(
+		config.NewDefaultModelDeploymentConfig(), config.NvidiaResourceName,
+	)
 }
 
 func TestModelDeploymentValidationSuite(t *testing.T) {
@@ -50,7 +53,7 @@ func (s *ModelDeploymentValidationSuite) TestMDMinReplicasDefaultValue() {
 	md := &deployment.ModelDeployment{
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 
 	s.g.Expect(*md.Spec.MinReplicas).To(Equal(md_routes.MdDefaultMinimumReplicas))
 }
@@ -59,7 +62,7 @@ func (s *ModelDeploymentValidationSuite) TestMDMaxReplicasDefaultValue() {
 	md := &deployment.ModelDeployment{
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 
 	s.g.Expect(*md.Spec.MaxReplicas).To(Equal(md_routes.MdDefaultMaximumReplicas))
 }
@@ -68,7 +71,7 @@ func (s *ModelDeploymentValidationSuite) TestMDResourcesDefaultValues() {
 	md := &deployment.ModelDeployment{
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 
 	s.g.Expect(*md.Spec.Resources).To(Equal(*md_routes.MdDefaultResources))
 }
@@ -77,7 +80,7 @@ func (s *ModelDeploymentValidationSuite) TestMDReadinessProbeDefaultValue() {
 	md := &deployment.ModelDeployment{
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 
 	s.g.Expect(*md.Spec.ReadinessProbeInitialDelay).To(Equal(md_routes.MdDefaultReadinessProbeInitialDelay))
 }
@@ -86,7 +89,7 @@ func (s *ModelDeploymentValidationSuite) TestMDLivenessProbeDefaultValue() {
 	md := &deployment.ModelDeployment{
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 
 	s.g.Expect(*md.Spec.LivenessProbeInitialDelay).To(Equal(md_routes.MdDefaultLivenessProbeInitialDelay))
 }
@@ -99,7 +102,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateNegativeMinReplicas() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.NegativeMinReplicasErrorMessage))
 }
@@ -112,7 +115,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateNegativeMaxReplicas() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.NegativeMaxReplicasErrorMessage))
 }
@@ -125,7 +128,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateMaximumReplicas() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.NegativeMaxReplicasErrorMessage))
 }
@@ -140,7 +143,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateMinLessMaxReplicas() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.MaxMoreThanMinReplicasErrorMessage))
 }
@@ -153,7 +156,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateMinModelThanDefaultMax() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).ToNot(ContainSubstring(md_routes.MaxMoreThanMinReplicasErrorMessage))
 	s.g.Expect(*md.Spec.MinReplicas).To(Equal(minReplicas))
@@ -165,7 +168,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateImage() {
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.EmptyImageErrorMessage))
 }
@@ -178,7 +181,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateReadinessProbe() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.ReadinessProbeErrorMessage))
 }
@@ -191,7 +194,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateLivenessProbe() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(md_routes.LivenessProbeErrorMessage))
 }
@@ -215,7 +218,7 @@ func (s *ModelDeploymentValidationSuite) TestMdResourcesValidation() {
 		},
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).Should(HaveOccurred())
 
 	errorMessage := err.Error()
@@ -232,16 +235,17 @@ func (s *ModelDeploymentValidationSuite) TestMdResourcesValidation() {
 }
 
 func (s *ModelDeploymentValidationSuite) TestValidateDefaultDockerPullConnectionName() {
-	defaultDockerPullConnectionName := "default-docker-pull-conn"
-	viper.SetDefault(config_deployment.DefaultDockerPullConnectionName, defaultDockerPullConnectionName)
+	newDefaultDockerPullConnectionName := "default-docker-pull-conn"
+	mdConfig := config.NewDefaultModelDeploymentConfig()
+	mdConfig.DefaultDockerPullConnName = newDefaultDockerPullConnectionName
 
 	md := &deployment.ModelDeployment{
 		Spec: v1alpha1.ModelDeploymentSpec{},
 	}
 
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = md_routes.NewModelDeploymentValidator(mdConfig, config.NvidiaResourceName).ValidatesMDAndSetDefaults(md)
 	s.g.Expect(md.Spec.ImagePullConnectionID).ShouldNot(BeNil())
-	s.g.Expect(*md.Spec.ImagePullConnectionID).Should(Equal(defaultDockerPullConnectionName))
+	s.g.Expect(*md.Spec.ImagePullConnectionID).Should(Equal(newDefaultDockerPullConnectionName))
 }
 
 func (s *ModelDeploymentValidationSuite) TestValidateDockerPullConnectionName() {
@@ -253,7 +257,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateDockerPullConnectionName() 
 		},
 	}
 
-	_ = md_routes.ValidatesMDAndSetDefaults(md)
+	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(md.Spec.ImagePullConnectionID).ShouldNot(BeNil())
 	s.g.Expect(*md.Spec.ImagePullConnectionID).Should(Equal(dockerPullConnectionName))
 }
@@ -263,7 +267,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateID() {
 		ID: "not-VALID-id-",
 	}
 
-	err := md_routes.ValidatesMDAndSetDefaults(md)
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }

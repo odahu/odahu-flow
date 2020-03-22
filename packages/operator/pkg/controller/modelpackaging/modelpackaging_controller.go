@@ -19,15 +19,13 @@ package modelpackaging
 import (
 	"context"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	packaging_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
-	packaging_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
-	"github.com/spf13/viper"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -49,24 +47,37 @@ var log = logf.Log.WithName("model-packager-controller")
 
 // Add creates a new ModelPackaging Controller and adds it to the Manager with default RBAC.
 // The Manager will set fields on the Controller and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+func Add(
+	mgr manager.Manager,
+	packagingConfig config.ModelPackagingConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) error {
+	return add(mgr, newReconciler(mgr, packagingConfig, operatorConfig, gpuResourceName))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
+func newReconciler(
+	mgr manager.Manager,
+	packagingConfig config.ModelPackagingConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) reconcile.Reconciler {
 	k8sClient := mgr.GetClient()
 
 	return &ReconcileModelPackaging{
 		Client: k8sClient,
 		scheme: mgr.GetScheme(),
 		config: mgr.GetConfig(),
-		packRepo: packaging_k8s_repository.NewRepository(
-			viper.GetString(packaging_conf.Namespace),
-			viper.GetString(packaging_conf.PackagingIntegrationNamespace),
+		packRepo: mp_k8s_repository.NewRepository(
+			packagingConfig.Namespace,
+			packagingConfig.PackagingIntegrationNamespace,
 			k8sClient,
 			mgr.GetConfig(),
 		),
+		packagingConfig: packagingConfig,
+		operatorConfig:  operatorConfig,
+		gpuResourceName: gpuResourceName,
 	}
 }
 
@@ -108,9 +119,12 @@ var _ reconcile.Reconciler = &ReconcileModelPackaging{}
 // ReconcileModelPackaging reconciles a ModelPackaging object
 type ReconcileModelPackaging struct {
 	client.Client
-	scheme   *runtime.Scheme
-	config   *rest.Config
-	packRepo packaging_repository.Repository
+	scheme          *runtime.Scheme
+	config          *rest.Config
+	packRepo        packaging_repository.Repository
+	packagingConfig config.ModelPackagingConfig
+	operatorConfig  config.OperatorConfig
+	gpuResourceName string
 }
 
 const (
@@ -220,7 +234,7 @@ func (r *ReconcileModelPackaging) getPackagingIntegration(packagingCR *odahuflow
 	var ti odahuflowv1alpha1.PackagingIntegration
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      packagingCR.Spec.Type,
-		Namespace: viper.GetString(packaging_conf.PackagingIntegrationNamespace),
+		Namespace: r.packagingConfig.PackagingIntegrationNamespace,
 	}, &ti); err != nil {
 		log.Error(err, "Get toolchain integration", "mt name", packagingCR)
 
@@ -236,7 +250,7 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 	if packagingCR.Status.State != "" && packagingCR.Status.State != odahuflowv1alpha1.ModelPackagingUnknown {
 		taskRun := &tektonv1alpha1.TaskRun{}
 		err := r.Get(context.TODO(), types.NamespacedName{
-			Name: packagingCR.Name, Namespace: viper.GetString(packaging_conf.Namespace),
+			Name: packagingCR.Name, Namespace: r.packagingConfig.Namespace,
 		}, taskRun)
 
 		if err != nil {
@@ -256,17 +270,17 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 	}
 
 	tolerations := []corev1.Toleration{}
-	tolerationConf := viper.GetStringMapString(packaging_conf.Toleration)
+	tolerationConf := r.packagingConfig.Toleration
 	if len(tolerationConf) != 0 {
 		tolerations = append(tolerations, corev1.Toleration{
-			Key:      tolerationConf[packaging_conf.TolerationKey],
-			Operator: corev1.TolerationOperator(tolerationConf[packaging_conf.TolerationOperator]),
-			Value:    tolerationConf[packaging_conf.TolerationValue],
-			Effect:   corev1.TaintEffect(tolerationConf[packaging_conf.TolerationEffect]),
+			Key:      tolerationConf[config.TolerationKey],
+			Operator: corev1.TolerationOperator(tolerationConf[config.TolerationOperator]),
+			Value:    tolerationConf[config.TolerationValue],
+			Effect:   corev1.TaintEffect(tolerationConf[config.TolerationEffect]),
 		})
 	}
 
-	taskSpec, err := generatePackagerTaskSpec(packagingCR, packagingIntegration)
+	taskSpec, err := r.generatePackagerTaskSpec(packagingCR, packagingIntegration)
 	if err != nil {
 		return nil, err
 	}
@@ -278,9 +292,9 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 		},
 		Spec: tektonv1alpha1.TaskRunSpec{
 			TaskSpec: taskSpec,
-			Timeout:  &metav1.Duration{Duration: viper.GetDuration(packaging_conf.Timeout)},
+			Timeout:  &metav1.Duration{Duration: r.packagingConfig.Timeout},
 			PodTemplate: tektonv1alpha1.PodTemplate{
-				NodeSelector: viper.GetStringMapString(packaging_conf.NodeSelector),
+				NodeSelector: r.packagingConfig.NodeSelector,
 				Tolerations:  tolerations,
 			},
 		},
@@ -297,7 +311,7 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 
 	found := &tektonv1alpha1.TaskRun{}
 	err = r.Get(context.TODO(), types.NamespacedName{
-		Name: taskRun.Name, Namespace: viper.GetString(packaging_conf.Namespace),
+		Name: taskRun.Name, Namespace: r.packagingConfig.Namespace,
 	}, found)
 
 	if err != nil && errors.IsNotFound(err) {
@@ -318,7 +332,7 @@ func (r *ReconcileModelPackaging) createResultConfigMap(packagingCR *odahuflowv1
 	resultCM := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      odahuflow.GeneratePackageResultCMName(packagingCR.Name),
-			Namespace: viper.GetString(packaging_conf.Namespace),
+			Namespace: r.packagingConfig.Namespace,
 		},
 		Data: map[string]string{},
 	}
@@ -334,7 +348,7 @@ func (r *ReconcileModelPackaging) createResultConfigMap(packagingCR *odahuflowv1
 
 	found := &corev1.ConfigMap{}
 	err := r.Get(context.TODO(), types.NamespacedName{
-		Name: resultCM.Name, Namespace: viper.GetString(packaging_conf.Namespace),
+		Name: resultCM.Name, Namespace: r.packagingConfig.Namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 		log.Info(fmt.Sprintf("Creating %s k8s result config map", resultCM.ObjectMeta.Name))

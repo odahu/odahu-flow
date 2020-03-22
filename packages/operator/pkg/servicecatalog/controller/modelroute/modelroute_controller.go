@@ -20,9 +20,8 @@ import (
 	"context"
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -50,16 +49,25 @@ const (
 	defaultModelRequestTimeout            = 10 * time.Second
 )
 
-func Add(mgr manager.Manager, mrc *catalog.ModelRouteCatalog) error {
-	return add(mgr, newReconciler(mgr, mrc))
+func Add(
+	mgr manager.Manager,
+	mrc *catalog.ModelRouteCatalog,
+	deploymentConfig config.ModelDeploymentConfig,
+) error {
+	return add(mgr, newReconciler(mgr, mrc, deploymentConfig))
 }
 
-func newReconciler(mgr manager.Manager, mrc *catalog.ModelRouteCatalog) reconcile.Reconciler {
+func newReconciler(
+	mgr manager.Manager,
+	mrc *catalog.ModelRouteCatalog,
+	deploymentConfig config.ModelDeploymentConfig,
+) reconcile.Reconciler {
 	rmr := ReconcileModelRoute{
-		Client: mgr.GetClient(),
-		scheme: mgr.GetScheme(),
-		mrc:    mrc,
-		ticker: time.NewTicker(defaultUpdatePeriod),
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		mrc:              mrc,
+		ticker:           time.NewTicker(defaultUpdatePeriod),
+		deploymentConfig: deploymentConfig,
 	}
 
 	go func() {
@@ -91,9 +99,10 @@ var _ reconcile.Reconciler = &ReconcileModelRoute{}
 
 type ReconcileModelRoute struct {
 	client.Client
-	scheme *runtime.Scheme
-	mrc    *catalog.ModelRouteCatalog
-	ticker *time.Ticker
+	scheme           *runtime.Scheme
+	mrc              *catalog.ModelRouteCatalog
+	ticker           *time.Ticker
+	deploymentConfig config.ModelDeploymentConfig
 }
 
 func (r *ReconcileModelRoute) StartUpdate() {
@@ -103,7 +112,7 @@ func (r *ReconcileModelRoute) StartUpdate() {
 		err := r.List(
 			context.TODO(),
 			&client.ListOptions{
-				Namespace: viper.GetString(deployment.Namespace),
+				Namespace: r.deploymentConfig.Namespace,
 			},
 			k8sRouteList,
 		)
@@ -123,11 +132,13 @@ func (r *ReconcileModelRoute) generateModelRequest(mr *odahuflowv1alpha1.ModelRo
 		Scheme: "http",
 		Host: fmt.Sprintf(
 			"%s.%s",
-			viper.GetString(deployment.IstioServiceName), viper.GetString(deployment.IstioNamespace)),
+			r.deploymentConfig.Istio.ServiceName,
+			r.deploymentConfig.Istio.Namespace,
+		),
 		Path: mr.Spec.URLPrefix,
 	}
 
-	edgeHostURL := viper.GetString(deployment.EdgeHost)
+	edgeHostURL := r.deploymentConfig.Edge.Host
 	parsedExternalEdgeURL, err := url.Parse(edgeHostURL)
 	if err != nil {
 		log.Error(err, "Can not parse the edge host url", "edge host", edgeHostURL)

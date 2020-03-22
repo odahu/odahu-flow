@@ -26,6 +26,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
+const (
+	LogFlushSize = 32
+)
+
 var logk8s = logf.Log.WithName("odahuflow_k8s")
 
 type Writer interface {

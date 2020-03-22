@@ -22,9 +22,8 @@ import (
 	v1alpha3_istio_api "github.com/aspenmesh/istio-client-go/pkg/apis/networking/v1alpha3"
 	gogotypes "github.com/gogo/protobuf/types"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	md_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	"github.com/spf13/viper"
 	v1alpha3_istio "istio.io/api/networking/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -55,12 +54,28 @@ var (
 	defaultRequeueDelay  = 1 * time.Second
 )
 
-func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+func Add(
+	mgr manager.Manager,
+	deploymentConfig config.ModelDeploymentConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) error {
+	return add(mgr, newReconciler(mgr, deploymentConfig, operatorConfig, gpuResourceName))
 }
 
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileModelRoute{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+func newReconciler(
+	mgr manager.Manager,
+	deploymentConfig config.ModelDeploymentConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) reconcile.Reconciler {
+	return &ReconcileModelRoute{
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		deploymentConfig: deploymentConfig,
+		operatorConfig:   operatorConfig,
+		gpuResourceName:  gpuResourceName,
+	}
 }
 
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
@@ -89,7 +104,10 @@ var _ reconcile.Reconciler = &ReconcileModelRoute{}
 
 type ReconcileModelRoute struct {
 	client.Client
-	scheme *runtime.Scheme
+	scheme           *runtime.Scheme
+	deploymentConfig config.ModelDeploymentConfig
+	operatorConfig   config.OperatorConfig
+	gpuResourceName  string
 }
 
 func VirtualServiceName(mr *odahuflowv1alpha1.ModelRoute) string {
@@ -145,7 +163,7 @@ func (r *ReconcileModelRoute) reconcileVirtualService(modelRouteCR *odahuflowv1a
 					Request: &v1alpha3_istio.Headers_HeaderOperations{
 						Add: map[string]string{
 							knativeRevisionHeader:  modelDeployment.Status.LastRevisionName,
-							knativeNamespaceHeader: viper.GetString(md_config.Namespace),
+							knativeNamespaceHeader: r.deploymentConfig.Namespace,
 						},
 					},
 				},
@@ -288,7 +306,7 @@ func (r *ReconcileModelRoute) reconcileVirtualService(modelRouteCR *odahuflowv1a
 func (r *ReconcileModelRoute) reconcileStatus(modelRouteCR *odahuflowv1alpha1.ModelRoute,
 	state odahuflowv1alpha1.ModelRouteState) error {
 	modelRouteCR.Status.EdgeURL = fmt.Sprintf(
-		"%s%s", viper.GetString(md_config.EdgeHost), modelRouteCR.Spec.URLPrefix,
+		"%s%s", r.deploymentConfig.Edge.Host, modelRouteCR.Spec.URLPrefix,
 	)
 	modelRouteCR.Status.State = state
 

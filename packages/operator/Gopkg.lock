@@ -85,6 +85,14 @@
   revision = "a0175ee3bccc567396460bf5acd36800cb10c49c"
 
 [[projects]]
+  branch = "master"
+  digest = "1:f780e2e814981de9dbdc2ca49d6c91d4aa4e2a1639ebc4106fafb0dc54fa5bd8"
+  name = "github.com/alecthomas/units"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "f65c72e2690dc4b403c8bd637baf4611cd4c069b"
+
+[[projects]]
   digest = "1:464aef731a5f82ded547c62e249a2e9ec59fbbc9ddab53cda7b9857852630a61"
   name = "github.com/appscode/jsonpatch"
   packages = ["."]
@@ -213,7 +221,10 @@
 [[projects]]
   digest = "1:6b014c67cb522566c30ef02116f9acb50cd60954708cf92c6654e2985696db18"
   name = "github.com/dgrijalva/jwt-go"
-  packages = ["."]
+  packages = [
+    ".",
+    "request",
+  ]
   pruneopts = "T"
   revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
   version = "v3.2.0"
@@ -1214,6 +1225,7 @@
   packages = [
     "expfmt",
     "internal/bitbucket.org/ww/goautoneg",
+    "log",
     "model",
   ]
   pruneopts = "T"
@@ -1611,6 +1623,7 @@
     "unix",
     "windows",
     "windows/registry",
+    "windows/svc/eventlog",
   ]
   pruneopts = "T"
   revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
@@ -1782,6 +1795,14 @@
   pruneopts = "T"
   revision = "045159ad57f3781d409358e3ade910a018c16b30"
   version = "v1.22.1"
+
+[[projects]]
+  digest = "1:79bb23751a6a8aaee4a780d0f0a16f43560efb557d53ffc713dc05f20dd4c2bf"
+  name = "gopkg.in/alecthomas/kingpin.v2"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
+  version = "v2.2.6"
 
 [[projects]]
   digest = "1:7fc160b460a6fc506b37fcca68332464c3f2cd57b6e3f111f26c5bbfd2d5518e"
@@ -2351,6 +2372,7 @@
     "github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api",
     "github.com/banzaicloud/bank-vaults/pkg/vault",
     "github.com/dgrijalva/jwt-go",
+    "github.com/dgrijalva/jwt-go/request",
     "github.com/emicklei/go-restful",
     "github.com/gin-gonic/gin",
     "github.com/go-logr/logr",
@@ -2375,6 +2397,7 @@
     "github.com/onsi/gomega",
     "github.com/pborman/uuid",
     "github.com/pkg/errors",
+    "github.com/prometheus/common/log",
     "github.com/rakyll/statik/fs",
     "github.com/satori/go.uuid",
     "github.com/spf13/cobra",
