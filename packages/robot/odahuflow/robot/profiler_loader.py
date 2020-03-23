@@ -90,6 +90,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'ALERTMANAGER_URL': os.getenv('ALERTMANAGER_URL', f'https://{host_base_domain}/alertmanager'),
                 'JUPYTERLAB_URL': os.getenv('JUPITERLAB_URL', f'https://{host_base_domain}/jupyterlab'),
                 'MLFLOW_URL': os.getenv('MLFLOW_URL', f'https://{host_base_domain}/mlflow'),
+                'AIRFLOW_URL': os.getenv('AIRFLOW_URL', f'https://{host_base_domain}/airflow'),
                 'IS_GPU_ENABLED': 'training_gpu' in data['node_pools'],
                 'SA_CLIENT_ID': test_sa_admin.client_id,
                 'SA_CLIENT_SECRET': test_sa_admin.client_secret,
