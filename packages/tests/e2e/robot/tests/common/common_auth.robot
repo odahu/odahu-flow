@@ -44,4 +44,4 @@ Invalid credentials raise Auth error
     service_url=${ALERTMANAGER_URL}/?orgId=1&x=2
     service_url=${JUPYTERLAB_URL}/lab
     service_url=${MLFLOW_URL}/?a=1
-    service_url=${AIRFLOW_URL}/
+    service_url=${AIRFLOW_URL}/admin/
