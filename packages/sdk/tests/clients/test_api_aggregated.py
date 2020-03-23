@@ -2,6 +2,7 @@ import json
 import logging
 import tempfile
 from io import StringIO
+from typing import Generator
 
 import pytest
 import yaml
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 @pytest.fixture()
-def conn_manifest_file() -> str:
+def conn_manifest_file() -> Generator[str, None, None]:
     """
     Returns path to a temporary Connection file
     """
@@ -28,7 +29,7 @@ def conn_manifest_file() -> str:
 
 
 @pytest.fixture()
-def conn_manifest_yaml_file() -> str:
+def conn_manifest_yaml_file() -> Generator[str, None, None]:
     """
     Returns path to a temporary Connection YAML file
     """
@@ -40,7 +41,7 @@ def conn_manifest_yaml_file() -> str:
 
 
 @pytest.fixture()
-def conn_manifest_dir() -> str:
+def conn_manifest_dir() -> Generator[str, None, None]:
     """
     Returns path to a temporary dir with Connection files
     """
