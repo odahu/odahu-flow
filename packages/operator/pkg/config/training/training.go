@@ -60,7 +60,7 @@ func init() {
 
 	viper.SetDefault(MetricURL, "")
 
-	viper.Set(Timeout, 4*time.Hour)
+	viper.SetDefault(Timeout, 16*time.Hour)
 
-	viper.Set(ResourceGPUName, "nvidia.com/gpu")
+	viper.SetDefault(ResourceGPUName, "nvidia.com/gpu")
 }
