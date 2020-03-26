@@ -19,11 +19,7 @@ package main
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
-	odahuflow_config "github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/controller"
@@ -31,7 +27,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"os"
 	"os/signal"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	k8s_config "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
@@ -44,10 +40,11 @@ var mainCmd = &cobra.Command{
 	Use:   "service-catalog",
 	Short: "Odahu-flow service catalog server",
 	Run: func(cmd *cobra.Command, args []string) {
+		odahuConfig := config.MustLoadConfig()
 		routeCatalog := catalog.NewModelRouteCatalog()
 
 		log.Info("setting up client for manager")
-		cfg, err := config.GetConfig()
+		cfg, err := k8s_config.GetConfig()
 		if err != nil {
 			log.Error(err, "unable to set up client config")
 			os.Exit(1)
@@ -75,11 +72,11 @@ var mainCmd = &cobra.Command{
 		}
 
 		log.Info("Setting up controller")
-		if err := controller.AddToManager(mgr, routeCatalog); err != nil {
+		if err := controller.AddToManager(mgr, routeCatalog, odahuConfig.Deployment); err != nil {
 			log.Error(err, "unable to register controllers to the manager")
 			os.Exit(1)
 		}
-		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog)
+		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
 
 		if err != nil {
 			log.Error(err, "Can't set up service-catalog server")
@@ -120,7 +117,7 @@ var mainCmd = &cobra.Command{
 }
 
 func init() {
-	odahuflow_config.InitBasicParams(mainCmd)
+	config.InitBasicParams(mainCmd)
 }
 
 func main() {

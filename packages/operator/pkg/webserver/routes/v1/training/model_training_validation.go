@@ -23,12 +23,10 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	"github.com/spf13/viper"
 	"go.uber.org/multierr"
 	"reflect"
 )
@@ -74,14 +72,23 @@ var (
 )
 
 type MtValidator struct {
-	mtRepository   mt_repository.Repository
-	connRepository conn_repository.Repository
+	mtRepository         mt_repository.Repository
+	connRepository       conn_repository.Repository
+	outputConnectionName string
+	gpuResourceName      string
 }
 
-func NewMtValidator(mtRepository mt_repository.Repository, connRepository conn_repository.Repository) *MtValidator {
+func NewMtValidator(
+	mtRepository mt_repository.Repository,
+	connRepository conn_repository.Repository,
+	outputConnectionName string,
+	gpuResourceName string,
+) *MtValidator {
 	return &MtValidator{
-		mtRepository:   mtRepository,
-		connRepository: connRepository,
+		mtRepository:         mtRepository,
+		connRepository:       connRepository,
+		outputConnectionName: outputConnectionName,
+		gpuResourceName:      gpuResourceName,
 	}
 }
 
@@ -135,7 +142,7 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 			"name", mt.ID, "resources", DefaultTrainingResources)
 		mt.Spec.Resources = &DefaultTrainingResources
 	} else {
-		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mt.Spec.Resources)
+		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mt.Spec.Resources, mtv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
 	}
 
@@ -224,12 +231,9 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 }
 
 func (mtv *MtValidator) validateOutputConnection(mt *training.ModelTraining) (err error) {
-
-	defaultOutConName := viper.GetString(train_conf.OutputConnectionName)
-
 	if len(mt.Spec.OutputConnection) == 0 {
-		if len(defaultOutConName) > 0 {
-			mt.Spec.OutputConnection = defaultOutConName
+		if len(mtv.outputConnectionName) > 0 {
+			mt.Spec.OutputConnection = mtv.outputConnectionName
 			logMT.Info("OutputConnection is empty. Use connection from configuration")
 		} else {
 			logMT.Info("OutputConnection is empty. Configuration doesn't contain default value")

@@ -1,5 +1,5 @@
 //
-//    Copyright 2020 EPAM Systems
+//    Copyright 2019 EPAM Systems
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -14,18 +14,12 @@
 //    limitations under the License.
 //
 
-package user
+package config
 
-import (
-	"github.com/spf13/viper"
-)
+type ServiceCatalog struct {
+	BaseURL string `json:"baseUrl"`
+}
 
-const (
-	NameClaim = "user.claims.name"
-	EmailClaim = "user.claims.email"
-)
-
-func init() {
-	viper.SetDefault(NameClaim, "name")
-	viper.SetDefault(EmailClaim, "email")
+func NewDefaultServiceCatalogConfig() ServiceCatalog {
+	return ServiceCatalog{}
 }

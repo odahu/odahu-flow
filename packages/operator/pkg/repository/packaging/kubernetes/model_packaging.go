@@ -24,12 +24,10 @@ import (
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -266,7 +264,7 @@ func (pkr *packagingK8sRepository) GetModelPackagingLogs(id string, writer utils
 			containerName,
 			writer,
 			follow,
-			viper.GetInt64(config_deployment.ModelLogsFlushSize),
+			utils.LogFlushSize,
 		)
 		if err != nil {
 			return err

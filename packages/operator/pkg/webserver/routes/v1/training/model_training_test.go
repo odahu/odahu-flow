@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -32,7 +33,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	train_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
@@ -42,7 +42,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -66,12 +65,9 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	s.server = gin.Default()
-	v1Group := s.server.Group("")
 	s.k8sClient = mgr.GetClient()
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, s.k8sClient, nil)
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient,)
-	train_route.ConfigureRoutes(v1Group, s.mtRepository, s.connRepository)
+	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient, )
 
 	// Create the connection that will be used as the vcs param for a training.
 	if err := s.connRepository.CreateConnection(&connection.Connection{
@@ -117,9 +113,6 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 		// If we get a panic that we have a test configuration problem
 		panic(err)
 	}
-
-	// Define output connection in configuration to not require this from user requests
-	viper.Set(train_config.OutputConnectionName, testMtOutConnDefault)
 }
 
 func (s *ModelTrainingRouteSuite) TearDownSuite() {
@@ -133,9 +126,6 @@ func (s *ModelTrainingRouteSuite) TearDownSuite() {
 }
 
 func (s *ModelTrainingRouteSuite) TearDownTest() {
-	viper.Set(train_config.Enabled, true)
-	viper.Set(train_config.OutputConnectionName, nil)
-
 	for _, mpID := range []string{testMtID, testMtID1, testMtID2} {
 		if err := s.mtRepository.DeleteModelTraining(mpID); err != nil && !errors.IsNotFound(err) {
 			// If a model training is not found then it was not created during a test case
@@ -147,6 +137,20 @@ func (s *ModelTrainingRouteSuite) TearDownTest() {
 
 func (s *ModelTrainingRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+
+	s.registerHandlers(config.MustLoadConfig().Training)
+}
+
+func (s *ModelTrainingRouteSuite) registerHandlers(trainingConfig config.ModelTrainingConfig) {
+	s.server = gin.Default()
+	v1Group := s.server.Group("")
+	train_route.ConfigureRoutes(
+		v1Group,
+		s.mtRepository,
+		s.connRepository,
+		trainingConfig,
+		config.NvidiaResourceName,
+	)
 }
 
 func (s *ModelTrainingRouteSuite) newMultipleMtStubs() {
@@ -410,7 +414,7 @@ func (s *ModelTrainingRouteSuite) TestCreateMT() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ModelTrainingRouteSuite) TestCreateMTModifiable(){
+func (s *ModelTrainingRouteSuite) TestCreateMTModifiable() {
 	newResource := newMtStub()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -509,7 +513,7 @@ func (s *ModelTrainingRouteSuite) TestUpdateMT() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *ModelTrainingRouteSuite) TestUpdateMDModifiable(){
+func (s *ModelTrainingRouteSuite) TestUpdateMDModifiable() {
 	resource := newMtStub()
 	s.g.Expect(s.mtRepository.CreateModelTraining(resource)).NotTo(HaveOccurred())
 
@@ -727,7 +731,9 @@ func (s *ModelTrainingRouteSuite) TestUpdateMTResult() {
 }
 
 func (s *ModelTrainingRouteSuite) TestDisabledAPIGetMT() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	mt := newMtStub()
 	s.g.Expect(s.mtRepository.CreateModelTraining(mt)).NotTo(HaveOccurred())
@@ -746,7 +752,9 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIGetMT() {
 }
 
 func (s *ModelTrainingRouteSuite) TestDisabledAPIGetAllMT() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, train_route.GetAllModelTrainingURL, nil)
@@ -762,7 +770,9 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIGetAllMT() {
 }
 
 func (s *ModelTrainingRouteSuite) TestDisabledAPIDeleteMT() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, strings.Replace(
@@ -780,7 +790,9 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIDeleteMT() {
 }
 
 func (s *ModelTrainingRouteSuite) TestDisabledAPIUpdateMT() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	newMt := newMtStub()
 
@@ -801,7 +813,9 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIUpdateMT() {
 }
 
 func (s *ModelTrainingRouteSuite) TestDisabledAPICreateMT() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	initialMT := newMtStub()
 

@@ -18,19 +18,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"os"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
-	odahuflow_config "github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
-	operator_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/operator"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	k8s_config "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
@@ -45,27 +41,36 @@ var mainCmd = &cobra.Command{
 }
 
 func init() {
-	odahuflow_config.InitBasicParams(mainCmd)
+	config.InitBasicParams(mainCmd)
 
 	const (
-		enableTrainControllerName = "enable-training-controller"
-		enablePackControllerName  = "enable-packaging-controller"
-		enableDepControllerName   = "enable-deployment-controller"
+		enableTrainControllerName  = "enable-training-controller"
+		enablePackControllerName   = "enable-packaging-controller"
+		enableDepControllerName    = "enable-deployment-controller"
+		trainingEnabledConfigKey   = "training.enabled"
+		packagingEnabledConfigKey  = "packaging.enabled"
+		deploymentEnabledConfigKey = "deployment.enabled"
 	)
 
 	mainCmd.PersistentFlags().Bool(enableTrainControllerName, false, "config file")
 	mainCmd.PersistentFlags().Bool(enablePackControllerName, false, "config file")
 	mainCmd.PersistentFlags().Bool(enableDepControllerName, false, "config file")
 
-	if err := viper.BindPFlag(training.Enabled, mainCmd.PersistentFlags().Lookup(enableTrainControllerName)); err != nil {
+	if err := viper.BindPFlag(
+		trainingEnabledConfigKey, mainCmd.PersistentFlags().Lookup(enableTrainControllerName),
+	); err != nil {
 		panic(err)
 	}
 
-	if err := viper.BindPFlag(packaging.Enabled, mainCmd.PersistentFlags().Lookup(enablePackControllerName)); err != nil {
+	if err := viper.BindPFlag(
+		packagingEnabledConfigKey, mainCmd.PersistentFlags().Lookup(enablePackControllerName),
+	); err != nil {
 		panic(err)
 	}
 
-	if err := viper.BindPFlag(deployment.Enabled, mainCmd.PersistentFlags().Lookup(enableDepControllerName)); err != nil {
+	if err := viper.BindPFlag(
+		deploymentEnabledConfigKey, mainCmd.PersistentFlags().Lookup(enableDepControllerName),
+	); err != nil {
 		panic(err)
 	}
 }
@@ -78,12 +83,14 @@ func main() {
 }
 
 func startOperator(cmd *cobra.Command, args []string) {
+	odahuConfig := config.MustLoadConfig()
+
 	logf.SetLogger(logf.ZapLogger(true))
 	log := logf.Log.WithName("entrypoint")
 
 	log.Info("setting up client for manager")
 
-	cfg, err := config.GetConfig()
+	cfg, err := k8s_config.GetConfig()
 	if err != nil {
 		log.Error(err, "unable to set up client config")
 		os.Exit(1)
@@ -93,7 +100,7 @@ func startOperator(cmd *cobra.Command, args []string) {
 	mgr, err := manager.New(
 		cfg,
 		manager.Options{
-			MetricsBindAddress: fmt.Sprintf(":%d", viper.GetInt(operator_config.MonitoringPort)),
+			MetricsBindAddress: fmt.Sprintf(":%d", odahuConfig.Operator.MonitoringPort),
 		},
 	)
 
@@ -111,7 +118,7 @@ func startOperator(cmd *cobra.Command, args []string) {
 	}
 
 	log.Info("Setting up controller")
-	if err := controller.AddToManager(mgr); err != nil {
+	if err := controller.AddToManager(mgr, odahuConfig); err != nil {
 		log.Error(err, "unable to register controllers to the manager")
 		os.Exit(1)
 	}

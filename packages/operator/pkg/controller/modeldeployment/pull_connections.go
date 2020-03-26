@@ -23,10 +23,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	dep_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/aws"
-	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -149,7 +147,7 @@ func (r *ReconcileModelDeployment) reconcileDockerDeploymentSecret(
 	expectedSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      depSecretName,
-			Namespace: viper.GetString(dep_conf.Namespace),
+			Namespace: r.deploymentConfig.Namespace,
 		},
 		Data: map[string][]byte{
 			DockerConfigSecretKey: dockerSecretBytes,
@@ -162,7 +160,7 @@ func (r *ReconcileModelDeployment) reconcileDockerDeploymentSecret(
 	}
 
 	var foundSecret = &corev1.Secret{}
-	secretNamespacedName := types.NamespacedName{Name: depSecretName, Namespace: viper.GetString(dep_conf.Namespace)}
+	secretNamespacedName := types.NamespacedName{Name: depSecretName, Namespace: r.deploymentConfig.Namespace}
 	err = r.Get(context.TODO(), secretNamespacedName, foundSecret)
 	switch {
 	case err != nil && k8serrors.IsNotFound(err):
@@ -199,7 +197,7 @@ func (r *ReconcileModelDeployment) reconcileDockerServiceAccount(
 	dockerServiceAccount := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      depSecretName,
-			Namespace: viper.GetString(dep_conf.Namespace),
+			Namespace: r.deploymentConfig.Namespace,
 		},
 		ImagePullSecrets: []corev1.LocalObjectReference{
 			{
@@ -215,7 +213,7 @@ func (r *ReconcileModelDeployment) reconcileDockerServiceAccount(
 	var foundDockerServiceAccount = &corev1.ServiceAccount{}
 	dockerServiceAccountName := types.NamespacedName{
 		Name:      depSecretName,
-		Namespace: viper.GetString(dep_conf.Namespace),
+		Namespace: r.deploymentConfig.Namespace,
 	}
 	if err := r.Get(
 		context.TODO(),

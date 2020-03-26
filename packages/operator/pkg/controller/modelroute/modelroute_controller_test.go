@@ -19,6 +19,7 @@ package modelroute
 import (
 	v1alpha3_istio_api "github.com/aspenmesh/istio-client-go/pkg/apis/networking/v1alpha3"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	. "github.com/onsi/gomega"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -106,7 +107,12 @@ func setUp(g *GomegaWithT) (chan struct{}, *sync.WaitGroup, chan reconcile.Reque
 		panic(err)
 	}
 
-	recFn, requests := SetupTestReconcile(newReconciler(mgr))
+	recFn, requests := SetupTestReconcile(newReconciler(
+		mgr,
+		config.NewDefaultModelDeploymentConfig(),
+		config.NewDefaultOperatorConfig(),
+		config.NvidiaResourceName,
+	))
 	g.Expect(add(mgr, recFn)).NotTo(HaveOccurred())
 
 	stopMgr, mgrStopped := StartTestManager(mgr, g)

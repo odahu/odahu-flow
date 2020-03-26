@@ -1,69 +1,45 @@
-//
-//    Copyright 2019 EPAM Systems
-//
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-//
-//        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-//
+/*
+ * Copyright 2020 EPAM Systems
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package config
 
-import (
-	"fmt"
-	"os"
-	"strings"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-)
-
 const (
-	defaultConfigPathForDev = "packages/operator"
+	NvidiaResourceName = "nvidia.com/gpu"
 )
 
-var (
-	CfgFile string
-	logC    = logf.Log.WithName("config")
-)
-
-func InitBasicParams(cmd *cobra.Command) {
-	setUpLogger()
-	cobra.OnInitialize(InitConfig)
-
-	cmd.PersistentFlags().StringVar(&CfgFile, "config", "", "config file")
+type ExternalUrl struct {
+	// Human readable name
+	Name string `json:"name"`
+	// Link to a resource
+	URL string `json:"url"`
+	// Optional link to an image which represents a type of the resource, for example the logo of Grafana
+	ImageURL string `json:"imageUrl"`
 }
 
-func PanicIfError(err error) {
-	if err != nil {
-		panic(err)
-	}
+type CommonConfig struct {
+	// The collection of external urls, for example: metrics, edge, service catalog and so on
+	ExternalURLs []ExternalUrl `json:"externalUrls"`
+	// Kubernetes can consume the GPU resource in the <vendor>.com/gpu format.
+	// For example, amd.com/gpu or nvidia.com/gpu.
+	ResourceGPUName string `json:"resourceGpuName"`
 }
 
-func InitConfig() {
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
-	if CfgFile != "" {
-		viper.SetConfigFile(CfgFile)
-	} else {
-		viper.AddConfigPath(defaultConfigPathForDev)
+func NewDefaultCommonConfig() CommonConfig {
+	return CommonConfig{
+		ExternalURLs:    []ExternalUrl{},
+		ResourceGPUName: NvidiaResourceName,
 	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		logC.Info(fmt.Sprintf("Error during reading of the odahuflow config: %s", err.Error()))
-	}
-}
-
-func setUpLogger() {
-	logf.SetLogger(logf.ZapLoggerTo(os.Stdout, true))
 }

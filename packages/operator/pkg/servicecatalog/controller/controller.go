@@ -17,15 +17,17 @@
 package controller
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-var AddToManagerFuncs []func(manager.Manager, *catalog.ModelRouteCatalog) error
+var AddToManagerFuncs []func(manager.Manager, *catalog.ModelRouteCatalog, config.ModelDeploymentConfig) error
 
-func AddToManager(m manager.Manager, mrc *catalog.ModelRouteCatalog) error {
+func AddToManager(
+	m manager.Manager, mrc *catalog.ModelRouteCatalog, deploymentConfig config.ModelDeploymentConfig) error {
 	for _, f := range AddToManagerFuncs {
-		if err := f(m, mrc); err != nil {
+		if err := f(m, mrc, deploymentConfig); err != nil {
 			return err
 		}
 	}

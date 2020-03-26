@@ -1,5 +1,58 @@
 definitions:
-  CommonConfiguration:
+  APIBackendConfig:
+    properties:
+      local:
+        $ref: '#/definitions/APILocalBackendConfig'
+        description: Local backend
+        type: object
+      type:
+        description: |-
+          Type of the backend. Available values:
+             * local
+             * config
+        type: string
+    type: object
+  APIConfig:
+    properties:
+      backend:
+        $ref: '#/definitions/APIBackendConfig'
+        type: object
+      port:
+        description: API HTTP port
+        type: integer
+    type: object
+  APILocalBackendConfig:
+    properties:
+      localBackendCrdPath:
+        description: Path to a dir with ODAHU CRDs
+        type: string
+    type: object
+  AuthConfig:
+    properties:
+      apiToken:
+        description: It is a mock for the future. Currently, it is always empty.
+        type: string
+      apiUrl:
+        description: ODAHU API URL
+        type: string
+      clientId:
+        description: OpenID client_id credential for service account
+        type: string
+      clientSecret:
+        description: OpenID client_secret credential for service account
+        type: string
+      oauthOidcTokenEndpoint:
+        description: OpenID token url
+        type: string
+    type: object
+  Claims:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  CommonConfig:
     properties:
       externalUrls:
         description: 'The collection of external urls, for example: metrics, edge,
@@ -7,17 +60,72 @@ definitions:
         items:
           $ref: '#/definitions/ExternalUrl'
         type: array
+      resourceGpuName:
+        description: |-
+          Kubernetes can consume the GPU resource in the <vendor>.com/gpu format.
+          For example, amd.com/gpu or nvidia.com/gpu.
+        type: string
     type: object
-  Configuration:
+  Config:
     properties:
+      api:
+        $ref: '#/definitions/APIConfig'
+        type: object
       common:
-        $ref: '#/definitions/CommonConfiguration'
-        description: Common secretion of configuration
+        $ref: '#/definitions/CommonConfig'
+        type: object
+      connection:
+        $ref: '#/definitions/ConnectionConfig'
+        type: object
+      deployment:
+        $ref: '#/definitions/ModelDeploymentConfig'
+        type: object
+      operator:
+        $ref: '#/definitions/OperatorConfig'
+        type: object
+      packager:
+        $ref: '#/definitions/PackagerConfig'
+        type: object
+      packaging:
+        $ref: '#/definitions/ModelPackagingConfig'
+        type: object
+      serviceCatalog:
+        $ref: '#/definitions/ServiceCatalog'
+        type: object
+      trainer:
+        $ref: '#/definitions/TrainerConfig'
         type: object
       training:
-        $ref: '#/definitions/TrainingConfiguration'
-        description: Configuration describe training process
+        $ref: '#/definitions/ModelTrainingConfig'
         type: object
+      user:
+        $ref: '#/definitions/UserConfig'
+        type: object
+    type: object
+  ConnectionConfig:
+    properties:
+      enabled:
+        description: Connection API server and operator are enabled
+        type: boolean
+      namespace:
+        description: Enable connection API/operator
+        type: string
+      repositoryType:
+        description: |-
+          Storage backend for connections. Available options:
+            * kubernetes
+            * vault
+        type: string
+      vault:
+        $ref: '#/definitions/Vault'
+        description: Connection Vault configuration
+        type: object
+    type: object
+  EdgeConfig:
+    properties:
+      host:
+        description: External model host
+        type: string
     type: object
   ExternalUrl:
     properties:
@@ -32,9 +140,203 @@ definitions:
         description: Link to a resource
         type: string
     type: object
-  TrainingConfiguration:
+  JWKS:
     properties:
+      enabled:
+        description: Model authorization enabled
+        type: boolean
+      issuer:
+        description: Issuer claim value
+        type: string
+      url:
+        description: JWKS URL
+        type: string
+    type: object
+  ModelDeploymentConfig:
+    properties:
+      defaultDockerPullConnName:
+        description: Default connection ID which will be used if a user doesn't specify
+          it in a model deployment
+        type: string
+      edge:
+        $ref: '#/definitions/EdgeConfig'
+        type: object
+      enabled:
+        description: Enable deployment API/operator
+        type: boolean
+      istio:
+        $ref: '#/definitions/ModelDeploymentIstioConfig'
+        type: object
+      namespace:
+        description: Kubernetes namespace, where model deployments will be deployed
+        type: string
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Kubernetes node selector for model deployments
+        type: object
+      security:
+        $ref: '#/definitions/ModelDeploymentSecurityConfig'
+        type: object
+      toleration:
+        additionalProperties:
+          type: string
+        description: Kubernetes tolerations for model deployments
+        type: object
+    type: object
+  ModelDeploymentIstioConfig:
+    properties:
+      namespace:
+        description: Istio ingress gateway namespace
+        type: string
+      serviceName:
+        description: Istio ingress gateway service name
+        type: string
+    type: object
+  ModelDeploymentSecurityConfig:
+    properties:
+      jwks:
+        $ref: '#/definitions/JWKS'
+        type: object
+      roleName:
+        description: Deprecated
+        type: string
+    type: object
+  ModelPackagingConfig:
+    properties:
+      enabled:
+        description: Enable packaging API/operator
+        type: boolean
+      modelPackagerImage:
+        type: string
+      namespace:
+        description: Kubernetes namespace, where model trainings will be deployed
+        type: string
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Kubernetes node selectors for model packaging pods
+        type: object
+      outputConnectionID:
+        type: string
+      packagerIntegrationNamespace:
+        type: string
+      serviceAccount:
+        type: string
+      timeout:
+        description: Timeout for full training process
+        type: string
+      toleration:
+        additionalProperties:
+          type: string
+        description: Kubernetes tolerations for model packaging pods
+        type: object
+    type: object
+  ModelTrainingConfig:
+    properties:
+      enabled:
+        description: Enable deployment API/operator
+        type: boolean
+      gpuNodeSelector:
+        additionalProperties:
+          type: string
+        type: object
+      gpuToleration:
+        additionalProperties:
+          type: string
+        description: Kubernetes tolerations for GPU model trainings pods
+        type: object
       metricUrl:
+        type: string
+      modelTrainerImage:
+        type: string
+      namespace:
+        description: Kubernetes namespace, where model trainings will be deployed
+        type: string
+      nodeSelector:
+        additionalProperties:
+          type: string
+        type: object
+      outputConnectionID:
+        type: string
+      serviceAccount:
+        type: string
+      timeout:
+        description: Timeout for full training process
+        type: string
+      toleration:
+        additionalProperties:
+          type: string
+        description: Kubernetes tolerations for model trainings pods
+        type: object
+      toolchainIntegrationNamespace:
+        type: string
+    type: object
+  OperatorConfig:
+    properties:
+      auth:
+        $ref: '#/definitions/AuthConfig'
+        type: object
+      monitoringPort:
+        description: Operator HTTP monitoring port
+        type: integer
+    type: object
+  PackagerConfig:
+    properties:
+      auth:
+        $ref: '#/definitions/AuthConfig'
+        type: object
+      modelTrainingId:
+        description: ID of the model packaging
+        type: string
+      mpFile:
+        description: The path to the configuration file for a user packager.
+        type: string
+      outputTrainingDir:
+        description: The path to the dir when a user packager will save their result.
+        type: string
+    type: object
+  ServiceCatalog:
+    properties:
+      baseUrl:
+        type: string
+    type: object
+  TrainerConfig:
+    properties:
+      auth:
+        $ref: '#/definitions/AuthConfig'
+        type: object
+      modelTrainingId:
+        description: ID of the model training
+        type: string
+      mtFile:
+        description: The path to the configuration file for a user trainer.
+        type: string
+      outputTrainingDir:
+        description: The path to the dir when a user trainer will save their result.
+        type: string
+    type: object
+  UserConfig:
+    properties:
+      claims:
+        $ref: '#/definitions/Claims'
+        type: object
+    type: object
+  Vault:
+    properties:
+      role:
+        description: Vault role for access to the secret engine path
+        type: string
+      secretEnginePath:
+        description: Vault secret engine path where connection will be stored
+        type: string
+      token:
+        description: |-
+          Optionally. Token for access to the vault server
+          If it is empty then client will use the k8s auth
+        type: string
+      url:
+        description: Vault URL
         type: string
     type: object
   Connection:
@@ -136,6 +438,7 @@ definitions:
   ModelPackagingSpec:
     properties:
       arguments:
+        additionalProperties: true
         description: List of arguments. This parameter depends on the specific packaging
           integration
         type: object
@@ -400,6 +703,8 @@ definitions:
   ModelDeploymentSpec:
     properties:
       annotations:
+        additionalProperties:
+          type: string
         description: Annotations for model pods.
         type: object
       image:
@@ -581,6 +886,8 @@ definitions:
           $ref: '#/definitions/EnvironmentVariable'
         type: array
       hyperParameters:
+        additionalProperties:
+          type: string
         description: Model training hyperParameters in parameter:value format
         type: object
       image:
@@ -694,6 +1001,8 @@ definitions:
   ToolchainIntegrationSpec:
     properties:
       additionalEnvironments:
+        additionalProperties:
+          type: string
         description: Additional environments for a training process
         type: object
       defaultImage:
@@ -743,29 +1052,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Configuration'
+            $ref: '#/definitions/Config'
       summary: Get the Odahuflow service configuration
-      tags:
-      - Configuration
-    put:
-      consumes:
-      - application/json
-      description: Update a Configuration
-      parameters:
-      - description: Create a Configuration
-        in: body
-        name: configuration
-        required: true
-        schema:
-          $ref: '#/definitions/Configuration'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/HTTPResult'
-      summary: Update a Odahuflow service configuration
       tags:
       - Configuration
   /api/v1/connection:

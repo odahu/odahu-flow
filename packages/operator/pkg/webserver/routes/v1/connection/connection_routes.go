@@ -18,12 +18,12 @@ package connection
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"net/http"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	conn_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -61,13 +61,16 @@ type controller struct {
 }
 
 func ConfigureRoutes(
-	routeGroup *gin.RouterGroup, connRepository conn_repository.Repository, keyEvaluator PublicKeyEvaluator,
+	routeGroup *gin.RouterGroup,
+	connRepository conn_repository.Repository,
+	keyEvaluator PublicKeyEvaluator,
+	connectionConfig config.ConnectionConfig,
 ) {
 	controller := &controller{
 		connRepository: connRepository,
 		validator:      NewConnValidator(keyEvaluator),
 	}
-	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(conn_config.Enabled))
+	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(connectionConfig.Enabled))
 
 	routeGroup.GET(GetConnectionURL, controller.getConnection)
 	routeGroup.GET(GetDecryptedConnectionURL, controller.getDecryptedConnection)

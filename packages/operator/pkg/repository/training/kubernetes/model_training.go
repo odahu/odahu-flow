@@ -22,12 +22,10 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	"time"
 
@@ -288,7 +286,7 @@ func (tkr *trainingK8sRepository) GetModelTrainingLogs(id string, writer utils.W
 			containerName,
 			writer,
 			follow,
-			viper.GetInt64(config_deployment.ModelLogsFlushSize),
+			utils.LogFlushSize,
 		)
 		if err != nil {
 			return err

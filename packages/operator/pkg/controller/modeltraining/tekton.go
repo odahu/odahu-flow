@@ -22,11 +22,8 @@ import (
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	operator_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/operator"
-	training_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	"github.com/spf13/viper"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -42,11 +39,11 @@ const (
 	configSecretName  = "odahu-flow-training-config" //nolint:gosec
 )
 
-func generateTrainerTaskSpec(
+func (r *ReconcileModelTraining) generateTrainerTaskSpec(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 	toolchainIntegration *training.ToolchainIntegration,
 ) (*tektonv1alpha1.TaskSpec, error) {
-	mtResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources)
+	mtResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
 		log.Error(err, "The training resources is not valid",
 			"mt_id", trainingCR.Name, "resources", mtResources)
@@ -54,13 +51,13 @@ func generateTrainerTaskSpec(
 		return nil, err
 	}
 
-	helperContainerResources := utils.CalculateHelperContainerResources(mtResources)
+	helperContainerResources := utils.CalculateHelperContainerResources(mtResources, r.gpuResourceName)
 	return &tektonv1alpha1.TaskSpec{
 		Steps: []tektonv1alpha1.Step{
-			createInitTrainerStep(helperContainerResources, trainingCR.Name),
-			createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
-			createArtifactValidationStep(helperContainerResources, trainingCR),
-			createResultTrainerStep(helperContainerResources, trainingCR),
+			r.createInitTrainerStep(helperContainerResources, trainingCR.Name),
+			r.createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
+			r.createArtifactValidationStep(helperContainerResources, trainingCR),
+			r.createResultTrainerStep(helperContainerResources, trainingCR),
 		},
 		Volumes: []corev1.Volume{
 			{
@@ -75,11 +72,13 @@ func generateTrainerTaskSpec(
 	}, nil
 }
 
-func createInitTrainerStep(res corev1.ResourceRequirements, mtID string) tektonv1alpha1.Step {
+func (r *ReconcileModelTraining) createInitTrainerStep(
+	res corev1.ResourceRequirements, mtID string,
+) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerSetupStep,
-			Image:   viper.GetString(training_conf.ModelBuilderImage),
+			Image:   r.trainingConfig.ModelTrainerImage,
 			Command: []string{pathToTrainerBin},
 			Args: []string{
 				"setup",
@@ -87,10 +86,8 @@ func createInitTrainerStep(res corev1.ResourceRequirements, mtID string) tektonv
 				path.Join(workspacePath, mtConfig),
 				"--mt-id",
 				mtID,
-				"--output-connection-name",
-				viper.GetString(training_conf.OutputConnectionName),
 				"--api-url",
-				viper.GetString(operator_conf.APIURL),
+				r.operatorConfig.Auth.APIURL,
 				"--config",
 				path.Join(configDir, configFileName),
 			},
@@ -105,7 +102,7 @@ func createInitTrainerStep(res corev1.ResourceRequirements, mtID string) tektonv
 	}
 }
 
-func createMainTrainerStep(
+func (r *ReconcileModelTraining) createMainTrainerStep(
 	train *odahuflowv1alpha1.ModelTraining,
 	trainingIntegration *training.ToolchainIntegration,
 	trainResources *corev1.ResourceRequirements) tektonv1alpha1.Step {
@@ -136,7 +133,7 @@ func createMainTrainerStep(
 	}
 }
 
-func createArtifactValidationStep(
+func (r *ReconcileModelTraining) createArtifactValidationStep(
 	validatorResources corev1.ResourceRequirements, trainingCR *odahuflowv1alpha1.ModelTraining,
 ) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
@@ -155,13 +152,13 @@ func createArtifactValidationStep(
 	}
 }
 
-func createResultTrainerStep(
+func (r *ReconcileModelTraining) createResultTrainerStep(
 	res corev1.ResourceRequirements, mt *odahuflowv1alpha1.ModelTraining,
 ) tektonv1alpha1.Step {
 	return tektonv1alpha1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerResultStep,
-			Image:   viper.GetString(training_conf.ModelBuilderImage),
+			Image:   r.trainingConfig.ModelTrainerImage,
 			Command: []string{pathToTrainerBin},
 			Args: []string{
 				"result",
@@ -169,10 +166,8 @@ func createResultTrainerStep(
 				path.Join(workspacePath, mtConfig),
 				"--mt-id",
 				mt.Name,
-				"--output-connection-name",
-				mt.Spec.OutputConnection,
 				"--api-url",
-				viper.GetString(operator_conf.APIURL),
+				r.operatorConfig.Auth.APIURL,
 				"--output-dir",
 				path.Join(workspacePath, outputDir),
 				"--config",

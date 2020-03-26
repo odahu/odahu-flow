@@ -18,8 +18,6 @@ package kubernetes
 
 import (
 	"fmt"
-	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
-	"github.com/spf13/viper"
 	"reflect"
 
 	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -101,7 +99,8 @@ func IsResourcePresent(value *string) bool {
 	return value != nil && *value != ""
 }
 
-func ConvertOdahuflowResourcesToK8s(odahuResources *odahuv1alpha1.ResourceRequirements) (
+func ConvertOdahuflowResourcesToK8s(
+	odahuResources *odahuv1alpha1.ResourceRequirements, gpuResourceName string) (
 	k8sResources corev1.ResourceRequirements, err error,
 ) {
 	if odahuResources == nil {
@@ -125,7 +124,7 @@ func ConvertOdahuflowResourcesToK8s(odahuResources *odahuv1alpha1.ResourceRequir
 	if odahuResources.Limits != nil && IsResourcePresent(odahuResources.Limits.GPU) {
 		err = multierr.Append(err, convertResource(
 			odahuResources.Limits.GPU, k8sResources.Limits,
-			corev1.ResourceName(viper.GetString(train_conf.ResourceGPUName)),
+			corev1.ResourceName(gpuResourceName),
 			"gpu", resLisLimitName,
 		))
 	} else if odahuResources.Requests != nil && IsResourcePresent(odahuResources.Requests.GPU) {
@@ -135,7 +134,7 @@ func ConvertOdahuflowResourcesToK8s(odahuResources *odahuv1alpha1.ResourceRequir
 
 		err = multierr.Append(err, convertResource(
 			odahuResources.Requests.GPU, k8sResources.Limits,
-			corev1.ResourceName(viper.GetString(train_conf.ResourceGPUName)),
+			corev1.ResourceName(gpuResourceName),
 			"gpu", resLisRequestName,
 		))
 	}

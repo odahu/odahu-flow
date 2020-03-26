@@ -20,7 +20,7 @@ import logging
 
 from odahuflow.sdk.clients.api import RemoteAPIClient, AsyncRemoteAPIClient
 from odahuflow.sdk.definitions import CONFIGURATION_URL
-from odahuflow.sdk.models import Configuration
+from odahuflow.sdk.models import Config
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,22 +30,13 @@ class ConfigurationClient(RemoteAPIClient):
     HTTP connection client
     """
 
-    def get(self) -> Configuration:
+    def get(self) -> Config:
         """
         Get Configuration from API server
 
         :return: Configuration
         """
-        return Configuration.from_dict(self.query(CONFIGURATION_URL))
-
-    def edit(self, conf: Configuration) -> Configuration:
-        """
-        Edit Configuration
-
-        :param conf: Configuration
-        :return Message from API server
-        """
-        return Configuration.from_dict(self.query(CONFIGURATION_URL, action='PUT', payload=conf.to_dict()))
+        return Config.from_dict(self.query(CONFIGURATION_URL))
 
 
 class AsyncConfigurationClient(AsyncRemoteAPIClient):
@@ -53,19 +44,10 @@ class AsyncConfigurationClient(AsyncRemoteAPIClient):
     HTTP connection async client
     """
 
-    async def get(self) -> Configuration:
+    async def get(self) -> Config:
         """
         Get Configuration from API server
 
         :return: Configuration
         """
-        return Configuration.from_dict(await self.query(CONFIGURATION_URL))
-
-    async def edit(self, conf: Configuration) -> Configuration:
-        """
-        Edit Configuration
-
-        :param conf: Configuration
-        :return Message from API server
-        """
-        return Configuration.from_dict(await self.query(CONFIGURATION_URL, action='PUT', payload=conf.to_dict()))
+        return Config.from_dict(await self.query(CONFIGURATION_URL))

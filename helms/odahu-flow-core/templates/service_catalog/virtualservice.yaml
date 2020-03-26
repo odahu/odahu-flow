@@ -13,8 +13,8 @@ spec:
   http:
     - match:
       - uri:
-          exact: "{{ .Values.config.service_catalog.base_url }}"
+          exact: "{{ .Values.config.serviceCatalog.baseUrl }}"
       redirect:
-        uri: {{ .Values.config.service_catalog.base_url }}/swagger/index.html
+        uri: {{ .Values.config.serviceCatalog.baseUrl }}/swagger/index.html
 {{- end }}
 {{- end }}

@@ -19,19 +19,15 @@ package main
 import (
 	"context"
 	"fmt"
-	api_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/api"
 	"github.com/spf13/viper"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
-	_ "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver"
 	"github.com/spf13/cobra"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -40,15 +36,17 @@ import (
 var log = logf.Log.WithName("api")
 
 const (
-	BackendTypeParam = "backend-type"
-	CRDPathParam     = "crd-path"
+	BackendTypeParam    = "backend-type"
+	CRDPathParam        = "crd-path"
+	BackendType         = "api.backend.type"
+	LocalBackendCRDPath = "api.backend.local.crdPath"
 )
 
 var mainCmd = &cobra.Command{
 	Use:   "api",
 	Short: "odahu-flow API server",
 	Run: func(cmd *cobra.Command, args []string) {
-		apiServer, err := webserver.NewAPIServer()
+		apiServer, err := webserver.NewAPIServer(config.MustLoadConfig())
 		if err != nil {
 			log.Error(err, "Can't set up api server")
 			os.Exit(1)
@@ -80,11 +78,13 @@ var mainCmd = &cobra.Command{
 func init() {
 	config.InitBasicParams(mainCmd)
 
-	mainCmd.PersistentFlags().String(BackendTypeParam, "", "Backend type")
-	config.PanicIfError(viper.BindPFlag(api_config.BackendType, mainCmd.PersistentFlags().Lookup(BackendTypeParam)))
+	mainCmd.PersistentFlags().String(BackendTypeParam, config.ConfigBackendType, "Backend type")
+	config.PanicIfError(viper.BindPFlag(BackendType, mainCmd.PersistentFlags().Lookup(BackendTypeParam)))
 
-	mainCmd.PersistentFlags().String(CRDPathParam, "", "Path to a directory with Odahu-flow CRDs")
-	config.PanicIfError(viper.BindPFlag(api_config.LocalBackendCRDPath, mainCmd.PersistentFlags().Lookup(CRDPathParam)))
+	mainCmd.PersistentFlags().String(
+		CRDPathParam, filepath.Join("config", "crds"), "Path to a directory with Odahu-flow CRDs",
+	)
+	config.PanicIfError(viper.BindPFlag(LocalBackendCRDPath, mainCmd.PersistentFlags().Lookup(CRDPathParam)))
 }
 
 func main() {

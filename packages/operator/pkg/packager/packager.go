@@ -21,13 +21,12 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	packager_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packager"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
 	connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"path"
@@ -44,20 +43,22 @@ type Packager struct {
 	connRepo         connection_repository.Repository
 	log              logr.Logger
 	modelPackagingID string
+	packagerConfig   config.PackagerConfig
 }
 
 func NewPackager(
 	packRepo packaging_repository.Repository,
 	connRepo connection_repository.Repository,
-	modelPackagingID string,
+	config config.PackagerConfig,
 ) *Packager {
 	return &Packager{
 		packRepo: packRepo,
 		connRepo: connRepo,
 		log: logf.Log.WithName("packager").WithValues(
-			odahuflow.ModelPackagingIDLogPrefix, modelPackagingID,
+			odahuflow.ModelPackagingIDLogPrefix, config.ModelPackagingID,
 		),
-		modelPackagingID: modelPackagingID,
+		modelPackagingID: config.ModelPackagingID,
+		packagerConfig:   config,
 	}
 }
 
@@ -159,13 +160,13 @@ func (p *Packager) downloadData(packaging *packaging.K8sPackager) (err error) {
 		return err
 	}
 
-	if err = os.Mkdir(viper.GetString(packager_conf.OutputPackagingDir), 0777); err != nil {
+	if err = os.Mkdir(p.packagerConfig.OutputDir, 0777); err != nil {
 		p.log.Error(err, "output dir creation")
 
 		return err
 	}
 
-	if err := utils.Unzip(packaging.TrainingZipName, viper.GetString(packager_conf.OutputPackagingDir)); err != nil {
+	if err := utils.Unzip(packaging.TrainingZipName, p.packagerConfig.OutputDir); err != nil {
 		p.log.Error(err, "unzip training data")
 
 		return err

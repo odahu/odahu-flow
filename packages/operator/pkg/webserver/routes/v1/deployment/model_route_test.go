@@ -19,6 +19,7 @@ package deployment_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -28,14 +29,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	md_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
 	dep_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	dep_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,12 +61,9 @@ func (s *ModelRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	s.server = gin.Default()
-	v1Group := s.server.Group("")
 	s.mdRepository = dep_k8s_repository.NewRepositoryWithOptions(
 		testNamespace, mgr.GetClient(), metav1.DeletePropagationBackground,
 	)
-	dep_route.ConfigureRoutes(v1Group, s.mdRepository)
 
 	err = s.mdRepository.CreateModelDeployment(&deployment.ModelDeployment{
 		ID: mdID1,
@@ -114,11 +110,17 @@ func (s *ModelRouteSuite) TearDownSuite() {
 
 func (s *ModelRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+
+	s.registerHTTPHandlers(config.NewDefaultModelDeploymentConfig())
+}
+
+func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
+	s.server = gin.Default()
+	v1Group := s.server.Group("")
+	dep_route.ConfigureRoutes(v1Group, s.mdRepository, deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelRouteSuite) TearDownTest() {
-	viper.Set(md_config.Enabled, true)
-
 	for _, mdID := range []string{mrID, mrID1, mrID2} {
 		if err := s.mdRepository.DeleteModelRoute(mdID); err != nil && !errors.IsNotFound(err) {
 			panic(err)
@@ -536,7 +538,9 @@ func (s *ModelRouteSuite) TestDeleteMRNotFound() {
 }
 
 func (s *ModelRouteSuite) TestDisabledAPIGetMR() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	mr := newStubMr()
 	s.g.Expect(s.mdRepository.CreateModelRoute(mr)).NotTo(HaveOccurred())
@@ -559,7 +563,9 @@ func (s *ModelRouteSuite) TestDisabledAPIGetMR() {
 }
 
 func (s *ModelRouteSuite) TestDisabledAPIGetAllModelRoutes() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -579,7 +585,9 @@ func (s *ModelRouteSuite) TestDisabledAPIGetAllModelRoutes() {
 }
 
 func (s *ModelRouteSuite) TestDisabledAPICreateMR() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	mr := newStubMr()
 	mrEntityBody, err := json.Marshal(mr)
@@ -599,7 +607,9 @@ func (s *ModelRouteSuite) TestDisabledAPICreateMR() {
 }
 
 func (s *ModelRouteSuite) TestDisabledAPIUpdateMR() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	mrEntity := newStubMr()
 
@@ -620,7 +630,9 @@ func (s *ModelRouteSuite) TestDisabledAPIUpdateMR() {
 }
 
 func (s *ModelRouteSuite) TestDisabledAPIDeleteMR() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 EPAM Systems
+ * Copyright 2020 EPAM Systems
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,45 @@
  * limitations under the License.
  */
 
-package api
+package config
 
 import (
-	"github.com/spf13/viper"
 	"path/filepath"
 )
 
-const (
+type APILocalBackendConfig struct {
+	// Path to a dir with ODAHU CRDs
+	LocalBackendCRDPath string `json:"localBackendCrdPath"`
+}
+
+type APIBackendConfig struct {
 	// Type of the backend. Available values:
 	//    * local
 	//    * config
-	BackendType = "api.backend.type"
-	// Path to a dir with Legion CRDs
-	LocalBackendCRDPath = "api.backend.local.crd_path"
-	// WEB Server port
-	Port = "api.port"
-)
+	Type string `json:"type"`
+	// Local backend
+	Local APILocalBackendConfig `json:"local"`
+}
+
+type APIConfig struct {
+	Backend APIBackendConfig `json:"backend"`
+	// API HTTP port
+	Port    int              `json:"port"`
+}
 
 const (
 	LocalBackendType  = "local"
 	ConfigBackendType = "config"
 )
 
-func init() {
-	viper.SetDefault(BackendType, ConfigBackendType)
-	viper.SetDefault(LocalBackendCRDPath, filepath.Join("config", "crds"))
-
-	viper.SetDefault(Port, 5000)
+func NewDefaultAPIConfig() APIConfig {
+	return APIConfig{
+		Backend: APIBackendConfig{
+			Type: ConfigBackendType,
+			Local: APILocalBackendConfig{
+				LocalBackendCRDPath: filepath.Join("config", "crds"),
+			},
+		},
+		Port: 5000,
+	}
 }

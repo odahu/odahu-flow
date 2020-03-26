@@ -346,12 +346,13 @@ config:
   common:
     # The collection of external urls, for example: metrics, edge, service catalog and so on
     # Type: string->string map
-    external_urls: []
+    externalUrls: []
   # Operator configuration
   operator:
-    # The in-cluster API url
-    # Type: string->string
-    api_url: http://odahu-flow-api.odahu-flow.svc.cluster.local
+    auth:
+      # The in-cluster API url
+      # Type: string->string
+      apiUrl: http://odahu-flow-api.odahu-flow.svc.cluster.local
     # OpenId Provider token url
     # oauth_oidc_token_endpoint: https://oauth2.googleapis.com/token
 
@@ -364,10 +365,9 @@ config:
     #   * kubernetes
     #   * vault
     # Type: string
-    repository_type: kubernetes
-    # TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
+    repositoryType: kubernetes
     # Type: string
-    decrypt_token: ""
+    decryptToken: ""
     # Vault storage backend configuration
     vault:
       # Vault URL
@@ -375,7 +375,7 @@ config:
       url: ""
       # Vault secret engine path where connection will be stored
       # Type: string
-      secret_engine_path: ""
+      secretEnginePath: ""
       # Vault role for access to the secret engine path
       # Type: string
       role: ""
@@ -396,7 +396,7 @@ config:
       # Default role name for model deployments
       # Required value
       # Type: string
-      role_name: test
+      roleName: test
       jwks:
         # Is model authorization enabled
         # Type: bool
@@ -420,14 +420,14 @@ config:
     # Determine where training artifact will be saved
     # Required value
     # Type: string
-    output_connection: models-output
+    outputConnection: models-output
     # Model trainer settings
-    model_trainer:
+    modelTrainer:
       # Model training base image
       # Required value
       # Type: string
       # image: "odahu/odahu-flow-model-trainer:latest"
-    model_validator:
+    modelValidator:
       # Model training base image
       # Required value
       # Type: string
@@ -445,23 +445,23 @@ config:
     # Determine where training artifact will be saved
     # Required value
     # Type: string
-    output_connection: models-output
+    outputConnection: models-output
     # Service account for packager pods
     # Required value
     # Type: string
-    service_account: odahu-flow-model-packager
+    serviceAccount: odahu-flow-model-packager
     # Model packager settings
-    model_packager:
+    modelPackager:
       # Model packager base image
       # Required value
       # Type: string
       # image: "odahu-flow-model-packager:latest"
 
   # Service catalog configuration
-  service_catalog:
+  serviceCatalog:
     # Base URL prefix for the model deployment swagger UI
     # Type: string
-    base_url: /service-catalog
+    baseUrl: /service-catalog
 
 
 # Service account used to upload odahu resources via odahuflowctl

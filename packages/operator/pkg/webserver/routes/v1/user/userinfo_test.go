@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/user"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	user_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/user"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -32,7 +33,7 @@ import (
 const (
 	userName = "John Doe"
 	email    = "test@email.org"
-	token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haW" +
+	token    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haW" +
 		"wiOiJ0ZXN0QGVtYWlsLm9yZyIsImlhdCI6MTUxNjIzOTAyMn0.mDHHgcPKVidgB7VFNfSHS-K08a4a4kRHQF94waNbpzg"
 )
 
@@ -45,7 +46,7 @@ type UserInfoRouteSuite struct {
 func (s *UserInfoRouteSuite) SetupSuite() {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	user_route.ConfigureRoutes(v1Group)
+	user_route.ConfigureRoutes(v1Group, config.NewDefaultUserConfig().Claims)
 }
 
 func (s *UserInfoRouteSuite) SetupTest() {

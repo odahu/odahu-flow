@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -31,7 +33,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	mp_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
@@ -39,7 +40,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -99,15 +99,16 @@ var (
 	}
 )
 
-type mpiValidationSuite struct {
+type PackagingIntegrationRouteSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	server         *gin.Engine
 	k8sEnvironment *envtest.Environment
 	mpRepository   mp_repository.Repository
+	connRepository conn_repository.Repository
 }
 
-func (s *mpiValidationSuite) SetupSuite() {
+func (s *PackagingIntegrationRouteSuite) SetupSuite() {
 	var cfg *rest.Config
 
 	s.k8sEnvironment = &envtest.Environment{
@@ -129,26 +130,37 @@ func (s *mpiValidationSuite) SetupSuite() {
 		s.T().Fatalf("Cannot setup the test k8s manager: %v", err)
 	}
 
-	s.server = gin.Default()
-	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
-	pack_route.ConfigureRoutes(s.server.Group(""), s.mpRepository, conn_k8s_repository.NewRepository(
+	s.mpRepository = mp_k8s_repository.NewRepository(
+		testNamespace, testNamespace, mgr.GetClient(), nil,
+	)
+	s.connRepository = conn_k8s_repository.NewRepository(
 		testNamespace, mgr.GetClient(),
-	))
+	)
 }
 
-func (s *mpiValidationSuite) TearDownSuite() {
+func (s *PackagingIntegrationRouteSuite) TearDownSuite() {
 	if err := s.k8sEnvironment.Stop(); err != nil {
 		s.T().Fatal("Cannot stop the test k8s api")
 	}
 }
 
-func (s *mpiValidationSuite) SetupTest() {
+func (s *PackagingIntegrationRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+	s.registerHandlers(config.NewDefaultModelPackagingConfig())
 }
 
-func (s *mpiValidationSuite) TearDownTest() {
-	viper.Set(mp_config.Enabled, true)
+func (s *PackagingIntegrationRouteSuite) registerHandlers(packagingConfig config.ModelPackagingConfig) {
+	s.server = gin.Default()
+	pack_route.ConfigureRoutes(
+		s.server.Group(""),
+		s.mpRepository,
+		s.connRepository,
+		packagingConfig,
+		config.NvidiaResourceName,
+	)
+}
 
+func (s *PackagingIntegrationRouteSuite) TearDownTest() {
 	for _, piID := range []string{piID} {
 		if err := s.mpRepository.DeletePackagingIntegration(piID); err != nil && !errors.IsNotFound(err) {
 			s.T().Fail()
@@ -172,10 +184,10 @@ func newPackagingIntegration() *packaging.PackagingIntegration {
 }
 
 func TestModelPackagingIntegrationSuite(t *testing.T) {
-	suite.Run(t, new(mpiValidationSuite))
+	suite.Run(t, new(PackagingIntegrationRouteSuite))
 }
 
-func (s *mpiValidationSuite) TestGetPackagingIntegration() {
+func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegration() {
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
 
@@ -192,7 +204,7 @@ func (s *mpiValidationSuite) TestGetPackagingIntegration() {
 	s.g.Expect(result.Spec).Should(Equal(pi.Spec))
 }
 
-func (s *mpiValidationSuite) TestGetPackagingIntegrationNotFound() {
+func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegrationNotFound() {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/packaging/integration/not-found", nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -206,7 +218,7 @@ func (s *mpiValidationSuite) TestGetPackagingIntegrationNotFound() {
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
 }
 
-func (s *mpiValidationSuite) TestCreatePackagingIntegration() {
+func (s *PackagingIntegrationRouteSuite) TestCreatePackagingIntegration() {
 	piEntity := newPackagingIntegration()
 	piEntityBody, err := json.Marshal(piEntity)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -230,7 +242,7 @@ func (s *mpiValidationSuite) TestCreatePackagingIntegration() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *mpiValidationSuite) TestCreatePackagingIntegrationModifiable(){
+func (s *PackagingIntegrationRouteSuite) TestCreatePackagingIntegrationModifiable() {
 	newResource := newPackagingIntegration()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -257,7 +269,7 @@ func (s *mpiValidationSuite) TestCreatePackagingIntegrationModifiable(){
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
-func (s *mpiValidationSuite) TestCreateDuplicatePackagingIntegration() {
+func (s *PackagingIntegrationRouteSuite) TestCreateDuplicatePackagingIntegration() {
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
 
@@ -277,7 +289,7 @@ func (s *mpiValidationSuite) TestCreateDuplicatePackagingIntegration() {
 	s.g.Expect(result.Message).Should(ContainSubstring("already exists"))
 }
 
-func (s *mpiValidationSuite) TestUpdatePackagingIntegration() {
+func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegration() {
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
 
@@ -306,7 +318,7 @@ func (s *mpiValidationSuite) TestUpdatePackagingIntegration() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *mpiValidationSuite) TestUpdatePackagingIntegrationModifiable(){
+func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegrationModifiable() {
 	resource := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(resource)).NotTo(HaveOccurred())
 
@@ -336,7 +348,7 @@ func (s *mpiValidationSuite) TestUpdatePackagingIntegrationModifiable(){
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
-func (s *mpiValidationSuite) TestUpdatePackagingIntegrationNotFound() {
+func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegrationNotFound() {
 	pi := newPackagingIntegration()
 	piEntityBody, err := json.Marshal(pi)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -354,7 +366,7 @@ func (s *mpiValidationSuite) TestUpdatePackagingIntegrationNotFound() {
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
 }
 
-func (s *mpiValidationSuite) TestDeletePackagingIntegration() {
+func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegration() {
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
 
@@ -375,7 +387,7 @@ func (s *mpiValidationSuite) TestDeletePackagingIntegration() {
 	s.g.Expect(piList).To(HaveLen(0))
 }
 
-func (s *mpiValidationSuite) TestDeletePackagingIntegrationNotFound() {
+func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegrationNotFound() {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/packaging/integration/%s", piID), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -389,8 +401,10 @@ func (s *mpiValidationSuite) TestDeletePackagingIntegrationNotFound() {
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
 }
 
-func (s *mpiValidationSuite) TestDisabledAPIGetPackagingIntegration() {
-	viper.Set(mp_config.Enabled, false)
+func (s *PackagingIntegrationRouteSuite) TestDisabledAPIGetPackagingIntegration() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
@@ -408,8 +422,10 @@ func (s *mpiValidationSuite) TestDisabledAPIGetPackagingIntegration() {
 	s.g.Expect(result.Spec).Should(Equal(pi.Spec))
 }
 
-func (s *mpiValidationSuite) TestDisabledAPIGetAllPackagingIntegration() {
-	viper.Set(mp_config.Enabled, false)
+func (s *PackagingIntegrationRouteSuite) TestDisabledAPIGetAllPackagingIntegration() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
@@ -427,8 +443,10 @@ func (s *mpiValidationSuite) TestDisabledAPIGetAllPackagingIntegration() {
 	s.g.Expect(result.Spec).Should(Equal(pi.Spec))
 }
 
-func (s *mpiValidationSuite) TestDisabledAPICreatePackagingIntegration() {
-	viper.Set(mp_config.Enabled, false)
+func (s *PackagingIntegrationRouteSuite) TestDisabledAPICreatePackagingIntegration() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	pi := newPackagingIntegration()
 	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
@@ -449,8 +467,10 @@ func (s *mpiValidationSuite) TestDisabledAPICreatePackagingIntegration() {
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
 
-func (s *mpiValidationSuite) TestDisabledAPIUpdatePackagingIntegration() {
-	viper.Set(mp_config.Enabled, false)
+func (s *PackagingIntegrationRouteSuite) TestDisabledAPIUpdatePackagingIntegration() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	pi := newPackagingIntegration()
 	piEntityBody, err := json.Marshal(pi)
@@ -469,8 +489,10 @@ func (s *mpiValidationSuite) TestDisabledAPIUpdatePackagingIntegration() {
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
 
-func (s *mpiValidationSuite) TestDisabledAPIDeletePackagingIntegration() {
-	viper.Set(mp_config.Enabled, false)
+func (s *PackagingIntegrationRouteSuite) TestDisabledAPIDeletePackagingIntegration() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/packaging/integration/%s", piID), nil)

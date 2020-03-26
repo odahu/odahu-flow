@@ -54,6 +54,7 @@ func init() {
 
 type ModelDeploymentController struct {
 	mdRepository md_repository.Repository
+	mdValidator  *ModelDeploymentValidator
 }
 
 // @Summary Get a Model deployment
@@ -135,7 +136,7 @@ func (mdc *ModelDeploymentController) createMD(c *gin.Context) {
 		return
 	}
 
-	if err := ValidatesMDAndSetDefaults(&md); err != nil {
+	if err := mdc.mdValidator.ValidatesMDAndSetDefaults(&md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Validation of the model deployment is failed: %v", md))
 		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
 
@@ -172,7 +173,7 @@ func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 		return
 	}
 
-	if err := ValidatesMDAndSetDefaults(&md); err != nil {
+	if err := mdc.mdValidator.ValidatesMDAndSetDefaults(&md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Validation of the model deployment is failed: %v", md))
 		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
 

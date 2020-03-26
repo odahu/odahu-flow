@@ -2,6 +2,7 @@ package vault
 
 import (
 	"encoding/json"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"path"
@@ -10,10 +11,8 @@ import (
 	bank_vaults "github.com/banzaicloud/bank-vaults/pkg/vault"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	conn_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -42,24 +41,24 @@ func NewRepository(
 	}
 }
 
-func NewRepositoryFromConfig() (conn_repository.Repository, error) {
+func NewRepositoryFromConfig(vaultConfig config.Vault) (conn_repository.Repository, error) {
 	vConfig := vaultapi.DefaultConfig()
-	vConfig.Address = viper.GetString(conn_config.VaultURL)
+	vConfig.Address = vaultConfig.URL
 
 	vClient, err := vaultapi.NewClient(vConfig)
 	if err != nil {
 		return nil, err
 	}
-	vClient.SetToken(viper.GetString(conn_config.VaultToken))
+	vClient.SetToken(vaultConfig.Token)
 	// This client provides authentication using k8s api
 	_, err = bank_vaults.NewClientFromRawClient(
 		vClient,
-		bank_vaults.ClientRole(viper.GetString(conn_config.VaultRole)),
+		bank_vaults.ClientRole(vaultConfig.Role),
 	)
 
 	return NewRepository(
 		vClient,
-		viper.GetString(conn_config.VaultSecretEnginePath),
+		vaultConfig.SecretEnginePath,
 	), err
 }
 
@@ -160,9 +159,9 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) er
 	case err == nil:
 		// If err is not nil, then the connection already exists.
 		existedConn.Spec = conn.Spec
-		existedConn.Status.UpdatedAt =  &metav1.Time{Time: time.Now()}
+		existedConn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 		err = vcr.createOrUpdateConnection(existedConn)
-		if err != nil{
+		if err != nil {
 			conn.Status = existedConn.Status
 		}
 		return err

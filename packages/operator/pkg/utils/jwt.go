@@ -21,8 +21,7 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/user"
-	user_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/user"
-	"github.com/spf13/viper"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 )
 
 // Errors
@@ -31,7 +30,7 @@ var (
 	ErrClaimExtraction = errors.New("claim extraction failed")
 )
 
-func ExtractUserInfoFromToken(token string) (*user.UserInfo, error) {
+func ExtractUserInfoFromToken(token string, config config.Claims) (*user.UserInfo, error) {
 	// Parse a token, but don't verify it
 	// Ignore the error, but make sure token isn't nil in case of there were parsing errors
 	parsedToken, _ := jwt.Parse(token, nil)
@@ -44,12 +43,12 @@ func ExtractUserInfoFromToken(token string) (*user.UserInfo, error) {
 		return nil, ErrClaimExtraction
 	}
 
-	userName, err := extractClaim(claims, viper.GetString(user_config.NameClaim))
+	userName, err := extractClaim(claims, config.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	userEmail, err := extractClaim(claims, viper.GetString(user_config.EmailClaim))
+	userEmail, err := extractClaim(claims, config.Email)
 	if err != nil {
 		return nil, err
 	}

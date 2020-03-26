@@ -19,14 +19,13 @@ package utils
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
-	api_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/api"
-	"github.com/spf13/viper"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" //nolint
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	k8s_config "sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -74,11 +73,11 @@ func NewClient(cache cache.Cache, config *rest.Config, options client.Options) (
 	}, nil
 }
 
-func newLocalManager() (ManagerCloser, error) {
+func newLocalManager(localConfig config.APILocalBackendConfig) (ManagerCloser, error) {
 	var cfg *rest.Config
 
 	k8sEnvironment := &envtest.Environment{
-		CRDDirectoryPaths: []string{viper.GetString(api_config.LocalBackendCRDPath)},
+		CRDDirectoryPaths: []string{localConfig.LocalBackendCRDPath},
 	}
 
 	err := apis.AddToScheme(scheme.Scheme)
@@ -102,21 +101,19 @@ func newLocalManager() (ManagerCloser, error) {
 	return &managerWrapper{k8sEnvironment: k8sEnvironment, Manager: mgr}, nil
 }
 
-func NewManager() (ManagerCloser, error) {
-	backendType := viper.GetString(api_config.BackendType)
-
-	switch backendType {
-	case api_config.ConfigBackendType:
+func NewManager(backendConfig config.APIBackendConfig) (ManagerCloser, error) {
+	switch backendConfig.Type {
+	case config.ConfigBackendType:
 		return newConfigManager()
-	case api_config.LocalBackendType:
-		return newLocalManager()
+	case config.LocalBackendType:
+		return newLocalManager(backendConfig.Local)
 	default:
-		return nil, fmt.Errorf("unexpected backend type: %s", backendType)
+		return nil, fmt.Errorf("unexpected backend type: %s", backendConfig.Type)
 	}
 }
 
 func newConfigManager() (ManagerCloser, error) {
-	cfg, err := config.GetConfig()
+	cfg, err := k8s_config.GetConfig()
 	if err != nil {
 		logM.Error(err, "K8s config creation")
 		return nil, err

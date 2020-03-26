@@ -19,6 +19,7 @@ package modeldeployment
 import (
 	"context"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"strconv"
 	"time"
 
@@ -28,13 +29,10 @@ import (
 	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/knative/serving/pkg/apis/serving/v1beta1"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	dep_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
-	operator_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/operator"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	"github.com/spf13/viper"
 	authv1alpha1_istio "istio.io/api/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -86,26 +84,44 @@ var (
 	defaultTerminationPeriod = int64(15)
 )
 
-func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+func Add(
+	mgr manager.Manager,
+	deploymentConfig config.ModelDeploymentConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) error {
+	return add(mgr, newReconciler(mgr, deploymentConfig, operatorConfig, gpuResourceName))
 }
 
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return newConfigurableReconciler(mgr)
+func newReconciler(
+	mgr manager.Manager,
+	deploymentConfig config.ModelDeploymentConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) reconcile.Reconciler {
+	return newConfigurableReconciler(mgr, deploymentConfig, operatorConfig, gpuResourceName)
 }
 
-func newConfigurableReconciler(mgr manager.Manager) reconcile.Reconciler {
+func newConfigurableReconciler(
+	mgr manager.Manager,
+	deploymentConfig config.ModelDeploymentConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) reconcile.Reconciler {
 	return &ReconcileModelDeployment{
 		Client:   mgr.GetClient(),
 		scheme:   mgr.GetScheme(),
 		recorder: mgr.GetRecorder(controllerName),
 		connRepo: conn_http_repository.NewRepository(
-			viper.GetString(operator_conf.APIURL),
-			viper.GetString(operator_conf.APIToken),
-			viper.GetString(operator_conf.ClientID),
-			viper.GetString(operator_conf.ClientSecret),
-			viper.GetString(operator_conf.OAuthOIDCTokenEndpoint),
+			operatorConfig.Auth.APIURL,
+			operatorConfig.Auth.APIToken,
+			operatorConfig.Auth.ClientID,
+			operatorConfig.Auth.ClientSecret,
+			operatorConfig.Auth.OAuthOIDCTokenEndpoint,
 		),
+		deploymentConfig: deploymentConfig,
+		operatorConfig:   operatorConfig,
+		gpuResourceName:  gpuResourceName,
 	}
 }
 
@@ -177,9 +193,12 @@ var _ reconcile.Reconciler = &ReconcileModelDeployment{}
 // ReconcileModelDeployment reconciles a ModelDeployment object
 type ReconcileModelDeployment struct {
 	client.Client
-	scheme   *runtime.Scheme
-	recorder record.EventRecorder
-	connRepo conn_repository.Repository
+	scheme           *runtime.Scheme
+	recorder         record.EventRecorder
+	connRepo         conn_repository.Repository
+	deploymentConfig config.ModelDeploymentConfig
+	operatorConfig   config.OperatorConfig
+	gpuResourceName  string
 }
 
 func knativeConfigurationName(md *odahuflowv1alpha1.ModelDeployment) string {
@@ -361,7 +380,7 @@ func (r *ReconcileModelDeployment) createModelContainer(
 		Path: "/healthcheck",
 	}
 
-	depResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(modelDeploymentCR.Spec.Resources)
+	depResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(modelDeploymentCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
 		return nil, err
 	}
@@ -424,8 +443,8 @@ func (r *ReconcileModelDeployment) reconcileAuthPolicy(
 				Origins: []*authv1alpha1_istio.OriginAuthenticationMethod{
 					{
 						Jwt: &authv1alpha1_istio.Jwt{
-							Issuer:  viper.GetString(dep_conf.SecurityJwksIssuer),
-							JwksUri: viper.GetString(dep_conf.SecurityJwksURL),
+							Issuer:  r.deploymentConfig.Security.JWKS.Issuer,
+							JwksUri: r.deploymentConfig.Security.JWKS.URL,
 							TriggerRules: []*authv1alpha1_istio.Jwt_TriggerRule{
 								{
 									// Healthcheck paths must be ignored
@@ -838,7 +857,7 @@ func (r *ReconcileModelDeployment) Reconcile(request reconcile.Request) (reconci
 		return reconcile.Result{}, nil
 	}
 
-	if viper.GetBool(dep_conf.SecurityJwksEnabled) {
+	if r.deploymentConfig.Security.JWKS.Enabled {
 		log.Info("Reconcile Auth Filter")
 
 		if err := r.reconcileAuthPolicy(log, modelDeploymentCR); err != nil {
@@ -881,7 +900,7 @@ func (r *ReconcileModelDeployment) Reconcile(request reconcile.Request) (reconci
 	modelDeployment := &appsv1.Deployment{}
 	modelDeploymentKey := types.NamespacedName{
 		Name:      knativeDeploymentName(latestReadyRevision),
-		Namespace: viper.GetString(dep_conf.Namespace),
+		Namespace: r.deploymentConfig.Namespace,
 	}
 
 	if err := r.Client.Get(context.TODO(), modelDeploymentKey, modelDeployment); errors.IsNotFound(err) {

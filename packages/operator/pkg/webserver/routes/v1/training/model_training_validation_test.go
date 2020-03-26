@@ -21,7 +21,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	train_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
@@ -30,13 +29,17 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 )
 
 // TODO: add multiple test error
+
+const (
+	outputConnectionName = "conn-id"
+	gpuResourceName      = "nvidia"
+)
 
 type ModelTrainingValidationSuite struct {
 	suite.Suite
@@ -58,7 +61,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
-	s.validator = train_route.NewMtValidator(s.mtRepository, s.connRepository)
+	s.validator = train_route.NewMtValidator(s.mtRepository, s.connRepository, outputConnectionName, gpuResourceName)
 
 	// Create the connection that will be used as the vcs param for a training.
 	if err := s.connRepository.CreateConnection(&connection.Connection{
@@ -92,10 +95,6 @@ func (s *ModelTrainingValidationSuite) TearDownSuite() {
 	if err := s.connRepository.DeleteConnection(testMtVCSID); err != nil {
 		panic(err)
 	}
-}
-
-func (s *ModelTrainingValidationSuite) TearDownTest() {
-	viper.Set(train_config.OutputConnectionName, nil)
 }
 
 func TestModelTrainingValidationSuite(t *testing.T) {
@@ -418,18 +417,26 @@ func (s *ModelTrainingValidationSuite) TestMtResourcesValidation() {
 func (s *ModelTrainingValidationSuite) TestOutputConnection() {
 
 	// If configuration output connection is not set then user must specify it as ModelTraining parameter
-	viper.Set(train_config.OutputConnectionName, nil)
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{},
 	}
-	err := s.validator.ValidatesAndSetDefaults(mt)
+	err := train_route.NewMtValidator(
+		s.mtRepository,
+		s.connRepository,
+		"",
+		gpuResourceName,
+	).ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
 
 	// If configuration output connection is set and user has not passed output connection as training
 	// parameter then output connection value from configuration will be used as default
-	viper.Set(train_config.OutputConnectionName, testMtOutConnDefault)
-	_ = s.validator.ValidatesAndSetDefaults(mt)
+	_ = train_route.NewMtValidator(
+		s.mtRepository,
+		s.connRepository,
+		testMtOutConnDefault,
+		gpuResourceName,
+	).ValidatesAndSetDefaults(mt)
 	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConnDefault))
 
 	// If configuration output connection is set but user also has passed output connection as training
