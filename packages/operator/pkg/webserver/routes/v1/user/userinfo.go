@@ -20,6 +20,7 @@ import (
 	"fmt"
 	request_jwt "github.com/dgrijalva/jwt-go/request"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/user"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	"net/http"
@@ -39,8 +40,14 @@ const (
 
 var log = logf.Log.WithName(controllerName)
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup) {
-	routeGroup.GET(GetUserInfoURL, getUserInfo)
+type controller struct {
+	config config.Claims
+}
+
+func ConfigureRoutes(routeGroup *gin.RouterGroup, config config.Claims) {
+	userController := controller{config: config}
+
+	routeGroup.GET(GetUserInfoURL, userController.getUserInfo)
 }
 
 // @Summary Get the user information
@@ -50,7 +57,7 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup) {
 // @Produce  json
 // @Success 200 {object} user.UserInfo
 // @Router /api/v1/user/info [get]
-func getUserInfo(c *gin.Context) {
+func (cc *controller) getUserInfo(c *gin.Context) {
 	token, err := request_jwt.AuthorizationHeaderExtractor.ExtractToken(c.Request)
 	if err == request_jwt.ErrNoTokenInRequest {
 		c.JSON(http.StatusOK, &user.AnonymousUser)
@@ -65,7 +72,7 @@ func getUserInfo(c *gin.Context) {
 		return
 	}
 
-	userInfo, err := utils.ExtractUserInfoFromToken(token)
+	userInfo, err := utils.ExtractUserInfoFromToken(token, cc.config)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, routes.HTTPResult{
 			Message: fmt.Sprintf("Malformed JWT: %s", err.Error()),

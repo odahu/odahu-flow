@@ -18,8 +18,6 @@ package packager
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	packager_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packager"
-	"github.com/spf13/viper"
 )
 
 // The function extracts data from a repository and creates the packaging entity.
@@ -46,7 +44,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 		})
 	}
 
-	modelHolder, err := p.connRepo.GetDecryptedConnection(viper.GetString(packager_conf.OutputConnectionName), )
+	modelHolder, err := p.connRepo.GetDecryptedConnection(modelPackaging.Spec.OutputConnection)
 	if err != nil {
 		return nil, err
 	}

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/spf13/viper"
 	k8_serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
@@ -103,9 +102,9 @@ func URLParamsToFilter(c *gin.Context, filter interface{}, fields map[string]int
 	return size, page, nil
 }
 
-func DisableAPIMiddleware(enabledAPIViperConfigKey string) gin.HandlerFunc {
+func DisableAPIMiddleware(enabledAPI bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !viper.GetBool(enabledAPIViperConfigKey) && c.Request.Method != http.MethodGet {
+		if !enabledAPI && c.Request.Method != http.MethodGet {
 			c.AbortWithStatusJSON(http.StatusBadRequest, HTTPResult{Message: DisabledAPIErrorMessage})
 		}
 	}

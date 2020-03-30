@@ -14,14 +14,21 @@
 //    limitations under the License.
 //
 
-package servicecatalog
+package config
 
-import "github.com/spf13/viper"
+type PackagerConfig struct {
+	Auth AuthConfig `json:"auth"`
+	// The path to the configuration file for a user packager.
+	MPFile string `json:"mpFile"`
+	// ID of the model packaging
+	ModelPackagingID string `json:"modelTrainingId"`
+	// The path to the dir when a user packager will save their result.
+	OutputDir string `json:"outputDir"`
+}
 
-const (
-	BaseURL = "service_catalog.base_url"
-)
-
-func init() {
-	viper.SetDefault(BaseURL, "")
+func NewDefaultPackagerConfig() PackagerConfig {
+	return PackagerConfig{
+		MPFile:    "mp.json",
+		OutputDir: "output",
+	}
 }

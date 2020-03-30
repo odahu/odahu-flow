@@ -29,39 +29,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Configuration"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a Configuration",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Configuration"
-                ],
-                "summary": "Update a Odahuflow service configuration",
-                "parameters": [
-                    {
-                        "description": "Create a Configuration",
-                        "name": "configuration",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Configuration"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/HTTPResult"
+                            "$ref": "#/definitions/Config"
                         }
                     }
                 }
@@ -1913,7 +1881,79 @@
         }
     },
     "definitions": {
-        "CommonConfiguration": {
+        "APIBackendConfig": {
+            "type": "object",
+            "properties": {
+                "local": {
+                    "description": "Local backend",
+                    "type": "object",
+                    "$ref": "#/definitions/APILocalBackendConfig"
+                },
+                "type": {
+                    "description": "Type of the backend. Available values:\n   * local\n   * config",
+                    "type": "string"
+                }
+            }
+        },
+        "APIConfig": {
+            "type": "object",
+            "properties": {
+                "backend": {
+                    "type": "object",
+                    "$ref": "#/definitions/APIBackendConfig"
+                },
+                "port": {
+                    "description": "API HTTP port",
+                    "type": "integer"
+                }
+            }
+        },
+        "APILocalBackendConfig": {
+            "type": "object",
+            "properties": {
+                "localBackendCrdPath": {
+                    "description": "Path to a dir with ODAHU CRDs",
+                    "type": "string"
+                }
+            }
+        },
+        "AuthConfig": {
+            "type": "object",
+            "properties": {
+                "apiToken": {
+                    "description": "It is a mock for the future. Currently, it is always empty.",
+                    "type": "string"
+                },
+                "apiUrl": {
+                    "description": "ODAHU API URL",
+                    "type": "string"
+                },
+                "clientId": {
+                    "description": "OpenID client_id credential for service account",
+                    "type": "string"
+                },
+                "clientSecret": {
+                    "description": "OpenID client_secret credential for service account",
+                    "type": "string"
+                },
+                "oauthOidcTokenEndpoint": {
+                    "description": "OpenID token url",
+                    "type": "string"
+                }
+            }
+        },
+        "Claims": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "CommonConfig": {
             "type": "object",
             "properties": {
                 "externalUrls": {
@@ -1922,21 +1962,90 @@
                     "items": {
                         "$ref": "#/definitions/ExternalUrl"
                     }
+                },
+                "resourceGpuName": {
+                    "description": "Kubernetes can consume the GPU resource in the \u003cvendor\u003e.com/gpu format.\nFor example, amd.com/gpu or nvidia.com/gpu.",
+                    "type": "string"
                 }
             }
         },
-        "Configuration": {
+        "Config": {
             "type": "object",
             "properties": {
-                "common": {
-                    "description": "Common secretion of configuration",
+                "api": {
                     "type": "object",
-                    "$ref": "#/definitions/CommonConfiguration"
+                    "$ref": "#/definitions/APIConfig"
+                },
+                "common": {
+                    "type": "object",
+                    "$ref": "#/definitions/CommonConfig"
+                },
+                "connection": {
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionConfig"
+                },
+                "deployment": {
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeploymentConfig"
+                },
+                "operator": {
+                    "type": "object",
+                    "$ref": "#/definitions/OperatorConfig"
+                },
+                "packager": {
+                    "type": "object",
+                    "$ref": "#/definitions/PackagerConfig"
+                },
+                "packaging": {
+                    "type": "object",
+                    "$ref": "#/definitions/ModelPackagingConfig"
+                },
+                "serviceCatalog": {
+                    "type": "object",
+                    "$ref": "#/definitions/ServiceCatalog"
+                },
+                "trainer": {
+                    "type": "object",
+                    "$ref": "#/definitions/TrainerConfig"
                 },
                 "training": {
-                    "description": "Configuration describe training process",
                     "type": "object",
-                    "$ref": "#/definitions/TrainingConfiguration"
+                    "$ref": "#/definitions/ModelTrainingConfig"
+                },
+                "user": {
+                    "type": "object",
+                    "$ref": "#/definitions/UserConfig"
+                }
+            }
+        },
+        "ConnectionConfig": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Connection API server and operator are enabled",
+                    "type": "boolean"
+                },
+                "namespace": {
+                    "description": "Enable connection API/operator",
+                    "type": "string"
+                },
+                "repositoryType": {
+                    "description": "Storage backend for connections. Available options:\n  * kubernetes\n  * vault",
+                    "type": "string"
+                },
+                "vault": {
+                    "description": "Connection Vault configuration",
+                    "type": "object",
+                    "$ref": "#/definitions/Vault"
+                }
+            }
+        },
+        "EdgeConfig": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "External model host",
+                    "type": "string"
                 }
             }
         },
@@ -1957,10 +2066,282 @@
                 }
             }
         },
-        "TrainingConfiguration": {
+        "JWKS": {
             "type": "object",
             "properties": {
+                "enabled": {
+                    "description": "Model authorization enabled",
+                    "type": "boolean"
+                },
+                "issuer": {
+                    "description": "Issuer claim value",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "JWKS URL",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelDeploymentConfig": {
+            "type": "object",
+            "properties": {
+                "defaultDockerPullConnName": {
+                    "description": "Default connection ID which will be used if a user doesn't specify it in a model deployment",
+                    "type": "string"
+                },
+                "edge": {
+                    "type": "object",
+                    "$ref": "#/definitions/EdgeConfig"
+                },
+                "enabled": {
+                    "description": "Enable deployment API/operator",
+                    "type": "boolean"
+                },
+                "istio": {
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeploymentIstioConfig"
+                },
+                "namespace": {
+                    "description": "Kubernetes namespace, where model deployments will be deployed",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Kubernetes node selector for model deployments",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "security": {
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeploymentSecurityConfig"
+                },
+                "toleration": {
+                    "description": "Kubernetes tolerations for model deployments",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ModelDeploymentIstioConfig": {
+            "type": "object",
+            "properties": {
+                "namespace": {
+                    "description": "Istio ingress gateway namespace",
+                    "type": "string"
+                },
+                "serviceName": {
+                    "description": "Istio ingress gateway service name",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelDeploymentSecurityConfig": {
+            "type": "object",
+            "properties": {
+                "jwks": {
+                    "type": "object",
+                    "$ref": "#/definitions/JWKS"
+                },
+                "roleName": {
+                    "description": "Deprecated",
+                    "type": "string"
+                }
+            }
+        },
+        "ModelPackagingConfig": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable packaging API/operator",
+                    "type": "boolean"
+                },
+                "modelPackagerImage": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Kubernetes namespace, where model trainings will be deployed",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Kubernetes node selectors for model packaging pods",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "outputConnectionID": {
+                    "type": "string"
+                },
+                "packagerIntegrationNamespace": {
+                    "type": "string"
+                },
+                "serviceAccount": {
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "Timeout for full training process",
+                    "type": "string"
+                },
+                "toleration": {
+                    "description": "Kubernetes tolerations for model packaging pods",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ModelTrainingConfig": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable deployment API/operator",
+                    "type": "boolean"
+                },
+                "gpuNodeSelector": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gpuToleration": {
+                    "description": "Kubernetes tolerations for GPU model trainings pods",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "metricUrl": {
+                    "type": "string"
+                },
+                "modelTrainerImage": {
+                    "type": "string"
+                },
+                "namespace": {
+                    "description": "Kubernetes namespace, where model trainings will be deployed",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "outputConnectionID": {
+                    "type": "string"
+                },
+                "serviceAccount": {
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "Timeout for full training process",
+                    "type": "string"
+                },
+                "toleration": {
+                    "description": "Kubernetes tolerations for model trainings pods",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "toolchainIntegrationNamespace": {
+                    "type": "string"
+                }
+            }
+        },
+        "OperatorConfig": {
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "$ref": "#/definitions/AuthConfig"
+                },
+                "monitoringPort": {
+                    "description": "Operator HTTP monitoring port",
+                    "type": "integer"
+                }
+            }
+        },
+        "PackagerConfig": {
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "$ref": "#/definitions/AuthConfig"
+                },
+                "modelTrainingId": {
+                    "description": "ID of the model packaging",
+                    "type": "string"
+                },
+                "mpFile": {
+                    "description": "The path to the configuration file for a user packager.",
+                    "type": "string"
+                },
+                "outputTrainingDir": {
+                    "description": "The path to the dir when a user packager will save their result.",
+                    "type": "string"
+                }
+            }
+        },
+        "ServiceCatalog": {
+            "type": "object",
+            "properties": {
+                "baseUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "TrainerConfig": {
+            "type": "object",
+            "properties": {
+                "auth": {
+                    "type": "object",
+                    "$ref": "#/definitions/AuthConfig"
+                },
+                "modelTrainingId": {
+                    "description": "ID of the model training",
+                    "type": "string"
+                },
+                "mtFile": {
+                    "description": "The path to the configuration file for a user trainer.",
+                    "type": "string"
+                },
+                "outputTrainingDir": {
+                    "description": "The path to the dir when a user trainer will save their result.",
+                    "type": "string"
+                }
+            }
+        },
+        "UserConfig": {
+            "type": "object",
+            "properties": {
+                "claims": {
+                    "type": "object",
+                    "$ref": "#/definitions/Claims"
+                }
+            }
+        },
+        "Vault": {
+            "type": "object",
+            "properties": {
+                "role": {
+                    "description": "Vault role for access to the secret engine path",
+                    "type": "string"
+                },
+                "secretEnginePath": {
+                    "description": "Vault secret engine path where connection will be stored",
+                    "type": "string"
+                },
+                "token": {
+                    "description": "Optionally. Token for access to the vault server\nIf it is empty then client will use the k8s auth",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Vault URL",
                     "type": "string"
                 }
             }
@@ -2102,7 +2483,8 @@
             "properties": {
                 "arguments": {
                     "description": "List of arguments. This parameter depends on the specific packaging integration",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": true
                 },
                 "artifactName": {
                     "description": "Training output artifact name",
@@ -2450,7 +2832,10 @@
             "properties": {
                 "annotations": {
                     "description": "Annotations for model pods.",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "description": "Model Docker image",
@@ -2679,7 +3064,10 @@
                 },
                 "hyperParameters": {
                     "description": "Model training hyperParameters in parameter:value format",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "image": {
                     "description": "Train image",
@@ -2834,7 +3222,10 @@
             "properties": {
                 "additionalEnvironments": {
                     "description": "Additional environments for a training process",
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "defaultImage": {
                     "description": "Default training Docker image",

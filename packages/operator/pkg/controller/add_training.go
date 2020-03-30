@@ -17,6 +17,7 @@
 package controller
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/modeltraining"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -27,12 +28,19 @@ func init() {
 }
 
 // AddToManagerTrainingFuncs is a list of functions to add all Controllers to the Manager
-var AddToManagerTrainingFuncs []func(manager.Manager) error
+var AddToManagerTrainingFuncs []func(
+	manager.Manager, config.ModelTrainingConfig, config.OperatorConfig, string,
+) error
 
 // AddToManager adds all Controllers to the Manager
-func AddTrainingToManager(m manager.Manager) error {
+func AddTrainingToManager(
+	m manager.Manager,
+	trainingConfig config.ModelTrainingConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) error {
 	for _, f := range AddToManagerTrainingFuncs {
-		if err := f(m); err != nil {
+		if err := f(m, trainingConfig, operatorConfig, gpuResourceName); err != nil {
 			return err
 		}
 	}

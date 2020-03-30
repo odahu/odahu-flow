@@ -20,13 +20,16 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	api_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/api"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1"
 	"github.com/rakyll/statik/fs"
-	"github.com/spf13/viper"
 	"net/http"
+)
+
+const (
+	URLPrefix = "/api/v1"
 )
 
 type Server struct {
@@ -34,7 +37,7 @@ type Server struct {
 	server  *http.Server
 }
 
-func NewAPIServer() (*Server, error) {
+func NewAPIServer(config *config.Config) (*Server, error) {
 	staticFS, err := fs.New()
 	if err != nil {
 		return nil, err
@@ -42,7 +45,7 @@ func NewAPIServer() (*Server, error) {
 
 	server := gin.Default()
 
-	mgr, err := utils.NewManager()
+	mgr, err := utils.NewManager(config.API.Backend)
 	if err != nil {
 		return nil, err
 	}
@@ -51,11 +54,11 @@ func NewAPIServer() (*Server, error) {
 	routes.SetUpSwagger(server.Group(""), staticFS)
 	routes.SetUpPrometheus(server)
 
-	v1Group := server.Group("/api/v1")
-	err = v1Routes.SetupV1Routes(v1Group, mgr.GetClient(), mgr.GetConfig())
+	v1Group := server.Group(URLPrefix)
+	err = v1Routes.SetupV1Routes(v1Group, mgr.GetClient(), mgr.GetConfig(), *config)
 
 	return &Server{manager: mgr, server: &http.Server{
-		Addr:    fmt.Sprintf(":%s", viper.GetString(api_config.Port)),
+		Addr:    fmt.Sprintf(":%d", config.API.Port),
 		Handler: server,
 	}}, err
 }

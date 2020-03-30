@@ -17,23 +17,24 @@
 package configuration
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/configuration"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
-	"github.com/spf13/viper"
 )
 
 const (
-	GetConfigurationURL    = "/configuration"
-	UpdateConfigurationURL = "/configuration"
+	GetConfigurationURL = "/configuration"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup) {
-	routeGroup.GET(GetConfigurationURL, getConfiguration)
-	routeGroup.PUT(UpdateConfigurationURL, updateConfiguration)
+type controller struct {
+	config config.Config
+}
+
+func ConfigureRoutes(routeGroup *gin.RouterGroup, config config.Config) {
+	controller := controller{config: config.CleanupSensitiveFields()}
+
+	routeGroup.GET(GetConfigurationURL, controller.getConfiguration)
 }
 
 // @Summary Get the Odahuflow service configuration
@@ -41,29 +42,8 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup) {
 // @Tags Configuration
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} configuration.Configuration
+// @Success 200 {object} config.Config
 // @Router /api/v1/configuration [get]
-func getConfiguration(c *gin.Context) {
-	c.JSON(http.StatusOK, &configuration.Configuration{
-		CommonConfiguration: configuration.CommonConfiguration{
-			ExternalURLs: configuration.ExportExternalUrlsFromConfig(),
-		},
-		TrainingConfiguration: configuration.TrainingConfiguration{
-			MetricURL: viper.GetString(training.MetricURL),
-		},
-	})
-}
-
-// @Summary Update a Odahuflow service configuration
-// @Description Update a Configuration
-// @Tags Configuration
-// @Param configuration body configuration.Configuration true "Create a Configuration"
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} routes.HTTPResult
-// @Router /api/v1/configuration [put]
-func updateConfiguration(c *gin.Context) {
-	// TODO: find the best way to implement it
-
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: "This is stub for now"})
+func (cc *controller) getConfiguration(c *gin.Context) {
+	c.JSON(http.StatusOK, cc.config)
 }

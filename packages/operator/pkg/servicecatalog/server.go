@@ -18,20 +18,22 @@ package servicecatalog
 
 import (
 	"github.com/gin-gonic/gin"
-	servicecatalog_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/servicecatalog"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"github.com/rakyll/statik/fs"
-	"github.com/spf13/viper"
 )
 
-func SetUPMainServer(mrc *catalog.ModelRouteCatalog) (*gin.Engine, error) {
+func SetUPMainServer(
+	mrc *catalog.ModelRouteCatalog,
+	config config.ServiceCatalog,
+) (*gin.Engine, error) {
 	staticFS, err := fs.New()
 	if err != nil {
 		return nil, err
 	}
 
 	server := gin.Default()
-	rootRouteGroup := server.Group(viper.GetString(servicecatalog_config.BaseURL))
+	rootRouteGroup := server.Group(config.BaseURL)
 
 	SetUpSwagger(rootRouteGroup, staticFS, mrc.ProcessSwaggerJSON)
 	SetUpHealthCheck(server)

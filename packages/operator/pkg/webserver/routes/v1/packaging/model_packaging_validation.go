@@ -19,9 +19,7 @@ package packaging
 import (
 	"errors"
 	"fmt"
-	pack_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	"github.com/spf13/viper"
 
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -61,14 +59,23 @@ var (
 )
 
 type MpValidator struct {
-	mpRepository   mp_repository.Repository
-	connRepository conn_repository.Repository
+	mpRepository         mp_repository.Repository
+	connRepository       conn_repository.Repository
+	outputConnectionName string
+	gpuResourceName      string
 }
 
-func NewMpValidator(mpRepository mp_repository.Repository, connRepository conn_repository.Repository) *MpValidator {
+func NewMpValidator(
+	mpRepository mp_repository.Repository,
+	connRepository conn_repository.Repository,
+	outputConnectionName string,
+	gpuResourceName string,
+) *MpValidator {
 	return &MpValidator{
-		mpRepository:   mpRepository,
-		connRepository: connRepository,
+		mpRepository:         mpRepository,
+		connRepository:       connRepository,
+		outputConnectionName: outputConnectionName,
+		gpuResourceName:      gpuResourceName,
 	}
 }
 
@@ -130,7 +137,7 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 			"name", mp.ID, "resources", DefaultPackagingResources)
 		mp.Spec.Resources = DefaultPackagingResources
 	} else {
-		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources)
+		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources, mpv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
 	}
 
@@ -243,11 +250,9 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 }
 
 func (mpv *MpValidator) validateOutputConnection(mp *packaging.ModelPackaging) (err error) {
-	defaultOutConName := viper.GetString(pack_conf.OutputConnectionName)
-
 	if len(mp.Spec.OutputConnection) == 0 {
-		if len(defaultOutConName) > 0 {
-			mp.Spec.OutputConnection = defaultOutConName
+		if len(mpv.outputConnectionName) > 0 {
+			mp.Spec.OutputConnection = mpv.outputConnectionName
 			logMP.Info("OutputConnection is empty. Use connection from configuration")
 		} else {
 			logMP.Info("OutputConnection is empty. Configuration doesn't contain default value")

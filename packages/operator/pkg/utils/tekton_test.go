@@ -1,8 +1,7 @@
 package utils
 
 import (
-	training_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
-	"github.com/spf13/viper"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	corev1 "k8s.io/api/core/v1"
 	k8s_resource "k8s.io/apimachinery/pkg/api/resource"
 	"reflect"
@@ -14,18 +13,25 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 	resourceMemory := *k8s_resource.NewQuantity(911, k8s_resource.DecimalSI)
 	resourceGPU := *k8s_resource.NewQuantity(73, k8s_resource.DecimalSI)
 
-	gpuResourceName := corev1.ResourceName(viper.GetString(training_conf.ResourceGPUName))
+	gpuResourceName := corev1.ResourceName(config.NvidiaResourceName)
+	type args struct {
+		res             corev1.ResourceRequirements
+		gpuResourceName string
+	}
 
 	tests := []struct {
 		name string
-		args corev1.ResourceRequirements
+		args args
 		want corev1.ResourceRequirements
 	}{
 		{
 			"Empty Resources",
-			corev1.ResourceRequirements{
-				Limits:   nil,
-				Requests: nil,
+			args{
+				corev1.ResourceRequirements{
+					Limits:   nil,
+					Requests: nil,
+				},
+				config.NvidiaResourceName,
 			},
 			corev1.ResourceRequirements{
 				Limits:   DefaultHelperLimits.DeepCopy(),
@@ -34,12 +40,15 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 		},
 		{
 			"Override the requests resources",
-			corev1.ResourceRequirements{
-				Limits: nil,
-				Requests: corev1.ResourceList{
-					corev1.ResourceMemory: *k8s_resource.NewQuantity(2, k8s_resource.DecimalSI),
-					corev1.ResourceCPU:    *k8s_resource.NewQuantity(3, k8s_resource.DecimalSI),
+			args{
+				corev1.ResourceRequirements{
+					Limits: nil,
+					Requests: corev1.ResourceList{
+						corev1.ResourceMemory: *k8s_resource.NewQuantity(2, k8s_resource.DecimalSI),
+						corev1.ResourceCPU:    *k8s_resource.NewQuantity(3, k8s_resource.DecimalSI),
+					},
 				},
+				config.NvidiaResourceName,
 			},
 			corev1.ResourceRequirements{
 				Limits:   DefaultHelperLimits.DeepCopy(),
@@ -48,11 +57,14 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 		},
 		{
 			"Empty CPU limit resources",
-			corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					corev1.ResourceMemory: resourceCPU,
+			args{
+				corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceMemory: resourceCPU,
+					},
+					Requests: nil,
 				},
-				Requests: nil,
+				config.NvidiaResourceName,
 			},
 			corev1.ResourceRequirements{
 				Limits: corev1.ResourceList{
@@ -64,11 +76,14 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 		},
 		{
 			"Empty Memory limit resources",
-			corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					corev1.ResourceCPU: resourceCPU,
+			args{
+				corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU: resourceCPU,
+					},
+					Requests: nil,
 				},
-				Requests: nil,
+				config.NvidiaResourceName,
 			},
 			corev1.ResourceRequirements{
 				Limits: corev1.ResourceList{
@@ -80,11 +95,14 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 		},
 		{
 			"GPU removing from limit",
-			corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					gpuResourceName: resourceGPU,
+			args{
+				corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						gpuResourceName: resourceGPU,
+					},
+					Requests: nil,
 				},
-				Requests: nil,
+				config.NvidiaResourceName,
 			},
 			corev1.ResourceRequirements{
 				Limits:   DefaultHelperLimits.DeepCopy(),
@@ -93,13 +111,16 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 		},
 		{
 			"Main workflow",
-			corev1.ResourceRequirements{
-				Limits: corev1.ResourceList{
-					corev1.ResourceCPU:    resourceCPU,
-					corev1.ResourceMemory: resourceMemory,
-					gpuResourceName:       resourceGPU,
+			args{
+				corev1.ResourceRequirements{
+					Limits: corev1.ResourceList{
+						corev1.ResourceCPU:    resourceCPU,
+						corev1.ResourceMemory: resourceMemory,
+						gpuResourceName:       resourceGPU,
+					},
+					Requests: nil,
 				},
-				Requests: nil,
+				config.NvidiaResourceName,
 			},
 			corev1.ResourceRequirements{
 				Limits: corev1.ResourceList{
@@ -114,7 +135,7 @@ func TestCalculateHelperContainerResources(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CalculateHelperContainerResources(tt.args); !reflect.DeepEqual(got, tt.want) {
+			if got := CalculateHelperContainerResources(tt.args.res, tt.args.gpuResourceName); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CalculateHelperContainerResources() = %v, want %v", got, tt.want)
 			}
 		})

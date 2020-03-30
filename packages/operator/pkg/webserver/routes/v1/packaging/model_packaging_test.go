@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"net/http"
 	"net/http/httptest"
@@ -34,7 +35,6 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	mp_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
@@ -43,7 +43,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -100,13 +99,8 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 		s.T().Fatalf("Cannot create new k8s client: %v", err)
 	}
 
-	s.server = gin.Default()
-	v1Group := s.server.Group("")
 	s.k8sClient = mgr.GetClient()
 	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, s.k8sClient, nil)
-	pack_route.ConfigureRoutes(v1Group, s.mpRepository, conn_k8s_repository.NewRepository(
-		testNamespace, mgr.GetClient(),
-	))
 
 	err = s.mpRepository.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpRoute,
@@ -140,7 +134,6 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	}); err != nil {
 		s.T().Fatalf("Cannot create Connection: %v", err)
 	}
-
 }
 
 func (s *ModelPackagingRouteSuite) TearDownSuite() {
@@ -155,11 +148,25 @@ func (s *ModelPackagingRouteSuite) TearDownSuite() {
 
 func (s *ModelPackagingRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+
+	s.registerHandlers(config.NewDefaultModelPackagingConfig())
+}
+
+func (s *ModelPackagingRouteSuite) registerHandlers(packagingConfig config.ModelPackagingConfig) {
+	s.server = gin.Default()
+	v1Group := s.server.Group("")
+	pack_route.ConfigureRoutes(
+		v1Group,
+		s.mpRepository,
+		conn_k8s_repository.NewRepository(
+			testNamespace, s.k8sClient,
+		),
+		packagingConfig,
+		config.NvidiaResourceName,
+	)
 }
 
 func (s *ModelPackagingRouteSuite) TearDownTest() {
-	viper.Set(mp_config.Enabled, true)
-
 	for _, mpID := range []string{mpIDRoute, testMpID1, testMpID2} {
 		if err := s.mpRepository.DeleteModelPackaging(mpID); err != nil && !errors.IsNotFound(err) {
 			// If a model packaging is not found then it was not created during a test case
@@ -360,7 +367,7 @@ func (s *ModelPackagingRouteSuite) TestCreateMP() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ModelPackagingRouteSuite) TestCreateMPModifiable(){
+func (s *ModelPackagingRouteSuite) TestCreateMPModifiable() {
 	newResource := newModelPackaging()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -434,7 +441,7 @@ func (s *ModelPackagingRouteSuite) TestUpdateMP() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *ModelPackagingRouteSuite) TestUpdateMPModifiable(){
+func (s *ModelPackagingRouteSuite) TestUpdateMPModifiable() {
 	resource := newModelPackaging()
 	s.g.Expect(s.mpRepository.CreateModelPackaging(resource)).NotTo(HaveOccurred())
 
@@ -569,7 +576,9 @@ func (s *ModelPackagingRouteSuite) TestSavingMPResult() {
 }
 
 func (s *ModelPackagingRouteSuite) TestDisabledAPIDeleteMP() {
-	viper.Set(mp_config.Enabled, false)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -589,7 +598,9 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPIDeleteMP() {
 }
 
 func (s *ModelPackagingRouteSuite) TestDisabledAPIUpdateMP() {
-	viper.Set(mp_config.Enabled, false)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	mpEntity := newModelPackaging()
 
@@ -610,7 +621,9 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPIUpdateMP() {
 }
 
 func (s *ModelPackagingRouteSuite) TestDisabledAPICreateMP() {
-	viper.Set(mp_config.Enabled, false)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	mpEntity := newModelPackaging()
 
@@ -630,7 +643,9 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPICreateMP() {
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
 func (s *ModelPackagingRouteSuite) TestDisabledAPIGetMP() {
-	viper.Set(mp_config.Enabled, false)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	mp := newModelPackaging()
 	s.g.Expect(s.mpRepository.CreateModelPackaging(mp)).NotTo(HaveOccurred())
@@ -653,7 +668,9 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPIGetMP() {
 }
 
 func (s *ModelPackagingRouteSuite) TestDisabledAPIGetAllMP() {
-	viper.Set(mp_config.Enabled, false)
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Enabled = false
+	s.registerHandlers(packagingConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, pack_route.GetAllModelPackagingURL, nil)

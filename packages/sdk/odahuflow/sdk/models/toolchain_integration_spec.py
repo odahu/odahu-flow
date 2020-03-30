@@ -15,18 +15,18 @@ class ToolchainIntegrationSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, additional_environments: object=None, default_image: str=None, entrypoint: str=None):  # noqa: E501
+    def __init__(self, additional_environments: Dict[str, str]=None, default_image: str=None, entrypoint: str=None):  # noqa: E501
         """ToolchainIntegrationSpec - a model defined in Swagger
 
         :param additional_environments: The additional_environments of this ToolchainIntegrationSpec.  # noqa: E501
-        :type additional_environments: object
+        :type additional_environments: Dict[str, str]
         :param default_image: The default_image of this ToolchainIntegrationSpec.  # noqa: E501
         :type default_image: str
         :param entrypoint: The entrypoint of this ToolchainIntegrationSpec.  # noqa: E501
         :type entrypoint: str
         """
         self.swagger_types = {
-            'additional_environments': object,
+            'additional_environments': Dict[str, str],
             'default_image': str,
             'entrypoint': str
         }
@@ -53,24 +53,24 @@ class ToolchainIntegrationSpec(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def additional_environments(self) -> object:
+    def additional_environments(self) -> Dict[str, str]:
         """Gets the additional_environments of this ToolchainIntegrationSpec.
 
         Additional environments for a training process  # noqa: E501
 
         :return: The additional_environments of this ToolchainIntegrationSpec.
-        :rtype: object
+        :rtype: Dict[str, str]
         """
         return self._additional_environments
 
     @additional_environments.setter
-    def additional_environments(self, additional_environments: object):
+    def additional_environments(self, additional_environments: Dict[str, str]):
         """Sets the additional_environments of this ToolchainIntegrationSpec.
 
         Additional environments for a training process  # noqa: E501
 
         :param additional_environments: The additional_environments of this ToolchainIntegrationSpec.
-        :type additional_environments: object
+        :type additional_environments: Dict[str, str]
         """
 
         self._additional_environments = additional_environments

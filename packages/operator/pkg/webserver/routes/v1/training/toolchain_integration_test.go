@@ -19,6 +19,7 @@ package training_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -28,7 +29,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	train_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
@@ -37,7 +37,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -68,16 +67,11 @@ func (s *ToolchainIntegrationRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	s.server = gin.Default()
-	v1Group := s.server.Group("")
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
-	train_route.ConfigureRoutes(v1Group, s.mtRepository, s.connRepository)
 }
 
 func (s *ToolchainIntegrationRouteSuite) TearDownTest() {
-	viper.Set(train_config.Enabled, true)
-
 	for _, mpID := range []string{
 		testToolchainIntegrationID,
 		testToolchainIntegrationID1,
@@ -93,6 +87,20 @@ func (s *ToolchainIntegrationRouteSuite) TearDownTest() {
 
 func (s *ToolchainIntegrationRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+
+	s.registerHandlers(config.NewDefaultModelTrainingConfig())
+}
+
+func (s *ToolchainIntegrationRouteSuite) registerHandlers(trainingConfig config.ModelTrainingConfig) {
+	s.server = gin.Default()
+	v1Group := s.server.Group("")
+	train_route.ConfigureRoutes(
+		v1Group,
+		s.mtRepository,
+		s.connRepository,
+		trainingConfig,
+		config.NvidiaResourceName,
+	)
 }
 
 func TestToolchainIntegrationRouteSuite(t *testing.T) {
@@ -292,7 +300,7 @@ func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegration() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationModifiable(){
+func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationModifiable() {
 	newResource := newTiStub()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -395,7 +403,7 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegration() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationModifiable(){
+func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationModifiable() {
 	resource := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(resource)).NotTo(HaveOccurred())
 
@@ -426,7 +434,6 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationModifiabl
 	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
-
 
 func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationValidation() {
 	ti := newTiStub()
@@ -512,7 +519,9 @@ func (s *ToolchainIntegrationRouteSuite) TestDeleteToolchainIntegrationNotFound(
 }
 
 func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIDeleteToolchainIntegration() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, strings.Replace(
@@ -530,7 +539,9 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIDeleteToolchainIntegrati
 }
 
 func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIUpdateToolchainIntegration() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	ti := newTiStub()
 
@@ -551,7 +562,9 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIUpdateToolchainIntegrati
 }
 
 func (s *ToolchainIntegrationRouteSuite) TestDisabledAPICreateToolchainIntegrationValidation() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	tiEntity := newTiStub()
 	tiEntity.Spec.Entrypoint = ""
@@ -574,7 +587,9 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPICreateToolchainIntegrati
 }
 
 func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIGetAllTi() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	s.newMultipleTiStubs()
 
@@ -596,7 +611,9 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIGetAllTi() {
 }
 
 func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIGetToolchainIntegration() {
-	viper.Set(train_config.Enabled, false)
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Enabled = false
+	s.registerHandlers(trainingConfig)
 
 	ti := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti)).NotTo(HaveOccurred())

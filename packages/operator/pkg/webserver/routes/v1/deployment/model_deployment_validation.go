@@ -20,10 +20,9 @@ import (
 	"errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	config_deployment "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	"github.com/spf13/viper"
 	"go.uber.org/multierr"
 )
 
@@ -58,7 +57,22 @@ var (
 	MdDefaultReadinessProbeInitialDelay = int32(2)
 )
 
-func ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
+type ModelDeploymentValidator struct {
+	modelDeploymentConfig config.ModelDeploymentConfig
+	gpuResourceName       string
+}
+
+func NewModelDeploymentValidator(
+	modelDeploymentConfig config.ModelDeploymentConfig,
+	gpuResourceName string,
+) *ModelDeploymentValidator {
+	return &ModelDeploymentValidator{
+		modelDeploymentConfig: modelDeploymentConfig,
+		gpuResourceName:       gpuResourceName,
+	}
+}
+
+func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
 	err = multierr.Append(err, validation.ValidateID(md.ID))
 
 	if len(md.Spec.Image) == 0 {
@@ -68,7 +82,7 @@ func ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
 	if md.Spec.RoleName == nil || len(*md.Spec.RoleName) == 0 {
 		logMD.Info("Role name parameter is nil or empty. Set the default value",
 			"Deployment name", md.ID, "role name", MdDefaultMinimumReplicas)
-		defaultRoleName := viper.GetString(config_deployment.DefaultRoleName)
+		defaultRoleName := mdv.modelDeploymentConfig.Security.RoleName
 		md.Spec.RoleName = &defaultRoleName
 	}
 
@@ -102,7 +116,7 @@ func ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
 			"name", md.ID, "resources", MdDefaultResources)
 		md.Spec.Resources = MdDefaultResources
 	} else {
-		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources)
+		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources, mdv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
 	}
 
@@ -124,12 +138,13 @@ func ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
 	}
 
 	if md.Spec.ImagePullConnectionID == nil || len(*md.Spec.ImagePullConnectionID) == 0 {
-		defaultDockerPullConnName := viper.GetString(config_deployment.DefaultDockerPullConnectionName)
-		logMD.Info("Docker pull connection name parameter is nil. Set the default value",
+		logMD.Info(
+			"Docker pull connection name parameter is nil. Set the default value",
 			"name", md.ID,
-			"replicas", defaultDockerPullConnName)
+			"replicas", mdv.modelDeploymentConfig.DefaultDockerPullConnName,
+		)
 
-		md.Spec.ImagePullConnectionID = &defaultDockerPullConnName
+		md.Spec.ImagePullConnectionID = &mdv.modelDeploymentConfig.DefaultDockerPullConnName
 	}
 
 	return err

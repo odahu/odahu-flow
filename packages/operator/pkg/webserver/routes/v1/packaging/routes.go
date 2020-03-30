@@ -18,19 +18,24 @@ package packaging
 
 import (
 	"github.com/gin-gonic/gin"
-	mp_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, repository mp_repository.Repository,
-	connRepository conn_repository.Repository) {
+func ConfigureRoutes(
+	routeGroup *gin.RouterGroup,
+	repository mp_repository.Repository,
+	connRepository conn_repository.Repository,
+	config config.ModelPackagingConfig,
+	gpuResourceName string,
+) {
 	mtController := ModelPackagingController{
 		repository: repository,
-		validator:  NewMpValidator(repository, connRepository),
+		validator:  NewMpValidator(repository, connRepository, config.OutputConnectionID, gpuResourceName),
 	}
-	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(mp_config.Enabled))
+	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(config.Enabled))
 
 	routeGroup.GET(GetModelPackagingURL, mtController.getMP)
 	routeGroup.GET(GetAllModelPackagingURL, mtController.getAllMPs)

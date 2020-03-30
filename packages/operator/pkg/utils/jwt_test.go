@@ -17,6 +17,7 @@
 package utils_test
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -46,7 +47,7 @@ func (s *JWTTestSuite) TestExtractUserInfoFromToken() {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOiJ0Z" +
 		"XN0QGVtYWlsLm9yZyIsImlhdCI6MTUxNjIzOTAyMn0.mDHHgcPKVidgB7VFNfSHS-K08a4a4kRHQF94waNbpzg"
 
-	userInfo, err := utils.ExtractUserInfoFromToken(token)
+	userInfo, err := utils.ExtractUserInfoFromToken(token, config.NewDefaultUserConfig().Claims)
 	s.g.Expect(err).Should(BeNil())
 	s.g.Expect(userInfo.Username).Should(Equal("John Doe"))
 	s.g.Expect(userInfo.Email).Should(Equal("test@email.org"))
@@ -61,7 +62,7 @@ func (s *JWTTestSuite) TestExtractUserInfoFromTokenMissingName() {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGVtYWlsLm9yZyIs" +
 		"ImlhdCI6MTUxNjIzOTAyMn0.ezWMqjto3LXFSzR7dUbusmgUmdaxdRHM9UA6qHj0k-A"
 
-	_, err := utils.ExtractUserInfoFromToken(token)
+	_, err := utils.ExtractUserInfoFromToken(token, config.NewDefaultUserConfig().Claims)
 	s.g.Expect(err).ShouldNot(BeNil())
 	s.g.Expect(err.Error()).Should(ContainSubstring("claim is missing"))
 }
@@ -75,7 +76,7 @@ func (s *JWTTestSuite) TestExtractUserInfoFromTokenMissingEmail() {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0Ij" +
 		"oxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
-	_, err := utils.ExtractUserInfoFromToken(token)
+	_, err := utils.ExtractUserInfoFromToken(token, config.NewDefaultUserConfig().Claims)
 	s.g.Expect(err).ShouldNot(BeNil())
 	s.g.Expect(err.Error()).Should(ContainSubstring("claim is missing"))
 }
@@ -90,7 +91,7 @@ func (s *JWTTestSuite) TestExtractUserInfoFromTokenEmailNotStringType() {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZW1haWwiOl" +
 		"sidGVzdEBlbWFpbC5vcmciXSwiaWF0IjoxNTE2MjM5MDIyfQ._MsFbVFXKIl5JAkiC-pY2KxEqriOtKBpqxLBoBIAvNE"
 
-	_, err := utils.ExtractUserInfoFromToken(token)
+	_, err := utils.ExtractUserInfoFromToken(token, config.NewDefaultUserConfig().Claims)
 	s.g.Expect(err).ShouldNot(BeNil())
 	s.g.Expect(err.Error()).Should(ContainSubstring("claim is not the string type"))
 }
@@ -105,7 +106,7 @@ func (s *JWTTestSuite) TestExtractUserInfoFromTokenNameNotStringType() {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6WyJKb2huIERvZSJdLCJlbWF" +
 		"pbCI6InRlc3RAZW1haWwub3JnIiwiaWF0IjoxNTE2MjM5MDIyfQ.9Wchix3yJEIDxZ1crkqSXE2xs_uxt8vswQPzL0-Q33E"
 
-	_, err := utils.ExtractUserInfoFromToken(token)
+	_, err := utils.ExtractUserInfoFromToken(token, config.NewDefaultUserConfig().Claims)
 	s.g.Expect(err).ShouldNot(BeNil())
 	s.g.Expect(err.Error()).Should(ContainSubstring("claim is not the string type"))
 }
@@ -114,6 +115,6 @@ func (s *JWTTestSuite) TestExtractUserInfoFromTokenClaimsMissing() {
 	//nolint
 	token := "malformed_jwt"
 
-	_, err := utils.ExtractUserInfoFromToken(token)
+	_, err := utils.ExtractUserInfoFromToken(token, config.NewDefaultUserConfig().Claims)
 	s.g.Expect(err).Should(Equal(utils.ErrMalformedJWT))
 }

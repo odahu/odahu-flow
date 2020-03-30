@@ -19,10 +19,7 @@ package controller
 import (
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
 	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
-	"github.com/spf13/viper"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -31,8 +28,8 @@ import (
 var log = logf.Log.WithName("controller-setup")
 
 // AddToManager adds all Controllers to the Manager
-func AddToManager(m manager.Manager) error {
-	if viper.GetBool(training.Enabled) {
+func AddToManager(m manager.Manager, odahuConfig *config.Config) error {
+	if odahuConfig.Training.Enabled {
 		log.Info("Setting up the training controller")
 
 		if err := tektonschema.AddToScheme(m.GetScheme()); err != nil {
@@ -41,12 +38,14 @@ func AddToManager(m manager.Manager) error {
 			return err
 		}
 
-		if err := AddTrainingToManager(m); err != nil {
+		if err := AddTrainingToManager(
+			m, odahuConfig.Training, odahuConfig.Operator, odahuConfig.Common.ResourceGPUName,
+		); err != nil {
 			return err
 		}
 	}
 
-	if viper.GetBool(packaging.Enabled) {
+	if odahuConfig.Packaging.Enabled {
 		log.Info("Setting up the packaging controller")
 
 		if err := tektonschema.AddToScheme(m.GetScheme()); err != nil {
@@ -55,12 +54,14 @@ func AddToManager(m manager.Manager) error {
 			return err
 		}
 
-		if err := AddPackagingToManager(m); err != nil {
+		if err := AddPackagingToManager(
+			m, odahuConfig.Packaging, odahuConfig.Operator, odahuConfig.Common.ResourceGPUName,
+		); err != nil {
 			return err
 		}
 	}
 
-	if viper.GetBool(deployment.Enabled) {
+	if odahuConfig.Deployment.Enabled {
 		log.Info("Setting up the deployment controller")
 
 		log.Info("Setting up Istio scheme")
@@ -73,7 +74,9 @@ func AddToManager(m manager.Manager) error {
 			return err
 		}
 
-		if err := AddDeploymentToManager(m); err != nil {
+		if err := AddDeploymentToManager(
+			m, odahuConfig.Deployment, odahuConfig.Operator, odahuConfig.Common.ResourceGPUName,
+		); err != nil {
 			return err
 		}
 	}

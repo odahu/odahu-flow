@@ -22,14 +22,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	md_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	dep_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	dep_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -85,21 +84,23 @@ func (s *ModelDeploymentRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	s.server = gin.Default()
-	v1Group := s.server.Group("")
 	s.mdRepository = dep_k8s_repository.NewRepositoryWithOptions(
 		testNamespace, mgr.GetClient(), metav1.DeletePropagationBackground,
 	)
-	dep_route.ConfigureRoutes(v1Group, s.mdRepository)
+}
+
+func (s *ModelDeploymentRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
+	s.server = gin.Default()
+	v1Group := s.server.Group("")
+	dep_route.ConfigureRoutes(v1Group, s.mdRepository, deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelDeploymentRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+	s.registerHTTPHandlers(config.NewDefaultModelDeploymentConfig())
 }
 
 func (s *ModelDeploymentRouteSuite) TearDownTest() {
-	viper.Set(md_config.Enabled, true)
-
 	for _, currMdID := range []string{mdID, mdID1, mdID2} {
 		if err := s.mdRepository.DeleteModelDeployment(currMdID); err != nil && !errors.IsNotFound(err) {
 			panic(err)
@@ -363,7 +364,7 @@ func (s *ModelDeploymentRouteSuite) TestCreateMD() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ModelDeploymentRouteSuite) TestCreateMDModifiable(){
+func (s *ModelDeploymentRouteSuite) TestCreateMDModifiable() {
 	newResource := newStubMd()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -464,7 +465,7 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMD() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *ModelDeploymentRouteSuite) TestUpdateMDModifiable(){
+func (s *ModelDeploymentRouteSuite) TestUpdateMDModifiable() {
 	resource := newStubMd()
 	s.g.Expect(s.mdRepository.CreateModelDeployment(resource)).NotTo(HaveOccurred())
 
@@ -491,7 +492,7 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMDModifiable(){
 	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
 	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
 	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
- 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
+	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
 func (s *ModelDeploymentRouteSuite) TestUpdateMDValidation() {
@@ -580,7 +581,9 @@ func (s *ModelDeploymentRouteSuite) TestDeleteMDNotFound() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetMD() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	md := newStubMd()
 	s.g.Expect(s.mdRepository.CreateModelDeployment(md)).NotTo(HaveOccurred())
@@ -613,7 +616,9 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetMD() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetAllMD() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	s.newMultipleMds()
 
@@ -635,7 +640,9 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetAllMD() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPICreateMD() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 	md := newStubMd()
 
 	s.g.Expect(s.mdRepository.CreateModelDeployment(md)).NotTo(HaveOccurred())
@@ -657,7 +664,9 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPICreateMD() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPIUpdateMD() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 	mdEntity := newStubMd()
 
 	mdEntityBody, err := json.Marshal(mdEntity)
@@ -677,7 +686,9 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIUpdateMD() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPIDeleteMD() {
-	viper.Set(md_config.Enabled, false)
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	deploymentConfig.Enabled = false
+	s.registerHTTPHandlers(deploymentConfig)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(

@@ -19,7 +19,6 @@ package main
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	trainer_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/trainer"
 	conn_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
 	train_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/trainer"
@@ -32,11 +31,14 @@ import (
 var log = logf.Log.WithName("trainer-main")
 
 const (
-	mtFileCLIParam               = "mt-file"
-	mtIDCLIParam                 = "mt-id"
-	outputConnectionNameCLIParam = "output-connection-name"
-	apiURLCLIParam               = "api-url"
-	outputTrainingDirCLIParam    = "output-dir"
+	mtFileCLIParam             = "mt-file"
+	mtIDCLIParam               = "mt-id"
+	apiURLCLIParam             = "api-url"
+	outputTrainingDirCLIParam  = "output-dir"
+	MTFileConfigKey            = "trainer.mtFile"
+	OutputTrainingDirConfigKey = "trainer.outputDir"
+	APIURLConfigKey            = "trainer.auth.apiUrl"
+	ModelTrainingIDConfigKey   = "trainer.modelTrainingId"
 )
 
 var mainCmd = &cobra.Command{
@@ -49,7 +51,7 @@ var trainerSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Prepare environment for a trainer",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := newTrainerWithHTTPRepositories().Setup(); err != nil {
+		if err := newTrainerWithHTTPRepositories(config.MustLoadConfig().Trainer).Setup(); err != nil {
 			log.Error(err, "Training setup failed")
 			os.Exit(1)
 		}
@@ -60,7 +62,7 @@ var saveCmd = &cobra.Command{
 	Use:   "result",
 	Short: "Save a trainer result",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := newTrainerWithHTTPRepositories().SaveResult(); err != nil {
+		if err := newTrainerWithHTTPRepositories(config.MustLoadConfig().Trainer).SaveResult(); err != nil {
 			log.Error(err, "Result saving failed")
 			os.Exit(1)
 		}
@@ -77,48 +79,43 @@ func init() {
 	config.InitBasicParams(mainCmd)
 
 	mainCmd.PersistentFlags().String(mtFileCLIParam, "mt.json", "File with model training content")
-	config.PanicIfError(viper.BindPFlag(trainer_conf.MTFile, mainCmd.PersistentFlags().Lookup(mtFileCLIParam)))
+	config.PanicIfError(viper.BindPFlag(MTFileConfigKey, mainCmd.PersistentFlags().Lookup(mtFileCLIParam)))
 
 	mainCmd.PersistentFlags().String(mtIDCLIParam, "", "ID of the model training")
-	config.PanicIfError(viper.BindPFlag(trainer_conf.ModelTrainingID, mainCmd.PersistentFlags().Lookup(mtIDCLIParam)))
+	config.PanicIfError(viper.BindPFlag(ModelTrainingIDConfigKey, mainCmd.PersistentFlags().Lookup(mtIDCLIParam)))
 
 	mainCmd.PersistentFlags().String(apiURLCLIParam, "", "API URL")
-	config.PanicIfError(viper.BindPFlag(trainer_conf.APIURL, mainCmd.PersistentFlags().Lookup(apiURLCLIParam)))
+	config.PanicIfError(viper.BindPFlag(APIURLConfigKey, mainCmd.PersistentFlags().Lookup(apiURLCLIParam)))
 
 	mainCmd.PersistentFlags().String(
 		outputTrainingDirCLIParam, currentDir,
 		"The path to the dir when a user trainer will save their result",
 	)
 	config.PanicIfError(viper.BindPFlag(
-		trainer_conf.OutputTrainingDir, mainCmd.PersistentFlags().Lookup(outputTrainingDirCLIParam),
+		OutputTrainingDirConfigKey, mainCmd.PersistentFlags().Lookup(outputTrainingDirCLIParam),
 	))
-
-	mainCmd.PersistentFlags().String(outputConnectionNameCLIParam,
-		"It is a connection ID, which specifies where a artifact trained artifact is stored.",
-		"File with model training content",
-	)
-	config.PanicIfError(viper.BindPFlag(
-		trainer_conf.OutputConnectionName,
-		mainCmd.PersistentFlags().Lookup(outputConnectionNameCLIParam)),
-	)
 
 	mainCmd.AddCommand(trainerSetupCmd, saveCmd)
 }
 
-func newTrainerWithHTTPRepositories() *trainer.ModelTrainer {
-	log.Info(fmt.Sprintf("OAuthOIDCTokenEndpoint: %s", viper.GetString(trainer_conf.OAuthOIDCTokenEndpoint)))
+func newTrainerWithHTTPRepositories(config config.TrainerConfig) *trainer.ModelTrainer {
+	log.Info(fmt.Sprintf("OAuthOIDCTokenEndpoint: %s", viper.GetString(config.Auth.OAuthOIDCTokenEndpoint)))
 	trainRepo := train_http_storage.NewRepository(
-		viper.GetString(trainer_conf.APIURL), viper.GetString(trainer_conf.APIToken),
-		viper.GetString(trainer_conf.ClientID), viper.GetString(trainer_conf.ClientSecret),
-		viper.GetString(trainer_conf.OAuthOIDCTokenEndpoint),
+		config.Auth.APIURL,
+		config.Auth.APIToken,
+		config.Auth.ClientID,
+		config.Auth.ClientSecret,
+		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 	connRepo := conn_http_storage.NewRepository(
-		viper.GetString(trainer_conf.APIURL), viper.GetString(trainer_conf.APIToken),
-		viper.GetString(trainer_conf.ClientID), viper.GetString(trainer_conf.ClientSecret),
-		viper.GetString(trainer_conf.OAuthOIDCTokenEndpoint),
+		config.Auth.APIURL,
+		config.Auth.APIToken,
+		config.Auth.ClientID,
+		config.Auth.ClientSecret,
+		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 
-	return trainer.NewModelTrainer(trainRepo, connRepo, viper.GetString(trainer_conf.ModelTrainingID))
+	return trainer.NewModelTrainer(trainRepo, connRepo, config)
 }
 
 func main() {

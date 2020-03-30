@@ -28,20 +28,20 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type modelPackagingIntegrationSuite struct {
+type PackagingIntegrationValidationSuite struct {
 	suite.Suite
 	g *GomegaWithT
 }
 
-func (s *modelPackagingIntegrationSuite) SetupTest() {
+func (s *PackagingIntegrationValidationSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
 }
 
 func TestMPIValidateSuite(t *testing.T) {
-	suite.Run(t, new(modelPackagingIntegrationSuite))
+	suite.Run(t, new(PackagingIntegrationValidationSuite))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiIDValidation() {
+func (s *PackagingIntegrationValidationSuite) TestPiIDValidation() {
 	pi := &packaging.PackagingIntegration{
 		Spec: packaging.PackagingIntegrationSpec{},
 	}
@@ -51,7 +51,7 @@ func (s *modelPackagingIntegrationSuite) TestPiIDValidation() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyIDErrorMessage))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiEntrypointValidation() {
+func (s *PackagingIntegrationValidationSuite) TestPiEntrypointValidation() {
 	pi := &packaging.PackagingIntegration{
 		Spec: packaging.PackagingIntegrationSpec{},
 	}
@@ -61,7 +61,7 @@ func (s *modelPackagingIntegrationSuite) TestPiEntrypointValidation() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyEntrypointErrorMessage))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiDefaultImageValidation() {
+func (s *PackagingIntegrationValidationSuite) TestPiDefaultImageValidation() {
 	pi := &packaging.PackagingIntegration{
 		Spec: packaging.PackagingIntegrationSpec{},
 	}
@@ -71,7 +71,7 @@ func (s *modelPackagingIntegrationSuite) TestPiDefaultImageValidation() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyDefaultImageErrorMessage))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiEmptyTargetsValidation() {
+func (s *PackagingIntegrationValidationSuite) TestPiEmptyTargetsValidation() {
 	pi := &packaging.PackagingIntegration{
 		ID: "some-id",
 		Spec: packaging.PackagingIntegrationSpec{
@@ -85,7 +85,7 @@ func (s *modelPackagingIntegrationSuite) TestPiEmptyTargetsValidation() {
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiEmptyArgumentsValidation() {
+func (s *PackagingIntegrationValidationSuite) TestPiEmptyArgumentsValidation() {
 	pi := &packaging.PackagingIntegration{
 		ID: "some-id",
 		Spec: packaging.PackagingIntegrationSpec{
@@ -99,7 +99,7 @@ func (s *modelPackagingIntegrationSuite) TestPiEmptyArgumentsValidation() {
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiEmptyTargetName() {
+func (s *PackagingIntegrationValidationSuite) TestPiEmptyTargetName() {
 	pi := &packaging.PackagingIntegration{
 		ID: "some-id",
 		Spec: packaging.PackagingIntegrationSpec{
@@ -123,7 +123,7 @@ func (s *modelPackagingIntegrationSuite) TestPiEmptyTargetName() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.TargetEmptyNameErrorMessage))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiEmptyConnectionType() {
+func (s *PackagingIntegrationValidationSuite) TestPiEmptyConnectionType() {
 	targetName := "some-name"
 	pi := &packaging.PackagingIntegration{
 		ID: "some-id",
@@ -150,7 +150,7 @@ func (s *modelPackagingIntegrationSuite) TestPiEmptyConnectionType() {
 	)))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiUnknownConnectionType() {
+func (s *PackagingIntegrationValidationSuite) TestPiUnknownConnectionType() {
 	unknownConnType := "some-type"
 	targetName := "some-name"
 	pi := &packaging.PackagingIntegration{
@@ -178,7 +178,7 @@ func (s *modelPackagingIntegrationSuite) TestPiUnknownConnectionType() {
 	)))
 }
 
-func (s *modelPackagingIntegrationSuite) TestPiNotValidJsonSchema() {
+func (s *PackagingIntegrationValidationSuite) TestPiNotValidJsonSchema() {
 	pi := &packaging.PackagingIntegration{
 		ID: "some-id",
 		Spec: packaging.PackagingIntegrationSpec{
@@ -208,7 +208,7 @@ func (s *modelPackagingIntegrationSuite) TestPiNotValidJsonSchema() {
 	s.g.Expect(err.Error()).Should(ContainSubstring("given: /bool/ Expected valid values are"))
 }
 
-func (s *modelPackagingIntegrationSuite) TestValidateID() {
+func (s *PackagingIntegrationValidationSuite) TestValidateID() {
 	pi := &packaging.PackagingIntegration{
 		ID: "not-VALID-id-",
 	}

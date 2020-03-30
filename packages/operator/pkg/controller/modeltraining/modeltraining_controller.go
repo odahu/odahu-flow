@@ -21,12 +21,11 @@ import (
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	train_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	"github.com/spf13/viper"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -54,25 +53,38 @@ var log = logf.Log.WithName(controllerName)
 
 // Add creates a new ModelTraining Controller and adds it to the Manager with default RBAC.
 // The Manager will set fields on the Controller and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+func Add(
+	mgr manager.Manager,
+	trainingConfig config.ModelTrainingConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) error {
+	return add(mgr, newReconciler(mgr, trainingConfig, operatorConfig, gpuResourceName))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
+func newReconciler(
+	mgr manager.Manager,
+	trainingConfig config.ModelTrainingConfig,
+	operatorConfig config.OperatorConfig,
+	gpuResourceName string,
+) reconcile.Reconciler {
 	k8sClient := mgr.GetClient()
 
 	return &ReconcileModelTraining{
-		Client:   k8sClient,
-		config:   mgr.GetConfig(),
-		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetRecorder(controllerName),
+		Client:    k8sClient,
+		k8sConfig: mgr.GetConfig(),
+		scheme:    mgr.GetScheme(),
+		recorder:  mgr.GetRecorder(controllerName),
 		trainRepo: train_k8s_repository.NewRepository(
-			viper.GetString(train_conf.Namespace),
-			viper.GetString(train_conf.ToolchainIntegrationNamespace),
+			trainingConfig.Namespace,
+			trainingConfig.ToolchainIntegrationNamespace,
 			k8sClient,
 			mgr.GetConfig(),
 		),
+		trainingConfig:  trainingConfig,
+		operatorConfig:  operatorConfig,
+		gpuResourceName: gpuResourceName,
 	}
 }
 
@@ -117,10 +129,13 @@ var _ reconcile.Reconciler = &ReconcileModelTraining{}
 // ReconcileModelTraining reconciles a ModelTraining object
 type ReconcileModelTraining struct {
 	client.Client
-	scheme    *runtime.Scheme
-	recorder  record.EventRecorder
-	config    *rest.Config
-	trainRepo train_repository.Repository
+	scheme          *runtime.Scheme
+	recorder        record.EventRecorder
+	k8sConfig       *rest.Config
+	trainRepo       train_repository.Repository
+	trainingConfig  config.ModelTrainingConfig
+	operatorConfig  config.OperatorConfig
+	gpuResourceName string
 }
 
 type BuilderConf struct {
@@ -230,7 +245,7 @@ func (r *ReconcileModelTraining) getToolchainIntegration(trainingCR *odahuflowv1
 	var ti odahuflowv1alpha1.ToolchainIntegration
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Name:      trainingCR.Spec.Toolchain,
-		Namespace: viper.GetString(train_conf.ToolchainIntegrationNamespace),
+		Namespace: r.trainingConfig.ToolchainIntegrationNamespace,
 	}, &ti); err != nil {
 		log.Error(err, "Get toolchain integration", "mt id", trainingCR)
 		return nil, err
@@ -247,30 +262,30 @@ func isGPUResourceSet(trainingCR *odahuflowv1alpha1.ModelTraining) bool {
 				kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Requests.GPU)))
 }
 
-func getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {
+func (r *ReconcileModelTraining) getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {
 	if isGPUResourceSet(trainingCR) {
-		return viper.GetStringMapString(train_conf.GPUNodeSelector)
+		return r.trainingConfig.GPUNodeSelector
 	}
 
-	return viper.GetStringMapString(train_conf.NodeSelector)
+	return r.trainingConfig.NodeSelector
 }
 
-func getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
+func (r *ReconcileModelTraining) getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
 	tolerations := []corev1.Toleration{}
 
 	var tolerationConf map[string]string
 	if isGPUResourceSet(trainingCR) {
-		tolerationConf = viper.GetStringMapString(train_conf.GPUToleration)
+		tolerationConf = r.trainingConfig.GPUToleration
 	} else {
-		tolerationConf = viper.GetStringMapString(train_conf.Toleration)
+		tolerationConf = r.trainingConfig.Toleration
 	}
 
 	if len(tolerationConf) != 0 {
 		tolerations = append(tolerations, corev1.Toleration{
-			Key:      tolerationConf[train_conf.TolerationKey],
-			Operator: corev1.TolerationOperator(tolerationConf[train_conf.TolerationOperator]),
-			Value:    tolerationConf[train_conf.TolerationValue],
-			Effect:   corev1.TaintEffect(tolerationConf[train_conf.TolerationEffect]),
+			Key:      tolerationConf[config.TolerationKey],
+			Operator: corev1.TolerationOperator(tolerationConf[config.TolerationOperator]),
+			Value:    tolerationConf[config.TolerationValue],
+			Effect:   corev1.TaintEffect(tolerationConf[config.TolerationEffect]),
 		})
 	}
 
@@ -283,7 +298,7 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 	if trainingCR.Status.State != "" && trainingCR.Status.State != odahuflowv1alpha1.ModelTrainingUnknown {
 		taskRun := &tektonv1alpha1.TaskRun{}
 		err := r.Get(context.TODO(), types.NamespacedName{
-			Name: trainingCR.Name, Namespace: viper.GetString(train_conf.Namespace),
+			Name: trainingCR.Name, Namespace: r.trainingConfig.Namespace,
 		}, taskRun)
 		if err != nil {
 			return nil, err
@@ -299,7 +314,7 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 		return nil, err
 	}
 
-	taskSpec, err := generateTrainerTaskSpec(trainingCR, toolchainIntegration)
+	taskSpec, err := r.generateTrainerTaskSpec(trainingCR, toolchainIntegration)
 	if err != nil {
 		return nil, err
 	}
@@ -311,10 +326,10 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 		},
 		Spec: tektonv1alpha1.TaskRunSpec{
 			TaskSpec: taskSpec,
-			Timeout:  &metav1.Duration{Duration: viper.GetDuration(train_conf.Timeout)},
+			Timeout:  &metav1.Duration{Duration: r.trainingConfig.Timeout},
 			PodTemplate: tektonv1alpha1.PodTemplate{
-				NodeSelector: getNodeSelector(trainingCR),
-				Tolerations:  getTolerations(trainingCR),
+				NodeSelector: r.getNodeSelector(trainingCR),
+				Tolerations:  r.getTolerations(trainingCR),
 			},
 		},
 	}
@@ -330,7 +345,7 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 
 	found := &tektonv1alpha1.TaskRun{}
 	err = r.Get(context.TODO(), types.NamespacedName{
-		Name: taskRun.Name, Namespace: viper.GetString(train_conf.Namespace),
+		Name: taskRun.Name, Namespace: r.trainingConfig.Namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 		log.Info(fmt.Sprintf("Creating %s k8s task run", taskRun.ObjectMeta.Name))
@@ -350,7 +365,7 @@ func (r *ReconcileModelTraining) createResultConfigMap(trainingCR *odahuflowv1al
 	resultCM := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      odahuflow.GenerateTrainingResultCMName(trainingCR.Name),
-			Namespace: viper.GetString(train_conf.Namespace),
+			Namespace: r.trainingConfig.Namespace,
 		},
 		Data: map[string]string{},
 	}
@@ -366,7 +381,7 @@ func (r *ReconcileModelTraining) createResultConfigMap(trainingCR *odahuflowv1al
 
 	found := &corev1.ConfigMap{}
 	err := r.Get(context.TODO(), types.NamespacedName{
-		Name: resultCM.Name, Namespace: viper.GetString(train_conf.Namespace),
+		Name: resultCM.Name, Namespace: r.trainingConfig.Namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
 		log.Info(fmt.Sprintf("Creating %s k8s result config map", resultCM.ObjectMeta.Name))

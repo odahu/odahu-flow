@@ -19,6 +19,7 @@ package connection_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,14 +27,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	conn_config "github.com/odahu/odahu-flow/packages/operator/pkg/config/connection"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	conn_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/connection"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -54,21 +53,16 @@ type ConnectionRouteGenericSuite struct {
 	suite.Suite
 	g                *GomegaWithT
 	server           *gin.Engine
+	routeGroup       *gin.RouterGroup
 	connRepository   conn_repository.Repository
 	connDecryptToken string
 }
 
 func (s *ConnectionRouteGenericSuite) SetupSuite() {
 	utils.SetupLogger()
-
-	s.server = gin.Default()
-	v1Group := s.server.Group("")
-	conn_route.ConfigureRoutes(v1Group, s.connRepository, stubKeyEvaluator)
 }
 
 func (s *ConnectionRouteGenericSuite) TearDownTest() {
-	viper.Set(conn_config.Enabled, true)
-
 	for _, connID := range []string{connID, connID1, connID2} {
 		if err := s.connRepository.DeleteConnection(connID); err != nil && !odahuflow_errors.IsNotFoundError(err) {
 			// If a connection is not found then it was not created during a test case
@@ -79,6 +73,16 @@ func (s *ConnectionRouteGenericSuite) TearDownTest() {
 
 func (s *ConnectionRouteGenericSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: true,
+	})
+}
+
+func (s *ConnectionRouteGenericSuite) registerHTTPHandlers(connectionConfig config.ConnectionConfig) {
+	s.server = gin.Default()
+	s.routeGroup = s.server.Group("")
+	conn_route.ConfigureRoutes(s.routeGroup, s.connRepository, stubKeyEvaluator, connectionConfig)
 }
 
 func (s *ConnectionRouteGenericSuite) newMultipleConnStubs() []*connection.Connection {
@@ -365,7 +369,7 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnection() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable(){
+func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable() {
 	newResource := newConnStub()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -389,7 +393,6 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable(){
 	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
-
 
 func (s *ConnectionRouteGenericSuite) TestCreateDuplicateConnection() {
 	conn := newConnStub()
@@ -594,7 +597,9 @@ func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnectionNotFound() {
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetConnection() {
-	viper.Set(conn_config.Enabled, false)
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: false,
+	})
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -614,7 +619,9 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetConnection() {
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetAllConnections() {
-	viper.Set(conn_config.Enabled, false)
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: false,
+	})
 
 	conn := newConnStub()
 	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
@@ -639,7 +646,9 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetAllConnections() {
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetDecryptedConnection() {
-	viper.Set(conn_config.Enabled, false)
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: false,
+	})
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -664,7 +673,9 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetDecryptedConnection() {
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPICreateConnection() {
-	viper.Set(conn_config.Enabled, false)
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: false,
+	})
 
 	connEntity := newConnStub()
 
@@ -688,7 +699,9 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPICreateConnection() {
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIUpdateConnection() {
-	viper.Set(conn_config.Enabled, false)
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: false,
+	})
 
 	connEntity := newConnStub()
 
@@ -712,8 +725,9 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIUpdateConnection() {
 }
 
 func (s *ConnectionRouteGenericSuite) TestDisabledAPIDeleteConnection() {
-	viper.Set(conn_config.Enabled, false)
-
+	s.registerHTTPHandlers(config.ConnectionConfig{
+		Enabled: false,
+	})
 	w := httptest.NewRecorder()
 
 	req, err := http.NewRequest(

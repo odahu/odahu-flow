@@ -1,5 +1,4 @@
 ---
-# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
 apiVersion: v1
 kind: Secret
 metadata:
@@ -11,7 +10,6 @@ data:
   "config.yaml": |
     {{ toYaml .Values.config | b64enc }}
 ---
-# TODO: Remove after implementation of the issue https://github.com/legion-platform/legion/issues/1008
 apiVersion: v1
 kind: Secret
 metadata:

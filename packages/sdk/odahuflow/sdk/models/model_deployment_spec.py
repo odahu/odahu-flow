@@ -16,11 +16,11 @@ class ModelDeploymentSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, annotations: object=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
+    def __init__(self, annotations: Dict[str, str]=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
         """ModelDeploymentSpec - a model defined in Swagger
 
         :param annotations: The annotations of this ModelDeploymentSpec.  # noqa: E501
-        :type annotations: object
+        :type annotations: Dict[str, str]
         :param image: The image of this ModelDeploymentSpec.  # noqa: E501
         :type image: str
         :param image_pull_conn_id: The image_pull_conn_id of this ModelDeploymentSpec.  # noqa: E501
@@ -39,7 +39,7 @@ class ModelDeploymentSpec(Model):
         :type role_name: str
         """
         self.swagger_types = {
-            'annotations': object,
+            'annotations': Dict[str, str],
             'image': str,
             'image_pull_conn_id': str,
             'liveness_probe_initial_delay': int,
@@ -84,24 +84,24 @@ class ModelDeploymentSpec(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def annotations(self) -> object:
+    def annotations(self) -> Dict[str, str]:
         """Gets the annotations of this ModelDeploymentSpec.
 
         Annotations for model pods.  # noqa: E501
 
         :return: The annotations of this ModelDeploymentSpec.
-        :rtype: object
+        :rtype: Dict[str, str]
         """
         return self._annotations
 
     @annotations.setter
-    def annotations(self, annotations: object):
+    def annotations(self, annotations: Dict[str, str]):
         """Sets the annotations of this ModelDeploymentSpec.
 
         Annotations for model pods.  # noqa: E501
 
         :param annotations: The annotations of this ModelDeploymentSpec.
-        :type annotations: object
+        :type annotations: Dict[str, str]
         """
 
         self._annotations = annotations

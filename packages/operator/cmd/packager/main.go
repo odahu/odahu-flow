@@ -18,7 +18,6 @@ package main
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	packager_conf "github.com/odahu/odahu-flow/packages/operator/pkg/config/packager"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/packager"
 	connection_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
 	packaging_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/http"
@@ -31,10 +30,12 @@ import (
 var log = logf.Log.WithName("packager-main")
 
 const (
-	mpFileCLIParam               = "mp-file"
-	mpIDCLIParam                 = "mp-id"
-	outputConnectionNameCLIParam = "output-connection-name"
-	apiURLCLIParam               = "api-url"
+	mpFileCLIParam   = "mp-file"
+	mpIDCLIParam     = "mp-id"
+	apiURLCLIParam   = "api-url"
+	MPFile           = "packager.mpFile"
+	APIURL           = "packager.auth.apiUrl"
+	ModelPackagingID = "packager.modelPackagingId"
 )
 
 var mainCmd = &cobra.Command{
@@ -47,7 +48,7 @@ var packagerSetupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Prepare environment for a packager",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := newPackagerWithHTTPRepositories().SetupPackager(); err != nil {
+		if err := newPackagerWithHTTPRepositories(config.MustLoadConfig().Packager).SetupPackager(); err != nil {
 			log.Error(err, "Packaging setup failed")
 			os.Exit(1)
 		}
@@ -58,7 +59,7 @@ var saveCmd = &cobra.Command{
 	Use:   "result",
 	Short: "Save a packer result",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := newPackagerWithHTTPRepositories().SaveResult(); err != nil {
+		if err := newPackagerWithHTTPRepositories(config.MustLoadConfig().Packager).SaveResult(); err != nil {
 			log.Error(err, "Result saving failed")
 			os.Exit(1)
 		}
@@ -69,39 +70,34 @@ func init() {
 	config.InitBasicParams(mainCmd)
 
 	mainCmd.PersistentFlags().String(mpFileCLIParam, "mp.json", "File with model packaging content")
-	config.PanicIfError(viper.BindPFlag(packager_conf.MPFile, mainCmd.PersistentFlags().Lookup(mpFileCLIParam)))
+	config.PanicIfError(viper.BindPFlag(MPFile, mainCmd.PersistentFlags().Lookup(mpFileCLIParam)))
 
 	mainCmd.PersistentFlags().String(mpIDCLIParam, "", "ID of the model packaging")
-	config.PanicIfError(viper.BindPFlag(packager_conf.ModelPackagingID, mainCmd.PersistentFlags().Lookup(mpIDCLIParam)))
+	config.PanicIfError(viper.BindPFlag(ModelPackagingID, mainCmd.PersistentFlags().Lookup(mpIDCLIParam)))
 
 	mainCmd.PersistentFlags().String(apiURLCLIParam, "", "API URL")
-	config.PanicIfError(viper.BindPFlag(packager_conf.APIURL, mainCmd.PersistentFlags().Lookup(apiURLCLIParam)))
-
-	mainCmd.PersistentFlags().String(outputConnectionNameCLIParam,
-		"It is a connection ID, which specifies where a artifact trained artifact is stored.",
-		"File with model packaging content",
-	)
-	config.PanicIfError(viper.BindPFlag(
-		packager_conf.OutputConnectionName,
-		mainCmd.PersistentFlags().Lookup(outputConnectionNameCLIParam)),
-	)
+	config.PanicIfError(viper.BindPFlag(APIURL, mainCmd.PersistentFlags().Lookup(apiURLCLIParam)))
 
 	mainCmd.AddCommand(packagerSetupCmd, saveCmd)
 }
 
-func newPackagerWithHTTPRepositories() *packager.Packager {
+func newPackagerWithHTTPRepositories(config config.PackagerConfig) *packager.Packager {
 	packRepo := packaging_http_repository.NewRepository(
-		viper.GetString(packager_conf.APIURL), viper.GetString(packager_conf.APIToken),
-		viper.GetString(packager_conf.ClientID), viper.GetString(packager_conf.ClientSecret),
-		viper.GetString(packager_conf.OAuthOIDCTokenEndpoint),
+		config.Auth.APIURL,
+		config.Auth.APIToken,
+		config.Auth.ClientID,
+		config.Auth.ClientSecret,
+		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 	connRepo := connection_http_repository.NewRepository(
-		viper.GetString(packager_conf.APIURL), viper.GetString(packager_conf.APIToken),
-		viper.GetString(packager_conf.ClientID), viper.GetString(packager_conf.ClientSecret),
-		viper.GetString(packager_conf.OAuthOIDCTokenEndpoint),
+		config.Auth.APIURL,
+		config.Auth.APIToken,
+		config.Auth.ClientID,
+		config.Auth.ClientSecret,
+		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 
-	return packager.NewPackager(packRepo, connRepo, viper.GetString(packager_conf.ModelPackagingID))
+	return packager.NewPackager(packRepo, connRepo, config)
 }
 
 func main() {
