@@ -18,7 +18,7 @@ package modeldeployment
 
 import (
 	"context"
-	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	v1 "github.com/knative/serving/pkg/apis/serving/v1"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
@@ -107,7 +107,7 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(requests, timeout).Should(Receive(Equal(expectedRequest)))
 	g.Eventually(requests, timeout).Should(Receive(Equal(expectedRequest)))
 
-	configuration := &knservingv1alpha1.Configuration{}
+	configuration := &v1.Configuration{}
 	configurationKey := types.NamespacedName{Name: knativeConfigurationName(md), Namespace: mdNamespace}
 	g.Expect(c.Get(context.TODO(), configurationKey, configuration)).ToNot(HaveOccurred())
 
