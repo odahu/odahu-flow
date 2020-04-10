@@ -122,7 +122,7 @@ def list_local_trainings() -> List[str]:
     if not os.path.exists(config.LOCAL_MODEL_OUTPUT_DIR):
         return []
 
-    return listdir(config.LOCAL_MODEL_OUTPUT_DIR)
+    return sorted(listdir(config.LOCAL_MODEL_OUTPUT_DIR), key=str.lower)
 
 
 def cleanup_local_artifacts():
