@@ -21,11 +21,11 @@ from odahuflow.sdk.local.training import list_local_trainings
 #         assert len(os.listdir(mock_dir)) == 1
 #         assert list_local_trainings() == ['wine-132121-fine']
 
-@patch('odahuflow.sdk.local.training.config.LOCAL_MODEL_OUTPUT_DIR', 'mock_dir')
 def test_list_local_trainings(tmpdir):
     mock_dir = tmpdir
     mock_dir.mkdir('wine-132121-fine')
     # pdb.set_trace()
     assert isdir(mock_dir)
     assert len(os.listdir(mock_dir)) == 1
-    assert list_local_trainings() == ['wine-132121-fine']
+    with patch('odahuflow.sdk.local.training.config.LOCAL_MODEL_OUTPUT_DIR', mock_dir):
+        assert list_local_trainings() == ['wine-132121-fine']
