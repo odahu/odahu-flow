@@ -28,7 +28,7 @@ type ModelTrainingConfig struct {
 	// Enable deployment API/operator
 	Enabled            bool              `json:"enabled"`
 	ServiceAccount     string            `json:"serviceAccount"`
-	OutputConnectionID string            `json:"outputConnectionID"`
+	OutputConnectionID string            `json:"outputConnection"`
 	NodeSelector       map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model trainings pods
 	Toleration      map[string]string `json:"toleration"`

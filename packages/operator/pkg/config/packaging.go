@@ -28,7 +28,7 @@ type ModelPackagingConfig struct {
 	// Enable packaging API/operator
 	Enabled            bool   `json:"enabled"`
 	ServiceAccount     string `json:"serviceAccount"`
-	OutputConnectionID string `json:"outputConnectionID"`
+	OutputConnectionID string `json:"outputConnection"`
 	// Kubernetes node selectors for model packaging pods
 	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model packaging pods

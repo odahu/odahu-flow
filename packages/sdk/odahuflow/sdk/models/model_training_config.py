@@ -66,7 +66,7 @@ class ModelTrainingConfig(Model):
             'model_trainer_image': 'modelTrainerImage',
             'namespace': 'namespace',
             'node_selector': 'nodeSelector',
-            'output_connection_id': 'outputConnectionID',
+            'output_connection_id': 'outputConnection',
             'service_account': 'serviceAccount',
             'timeout': 'timeout',
             'toleration': 'toleration',

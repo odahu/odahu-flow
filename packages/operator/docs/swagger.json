@@ -2173,7 +2173,7 @@
                         "type": "string"
                     }
                 },
-                "outputConnectionID": {
+                "outputConnection": {
                     "type": "string"
                 },
                 "packagerIntegrationNamespace": {
@@ -2231,7 +2231,7 @@
                         "type": "string"
                     }
                 },
-                "outputConnectionID": {
+                "outputConnection": {
                     "type": "string"
                 },
                 "serviceAccount": {

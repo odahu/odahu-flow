@@ -217,7 +217,7 @@ definitions:
           type: string
         description: Kubernetes node selectors for model packaging pods
         type: object
-      outputConnectionID:
+      outputConnection:
         type: string
       packagerIntegrationNamespace:
         type: string
@@ -257,7 +257,7 @@ definitions:
         additionalProperties:
           type: string
         type: object
-      outputConnectionID:
+      outputConnection:
         type: string
       serviceAccount:
         type: string

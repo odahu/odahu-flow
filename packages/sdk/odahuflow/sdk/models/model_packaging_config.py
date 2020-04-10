@@ -54,7 +54,7 @@ class ModelPackagingConfig(Model):
             'model_packager_image': 'modelPackagerImage',
             'namespace': 'namespace',
             'node_selector': 'nodeSelector',
-            'output_connection_id': 'outputConnectionID',
+            'output_connection_id': 'outputConnection',
             'packager_integration_namespace': 'packagerIntegrationNamespace',
             'service_account': 'serviceAccount',
             'timeout': 'timeout',

@@ -2190,7 +2190,7 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "outputConnectionID": {
+                "outputConnection": {
                     "type": "string"
                 },
                 "packagerIntegrationNamespace": {
@@ -2248,7 +2248,7 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "outputConnectionID": {
+                "outputConnection": {
                     "type": "string"
                 },
                 "serviceAccount": {
