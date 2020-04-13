@@ -1,9 +1,5 @@
-import os
 from os.path import isdir
-
-import pdb
 from unittest.mock import patch
-
 from odahuflow.sdk.local.training import list_local_trainings
 
 
