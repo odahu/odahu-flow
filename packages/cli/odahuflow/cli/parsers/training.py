@@ -66,7 +66,7 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
     Get trainings.\n
     The command without id argument retrieve all trainings.\n
     Get all trainings in json format:\n
-        odahuflowctl train get --format json\n
+        odahuflowctl train get --output-format json\n
     Get training with "git-repo" id:\n
         odahuflowctl train get --id git-repo\n
     Using jsonpath:\n
