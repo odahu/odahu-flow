@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+AIRFLOW_NAMESPACE=airflow
+AIRFLOW_WEB_CONTAINER_NAME=airflow-web
+
 function ReadArguments() {
   if [[ $# == 0 ]]; then
     echo "ERROR: Options not specified! Use -h for help!"
@@ -61,7 +64,7 @@ function wait_dags_finish() {
       #id  | run_id               | state      | execution_date       | state_date           |
       #152 | manual__2019-12-25T14:53:03+00:00 | success    | 2019-12-25T14:53:03+00:00 | 2019-12-25T14:53:03.236701+00:00 |
       #152 | manual__2019-12-25T13:52:01+00:00 | success    | 2019-12-25T14:53:03+00:00 | 2019-12-25T14:53:03.236701+00:00 |
-      state=$(kubectl exec "$POD" -n airflow -it -- airflow list_dag_runs "${dag_id}" | grep -- "${dag_run_id}" | awk '{print $5}')
+      state=$(kubectl exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow list_dag_runs "${dag_id}" | grep -- "${dag_run_id}" | awk '{print $5}')
 
       case "${state}" in
       "success")
@@ -87,7 +90,7 @@ function wait_dags_finish() {
 
 export TEST_DAG_RUN_IDS=()
 ReadArguments "$@"
-export POD=$(kubectl get pods -l app=airflow -n airflow -o custom-columns=:metadata.name --no-headers | head -n 1)
+export POD=$(kubectl get pods -l app=airflow -l component=web -n "${AIRFLOW_NAMESPACE}" -o custom-columns=:metadata.name --no-headers | head -n 1)
 
 # Run all test dags
 for dag_id in ${TEST_DAG_IDS[@]}; do
@@ -95,7 +98,7 @@ for dag_id in ${TEST_DAG_IDS[@]}; do
   TEST_DAG_RUN_IDS+=("${dag_run_id}")
 
   echo "Run the ${dag_run_id} of ${dag_id} dag"
-  kubectl exec "$POD" -n airflow -it -- airflow trigger_dag -r "${dag_run_id}" "${dag_id}"
+  kubectl exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow trigger_dag -r "${dag_run_id}" "${dag_id}"
 done
 
 wait_dags_finish

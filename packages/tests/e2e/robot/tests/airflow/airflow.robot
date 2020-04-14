@@ -4,7 +4,7 @@ Resource            ../../resources/keywords.robot
 Force Tags  airflow
 
 *** Variables ***
-${TEST_DAG_RUN_IDS}  health_check
+${TEST_DAG_RUN_IDS}  health_check,airflow-wine-from-yamls
 
 *** Test Cases ***
 Airflow DAG
