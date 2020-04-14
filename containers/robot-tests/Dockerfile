@@ -28,6 +28,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
     apt-get install -y --no-install-recommends azure-cli google-cloud-sdk &&\
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
+ENV KUBECTL_VERSION=v1.14.10
+
+RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
+    chmod a+x /usr/local/bin/kubectl
+
 RUN pip install --disable-pip-version-check --upgrade pip==18.1 pipenv==2018.10.13 awscli
 
 ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86_64.sh
