@@ -121,8 +121,6 @@ def start_train(trainer: K8sTrainer, output_dir: str):
 def list_local_trainings() -> List[str]:
     if not os.path.exists(config.LOCAL_MODEL_OUTPUT_DIR):
         return []
-
-    # sorting based on ASCII sort order https://en.wikipedia.org/wiki/ASCII
     return sorted(listdir(config.LOCAL_MODEL_OUTPUT_DIR))
 
 
