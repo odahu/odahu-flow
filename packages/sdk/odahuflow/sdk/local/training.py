@@ -121,8 +121,7 @@ def start_train(trainer: K8sTrainer, output_dir: str):
 def list_local_trainings() -> List[str]:
     if not os.path.exists(config.LOCAL_MODEL_OUTPUT_DIR):
         return []
-
-    return listdir(config.LOCAL_MODEL_OUTPUT_DIR)
+    return sorted(listdir(config.LOCAL_MODEL_OUTPUT_DIR))
 
 
 def cleanup_local_artifacts():

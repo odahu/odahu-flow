@@ -81,7 +81,7 @@ def cleanup_artifacts():
     """
     Delete all training local artifacts.
     Usage example:\n
-        * odahuflowctl local train cleanup\n
+        * odahuflowctl local train cleanup-artifacts\n
     \f
     """
     cleanup_local_artifacts()
@@ -92,7 +92,7 @@ def cleanup_containers():
     """
     Delete all training docker containers.
     Usage example:\n
-        * odahuflowctl local train cleanup\n
+        * odahuflowctl local train cleanup-artifacts\n
     \f
     """
     cleanup_training_docker_containers()

@@ -63,7 +63,7 @@ COMMAND_GROUPS = [
 click_completion.init()
 
 
-@click.group(cls=AbbreviationGroup)
+@click.group(cls=AbbreviationGroup, context_settings={'max_content_width': 100})
 @click.option('--verbose/--non-verbose', default=False)
 def base(verbose=False):
     """
