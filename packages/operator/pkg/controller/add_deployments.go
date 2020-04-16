@@ -19,6 +19,7 @@ package controller
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/modeldeployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/deploymenthook"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/modelroute"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -27,6 +28,7 @@ func init() {
 	// AddToManagerDeploymentFuncs is a list of functions to create controllers and add them to a manager.
 	AddToManagerDeploymentFuncs = append(AddToManagerDeploymentFuncs, modeldeployment.Add)
 	AddToManagerDeploymentFuncs = append(AddToManagerDeploymentFuncs, modelroute.Add)
+	AddToManagerDeploymentFuncs = append(AddToManagerDeploymentFuncs, deploymenthook.Add)
 }
 
 // AddToManagerDeploymentFuncs is a list of functions to add all Controllers to the Manager
