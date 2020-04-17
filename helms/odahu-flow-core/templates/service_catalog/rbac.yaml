@@ -111,7 +111,7 @@ rules:
   - apiGroups:
       - odahuflow.odahu.org
     resources:
-      - connecitons
+      - connections
     verbs:
       - get
       - list

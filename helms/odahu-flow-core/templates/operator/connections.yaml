@@ -10,8 +10,7 @@ data:
     ---
     kind: Connection
     id: {{ $conn.id }}
-    spec:
-      {{ toYaml $conn.spec | nindent 6 }}
+    spec: {{ toYaml $conn.spec | nindent 6 }}
 {{- end }}
 ---
 apiVersion: batch/v1

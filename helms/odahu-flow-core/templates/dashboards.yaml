@@ -1,17 +1,19 @@
 {{ $root := . }}
+{{- if $root.Values.metrics.enabled }}
 {{ range $path, $bytes := .Files.Glob "files/dashboards/*" }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ base $path | quote }}
-  {{ if $root.Values.metrics.dashboardFolder }}
+  {{- if $root.Values.metrics.dashboardFolder }}
   annotations:
     k8s-sidecar-target-directory: {{ $root.Values.metrics.dashboardFolder | quote }}
-  {{ end }}
+  {{- end }}
   labels:
     grafana_dashboard: "1"
 data:
   {{ base $path }}: |-
 {{ $root.Files.Get $path | indent 4 }}
 {{ end }}
+{{- end }}

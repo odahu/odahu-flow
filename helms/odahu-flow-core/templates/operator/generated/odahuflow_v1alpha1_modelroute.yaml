@@ -11,7 +11,7 @@ spec:
   - JSONPath: .status.edgeUrl
     name: Edge URL
     type: string
-  - JSONPath: .spec.modelDeployments
+  - JSONPath: .spec.modelDeployments[*].mdName
     name: Routes
     type: string
   - JSONPath: .spec.mirror

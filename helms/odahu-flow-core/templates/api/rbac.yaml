@@ -130,7 +130,27 @@ rules:
   - apiGroups:
       - odahuflow.odahu.org
     resources:
-      - connecitons
+      - modeltrainings
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - modeltrainings/status
+    verbs:
+      - get
+      - update
+      - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - connections
     verbs:
       - get
       - list
@@ -165,46 +185,6 @@ rules:
       - update
       - patch
       - delete
-  - apiGroups:
-      - odahuflow.odahu.org
-    resources:
-      - modeltrainings
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - odahuflow.odahu.org
-    resources:
-      - modeltrainings/status
-    verbs:
-      - get
-      - update
-      - patch
-  - apiGroups:
-      - odahuflow.odahu.org
-    resources:
-      - modelpackagings
-    verbs:
-      - get
-      - list
-      - watch
-      - create
-      - update
-      - patch
-      - delete
-  - apiGroups:
-      - odahuflow.odahu.org
-    resources:
-      - modelpackagings/status
-    verbs:
-      - get
-      - update
-      - patch
   - apiGroups:
       - odahuflow.odahu.org
     resources:

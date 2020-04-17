@@ -20,29 +20,29 @@ data:
                 - name: collector
                   image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.feedback.rq_catcher "tpl" "%sodahu-flow-feedback-rq-catcher:%s") }}"
                   env:
-                      - name: GIN_MODE
-                        value: "release"
+                    - name: GIN_MODE
+                      value: "release"
                   command:
-                      - ./rq-catcher
+                    - ./rq-catcher
                   args:
-                      - "--fluentd-host"
-                      - "{{ .Values.feedback.fluentd.host }}"
-                      - "--fluentd-port"
-                      - "{{ .Values.feedback.fluentd.port }}"
-                      - "--prohibited-headers"
-                      - "{{ .Values.feedback.rq_catcher.prohibited_headers | join "," }}"
+                    - "--fluentd-host"
+                    - "{{ .Values.feedback.fluentd.host }}"
+                    - "--fluentd-port"
+                    - "{{ .Values.feedback.fluentd.port }}"
+                    - "--prohibited-headers"
+                    - "{{ .Values.feedback.rq_catcher.prohibited_headers | join "," }}"
                   ports:
-                      - containerPort: 7777
-                        name: api
-                        protocol: TCP
+                    - containerPort: 7777
+                      name: api
+                      protocol: TCP
                   livenessProbe:
-                      httpGet:
-                          path: /metrics
-                          port: 7777
-                      initialDelaySeconds: 10
-                      timeoutSeconds: 8
-                      failureThreshold: 5
-                      periodSeconds: 10
+                    httpGet:
+                      path: /metrics
+                      port: 7777
+                    initialDelaySeconds: 10
+                    timeoutSeconds: 8
+                    failureThreshold: 5
+                    periodSeconds: 10
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -69,7 +69,7 @@ rules:
       - patch
       - delete
   - apiGroups:
-    - apps
+      - apps
     resources:
       - deployments/status
     verbs:
@@ -81,29 +81,29 @@ rules:
       - patch
       - delete
   - apiGroups:
-        - extensions
+      - extensions
     resources:
-        - deployments
+      - deployments
     verbs:
-        - get
-        - list
-        - watch
-        - create
-        - update
-        - patch
-        - delete
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
   - apiGroups:
-        - extensions
+      - extensions
     resources:
-        - deployments/status
+      - deployments/status
     verbs:
-        - get
-        - list
-        - watch
-        - create
-        - update
-        - patch
-        - delete
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -168,7 +168,7 @@ spec:
             name: "{{ .Release.Name }}-feedback-rq-catcher-patch"
       containers:
         - name: post-install-job
-          image: "bitnami/kubectl:1.13.4-ol-7-r134"
+          image: "bitnami/kubectl:1.14"
           volumeMounts:
               - mountPath: /etc/odahu-flow
                 name: patch
@@ -176,6 +176,6 @@ spec:
             - "/bin/bash"
           args:
             - "-c"
-            - 'kubectl -n {{ .Values.feedback.istio_namespace}} patch deployments. istio-ingressgateway --patch "$(cat /etc/odahu-flow/patch.yaml)"'
+            - 'kubectl -n {{ .Values.feedback.istio_namespace}} patch deployment istio-ingressgateway --patch "$(cat /etc/odahu-flow/patch.yaml)"'
 {{- end }}
 {{- end }}

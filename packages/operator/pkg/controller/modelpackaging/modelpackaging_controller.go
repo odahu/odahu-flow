@@ -379,7 +379,7 @@ func isPackagingFinished(mp *odahuflowv1alpha1.ModelPackaging) bool {
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=packagingintegrations/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=tekton.dev,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=tekton.dev,resources=taskruns/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=connecitons,verbs=get;list
+// +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=connections,verbs=get;list
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 func (r *ReconcileModelPackaging) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	// Fetch the ModelPackaging

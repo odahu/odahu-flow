@@ -17,13 +17,13 @@ spec:
   - JSONPath: .spec.vcsName
     name: VCS name
     type: string
-  - JSONPath: .status.modelName
+  - JSONPath: .spec.model.name
     name: Model name
     type: string
-  - JSONPath: .status.modelVersion
+  - JSONPath: .spec.model.version
     name: Model version
     type: string
-  - JSONPath: .status.modelImage
+  - JSONPath: .spec.image
     name: Model image
     type: string
   group: odahuflow.odahu.org
@@ -73,7 +73,7 @@ spec:
                 type: object
               type: array
             entrypoint:
-              description: Model training file. It can be python\bash script or jupiter
+              description: Model training file. It can be python\bash script or Jupyter
                 notebook
               type: string
             envs:

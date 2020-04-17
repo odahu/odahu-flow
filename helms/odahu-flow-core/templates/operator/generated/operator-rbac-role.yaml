@@ -107,6 +107,7 @@ rules:
   - odahuflow.odahu.org
   resources:
   - modeldeployments
+  - modeldeployments/finalizers
   verbs:
   - get
   - list
@@ -376,6 +377,7 @@ rules:
   - odahuflow.odahu.org
   resources:
   - modelpackagings
+  - modelpackagings/finalizers
   verbs:
   - get
   - list
@@ -435,7 +437,7 @@ rules:
 - apiGroups:
   - odahuflow.odahu.org
   resources:
-  - connecitons
+  - connections
   verbs:
   - get
   - list
@@ -450,6 +452,7 @@ rules:
   - odahuflow.odahu.org
   resources:
   - modelroutes
+  - modelroutes/finalizers
   verbs:
   - get
   - list
@@ -474,6 +477,7 @@ rules:
   - networking.istio.io
   resources:
   - virtualservices
+  - virtualservices/finalizers
   verbs:
   - get
   - list
@@ -524,6 +528,7 @@ rules:
   - odahuflow.odahu.org
   resources:
   - modeltrainings
+  - modeltrainings/finalizers
   verbs:
   - get
   - list
