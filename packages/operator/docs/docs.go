@@ -1983,6 +1983,10 @@ var doc = `{
                 "resourceGpuName": {
                     "description": "Kubernetes can consume the GPU resource in the \u003cvendor\u003e.com/gpu format.\nFor example, amd.com/gpu or nvidia.com/gpu.",
                     "type": "string"
+                },
+                "version": {
+                    "description": "Version of ODAHU platform",
+                    "type": "string"
                 }
             }
         },
@@ -2298,7 +2302,7 @@ var doc = `{
                     "description": "The path to the configuration file for a user packager.",
                     "type": "string"
                 },
-                "outputTrainingDir": {
+                "outputDir": {
                     "description": "The path to the dir when a user packager will save their result.",
                     "type": "string"
                 }
@@ -2327,7 +2331,7 @@ var doc = `{
                     "description": "The path to the configuration file for a user trainer.",
                     "type": "string"
                 },
-                "outputTrainingDir": {
+                "outputDir": {
                     "description": "The path to the dir when a user trainer will save their result.",
                     "type": "string"
                 }
