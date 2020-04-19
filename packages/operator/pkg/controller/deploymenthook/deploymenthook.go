@@ -3,7 +3,7 @@ package deploymenthook
 import (
 	"context"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
+	"github.com/prometheus/common/log"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,15 +28,13 @@ const (
 	webhookconfigName  = "modeldeployment-webhook-config"
 )
 
-// +kubebuilder:webhook:path=/mutate-v1-pod,mutating=true,failurePolicy=ignore,groups="",resources=pods,verbs=create;update,versions=v1,name=modeldeployment-webhook
-
 func Add(
 	mgr manager.Manager,
 	deploymentConfig config.ModelDeploymentConfig,
 	_ config.OperatorConfig,
 	_ string,
 ) error {
-	log := logf.Log.WithName(webhookName).WithValues(odahuflow.ModelDeploymentIDLogPrefix)
+	log := logf.Log.WithName(webhookName)
 	log.Info("Creating model deployment webhook for knative pods")
 
 	wh, err := builder.NewWebhookBuilder().
@@ -52,7 +50,7 @@ func Add(
 		return err
 	}
 
-	log.Info("Setting up webhook server")
+	log.Info("Setting up deployment webhook server")
 	as, err := webhook.NewServer(webhookServerName, mgr, webhook.ServerOptions{
 		Port: 6443,
 		BootstrapOptions: &webhook.BootstrapOptions{
@@ -72,7 +70,7 @@ func Add(
 		return err
 	}
 
-	log.Info("Registering webhooks to the webhook server")
+	log.Info("Registering deployment webhook to the server")
 	err = as.Register(wh)
 	if err != nil {
 		return err
@@ -108,10 +106,13 @@ func (pm *podMutator) Handle(_ context.Context, req types.Request) types.Respons
 
 //Adds node selectors from deployment config to knative pods
 func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
-	if pod.Annotations == nil {
-		pod.Annotations = map[string]string{}
+	nodeSelector := pm.deploymentConfig.NodeSelector
+	if len(nodeSelector) > 0 {
+		pod.Spec.NodeSelector = nodeSelector
+		log.Infof("Assigning node selector %v to a pod %v", nodeSelector, pod.Name)
+	} else {
+		log.Warnf("Got empty node selector from deployment config, doing nothing to a pod %v", pod.Name)
 	}
-	pod.Spec.NodeSelector = pm.deploymentConfig.NodeSelector
 	return nil
 }
 
