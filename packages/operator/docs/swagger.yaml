@@ -65,6 +65,9 @@ definitions:
           Kubernetes can consume the GPU resource in the <vendor>.com/gpu format.
           For example, amd.com/gpu or nvidia.com/gpu.
         type: string
+      version:
+        description: Version of ODAHU platform
+        type: string
     type: object
   Config:
     properties:
@@ -292,7 +295,7 @@ definitions:
       mpFile:
         description: The path to the configuration file for a user packager.
         type: string
-      outputTrainingDir:
+      outputDir:
         description: The path to the dir when a user packager will save their result.
         type: string
     type: object
@@ -312,7 +315,7 @@ definitions:
       mtFile:
         description: The path to the configuration file for a user trainer.
         type: string
-      outputTrainingDir:
+      outputDir:
         description: The path to the dir when a user trainer will save their result.
         type: string
     type: object

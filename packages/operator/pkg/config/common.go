@@ -35,11 +35,14 @@ type CommonConfig struct {
 	// Kubernetes can consume the GPU resource in the <vendor>.com/gpu format.
 	// For example, amd.com/gpu or nvidia.com/gpu.
 	ResourceGPUName string `json:"resourceGpuName"`
+	// Version of ODAHU platform
+	Version string `json:"version"`
 }
 
 func NewDefaultCommonConfig() CommonConfig {
 	return CommonConfig{
 		ExternalURLs:    []ExternalUrl{},
 		ResourceGPUName: NvidiaResourceName,
+		Version: "develop",
 	}
 }
