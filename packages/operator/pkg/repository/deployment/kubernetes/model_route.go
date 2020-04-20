@@ -161,11 +161,11 @@ func (kc *deploymentK8sRepository) CreateModelRoute(route *deployment.ModelRoute
 			Name:      route.ID,
 			Namespace: kc.namespace,
 		},
-		Spec:   route.Spec,
+		Spec: route.Spec,
 	}
 
-	k8sRoute.Status.CreatedAt =  &metav1.Time{Time: time.Now()}
-	k8sRoute.Status.UpdatedAt =  &metav1.Time{Time: time.Now()}
+	k8sRoute.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	k8sRoute.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := kc.k8sClient.Create(context.TODO(), k8sRoute); err != nil {
 		logC.Error(err, "DataBinding creation error from k8s", "name", route.ID)

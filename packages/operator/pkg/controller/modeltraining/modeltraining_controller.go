@@ -255,11 +255,10 @@ func (r *ReconcileModelTraining) getToolchainIntegration(trainingCR *odahuflowv1
 
 // The function returns true if one of the GPU resources is set up.
 func isGPUResourceSet(trainingCR *odahuflowv1alpha1.ModelTraining) bool {
-	return trainingCR.Spec.Resources != nil && (
-		(trainingCR.Spec.Resources.Limits != nil &&
-			kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Limits.GPU)) ||
-			(trainingCR.Spec.Resources.Requests != nil &&
-				kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Requests.GPU)))
+	return trainingCR.Spec.Resources != nil && ((trainingCR.Spec.Resources.Limits != nil &&
+		kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Limits.GPU)) ||
+		(trainingCR.Spec.Resources.Requests != nil &&
+			kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Requests.GPU)))
 }
 
 func (r *ReconcileModelTraining) getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {

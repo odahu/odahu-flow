@@ -33,9 +33,8 @@ const (
 	defaultAPIRequestTimeout = 10 * time.Second
 	authorizationHeaderName  = "Authorization"
 	authorizationHeaderValue = "Bearer %s"
-	serviceAccountScopes = "openid profile offline_access groups"
-	clientCredentialsGrant = "client_credentials"
-
+	serviceAccountScopes     = "openid profile offline_access groups"
+	clientCredentialsGrant   = "client_credentials"
 )
 
 var log = logf.Log.WithName("connection-controller")
@@ -102,12 +101,12 @@ func (bec *BaseAPIClient) Do(req *http.Request) (*http.Response, error) {
 	resp, err := apiHTTPClient.Do(req)
 
 	// First attempt could finished by 401 response
-	if resp != nil && loginRequired(resp){
+	if resp != nil && loginRequired(resp) {
 
 		// If login required (401) let's login
 		loginErr := bec.Login()
-		if loginErr != nil{
-			log.Error(loginErr,"Login attempt is failed")
+		if loginErr != nil {
+			log.Error(loginErr, "Login attempt is failed")
 			return resp, loginErr
 		}
 
@@ -123,14 +122,14 @@ func (bec *BaseAPIClient) Do(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
-func loginRequired(response *http.Response) bool{
+func loginRequired(response *http.Response) bool {
 	return response.StatusCode == http.StatusUnauthorized
 }
 
-func(bec *BaseAPIClient) Login() error{
+func (bec *BaseAPIClient) Login() error {
 
 	data := url.Values{}
-	data.Set("grant_type",clientCredentialsGrant)
+	data.Set("grant_type", clientCredentialsGrant)
 	data.Set("client_id", bec.clientID)
 	data.Set("client_secret", bec.clientSecret)
 	data.Set("scope", serviceAccountScopes)
@@ -139,7 +138,7 @@ func(bec *BaseAPIClient) Login() error{
 
 	request, err := http.NewRequest(http.MethodPost, bec.tokenURL, body)
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -149,12 +148,12 @@ func(bec *BaseAPIClient) Login() error{
 		Timeout: defaultAPIRequestTimeout,
 	}
 	resp, err := apiHTTPClient.Do(request)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
 	bodyBytes, errRead := ioutil.ReadAll(resp.Body)
-	if errRead != nil{
+	if errRead != nil {
 		return errRead
 	}
 	var OAuthResp OAuthTokenResponse

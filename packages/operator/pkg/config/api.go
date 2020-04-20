@@ -37,7 +37,7 @@ type APIBackendConfig struct {
 type APIConfig struct {
 	Backend APIBackendConfig `json:"backend"`
 	// API HTTP port
-	Port    int              `json:"port"`
+	Port int `json:"port"`
 }
 
 const (

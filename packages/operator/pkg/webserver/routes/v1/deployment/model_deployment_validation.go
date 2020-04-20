@@ -19,7 +19,7 @@ package deployment
 import (
 	"errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
@@ -37,22 +37,8 @@ const (
 )
 
 var (
-	MdDefaultMinimumReplicas = int32(0)
-	MdDefaultMaximumReplicas = int32(1)
-	defaultMemoryLimit       = "256Mi"
-	defaultCPULimit          = "256m"
-	defaultMemoryRequests    = "128Mi"
-	defaultCPURequests       = "128m"
-	MdDefaultResources       = &v1alpha1.ResourceRequirements{
-		Limits: &v1alpha1.ResourceList{
-			CPU:    &defaultCPULimit,
-			Memory: &defaultMemoryLimit,
-		},
-		Requests: &v1alpha1.ResourceList{
-			CPU:    &defaultCPURequests,
-			Memory: &defaultMemoryRequests,
-		},
-	}
+	MdDefaultMinimumReplicas            = int32(0)
+	MdDefaultMaximumReplicas            = int32(1)
 	MdDefaultLivenessProbeInitialDelay  = int32(2)
 	MdDefaultReadinessProbeInitialDelay = int32(2)
 )
@@ -60,6 +46,7 @@ var (
 type ModelDeploymentValidator struct {
 	modelDeploymentConfig config.ModelDeploymentConfig
 	gpuResourceName       string
+	defaultResources      odahuflowv1alpha1.ResourceRequirements
 }
 
 func NewModelDeploymentValidator(
@@ -69,6 +56,7 @@ func NewModelDeploymentValidator(
 	return &ModelDeploymentValidator{
 		modelDeploymentConfig: modelDeploymentConfig,
 		gpuResourceName:       gpuResourceName,
+		defaultResources:      modelDeploymentConfig.DefaultResources,
 	}
 }
 
@@ -113,8 +101,8 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.Resources == nil {
 		logMD.Info("Deployment resources parameter is nil. Set the default value",
-			"name", md.ID, "resources", MdDefaultResources)
-		md.Spec.Resources = MdDefaultResources
+			"name", md.ID, "resources", mdv.defaultResources)
+		md.Spec.Resources = mdv.defaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources, mdv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)

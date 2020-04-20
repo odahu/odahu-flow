@@ -67,7 +67,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 
 	s.k8sClient = mgr.GetClient()
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, s.k8sClient, nil)
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient, )
+	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient)
 
 	// Create the connection that will be used as the vcs param for a training.
 	if err := s.connRepository.CreateConnection(&connection.Connection{
@@ -170,6 +170,7 @@ func TestModelTrainingRouteSuite(t *testing.T) {
 }
 
 func newMtStub() *training.ModelTraining {
+	res := config.NewDefaultModelTrainingConfig().DefaultResources
 	return &training.ModelTraining{
 		ID: testMtID,
 		Spec: odahuflowv1alpha1.ModelTrainingSpec{
@@ -183,7 +184,7 @@ func newMtStub() *training.ModelTraining {
 			VCSName:          testMtVCSID,
 			Image:            testMtImage,
 			Reference:        testMtReference,
-			Resources:        &train_route.DefaultTrainingResources,
+			Resources:        &res,
 			OutputConnection: testMtOutConn,
 		},
 	}

@@ -17,8 +17,16 @@
 package config
 
 import (
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"os"
 	"time"
+)
+
+var (
+	defaultTrainingMemoryLimit    = "256Mi"
+	defaultTrainingCPULimit       = "256m"
+	defaultTrainingMemoryRequests = "128Mi"
+	defaultTrainingCPURequests    = "128m"
 )
 
 type ModelTrainingConfig struct {
@@ -39,6 +47,8 @@ type ModelTrainingConfig struct {
 	ModelTrainerImage string            `json:"modelTrainerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
+	// Default resources for training pods
+	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
 }
 
 func NewDefaultModelTrainingConfig() ModelTrainingConfig {
@@ -50,5 +60,15 @@ func NewDefaultModelTrainingConfig() ModelTrainingConfig {
 		ServiceAccount:                "odahu-flow-model-trainer",
 		// workaround https://github.com/spf13/viper/issues/761
 		ModelTrainerImage: os.Getenv("TRAINING_MODEL_TRAINER_IMAGE"),
+		DefaultResources: odahuflowv1alpha1.ResourceRequirements{
+			Requests: &odahuflowv1alpha1.ResourceList{
+				CPU:    &defaultTrainingCPURequests,
+				Memory: &defaultTrainingMemoryRequests,
+			},
+			Limits: &odahuflowv1alpha1.ResourceList{
+				CPU:    &defaultTrainingCPULimit,
+				Memory: &defaultTrainingMemoryLimit,
+			},
+		},
 	}
 }

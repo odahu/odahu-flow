@@ -21,6 +21,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
@@ -39,6 +40,10 @@ import (
 const (
 	outputConnectionName = "conn-id"
 	gpuResourceName      = "nvidia"
+)
+
+var (
+	defaultTrainingResource = config.NewDefaultModelTrainingConfig().DefaultResources
 )
 
 type ModelTrainingValidationSuite struct {
@@ -61,7 +66,13 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
-	s.validator = train_route.NewMtValidator(s.mtRepository, s.connRepository, outputConnectionName, gpuResourceName)
+	s.validator = train_route.NewMtValidator(
+		s.mtRepository,
+		s.connRepository,
+		defaultTrainingResource,
+		outputConnectionName,
+		gpuResourceName,
+	)
 
 	// Create the connection that will be used as the vcs param for a training.
 	if err := s.connRepository.CreateConnection(&connection.Connection{
@@ -108,7 +119,7 @@ func (s *ModelTrainingValidationSuite) TestMtDefaultResource() {
 
 	_ = s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(mt.Spec.Resources).ShouldNot(BeNil())
-	s.g.Expect(*mt.Spec.Resources).Should(Equal(train_route.DefaultTrainingResources))
+	s.g.Expect(*mt.Spec.Resources).Should(Equal(defaultTrainingResource))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtVcsReference() {
@@ -423,6 +434,7 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection() {
 	err := train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
+		defaultTrainingResource,
 		"",
 		gpuResourceName,
 	).ValidatesAndSetDefaults(mt)
@@ -434,6 +446,7 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection() {
 	_ = train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
+		defaultTrainingResource,
 		testMtOutConnDefault,
 		gpuResourceName,
 	).ValidatesAndSetDefaults(mt)

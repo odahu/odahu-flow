@@ -39,14 +39,14 @@ var (
 )
 
 type k8sConnectionRepository struct {
-	k8sClient        client.Client
-	namespace        string
+	k8sClient client.Client
+	namespace string
 }
 
 func NewRepository(namespace string, k8sClient client.Client) conn_repository.Repository {
 	return &k8sConnectionRepository{
-		namespace:        namespace,
-		k8sClient:        k8sClient,
+		namespace: namespace,
+		k8sClient: k8sClient,
 	}
 }
 

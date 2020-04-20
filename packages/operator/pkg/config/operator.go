@@ -17,9 +17,9 @@
 package config
 
 type OperatorConfig struct {
-	Auth           AuthConfig `json:"auth"`
+	Auth AuthConfig `json:"auth"`
 	// Operator HTTP monitoring port
-	MonitoringPort int        `json:"monitoringPort"`
+	MonitoringPort int `json:"monitoringPort"`
 }
 
 func NewDefaultOperatorConfig() OperatorConfig {

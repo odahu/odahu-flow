@@ -41,7 +41,8 @@ type ModelDeploymentValidationSuite struct {
 func (s *ModelDeploymentValidationSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
 	s.defaultModelValidator = md_routes.NewModelDeploymentValidator(
-		config.NewDefaultModelDeploymentConfig(), config.NvidiaResourceName,
+		config.NewDefaultModelDeploymentConfig(),
+		config.NvidiaResourceName,
 	)
 }
 
@@ -73,7 +74,7 @@ func (s *ModelDeploymentValidationSuite) TestMDResourcesDefaultValues() {
 	}
 	_ = s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 
-	s.g.Expect(*md.Spec.Resources).To(Equal(*md_routes.MdDefaultResources))
+	s.g.Expect(*md.Spec.Resources).To(Equal(config.NewDefaultModelTrainingConfig().DefaultResources))
 }
 
 func (s *ModelDeploymentValidationSuite) TestMDReadinessProbeDefaultValue() {

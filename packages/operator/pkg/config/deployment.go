@@ -16,13 +16,22 @@
 
 package config
 
+import odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+
+var (
+	defaultDeploymentMemoryLimit    = "256Mi"
+	defaultDeploymentCPULimit       = "256m"
+	defaultDeploymentMemoryRequests = "128Mi"
+	defaultDeploymentCPURequests    = "128m"
+)
+
 type JWKS struct {
 	// JWKS URL
-	URL     string `json:"url"`
+	URL string `json:"url"`
 	// Issuer claim value
-	Issuer  string `json:"issuer"`
+	Issuer string `json:"issuer"`
 	// Model authorization enabled
-	Enabled bool   `json:"enabled"`
+	Enabled bool `json:"enabled"`
 }
 
 type EdgeConfig struct {
@@ -34,11 +43,11 @@ type ModelDeploymentIstioConfig struct {
 	// Istio ingress gateway service name
 	ServiceName string `json:"serviceName"`
 	// Istio ingress gateway namespace
-	Namespace   string `json:"namespace"`
+	Namespace string `json:"namespace"`
 }
 
 type ModelDeploymentSecurityConfig struct {
-	JWKS     JWKS   `json:"jwks"`
+	JWKS JWKS `json:"jwks"`
 	// Deprecated
 	RoleName string `json:"roleName"`
 }
@@ -47,16 +56,18 @@ type ModelDeploymentConfig struct {
 	// Kubernetes namespace, where model deployments will be deployed
 	Namespace string `json:"namespace"`
 	// Enable deployment API/operator
-	Enabled                   bool                          `json:"enabled"`
-	Security                  ModelDeploymentSecurityConfig `json:"security"`
+	Enabled  bool                          `json:"enabled"`
+	Security ModelDeploymentSecurityConfig `json:"security"`
 	// Default connection ID which will be used if a user doesn't specify it in a model deployment
-	DefaultDockerPullConnName string                        `json:"defaultDockerPullConnName"`
-	Edge                      EdgeConfig                    `json:"edge"`
+	DefaultDockerPullConnName string     `json:"defaultDockerPullConnName"`
+	Edge                      EdgeConfig `json:"edge"`
 	// Kubernetes node selector for model deployments
-	NodeSelector              map[string]string             `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model deployments
-	Toleration                map[string]string             `json:"toleration"`
-	Istio                     ModelDeploymentIstioConfig    `json:"istio"`
+	Toleration map[string]string          `json:"toleration"`
+	Istio      ModelDeploymentIstioConfig `json:"istio"`
+	// Default resources for deployment pods
+	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
 }
 
 func NewDefaultModelDeploymentConfig() ModelDeploymentConfig {
@@ -70,6 +81,16 @@ func NewDefaultModelDeploymentConfig() ModelDeploymentConfig {
 		Istio: ModelDeploymentIstioConfig{
 			ServiceName: "istio-ingressgateway",
 			Namespace:   "istio-system",
+		},
+		DefaultResources: odahuflowv1alpha1.ResourceRequirements{
+			Requests: &odahuflowv1alpha1.ResourceList{
+				CPU:    &defaultDeploymentCPURequests,
+				Memory: &defaultDeploymentMemoryRequests,
+			},
+			Limits: &odahuflowv1alpha1.ResourceList{
+				CPU:    &defaultDeploymentCPULimit,
+				Memory: &defaultDeploymentMemoryLimit,
+			},
 		},
 	}
 }

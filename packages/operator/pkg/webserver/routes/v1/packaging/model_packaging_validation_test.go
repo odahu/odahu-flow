@@ -50,6 +50,7 @@ var (
 	connDockerTypeMpValid            = "docker-conn"
 	connS3TypeMpValid                = "s3-conn"
 	defaultTargetArgument1Connection = "default-conn-id"
+	defaultResources                 = config.NewDefaultModelTrainingConfig().DefaultResources
 	piArgumentsMpValid               = packaging.JsonSchema{
 		Properties: []packaging.Property{
 			{
@@ -136,7 +137,11 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 	s.mpRepository = mp_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
 	s.validator = pack_route.NewMpValidator(
-		s.mpRepository, s.connRepository, "conn-id", config.NvidiaResourceName,
+		s.mpRepository,
+		s.connRepository,
+		"conn-id",
+		config.NvidiaResourceName,
+		defaultResources,
 	)
 
 	err = s.mpRepository.CreatePackagingIntegration(&packaging.PackagingIntegration{
@@ -460,7 +465,7 @@ func (s *ModelPackagingValidationSuite) TestMpGenerateDefaultResources() {
 
 	_ = s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.Resources).ShouldNot(BeNil())
-	s.g.Expect(mp.Spec.Resources).Should(Equal(pack_route.DefaultPackagingResources))
+	s.g.Expect(mp.Spec.Resources).Should(Equal(&defaultResources))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpResourcesValidation() {
@@ -514,6 +519,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 		s.connRepository,
 		"",
 		config.NvidiaResourceName,
+		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
@@ -525,6 +531,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 		s.connRepository,
 		testMpOutConnDefault,
 		config.NvidiaResourceName,
+		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConnDefault))
 
@@ -536,6 +543,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 		s.connRepository,
 		testMpOutConn,
 		config.NvidiaResourceName,
+		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConn))
 
@@ -548,6 +556,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 		s.connRepository,
 		testMpOutConn,
 		config.NvidiaResourceName,
+		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))

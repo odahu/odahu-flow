@@ -161,6 +161,10 @@ definitions:
         description: Default connection ID which will be used if a user doesn't specify
           it in a model deployment
         type: string
+      defaultResources:
+        $ref: '#/definitions/ResourceRequirements'
+        description: Default resources for deployment pods
+        type: object
       edge:
         $ref: '#/definitions/EdgeConfig'
         type: object
@@ -207,6 +211,10 @@ definitions:
     type: object
   ModelPackagingConfig:
     properties:
+      defaultResources:
+        $ref: '#/definitions/ResourceRequirements'
+        description: Default resources for packaging pods
+        type: object
       enabled:
         description: Enable packaging API/operator
         type: boolean
@@ -237,6 +245,10 @@ definitions:
     type: object
   ModelTrainingConfig:
     properties:
+      defaultResources:
+        $ref: '#/definitions/ResourceRequirements'
+        description: Default resources for training pods
+        type: object
       enabled:
         description: Enable deployment API/operator
         type: boolean

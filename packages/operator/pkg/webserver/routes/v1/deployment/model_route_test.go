@@ -326,7 +326,7 @@ func (s *ModelRouteSuite) TestCreateMR() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ModelRouteSuite) TestCreateMRModifiable(){
+func (s *ModelRouteSuite) TestCreateMRModifiable() {
 	newResource := newStubMr()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -350,7 +350,6 @@ func (s *ModelRouteSuite) TestCreateMRModifiable(){
 	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
-
 
 func (s *ModelRouteSuite) TestCreateDuplicateMR() {
 	mr := newStubMr()
@@ -423,7 +422,7 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *ModelRouteSuite) TestUpdateMRModifiable(){
+func (s *ModelRouteSuite) TestUpdateMRModifiable() {
 	resource := newStubMr()
 	s.g.Expect(s.mdRepository.CreateModelRoute(resource)).NotTo(HaveOccurred())
 
@@ -452,7 +451,6 @@ func (s *ModelRouteSuite) TestUpdateMRModifiable(){
 	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
-
 
 func (s *ModelRouteSuite) TestUpdateMRNotFound() {
 	mrEntity := newStubMr()

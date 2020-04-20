@@ -22,7 +22,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
@@ -41,28 +41,12 @@ const (
 	defaultIDTemplate                    = "%s-%s-%s"
 )
 
-var (
-	defaultMemoryLimit        = "2028Mi"
-	defaultCPULimit           = "2000m"
-	defaultMemoryRequests     = "1024Mi"
-	defaultCPURequests        = "1000m"
-	DefaultPackagingResources = &v1alpha1.ResourceRequirements{
-		Limits: &v1alpha1.ResourceList{
-			CPU:    &defaultCPULimit,
-			Memory: &defaultMemoryLimit,
-		},
-		Requests: &v1alpha1.ResourceList{
-			CPU:    &defaultCPURequests,
-			Memory: &defaultMemoryRequests,
-		},
-	}
-)
-
 type MpValidator struct {
 	mpRepository         mp_repository.Repository
 	connRepository       conn_repository.Repository
 	outputConnectionName string
 	gpuResourceName      string
+	defaultResources     odahuflowv1alpha1.ResourceRequirements
 }
 
 func NewMpValidator(
@@ -70,12 +54,14 @@ func NewMpValidator(
 	connRepository conn_repository.Repository,
 	outputConnectionName string,
 	gpuResourceName string,
+	defaultResources odahuflowv1alpha1.ResourceRequirements,
 ) *MpValidator {
 	return &MpValidator{
 		mpRepository:         mpRepository,
 		connRepository:       connRepository,
 		outputConnectionName: outputConnectionName,
 		gpuResourceName:      gpuResourceName,
+		defaultResources:     defaultResources,
 	}
 }
 
@@ -134,8 +120,8 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 
 	if mp.Spec.Resources == nil {
 		logMP.Info("Packaging resource parameter is nil. Set the default value",
-			"name", mp.ID, "resources", DefaultPackagingResources)
-		mp.Spec.Resources = DefaultPackagingResources
+			"name", mp.ID, "resources", mpv.defaultResources)
+		mp.Spec.Resources = mpv.defaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources, mpv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
@@ -188,8 +174,8 @@ func (mpv *MpValidator) validateArguments(pi *packaging.PackagingIntegration, mp
 }
 
 func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *packaging.ModelPackaging) (err error) {
-	requiredTargets := make(map[string]v1alpha1.TargetSchema)
-	allTargets := make(map[string]v1alpha1.TargetSchema)
+	requiredTargets := make(map[string]odahuflowv1alpha1.TargetSchema)
+	allTargets := make(map[string]odahuflowv1alpha1.TargetSchema)
 
 	for _, target := range pi.Spec.Schema.Targets {
 		allTargets[target.Name] = target
@@ -212,7 +198,7 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 				isValidConnectionType := false
 
 				for _, connType := range targetSchema.ConnectionTypes {
-					if v1alpha1.ConnectionType(connType) == conn.Spec.Type {
+					if odahuflowv1alpha1.ConnectionType(connType) == conn.Spec.Type {
 						isValidConnectionType = true
 						break
 					}
@@ -230,7 +216,7 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 		if len(target.Default) != 0 {
 			delete(requiredTargets, target.Name)
 
-			mp.Spec.Targets = append(mp.Spec.Targets, v1alpha1.Target{
+			mp.Spec.Targets = append(mp.Spec.Targets, odahuflowv1alpha1.Target{
 				Name:           target.Name,
 				ConnectionName: target.Default,
 			})

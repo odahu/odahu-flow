@@ -56,7 +56,6 @@ func Unzip(src string, dest string) error {
 		return err
 	}
 
-
 	cmd := exec.Command("tar", "-xvf", src, "-C", ".")
 	cmd.Dir = dest
 	cmd.Stdout = os.Stdout

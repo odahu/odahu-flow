@@ -176,13 +176,14 @@ func (s *ModelPackagingRouteSuite) TearDownTest() {
 }
 
 func newModelPackaging() *packaging.ModelPackaging {
+	resources := config.NewDefaultModelTrainingConfig().DefaultResources
 	return &packaging.ModelPackaging{
 		ID: mpIDRoute,
 		Spec: packaging.ModelPackagingSpec{
 			ArtifactName:     mpArtifactName,
 			IntegrationName:  piIDMpRoute,
 			Image:            mpImage,
-			Resources:        pack_route.DefaultPackagingResources,
+			Resources:        &resources,
 			OutputConnection: testOutConn,
 		},
 	}
