@@ -24,9 +24,9 @@ type TapRequest struct {
 			} `yaml:"http_request_headers_match"`
 		} `yaml:"match_config"`
 		OutputConfig struct {
-			Sinks []TapSink `yaml:"sinks"`
-			MaxBufferedTxBytes int32 `yaml:"max_buffered_tx_bytes"`
-			MaxBufferedRxBytes int32 `yaml:"max_buffered_rx_bytes"`
+			Sinks              []TapSink `yaml:"sinks"`
+			MaxBufferedTxBytes int32     `yaml:"max_buffered_tx_bytes"`
+			MaxBufferedRxBytes int32     `yaml:"max_buffered_rx_bytes"`
 		} `yaml:"output_config"`
 	} `yaml:"tap_config"`
 }

@@ -41,7 +41,7 @@ type httpConnectionRepository struct {
 
 func NewRepository(
 	apiURL string, token string, clientID string,
-	clientSecret string, tokenURL string, ) conn_repository.Repository {
+	clientSecret string, tokenURL string) conn_repository.Repository {
 	return &httpConnectionRepository{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
@@ -64,7 +64,7 @@ func (hcr *httpConnectionRepository) GetDecryptedConnection(id string) (*connect
 	return hcr.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
-			Path:     strings.Replace(conn_routes.GetDecryptedConnectionURL, ":id", id, 1),
+			Path: strings.Replace(conn_routes.GetDecryptedConnectionURL, ":id", id, 1),
 		},
 	})
 }

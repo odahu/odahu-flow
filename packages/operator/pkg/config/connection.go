@@ -39,13 +39,13 @@ type ConnectionConfig struct {
 	// Enable connection API/operator
 	Namespace string `json:"namespace"`
 	// Connection API server and operator are enabled
-	Enabled   bool   `json:"enabled"`
+	Enabled bool `json:"enabled"`
 	// Storage backend for connections. Available options:
 	//   * kubernetes
 	//   * vault
 	RepositoryType ConnectionRepositoryType `json:"repositoryType"`
 	// Connection Vault configuration
-	Vault          Vault                    `json:"vault"`
+	Vault Vault `json:"vault"`
 }
 
 func NewDefaultConnectionConfig() ConnectionConfig {

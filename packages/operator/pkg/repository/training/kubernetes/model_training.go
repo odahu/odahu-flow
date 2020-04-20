@@ -250,8 +250,8 @@ func (tkr *trainingK8sRepository) CreateModelTraining(mt *training.ModelTraining
 		Spec: mt.Spec,
 	}
 
-	k8sMd.Status.CreatedAt =  &metav1.Time{Time: time.Now()}
-	k8sMd.Status.UpdatedAt =  &metav1.Time{Time: time.Now()}
+	k8sMd.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	k8sMd.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := tkr.k8sClient.Create(context.TODO(), k8sMd); err != nil {
 		logMT.Error(err, "ModelTraining creation error from k8s", "name", mt.ID)

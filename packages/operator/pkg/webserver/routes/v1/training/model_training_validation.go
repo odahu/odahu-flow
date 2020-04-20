@@ -21,7 +21,7 @@ import (
 	"fmt"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
@@ -50,21 +50,7 @@ const (
 
 var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
-	defaultMemoryLimit            = "256Mi"
-	defaultCPULimit               = "256m"
-	defaultMemoryRequests         = "128Mi"
-	defaultCPURequests            = "128m"
-	DefaultTrainingResources      = v1alpha1.ResourceRequirements{
-		Limits: &v1alpha1.ResourceList{
-			CPU:    &defaultCPULimit,
-			Memory: &defaultMemoryLimit,
-		},
-		Requests: &v1alpha1.ResourceList{
-			CPU:    &defaultCPURequests,
-			Memory: &defaultMemoryRequests,
-		},
-	}
-	expectedConnectionDataTypes = map[v1alpha1.ConnectionType]bool{
+	expectedConnectionDataTypes   = map[odahuflowv1alpha1.ConnectionType]bool{
 		connection.GcsType:       true,
 		connection.S3Type:        true,
 		connection.AzureBlobType: true,
@@ -76,17 +62,20 @@ type MtValidator struct {
 	connRepository       conn_repository.Repository
 	outputConnectionName string
 	gpuResourceName      string
+	defaultResources     odahuflowv1alpha1.ResourceRequirements
 }
 
 func NewMtValidator(
 	mtRepository mt_repository.Repository,
 	connRepository conn_repository.Repository,
+	defaultResources odahuflowv1alpha1.ResourceRequirements,
 	outputConnectionName string,
 	gpuResourceName string,
 ) *MtValidator {
 	return &MtValidator{
 		mtRepository:         mtRepository,
 		connRepository:       connRepository,
+		defaultResources:     defaultResources,
 		outputConnectionName: outputConnectionName,
 		gpuResourceName:      gpuResourceName,
 	}
@@ -139,8 +128,8 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 
 	if mt.Spec.Resources == nil {
 		logMT.Info("Training resource parameter is nil. Set the default value",
-			"name", mt.ID, "resources", DefaultTrainingResources)
-		mt.Spec.Resources = &DefaultTrainingResources
+			"name", mt.ID, "resources", mtv.defaultResources)
+		mt.Spec.Resources = mtv.defaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mt.Spec.Resources, mtv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)

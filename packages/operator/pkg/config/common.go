@@ -43,6 +43,6 @@ func NewDefaultCommonConfig() CommonConfig {
 	return CommonConfig{
 		ExternalURLs:    []ExternalUrl{},
 		ResourceGPUName: NvidiaResourceName,
-		Version: "develop",
+		Version:         "develop",
 	}
 }

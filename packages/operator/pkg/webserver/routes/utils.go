@@ -112,7 +112,7 @@ func DisableAPIMiddleware(enabledAPI bool) gin.HandlerFunc {
 
 // Because k8s has only "seconds" precision therefore we should operate the same precision in tests to
 // compare timings in appropriate way
-func GetTimeNowTruncatedToSeconds() metav1.Time{
+func GetTimeNowTruncatedToSeconds() metav1.Time {
 	t1 := time.Now()
 	t2 := t1.Truncate(time.Second)
 	return metav1.Time{Time: t2}

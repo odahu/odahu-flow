@@ -17,8 +17,16 @@
 package config
 
 import (
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"os"
 	"time"
+)
+
+var (
+	defaultPackagingMemoryLimit    = "2028Mi"
+	defaultPackagingCPULimit       = "2000m"
+	defaultPackagingMemoryRequests = "1024Mi"
+	defaultPackagingCPURequests    = "1000m"
 )
 
 type ModelPackagingConfig struct {
@@ -36,6 +44,8 @@ type ModelPackagingConfig struct {
 	ModelPackagerImage string            `json:"modelPackagerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
+	// Default resources for packaging pods
+	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
 }
 
 func NewDefaultModelPackagingConfig() ModelPackagingConfig {
@@ -47,5 +57,15 @@ func NewDefaultModelPackagingConfig() ModelPackagingConfig {
 		ServiceAccount:                "odahu-flow-model-packager",
 		// workaround of the issue https://github.com/spf13/viper/issues/761
 		ModelPackagerImage: os.Getenv("PACKAGING_MODEL_PACKAGER_IMAGE"),
+		DefaultResources: odahuflowv1alpha1.ResourceRequirements{
+			Requests: &odahuflowv1alpha1.ResourceList{
+				CPU:    &defaultPackagingCPURequests,
+				Memory: &defaultPackagingMemoryRequests,
+			},
+			Limits: &odahuflowv1alpha1.ResourceList{
+				CPU:    &defaultPackagingCPULimit,
+				Memory: &defaultPackagingMemoryLimit,
+			},
+		},
 	}
 }

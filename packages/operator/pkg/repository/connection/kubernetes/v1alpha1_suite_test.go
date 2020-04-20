@@ -38,7 +38,7 @@ var (
 )
 
 const (
-	testNamespace    = "default"
+	testNamespace = "default"
 )
 
 func TestMain(m *testing.M) {

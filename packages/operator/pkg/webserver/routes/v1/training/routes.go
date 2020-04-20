@@ -33,7 +33,13 @@ func ConfigureRoutes(
 ) {
 	mtController := ModelTrainingController{
 		mtRepository: mtRepository,
-		validator:    NewMtValidator(mtRepository, connRepository, config.OutputConnectionID, gpuResourceName),
+		validator: NewMtValidator(
+			mtRepository,
+			connRepository,
+			config.DefaultResources,
+			config.OutputConnectionID,
+			gpuResourceName,
+		),
 	}
 	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(config.Enabled))
 

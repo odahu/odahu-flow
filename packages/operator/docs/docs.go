@@ -2111,6 +2111,11 @@ var doc = `{
                     "description": "Default connection ID which will be used if a user doesn't specify it in a model deployment",
                     "type": "string"
                 },
+                "defaultResources": {
+                    "description": "Default resources for deployment pods",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
                 "edge": {
                     "type": "object",
                     "$ref": "#/definitions/EdgeConfig"
@@ -2176,6 +2181,11 @@ var doc = `{
         "ModelPackagingConfig": {
             "type": "object",
             "properties": {
+                "defaultResources": {
+                    "description": "Default resources for packaging pods",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
                 "enabled": {
                     "description": "Enable packaging API/operator",
                     "type": "boolean"
@@ -2219,6 +2229,11 @@ var doc = `{
         "ModelTrainingConfig": {
             "type": "object",
             "properties": {
+                "defaultResources": {
+                    "description": "Default resources for training pods",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
                 "enabled": {
                     "description": "Enable deployment API/operator",
                     "type": "boolean"
