@@ -21,11 +21,13 @@ import (
 )
 
 const (
-	webhookName        = "modeldeployment-webhook"
-	webhookServerName  = "modeldeployment-webhook-server"
-	webhookServiceName = "modeldeployment-webhook-service"
-	webhookSecretName  = "modeldeployment-webhook-secret"
-	webhookconfigName  = "modeldeployment-webhook-config"
+	webhookName            = "modeldeployment-webhook"
+	webhookServerName      = "modeldeployment-webhook-server"
+	webhookServiceName     = "modeldeployment-webhook-service"
+	webhookSecretName      = "modeldeployment-webhook-secret"
+	webhookconfigName      = "modeldeployment-webhook-config"
+	namespaceSelectorKey   = "modeldeployment-webhook"
+	namespaceSelectorValue = "enabled"
 )
 
 func Add(
@@ -38,12 +40,11 @@ func Add(
 	log.Info("Creating model deployment webhook for knative pods")
 
 	wh, err := builder.NewWebhookBuilder().
-		Name(webhookName).
 		Mutating().
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
 		ForType(&corev1.Pod{}).
-		NamespaceSelector(&metav1.LabelSelector{MatchLabels: map[string]string{"namespace": deploymentConfig.Namespace}}).
+		NamespaceSelector(&metav1.LabelSelector{MatchLabels: map[string]string{namespaceSelectorKey: namespaceSelectorValue}}).
 		Handlers(&podMutator{deploymentConfig: deploymentConfig}).
 		Build()
 	if err != nil {
