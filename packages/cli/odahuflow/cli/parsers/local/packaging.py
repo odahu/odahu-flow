@@ -46,7 +46,6 @@ def packaging(ctx: click.core.Context, url: str, token: str):
 
 
 @packaging.command('cleanup-containers')
-@pass_obj
 def cleanup_containers():
     """
     Delete all packaging docker containers.

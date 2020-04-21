@@ -4,7 +4,7 @@ import logging
 import os
 from os import listdir
 from os.path import join
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from shutil import rmtree
 from typing import List
 
@@ -33,7 +33,8 @@ def launch_training_container(trainer: K8sTrainer, output_dir: str) -> None:
             trainer.toolchain_integration.spec.entrypoint,
             "--verbose",
             "--mt",
-            join(WORKSPACE_PATH, TRAINER_CONF_PATH),
+            # specified path for Docker Linux Container ignoring OS
+            str(PurePosixPath(WORKSPACE_PATH, TRAINER_CONF_PATH)),
             "--target",
             MODEL_OUTPUT_CONTAINER_PATH,
         ],
