@@ -89,7 +89,7 @@ func SetupV1Routes(
 		routeGroup, trainRepository, connRepository, odahuConfig.Training, odahuConfig.Common.ResourceGPUName,
 	)
 	configuration.ConfigureRoutes(routeGroup, odahuConfig)
-	userinfo.ConfigureRoutes(routeGroup, odahuConfig.User.Claims)
+	userinfo.ConfigureRoutes(routeGroup, odahuConfig.Users.Claims)
 
 	return err
 }

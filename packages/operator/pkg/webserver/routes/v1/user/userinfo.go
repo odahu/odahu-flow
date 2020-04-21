@@ -52,7 +52,7 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup, config config.Claims) {
 
 // @Summary Get the user information
 // @Description Get the user information(email, name and so on)
-// @Tags User
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} user.UserInfo

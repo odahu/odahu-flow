@@ -101,7 +101,7 @@ definitions:
       training:
         $ref: '#/definitions/ModelTrainingConfig'
         type: object
-      user:
+      users:
         $ref: '#/definitions/UserConfig'
         type: object
     type: object
@@ -336,6 +336,9 @@ definitions:
       claims:
         $ref: '#/definitions/Claims'
         type: object
+      signOutUrl:
+        description: The sign out endpoint logs out the authenticated 
+        type: string
     type: object
   Vault:
     properties:
@@ -2286,5 +2289,5 @@ paths:
             $ref: '#/definitions/UserInfo'
       summary: Get the user information
       tags:
-      - User
+      - Users
 swagger: "2.0"

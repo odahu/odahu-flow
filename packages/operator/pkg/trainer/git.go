@@ -139,7 +139,7 @@ func getSSHKeyAuth(sshKey []byte, knownHostPath string) (transport.AuthMethod, e
 	return auth, nil
 }
 
-// User reference can be short reference(for example: develop),
+// Users reference can be short reference(for example: develop),
 // full reference(for example: refs/remotes/origin/develop) or just a hash commit.
 // Determine in the following order:
 //   * full reference

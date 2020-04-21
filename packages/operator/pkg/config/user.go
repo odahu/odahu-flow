@@ -23,6 +23,8 @@ type Claims struct {
 
 type UserConfig struct {
 	Claims Claims `json:"claims"`
+	// The sign out endpoint logs out the authenticated user.
+	SignOutURL string `json:"signOutUrl"`
 }
 
 func NewDefaultUserConfig() UserConfig {
