@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-set -o pipefail
+set -ox pipefail
 
 MODEL_NAMES=(simple-model fail counter feedback)
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
@@ -96,13 +96,58 @@ function wait_all_background_task() {
   fi
 }
 
+# Copy local directory or file to a bucket
+# $1 - local directory or file
+# $2 - bucket directory or file
+function copy_to_cluster_bucket() {
+  local source="${1}"
+  local target="${2}"
+
+  case "${CLOUD_PROVIDER}" in
+  aws)
+    aws s3 cp --recursive "${source}" "s3://${CLUSTER_NAME}-data-store/${target}"
+    ;;
+  azure)
+    STORAGE_ACCOUNT=$(az storage account list -g "${CLUSTER_NAME}" --query "[?tags.cluster=='${CLUSTER_NAME}' && tags.purpose=='Odahuflow models storage'].[name]" -otsv)
+
+    az storage blob upload-batch --account-name "${STORAGE_ACCOUNT}" --source "${source}" \
+      --destination "${CLUSTER_NAME}-data-store" --destination-path "${target}"
+    ;;
+  gcp)
+    gsutil cp -r "${source}" "gs://${CLUSTER_NAME}-data-store/${target}"
+    ;;
+  *)
+    echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
+    usage
+    exit 1
+    ;;
+  esac
+}
+
 # Create a test data OdahuFlow connection based on models-output connection.
 # Arguments:
 # $1 - OdahuFlow connection ID, which will be used for new connection
 # $2 - OdahuFlow connection uri, which will be used for new connection
 function create_test_data_connection() {
+  case "${CLOUD_PROVIDER}" in
+  aws)
+    remote_dir="s3://${CLUSTER_NAME}-data-store"
+    ;;
+  azure)
+    remote_dir="${CLUSTER_NAME}-data-store"
+    ;;
+  gcp)
+    remote_dir="gs://${CLUSTER_NAME}-data-store"
+    ;;
+  *)
+    echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
+    usage
+    exit 1
+    ;;
+  esac
+
   local conn_id="${1}"
-  local conn_uri="${2}"
+  local conn_uri="${remote_dir}/${2}"
   local conn_file="test-data-connection.yaml"
 
   # Replaced the uri with the test data directory and added the kind field
@@ -113,6 +158,22 @@ function create_test_data_connection() {
   odahuflowctl conn delete --id "${conn_id}" --ignore-not-found
   odahuflowctl conn create -f "${conn_file}" --id "${conn_id}"
   rm "${conn_file}"
+}
+
+# Upload test dags from odahu-examples repository to the cluster dags
+function upload_test_dags() {
+    git_url="https://github.com/odahu/odahu-examples.git"
+    dag_dirs=("mlflow/sklearn/wine/airflow")
+    tmp_odahu_example_dir=$(mktemp -d -t upload-test-dags-XXXXXXXXXX)
+
+    git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
+
+    for dag_dir in "${dag_dirs[@]}" ;
+    do
+      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "dags/$(dirname ${dag_dir})/"
+    done
+
+    rm -rf "${tmp_odahu_example_dir}"
 }
 
 # Main entrypoint for setup command.
@@ -132,38 +193,17 @@ function setup() {
   wget -O "${TEST_DATA}/wine-quality.csv" "https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # Pushes a test data to the bucket and create a file with the connection
-  case "${CLOUD_PROVIDER}" in
-  aws)
-    remote_dir="s3://${CLUSTER_NAME}-data-store/test-data"
-
-    aws s3 cp --recursive "${TEST_DATA}/" "${remote_dir}/data/"
-    ;;
-  azure)
-    remote_dir="${CLUSTER_NAME}-data-store/test-data"
-    STORAGE_ACCOUNT=$(az storage account list -g "${CLUSTER_NAME}" --query "[?tags.cluster=='${CLUSTER_NAME}' && tags.purpose=='Odahuflow models storage'].[name]" -otsv)
-
-    az storage blob upload-batch --account-name "${STORAGE_ACCOUNT}" --source "${TEST_DATA}/" \
-      --destination "${CLUSTER_NAME}-data-store" --destination-path "test-data/data"
-    ;;
-  gcp)
-    remote_dir="gs://${CLUSTER_NAME}-data-store/test-data"
-
-    gsutil cp -r "${TEST_DATA}/" "${remote_dir}/"
-    ;;
-  *)
-    echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
-    usage
-    exit 1
-    ;;
-  esac
+  copy_to_cluster_bucket "${TEST_DATA}/" "test-data/"
 
   # Update test-data connections
-  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "${remote_dir}/data/valid_gppi/odahuflow.project.yaml"
-  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "${remote_dir}/data/valid_gppi/"
-  create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "${remote_dir}/data/invalid_gppi/odahuflow.project.yaml"
-  create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "${remote_dir}/data/invalid_gppi/"
-  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "${remote_dir}/data/custom_output/"
-  create_test_data_connection "${TEST_WINE_CONN_ID}" "${remote_dir}/data/wine-quality.csv"
+  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
+  create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "test-data/data/invalid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "test-data/data/invalid_gppi/"
+  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
+  create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
+
+  upload_test_dags
 
   wait_all_background_task
 }
