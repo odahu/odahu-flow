@@ -1866,7 +1866,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
                 "summary": "Get the user information",
                 "responses": {
@@ -2016,7 +2016,7 @@
                     "type": "object",
                     "$ref": "#/definitions/ModelTrainingConfig"
                 },
-                "user": {
+                "users": {
                     "type": "object",
                     "$ref": "#/definitions/UserConfig"
                 }
@@ -2341,6 +2341,10 @@
                 "claims": {
                     "type": "object",
                     "$ref": "#/definitions/Claims"
+                },
+                "signOutUrl": {
+                    "description": "The sign out endpoint logs out the authenticated ",
+                    "type": "string"
                 }
             }
         },

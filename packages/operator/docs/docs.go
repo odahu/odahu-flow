@@ -1883,7 +1883,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "User"
+                    "Users"
                 ],
                 "summary": "Get the user information",
                 "responses": {
@@ -2033,7 +2033,7 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/ModelTrainingConfig"
                 },
-                "user": {
+                "users": {
                     "type": "object",
                     "$ref": "#/definitions/UserConfig"
                 }
@@ -2358,6 +2358,10 @@ var doc = `{
                 "claims": {
                     "type": "object",
                     "$ref": "#/definitions/Claims"
+                },
+                "signOutUrl": {
+                    "description": "The sign out endpoint logs out the authenticated ",
+                    "type": "string"
                 }
             }
         },

@@ -57,7 +57,7 @@ type AuthConfig struct {
 type Config struct {
 	API            APIConfig             `json:"api"`
 	Common         CommonConfig          `json:"common"`
-	User           UserConfig            `json:"user"`
+	Users          UserConfig            `json:"users"`
 	Connection     ConnectionConfig      `json:"connection"`
 	Deployment     ModelDeploymentConfig `json:"deployment"`
 	ServiceCatalog ServiceCatalog        `json:"serviceCatalog"`
@@ -85,7 +85,7 @@ func LoadConfig() (*Config, error) {
 	config := &Config{
 		API:            NewDefaultAPIConfig(),
 		Common:         NewDefaultCommonConfig(),
-		User:           NewDefaultUserConfig(),
+		Users:          NewDefaultUserConfig(),
 		Connection:     NewDefaultConnectionConfig(),
 		Deployment:     NewDefaultModelDeploymentConfig(),
 		ServiceCatalog: NewDefaultServiceCatalogConfig(),
