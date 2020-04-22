@@ -7,7 +7,6 @@ import (
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apitypes "k8s.io/apimachinery/pkg/types"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -21,13 +20,14 @@ import (
 )
 
 const (
-	webhookName            = "modeldeployment-webhook"
-	webhookServerName      = "modeldeployment-webhook-server"
-	webhookServiceName     = "modeldeployment-webhook-service"
-	webhookSecretName      = "modeldeployment-webhook-secret"
-	webhookconfigName      = "modeldeployment-webhook-config"
-	namespaceSelectorKey   = "modeldeployment-webhook"
-	namespaceSelectorValue = "enabled"
+	webhookName                 = "modeldeployment-webhook"
+	webhookServerName           = "modeldeployment-webhook-server"
+	webhookServiceName          = "modeldeployment-webhook-service"
+	webhookconfigName           = "modeldeployment-webhook-config"
+	namespaceSelectorKey        = "modeldeployment-webhook"
+	namespaceSelectorValue      = "enabled"
+	webhookServiceSelectorKey   = "app"
+	webhookServiceSelectorValue = "operator"
 )
 
 func Add(
@@ -56,14 +56,10 @@ func Add(
 		Port: 6443,
 		BootstrapOptions: &webhook.BootstrapOptions{
 			MutatingWebhookConfigName: webhookconfigName,
-			Secret: &apitypes.NamespacedName{
-				Namespace: deploymentConfig.Namespace,
-				Name:      webhookSecretName,
-			},
 			Service: &webhook.Service{
 				Namespace: deploymentConfig.Namespace,
 				Name:      webhookServiceName,
-				Selectors: deploymentConfig.NodeSelector,
+				Selectors: map[string]string{webhookServiceSelectorKey: webhookServiceSelectorValue},
 			},
 		},
 	})
@@ -108,7 +104,7 @@ func (pm *podMutator) Handle(_ context.Context, req types.Request) types.Respons
 //Adds node selectors from deployment config to knative pods
 func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 	nodeSelector := pm.deploymentConfig.NodeSelector
-	if len(nodeSelector) > 0 {
+	if len(nodeSelector) > 0  {
 		pod.Spec.NodeSelector = nodeSelector
 		log.Infof("Assigning node selector %v to a pod %v", nodeSelector, pod.Name)
 	} else {
