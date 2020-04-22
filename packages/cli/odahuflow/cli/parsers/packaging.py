@@ -58,13 +58,17 @@ def packaging(ctx: click.core.Context, url: str, token: str):
 @pass_obj
 def get(client: ModelPackagingClient, pack_id: str, output_format: str):
     """
-    Get packagings.\n
-    The command without id argument retrieve all packagings.\n
-    Get all packagings in json format:\n
-        odahuflowctl pack get --format json\n
-    Get packaging with "git-repo" id:\n
-        odahuflowctl pack get --id git-repo\n
-    Using jsonpath:\n
+    \b
+    Get packagings.
+    The command without id argument retrieve all packagings.
+    \b
+    Get all packagings in json format:
+        odahuflowctl pack get --format json
+    \b
+    Get packaging with "git-repo" id:
+        odahuflowctl pack get --id git-repo
+    \b
+    Using jsonpath:
         odahuflowctl pack get -o 'jsonpath=[*].spec.reference'
     \f
     :param client: Model packaging HTTP client
@@ -89,12 +93,14 @@ def get(client: ModelPackagingClient, pack_id: str, output_format: str):
 def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, timeout: int,
            artifact_name: str):
     """
-    Create a packaging.\n
+    \b
+    Create a packaging.
     You should specify a path to file with a packaging. The file must contain only one packaging.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples packagings than you should use "odahuflowctl res apply" instead.
-    If you provide the packaging id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to create multiples packagings, you should use "odahuflowctl bulk apply" instead.
+    If you provide the packaging id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl pack create -f pack.yaml --id examples-git
     \f
     :param timeout: timeout in seconds. for wait (if no-wait is off)
@@ -132,12 +138,14 @@ def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, ti
 def edit(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, timeout: int,
          artifact_name: str):
     """
-    Update a packaging.\n
+    \b
+    Update a packaging.
     You should specify a path to file with a packaging. The file must contain only one packaging.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples packagings than you should use "odahuflowctl res apply" instead.
-    If you provide the packaging id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to update multiples packagings, you should use "odahuflowctl bulk apply" instead.
+    If you provide the packaging id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl pack update -f pack.yaml --id examples-git
     \f
     :param client: Model packaging HTTP client
@@ -171,14 +179,16 @@ def edit(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, time
 @pass_obj
 def delete(client: ModelPackagingClient, pack_id: str, file: str, ignore_not_found: bool):
     """
-    Delete a packaging.\n
+    \b
+    Delete a packaging.
     For this command, you must provide a packaging ID or path to file with one packaging.
     The file must contain only one packaging.
-    If you want to delete multiples packagings than you should use "odahuflowctl res delete" instead.
-    For now, CLI supports yaml and JSON file formats.
-    The command will be failed if you provide both arguments.\n
-    Usage example:\n
-        * odahuflowctl pack delete --id examples-git\n
+    If you want to delete multiples packagings, you should use "odahuflowctl bulk delete" instead.
+    For now, CLI supports YAML and JSON file formats.
+    The command will fail if you provide both arguments.
+    \b
+    Usage example:
+        * odahuflowctl pack delete --id examples-git
         * odahuflowctl pack delete -f pack.yaml
     \f
     :param client: Model packaging HTTP client
@@ -213,14 +223,14 @@ def delete(client: ModelPackagingClient, pack_id: str, file: str, ignore_not_fou
 @pass_obj
 def logs(client: ModelPackagingClient, pack_id: str, file: str, follow: bool):
     """
-    Stream packaging logs.\n
+    \b
+    Stream packaging logs.
     For this command, you must provide a packaging ID or path to file with one packaging.
     The file must contain only one packaging.
-    If you want to delete multiples packagings than you should use "odahuflowctl res delete" instead.
-    For now, CLI supports yaml and JSON file formats.
-    The command will be failed if you provide both arguments.\n
-    Usage example:\n
-        * odahuflowctl pack delete --id examples-git\n
+    The command will fail if you provide both arguments.
+    \b
+    Usage example:
+        * odahuflowctl pack delete --id examples-git
         * odahuflowctl pack delete -f pack.yaml
     \f
     :param follow: Follow logs stream
@@ -247,7 +257,7 @@ def logs(client: ModelPackagingClient, pack_id: str, file: str, follow: bool):
 
 def wait_packaging_finish(timeout: int, wait: bool, mp_id: str, mp_client: ModelPackagingClient):
     """
-    Wait packaging to finish according command line arguments
+    Wait for packaging to finish according to command line arguments
 
     :param wait:
     :param timeout:

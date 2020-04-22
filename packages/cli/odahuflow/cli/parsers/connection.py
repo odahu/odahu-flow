@@ -48,13 +48,17 @@ def connection(ctx: click.core.Context, url: str, token: str):
 @pass_obj
 def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: bool):
     """
-    Get connections.\n
-    The command without id argument retrieve all connections.\n
-    Get all connections in json format:\n
-        odahuflowctl conn get --format json\n
-    Get connection with "git-repo" id:\n
-        odahuflowctl conn get --id git-repo\n
-    Using jsonpath:\n
+    \b
+    Get connections.
+    The command without id argument retrieve all connections.
+    \b
+    Get all connections in json format:
+        odahuflowctl conn get --format json
+    \b
+    Get connection with "git-repo" id:
+        odahuflowctl conn get --id git-repo
+    \b
+    Using jsonpath:
         odahuflowctl conn get -o 'jsonpath=[*].spec.reference'
     \f
     :param decrypted: if set than decrypted connection will be returned
@@ -84,12 +88,14 @@ def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: b
 @pass_obj
 def create(client: ConnectionClient, conn_id: str, file: str, output_format: str):
     """
-    Create a connection.\n
+    \b
+    Create a connection.
     You should specify a path to file with a connection. The file must contain only one connection.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples connections than you should use "odahuflowctl res apply" instead.
-    If you provide the connection id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to create multiples connections, you should use "odahuflowctl bulk apply" instead.
+    If you provide the connection id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl conn create -f conn.yaml --id examples-git
     \f
     :param client: Connection HTTP client
@@ -115,12 +121,14 @@ def create(client: ConnectionClient, conn_id: str, file: str, output_format: str
 @pass_obj
 def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
     """
-    Update a connection.\n
+    \b
+    Update a connection.
     You should specify a path to file with a connection. The file must contain only one connection.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples connections than you should use "odahuflowctl res apply" instead.
-    If you provide the connection id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to update multiples connections, you should use "odahuflowctl bulk apply" instead.
+    If you provide the connection id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl conn update -f conn.yaml --id examples-git
     \f
     :param client: Connection HTTP client
@@ -146,15 +154,17 @@ def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
 @pass_obj
 def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: bool):
     """
-    Delete a connection.\n
+    \b
+    Delete a connection.
     For this command, you must provide a connection ID or path to file with one connection.
     The file must contain only one connection.
-    If you want to delete multiples connections than you should use "odahuflowctl res delete" instead.
-    For now, CLI supports yaml and JSON file formats.
-    The command will be failed if you provide both arguments.\n
-    Usage example:\n
-        * odahuflowctl conn delete --id examples-git\n
-        * odahuflowctl conn delete -f conn.yaml\n
+    If you want to delete multiples connections, you should use "odahuflowctl bulk delete" instead.
+    For now, CLI supports YAML and JSON file formats.
+    The command will fail if you provide both arguments.
+    \b
+    Usage example:
+        * odahuflowctl conn delete --id examples-git
+        * odahuflowctl conn delete -f conn.yaml
         * odahuflowctl conn delete --id examples-git --ignore-not-found
     \f
     :param client: Connection HTTP client

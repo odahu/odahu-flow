@@ -63,13 +63,17 @@ def training(ctx: click.core.Context, url: str, token: str):
 @pass_obj
 def get(client: ModelTrainingClient, train_id: str, output_format: str):
     """
-    Get trainings.\n
-    The command without id argument retrieve all trainings.\n
-    Get all trainings in json format:\n
-        odahuflowctl train get --output-format json\n
-    Get training with "git-repo" id:\n
-        odahuflowctl train get --id git-repo\n
-    Using jsonpath:\n
+    \b
+    Get trainings.
+    The command without id argument retrieve all trainings.
+    \b
+    Get all trainings in json format:
+        odahuflowctl train get --output-format json
+    \b
+    Get training with "git-repo" id:
+        odahuflowctl train get --id git-repo
+    \b
+    Using jsonpath:
         odahuflowctl train get -o 'jsonpath=[*].spec.reference'
     \f
     :param client: Model training HTTP client
@@ -94,12 +98,14 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
 def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
            timeout: int):
     """
-    Create a training.\n
+    \b
+    Create a training.
     You should specify a path to file with a training. The file must contain only one training.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples trainings than you should use "odahuflowctl res apply" instead.
-    If you provide the training id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to create multiples trainings, you should use "odahuflowctl bulk apply" instead.
+    If you provide the training id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl train create -f train.yaml --id examples-git
     \f
     :param timeout: timeout in seconds. for wait (if no-wait is off)
@@ -133,12 +139,14 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
 def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
          timeout: int):
     """
-    Rerun a training.\n
+    \b
+    Rerun a training.
     You should specify a path to file with a training. The file must contain only one training.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples trainings than you should use "odahuflowctl res apply" instead.
-    If you provide the training id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to update multiples trainings, you should use "odahuflowctl bulk apply" instead.
+    If you provide the training id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl train update -f train.yaml --id examples-git
     \f
     :param client: Model training HTTP client
@@ -170,14 +178,16 @@ def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
 def delete(client: ModelTrainingClient, train_id: str, file: str,
            ignore_not_found: bool):
     """
-    Delete a training.\n
+    \b
+    Delete a training.
     For this command, you must provide a training ID or path to file with one training.
     The file must contain only one training.
-    If you want to delete multiples trainings than you should use "odahuflowctl res delete" instead.
-    For now, CLI supports yaml and JSON file formats.
-    The command will be failed if you provide both arguments.\n
-    Usage example:\n
-        * odahuflowctl train delete --id examples-git\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to delete multiples trainings, you should use "odahuflowctl bulk delete" instead.
+    The command will fail if you provide both arguments.
+    \b
+    Usage example:
+        * odahuflowctl train delete --id examples-git
         * odahuflowctl train delete -f train.yaml
     \f
     :param client: Model training HTTP client
@@ -214,14 +224,13 @@ def delete(client: ModelTrainingClient, train_id: str, file: str,
 @pass_obj
 def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
     """
-    Stream training logs.\n
+    \b
+    Stream training logs.
     For this command, you must provide a training ID or path to file with one training.
     The file must contain only one training.
-    If you want to delete multiples trainings than you should use "odahuflowctl res delete" instead.
-    For now, CLI supports yaml and JSON file formats.
-    The command will be failed if you provide both arguments.\n
-    Usage example:\n
-        * odahuflowctl train delete --id examples-git\n
+    \b
+    Usage example:
+        * odahuflowctl train delete --id examples-git
         * odahuflowctl train delete -f train.yaml
     \f
     :param follow: Follow logs stream
@@ -246,7 +255,7 @@ def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
 def wait_training_finish(timeout: int, wait: bool, mt_id: str,
                          mt_client: ModelTrainingClient):
     """
-    Wait training to finish according command line arguments
+    Wait for training to finish according to command line arguments
 
     :param wait:
     :param timeout:

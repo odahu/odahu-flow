@@ -48,9 +48,11 @@ def packaging(ctx: click.core.Context, url: str, token: str):
 @packaging.command('cleanup-containers')
 def cleanup_containers():
     """
+    \b
     Delete all packaging docker containers.
-    Usage example:\n
-        * odahuflowctl local pack cleanup-artifacts\n
+    \b
+    Usage example:
+        * odahuflowctl local pack cleanup-artifacts
     \f
     """
     cleanup_packaging_docker_containers()
@@ -71,9 +73,11 @@ def cleanup_containers():
 def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], manifest_dir: List[str],
         artifact_path: str, artifact_name: str, is_target_disabled: bool):
     """
-    Start a packaging process locally.\n
-    Usage example:\n
-        * odahuflowctl local pack run --id wine\n
+    \b
+    Start a packaging process locally.
+    \b
+    Usage example:
+        * odahuflowctl local pack run --id wine
     \f
     """
     entities: List[OdahuflowCloudResourceUpdatePair] = []
