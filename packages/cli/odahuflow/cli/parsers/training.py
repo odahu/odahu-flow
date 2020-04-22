@@ -102,7 +102,7 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
     Create a training.
     You should specify a path to file with a training. The file must contain only one training.
     For now, CLI supports YAML and JSON file formats.
-    If you want to create multiples trainings, you should use "odahuflowctl bulk apply" instead.
+    If you want to create multiple trainings, you should use "odahuflowctl bulk apply" instead.
     If you provide the training id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -143,7 +143,7 @@ def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
     Rerun a training.
     You should specify a path to file with a training. The file must contain only one training.
     For now, CLI supports YAML and JSON file formats.
-    If you want to update multiples trainings, you should use "odahuflowctl bulk apply" instead.
+    If you want to update multiple trainings, you should use "odahuflowctl bulk apply" instead.
     If you provide the training id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -183,7 +183,7 @@ def delete(client: ModelTrainingClient, train_id: str, file: str,
     For this command, you must provide a training ID or path to file with one training.
     The file must contain only one training.
     For now, CLI supports YAML and JSON file formats.
-    If you want to delete multiples trainings, you should use "odahuflowctl bulk delete" instead.
+    If you want to delete multiple trainings, you should use "odahuflowctl bulk delete" instead.
     The command will fail if you provide both arguments.
     \b
     Usage example:

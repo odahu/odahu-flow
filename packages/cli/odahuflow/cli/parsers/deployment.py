@@ -95,7 +95,7 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
     Create a deployment.
     You should specify a path to file with a deployment. The file must contain only one deployment.
     For now, CLI supports YAML and JSON file formats.
-    If you want to create multiples deployments, you should use "odahuflowctl bulk apply" instead.
+    If you want to create multiple deployments, you should use "odahuflowctl bulk apply" instead.
     If you provide the deployment id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -138,7 +138,7 @@ def edit(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeo
     Update a deployment.
     You should specify a path to file with a deployment. The file must contain only one deployment.
     For now, CLI supports YAML and JSON file formats.
-    If you want to update multiples deployments, you should use "odahuflowctl bulk apply" instead.
+    If you want to update multiple deployments, you should use "odahuflowctl bulk apply" instead.
     If you provide the deployment id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -183,7 +183,7 @@ def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_foun
     Delete a deployment.
     For this command, you must provide a deployment ID or path to file with one deployment.
     The file must contain only one deployment.
-    If you want to delete multiples deployments, you should use "odahuflowctl bulk delete" instead.
+    If you want to delete multiple deployments, you should use "odahuflowctl bulk delete" instead.
     For now, CLI supports YAML and JSON file formats.
     The command will fail if you provide both arguments.
     \b

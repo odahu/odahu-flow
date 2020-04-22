@@ -97,7 +97,7 @@ def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, ti
     Create a packaging.
     You should specify a path to file with a packaging. The file must contain only one packaging.
     For now, CLI supports YAML and JSON file formats.
-    If you want to create multiples packagings, you should use "odahuflowctl bulk apply" instead.
+    If you want to create multiple packagings, you should use "odahuflowctl bulk apply" instead.
     If you provide the packaging id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -142,7 +142,7 @@ def edit(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, time
     Update a packaging.
     You should specify a path to file with a packaging. The file must contain only one packaging.
     For now, CLI supports YAML and JSON file formats.
-    If you want to update multiples packagings, you should use "odahuflowctl bulk apply" instead.
+    If you want to update multiple packagings, you should use "odahuflowctl bulk apply" instead.
     If you provide the packaging id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -183,7 +183,7 @@ def delete(client: ModelPackagingClient, pack_id: str, file: str, ignore_not_fou
     Delete a packaging.
     For this command, you must provide a packaging ID or path to file with one packaging.
     The file must contain only one packaging.
-    If you want to delete multiples packagings, you should use "odahuflowctl bulk delete" instead.
+    If you want to delete multiple packagings, you should use "odahuflowctl bulk delete" instead.
     For now, CLI supports YAML and JSON file formats.
     The command will fail if you provide both arguments.
     \b

@@ -92,7 +92,7 @@ def create(client: ConnectionClient, conn_id: str, file: str, output_format: str
     Create a connection.
     You should specify a path to file with a connection. The file must contain only one connection.
     For now, CLI supports YAML and JSON file formats.
-    If you want to create multiples connections, you should use "odahuflowctl bulk apply" instead.
+    If you want to create multiple connections, you should use "odahuflowctl bulk apply" instead.
     If you provide the connection id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -125,7 +125,7 @@ def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
     Update a connection.
     You should specify a path to file with a connection. The file must contain only one connection.
     For now, CLI supports YAML and JSON file formats.
-    If you want to update multiples connections, you should use "odahuflowctl bulk apply" instead.
+    If you want to update multiple connections, you should use "odahuflowctl bulk apply" instead.
     If you provide the connection id parameter, it will override before sending to API server.
     \b
     Usage example:
@@ -158,7 +158,7 @@ def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: 
     Delete a connection.
     For this command, you must provide a connection ID or path to file with one connection.
     The file must contain only one connection.
-    If you want to delete multiples connections, you should use "odahuflowctl bulk delete" instead.
+    If you want to delete multiple connections, you should use "odahuflowctl bulk delete" instead.
     For now, CLI supports YAML and JSON file formats.
     The command will fail if you provide both arguments.
     \b
