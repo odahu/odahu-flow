@@ -1,6 +1,7 @@
 import json
 import logging
 from os.path import join
+from pathlib import PurePosixPath
 from typing import Dict, Any
 
 import docker
@@ -49,7 +50,8 @@ def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
         command=[
             packager.packaging_integration.spec.entrypoint,
             ARTIFACT_PATH,
-            join(ARTIFACT_PATH, PACKAGER_CONF_FILE_PATH),
+            # specified path for Docker Linux Container ignoring OS
+            str(PurePosixPath(ARTIFACT_PATH, PACKAGER_CONF_FILE_PATH)),
         ],
         mounts=[
             Mount(ARTIFACT_PATH, artifact_path, type="bind"),

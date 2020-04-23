@@ -36,8 +36,9 @@ def config_group():
 @click.argument('value', type=str, required=True)
 def config_set(key: str, value: str):
     """
-    Set configuration variable.\n
-    Usage example:\n
+    \b
+    Set configuration variable.
+    Usage example:
         * odahuflowctl config set API_URL http://localhost:5000
     \f
     :param key: Configuration variable name
@@ -59,8 +60,9 @@ def config_set(key: str, value: str):
 @click.option('--show-secrets/--no-show-secrets', default=False, help='Show tokens and passwords')
 def config_get(key: str, show_secrets: bool):
     """
-    Get configuration variable value\n
-    Usage example:\n
+    \b
+    Get configuration variable value.
+    Usage example:
         * odahuflowctl config get API_URL --show-secrets
     \f
     :param key: Configuration variable name
@@ -77,8 +79,9 @@ def config_get(key: str, show_secrets: bool):
 @click.option('--with-system/--no-with-system', default=False, help='Show with system variables')
 def config_get_all(show_secrets: bool, with_system: bool):
     """
-    Get all configuration variables\n
-    Usage example:\n
+    \b
+    Get all configuration variables.
+    Usage example:
         * odahuflowctl config all --show-secrets --with-system
     \f
     :param with_system: Show with system variables
@@ -102,8 +105,9 @@ def config_get_all(show_secrets: bool, with_system: bool):
 @config_group.command(name="path")
 def config_path():
     """
-    Get configuration storage
-    Usage example:\n
+    \b
+    Get configuration storage.
+    Usage example:
         * odahuflowctl config path
     \f
     """

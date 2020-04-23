@@ -53,11 +53,14 @@ def training(ctx: click.core.Context, url: str, token: str):
               default=PLAIN_TEXT_OUTPUT_FORMAT, type=click.Choice([PLAIN_TEXT_OUTPUT_FORMAT, JSON_OUTPUT_FORMAT]))
 def training_list(output_format: str):
     """
-    Get list of local training artifacts.\n
-    Get all training artifacts:\n
-        odahuflowctl local train list\n
-    Get all training artifacts in json format:\n
-        odahuflowctl local train -o json\n
+    \b
+    Get list of local training artifacts.
+    \b
+    Get all training artifacts:
+        odahuflowctl local train list
+    \b
+    Get all training artifacts in json format:
+        odahuflowctl local train -o json
     \f
     :param output_format: Output format
     """
@@ -79,9 +82,11 @@ def training_list(output_format: str):
 @training.command('cleanup-artifacts')
 def cleanup_artifacts():
     """
+    \b
     Delete all training local artifacts.
-    Usage example:\n
-        * odahuflowctl local train cleanup-artifacts\n
+    \b
+    Usage example:
+        * odahuflowctl local train cleanup-artifacts
     \f
     """
     cleanup_local_artifacts()
@@ -90,9 +95,11 @@ def cleanup_artifacts():
 @training.command('cleanup-containers')
 def cleanup_containers():
     """
+    \b
     Delete all training docker containers.
-    Usage example:\n
-        * odahuflowctl local train cleanup-artifacts\n
+    \b
+    Usage example:
+        * odahuflowctl local train cleanup-artifacts
     \f
     """
     cleanup_training_docker_containers()
@@ -104,14 +111,17 @@ def cleanup_containers():
               help='Path to a ODAHU-flow manifest file')
 @click.option('--manifest-dir', '-d', type=click.Path(), multiple=True,
               help='Path to a directory with ODAHU-flow manifest files')
-@click.option('--output-dir', '--output', type=click.Path(), help='Directory where model artifact will be saved')
+@click.option('--output-dir', '--output', type=click.Path(), help='Directory where model artifact will be saved.\
+                                                                  Training artifact name would be the same as the dir.')
 @pass_obj
 def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], manifest_dir: List[str],
         output_dir: str):
     """
-    Start a training process locally.\n
-    Usage example:\n
-        * odahuflowctl local train run --id examples-git\n
+    \b
+    Start a training process locally.
+    \b
+    Usage example:
+        * odahuflowctl local train run --id examples-git
     \f
     """
     entities: List[OdahuflowCloudResourceUpdatePair] = []

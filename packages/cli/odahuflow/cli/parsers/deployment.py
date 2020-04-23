@@ -57,13 +57,17 @@ def deployment(ctx: click.core.Context, url: str, token: str):
 @pass_obj
 def get(client: ModelDeploymentClient, md_id: str, output_format: str):
     """
-    Get deployments.\n
-    The command without id argument retrieve all deployments.\n
-    Get all deployments in json format:\n
-        odahuflowctl dep get --format json\n
-    Get deployment with "git-repo" id:\n
-        odahuflowctl dep get --id model-wine\n
-    Using jsonpath:\n
+    \b
+    Get deployments.
+    The command without id argument retrieve all deployments.
+    \b
+    Get all deployments in json format:
+        odahuflowctl dep get --format json
+    \b
+    Get deployment with "git-repo" id:
+        odahuflowctl dep get --id model-wine
+    \b
+    Using jsonpath:
         odahuflowctl dep get -o 'jsonpath=[*].spec.reference'
     \f
     :param client: Model deployment HTTP client
@@ -87,12 +91,14 @@ def get(client: ModelDeploymentClient, md_id: str, output_format: str):
 @pass_obj
 def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeout: int, image: str):
     """
-    Create a deployment.\n
+    \b
+    Create a deployment.
     You should specify a path to file with a deployment. The file must contain only one deployment.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples deployments than you should use "odahuflowctl res apply" instead.
-    If you provide the deployment id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to create multiple deployments, you should use "odahuflowctl bulk apply" instead.
+    If you provide the deployment id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl dep create -f dep.yaml --id examples-git
     \f
     :param timeout: timeout in seconds. for wait (if no-wait is off)
@@ -128,12 +134,14 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
 @pass_obj
 def edit(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeout: int, image: str):
     """
-    Update a deployment.\n
+    \b
+    Update a deployment.
     You should specify a path to file with a deployment. The file must contain only one deployment.
-    For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples deployments than you should use "odahuflowctl res apply" instead.
-    If you provide the deployment id parameter than it will be overridden before sending to API server.\n
-    Usage example:\n
+    For now, CLI supports YAML and JSON file formats.
+    If you want to update multiple deployments, you should use "odahuflowctl bulk apply" instead.
+    If you provide the deployment id parameter, it will override before sending to API server.
+    \b
+    Usage example:
         * odahuflowctl dep update -f dep.yaml --id examples-git
     \f
     :param client: Model deployment HTTP client
@@ -171,14 +179,16 @@ def edit(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeo
 def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_found: bool,
            wait: bool, timeout: int):
     """
-    Delete a deployment.\n
+    \b
+    Delete a deployment.
     For this command, you must provide a deployment ID or path to file with one deployment.
     The file must contain only one deployment.
-    If you want to delete multiples deployments than you should use "odahuflowctl res delete" instead.
-    For now, CLI supports yaml and JSON file formats.
-    The command will be failed if you provide both arguments.\n
-    Usage example:\n
-        * odahuflowctl dep delete --id examples-git\n
+    If you want to delete multiple deployments, you should use "odahuflowctl bulk delete" instead.
+    For now, CLI supports YAML and JSON file formats.
+    The command will fail if you provide both arguments.
+    \b
+    Usage example:
+        * odahuflowctl dep delete --id examples-git
         * odahuflowctl dep delete -f dep.yaml
     \f
     :param timeout: timeout in seconds. for wait (if no-wait is off)
@@ -246,7 +256,7 @@ def wait_delete_operation_finish(timeout: int, wait: bool, md_id: str, md_client
 
 def wait_deployment_finish(timeout: int, wait: bool, md_id: str, md_client: ModelDeploymentClient):
     """
-    Wait deployment to finish according command line arguments
+    Wait for deployment to finish according to command line arguments
 
     :param timeout: timeout in seconds. for wait (if no-wait is off)
     :param wait: no wait until deletion will be finished
@@ -272,7 +282,7 @@ def wait_deployment_finish(timeout: int, wait: bool, md_id: str, md_client: Mode
             if md.status.state == READY_STATE:
                 if md.spec.min_replicas <= md.status.available_replicas:
                     print(f'Model {md_id} was deployed. '
-                          f'Deployment process took is {round(time.time() - start)} seconds')
+                          f'Deployment process took {round(time.time() - start)} seconds')
                     return
                 else:
                     print(f'Model {md_id} was deployed. '
