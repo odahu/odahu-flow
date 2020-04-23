@@ -20,14 +20,23 @@ import (
 )
 
 const (
-	webhookName                 = "modeldeployment-webhook"
-	webhookServerName           = "modeldeployment-webhook-server"
-	webhookServiceName          = "modeldeployment-webhook-service"
-	webhookconfigName           = "modeldeployment-webhook-config"
-	namespaceSelectorKey        = "modeldeployment-webhook"
-	namespaceSelectorValue      = "enabled"
+	webhookName        = "modeldeployment-webhook"
+	webhookServerName  = "modeldeployment-webhook-server"
+	webhookServiceName = "modeldeployment-webhook-service"
+	webhookconfigName  = "modeldeployment-webhook-config"
+
+	//TODO label ns automatically?
+	//label for a watched  namespace where pods are created
+	namespaceSelectorKey   = "modeldeployment-webhook"
+	namespaceSelectorValue = "enabled"
+
+	//TODO no hardcode
+	//selectors for pods for webhook to run on
 	webhookServiceSelectorKey   = "app"
 	webhookServiceSelectorValue = "operator"
+
+	//namespace where webhook service will be created
+	webhookServiceNamespace = "odahu-flow"
 )
 
 func Add(
@@ -57,7 +66,7 @@ func Add(
 		BootstrapOptions: &webhook.BootstrapOptions{
 			MutatingWebhookConfigName: webhookconfigName,
 			Service: &webhook.Service{
-				Namespace: deploymentConfig.Namespace,
+				Namespace: webhookServiceNamespace,
 				Name:      webhookServiceName,
 				Selectors: map[string]string{webhookServiceSelectorKey: webhookServiceSelectorValue},
 			},
@@ -101,14 +110,14 @@ func (pm *podMutator) Handle(_ context.Context, req types.Request) types.Respons
 	return admission.PatchResponse(pod, podCopy)
 }
 
-//Adds node selectors from deployment config to knative pods
+//Adds node selectors and tolerations from the deployment config to knative pods
 func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 	nodeSelector := pm.deploymentConfig.NodeSelector
-	if len(nodeSelector) > 0  {
+	if len(nodeSelector) > 0 {
 		pod.Spec.NodeSelector = nodeSelector
 		log.Infof("Assigning node selector %v to a pod %v", nodeSelector, pod.Name)
 	} else {
-		log.Warnf("Got empty node selector from deployment config, doing nothing to a pod %v", pod.Name)
+		log.Warnf("Got empty node selector from deployment config, skipping for a pod %v", pod.Name)
 	}
 	return nil
 }
