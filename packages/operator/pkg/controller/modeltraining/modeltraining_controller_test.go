@@ -480,3 +480,67 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
 }
+
+func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
+	const (
+		trainingEnvKey    = "training-env-key"
+		trainingEnvValue  = "training-env-value"
+		toolchainEnvKey   = "toolchain-env-key"
+		toolchainEnvValue = "toolchain-env-value"
+	)
+
+	s.initReconciler(config.NewDefaultModelTrainingConfig())
+
+	ti := &odahuflowv1alpha1.ToolchainIntegration{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      testToolchainIntegrationID,
+			Namespace: testNamespace,
+		},
+		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
+			DefaultImage: toolchainImage,
+			AdditionalEnvironments: map[string]string{
+				toolchainEnvKey: toolchainEnvValue,
+			},
+		},
+	}
+
+	mt := &odahuflowv1alpha1.ModelTraining{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      mtName,
+			Namespace: testNamespace,
+		},
+		Spec: odahuflowv1alpha1.ModelTrainingSpec{
+			Toolchain: testToolchainIntegrationID,
+			CustomEnvs: []odahuflowv1alpha1.EnvironmentVariable{
+				{Name: trainingEnvKey, Value: trainingEnvValue},
+			},
+		},
+	}
+
+	// Recreate the toolchain integration
+	err := s.k8sClient.Delete(context.TODO(), ti)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	err = s.k8sClient.Create(context.TODO(), ti)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	err = s.k8sClient.Create(context.TODO(), mt)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	defer s.k8sClient.Delete(context.TODO(), mt)
+
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+
+	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
+
+	tr := &tektonv1alpha1.TaskRun{}
+	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
+	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+
+	// second container is the training container
+	envs := tr.Spec.TaskSpec.Steps[1].Env
+	// first envs must be toolchains envs, then training envs
+	s.g.Expect(envs).Should(Equal([]corev1.EnvVar{
+		{Name: toolchainEnvKey, Value: toolchainEnvValue},
+		{Name: trainingEnvKey, Value: trainingEnvValue},
+	}))
+}
