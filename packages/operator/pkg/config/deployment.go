@@ -43,6 +43,15 @@ type ModelDeploymentSecurityConfig struct {
 	RoleName string `json:"roleName"`
 }
 
+
+type Toleration struct {
+	Effect string `json:"Effect"`
+	Key string `json:"Key"`
+	Operator string `json:"Operator"`
+	Value string `json:"Value"`
+	TolerationSeconds *int64 `json:"TolerationSeconds"`
+}
+
 type ModelDeploymentConfig struct {
 	// Kubernetes namespace, where model deployments will be deployed
 	Namespace string `json:"namespace"`
@@ -55,7 +64,7 @@ type ModelDeploymentConfig struct {
 	// Kubernetes node selector for model deployments
 	NodeSelector              map[string]string             `json:"nodeSelector"`
 	// Kubernetes tolerations for model deployments
-	Toleration                map[string]string             `json:"toleration"`
+	Toleration                *Toleration                   `json:"toleration,omitempty"`
 	Istio                     ModelDeploymentIstioConfig    `json:"istio"`
 }
 
