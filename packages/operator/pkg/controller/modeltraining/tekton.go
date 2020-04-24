@@ -107,11 +107,17 @@ func (r *ReconcileModelTraining) createMainTrainerStep(
 	trainingIntegration *training.ToolchainIntegration,
 	trainResources *corev1.ResourceRequirements) tektonv1alpha1.Step {
 
-	envs := make([]corev1.EnvVar, 0, len(trainingIntegration.Spec.AdditionalEnvironments))
+	envs := make([]corev1.EnvVar, 0, len(trainingIntegration.Spec.AdditionalEnvironments)+len(train.Spec.CustomEnvs))
 	for name, value := range trainingIntegration.Spec.AdditionalEnvironments {
 		envs = append(envs, corev1.EnvVar{
 			Name:  name,
 			Value: value,
+		})
+	}
+	for _, env := range train.Spec.CustomEnvs {
+		envs = append(envs, corev1.EnvVar{
+			Name:  env.Name,
+			Value: env.Value,
 		})
 	}
 
