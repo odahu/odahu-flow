@@ -3,7 +3,6 @@ package deploymenthook
 import (
 	"context"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/prometheus/common/log"
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,12 +24,10 @@ const (
 	webhookServiceName = "modeldeployment-webhook-service"
 	webhookconfigName  = "modeldeployment-webhook-config"
 
-	//TODO label ns automatically?
 	//label for a watched  namespace where pods are created
 	namespaceSelectorKey   = "modeldeployment-webhook"
 	namespaceSelectorValue = "enabled"
 
-	//TODO no hardcode
 	//selectors for pods for webhook to run on
 	webhookServiceSelectorKey   = "app"
 	webhookServiceSelectorValue = "operator"
@@ -39,13 +36,14 @@ const (
 	webhookServiceNamespace = "odahu-flow"
 )
 
+var log = logf.Log.WithName(webhookName)
+
 func Add(
 	mgr manager.Manager,
 	deploymentConfig config.ModelDeploymentConfig,
 	_ config.OperatorConfig,
 	_ string,
 ) error {
-	log := logf.Log.WithName(webhookName)
 	log.Info("Creating model deployment webhook for knative pods")
 
 	wh, err := builder.NewWebhookBuilder().
@@ -90,10 +88,9 @@ type podMutator struct {
 	deploymentConfig config.ModelDeploymentConfig
 }
 
-// Implement admission.Handler so the controller can handle admission request.
 var _ admission.Handler = &podMutator{}
 
-// podMutator adds an annotation to every incoming pods.
+// +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=mutatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 func (pm *podMutator) Handle(_ context.Context, req types.Request) types.Response {
 	pod := &corev1.Pod{}
 
@@ -115,14 +112,27 @@ func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 	nodeSelector := pm.deploymentConfig.NodeSelector
 	if len(nodeSelector) > 0 {
 		pod.Spec.NodeSelector = nodeSelector
-		log.Infof("Assigning node selector %v to a pod %v", nodeSelector, pod.Name)
+		log.Info("Assigning node selector to a pod", "nodeSelector", nodeSelector, "pod name", pod.Name)
 	} else {
-		log.Warnf("Got empty node selector from deployment config, skipping for a pod %v", pod.Name)
+		log.Info("Got empty node selector from deployment config, skipping", "pod name", pod.Name)
 	}
+
+	toleration := pm.deploymentConfig.Toleration
+	if toleration != nil {
+		parsedToleration := corev1.Toleration{Key: toleration.Key,
+			Operator:          corev1.TolerationOperator(toleration.Operator),
+			Value:             toleration.Value,
+			Effect:            corev1.TaintEffect(toleration.Effect),
+			TolerationSeconds: toleration.TolerationSeconds}
+		pod.Spec.Tolerations = append(pod.Spec.Tolerations, parsedToleration)
+		log.Info("Assigning toleration to a pod", "toleration", toleration, "pod name", pod.Name)
+	} else {
+		log.Info("Got empty toleration from deployment config, skipping", "pod name", pod.Name)
+	}
+
 	return nil
 }
 
-//Client and Decoder are auto injected
 var _ inject.Client = &podMutator{}
 
 func (pm *podMutator) InjectClient(c client.Client) error {
