@@ -16,14 +16,17 @@
 
 package config
 
+import "os"
+
 type OperatorConfig struct {
 	Auth           AuthConfig `json:"auth"`
 	// Operator HTTP monitoring port
 	MonitoringPort int        `json:"monitoringPort"`
+	Namespace      string     `json:"-"`
 }
 
 func NewDefaultOperatorConfig() OperatorConfig {
 	return OperatorConfig{
 		MonitoringPort: 7777,
-	}
+		Namespace:      os.Getenv("OPERATOR_NAMESPACE")}
 }

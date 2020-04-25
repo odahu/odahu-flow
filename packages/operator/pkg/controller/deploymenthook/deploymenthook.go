@@ -1,3 +1,19 @@
+//
+//    Copyright 2020 EPAM Systems
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+//
+
 package deploymenthook
 
 import (
@@ -31,9 +47,6 @@ const (
 	//selectors for pods for webhook to run on
 	webhookServiceSelectorKey   = "app"
 	webhookServiceSelectorValue = "operator"
-
-	//namespace where webhook service will be created
-	webhookServiceNamespace = "odahu-flow"
 )
 
 var log = logf.Log.WithName(webhookName)
@@ -41,7 +54,7 @@ var log = logf.Log.WithName(webhookName)
 func Add(
 	mgr manager.Manager,
 	deploymentConfig config.ModelDeploymentConfig,
-	_ config.OperatorConfig,
+	operatorConfig config.OperatorConfig,
 	_ string,
 ) error {
 	log.Info("Creating model deployment webhook for knative pods")
@@ -58,13 +71,13 @@ func Add(
 		return err
 	}
 
-	log.Info("Setting up deployment webhook server")
+	log.Info("Setting up deployment webhook server", "service namespace", operatorConfig.Namespace)
 	as, err := webhook.NewServer(webhookServerName, mgr, webhook.ServerOptions{
 		Port: 6443,
 		BootstrapOptions: &webhook.BootstrapOptions{
 			MutatingWebhookConfigName: webhookconfigName,
 			Service: &webhook.Service{
-				Namespace: webhookServiceNamespace,
+				Namespace: operatorConfig.Namespace,
 				Name:      webhookServiceName,
 				Selectors: map[string]string{webhookServiceSelectorKey: webhookServiceSelectorValue},
 			},
@@ -90,7 +103,6 @@ type podMutator struct {
 
 var _ admission.Handler = &podMutator{}
 
-// +kubebuilder:rbac:groups=admissionregistration.k8s.io,resources=mutatingwebhookconfigurations,verbs=get;list;watch;create;update;patch;delete
 func (pm *podMutator) Handle(_ context.Context, req types.Request) types.Response {
 	pod := &corev1.Pod{}
 
@@ -119,24 +131,17 @@ func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 
 	toleration := pm.deploymentConfig.Toleration
 	if toleration != nil {
-		parsedToleration := corev1.Toleration{Key: toleration.Key,
+		v1Toleration := corev1.Toleration{Key: toleration.Key,
 			Operator:          corev1.TolerationOperator(toleration.Operator),
 			Value:             toleration.Value,
 			Effect:            corev1.TaintEffect(toleration.Effect),
 			TolerationSeconds: toleration.TolerationSeconds}
-		pod.Spec.Tolerations = append(pod.Spec.Tolerations, parsedToleration)
+		pod.Spec.Tolerations = append(pod.Spec.Tolerations, v1Toleration)
 		log.Info("Assigning toleration to a pod", "toleration", toleration, "pod name", pod.Name)
 	} else {
 		log.Info("Got empty toleration from deployment config, skipping", "pod name", pod.Name)
 	}
 
-	return nil
-}
-
-var _ inject.Client = &podMutator{}
-
-func (pm *podMutator) InjectClient(c client.Client) error {
-	pm.client = c
 	return nil
 }
 
