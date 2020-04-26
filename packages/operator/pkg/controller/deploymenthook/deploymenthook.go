@@ -24,7 +24,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"net/http"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -96,7 +95,6 @@ func Add(
 }
 
 type podMutator struct {
-	client           client.Client
 	decoder          types.Decoder
 	deploymentConfig config.ModelDeploymentConfig
 }
@@ -131,7 +129,8 @@ func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 
 	toleration := pm.deploymentConfig.Toleration
 	if toleration != nil {
-		v1Toleration := corev1.Toleration{Key: toleration.Key,
+		v1Toleration := corev1.Toleration{
+			Key:               toleration.Key,
 			Operator:          corev1.TolerationOperator(toleration.Operator),
 			Value:             toleration.Value,
 			Effect:            corev1.TaintEffect(toleration.Effect),
