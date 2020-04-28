@@ -58,7 +58,7 @@ def training(ctx: click.core.Context, url: str, token: str):
 
 @training.command()
 @click.option('--train-id', '--id', help='Model training ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelTrainingClient, train_id: str, output_format: str):

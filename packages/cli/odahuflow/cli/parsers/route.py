@@ -45,7 +45,7 @@ def route(ctx: click.core.Context, url: str, token: str):
 
 @route.command()
 @click.option('--mr-id', '--id', 'mr_id', help='ModelRoute ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelRouteClient, mr_id: str, output_format: str):
@@ -53,11 +53,11 @@ def get(client: ModelRouteClient, mr_id: str, output_format: str):
     Get routes.\n
     The command without id argument retrieve all routes.\n
     Get all routes in json format:\n
-        odahuflowctl conn get --format json\n
+        odahuflowctl route get --output-format json\n
     Get model route with "git-repo" id:\n
-        odahuflowctl conn get --id git-repo\n
+        odahuflowctl route get --id git-repo\n
     Using jsonpath:\n
-        odahuflowctl conn get -o 'jsonpath=[*].spec.reference'
+        odahuflowctl route get -o 'jsonpath=[*].spec.reference'
     \f
     :param client: ModelRoute HTTP client
     :param mr_id: ModelRoute ID

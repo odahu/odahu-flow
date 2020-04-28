@@ -49,7 +49,7 @@ def get(client: ToolchainIntegrationClient, ti_id: str, output_format: str):
     Get toolchain integrations.\n
     The command without id argument retrieve all toolchain integrations.\n
     Get all toolchain integrations in json format:\n
-        odahuflowctl tn-integration get --format json\n
+        odahuflowctl tn-integration get --output-format json\n
     Get toolchain integration with "git-repo" id:\n
         odahuflowctl tn-integration get --id git-repo\n
     Using jsonpath:\n
@@ -68,7 +68,7 @@ def get(client: ToolchainIntegrationClient, ti_id: str, output_format: str):
 @toolchain_integration.command()
 @click.option('--ti-id', '--id', help='Toolchain integration ID')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with toolchain integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_format: str):
@@ -100,7 +100,7 @@ def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_for
 @toolchain_integration.command()
 @click.option('--ti-id', '--id', help='Toolchain integration ID')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with toolchain integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def edit(client: ToolchainIntegrationClient, ti_id: str, file: str, output_format: str):

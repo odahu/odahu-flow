@@ -53,7 +53,7 @@ def packaging(ctx: click.core.Context, url: str, token: str):
 
 @packaging.command()
 @click.option('--pack-id', '--id', help='Model packaging ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelPackagingClient, pack_id: str, output_format: str):
@@ -63,7 +63,7 @@ def get(client: ModelPackagingClient, pack_id: str, output_format: str):
     The command without id argument retrieve all packagings.
     \b
     Get all packagings in json format:
-        odahuflowctl pack get --format json
+        odahuflowctl pack get --output-format json
     \b
     Get packaging with "git-repo" id:
         odahuflowctl pack get --id git-repo

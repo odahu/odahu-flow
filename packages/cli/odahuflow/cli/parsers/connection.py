@@ -41,7 +41,7 @@ def connection(ctx: click.core.Context, url: str, token: str):
 
 @connection.command()
 @click.option('--conn-id', '--id', help='Connection ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @click.option('--decrypted', '-d', help='Flag means that connection sensitive data should be decrypted',
               default=False, is_flag=True)
@@ -53,7 +53,7 @@ def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: b
     The command without id argument retrieve all connections.
     \b
     Get all connections in json format:
-        odahuflowctl conn get --format json
+        odahuflowctl conn get --output-format json
     \b
     Get connection with "git-repo" id:
         odahuflowctl conn get --id git-repo
@@ -83,7 +83,7 @@ def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: b
 @connection.command()
 @click.option('--conn-id', '--id', help='Connection ID')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with connection')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def create(client: ConnectionClient, conn_id: str, file: str, output_format: str):
@@ -116,7 +116,7 @@ def create(client: ConnectionClient, conn_id: str, file: str, output_format: str
 @connection.command()
 @click.option('--conn-id', '--id', help='Connection ID')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with connection')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
