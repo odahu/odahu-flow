@@ -64,9 +64,9 @@ def get(client: ModelRouteClient, mr_id: str, output_format: str):
     :param output_format: Output format
     :return:
     """
-    conns = [client.get(mr_id)] if mr_id else client.get_all()
+    routes = [client.get(mr_id)] if mr_id else client.get_all()
 
-    format_output(conns, output_format)
+    format_output(routes, output_format)
 
 
 @route.command()
@@ -85,7 +85,7 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
     If you want to create multiples routes than you should use "odahuflowctl res apply" instead.
     If you provide the model route id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
-        * odahuflowctl conn create -f conn.yaml --id examples-git
+        * odahuflowctl route create -f route.yaml --id examples-git
     \f
     :param timeout: timeout in seconds. for wait (if no-wait is off)
     :param wait: no wait until operation will be finished
@@ -93,14 +93,14 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
     :param mr_id: ModelRoute ID
     :param file: Path to the file with only one model route
     """
-    conn = parse_resources_file_with_one_item(file).resource
-    if not isinstance(conn, ModelRoute):
-        raise ValueError(f'ModelRoute expected, but {type(conn)} provided')
+    route = parse_resources_file_with_one_item(file).resource
+    if not isinstance(route, ModelRoute):
+        raise ValueError(f'ModelRoute expected, but {type(route)} provided')
 
     if mr_id:
-        conn.id = mr_id
+        route.id = mr_id
 
-    click.echo(client.create(conn))
+    click.echo(client.create(route))
 
     wait_operation_finish(timeout, wait, mr_id, client)
 
@@ -121,7 +121,7 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
     If you want to update multiples routes than you should use "odahuflowctl res apply" instead.
     If you provide the model route id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
-        * odahuflowctl conn update -f conn.yaml --id examples-git
+        * odahuflowctl route update -f route.yaml --id examples-git
     \f
     :param timeout: timeout in seconds. for wait (if no-wait is off)
     :param wait: no wait until operation will be finished
@@ -129,14 +129,14 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
     :param mr_id: Model route ID
     :param file: Path to the file with only one model route
     """
-    conn = parse_resources_file_with_one_item(file).resource
-    if not isinstance(conn, ModelRoute):
-        raise ValueError(f'ModelRoute expected, but {type(conn)} provided')
+    route = parse_resources_file_with_one_item(file).resource
+    if not isinstance(route, ModelRoute):
+        raise ValueError(f'ModelRoute expected, but {type(route)} provided')
 
     if mr_id:
-        conn.id = mr_id
+        route.id = mr_id
 
-    click.echo(client.edit(conn))
+    click.echo(client.edit(route))
 
     wait_operation_finish(timeout, wait, mr_id, client)
 
@@ -156,8 +156,8 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
     For now, CLI supports yaml and JSON file formats.
     The command will be failed if you provide both arguments.\n
     Usage example:\n
-        * odahuflowctl conn delete --id examples-git\n
-        * odahuflowctl conn delete -f conn.yaml
+        * odahuflowctl route delete --id examples-git\n
+        * odahuflowctl route delete -f route.yaml
     \f
     :param client: ModelRoute HTTP client
     :param mr_id: ModelRoute ID
@@ -167,11 +167,11 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
     check_id_or_file_params_present(mr_id, file)
 
     if file:
-        conn = parse_resources_file_with_one_item(file).resource
-        if not isinstance(conn, ModelRoute):
-            raise ValueError(f'ModelRoute expected, but {type(conn)} provided')
+        route = parse_resources_file_with_one_item(file).resource
+        if not isinstance(route, ModelRoute):
+            raise ValueError(f'ModelRoute expected, but {type(route)} provided')
 
-        mr_id = conn.id
+        mr_id = route.id
 
     try:
         click.echo(client.delete(mr_id))
