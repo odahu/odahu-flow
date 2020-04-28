@@ -66,7 +66,7 @@ def get(client: ModelRouteClient, mr_id: str, output_format: str):
     """
     routes = [client.get(mr_id)] if mr_id else client.get_all()
 
-    print("Routes not found") if not routes else format_output(routes, output_format)
+    format_output(routes, output_format)
 
 
 @route.command()
