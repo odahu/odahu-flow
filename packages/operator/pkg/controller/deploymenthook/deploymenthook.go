@@ -129,13 +129,7 @@ func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 
 	toleration := pm.deploymentConfig.Toleration
 	if toleration != nil {
-		v1Toleration := corev1.Toleration{
-			Key:               toleration.Key,
-			Operator:          corev1.TolerationOperator(toleration.Operator),
-			Value:             toleration.Value,
-			Effect:            corev1.TaintEffect(toleration.Effect),
-			TolerationSeconds: toleration.TolerationSeconds}
-		pod.Spec.Tolerations = append(pod.Spec.Tolerations, v1Toleration)
+		pod.Spec.Tolerations = append(pod.Spec.Tolerations, *toleration)
 		log.Info("Assigning toleration to a pod", "toleration", toleration, "pod name", pod.Name)
 	} else {
 		log.Info("Got empty toleration from deployment config, skipping", "pod name", pod.Name)
