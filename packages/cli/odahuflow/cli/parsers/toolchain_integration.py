@@ -62,7 +62,7 @@ def get(client: ToolchainIntegrationClient, ti_id: str, output_format: str):
     """
     tis = [client.get(ti_id)] if ti_id else client.get_all()
 
-    format_output(tis, output_format)
+    print("Toolchain integrations not found") if not tis else format_output(tis, output_format)
 
 
 @toolchain_integration.command()

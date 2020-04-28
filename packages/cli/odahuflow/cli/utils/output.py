@@ -52,7 +52,7 @@ ALL_OUTPUT_FORMATS = [
 def validate_output_format(ctx, param, value):
     """
     Custom validator for "--output-format" parameter.
-    It's an analog of click.Choise
+    It's an analog of click.Choice
 
     :param ctx: click context
     :param param: param name
