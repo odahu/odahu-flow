@@ -51,7 +51,7 @@ def get(client: PackagingIntegrationClient, pi_id: str, output_format: str):
     Get packaging integrations.\n
     The command without id argument retrieve all packaging integrations.\n
     Get all packaging integrations in json format:\n
-        odahuflowctl pack-integration get --format json\n
+        odahuflowctl pack-integration get --output-format json\n
     Get packaging integration with "git-repo" id:\n
         odahuflowctl pack-integration get --id git-repo\n
     Using jsonpath:\n
