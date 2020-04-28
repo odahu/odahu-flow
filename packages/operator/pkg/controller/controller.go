@@ -18,7 +18,7 @@ package controller
 
 import (
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
-	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	v1 "github.com/knative/serving/pkg/apis/serving/v1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -68,7 +68,7 @@ func AddToManager(m manager.Manager, odahuConfig *config.Config) error {
 		istioschema.AddToScheme(m.GetScheme())
 
 		log.Info("Setting up Knative scheme")
-		if err := knservingv1alpha1.AddToScheme(m.GetScheme()); err != nil {
+		if err := v1.AddToScheme(m.GetScheme()); err != nil {
 			log.Error(err, "unable add Knative APIs to scheme")
 
 			return err

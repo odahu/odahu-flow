@@ -16,7 +16,10 @@
 
 package config
 
-import odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+import (
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	v1 "k8s.io/api/core/v1"
+)
 
 var (
 	defaultDeploymentMemoryLimit    = "256Mi"
@@ -64,8 +67,8 @@ type ModelDeploymentConfig struct {
 	// Kubernetes node selector for model deployments
 	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model deployments
-	Toleration map[string]string          `json:"toleration"`
-	Istio      ModelDeploymentIstioConfig `json:"istio"`
+	Toleration                *v1.Toleration                `json:"toleration,omitempty"`
+	Istio                     ModelDeploymentIstioConfig    `json:"istio"`
 	// Default resources for deployment pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
 }
