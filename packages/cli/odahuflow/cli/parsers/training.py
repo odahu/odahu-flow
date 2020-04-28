@@ -83,7 +83,7 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
     """
     trains = [client.get(train_id)] if train_id else client.get_all()
 
-    format_output(trains, output_format)
+    print("Trainings not found") if not trains else format_output(trains, output_format)
 
 
 @training.command()

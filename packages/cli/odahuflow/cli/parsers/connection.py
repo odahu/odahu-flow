@@ -77,7 +77,7 @@ def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: b
     else:
         conns = client.get_all()
 
-    format_output(conns, output_format)
+    print("Connections not found") if not conns else format_output(conns, output_format)
 
 
 @connection.command()

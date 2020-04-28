@@ -78,7 +78,7 @@ def get(client: ModelPackagingClient, pack_id: str, output_format: str):
     """
     packs = [client.get(pack_id)] if pack_id else client.get_all()
 
-    format_output(packs, output_format)
+    print("Packagings not found") if not packs else format_output(packs, output_format)
 
 
 @packaging.command()

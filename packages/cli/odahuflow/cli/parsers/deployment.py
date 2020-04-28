@@ -77,7 +77,7 @@ def get(client: ModelDeploymentClient, md_id: str, output_format: str):
     """
     mds = [client.get(md_id)] if md_id else client.get_all()
 
-    format_output(mds, output_format)
+    print("Deployments not found") if not mds else format_output(mds, output_format)
 
 
 @deployment.command()
