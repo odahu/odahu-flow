@@ -44,7 +44,7 @@ def model():
 def invoke(json_input, model_route: str, model_deployment: str, url: str, url_prefix: str,
            host: str, jwt: str, json_file: str):
     """
-    Invoke model endpoint
+    Invoke model endpoint.
 
     :param json_input:
     :param client:
@@ -72,7 +72,7 @@ def invoke(json_input, model_route: str, model_deployment: str, url: str, url_pr
 def info(model_route: str, model_deployment: str, url: str, url_prefix: str,
          host: str, jwt: str):
     """
-    Get model information
+    Get model information.
 
     :param client: Model HTTP Client
     """

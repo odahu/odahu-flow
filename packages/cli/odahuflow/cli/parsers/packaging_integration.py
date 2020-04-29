@@ -51,7 +51,7 @@ def get(client: PackagingIntegrationClient, pi_id: str, output_format: str):
     Get packaging integrations.\n
     The command without id argument retrieve all packaging integrations.\n
     Get all packaging integrations in json format:\n
-        odahuflowctl pack-integration get --format json\n
+        odahuflowctl pack-integration get --output-format json\n
     Get packaging integration with "git-repo" id:\n
         odahuflowctl pack-integration get --id git-repo\n
     Using jsonpath:\n
@@ -70,7 +70,7 @@ def get(client: PackagingIntegrationClient, pi_id: str, output_format: str):
 @packaging_integration.command()
 @click.option('--pi-id', '--id', help='Packaging integration ID')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def create(client: PackagingIntegrationClient, pi_id: str, file: str, output_format: str):

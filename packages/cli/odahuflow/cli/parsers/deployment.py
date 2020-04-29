@@ -52,7 +52,7 @@ def deployment(ctx: click.core.Context, url: str, token: str):
 
 @deployment.command()
 @click.option('--md-id', '--id', help='Model deployment ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
+@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
 @pass_obj
 def get(client: ModelDeploymentClient, md_id: str, output_format: str):
@@ -62,7 +62,7 @@ def get(client: ModelDeploymentClient, md_id: str, output_format: str):
     The command without id argument retrieve all deployments.
     \b
     Get all deployments in json format:
-        odahuflowctl dep get --format json
+        odahuflowctl dep get --output-format json
     \b
     Get deployment with "git-repo" id:
         odahuflowctl dep get --id model-wine
