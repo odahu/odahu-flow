@@ -25,6 +25,10 @@ TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 
 TEST_DATA_TI_ID=training-data-helper
 EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
+CLOUD_PROVIDER="$(jq '.cloud.type' -r "${CLUSTER_PROFILE}")"
+CLUSTER_NAME="$(jq '.cluster_name' -r "${CLUSTER_PROFILE}")"
+
+RCLONE_PROFILE_NAME="robot-tests"
 
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
 # Arguments:
@@ -54,24 +58,7 @@ function pack_model() {
   cd -
 
   # Pushes trained zip artifact to the bucket
-  case "${CLOUD_PROVIDER}" in
-  aws)
-    aws s3 cp "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip" "s3://${CLUSTER_NAME}-data-store/output/${mp_id}.zip"
-    ;;
-  azure)
-    STORAGE_ACCOUNT=$(az storage account list -g "${CLUSTER_NAME}" --query "[?tags.cluster=='${CLUSTER_NAME}' && tags.purpose=='Odahuflow models storage'].[name]" -otsv)
-    az storage blob upload --account-name "${STORAGE_ACCOUNT}" -c "${CLUSTER_NAME}-data-store" \
-      -f "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip" -n "output/${mp_id}.zip"
-    ;;
-  gcp)
-    gsutil cp "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip" "gs://${CLUSTER_NAME}-data-store/output/${mp_id}.zip"
-    ;;
-  *)
-    echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
-    usage
-    exit 1
-    ;;
-  esac
+  copy_to_cluster_bucket "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip" "output/"
 
   rm "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip"
 
@@ -96,25 +83,38 @@ function wait_all_background_task() {
   fi
 }
 
-# Copy local directory or file to a bucket
-# $1 - local directory or file
-# $2 - bucket directory or file
-function copy_to_cluster_bucket() {
-  local source="${1}"
-  local target="${2}"
-
+function configure_rclone() {
   case "${CLOUD_PROVIDER}" in
   aws)
-    aws s3 cp --recursive "${source}" "s3://${CLUSTER_NAME}-data-store/${target}"
+    local access_key_id="$(jq -r .cloud.aws.credentials.AWS_ACCESS_KEY_ID ${CLUSTER_PROFILE})"
+    local secret_access_key="$(jq -r .cloud.aws.credentials.AWS_SECRET_ACCESS_KEY ${CLUSTER_PROFILE})"
+    local region="$(jq -r .cloud.aws.region ${CLUSTER_PROFILE})"
+
+    rclone config create "${RCLONE_PROFILE_NAME}" "s3" \
+              provider AWS \
+              account bucket-owner-full-control \
+              sas_url true \
+              server_side_encryption AES256 \
+              storage_class STANDARD \
+              region "${region}" \
+              access_key_id "${access_key_id}" \
+              secret_access_key "${secret_access_key}"
     ;;
   azure)
-    STORAGE_ACCOUNT=$(az storage account list -g "${CLUSTER_NAME}" --query "[?tags.cluster=='${CLUSTER_NAME}' && tags.purpose=='Odahuflow models storage'].[name]" -otsv)
+    local account="$(jq -r .cloud.azure.storage_account ${CLUSTER_PROFILE})"
+    local sas_url="$(odahuflowctl conn get --id models-output --decrypted -o json | jq -r '.[0].spec.keySecret')"
 
-    az storage blob upload-batch --account-name "${STORAGE_ACCOUNT}" --source "${source}" \
-      --destination "${CLUSTER_NAME}-data-store" --destination-path "${target}"
+    rclone config create "${RCLONE_PROFILE_NAME}" "azureblob" \
+              account "${account}" \
+              sas_url "${sas_url}"
     ;;
   gcp)
-    gsutil cp -r "${source}" "gs://${CLUSTER_NAME}-data-store/${target}"
+    local service_account_credentials="$(jq -r .cloud.gcp.credentials.GOOGLE_CREDENTIALS ${CLUSTER_PROFILE})"
+    rclone config create "${RCLONE_PROFILE_NAME}" "google cloud storage" \
+              object_acl projectPrivate \
+              bucket_acl projectPrivate \
+              bucket_policy_only true \
+              service_account_credentials "${service_account_credentials}"
     ;;
   *)
     echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
@@ -122,6 +122,16 @@ function copy_to_cluster_bucket() {
     exit 1
     ;;
   esac
+}
+
+# Copy local directory or file to a bucket
+# $1 - local directory or file
+# $2 - bucket directory or file
+function copy_to_cluster_bucket() {
+  local source="${1}"
+  local target="${2}"
+
+  rclone copy "${source}" "${RCLONE_PROFILE_NAME}:${CLUSTER_NAME}-data-store/${target}"
 }
 
 # Create a test data OdahuFlow connection based on models-output connection.
@@ -170,7 +180,7 @@ function upload_test_dags() {
 
     for dag_dir in "${dag_dirs[@]}" ;
     do
-      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "dags/$(dirname ${dag_dir})/"
+      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "dags/${dag_dir}/"
     done
 
     rm -rf "${tmp_odahu_example_dir}"
@@ -193,7 +203,7 @@ function setup() {
   wget -O "${TEST_DATA}/wine-quality.csv" "https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # Pushes a test data to the bucket and create a file with the connection
-  copy_to_cluster_bucket "${TEST_DATA}/" "test-data/"
+  copy_to_cluster_bucket "${TEST_DATA}/" "test-data/data/"
 
   # Update test-data connections
   create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
@@ -257,6 +267,8 @@ while [ "${1}" != "" ]; do
     ;;
   esac
 done
+
+configure_rclone
 
 # Main programm entrypoint
 case "${COMMAND}" in
