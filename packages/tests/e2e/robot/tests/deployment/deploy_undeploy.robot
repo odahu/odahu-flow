@@ -41,7 +41,6 @@ Check API deploy procedure
 Update model deployment
     [Documentation]  Check model deployment upgrade
     [Teardown]  Cleanup resources
-    [Tags]  kek
     Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL}
 

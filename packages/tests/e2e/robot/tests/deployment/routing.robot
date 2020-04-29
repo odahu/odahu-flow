@@ -148,7 +148,6 @@ File with entitiy not found
     command=delete
 
 Scaledown to zero pods
-    [Tags]  kek
     [Documentation]  Wait until model scales down to zero pods
     Wait Until Keyword Succeeds  4m  5 sec  Expect number of replicas  ${MD_COUNTER_MODEL_1}  0
 
