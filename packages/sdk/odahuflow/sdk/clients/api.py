@@ -468,7 +468,7 @@ class AsyncRemoteAPIClient(RemoteAPIClient):
         while left_retries > 0:
             try:
                 async with session.request(**request_kwargs) as resp:
-                    print(resp)
+                    LOGGER.debug(resp)
                     if self._login_required(resp):
                         raise LoginRequired()
 
