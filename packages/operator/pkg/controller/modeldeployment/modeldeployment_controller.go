@@ -83,6 +83,10 @@ var (
 	defaultTerminationPeriod = int64(15)
 )
 
+const (
+	deploymentIDLabel = "odahu.org/deploymentID"
+)
+
 func Add(
 	mgr manager.Manager,
 	deploymentConfig config.ModelDeploymentConfig,
@@ -302,6 +306,7 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						modelNameAnnotationKey: modelDeploymentCR.Name,
+						deploymentIDLabel:      modelDeploymentCR.Name,
 					},
 					Annotations: map[string]string{
 						knativeAutoscalingClass:     defaultKnativeAutoscalingClass,

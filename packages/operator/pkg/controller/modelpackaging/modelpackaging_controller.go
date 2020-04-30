@@ -43,6 +43,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
+const (
+	packagingIDLabel = "odahu.org/packagingID"
+)
+
 var log = logf.Log.WithName("model-packager-controller")
 
 // Add creates a new ModelPackaging Controller and adds it to the Manager with default RBAC.
@@ -289,6 +293,9 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      packagingCR.Name,
 			Namespace: packagingCR.Namespace,
+			Labels: map[string]string{
+				packagingIDLabel: packagingCR.Name,
+			},
 		},
 		Spec: tektonv1alpha1.TaskRunSpec{
 			TaskSpec: taskSpec,

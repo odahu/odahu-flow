@@ -49,6 +49,10 @@ const (
 	evictedPodReason = "Evicted"
 )
 
+const (
+	trainingIDLabel = "odahu.org/trainingID"
+)
+
 var log = logf.Log.WithName(controllerName)
 
 // Add creates a new ModelTraining Controller and adds it to the Manager with default RBAC.
@@ -322,6 +326,9 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      trainingCR.Name,
 			Namespace: trainingCR.Namespace,
+			Labels: map[string]string{
+				trainingIDLabel: trainingCR.Name,
+			},
 		},
 		Spec: tektonv1alpha1.TaskRunSpec{
 			TaskSpec: taskSpec,
