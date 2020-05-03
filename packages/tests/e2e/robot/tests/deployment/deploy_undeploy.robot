@@ -14,6 +14,7 @@ Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Run Keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                               Login to the api and edge  AND
+...                               Scale up nodepool  AND
 ...                               Cleanup resources
 Suite Teardown      Run keywords  Cleanup resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}

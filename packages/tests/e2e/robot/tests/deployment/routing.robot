@@ -18,6 +18,7 @@ Library             odahuflow.robot.libraries.model.Model
 Library             Collections
 Suite Setup         Run keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
+...                 Scale up nodepool  AND
 ...                 Cleanup resources  AND
 ...                 Run API deploy from model packaging and check model started  ${MP_COUNTER_MODEL}   ${MD_COUNTER_MODEL_1}   ${RES_DIR}/min-replicas-0.deployment.odahuflow.yaml  AND
 ...                 Run API deploy from model packaging and check model started  ${MP_COUNTER_MODEL}   ${MD_COUNTER_MODEL_2}   ${RES_DIR}/min-replicas-0.deployment.odahuflow.yaml  AND

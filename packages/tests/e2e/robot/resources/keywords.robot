@@ -42,6 +42,12 @@ Build model
     Set Suite Variable  ${model_image_key_name}  ${mt.trained_image}
 
     # --------- DEPLOY COMMAND SECTION -----------
+Scale up nodepool
+    [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
+
+    ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
+    Shell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${res.stdout} --timeout 400
+    Shell  odahuflowctl --verbose md delete ${md_name} --ignore-not-found
 
 Run API deploy from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
