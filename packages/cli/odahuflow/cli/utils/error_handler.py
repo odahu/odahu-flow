@@ -25,8 +25,10 @@ LOG = logging.getLogger(__name__)
 
 TIMEOUT_ERROR_MESSAGE = 'Time out: operation has not been confirmed'
 IGNORE_NOT_FOUND_ERROR_MESSAGE = '{} was not found. Ignore'
-ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide a ID or ' \
+ID_AND_FILE_GIVEN_ERROR_MESSAGE = 'You should provide an ID or ' \
                                    'file parameter, not both.'
+ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide an ID or ' \
+                                   'file parameter.'
 
 
 def check_id_or_file_params_present(
@@ -39,7 +41,7 @@ def check_id_or_file_params_present(
         raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
 
     if entity_id and file:
-        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
+        raise ValueError(ID_AND_FILE_GIVEN_ERROR_MESSAGE)
 
 
 @contextmanager
