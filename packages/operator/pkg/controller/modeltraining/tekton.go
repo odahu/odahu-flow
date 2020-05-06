@@ -56,8 +56,8 @@ func (r *ReconcileModelTraining) generateTrainerTaskSpec(
 		Steps: []tektonv1alpha1.Step{
 			r.createInitTrainerStep(helperContainerResources, trainingCR.Name),
 			r.createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
-			r.createArtifactValidationStep(helperContainerResources, trainingCR),
 			r.createResultTrainerStep(helperContainerResources, trainingCR),
+			r.createArtifactValidationStep(helperContainerResources, trainingCR),
 		},
 		Volumes: []corev1.Volume{
 			{
