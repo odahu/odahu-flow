@@ -26,7 +26,6 @@ TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 TEST_DATA_TI_ID=training-data-helper
 EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
 CLOUD_PROVIDER="$(jq '.cloud.type' -r "${CLUSTER_PROFILE}")"
-CLUSTER_NAME="$(jq '.cluster_name' -r "${CLUSTER_PROFILE}")"
 BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 
 RCLONE_PROFILE_NAME="robot-tests"
@@ -59,7 +58,7 @@ function pack_model() {
   cd -
 
   # Pushes trained zip artifact to the bucket
-  copy_to_cluster_bucket "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip" "output/"
+  copy_to_cluster_bucket "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip" "${BUCKET_NAME}/output/"
 
   rm "${TRAINED_ARTIFACTS_DIR}/${mp_id}.zip"
 
@@ -87,9 +86,10 @@ function wait_all_background_task() {
 function configure_rclone() {
   case "${CLOUD_PROVIDER}" in
   aws)
-    local access_key_id="$(jq -r .cloud.aws.credentials.AWS_ACCESS_KEY_ID ${CLUSTER_PROFILE})"
-    local secret_access_key="$(jq -r .cloud.aws.credentials.AWS_SECRET_ACCESS_KEY ${CLUSTER_PROFILE})"
-    local region="$(jq -r .cloud.aws.region ${CLUSTER_PROFILE})"
+    local access_key_id secret_access_key region
+    access_key_id="$(jq -r .cloud.aws.credentials.AWS_ACCESS_KEY_ID "${CLUSTER_PROFILE}")"
+    secret_access_key="$(jq -r .cloud.aws.credentials.AWS_SECRET_ACCESS_KEY "${CLUSTER_PROFILE}")"
+    region="$(jq -r .cloud.aws.region "${CLUSTER_PROFILE}")"
 
     rclone config create "${RCLONE_PROFILE_NAME}" "s3" \
               provider AWS \
@@ -102,15 +102,17 @@ function configure_rclone() {
               secret_access_key "${secret_access_key}"
     ;;
   azure)
-    local account="$(jq -r .cloud.azure.storage_account ${CLUSTER_PROFILE})"
-    local sas_url="$(odahuflowctl conn get --id models-output --decrypted -o json | jq -r '.[0].spec.keySecret')"
+    local account sas_url
+    account="$(jq -r .cloud.azure.storage_account "${CLUSTER_PROFILE}")"
+    sas_url="$(odahuflowctl conn get --id models-output --decrypted -o json | jq -r '.[0].spec.keySecret')"
 
     rclone config create "${RCLONE_PROFILE_NAME}" "azureblob" \
               account "${account}" \
               sas_url "${sas_url}"
     ;;
   gcp)
-    local service_account_credentials="$(jq -r .cloud.gcp.credentials.GOOGLE_CREDENTIALS ${CLUSTER_PROFILE})"
+    local service_account_credentials
+    service_account_credentials="$(jq -r .cloud.gcp.credentials.GOOGLE_CREDENTIALS "${CLUSTER_PROFILE}")"
     rclone config create "${RCLONE_PROFILE_NAME}" "google cloud storage" \
               object_acl projectPrivate \
               bucket_acl projectPrivate \
@@ -132,7 +134,7 @@ function copy_to_cluster_bucket() {
   local source="${1}"
   local target="${2}"
 
-  rclone copy "${source}" "${RCLONE_PROFILE_NAME}:${BUCKET_NAME}/${target}"
+  rclone copy "${source}" "${RCLONE_PROFILE_NAME}:${target}"
 }
 
 # Create a test data OdahuFlow connection based on models-output connection.
@@ -171,7 +173,7 @@ function create_test_data_connection() {
   rm "${conn_file}"
 }
 
-# Upload test dags from odahu-examples repository to the cluster dags
+# Upload test dags from odahu-examples repository to the cluster dags object storage bucket
 function upload_test_dags() {
     git_url="https://github.com/odahu/odahu-examples.git"
     dag_dirs=("mlflow/sklearn/wine/airflow")
@@ -179,9 +181,13 @@ function upload_test_dags() {
 
     git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
+    local dag_bucket dag_bucket_path
+    dag_bucket="$(jq -r ".airflow.dag_bucket // \"$BUCKET_NAME\"" "${CLUSTER_PROFILE}")"
+    dag_bucket_path="$(jq -r ".airflow.dag_bucket_path // \"/dags\"" "${CLUSTER_PROFILE}")"
+
     for dag_dir in "${dag_dirs[@]}" ;
     do
-      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "dags/${dag_dir}/"
+      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "${dag_bucket}${dag_bucket_path}/${dag_dir}/"
     done
 
     rm -rf "${tmp_odahu_example_dir}"
@@ -195,7 +201,7 @@ function setup() {
   done
 
   # Create training-data-helper toolchain integration
-  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" > "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
   odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
@@ -204,7 +210,7 @@ function setup() {
   wget -O "${TEST_DATA}/wine-quality.csv" "https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # Pushes a test data to the bucket and create a file with the connection
-  copy_to_cluster_bucket "${TEST_DATA}/" "test-data/data/"
+  copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
 
   # Update test-data connections
   create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
@@ -236,7 +242,7 @@ function cleanup() {
 # Prints the help message
 function usage() {
   echo "Setup or cleanup training stuff for robot tests."
-  echo "usage: training_stuff.sh [[setup|cleanup][--models][--help][--verbose]"
+  echo "usage: ${0} [[setup|cleanup][--models][--help][--verbose]"
 }
 
 # The command line arguments parsing
@@ -280,7 +286,7 @@ cleanup)
   cleanup
   ;;
 *)
-  echo "Unxpected command: ${COMMAND}"
+  echo "Unexpected command: ${COMMAND}"
   usage
   exit 1
   ;;

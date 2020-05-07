@@ -3,6 +3,7 @@ set -e
 
 AIRFLOW_NAMESPACE=airflow
 AIRFLOW_WEB_CONTAINER_NAME=airflow-web
+KUBECTL="kubectl --request-timeout 10s"
 
 function ReadArguments() {
   if [[ $# == 0 ]]; then
@@ -13,8 +14,8 @@ function ReadArguments() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
     -h | --help)
-      echo "test_composer.sh - Launch and wait finish of the dags"
-      echo -e "Usage: ./test_composer.sh [OPTIONS]\n\noptions:"
+      echo "$0 - Launch and wait finish of the dags"
+      echo -e "Usage: $0 [OPTIONS]\n\noptions:"
       echo -e "--dags\t\tDags for testing, for example: --dags 'airflow-wine,airflow-tensorflow'"
       echo -e "-v  --verbose\t\tverbose mode for debug purposes"
       echo -e "-h  --help\t\tshow brief help"
@@ -36,7 +37,7 @@ function ReadArguments() {
   done
 
   # Check mandatory parameters
-  if [[ ! TEST_DAG_IDS_RAW ]]; then
+  if [[ ! $TEST_DAG_IDS_RAW ]]; then
     echo "ERROR: dags argument must be specified. Use -h for help!"
     exit 1
   else
@@ -50,13 +51,13 @@ function ReadArguments() {
 }
 
 function wait_dags_finish() {
-  for i in ${!TEST_DAG_RUN_IDS[@]}; do
+  for i in "${!TEST_DAG_RUN_IDS[@]}"; do
     dag_run_id="${TEST_DAG_RUN_IDS[${i}]}"
     dag_id="${TEST_DAG_IDS[${i}]}"
 
     echo "Wait for the finishing of ${dag_id} and ${dag_run_id} its run"
 
-    while [ true ]; do
+    while true; do
       # Extract a dag state from the following output table.
       #------------------------------------------------------------------------------------------------------------------------
       #DAG RUNS
@@ -64,7 +65,7 @@ function wait_dags_finish() {
       #id  | run_id               | state      | execution_date       | state_date           |
       #152 | manual__2019-12-25T14:53:03+00:00 | success    | 2019-12-25T14:53:03+00:00 | 2019-12-25T14:53:03.236701+00:00 |
       #152 | manual__2019-12-25T13:52:01+00:00 | success    | 2019-12-25T14:53:03+00:00 | 2019-12-25T14:53:03.236701+00:00 |
-      state=$(kubectl exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow list_dag_runs "${dag_id}" | grep -- "${dag_run_id}" | awk '{print $5}')
+      state=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow list_dag_runs "${dag_id}" | awk "/${dag_run_id}/ {print \$5}")
 
       case "${state}" in
       "success")
@@ -72,7 +73,7 @@ function wait_dags_finish() {
         break
         ;;
       "running")
-        echo "DAG run ${dag_run_id} is running. Slepping 30 sec..."
+        echo "DAG run ${dag_run_id} is running. Sleeping 30 sec..."
         sleep 30
         ;;
       "failed")
@@ -90,15 +91,16 @@ function wait_dags_finish() {
 
 export TEST_DAG_RUN_IDS=()
 ReadArguments "$@"
-export POD=$(kubectl get pods -l app=airflow -l component=web -n "${AIRFLOW_NAMESPACE}" -o custom-columns=:metadata.name --no-headers | head -n 1)
+POD=$(${KUBECTL} get pods -l app=airflow -l component=web -n "${AIRFLOW_NAMESPACE}" -o jsonpath='{.items[0].metadata.name}')
+export POD
 
 # Run all test dags
-for dag_id in ${TEST_DAG_IDS[@]}; do
+for dag_id in "${TEST_DAG_IDS[@]}"; do
   dag_run_id="${dag_id}-ci-$(date +%s)"
   TEST_DAG_RUN_IDS+=("${dag_run_id}")
 
   echo "Run the ${dag_run_id} of ${dag_id} dag"
-  kubectl exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow trigger_dag -r "${dag_run_id}" "${dag_id}"
+  ${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow trigger_dag -r "${dag_run_id}" "${dag_id}"
 done
 
 wait_dags_finish
