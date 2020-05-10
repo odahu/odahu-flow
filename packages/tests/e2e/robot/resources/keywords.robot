@@ -52,6 +52,7 @@ Scale up nodepool
 Run API deploy from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
 
+    Scale up nodepool  ${mp_name}  {md_name}  ${res_file}
     ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
     StrictShell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${res.stdout}
 
