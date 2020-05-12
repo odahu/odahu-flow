@@ -23,8 +23,8 @@ import typing
 
 import pytest
 from click.testing import CliRunner
-from odahuflow.cli.parsers.connection import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
-    ID_AND_FILE_MISSED_ERROR_MESSAGE
+from odahuflow.cli.utils.error_handler import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
+    ID_AND_FILE_GIVEN_ERROR_MESSAGE, ID_AND_FILE_MISSED_ERROR_MESSAGE
 from odahuflow.cli.utils.output import JSON_OUTPUT_FORMAT, \
     JSONPATH_OUTPUT_FORMAT
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
@@ -164,6 +164,19 @@ def test_delete_id_and_file_present(tmp_path, cli_runner: CliRunner,
         json.dumps({**entity_test_data.entity.to_dict(), **{'kind': entity_test_data.kind}}))
     result = cli_runner.invoke(entity_test_data.click_group,
                                ['delete', '--id', 'some-id', '-f', entity_file],
+                               obj=entity_test_data.entity_client)
+
+    assert result.exit_code != 0
+    assert ID_AND_FILE_GIVEN_ERROR_MESSAGE in str(result.exception)
+
+
+def test_delete_no_id_or_file_present(tmp_path, cli_runner: CliRunner,
+                                    entity_test_data: EntityTestData):
+    entity_file = tmp_path / "entity.yaml"
+    entity_file.write_text(
+        json.dumps({**entity_test_data.entity.to_dict(), **{'kind': entity_test_data.kind}}))
+    result = cli_runner.invoke(entity_test_data.click_group,
+                               ['delete'],
                                obj=entity_test_data.entity_client)
 
     assert result.exit_code != 0
