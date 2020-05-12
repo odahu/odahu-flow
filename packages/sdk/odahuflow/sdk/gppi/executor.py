@@ -125,7 +125,8 @@ class ExecutionEnvironment:
         self.create_env()
 
         if skip_deps:
-            _logger.warning(f'Flag "skip_deps"=True. Installing deps is skipped')
+
+            _logger.warning('Flag "skip_deps"=True. Installing deps is skipped')
         else:
             _logger.info(f'Start to install dependencies for {self.__class__}')
             self.install_dependencies()
@@ -215,7 +216,7 @@ class GPPITrainedModelBinary:
 
         self.exec_env = None
         if not use_current_env:
-            _logger.info(f'Start initializing environment')
+            _logger.info('Start initializing environment')
             self.exec_env: ExecutionEnvironment = self._init_exec_env(env_name)
 
     @property
@@ -224,7 +225,7 @@ class GPPITrainedModelBinary:
 
     def execute(self, command: str, cwd: str = None, stream_output: bool = True):
         if self.use_current_env:
-            _logger.info(f'use_current_env flag = True. Start to execute command without changing environment')
+            _logger.info('use_current_env flag = True. Start to execute command without changing environment')
             exit_code, output, err_ = run('bash', '-c', command, cwd=cwd, stream_output=stream_output)
         else:
             _logger.info(f'use_current_env flag = False. Start to execute command in {self.exec_env}')

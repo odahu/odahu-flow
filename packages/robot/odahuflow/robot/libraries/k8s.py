@@ -202,7 +202,7 @@ class K8s:
         """
         if not wait_until(lambda: self.get_number_of_md_replicas(name, expected_number_of_replicas),
                           iteration_duration=10, iterations=24):  # 4 min
-            raise Exception(f"Timeout")
+            raise Exception("Timeout")
 
     def deployment_is_running(self, deployment_name, namespace):
         """

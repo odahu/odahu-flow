@@ -239,10 +239,10 @@ def logs(client: ModelPackagingClient, pack_id: str, file: str, follow: bool):
     :param file: Path to the file with only one packaging
     """
     if not pack_id and not file:
-        raise ValueError(f'You should provide a packaging ID or file parameter, not both.')
+        raise ValueError('You should provide a packaging ID or file parameter, not both.')
 
     if pack_id and file:
-        raise ValueError(f'You should provide a packaging ID or file parameter, not both.')
+        raise ValueError('You should provide a packaging ID or file parameter, not both.')
 
     if file:
         pack = parse_resources_file_with_one_item(file).resource

@@ -22,7 +22,7 @@ import (
 	admissionregistrationv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" //nolint
 	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
@@ -63,7 +63,8 @@ func Add(
 		Operations(admissionregistrationv1beta1.Create, admissionregistrationv1beta1.Update).
 		WithManager(mgr).
 		ForType(&corev1.Pod{}).
-		NamespaceSelector(&metav1.LabelSelector{MatchLabels: map[string]string{namespaceSelectorKey: namespaceSelectorValue}}).
+		NamespaceSelector(&metav1.LabelSelector{
+			MatchLabels: map[string]string{namespaceSelectorKey: namespaceSelectorValue}}).
 		Handlers(&podMutator{deploymentConfig: deploymentConfig}).
 		Build()
 	if err != nil {
@@ -110,15 +111,12 @@ func (pm *podMutator) Handle(_ context.Context, req types.Request) types.Respons
 	}
 
 	podCopy := pod.DeepCopy()
-	err = pm.addNodeSelectors(podCopy)
-	if err != nil {
-		return admission.ErrorResponse(http.StatusInternalServerError, err)
-	}
+	pm.addNodeSelectors(podCopy)
 	return admission.PatchResponse(pod, podCopy)
 }
 
 //Adds node selectors and tolerations from the deployment config to knative pods
-func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
+func (pm *podMutator) addNodeSelectors(pod *corev1.Pod)  {
 	nodeSelector := pm.deploymentConfig.NodeSelector
 	if len(nodeSelector) > 0 {
 		pod.Spec.NodeSelector = nodeSelector
@@ -134,8 +132,6 @@ func (pm *podMutator) addNodeSelectors(pod *corev1.Pod) error {
 	} else {
 		log.Info("Got empty toleration from deployment config, skipping", "pod name", pod.Name)
 	}
-
-	return nil
 }
 
 var _ inject.Decoder = &podMutator{}
