@@ -27,6 +27,7 @@ TEST_DATA_TI_ID=training-data-helper
 EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
 CLOUD_PROVIDER="$(jq '.cloud.type' -r "${CLUSTER_PROFILE}")"
 CLUSTER_NAME="$(jq '.cluster_name' -r "${CLUSTER_PROFILE}")"
+BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 
 RCLONE_PROFILE_NAME="robot-tests"
 
@@ -131,7 +132,7 @@ function copy_to_cluster_bucket() {
   local source="${1}"
   local target="${2}"
 
-  rclone copy "${source}" "${RCLONE_PROFILE_NAME}:${CLUSTER_NAME}-data-store/${target}"
+  rclone copy "${source}" "${RCLONE_PROFILE_NAME}:${BUCKET_NAME}/${target}"
 }
 
 # Create a test data OdahuFlow connection based on models-output connection.
@@ -141,13 +142,13 @@ function copy_to_cluster_bucket() {
 function create_test_data_connection() {
   case "${CLOUD_PROVIDER}" in
   aws)
-    remote_dir="s3://${CLUSTER_NAME}-data-store"
+    remote_dir="s3://${BUCKET_NAME}"
     ;;
   azure)
-    remote_dir="${CLUSTER_NAME}-data-store"
+    remote_dir="${BUCKET_NAME}"
     ;;
   gcp)
-    remote_dir="gs://${CLUSTER_NAME}-data-store"
+    remote_dir="gs://${BUCKET_NAME}"
     ;;
   *)
     echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
