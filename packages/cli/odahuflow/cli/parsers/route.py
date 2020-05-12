@@ -93,14 +93,14 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
     :param mr_id: ModelRoute ID
     :param file: Path to the file with only one model route
     """
-    route = parse_resources_file_with_one_item(file).resource
-    if not isinstance(route, ModelRoute):
-        raise ValueError(f'ModelRoute expected, but {type(route)} provided')
+    route_resource = parse_resources_file_with_one_item(file).resource
+    if not isinstance(route_resource, ModelRoute):
+        raise ValueError(f'ModelRoute expected, but {type(route_resource)} provided')
 
     if mr_id:
-        route.id = mr_id
+        route_resource.id = mr_id
 
-    click.echo(client.create(route))
+    click.echo(client.create(route_resource))
 
     wait_operation_finish(timeout, wait, mr_id, client)
 
@@ -129,14 +129,14 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
     :param mr_id: Model route ID
     :param file: Path to the file with only one model route
     """
-    route = parse_resources_file_with_one_item(file).resource
-    if not isinstance(route, ModelRoute):
-        raise ValueError(f'ModelRoute expected, but {type(route)} provided')
+    route_resource = parse_resources_file_with_one_item(file).resource
+    if not isinstance(route_resource, ModelRoute):
+        raise ValueError(f'ModelRoute expected, but {type(route_resource)} provided')
 
     if mr_id:
-        route.id = mr_id
+        route_resource.id = mr_id
 
-    click.echo(client.edit(route))
+    click.echo(client.edit(route_resource))
 
     wait_operation_finish(timeout, wait, mr_id, client)
 
@@ -167,11 +167,11 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
     check_id_or_file_params_present(mr_id, file)
 
     if file:
-        route = parse_resources_file_with_one_item(file).resource
-        if not isinstance(route, ModelRoute):
-            raise ValueError(f'ModelRoute expected, but {type(route)} provided')
+        route_resource = parse_resources_file_with_one_item(file).resource
+        if not isinstance(route_resource, ModelRoute):
+            raise ValueError(f'ModelRoute expected, but {type(route_resource)} provided')
 
-        mr_id = route.id
+        mr_id = route_resource.id
 
     try:
         click.echo(client.delete(mr_id))
