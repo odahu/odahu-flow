@@ -109,7 +109,7 @@ def process_bulk_operation(api_client: RemoteAPIClient, filename: str, is_remova
     click.echo(', '.join(output))
 
     if result.errors:
-        click.echo(f'Some errors detected:')
+        click.echo('Some errors detected:')
         for error in result.errors:
             click.echo(f'\t{error}')
         sys.exit(1)

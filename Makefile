@@ -26,6 +26,7 @@ MOCKS_DIR=target/mocks
 SWAGGER_FILE=packages/operator/docs/swagger.yaml
 PYTHON_MODEL_DIR=packages/sdk/odahuflow/sdk/models
 SWAGGER_CODEGEN_BIN=java -jar swagger-codegen-cli.jar
+PIP_BIN=pip3
 
 HIERA_KEYS_DIR=
 ODAHUFLOW_PROFILES_DIR=
@@ -56,17 +57,17 @@ install-all: install-sdk install-cli install-robot
 ## install-sdk: Install sdk python package
 install-sdk:
 	cd packages/sdk && \
-		pip3 install ${BUILD_PARAMS} -e .
+		"${PIP_BIN}" install ${BUILD_PARAMS} -e .
 
 ## install-cli: Install cli python package
 install-cli:
 	cd packages/cli && \
-		pip3 install ${BUILD_PARAMS} -e .
+		"${PIP_BIN}" install ${BUILD_PARAMS} -e .
 
 ## install-robot: Install robot tests
 install-robot:
 	cd packages/robot && \
-		pip3 install ${BUILD_PARAMS} -e .
+		"${PIP_BIN}" install ${BUILD_PARAMS} -e .
 
 ## docker-build-odahu-flow-cli: Build image with odahuflow cli
 docker-build-odahu-flow-cli:

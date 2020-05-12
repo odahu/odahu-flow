@@ -67,7 +67,7 @@ def test(ctx):
     """
     ctx_obj: GppiCommandContextObj = ctx.obj
     ctx_obj.model_binary.self_check()
-    click.echo(f'OK\nGPPI is correct and could be packaged or deployed')
+    click.echo('OK\nGPPI is correct and could be packaged or deployed')
 
 
 @gppi.command()
