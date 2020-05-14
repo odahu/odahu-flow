@@ -17,7 +17,7 @@ import http
 
 import click
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import ID_AND_FILE_MISSED_ERROR_MESSAGE, \
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, \
     IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
@@ -172,11 +172,7 @@ def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: 
     :param file: Path to the file with only one connection
     :param ignore_not_found: ignore if connection is not found
     """
-    if not conn_id and not file:
-        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
-
-    if conn_id and file:
-        raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)
+    check_id_or_file_params_present(conn_id, file)
 
     if file:
         conn = parse_resources_file_with_one_item(file).resource

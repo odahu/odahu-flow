@@ -9,7 +9,6 @@ def test_list_local_trainings(tmpdir):
                '2Wine-1@-12',
                'Wine-1@-123',
                '@wine-1@-12',
-               'Zine-1@-12',
                'zine-1@-12',
                'Awine-1@']
     for folder in folders:
@@ -20,7 +19,6 @@ def test_list_local_trainings(tmpdir):
                                           '@wine-1@-12',
                                           'Awine-1@',
                                           'Wine-1@-123',
-                                          'Zine-1@-12',
                                           '[wine-1@-12',
                                           'wine-1@-12',
                                           'zine-1@-12']

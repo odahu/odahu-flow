@@ -35,7 +35,7 @@ def check_id_or_file_params_present(
         entity_id: Optional[str], file: Optional[str]
 ) -> None:
     """
-    Verify that only one parameter is None or empty
+    Verify that only one parameter is present
     """
     if not entity_id and not file:
         raise ValueError(ID_AND_FILE_MISSED_ERROR_MESSAGE)

@@ -77,7 +77,7 @@ def _check_conda():
     except Exception as exc_info:
         raise Exception("Could not find Conda executable at {0}. "
                         "Ensure Conda is installed as per the instructions "
-                        "at https://conda.io/docs/user-guide/install/index.html") from exc_info
+                        "at https://docs.conda.io/projects/conda/en/latest/user-guide/install/") from exc_info
 
 
 def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
