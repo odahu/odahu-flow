@@ -43,7 +43,7 @@ func TestPodMutator(t *testing.T) {
 	pm := podMutator{deploymentConfig: config.ModelDeploymentConfig{NodeSelector: nodeSelector, Toleration: toleration}}
 	pod := &corev1.Pod{}
 	pod.Spec.Tolerations = append(pod.Spec.Tolerations, defaultToleration)
-	_ = pm.addNodeSelectors(pod)
+	pm.addNodeSelectors(pod)
 
 	expectedPod := &corev1.Pod{}
 	expectedPod.Spec.Tolerations = append(expectedPod.Spec.Tolerations, defaultToleration, *toleration)

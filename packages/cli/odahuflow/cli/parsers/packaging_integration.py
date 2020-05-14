@@ -26,7 +26,7 @@ from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClie
 from odahuflow.sdk.models import PackagingIntegration
 
 IGNORE_NOT_FOUND_ERROR_MESSAGE = 'Packaging integration {} was not found. Ignore'
-ID_AND_FILE_MISSED_ERROR_MESSAGE = f'You should provide a packaging integration ID or file parameter, not both.'
+ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide a packaging integration ID or file parameter, not both.'
 
 
 @click.group()
