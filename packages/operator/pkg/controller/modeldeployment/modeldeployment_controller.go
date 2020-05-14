@@ -19,7 +19,6 @@ package modeldeployment
 import (
 	"context"
 	"fmt"
-	v1 "github.com/knative/serving/pkg/apis/serving/v1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"strconv"
 	"time"
@@ -27,6 +26,8 @@ import (
 	authv1alpha1 "github.com/aspenmesh/istio-client-go/pkg/apis/authentication/v1alpha1"
 	"github.com/go-logr/logr"
 	"github.com/knative/serving/pkg/apis/serving"
+	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	"github.com/knative/serving/pkg/apis/serving/v1beta1"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
@@ -141,7 +142,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &v1.Configuration{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &knservingv1alpha1.Configuration{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &odahuflowv1alpha1.ModelDeployment{},
 	})
@@ -162,7 +163,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &v1.Revision{}}, &EnqueueRequestForImplicitOwner{})
+	err = c.Watch(&source.Kind{Type: &knservingv1alpha1.Revision{}}, &EnqueueRequestForImplicitOwner{})
 	if err != nil {
 		return err
 	}
@@ -296,13 +297,13 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 		serviceAccountName = odahuflow.GenerateDeploymentConnectionSecretName(modelDeploymentCR.Name)
 	}
 
-	knativeConfiguration := &v1.Configuration{
+	knativeConfiguration := &knservingv1alpha1.Configuration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      knativeConfigurationName(modelDeploymentCR),
 			Namespace: modelDeploymentCR.Namespace,
 		},
-		Spec: v1.ConfigurationSpec{
-			Template: v1.RevisionTemplateSpec{
+		Spec: knservingv1alpha1.ConfigurationSpec{
+			Template: &knservingv1alpha1.RevisionTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						modelNameAnnotationKey: modelDeploymentCR.Name,
@@ -316,14 +317,16 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 						knativeAutoscalingTargetKey: knativeAutoscalingTargetDefaultValue,
 					},
 				},
-				Spec: v1.RevisionSpec{
-					PodSpec: corev1.PodSpec{
-						ServiceAccountName: serviceAccountName,
-						Containers: []corev1.Container{
-							*container,
+				Spec: knservingv1alpha1.RevisionSpec{
+					RevisionSpec: v1beta1.RevisionSpec{
+						TimeoutSeconds: &defaultTerminationPeriod,
+						PodSpec: v1beta1.PodSpec{
+							ServiceAccountName: serviceAccountName,
+							Containers: []corev1.Container{
+								*container,
+							},
 						},
 					},
-					TimeoutSeconds: &defaultTerminationPeriod,
 				},
 			},
 		},
@@ -338,7 +341,7 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 		return err
 	}
 
-	found := &v1.Configuration{}
+	found := &knservingv1alpha1.Configuration{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: knativeConfiguration.Name, Namespace: knativeConfiguration.Namespace,
 	}, found)
@@ -517,7 +520,7 @@ func (r *ReconcileModelDeployment) getLatestReadyRevision(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
 ) (string, bool, error) {
-	knativeConfiguration := &v1.Configuration{}
+	knativeConfiguration := &knservingv1alpha1.Configuration{}
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Name: knativeConfigurationName(modelDeploymentCR), Namespace: modelDeploymentCR.Namespace,
 	}, knativeConfiguration); errors.IsNotFound(err) {
@@ -711,7 +714,7 @@ func (r *ReconcileModelDeployment) cleanupOldRevisions(
 		return nil
 	}
 
-	lastKnativeRevision := &v1.Revision{}
+	lastKnativeRevision := &knservingv1alpha1.Revision{}
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Name: lastRevisionName, Namespace: modelDeploymentCR.Namespace,
 	}, lastKnativeRevision); err != nil {
@@ -733,7 +736,7 @@ func (r *ReconcileModelDeployment) cleanupOldRevisions(
 		return err
 	}
 
-	knativeRevisions := &v1.RevisionList{}
+	knativeRevisions := &knservingv1alpha1.RevisionList{}
 
 	labelSelectorReq, err := labels.NewRequirement(
 		modelNameAnnotationKey,
