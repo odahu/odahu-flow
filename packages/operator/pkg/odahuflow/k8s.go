@@ -21,8 +21,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	v1 "github.com/knative/serving/pkg/apis/serving/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 )
 
 const (
@@ -74,7 +75,7 @@ func StoreHash(obj metav1.Object) error {
 }
 
 // Compute hash and store it in the annotations
-func StoreHashKnative(obj *v1.Configuration) error {
+func StoreHashKnative(obj *knservingv1alpha1.Configuration) error {
 	h := sha512.New()
 	jsonData, err := json.Marshal(obj)
 	if err != nil {
