@@ -94,7 +94,7 @@ class ModelTrainingClient(RemoteAPIClient):
         return self.stream(f'{MODEL_TRAINING_URL}/{name}/log', 'GET', params={'follow': follow})
 
 
-class AsyncModelTrainingClient(AsyncRemoteAPIClient, ModelTrainingClient):
+class AsyncModelTrainingClient(AsyncRemoteAPIClient):
     """
     Model training async client
     """
