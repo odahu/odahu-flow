@@ -42,24 +42,23 @@ Build model
     Set Suite Variable  ${model_image_key_name}  ${mt.trained_image}
 
     # --------- DEPLOY COMMAND SECTION -----------
-Scale up nodepool
-    [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
-
-    ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
-    Shell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${res.stdout} --timeout 400
+Scale up nodepool from image
+    [Arguments]  ${image}  ${md_name}  ${res_file}
+    Shell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${image} --timeout 400
     Shell  odahuflowctl --verbose md delete ${md_name} --ignore-not-found
 
 Run API deploy from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
 
-    Scale up nodepool  ${mp_name}  {md_name}  ${res_file}
     ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
+    Scale up nodepool from image  ${res.stdout}  {md_name}  ${res_file}
     StrictShell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${res.stdout}
 
 Run API apply from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
 
     ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
+    Scale up nodepool from image  ${res.stdout}  {md_name}  ${res_file}
     StrictShell  odahuflowctl --verbose dep edit --id ${md_name} -f ${res_file} --image ${res.stdout}
 
 Run API deploy from model packaging and check model started
@@ -147,7 +146,8 @@ Run example model
     StrictShell  odahuflowctl --verbose pack create -f ${manifests_dir}/packaging.odahuflow.yaml --artifact-name ${res.stdout} --id ${example_id}
     ${res}=  StrictShell  odahuflowctl pack get --id ${example_id} -o 'jsonpath=$[0].status.results[0].value'
 
-    StrictShell  odahuflowctl --verbose dep create -f ${manifests_dir}/deployment.odahuflow.yaml --image ${res.stdout} --id ${example_id}
+   Scale up nodepool from image  ${res.stdout} ${example_id}  ${manifests_dir}/packaging.odahuflow.yaml
+   StrictShell  odahuflowctl --verbose dep create -f ${manifests_dir}/deployment.odahuflow.yaml --image ${res.stdout} --id ${example_id}
 
     Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --mr ${example_id}
     Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --mr ${example_id} --json-file ${manifests_dir}/request.json
