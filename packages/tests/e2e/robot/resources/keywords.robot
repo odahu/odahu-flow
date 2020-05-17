@@ -51,14 +51,14 @@ Run API deploy from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
 
     ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
-    Scale up nodepool from image  ${res.stdout}  {md_name}  ${res_file}
+    Scale up nodepool from image  ${res.stdout}  ${md_name}  ${res_file}
     StrictShell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${res.stdout}
 
 Run API apply from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
 
     ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
-    Scale up nodepool from image  ${res.stdout}  {md_name}  ${res_file}
+    Scale up nodepool from image  ${res.stdout}  ${md_name}  ${res_file}
     StrictShell  odahuflowctl --verbose dep edit --id ${md_name} -f ${res_file} --image ${res.stdout}
 
 Run API deploy from model packaging and check model started
