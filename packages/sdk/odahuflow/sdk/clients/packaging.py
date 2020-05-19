@@ -95,7 +95,7 @@ class ModelPackagingClient(RemoteAPIClient):
         return self.stream(f'{MODEL_PACKING_URL}/{name}/log', 'GET', params={'follow': follow})
 
 
-class AsyncModelPackagingClient(AsyncRemoteAPIClient, ModelPackagingClient):
+class AsyncModelPackagingClient(AsyncRemoteAPIClient):
     """
     Model Packaging async client
     """
