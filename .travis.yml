@@ -30,6 +30,10 @@ matrix:
         # Install other dependencies
         - make install-all
         - make install-python-tests
+        # for Code Coverage
+        - pip install codecov
+        - pip install coveralls
+        - pip install pytest-cov
       script:
         - make python-unittests
     - language: python
@@ -108,3 +112,9 @@ matrix:
         - dep ensure -v -vendor-only
         - make test
         - make lint
+after_success:
+  - codecov
+  - coveralls
+after_failure:
+  - codecov
+  - coveralls
