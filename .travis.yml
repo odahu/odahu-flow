@@ -87,7 +87,6 @@ matrix:
         - dep ensure -v -vendor-only
         - make test
         - make lint
-        - go test -race -coverprofile=coverage.txt -covermode=atomic
         - bash <(curl -s https://codecov.io/bash) -cF go
     ###########################
     ### FEEDBACK AGGREGATOR ###
@@ -106,12 +105,12 @@ matrix:
         - sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
         - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
         - go get github.com/t-yuki/gocover-cobertura
+        - go get -t -v ./...
       script:
         - cd packages/feedback
         - dep ensure -v -vendor-only
         - make test
         - make lint
-        - go test -race -coverprofile=coverage.txt -covermode=atomic
         - bash <(curl -s https://codecov.io/bash) -cF go
 after_success:
   - codecov
