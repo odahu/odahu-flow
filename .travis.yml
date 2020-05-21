@@ -105,7 +105,6 @@ matrix:
         - sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
         - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
         - go get github.com/t-yuki/gocover-cobertura
-        - go get -t -v ./...
       script:
         - cd packages/feedback
         - dep ensure -v -vendor-only
