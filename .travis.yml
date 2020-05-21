@@ -31,7 +31,6 @@ matrix:
         - make install-python-tests
         # for Code Coverage
         - pip install codecov
-        - pip install coveralls
         - pip install pytest-cov
       script:
         - make python-unittests
@@ -111,7 +110,5 @@ matrix:
         - make lint
 after_success:
   - codecov
-  - coveralls
 after_failure:
   - codecov
-  - coveralls
