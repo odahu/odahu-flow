@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/odahu/odahu-flow/branch/develop/graph/badge.svg)](https://codecov.io/gh/odahu/odahu-flow)
+
 ## Documentation
 
 Latest version of [documentation](https://docs.odahu.org/about.html)
