@@ -34,6 +34,7 @@ matrix:
         - pip install pytest-cov
       script:
         - make python-unittests
+        - bash <(curl -s https://codecov.io/bash) -cF python
     - language: python
       python: 3.6
       before_script:
@@ -86,6 +87,7 @@ matrix:
         - dep ensure -v -vendor-only
         - make test
         - make lint
+        - bash <(curl -s https://codecov.io/bash) -cF go
     ###########################
     ### FEEDBACK AGGREGATOR ###
     ###########################
@@ -108,6 +110,7 @@ matrix:
         - dep ensure -v -vendor-only
         - make test
         - make lint
+        - bash <(curl -s https://codecov.io/bash) -cF go
 after_success:
   - codecov
 after_failure:
