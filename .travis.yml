@@ -63,7 +63,11 @@ matrix:
     ### OPERATOR ###
     ################
     - language: go
-      go: 1.12.x
+      go: 
+        - 1.12.x
+        - tip
+      before_install:
+        - go get -t -v ./...
       before_script:
         - sudo apt-get update -qq
         - sudo apt-get install wget make gcc pigz
