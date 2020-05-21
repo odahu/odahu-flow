@@ -2,7 +2,8 @@
 branch = True
 include = 
           ./packages/*.go
-          ./packages/*.py
+          ./packages/cli/*.py
+          ./packages/sdk/*.py
 omit =
     */*test*/*
 [report]
