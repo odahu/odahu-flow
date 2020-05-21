@@ -2,8 +2,8 @@
 branch = True
 include = 
           ./packages/operator/pkg/*
-          ./packages/cli/odahuflow/cli/*
-          ./packages/sdk/odahuflow/sdk/*
+          ./packages/cli/*
+          ./packages/sdk/*
 omit =
     */test*/*
 [report]
