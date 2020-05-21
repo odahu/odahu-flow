@@ -1,11 +1,10 @@
 [run]
 branch = True
 include = 
-          ./packages/operator/pkg/*
-          ./packages/cli/*
-          ./packages/sdk/*
+          ./packages/*.go
+          ./packages/*.py
 omit =
-    */test*/*
+    */*test*/*
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
