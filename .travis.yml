@@ -68,9 +68,8 @@ matrix:
       script:
         - cd packages/operator
         - dep ensure -v -vendor-only
-        - make test
         - make lint
-        # - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+        - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
         - bash <(curl -s https://codecov.io/bash) -cF go
     ###########################
     ### FEEDBACK AGGREGATOR ###
@@ -94,9 +93,8 @@ matrix:
       script:
         - cd packages/feedback
         - dep ensure -v -vendor-only
-        - make test
         - make lint
-        # - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+        - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
         - bash <(curl -s https://codecov.io/bash) -cF go
 after_success:
   - codecov
