@@ -187,7 +187,7 @@ install-python-tests:
 
 ## python-unittests: Run pythoon unit tests
 python-unittests:
-	DEBUG=true VERBOSE=true pytest --cov
+	DEBUG=true VERBOSE=true pytest --cov-branch
 
 ## setup-e2e-robot: Prepare a test data for the e2e robot tests
 setup-e2e-robot:
