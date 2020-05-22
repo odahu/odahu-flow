@@ -21,24 +21,6 @@ matrix:
     - language: python
       python: 3.6
       before_script:
-        # Install conda
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-        - bash miniconda.sh -b -p $HOME/miniconda
-        - source "$HOME/miniconda/etc/profile.d/conda.sh"
-        - conda --version
-        # Install other dependencies
-        - make install-all
-        - make install-python-tests
-        # for Code Coverage
-        #- pip install codecov
-        #- pip install pytest-cov
-      script:
-        - make python-lint
-        # - make python-unittests
-        # - bash <(curl -s https://codecov.io/bash) -cF python
-    - language: python
-      python: 3.6
-      before_script:
         - make install-all
         - make install-python-linter
       script:
