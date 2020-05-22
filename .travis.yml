@@ -86,9 +86,8 @@ matrix:
         - cd packages/operator
         - dep ensure -v -vendor-only
         - make test
+        - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint
-        - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-        - bash <(curl -s https://codecov.io/bash) -cF go
     ###########################
     ### FEEDBACK AGGREGATOR ###
     ###########################
@@ -110,9 +109,8 @@ matrix:
         - cd packages/feedback
         - dep ensure -v -vendor-only
         - make test
+        - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint
-        - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
-        - bash <(curl -s https://codecov.io/bash) -cF go
 after_success:
   - codecov
 after_failure:
