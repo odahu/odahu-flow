@@ -30,9 +30,10 @@ matrix:
         - make install-all
         - make install-python-tests
         # for Code Coverage
-        - pip install codecov
-        - pip install pytest-cov
+        #- pip install codecov
+        #- pip install pytest-cov
       script:
+        - make python-lint
         # - make python-unittests
         # - bash <(curl -s https://codecov.io/bash) -cF python
     - language: python
