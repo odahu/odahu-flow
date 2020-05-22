@@ -5,7 +5,7 @@ include =
           ./packages/cli/*.py
           ./packages/sdk/*.py
 omit =
-    */*test*/*
+          *test*
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
