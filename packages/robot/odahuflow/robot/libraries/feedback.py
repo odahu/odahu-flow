@@ -40,8 +40,8 @@ class Feedback:
 
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
     S3_LISTING_REQUEST_LIMIT = 1000
-    WAIT_FILE_TIME = 10
-    WAIT_FILE_ITERATIONS = 12
+    WAIT_FILE_TIME = 5
+    WAIT_FILE_ITERATIONS = 36
 
     def __init__(self, cloud_type, bucket, cluster_name):
         """
