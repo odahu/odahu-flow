@@ -70,13 +70,15 @@ matrix:
         - dep ensure -v -vendor-only
         - make test
         - make lint
-        #- go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+        # - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
         - bash <(curl -s https://codecov.io/bash) -cF go
     ###########################
     ### FEEDBACK AGGREGATOR ###
     ###########################
     - language: go
-      go: 1.12.x
+      go:
+        - 1.12.x
+        - tip
       before_script:
         - sudo apt-get update -qq
         - sudo apt-get install wget make gcc
@@ -94,7 +96,7 @@ matrix:
         - dep ensure -v -vendor-only
         - make test
         - make lint
-        #- go test ./... -race -coverprofile=coverage.txt -covermode=atomic
+        # - go test ./... -race -coverprofile=coverage.txt -covermode=atomic
         - bash <(curl -s https://codecov.io/bash) -cF go
 after_success:
   - codecov
