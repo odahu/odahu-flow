@@ -4,7 +4,7 @@ import os
 import pytest
 from odahuflow.sdk.gppi.executor import GPPITrainedModelBinary, VALIDATION_FAILED_EXCEPTION_MESSAGE
 
-GPPI_MODEL_RESOURCES = 'packages/sdk/tests/gppi/resources'
+GPPI_MODEL_RESOURCES = os.path.join(os.path.dirname(__file__), 'resources')
 
 logging.basicConfig(level=logging.INFO)
 
