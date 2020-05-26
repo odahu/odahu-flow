@@ -11,7 +11,6 @@ matrix:
     ### SECURITY ###
     ################
     - language: bash
-      sudo: true
       before_script:
         - sudo make install-vulnerabilities-checker
       script:
@@ -30,8 +29,12 @@ matrix:
         # Install other dependencies
         - make install-all
         - make install-python-tests
+        # for Code Coverage
+        - pip install codecov
+        - pip install pytest-cov
       script:
         - make python-unittests
+        - bash <(curl -s https://codecov.io/bash) -cF python
     - language: python
       python: 3.6
       before_script:
@@ -61,7 +64,6 @@ matrix:
     ################
     - language: go
       go: 1.12.x
-      sudo: true
       before_script:
         - sudo apt-get update -qq
         - sudo apt-get install wget make gcc pigz
@@ -84,13 +86,13 @@ matrix:
         - cd packages/operator
         - dep ensure -v -vendor-only
         - make test
+        - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint
     ###########################
     ### FEEDBACK AGGREGATOR ###
     ###########################
     - language: go
       go: 1.12.x
-      sudo: true
       before_script:
         - sudo apt-get update -qq
         - sudo apt-get install wget make gcc
@@ -107,4 +109,9 @@ matrix:
         - cd packages/feedback
         - dep ensure -v -vendor-only
         - make test
+        - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint
+after_success:
+  - codecov
+after_failure:
+  - codecov

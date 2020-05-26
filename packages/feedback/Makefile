@@ -2,7 +2,7 @@ all: help
 
 ## test: Run unit tests
 test:
-	gotestsum --junitfile feedback-report.xml -- -coverprofile=feedback-cover.out ./pkg/...
+	gotestsum --junitfile feedback-report.xml -- -race -coverprofile=coverage.txt ./pkg/...
 
 ## build-all: Buld all services
 build-all: build-collector build-rq-catcher
