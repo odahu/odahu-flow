@@ -27,7 +27,7 @@ from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, T
 from odahuflow.cli.utils.logs import print_logs
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import WrongHttpStatusCode, APIConnectionException
+from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, APIConnectionException
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.packaging import ModelPackaging, ModelPackagingClient, SUCCEEDED_STATE, FAILED_STATE
 
@@ -89,9 +89,11 @@ def get(client: ModelPackagingClient, pack_id: str, output_format: str):
 @click.option('--artifact-name', type=str, help='Override artifact name from file')
 @click.option('--timeout', default=DEFAULT_PACKAGING_TIMEOUT, type=int,
               help='timeout in seconds. for wait (if no-wait is off)')
+@click.option('--ignore-if-exists', is_flag=True,
+              help='Ignore if entity is already exists on API server. Return success status code')
 @pass_obj
 def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, timeout: int,
-           artifact_name: str):
+           artifact_name: str, ignore_if_exists: bool):
     """
     \b
     Create a packaging.
@@ -109,6 +111,7 @@ def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, ti
     :param pack_id: Model packaging ID
     :param file: Path to the file with only one packaging
     :param artifact_name: Override artifact name from file
+    :param ignore_if_exists: Return success status code if entity is already exists
     """
     pack = parse_resources_file_with_one_item(file).resource
     if not isinstance(pack, ModelPackaging):
@@ -120,7 +123,15 @@ def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, ti
     if artifact_name:
         pack.spec.artifact_name = artifact_name
 
-    mp = client.create(pack)
+    try:
+        mp = client.create(pack)
+    except EntityAlreadyExists as e:
+        if ignore_if_exists:
+            LOGGER.debug(f'--ignore-if-exists was passed: {e} will be suppressed')
+            click.echo('Packaging already exists')
+            return
+        raise
+
     click.echo(f"Start packing: {mp}")
 
     wait_packaging_finish(timeout, wait, pack.id, client)
