@@ -27,7 +27,7 @@ from odahuflow.cli.utils.verifiers import positive_number
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.deployment import ModelDeployment, ModelDeploymentClient, READY_STATE, \
     FAILED_STATE
-from odahuflow.sdk.clients.api import WrongHttpStatusCode
+from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 
 DEFAULT_WAIT_TIMEOUT = 5
@@ -88,8 +88,11 @@ def get(client: ModelDeploymentClient, md_id: str, output_format: str):
 @click.option('--timeout', default=DEFAULT_DEPLOYMENT_TIMEOUT, type=int, callback=positive_number,
               help='timeout in seconds. for wait (if no-wait is off)')
 @click.option('--image', type=str, help='Override Docker image from file')
+@click.option('--ignore-if-exists', is_flag=True,
+              help='Ignore if entity is already exists on API server. Return success status code')
 @pass_obj
-def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeout: int, image: str):
+def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeout: int, image: str,
+           ignore_if_exists: bool):
     """
     \b
     Create a deployment.
@@ -107,6 +110,7 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
     :param md_id: Model deployment ID
     :param file: Path to the file with only one deployment
     :param image: Override Docker image from file
+    :param ignore_if_exists: Return success status code if entity is already exists
     """
     md = parse_resources_file_with_one_item(file).resource
     if not isinstance(md, ModelDeployment):
@@ -118,7 +122,16 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
     if image:
         md.spec.image = image
 
-    click.echo(client.create(md))
+    try:
+        res = client.create(md)
+    except EntityAlreadyExists as e:
+        if ignore_if_exists:
+            LOGGER.debug(f'--ignore-if-exists was passed: {e} will be suppressed')
+            click.echo('Deployment already exists')
+            return
+        raise
+
+    click.echo(res)
 
     wait_deployment_finish(timeout, wait, md.id, client)
 
