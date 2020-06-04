@@ -81,14 +81,14 @@ func (kc *deploymentK8sRepository) GetModelRouteList(options ...kubernetes.ListO
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := kc.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := kc.k8sClient.List(context.TODO(), &k8sMRList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
 			Raw: &metav1.ListOptions{
 				Limit:    int64(*listOptions.Size),
 				Continue: continueToken,
 			},
-		}, &k8sMRList); err != nil {
+		}); err != nil {
 			logC.Error(err, "Get Model Route from k8s")
 
 			return nil, err

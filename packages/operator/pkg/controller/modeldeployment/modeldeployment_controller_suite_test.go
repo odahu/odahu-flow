@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
-	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 var cfg *rest.Config

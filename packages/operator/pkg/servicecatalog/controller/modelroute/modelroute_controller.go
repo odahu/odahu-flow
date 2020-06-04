@@ -111,10 +111,10 @@ func (r *ReconcileModelRoute) StartUpdate() {
 	for range r.ticker.C {
 		err := r.List(
 			context.TODO(),
+			k8sRouteList,
 			&client.ListOptions{
 				Namespace: r.deploymentConfig.Namespace,
 			},
-			k8sRouteList,
 		)
 
 		if err != nil {

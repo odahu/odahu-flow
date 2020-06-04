@@ -18,14 +18,14 @@ package rclone
 
 import (
 	"fmt"
-	_ "github.com/ncw/rclone/backend/local" //nolint
-	"github.com/ncw/rclone/fs"
-	"github.com/ncw/rclone/fs/cache"
-	"github.com/ncw/rclone/fs/operations"
-	"github.com/ncw/rclone/fs/sync"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/pkg/errors"
+	_ "github.com/rclone/rclone/backend/local" //nolint
+	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/cache"
+	"github.com/rclone/rclone/fs/operations"
+	"github.com/rclone/rclone/fs/sync"
 	uuid "github.com/satori/go.uuid"
 	"path"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"

@@ -18,10 +18,10 @@ package rclone
 
 import (
 	"fmt"
-	_ "github.com/ncw/rclone/backend/azureblob" //nolint
-	"github.com/ncw/rclone/fs"
-	"github.com/ncw/rclone/fs/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	_ "github.com/rclone/rclone/backend/azureblob" //nolint
+	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/config"
 	"net/url"
 	"strings"
 )

@@ -8,7 +8,7 @@ import (
 	"path"
 	"time"
 
-	bank_vaults "github.com/banzaicloud/bank-vaults/pkg/vault"
+	bank_vaults "github.com/banzaicloud/bank-vaults/pkg/sdk/vault"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
