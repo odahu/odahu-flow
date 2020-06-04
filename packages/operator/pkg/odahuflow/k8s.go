@@ -23,7 +23,7 @@ import (
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 )
 
 const (

@@ -88,14 +88,14 @@ func (kc *deploymentK8sRepository) GetModelDeploymentList(options ...kubernetes.
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := kc.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := kc.k8sClient.List(context.TODO(), &k8sMDList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
 			Raw: &metav1.ListOptions{
 				Limit:    int64(*listOptions.Size),
 				Continue: continueToken,
 			},
-		}, &k8sMDList); err != nil {
+		}); err != nil {
 			logMD.Error(err, "Get Model Deployment from k8s")
 
 			return nil, err

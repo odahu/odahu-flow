@@ -134,14 +134,14 @@ func (pkr *packagingK8sRepository) GetModelPackagingList(options ...kubernetes.L
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := pkr.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := pkr.k8sClient.List(context.TODO(), &k8sMpList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     pkr.namespace,
 			Raw: &metav1.ListOptions{
 				Limit:    int64(*listOptions.Size),
 				Continue: continueToken,
 			},
-		}, &k8sMpList); err != nil {
+		}); err != nil {
 			logMP.Error(err, "Get Model Packaging from k8s")
 
 			return nil, err

@@ -153,9 +153,7 @@ func (r *ReconcileModelRoute) reconcileVirtualService(modelRouteCR *odahuflowv1a
 				Destination: &v1alpha3_istio.Destination{
 					Host: modelDeployment.Status.ServiceURL,
 					Port: &v1alpha3_istio.PortSelector{
-						Port: &v1alpha3_istio.PortSelector_Number{
-							Number: uint32(80),
-						},
+						Number: uint32(80),
 					},
 				},
 				Weight: *md.Weight,

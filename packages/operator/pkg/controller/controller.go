@@ -18,9 +18,9 @@ package controller
 
 import (
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
-	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
+	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )

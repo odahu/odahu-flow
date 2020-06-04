@@ -25,9 +25,6 @@ import (
 
 	authv1alpha1 "github.com/aspenmesh/istio-client-go/pkg/apis/authentication/v1alpha1"
 	"github.com/go-logr/logr"
-	"github.com/knative/serving/pkg/apis/serving"
-	knservingv1alpha1 "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	"github.com/knative/serving/pkg/apis/serving/v1beta1"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
@@ -44,6 +41,9 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
+	"knative.dev/serving/pkg/apis/serving"
+	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	"knative.dev/serving/pkg/apis/serving/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -701,7 +701,7 @@ func (r *ReconcileModelDeployment) reconcileEndpoints(
 }
 
 // Cleanup old Knative revisions
-// Workaround for https://github.com/knative/serving/issues/2720
+// Workaround for https://knative.dev/serving/issues/2720
 // TODO: need to upgrade knative
 func (r *ReconcileModelDeployment) cleanupOldRevisions(
 	log logr.Logger,
@@ -754,10 +754,10 @@ func (r *ReconcileModelDeployment) cleanupOldRevisions(
 	labelSelector := labels.NewSelector()
 	labelSelector.Add(*labelSelectorReq)
 
-	if err := r.List(context.TODO(), &client.ListOptions{
+	if err := r.List(context.TODO(), knativeRevisions, &client.ListOptions{
 		LabelSelector: labelSelector,
 		Namespace:     modelDeploymentCR.Namespace,
-	}, knativeRevisions); err != nil {
+	}); err != nil {
 		log.Error(err, "Get the list of knative revisions")
 
 		return err

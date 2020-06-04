@@ -163,14 +163,14 @@ func (tkr *trainingK8sRepository) GetModelTrainingList(options ...kubernetes.Lis
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := tkr.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := tkr.k8sClient.List(context.TODO(), &k8sMDList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     tkr.namespace,
 			Raw: &metav1.ListOptions{
 				Limit:    int64(*listOptions.Size),
 				Continue: continueToken,
 			},
-		}, &k8sMDList); err != nil {
+		}); err != nil {
 			logMT.Error(err, "Get Model Training from k8s")
 
 			return nil, err

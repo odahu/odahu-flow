@@ -112,14 +112,14 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := kc.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := kc.k8sClient.List(context.TODO(), &k8sConnList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
 			Raw: &metav1.ListOptions{
 				Limit:    int64(*listOptions.Size),
 				Continue: continueToken,
 			},
-		}, &k8sConnList); err != nil {
+		}); err != nil {
 			logC.Error(err, "Get connection from k8s")
 
 			return nil, convertK8sErrToOdahuflowErr(err)
