@@ -11,5 +11,5 @@ do
 
     pipenv update
 
-    ${ROOT_DIR}/scripts/convert_pipenv_to_requirements.py $(pwd)
+    "${ROOT_DIR}/scripts/convert_pipenv_to_requirements.py" "$(pwd)"
 done
