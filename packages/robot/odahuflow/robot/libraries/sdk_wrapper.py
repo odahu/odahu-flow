@@ -11,11 +11,10 @@ from odahuflow.sdk.clients.training import ModelTrainingClient
 
 from odahuflow.sdk.clients.api import RemoteAPIClient
 
-SA=
-CLIENT_SECRET=
+CLIENT_ID =
+CLIENT_SECRET =
 
-
-remote_api = RemoteAPIClient(client_id=SA, client_secret=CLIENT_SECRET)
+remote_api = RemoteAPIClient(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 remote_api.info()
 
 
