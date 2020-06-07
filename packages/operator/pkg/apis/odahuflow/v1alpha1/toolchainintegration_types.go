@@ -17,6 +17,9 @@
 package v1alpha1
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -58,6 +61,31 @@ type ToolchainIntegrationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []ToolchainIntegration `json:"items"`
+}
+
+func (tiSpec ToolchainIntegrationSpec) Value() (driver.Value, error) {
+	return json.Marshal(tiSpec)
+}
+
+func (tiSpec *ToolchainIntegrationSpec) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &tiSpec)
+	return res
+}
+
+func (tiStatus ToolchainIntegrationStatus) Value() (driver.Value, error) {
+	return json.Marshal(tiStatus)
+}
+
+func (tiStatus ToolchainIntegrationStatus) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, &tiStatus)
 }
 
 func init() {
