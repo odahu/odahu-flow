@@ -58,6 +58,13 @@ class WrongHttpStatusCode(Exception):
         self.status_code = status_code
 
 
+class EntityAlreadyExists(WrongHttpStatusCode):
+    """
+    Exception for 409 conflict: entity already exists
+    """
+    pass
+
+
 class APIConnectionException(Exception):
     """
     Exception that says that client can not reach API server
@@ -339,6 +346,8 @@ def _handle_query_response(text: str, payload: Mapping[Any, Any], status_code: i
     except ValueError:
         answer = {}
 
+    if status_code == 409:
+        raise EntityAlreadyExists(status_code, answer)
     if 400 <= status_code < 600:
         raise WrongHttpStatusCode(status_code, answer)
 
