@@ -19,7 +19,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup example resources  ${WINE_ID}  AND
 ...                 Remove file  ${LOCAL_CONFIG}
-Force Tags          e2e  wine  api
+Force Tags          e2e  wine  cli
 
 *** Test Cases ***
 Wine model
