@@ -17,7 +17,6 @@
 package training_test
 
 import (
-	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/stretchr/testify/suite"
@@ -36,9 +35,8 @@ func (s *TIK8SRouteSuite) SetupSuite() {
 	}
 
 	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
 }
 
-func TestToolchainIntegrationK8SRouteSuite(t *testing.T) {
+func TestTIK8SRouteSuite(t *testing.T) {
 	suite.Run(t, new(TIK8SRouteSuite))
 }

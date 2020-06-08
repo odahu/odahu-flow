@@ -1973,6 +1973,10 @@ var doc = `{
         "CommonConfig": {
             "type": "object",
             "properties": {
+                "databaseConnectionString": {
+                    "description": "Database connection string",
+                    "type": "string"
+                },
                 "externalUrls": {
                     "description": "The collection of external urls, for example: metrics, edge, service catalog and so on",
                     "type": "array",
@@ -2285,6 +2289,10 @@ var doc = `{
                     }
                 },
                 "toolchainIntegrationNamespace": {
+                    "type": "string"
+                },
+                "toolchainIntegrationRepositoryType": {
+                    "description": "Storage backend for toolchain integrations. Available options:\n  * kubernetes\n  * postgres",
                     "type": "string"
                 }
             }

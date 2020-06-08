@@ -28,13 +28,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
-	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 const (
@@ -50,10 +49,9 @@ var (
 
 type TIGenericRouteSuite struct {
 	suite.Suite
-	g              *GomegaWithT
-	server         *gin.Engine
-	mtRepository   mt_repository.Repository
-	connRepository conn_repository.Repository
+	g            *GomegaWithT
+	server       *gin.Engine
+	mtRepository mt_repository.ToolchainRepository
 }
 
 func (s *TIGenericRouteSuite) TearDownTest() {
@@ -62,7 +60,7 @@ func (s *TIGenericRouteSuite) TearDownTest() {
 		testToolchainIntegrationID1,
 		testToolchainIntegrationID2,
 	} {
-		if err := s.mtRepository.DeleteToolchainIntegration(mpID); err != nil && !errors.IsNotFound(err) {
+		if err := s.mtRepository.DeleteToolchainIntegration(mpID); err != nil && !odahuErrors.IsNotFoundError(err) {
 			// If a model training is not found then it was not created during a test case
 			// All other errors propagate as a panic
 			panic(err)
@@ -79,13 +77,8 @@ func (s *TIGenericRouteSuite) SetupTest() {
 func (s *TIGenericRouteSuite) registerHandlers(trainingConfig config.ModelTrainingConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	train_route.ConfigureRoutes(
-		v1Group,
-		s.mtRepository,
-		s.connRepository,
-		trainingConfig,
-		config.NvidiaResourceName,
-	)
+	trainingGroup := v1Group.Group("", routes.DisableAPIMiddleware(trainingConfig.Enabled))
+	train_route.ConfigureToolchainRoutes(trainingGroup, s.mtRepository)
 }
 
 func newTiStub() *training.ToolchainIntegration {
@@ -398,7 +391,7 @@ func (s *TIGenericRouteSuite) TestUpdateToolchainIntegrationModifiable() {
 	reqTime := routes.GetTimeNowTruncatedToSeconds()
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
-		http.MethodPut, train_route.CreateToolchainIntegrationURL, bytes.NewReader(newResourceBody),
+		http.MethodPut, train_route.UpdateToolchainIntegrationURL, bytes.NewReader(newResourceBody),
 	)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)

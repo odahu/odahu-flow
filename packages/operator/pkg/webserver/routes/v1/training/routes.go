@@ -21,7 +21,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 )
 
 func ConfigureRoutes(
@@ -41,7 +40,6 @@ func ConfigureRoutes(
 			gpuResourceName,
 		),
 	}
-	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(config.Enabled))
 
 	routeGroup.GET(GetModelTrainingURL, mtController.getMT)
 	routeGroup.GET(GetAllModelTrainingURL, mtController.getAllMTs)
@@ -51,14 +49,4 @@ func ConfigureRoutes(
 	routeGroup.PUT(SaveModelTrainingResultURL, mtController.saveMPResults)
 	routeGroup.DELETE(DeleteModelTrainingURL, mtController.deleteMT)
 
-	tiController := &ToolchainIntegrationController{
-		repository: mtRepository,
-		validator:  NewTiValidator(),
-	}
-
-	routeGroup.GET(GetToolchainIntegrationURL, tiController.getToolchainIntegration)
-	routeGroup.GET(GetAllToolchainIntegrationURL, tiController.getAllToolchainIntegrations)
-	routeGroup.POST(CreateToolchainIntegrationURL, tiController.createToolchainIntegration)
-	routeGroup.PUT(UpdateToolchainIntegrationURL, tiController.updateToolchainIntegration)
-	routeGroup.DELETE(DeleteToolchainIntegrationURL, tiController.deleteToolchainIntegration)
 }

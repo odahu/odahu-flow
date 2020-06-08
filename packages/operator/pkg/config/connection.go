@@ -16,13 +16,6 @@
 
 package config
 
-type ConnectionRepositoryType string
-
-const (
-	RepositoryKubernetesType ConnectionRepositoryType = "kubernetes"
-	RepositoryVaultType      ConnectionRepositoryType = "vault"
-)
-
 type Vault struct {
 	// Vault URL
 	URL string `json:"url"`
@@ -43,7 +36,7 @@ type ConnectionConfig struct {
 	// Storage backend for connections. Available options:
 	//   * kubernetes
 	//   * vault
-	RepositoryType ConnectionRepositoryType `json:"repositoryType"`
+	RepositoryType RepositoryType `json:"repositoryType"`
 	// Connection Vault configuration
 	Vault Vault `json:"vault"`
 }

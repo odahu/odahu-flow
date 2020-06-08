@@ -15,8 +15,7 @@ import (
 )
 
 var (
-	//connString string = "postgresql://postgres:example@localhost:5432/postgres?sslmode=disable"
-	connString string = ""
+	connString string
 )
 
 const (

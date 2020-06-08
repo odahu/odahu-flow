@@ -20,7 +20,9 @@ import (
 	"context"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -50,7 +52,12 @@ func (tkr *trainingK8sRepository) GetToolchainIntegration(name string) (*trainin
 	); err != nil {
 		logC.Error(err, "Get Toolchain Integration from k8s", "name", name)
 
-		return nil, err
+		switch {
+		case errors.IsNotFound(err):
+			return nil, odahuErrors.NotFoundError{Entity: name}
+		default:
+			return nil, err
+		}
 	}
 
 	return transform(k8sMR), nil
@@ -120,7 +127,12 @@ func (tkr *trainingK8sRepository) DeleteToolchainIntegration(name string) error 
 	); err != nil {
 		logC.Error(err, "Delete Packaging Integration from k8s", "name", name)
 
-		return err
+		switch {
+		case errors.IsNotFound(err):
+			return odahuErrors.NotFoundError{Entity: name}
+		default:
+			return err
+		}
 	}
 
 	return nil
