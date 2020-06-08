@@ -23,23 +23,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
-	mt_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 const (
@@ -53,7 +48,7 @@ var (
 	}
 )
 
-type ToolchainIntegrationRouteSuite struct {
+type TIGenericRouteSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	server         *gin.Engine
@@ -61,17 +56,7 @@ type ToolchainIntegrationRouteSuite struct {
 	connRepository conn_repository.Repository
 }
 
-func (s *ToolchainIntegrationRouteSuite) SetupSuite() {
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
-	if err != nil {
-		panic(err)
-	}
-
-	s.mtRepository = mt_k8s_repository.NewRepository(testNamespace, testNamespace, mgr.GetClient(), nil)
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
-}
-
-func (s *ToolchainIntegrationRouteSuite) TearDownTest() {
+func (s *TIGenericRouteSuite) TearDownTest() {
 	for _, mpID := range []string{
 		testToolchainIntegrationID,
 		testToolchainIntegrationID1,
@@ -85,13 +70,13 @@ func (s *ToolchainIntegrationRouteSuite) TearDownTest() {
 	}
 }
 
-func (s *ToolchainIntegrationRouteSuite) SetupTest() {
+func (s *TIGenericRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
 
 	s.registerHandlers(config.NewDefaultModelTrainingConfig())
 }
 
-func (s *ToolchainIntegrationRouteSuite) registerHandlers(trainingConfig config.ModelTrainingConfig) {
+func (s *TIGenericRouteSuite) registerHandlers(trainingConfig config.ModelTrainingConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
 	train_route.ConfigureRoutes(
@@ -101,10 +86,6 @@ func (s *ToolchainIntegrationRouteSuite) registerHandlers(trainingConfig config.
 		trainingConfig,
 		config.NvidiaResourceName,
 	)
-}
-
-func TestToolchainIntegrationRouteSuite(t *testing.T) {
-	suite.Run(t, new(ToolchainIntegrationRouteSuite))
 }
 
 func newTiStub() *training.ToolchainIntegration {
@@ -118,7 +99,7 @@ func newTiStub() *training.ToolchainIntegration {
 	}
 }
 
-func (s *ToolchainIntegrationRouteSuite) newMultipleTiStubs() {
+func (s *TIGenericRouteSuite) newMultipleTiStubs() {
 	ti1 := &training.ToolchainIntegration{
 		ID: testToolchainIntegrationID1,
 		Spec: v1alpha1.ToolchainIntegrationSpec{
@@ -136,7 +117,7 @@ func (s *ToolchainIntegrationRouteSuite) newMultipleTiStubs() {
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti2)).NotTo(HaveOccurred())
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestGetToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestGetToolchainIntegration() {
 	ti := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti)).NotTo(HaveOccurred())
 
@@ -156,7 +137,7 @@ func (s *ToolchainIntegrationRouteSuite) TestGetToolchainIntegration() {
 	s.g.Expect(tiResponse.Spec).Should(Equal(ti.Spec))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestGetToolchainIntegrationNotFound() {
+func (s *TIGenericRouteSuite) TestGetToolchainIntegrationNotFound() {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, strings.Replace(
 		train_route.GetToolchainIntegrationURL, ":id", "not-found", -1,
@@ -172,7 +153,7 @@ func (s *ToolchainIntegrationRouteSuite) TestGetToolchainIntegrationNotFound() {
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestGetAllTiEmptyResult() {
+func (s *TIGenericRouteSuite) TestGetAllTiEmptyResult() {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, train_route.GetAllToolchainIntegrationURL, nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -186,7 +167,7 @@ func (s *ToolchainIntegrationRouteSuite) TestGetAllTiEmptyResult() {
 	s.g.Expect(tiResponse).Should(HaveLen(0))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestGetAllTi() {
+func (s *TIGenericRouteSuite) TestGetAllTi() {
 	s.newMultipleTiStubs()
 
 	w := httptest.NewRecorder()
@@ -206,7 +187,7 @@ func (s *ToolchainIntegrationRouteSuite) TestGetAllTi() {
 	}
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestGetAllTiPaging() {
+func (s *TIGenericRouteSuite) TestGetAllTiPaging() {
 	s.newMultipleTiStubs()
 
 	toolchainsNames := map[string]interface{}{testToolchainIntegrationID1: nil, testToolchainIntegrationID2: nil}
@@ -273,7 +254,7 @@ func (s *ToolchainIntegrationRouteSuite) TestGetAllTiPaging() {
 	s.g.Expect(toolchains).Should(BeEmpty())
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestCreateToolchainIntegration() {
 	tiEntity := newTiStub()
 
 	tiEntityBody, err := json.Marshal(tiEntity)
@@ -300,7 +281,7 @@ func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegration() {
 }
 
 // CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationModifiable() {
+func (s *TIGenericRouteSuite) TestCreateToolchainIntegrationModifiable() {
 	newResource := newTiStub()
 
 	newResourceBody, err := json.Marshal(newResource)
@@ -327,7 +308,7 @@ func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationModifiabl
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationValidation() {
+func (s *TIGenericRouteSuite) TestCreateToolchainIntegrationValidation() {
 	tiEntity := newTiStub()
 	tiEntity.Spec.Entrypoint = ""
 
@@ -349,7 +330,7 @@ func (s *ToolchainIntegrationRouteSuite) TestCreateToolchainIntegrationValidatio
 	s.g.Expect(resultResponse.Message).Should(ContainSubstring(train_route.ValidationTiErrorMessage))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestCreateDuplicateToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestCreateDuplicateToolchainIntegration() {
 	ti := newTiStub()
 
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti)).NotTo(HaveOccurred())
@@ -372,7 +353,7 @@ func (s *ToolchainIntegrationRouteSuite) TestCreateDuplicateToolchainIntegration
 	s.g.Expect(result.Message).Should(ContainSubstring("already exists"))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestUpdateToolchainIntegration() {
 	ti := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti)).NotTo(HaveOccurred())
 
@@ -403,7 +384,7 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegration() {
 }
 
 // UpdatedAt field should automatically be updated after update request
-func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationModifiable() {
+func (s *TIGenericRouteSuite) TestUpdateToolchainIntegrationModifiable() {
 	resource := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(resource)).NotTo(HaveOccurred())
 
@@ -435,7 +416,7 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationModifiabl
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationValidation() {
+func (s *TIGenericRouteSuite) TestUpdateToolchainIntegrationValidation() {
 	ti := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti)).NotTo(HaveOccurred())
 
@@ -460,7 +441,7 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationValidatio
 	s.g.Expect(resultResponse.Message).Should(ContainSubstring(train_route.ValidationTiErrorMessage))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationNotFound() {
+func (s *TIGenericRouteSuite) TestUpdateToolchainIntegrationNotFound() {
 	ti := newTiStub()
 
 	tiBody, err := json.Marshal(ti)
@@ -479,7 +460,7 @@ func (s *ToolchainIntegrationRouteSuite) TestUpdateToolchainIntegrationNotFound(
 	s.g.Expect(response.Message).Should(ContainSubstring("not found"))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDeleteToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestDeleteToolchainIntegration() {
 	ti := newTiStub()
 	s.g.Expect(s.mtRepository.CreateToolchainIntegration(ti)).NotTo(HaveOccurred())
 
@@ -502,7 +483,7 @@ func (s *ToolchainIntegrationRouteSuite) TestDeleteToolchainIntegration() {
 	s.g.Expect(tiList).To(HaveLen(0))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDeleteToolchainIntegrationNotFound() {
+func (s *TIGenericRouteSuite) TestDeleteToolchainIntegrationNotFound() {
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, strings.Replace(
 		train_route.DeleteToolchainIntegrationURL, ":id", "not-found", -1,
@@ -518,7 +499,7 @@ func (s *ToolchainIntegrationRouteSuite) TestDeleteToolchainIntegrationNotFound(
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIDeleteToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestDisabledAPIDeleteToolchainIntegration() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.Enabled = false
 	s.registerHandlers(trainingConfig)
@@ -538,7 +519,7 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIDeleteToolchainIntegrati
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIUpdateToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestDisabledAPIUpdateToolchainIntegration() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.Enabled = false
 	s.registerHandlers(trainingConfig)
@@ -561,7 +542,7 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIUpdateToolchainIntegrati
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDisabledAPICreateToolchainIntegrationValidation() {
+func (s *TIGenericRouteSuite) TestDisabledAPICreateToolchainIntegrationValidation() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.Enabled = false
 	s.registerHandlers(trainingConfig)
@@ -586,7 +567,7 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPICreateToolchainIntegrati
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIGetAllTi() {
+func (s *TIGenericRouteSuite) TestDisabledAPIGetAllTi() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.Enabled = false
 	s.registerHandlers(trainingConfig)
@@ -610,7 +591,7 @@ func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIGetAllTi() {
 	}
 }
 
-func (s *ToolchainIntegrationRouteSuite) TestDisabledAPIGetToolchainIntegration() {
+func (s *TIGenericRouteSuite) TestDisabledAPIGetToolchainIntegration() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.Enabled = false
 	s.registerHandlers(trainingConfig)
