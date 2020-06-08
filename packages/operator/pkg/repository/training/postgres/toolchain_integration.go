@@ -7,11 +7,18 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 const (
 	toolchainIntegrationTable   = "odahu_operator_toolchain_integration"
 	uniqueViolationPostgresCode = pq.ErrorCode("23505") // unique_violation
+)
+
+var (
+	MaxSize   = 500
+	FirstPage = 0
 )
 
 type ToolchainRepository struct {
@@ -39,9 +46,24 @@ func (tr ToolchainRepository) GetToolchainIntegration(name string) (*training.To
 }
 
 func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.ListOption) ([]training.ToolchainIntegration, error) {
-	rows, err := tr.DB.Query(
-		fmt.Sprintf("SELECT id, spec, status FROM %s", toolchainIntegrationTable),
+
+	listOptions := &kubernetes.ListOptions{
+		Filter: nil,
+		Page:   &FirstPage,
+		Size:   &MaxSize,
+	}
+	for _, option := range options {
+		option(listOptions)
+	}
+
+	offset := *listOptions.Size * (*listOptions.Page)
+
+	stmt := fmt.Sprintf(
+		"SELECT id, spec, status FROM %s ORDER BY id LIMIT %d OFFSET %d",
+		toolchainIntegrationTable, *listOptions.Size, offset,
 	)
+
+	rows, err := tr.DB.Query(stmt)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +88,17 @@ func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.
 }
 
 func (tr ToolchainRepository) DeleteToolchainIntegration(name string) error {
+
+	// First try to check that row exists otherwise raise exception to fit interface
+	_, err := tr.GetToolchainIntegration(name)
+	if err != nil {
+		return err
+	}
+
+	// If exists, delete it
+
 	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", toolchainIntegrationTable)
-	_, err := tr.DB.Exec(sqlStatement, name)
+	_, err = tr.DB.Exec(sqlStatement, name)
 	if err != nil {
 		return err
 	}
@@ -75,8 +106,18 @@ func (tr ToolchainRepository) DeleteToolchainIntegration(name string) error {
 }
 
 func (tr ToolchainRepository) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+
+	// First try to check that row exists otherwise raise exception to fit interface
+	oldTi, err := tr.GetToolchainIntegration(md.ID)
+	if err != nil {
+		return err
+	}
+
+	md.Status = oldTi.Status
+	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", toolchainIntegrationTable)
-	_, err := tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
+	_, err = tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
 	if err != nil {
 		return err
 	}
@@ -84,11 +125,14 @@ func (tr ToolchainRepository) UpdateToolchainIntegration(md *training.ToolchainI
 }
 
 func (tr ToolchainRepository) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
+
+	md.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+
 	_, err := tr.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", toolchainIntegrationTable),
 		md.ID, md.Spec, md.Status,
 	)
-
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
 		if ok && pqError.Code == uniqueViolationPostgresCode {

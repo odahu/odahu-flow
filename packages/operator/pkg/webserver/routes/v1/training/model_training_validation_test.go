@@ -247,7 +247,7 @@ func (s *ModelTrainingValidationSuite) TestMtToolchainType() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(
-		"toolchainintegrations.odahuflow.odahu.org \"not-exists\" not found"))
+		"entity \"not-exists\" is not found"))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtVcsNotExists() {

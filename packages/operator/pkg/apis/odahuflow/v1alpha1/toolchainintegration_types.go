@@ -80,12 +80,13 @@ func (tiStatus ToolchainIntegrationStatus) Value() (driver.Value, error) {
 	return json.Marshal(tiStatus)
 }
 
-func (tiStatus ToolchainIntegrationStatus) Scan(value interface{}) error {
+func (tiStatus *ToolchainIntegrationStatus) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
-	return json.Unmarshal(b, &tiStatus)
+	res := json.Unmarshal(b, &tiStatus)
+	return res
 }
 
 func init() {
