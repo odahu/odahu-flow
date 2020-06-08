@@ -19,7 +19,7 @@ Suite Teardown      Run Keywords
 ...                 Cleanup resources  AND
 ...                 Remove file  ${LOCAL_CONFIG}
 Test Teardown       Cleanup resources
-Force Tags          packaging
+Force Tags          packaging cli
 
 *** Keywords ***
 Cleanup resources
