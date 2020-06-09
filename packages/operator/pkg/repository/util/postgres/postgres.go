@@ -25,7 +25,7 @@ func MainTestWrapper(m *testing.M, connString *string) int {
 		log.Fatalf("Could not connect to docker: %s", err)
 	}
 
-	pool.MaxWait = time.Second * 5
+	pool.MaxWait = time.Second * 10
 
 	// pulls an image, creates a container based on it and runs it
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
@@ -44,8 +44,8 @@ func MainTestWrapper(m *testing.M, connString *string) int {
 	defer pool.Purge(resource)
 
 	*connString = fmt.Sprintf(
-		"postgresql://postgres:example@localhost:%s/postgres?sslmode=disable",
-		resource.GetPort("5432/tcp"),
+		"postgresql://postgres:example@localhost:%s/postgres?sslmode=disable&search_path=%s",
+		resource.GetPort("5432/tcp"), "public",
 	)
 
 	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
