@@ -46,7 +46,7 @@ func (s *TIPostgresRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	s.pool.MaxWait = time.Second * 20
+	s.pool.MaxWait = time.Second * 30
 
 	// pulls an image, creates a container based on it and runs it
 	s.resource, err = s.pool.RunWithOptions(&dockertest.RunOptions{
@@ -61,6 +61,9 @@ func (s *TIPostgresRouteSuite) SetupSuite() {
 	})
 	if err != nil {
 		panic("Could not start postgres")
+	}
+	if err = s.resource.Expire(5 * 60); err != nil {
+		panic("Could not set container expire")
 	}
 
 	connString := fmt.Sprintf(
