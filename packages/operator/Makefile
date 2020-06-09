@@ -115,6 +115,11 @@ ifndef GOPATH
 endif
 	go generate ./pkg/... ./cmd/...
 
+## generate-resources: Generate go-bindata
+generate-resources:
+	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go pkg/database/migrations/postgres/sources
+	git add pkg/database/migrations/postgres/bindata.go
+
 ## generate-all: Execute all code generators
 generate-all: generate manifests swag
 

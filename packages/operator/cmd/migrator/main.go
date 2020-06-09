@@ -14,8 +14,11 @@ var rootCmd = &cobra.Command{
 	Use:   "odahu-migrate",
 	Short: "odahu-migrate is tool that migrate odahu database forward",
 	Run: func(cmd *cobra.Command, args []string) {
-		migr := migrator_package.Migrator{databaseConnection}
-		err := migr.MigrateToLatest()
+		migr, err := migrator_package.NewMigrator(databaseConnection)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = migr.MigrateToLatest()
 		if err != nil {
 			log.Fatal(err)
 		}

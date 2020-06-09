@@ -83,7 +83,10 @@ func (s *TIPostgresRouteSuite) SetupSuite() {
 		panic("Cannot connect to DB")
 	}
 
-	migrator := migrator_package.Migrator{ConnString: connString}
+	migrator, err := migrator_package.NewMigrator(connString)
+	if err != nil {
+		panic("Cannot create migrator")
+	}
 	err = migrator.MigrateToLatest()
 	if err != nil {
 		panic("Cannot migrate schema")
