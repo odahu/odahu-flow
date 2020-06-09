@@ -182,8 +182,8 @@ function upload_test_dags() {
     git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
     local dag_bucket dag_bucket_path
-    dag_bucket="$(jq -r ".airflow.dag_bucket // \"$BUCKET_NAME\"" "${CLUSTER_PROFILE}")"
-    dag_bucket_path="$(jq -r ".airflow.dag_bucket_path // \"/dags\"" "${CLUSTER_PROFILE}")"
+    dag_bucket="$(jq -r ".airflow.dag_bucket |= if . == null or . == \"\" then \"$BUCKET_NAME\" else . end | .airflow.dag_bucket" "${CLUSTER_PROFILE}")"
+    dag_bucket_path="$(jq -r '.airflow.dag_bucket_path |= if . == null or . == "" then "/dags" else . end | .airflow.dag_bucket_path' "${CLUSTER_PROFILE}")"
 
     for dag_dir in "${dag_dirs[@]}" ;
     do
