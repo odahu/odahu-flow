@@ -347,6 +347,9 @@ config:
     # The collection of external urls, for example: metrics, edge, service catalog and so on
     # Type: string->string map
     externalUrls: []
+    # Valid connection string (including schema) syntax: https://godoc.org/github.com/lib/pq
+    # Type: string
+    databaseConnectionString:
   # Operator configuration
   operator:
     auth:
@@ -432,6 +435,11 @@ config:
       # Required value
       # Type: string
       # image: "odahu/odahu-flow-сli:latest"
+    # Storage backend for toolchain integrations. Available options:
+    #   * kubernetes
+    #   * postgres
+    # Type: string
+    toolchainIntegrationRepositoryType: kubernetes
 
   # Packaging configuration
   packaging:
