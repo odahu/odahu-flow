@@ -24,12 +24,12 @@ func (s *MigratorRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
 }
 
-func (s *MigratorRouteSuite) TearDownTest() {
-	err := s.migrator.DownAllMigrations()
-	if err != nil {
-		s.Suite.FailNow(fmt.Sprintf("Error while teardown test %v", err))
-	}
-}
+//func (s *MigratorRouteSuite) TearDownTest() {
+//	err := s.migrator.DownAllMigrations()
+//	if err != nil {
+//		s.Suite.FailNow(fmt.Sprintf("Error while teardown test %v", err))
+//	}
+//}
 
 func (s *MigratorRouteSuite) SetupSuite() {
 
@@ -64,7 +64,7 @@ func (s *MigratorRouteSuite) SetupSuite() {
 		s.resource.GetPort("5432/tcp"),
 	)
 
-	// exponential backoff-retry, because the application in the container might not be ready to accept connections yet
+	// exponential backoff-retry, becapkg/repository/util/postgres/postgres.go:63:47use the application in the container might not be ready to accept connections yet
 
 	var db = &sql.DB{}
 
@@ -79,7 +79,10 @@ func (s *MigratorRouteSuite) SetupSuite() {
 		panic("Cannot connect to DB")
 	}
 
-	s.migrator = &migrator_package.Migrator{ConnString: connString}
+	s.migrator, err = migrator_package.NewMigrator(connString)
+	if err != nil {
+		panic("Cannot create migrator")
+	}
 
 }
 
