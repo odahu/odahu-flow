@@ -4,4 +4,7 @@ jinja2>=2.7.3
 pyyaml>=3.1.2
 aiohttp>=3.6.2
 pydantic>=1.2
+dataclasses>=0.6
+typing-extensions>=3.6.5
+idna-ssl>=1.1.0
 docker>=4.2.0
