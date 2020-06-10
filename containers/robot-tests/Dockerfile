@@ -35,7 +35,8 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
     wget -qO /tmp/rclone.zip "https://downloads.rclone.org/${CLI_RCLONE_VERSION}/rclone-${CLI_RCLONE_VERSION}-linux-amd64.zip" && \
     mkdir /tmp/rclone && unzip /tmp/rclone.zip -d /tmp/rclone && \
     cp "/tmp/rclone/rclone-${CLI_RCLONE_VERSION}-linux-amd64/rclone" /usr/local/bin/rclone && \
-    chmod a+x /usr/local/bin/rclone /usr/local/bin/kubectl
+    chmod a+x /usr/local/bin/rclone /usr/local/bin/kubectl && \
+    rm -rf /tmp/rclone*
 
 RUN pip install --disable-pip-version-check --upgrade pip==18.1 pipenv==2018.10.13 awscli
 

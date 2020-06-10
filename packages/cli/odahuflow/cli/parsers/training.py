@@ -28,7 +28,7 @@ from odahuflow.cli.utils.logs import print_logs
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, \
     validate_output_format
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import WrongHttpStatusCode, \
+from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, \
     APIConnectionException
 from odahuflow.sdk.clients.api_aggregated import \
     parse_resources_file_with_one_item
@@ -94,9 +94,13 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
               help='no wait until scale will be finished')
 @click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
               help='timeout in seconds. for wait (if no-wait is off)')
+@click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
+              help='timeout in seconds. for wait (if no-wait is off)')
+@click.option('--ignore-if-exists', is_flag=True,
+              help='Ignore if entity is already exists on API server. Return success status code')
 @pass_obj
 def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
-           timeout: int):
+           timeout: int, ignore_if_exists: bool):
     """
     \b
     Create a training.
@@ -113,6 +117,7 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
     :param client: Model training HTTP client
     :param train_id: Model training ID
     :param file: Path to the file with only one training
+    :param ignore_if_exists: Return success status code if entity is already exists
     """
     train = parse_resources_file_with_one_item(file).resource
     if not isinstance(train, ModelTraining):
@@ -121,9 +126,16 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
     if train_id:
         train.id = train_id
 
-    train = client.create(train)
-    click.echo(f"Start training: {train}")
+    try:
+        train = client.create(train)
+    except EntityAlreadyExists as e:
+        if ignore_if_exists:
+            LOGGER.debug(f'--ignore-if-exists was passed: {e} will be suppressed')
+            click.echo('Training already exists')
+            return
+        raise
 
+    click.echo(f"Start training: {train}")
     wait_training_finish(timeout, wait, train.id, client)
 
 
