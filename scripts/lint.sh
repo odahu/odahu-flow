@@ -13,7 +13,7 @@ function pylint_cmd() {
     additional_pylint_args="${3}"
 
     pylint --output-format=parseable \
-           "${additional_pylint_args}" \
+           ${additional_pylint_args} \
            --reports=no "packages/${package_dir}" 2>&1 | tee "${PYLINT_FOLDER}/odahu-flow-${output_name}.log" &
 }
 
