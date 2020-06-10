@@ -1,3 +1,6 @@
+import os
+import json
+
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.configuration import ConfigurationClient
 from odahuflow.sdk.clients.connection import ConnectionClient
@@ -9,10 +12,15 @@ from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
 
-from odahuflow.sdk.clients.api import RemoteAPIClient
+from odahuflow.sdk.clients.api import RemoteAPIClient, Authenticator
 
-CLIENT_ID =
-CLIENT_SECRET =
+FILE = "test_sa"
+PATH = os.path.join(os.path.dirname(__file__), FILE)
+
+with open(PATH) as file:
+    dict_ = json.load(file)
+    CLIENT_ID = dict_['client_id']
+    CLIENT_SECRET = dict_['client_secret']
 
 remote_api = RemoteAPIClient(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
 remote_api.info()
