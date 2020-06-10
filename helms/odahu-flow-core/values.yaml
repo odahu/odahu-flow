@@ -479,4 +479,15 @@ resource_uploader_sa: {}
 #  client_secret: client-secret
 
 # OpenID provider url
-oauth_oidc_issuer_url: ""
+oauth_oidc_issuer_url:
+
+
+# DB Migrations tool image
+migrate:
+  # migrations could be disabled
+  # Type: bool
+  enabled: true
+
+  # This variable can be uncommented to setup custom image name for odahu migrate (server)
+  # Type: string
+  # image: custom-image:1.0

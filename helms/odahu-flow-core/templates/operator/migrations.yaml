@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-db-migrator"
+  labels:
+    component: "db-migrator"
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-4"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: db-migrator
+          image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.migrate "tpl" "%sodahu-flow-migrate:%s") }}"
+          args:
+            - "./odahu-migrate"
+            - "--database"
+            - {{ .Values.config.common.databaseConnectionString }}
