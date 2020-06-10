@@ -40,7 +40,7 @@ spec:
           env:
             - name: API_URL
               value: http://{{ .Release.Name }}-api.{{ .Release.Namespace }}.svc.cluster.local
-          image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.api "tpl" "%sodahu-flow-cli:%s") }}"
+          image: "{{ include "odahuflow.default-image-name" (dict "root" . "tpl" "%sodahu-flow-cli:%s") }}"
           volumeMounts:
             - mountPath: /opt/odahu-flow-resources
               name: resources
