@@ -15,7 +15,7 @@ Resource            ../../resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
-Default Tags        api  cli  bulk
+Default Tags        cli  bulk
 Suite Setup         Run keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                               Login to the api and edge  AND
 ...                               Cleanup resources

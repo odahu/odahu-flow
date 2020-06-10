@@ -19,7 +19,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup example resources  ${REUTERS_CLASSIFIER}  AND
 ...                 Remove file  ${LOCAL_CONFIG}
-Force Tags          e2e  reuters-classifier  api
+Force Tags          e2e  reuters-classifier  cli
 
 *** Test Cases ***
 Reuters classifier model

@@ -22,7 +22,7 @@ Suite Setup         Run keywords  Choose cluster context  ${CLUSTER_CONTEXT}  AN
 ...                               Login to the api and edge  AND
 ...                               Cleanup resources
 Suite Teardown      Remove File  ${LOCAL_CONFIG}
-Force Tags          training  api  cli  disable
+Force Tags          training  cli  disable
 
 *** Keywords ***
 Cleanup resources

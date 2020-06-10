@@ -16,7 +16,7 @@ Test Timeout        20 minutes
 Resource            ../../resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             Collections
-Force Tags          connection  cli  api
+Force Tags          connection  cli
 Suite Setup         Run keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                               Login to the api and edge  AND
 ...                               Cleanup resources
