@@ -1,3 +1,4 @@
+{{- if .Values.migrate.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -22,3 +23,4 @@ spec:
             - "./odahu-migrate"
             - "--database"
             - {{ .Values.config.common.databaseConnectionString }}
+{{- end }}
