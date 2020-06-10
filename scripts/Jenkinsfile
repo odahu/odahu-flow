@@ -123,6 +123,7 @@ pipeline {
                             cicdLibrary.buildDockerImage('odahu-flow-service-catalog', ".", "containers/operator/Dockerfile", "--target service-catalog --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                             cicdLibrary.buildDockerImage('odahu-flow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                             cicdLibrary.buildDockerImage('odahu-flow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildDockerImage('odahu-flow-migrate', ".", "containers/operator/Dockerfile", "--target odahu-migrate --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                         }
                     }
                 }
@@ -215,6 +216,13 @@ pipeline {
                     steps {
                         script {
                             cicdLibrary.uploadDockerImage('odahu-flow-api', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage('Upload Migrate Docker image') {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahu-flow-migrate', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                         }
                     }
                 }
