@@ -16,7 +16,12 @@
 
 package packaging
 
-import "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+)
 
 type PackagingIntegration struct {
 	// Packaging integration id
@@ -36,6 +41,19 @@ type PackagingIntegrationSpec struct {
 	Privileged bool `json:"privileged,omitempty"`
 	// Schema which describes targets and arguments for specific packaging integration
 	Schema Schema `json:"schema"`
+}
+
+func (piSpec PackagingIntegrationSpec) Value() (driver.Value, error) {
+	return json.Marshal(piSpec)
+}
+
+func (piSpec *PackagingIntegrationSpec) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &piSpec)
+	return res
 }
 
 type Schema struct {

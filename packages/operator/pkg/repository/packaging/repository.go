@@ -36,6 +36,10 @@ type Repository interface {
 	GetModelPackagingLogs(id string, writer utils.Writer, follow bool) error
 	UpdateModelPackaging(md *packaging.ModelPackaging) error
 	CreateModelPackaging(md *packaging.ModelPackaging) error
+	PackagingIntegrationRepository
+}
+
+type PackagingIntegrationRepository interface {
 	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
 	GetPackagingIntegrationList(options ...kubernetes.ListOption) ([]packaging.PackagingIntegration, error)
 	DeletePackagingIntegration(id string) error
