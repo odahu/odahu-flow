@@ -86,9 +86,11 @@ func SetupV1Routes(
 	// Setup the training toolchain repository
 	switch odahuConfig.Training.ToolchainIntegrationRepositoryType {
 	case config.RepositoryKubernetesType:
-		connRepository = k8s_connection_repository.NewRepository(
-			odahuConfig.Connection.Namespace,
+		tiRepository = k8s_training_repository.NewRepository(
+			odahuConfig.Training.Namespace,
+			odahuConfig.Training.ToolchainIntegrationNamespace,
 			k8sClient,
+			k8sConfig,
 		)
 	case config.RepositoryPostgresType:
 		db, err := sql.Open("postgres", odahuConfig.Common.DatabaseConnectionString)
@@ -109,10 +111,7 @@ func SetupV1Routes(
 	)
 
 	trainingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(odahuConfig.Training.Enabled))
-	training.ConfigureRoutes(
-		trainingRouteGroup, trainRepository, connRepository,
-		odahuConfig.Training, odahuConfig.Common.ResourceGPUName,
-	)
+	training.ConfigureRoutes(trainingRouteGroup, trainRepository, tiRepository, connRepository, odahuConfig.Training, odahuConfig.Common.ResourceGPUName)
 	training.ConfigureToolchainRoutes(
 		trainingRouteGroup, tiRepository,
 	)
