@@ -18,30 +18,10 @@ package packaging
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, repository mp_repository.Repository, piRepository mp_repository.PackagingIntegrationRepository, connRepository conn_repository.Repository, config config.ModelPackagingConfig, gpuResourceName string) {
-	mtController := ModelPackagingController{
-		repository: repository,
-		validator: NewMpValidator(
-			piRepository,
-			connRepository,
-			config.OutputConnectionID,
-			gpuResourceName,
-			config.DefaultResources,
-		),
-	}
-
-	routeGroup.GET(GetModelPackagingURL, mtController.getMP)
-	routeGroup.GET(GetAllModelPackagingURL, mtController.getAllMPs)
-	routeGroup.POST(CreateModelPackagingURL, mtController.createMP)
-	routeGroup.GET(GetModelPackagingLogsURL, mtController.getModelPackagingLog)
-	routeGroup.PUT(UpdateModelPackagingURL, mtController.updateMP)
-	routeGroup.PUT(SaveModelPackagingResultURL, mtController.saveMPResults)
-	routeGroup.DELETE(DeleteModelPackagingURL, mtController.deleteMP)
+func ConfigurePiRoutes(routeGroup *gin.RouterGroup, piRepository mp_repository.PackagingIntegrationRepository) {
 
 	piController := &PackagingIntegrationController{
 		repository: piRepository,

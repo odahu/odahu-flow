@@ -155,15 +155,10 @@ func (s *ModelPackagingRouteSuite) SetupTest() {
 func (s *ModelPackagingRouteSuite) registerHandlers(packagingConfig config.ModelPackagingConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	pack_route.ConfigureRoutes(
-		v1Group,
-		s.mpRepository,
-		conn_k8s_repository.NewRepository(
-			testNamespace, s.k8sClient,
-		),
-		packagingConfig,
-		config.NvidiaResourceName,
-	)
+	packGroup := v1Group.Group("", routes.DisableAPIMiddleware(packagingConfig.Enabled))
+	pack_route.ConfigureRoutes(packGroup, s.mpRepository, s.mpRepository, conn_k8s_repository.NewRepository(
+		testNamespace, s.k8sClient,
+	), packagingConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelPackagingRouteSuite) TearDownTest() {

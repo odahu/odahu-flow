@@ -24,28 +24,20 @@ import (
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
-	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
+	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
-	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 const (
@@ -104,44 +96,8 @@ type PackagingIntegrationRouteSuite struct {
 	g              *GomegaWithT
 	server         *gin.Engine
 	k8sEnvironment *envtest.Environment
-	mpRepository   mp_repository.Repository
+	mpRepository   mp_repository.PackagingIntegrationRepository
 	connRepository conn_repository.Repository
-}
-
-func (s *PackagingIntegrationRouteSuite) SetupSuite() {
-	var cfg *rest.Config
-
-	s.k8sEnvironment = &envtest.Environment{
-		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "..", "..", "config", "crds")},
-	}
-
-	err := odahuflow_apis.AddToScheme(scheme.Scheme)
-	if err != nil {
-		s.T().Fatalf("Cannot setup the odahuflow schema: %v", err)
-	}
-
-	cfg, err = s.k8sEnvironment.Start()
-	if err != nil {
-		s.T().Fatalf("Cannot setup the test k8s api: %v", err)
-	}
-
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
-	if err != nil {
-		s.T().Fatalf("Cannot setup the test k8s manager: %v", err)
-	}
-
-	s.mpRepository = mp_k8s_repository.NewRepository(
-		testNamespace, testNamespace, mgr.GetClient(), nil,
-	)
-	s.connRepository = conn_k8s_repository.NewRepository(
-		testNamespace, mgr.GetClient(),
-	)
-}
-
-func (s *PackagingIntegrationRouteSuite) TearDownSuite() {
-	if err := s.k8sEnvironment.Stop(); err != nil {
-		s.T().Fatal("Cannot stop the test k8s api")
-	}
 }
 
 func (s *PackagingIntegrationRouteSuite) SetupTest() {
@@ -151,18 +107,14 @@ func (s *PackagingIntegrationRouteSuite) SetupTest() {
 
 func (s *PackagingIntegrationRouteSuite) registerHandlers(packagingConfig config.ModelPackagingConfig) {
 	s.server = gin.Default()
-	pack_route.ConfigureRoutes(
-		s.server.Group(""),
-		s.mpRepository,
-		s.connRepository,
-		packagingConfig,
-		config.NvidiaResourceName,
-	)
+	v1Group := s.server.Group("")
+	packGroup := v1Group.Group("", routes.DisableAPIMiddleware(packagingConfig.Enabled))
+	pack_route.ConfigurePiRoutes(packGroup, s.mpRepository)
 }
 
 func (s *PackagingIntegrationRouteSuite) TearDownTest() {
 	for _, piID := range []string{piID} {
-		if err := s.mpRepository.DeletePackagingIntegration(piID); err != nil && !errors.IsNotFound(err) {
+		if err := s.mpRepository.DeletePackagingIntegration(piID); err != nil && !errors.IsNotFound(err) && !odahuErrors.IsNotFoundError(err) {
 			s.T().Fail()
 		}
 	}
@@ -181,10 +133,6 @@ func newPackagingIntegration() *packaging.PackagingIntegration {
 			},
 		},
 	}
-}
-
-func TestModelPackagingIntegrationSuite(t *testing.T) {
-	suite.Run(t, new(PackagingIntegrationRouteSuite))
 }
 
 func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegration() {

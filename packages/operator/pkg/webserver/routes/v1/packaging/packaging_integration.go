@@ -43,7 +43,7 @@ var (
 )
 
 type PackagingIntegrationController struct {
-	repository mp_repository.Repository
+	repository mp_repository.PackagingIntegrationRepository
 	validator  *PiValidator
 }
 
