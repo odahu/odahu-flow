@@ -43,14 +43,4 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup, repository mp_repository.Repos
 	routeGroup.PUT(SaveModelPackagingResultURL, mtController.saveMPResults)
 	routeGroup.DELETE(DeleteModelPackagingURL, mtController.deleteMP)
 
-	piController := &PackagingIntegrationController{
-		repository: piRepository,
-		validator:  NewPiValidator(),
-	}
-
-	routeGroup.GET(GetPackagingIntegrationURL, piController.getPackagingIntegration)
-	routeGroup.GET(GetAllPackagingIntegrationURL, piController.getAllPackagingIntegrations)
-	routeGroup.POST(CreatePackagingIntegrationURL, piController.createPackagingIntegration)
-	routeGroup.PUT(UpdatePackagingIntegrationURL, piController.updatePackagingIntegration)
-	routeGroup.DELETE(DeletePackagingIntegrationURL, piController.deletePackagingIntegration)
 }

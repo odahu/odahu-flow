@@ -186,9 +186,7 @@ func (s *ModelPackagingControllerSuite) initReconciler(packagingConfig config.Mo
 	packagingConfig.PackagingIntegrationNamespace = testNamespace
 	packagingConfig.Namespace = testNamespace
 
-	mpReconciler := newReconciler(
-		s.k8sManager, packagingConfig, config.NewDefaultOperatorConfig(), config.NvidiaResourceName,
-	)
+	mpReconciler := newReconciler(s.k8sManager, packagingConfig, config.NewDefaultOperatorConfig(), config.NewDefaultCommonConfig(), config.NvidiaResourceName)
 	recFn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
 		result, err := mpReconciler.Reconcile(req)
 		s.requests <- req
