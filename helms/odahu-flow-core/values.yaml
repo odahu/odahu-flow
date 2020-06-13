@@ -464,6 +464,11 @@ config:
       # Required value
       # Type: string
       # image: "odahu-flow-model-packager:latest"
+    # Storage backend for packaging integrations. Available options:
+    #   * kubernetes
+    #   * postgres
+    # Type: string
+    packagingIntegrationRepositoryType: kubernetes
 
   # Service catalog configuration
   serviceCatalog:
