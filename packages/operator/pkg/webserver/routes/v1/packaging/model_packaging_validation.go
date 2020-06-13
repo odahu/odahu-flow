@@ -42,7 +42,7 @@ const (
 )
 
 type MpValidator struct {
-	mpRepository         mp_repository.Repository
+	mpRepository         mp_repository.PackagingIntegrationRepository
 	connRepository       conn_repository.Repository
 	outputConnectionName string
 	gpuResourceName      string
@@ -50,7 +50,7 @@ type MpValidator struct {
 }
 
 func NewMpValidator(
-	mpRepository mp_repository.Repository,
+	mpRepository mp_repository.PackagingIntegrationRepository,
 	connRepository conn_repository.Repository,
 	outputConnectionName string,
 	gpuResourceName string,
