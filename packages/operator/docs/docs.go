@@ -2214,6 +2214,10 @@ var doc = `{
                 "packagerIntegrationNamespace": {
                     "type": "string"
                 },
+                "packagingIntegrationRepositoryType": {
+                    "description": "Storage backend for packaging integrations. Available options:\n  * kubernetes\n  * postgres",
+                    "type": "string"
+                },
                 "serviceAccount": {
                     "type": "string"
                 },

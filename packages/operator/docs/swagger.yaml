@@ -235,6 +235,12 @@ definitions:
         type: string
       packagerIntegrationNamespace:
         type: string
+      packagingIntegrationRepositoryType:
+        description: |-
+          Storage backend for packaging integrations. Available options:
+            * kubernetes
+            * postgres
+        type: string
       serviceAccount:
         type: string
       timeout:
