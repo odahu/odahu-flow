@@ -18,6 +18,7 @@ package modeltraining
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
@@ -25,6 +26,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
+	postgres_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -61,9 +63,10 @@ func Add(
 	mgr manager.Manager,
 	trainingConfig config.ModelTrainingConfig,
 	operatorConfig config.OperatorConfig,
+	commonConfig config.CommonConfig,
 	gpuResourceName string,
 ) error {
-	return add(mgr, newReconciler(mgr, trainingConfig, operatorConfig, gpuResourceName))
+	return add(mgr, newReconciler(mgr, trainingConfig, operatorConfig, commonConfig, gpuResourceName))
 }
 
 // newReconciler returns a new reconcile.Reconciler
@@ -71,9 +74,30 @@ func newReconciler(
 	mgr manager.Manager,
 	trainingConfig config.ModelTrainingConfig,
 	operatorConfig config.OperatorConfig,
+	commonConfig config.CommonConfig,
 	gpuResourceName string,
 ) reconcile.Reconciler {
 	k8sClient := mgr.GetClient()
+
+	// Setup the training toolchain repository
+	var tiRepository train_repository.ToolchainRepository
+	switch trainingConfig.ToolchainIntegrationRepositoryType {
+	case config.RepositoryKubernetesType:
+		tiRepository = train_k8s_repository.NewRepository(
+			trainingConfig.Namespace,
+			trainingConfig.ToolchainIntegrationNamespace,
+			k8sClient,
+			mgr.GetConfig(),
+		)
+	case config.RepositoryPostgresType:
+		db, err := sql.Open("postgres", commonConfig.DatabaseConnectionString)
+		if err != nil {
+			panic(fmt.Sprintf("Cannot init postgres repository %v", err))
+		}
+		tiRepository = postgres_training_repository.ToolchainRepository{DB: db}
+	default:
+		panic("DI toolchain repository failed")
+	}
 
 	return &ReconcileModelTraining{
 		Client:    k8sClient,
@@ -86,6 +110,7 @@ func newReconciler(
 			k8sClient,
 			mgr.GetConfig(),
 		),
+		toolchainRepo:   tiRepository,
 		trainingConfig:  trainingConfig,
 		operatorConfig:  operatorConfig,
 		gpuResourceName: gpuResourceName,
@@ -137,6 +162,7 @@ type ReconcileModelTraining struct {
 	recorder        record.EventRecorder
 	k8sConfig       *rest.Config
 	trainRepo       train_repository.Repository
+	toolchainRepo   train_repository.ToolchainRepository
 	trainingConfig  config.ModelTrainingConfig
 	operatorConfig  config.OperatorConfig
 	gpuResourceName string
@@ -246,12 +272,9 @@ func (r *ReconcileModelTraining) calculateStateByPod(
 func (r *ReconcileModelTraining) getToolchainIntegration(trainingCR *odahuflowv1alpha1.ModelTraining) (
 	*training.ToolchainIntegration, error,
 ) {
-	var ti odahuflowv1alpha1.ToolchainIntegration
-	if err := r.Get(context.TODO(), types.NamespacedName{
-		Name:      trainingCR.Spec.Toolchain,
-		Namespace: r.trainingConfig.ToolchainIntegrationNamespace,
-	}, &ti); err != nil {
-		log.Error(err, "Get toolchain integration", "mt id", trainingCR)
+	var ti *training.ToolchainIntegration
+	ti, err := r.toolchainRepo.GetToolchainIntegration(trainingCR.Spec.Toolchain)
+	if err != nil {
 		return nil, err
 	}
 	return &training.ToolchainIntegration{Spec: ti.Spec}, nil

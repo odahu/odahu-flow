@@ -165,9 +165,7 @@ func (s *ModelTrainingControllerSuite) initReconciler(trainingConfig config.Mode
 	trainingConfig.ToolchainIntegrationNamespace = testNamespace
 	trainingConfig.Namespace = testNamespace
 
-	mpReconciler := newReconciler(
-		s.k8sManager, trainingConfig, config.NewDefaultOperatorConfig(), config.NvidiaResourceName,
-	)
+	mpReconciler := newReconciler(s.k8sManager, trainingConfig, config.NewDefaultOperatorConfig(), config.NewDefaultCommonConfig(), config.NvidiaResourceName)
 	recFn := reconcile.Func(func(req reconcile.Request) (reconcile.Result, error) {
 		result, err := mpReconciler.Reconcile(req)
 		s.requests <- req
