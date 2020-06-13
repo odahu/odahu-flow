@@ -38,9 +38,7 @@ func AddToManager(m manager.Manager, odahuConfig *config.Config) error {
 			return err
 		}
 
-		if err := AddTrainingToManager(
-			m, odahuConfig.Training, odahuConfig.Operator, odahuConfig.Common.ResourceGPUName,
-		); err != nil {
+		if err := AddTrainingToManager(m, odahuConfig.Training, odahuConfig.Operator, odahuConfig.Common, odahuConfig.Common.ResourceGPUName); err != nil {
 			return err
 		}
 	}
