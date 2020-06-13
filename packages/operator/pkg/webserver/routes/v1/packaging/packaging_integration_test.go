@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -37,7 +36,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 const (
@@ -93,11 +91,9 @@ var (
 
 type PackagingIntegrationRouteSuite struct {
 	suite.Suite
-	g              *GomegaWithT
-	server         *gin.Engine
-	k8sEnvironment *envtest.Environment
-	mpRepository   mp_repository.PackagingIntegrationRepository
-	connRepository conn_repository.Repository
+	g            *GomegaWithT
+	server       *gin.Engine
+	mpRepository mp_repository.PackagingIntegrationRepository
 }
 
 func (s *PackagingIntegrationRouteSuite) SetupTest() {
@@ -114,7 +110,8 @@ func (s *PackagingIntegrationRouteSuite) registerHandlers(packagingConfig config
 
 func (s *PackagingIntegrationRouteSuite) TearDownTest() {
 	for _, piID := range []string{piID} {
-		if err := s.mpRepository.DeletePackagingIntegration(piID); err != nil && !errors.IsNotFound(err) && !odahuErrors.IsNotFoundError(err) {
+		err := s.mpRepository.DeletePackagingIntegration(piID)
+		if err != nil && !errors.IsNotFound(err) && !odahuErrors.IsNotFoundError(err) {
 			s.T().Fail()
 		}
 	}

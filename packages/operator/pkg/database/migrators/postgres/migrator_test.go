@@ -67,8 +67,6 @@ func (s *MigratorRouteSuite) SetupSuite() {
 		s.resource.GetPort("5432/tcp"),
 	)
 
-	// exponential backoff-retry, becapkg/repository/util/postgres/postgres.go:63:47use the application in the container might not be ready to accept connections yet
-
 	var db = &sql.DB{}
 
 	if err := s.pool.Retry(func() error {

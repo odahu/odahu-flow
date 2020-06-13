@@ -45,7 +45,9 @@ func (tr ToolchainRepository) GetToolchainIntegration(name string) (*training.To
 
 }
 
-func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.ListOption) ([]training.ToolchainIntegration, error) {
+func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.ListOption) (
+	[]training.ToolchainIntegration, error,
+) {
 
 	listOptions := &kubernetes.ListOptions{
 		Filter: nil,
@@ -58,12 +60,9 @@ func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	stmt := fmt.Sprintf(
-		"SELECT id, spec, status FROM %s ORDER BY id LIMIT %d OFFSET %d",
-		toolchainIntegrationTable, *listOptions.Size, offset,
-	)
+	stmt := "SELECT id, spec, status FROM odahu_operator_toolchain_integration ORDER BY id LIMIT $1 OFFSET $2"
 
-	rows, err := tr.DB.Query(stmt)
+	rows, err := tr.DB.Query(stmt, *listOptions.Size, offset)
 	if err != nil {
 		return nil, err
 	}

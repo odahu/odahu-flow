@@ -25,7 +25,9 @@ type PackagingIntegrationRepository struct {
 	DB *sql.DB
 }
 
-func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (*packaging.PackagingIntegration, error) {
+func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
+	*packaging.PackagingIntegration, error,
+) {
 
 	ti := new(packaging.PackagingIntegration)
 
@@ -45,7 +47,9 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 
 }
 
-func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ...kubernetes.ListOption) ([]packaging.PackagingIntegration, error) {
+func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ...kubernetes.ListOption) (
+	[]packaging.PackagingIntegration, error,
+) {
 
 	listOptions := &kubernetes.ListOptions{
 		Filter: nil,
@@ -58,12 +62,10 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ..
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	stmt := fmt.Sprintf(
-		"SELECT id, spec, status FROM %s ORDER BY id LIMIT %d OFFSET %d",
-		packagingIntegrationTable, *listOptions.Size, offset,
-	)
+	stmt := "SELECT id, spec, status FROM odahu_operator_packaging_integration ORDER BY id LIMIT $1 OFFSET $2"
 
-	rows, err := pir.DB.Query(stmt)
+	rows, err := pir.DB.Query(stmt, *listOptions.Size, offset)
+
 	if err != nil {
 		return nil, err
 	}

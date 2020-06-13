@@ -23,7 +23,9 @@ import (
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, repository mp_repository.Repository, piRepository mp_repository.PackagingIntegrationRepository, connRepository conn_repository.Repository, config config.ModelPackagingConfig, gpuResourceName string) {
+func ConfigureRoutes(routeGroup *gin.RouterGroup, repository mp_repository.Repository,
+	piRepository mp_repository.PackagingIntegrationRepository, connRepository conn_repository.Repository,
+	config config.ModelPackagingConfig, gpuResourceName string) {
 	mtController := ModelPackagingController{
 		repository: repository,
 		validator: NewMpValidator(

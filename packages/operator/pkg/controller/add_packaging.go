@@ -33,7 +33,10 @@ var AddToManagerPackagingFuncs []func(
 ) error
 
 // AddToManager adds all Controllers to the Manager
-func AddPackagingToManager(m manager.Manager, packagingConfig config.ModelPackagingConfig, operatorConfig config.OperatorConfig, commonConfig config.CommonConfig, gpuResourceName string) error {
+func AddPackagingToManager(
+	m manager.Manager, packagingConfig config.ModelPackagingConfig,
+	operatorConfig config.OperatorConfig, commonConfig config.CommonConfig, gpuResourceName string,
+) error {
 	for _, f := range AddToManagerPackagingFuncs {
 		if err := f(m, packagingConfig, operatorConfig, commonConfig, gpuResourceName); err != nil {
 			return err

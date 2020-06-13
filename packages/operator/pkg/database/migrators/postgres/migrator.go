@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"github.com/golang-migrate/migrate"
-	_ "github.com/golang-migrate/migrate/database/postgres"
+	_ "github.com/golang-migrate/migrate/database/postgres" // Skip lint
 	"github.com/golang-migrate/migrate/source/go_bindata"
 	migrations "github.com/odahu/odahu-flow/packages/operator/pkg/database/migrations/postgres"
 	"github.com/prometheus/common/log"
@@ -13,17 +13,23 @@ type Migrator struct {
 	client     *migrate.Migrate
 }
 
+func AssetFunc(name string) ([]byte, error) {
+	return migrations.Asset(name)
+}
+
 func NewMigrator(connString string) (*Migrator, error) {
 
 	migr := &Migrator{ConnString: connString}
 
 	// wrap assets into Resource
-	s := bindata.Resource(migrations.AssetNames(),
-		func(name string) ([]byte, error) {
-			return migrations.Asset(name)
-		})
+	s := bindata.Resource(migrations.AssetNames(), AssetFunc)
 
 	d, err := bindata.WithInstance(s)
+
+	if err != nil {
+		return nil, err
+	}
+
 	migr.client, err = migrate.NewWithSourceInstance("go-bindata", d, connString)
 
 	if err != nil {

@@ -130,11 +130,13 @@ func SetupV1Routes(
 	)
 
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(odahuConfig.Packaging.Enabled))
-	packaging.ConfigureRoutes(packagingRouteGroup, packRepository, piRepository, connRepository, odahuConfig.Packaging, odahuConfig.Common.ResourceGPUName)
+	packaging.ConfigureRoutes(packagingRouteGroup, packRepository, piRepository, connRepository,
+		odahuConfig.Packaging, odahuConfig.Common.ResourceGPUName)
 	packaging.ConfigurePiRoutes(packagingRouteGroup, piRepository)
 
 	trainingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(odahuConfig.Training.Enabled))
-	training.ConfigureRoutes(trainingRouteGroup, trainRepository, tiRepository, connRepository, odahuConfig.Training, odahuConfig.Common.ResourceGPUName)
+	training.ConfigureRoutes(trainingRouteGroup, trainRepository, tiRepository, connRepository,
+		odahuConfig.Training, odahuConfig.Common.ResourceGPUName)
 	training.ConfigureToolchainRoutes(
 		trainingRouteGroup, tiRepository,
 	)

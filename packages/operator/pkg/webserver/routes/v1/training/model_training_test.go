@@ -145,7 +145,10 @@ func (s *ModelTrainingRouteSuite) registerHandlers(trainingConfig config.ModelTr
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
 	trainGroup := v1Group.Group("", routes.DisableAPIMiddleware(trainingConfig.Enabled))
-	train_route.ConfigureRoutes(trainGroup, s.mtRepository, s.mtRepository, s.connRepository, trainingConfig, config.NvidiaResourceName)
+	train_route.ConfigureRoutes(
+		trainGroup, s.mtRepository, s.mtRepository, s.connRepository, trainingConfig,
+		config.NvidiaResourceName,
+	)
 }
 
 func (s *ModelTrainingRouteSuite) newMultipleMtStubs() {
