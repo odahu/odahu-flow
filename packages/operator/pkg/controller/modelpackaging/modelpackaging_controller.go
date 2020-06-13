@@ -18,14 +18,15 @@ package modelpackaging
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
+	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -51,13 +52,8 @@ var log = logf.Log.WithName("model-packager-controller")
 
 // Add creates a new ModelPackaging Controller and adds it to the Manager with default RBAC.
 // The Manager will set fields on the Controller and Start it when the Manager is Started.
-func Add(
-	mgr manager.Manager,
-	packagingConfig config.ModelPackagingConfig,
-	operatorConfig config.OperatorConfig,
-	gpuResourceName string,
-) error {
-	return add(mgr, newReconciler(mgr, packagingConfig, operatorConfig, gpuResourceName))
+func Add(mgr manager.Manager, packagingConfig config.ModelPackagingConfig, operatorConfig config.OperatorConfig, commonConfig config.CommonConfig, gpuResourceName string) error {
+	return add(mgr, newReconciler(mgr, packagingConfig, operatorConfig, commonConfig, gpuResourceName))
 }
 
 // newReconciler returns a new reconcile.Reconciler
@@ -65,9 +61,29 @@ func newReconciler(
 	mgr manager.Manager,
 	packagingConfig config.ModelPackagingConfig,
 	operatorConfig config.OperatorConfig,
-	gpuResourceName string,
-) reconcile.Reconciler {
+	commonConfig config.CommonConfig,
+	gpuResourceName string) reconcile.Reconciler {
 	k8sClient := mgr.GetClient()
+
+	// Setup the training toolchain repository
+	var piRepository mp_repository.PackagingIntegrationRepository
+	switch packagingConfig.PackagingIntegrationRepositoryType {
+	case config.RepositoryKubernetesType:
+		piRepository = mp_k8s_repository.NewRepository(
+			packagingConfig.Namespace,
+			packagingConfig.PackagingIntegrationNamespace,
+			k8sClient,
+			mgr.GetConfig(),
+		)
+	case config.RepositoryPostgresType:
+		db, err := sql.Open("postgres", commonConfig.DatabaseConnectionString)
+		if err != nil {
+			panic(fmt.Sprintf("Cannot init postgres repository %v", err))
+		}
+		piRepository = mp_postgres_repository.PackagingIntegrationRepository{DB: db}
+	default:
+		panic("DI packaging repository failed")
+	}
 
 	return &ReconcileModelPackaging{
 		Client: k8sClient,
@@ -79,6 +95,7 @@ func newReconciler(
 			k8sClient,
 			mgr.GetConfig(),
 		),
+		piRepo:          piRepository,
 		packagingConfig: packagingConfig,
 		operatorConfig:  operatorConfig,
 		gpuResourceName: gpuResourceName,
@@ -125,7 +142,8 @@ type ReconcileModelPackaging struct {
 	client.Client
 	scheme          *runtime.Scheme
 	config          *rest.Config
-	packRepo        packaging_repository.Repository
+	packRepo        mp_repository.Repository
+	piRepo          mp_repository.PackagingIntegrationRepository
 	packagingConfig config.ModelPackagingConfig
 	operatorConfig  config.OperatorConfig
 	gpuResourceName string
