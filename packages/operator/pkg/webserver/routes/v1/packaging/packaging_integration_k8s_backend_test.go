@@ -31,6 +31,7 @@ import (
 
 type PIK8Suite struct {
 	PackagingIntegrationRouteSuite
+	k8sEnvironment *envtest.Environment
 }
 
 func (s *PIK8Suite) SetupSuite() {

@@ -23,7 +23,10 @@ import (
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, mtRepository mt_repository.Repository, tiRepository mt_repository.ToolchainRepository, connRepository conn_repository.Repository, config config.ModelTrainingConfig, gpuResourceName string) {
+func ConfigureRoutes(routeGroup *gin.RouterGroup, mtRepository mt_repository.Repository,
+	tiRepository mt_repository.ToolchainRepository, connRepository conn_repository.Repository,
+	config config.ModelTrainingConfig, gpuResourceName string) {
+
 	mtController := ModelTrainingController{
 		mtRepository: mtRepository,
 		validator: NewMtValidator(

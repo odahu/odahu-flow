@@ -52,7 +52,10 @@ var log = logf.Log.WithName("model-packager-controller")
 
 // Add creates a new ModelPackaging Controller and adds it to the Manager with default RBAC.
 // The Manager will set fields on the Controller and Start it when the Manager is Started.
-func Add(mgr manager.Manager, packagingConfig config.ModelPackagingConfig, operatorConfig config.OperatorConfig, commonConfig config.CommonConfig, gpuResourceName string) error {
+func Add(
+	mgr manager.Manager, packagingConfig config.ModelPackagingConfig, operatorConfig config.OperatorConfig,
+	commonConfig config.CommonConfig, gpuResourceName string,
+) error {
 	return add(mgr, newReconciler(mgr, packagingConfig, operatorConfig, commonConfig, gpuResourceName))
 }
 

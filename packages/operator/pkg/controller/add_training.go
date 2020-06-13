@@ -33,7 +33,10 @@ var AddToManagerTrainingFuncs []func(
 ) error
 
 // AddToManager adds all Controllers to the Manager
-func AddTrainingToManager(m manager.Manager, trainingConfig config.ModelTrainingConfig, operatorConfig config.OperatorConfig, commonConfig config.CommonConfig, gpuResourceName string) error {
+func AddTrainingToManager(
+	m manager.Manager, trainingConfig config.ModelTrainingConfig, operatorConfig config.OperatorConfig,
+	commonConfig config.CommonConfig, gpuResourceName string,
+) error {
 	for _, f := range AddToManagerTrainingFuncs {
 		if err := f(m, trainingConfig, operatorConfig, commonConfig, gpuResourceName); err != nil {
 			return err
