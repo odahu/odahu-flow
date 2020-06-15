@@ -109,8 +109,9 @@ Basic routing
     # TODO: For now we can't control virtual service readiness.
     sleep  5s
 
-    : FOR    ${INDEX}    IN RANGE    1    20
-    \    Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    FOR    ${INDEX}    IN RANGE    1    20
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    END
 
     Check model counter  ${MD_COUNTER_MODEL_1}
     Check model counter  ${MD_COUNTER_MODEL_2}
@@ -122,8 +123,9 @@ Basic mirroring
     # TODO: For now we can't control virtual service readiness.
     sleep  5s
 
-    : FOR    ${INDEX}    IN RANGE    1    20
-    \    Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    FOR    ${INDEX}    IN RANGE    1    20
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    END
 
     Check model counter  ${MD_COUNTER_MODEL_1}
     Check model counter  ${MD_COUNTER_MODEL_2}
@@ -135,8 +137,9 @@ Mirror to broken model
     # TODO: For now we can't control virtual service readiness.
     sleep  5s
 
-    : FOR    ${INDEX}    IN RANGE    1    20
-    \    Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    FOR    ${INDEX}    IN RANGE    1    20
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    END
 
     Check model counter  ${MD_COUNTER_MODEL_1}
 
