@@ -108,8 +108,10 @@ Validate model API body log entry
 Validate model API body log entry for all entries
     [Documentation]  check that model API body log entries contains all required keys
     [Arguments]      ${log_entries}
-    :FOR    ${log_entry}    IN    @{log_entries}
-    \    Validate model API body log entry    ${log_entry}
+
+    FOR    ${log_entry}    IN    @{log_entries}
+        Validate model API body log entry    ${log_entry}
+    END
 
 Get model API body content from all entries
     [Documentation]  get model API body content from all entries
