@@ -22,7 +22,7 @@ Suite Setup         Run Keywords
 ...                 Check model started  ${MD_FEEDBACK_MODEL}
 Suite Teardown      Run keywords  Cleanup resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
-Force Tags          deployment  api  cli  feedback
+Force Tags          cli  deployment  feedback
 
 *** Variables ***
 ${REQUEST_ID_CHECK_RETRIES}         30

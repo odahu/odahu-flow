@@ -25,7 +25,7 @@ Suite Setup         Run keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${
 Suite Teardown      Run keywords  Cleanup resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Test Teardown       Cleanup routes
-Force Tags          deployment  api  cli  route
+Force Tags          cli  deployment  route
 
 *** Keywords ***
 Cleanup routes
