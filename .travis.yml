@@ -117,3 +117,5 @@ matrix:
         - make lint
 after_success:
   - codecov
+after_failure:	
+  - codecov
