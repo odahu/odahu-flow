@@ -12,18 +12,9 @@ from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
 
-from odahuflow.sdk.clients.api import RemoteAPIClient, Authenticator
+from odahuflow.sdk.clients.api import RemoteAPIClient
 
-FILE = "test_sa"
-PATH = os.path.join(os.path.dirname(__file__), FILE)
-
-with open(PATH) as file:
-    dict_ = json.load(file)
-    CLIENT_ID = dict_['client_id']
-    CLIENT_SECRET = dict_['client_secret']
-
-remote_api = RemoteAPIClient(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
-remote_api.info()
+remote_api = RemoteAPIClient()
 
 
 class Configuration:

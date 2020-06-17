@@ -126,11 +126,21 @@ Login to the api and edge
     ${res}=  Shell  odahuflowctl config set MODEL_HOST ${EDGE_URL}
     Should be equal  ${res.rc}  ${0}
 
+Logout
+    [Documentation]  Log out of ODAHU API through odahuflowctl
+    ${res}=  Shell  odahuflowctl --verbose logout
+    Should be equal  ${res.rc}  ${0}
+
 Cleanup example resources
     [Arguments]  ${example_id}
     StrictShell  odahuflowctl --verbose train delete --id ${example_id} --ignore-not-found
     StrictShell  odahuflowctl --verbose pack delete --id ${example_id} --ignore-not-found
     StrictShell  odahuflowctl --verbose dep delete --id ${example_id} --ignore-not-found
+
+# Cleanup specified type of resources
+#
+# Cleanup all resources
+#
 
 Run example model
     [Arguments]  ${example_id}  ${manifests_dir}
