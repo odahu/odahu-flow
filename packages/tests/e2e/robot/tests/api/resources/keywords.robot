@@ -1,6 +1,5 @@
 *** Settings ***
 Documentation       API keywords
-Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 
 *** Keywords ***
