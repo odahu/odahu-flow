@@ -19,7 +19,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup example resources  ${FLOWER_CLASSIFIER}  AND
 ...                 Remove file  ${LOCAL_CONFIG}
-Force Tags          e2e  flower-classifier  cli
+Force Tags          e2e  flower-classifier  api
 
 *** Test Cases ***
 Flower classifier model
