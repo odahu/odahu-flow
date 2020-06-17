@@ -4,6 +4,10 @@ python: 3.6
 services:
   - docker
 install: skip
+branches:
+  only:
+  - master
+  - develop
 
 matrix:
   include:
@@ -112,6 +116,4 @@ matrix:
         - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint
 after_success:
-  - codecov
-after_failure:
   - codecov
