@@ -10,18 +10,6 @@ Call API
     Log                          ${result}
     [Return]                     ${result}
 
-Call API with success
-    [Arguments]                  ${keyword}  @{arguments}
-    ${result}=                   Call API  ${keyword}  @{arguments}
-    ${result}=
-    [Return]                     ${result}
-
-Call API with fail
-    [Arguments]                  ${keyword}  @{arguments}
-    ${result}=                   Call API  ${keyword}  @{arguments}
-    # Status State Must Be         ${result}  failed
-    [Return]                     ${result}
-
 Log id
     [Arguments]                  ${input}
     ${output}=                   Log  ${input.id}
@@ -44,12 +32,9 @@ Status Reason Should Contain
     [Arguments]                  ${result}  ${exp_reason}
     should contain               ${result.status.reason}  ${exp_reason}
 
-Wait until command finish and return result
+Wait until command finishes and returns result
     [Arguments]    ${command}  ${cycles}=20  ${sleep_time}=30s  ${result}=  ${exp_result}='succeeded'
     FOR     ${i}    IN RANGE   ${cycles}
-        Log                    ${result.id}
-        Log                    ${result.status.state}
-        Log                    ${exp_result}
         ${result}=             Call API  ${command} get id  ${result.id}
         exit for loop if       '${exp_result}' == '${result.status.state}'
         Sleep                  ${sleep_time}

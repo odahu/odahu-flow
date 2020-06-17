@@ -1,6 +1,3 @@
-import os
-import json
-
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.configuration import ConfigurationClient
 from odahuflow.sdk.clients.connection import ConnectionClient
