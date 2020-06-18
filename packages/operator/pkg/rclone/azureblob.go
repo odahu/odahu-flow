@@ -22,6 +22,7 @@ import (
 	_ "github.com/rclone/rclone/backend/azureblob" //nolint
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
+	"github.com/rclone/rclone/fs/rc"
 	"net/url"
 	"strings"
 )
@@ -38,9 +39,9 @@ func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*F
 		return nil, err
 	}
 
-	if err := config.CreateRemote(configName, "azureblob", map[string]interface{}{
+	if err := config.CreateRemote(configName, "azureblob", rc.Params{
 		"sas_url": conn.KeySecret,
-	}); err != nil {
+	}, true, false); err != nil {
 		return nil, err
 	}
 

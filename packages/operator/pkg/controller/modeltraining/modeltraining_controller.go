@@ -28,14 +28,13 @@ import (
 	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 	postgres_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -103,7 +102,6 @@ func newReconciler(
 		Client:    k8sClient,
 		k8sConfig: mgr.GetConfig(),
 		scheme:    mgr.GetScheme(),
-		recorder:  mgr.GetRecorder(controllerName),
 		trainRepo: train_k8s_repository.NewRepository(
 			trainingConfig.Namespace,
 			trainingConfig.ToolchainIntegrationNamespace,
@@ -142,7 +140,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &tektonv1alpha1.TaskRun{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &tektonv1beta1.TaskRun{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &odahuflowv1alpha1.ModelTraining{},
 	})
@@ -159,7 +157,6 @@ var _ reconcile.Reconciler = &ReconcileModelTraining{}
 type ReconcileModelTraining struct {
 	client.Client
 	scheme          *runtime.Scheme
-	recorder        record.EventRecorder
 	k8sConfig       *rest.Config
 	trainRepo       train_repository.Repository
 	toolchainRepo   train_repository.ToolchainRepository
@@ -181,7 +178,7 @@ const (
 // Determine crd state by child pod.
 // If pod has RUNNING state then we determine crd state by state of trainer container in the pod
 func (r *ReconcileModelTraining) syncCrdState(
-	taskRun *tektonv1alpha1.TaskRun,
+	taskRun *tektonv1beta1.TaskRun,
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 ) error {
 	if len(taskRun.Status.Conditions) > 0 {
@@ -200,7 +197,7 @@ func (r *ReconcileModelTraining) syncCrdState(
 }
 
 func (r *ReconcileModelTraining) calculateStateByTaskRun(
-	taskRun *tektonv1alpha1.TaskRun,
+	taskRun *tektonv1beta1.TaskRun,
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 ) error {
 	lastCondition := taskRun.Status.Conditions[len(taskRun.Status.Conditions)-1]
@@ -320,9 +317,9 @@ func (r *ReconcileModelTraining) getTolerations(trainingCR *odahuflowv1alpha1.Mo
 
 func (r *ReconcileModelTraining) reconcileTaskRun(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
-) (*tektonv1alpha1.TaskRun, error) {
+) (*tektonv1beta1.TaskRun, error) {
 	if trainingCR.Status.State != "" && trainingCR.Status.State != odahuflowv1alpha1.ModelTrainingUnknown {
-		taskRun := &tektonv1alpha1.TaskRun{}
+		taskRun := &tektonv1beta1.TaskRun{}
 		err := r.Get(context.TODO(), types.NamespacedName{
 			Name: trainingCR.Name, Namespace: r.trainingConfig.Namespace,
 		}, taskRun)
@@ -345,7 +342,7 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 		return nil, err
 	}
 
-	taskRun := &tektonv1alpha1.TaskRun{
+	taskRun := &tektonv1beta1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      trainingCR.Name,
 			Namespace: trainingCR.Namespace,
@@ -353,10 +350,10 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 				trainingIDLabel: trainingCR.Name,
 			},
 		},
-		Spec: tektonv1alpha1.TaskRunSpec{
+		Spec: tektonv1beta1.TaskRunSpec{
 			TaskSpec: taskSpec,
 			Timeout:  &metav1.Duration{Duration: r.trainingConfig.Timeout},
-			PodTemplate: tektonv1alpha1.PodTemplate{
+			PodTemplate: &tektonv1beta1.PodTemplate{
 				NodeSelector: r.getNodeSelector(trainingCR),
 				Tolerations:  r.getTolerations(trainingCR),
 			},
@@ -372,7 +369,7 @@ func (r *ReconcileModelTraining) reconcileTaskRun(
 		return nil, err
 	}
 
-	found := &tektonv1alpha1.TaskRun{}
+	found := &tektonv1beta1.TaskRun{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: taskRun.Name, Namespace: r.trainingConfig.Namespace,
 	}, found)
