@@ -101,7 +101,6 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v1 v1.0.0-20140924161607-9f9df34309c0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	gopkg.in/yaml.v3 v3.0.0-20190709130402-674ba3eaed22 // indirect
 	istio.io/api v0.0.0-20191115173247-e1a1952e5b81
 	istio.io/client-go v0.0.0-20191120150049-26c62a04cdbc // indirect
 	istio.io/gogo-genproto v0.0.0-20191029161641-f7d19ec0141d // indirect
@@ -109,13 +108,13 @@ require (
 	k8s.io/apiextensions-apiserver v0.17.6 // indirect
 	k8s.io/apimachinery v0.17.6
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
-	k8s.io/code-generator v0.18.0 // indirect
 	k8s.io/gengo v0.0.0-20200205140755-e0e292d8aa12 // indirect
 	k8s.io/kubernetes v1.14.7 // indirect
 	k8s.io/utils v0.0.0-20200324210504-a9aa75ae1b89 // indirect
 	knative.dev/serving v0.15.0
 	mvdan.cc/xurls/v2 v2.0.0 // indirect
 	sigs.k8s.io/controller-runtime v0.5.2
+	sigs.k8s.io/controller-tools v0.2.9 // indirect
 	sigs.k8s.io/structured-merge-diff v1.0.1 // indirect
 	sigs.k8s.io/testing_frameworks v0.1.1 // indirect
 )
