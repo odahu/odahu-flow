@@ -17,6 +17,7 @@
 package rclone
 
 import (
+	"context"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
@@ -142,7 +143,7 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 		log.Info("Download directory from the remote bucket",
 			"local_dir", localDir, "remote_dir", remotePath,
 		)
-		return sync.CopyDir(localFs, remoteFs, copyEmptySrcDirs)
+		return sync.CopyDir(context.Background(), localFs, remoteFs, copyEmptySrcDirs)
 	}
 
 	if len(localFileName) == 0 {
@@ -152,7 +153,7 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 	log.Info("Download the file from the remote bucket",
 		"local_file", localPath, "remote_file", remotePath,
 	)
-	return operations.CopyFile(localFs, remoteFs, localFileName, srcFileName)
+	return operations.CopyFile(context.Background(), localFs, remoteFs, localFileName, srcFileName)
 }
 
 // Uploads files to connection specific storage from the local filesystem.
@@ -195,7 +196,7 @@ func (os *ObjectStorage) Upload(localPath, remotePath string) error {
 		log.Info("Upload the local directory to the remote bucket",
 			"local_dir", localPath, "remote_dir", remotePath,
 		)
-		return sync.CopyDir(rFs, lFs, copyEmptySrcDirs)
+		return sync.CopyDir(context.Background(), rFs, lFs, copyEmptySrcDirs)
 	}
 
 	if len(remoteFileName) == 0 {
@@ -205,5 +206,5 @@ func (os *ObjectStorage) Upload(localPath, remotePath string) error {
 	log.Info("Upload the file to the remote bucket",
 		"local_file", localPath, "remote_file", remotePath,
 	)
-	return operations.CopyFile(rFs, lFs, remoteFileName, srcFileName)
+	return operations.CopyFile(context.Background(), rFs, lFs, remoteFileName, srcFileName)
 }

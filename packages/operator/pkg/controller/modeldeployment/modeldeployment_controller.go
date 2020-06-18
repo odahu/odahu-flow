@@ -40,10 +40,8 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/client-go/tools/record"
 	"knative.dev/serving/pkg/apis/serving"
-	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-	"knative.dev/serving/pkg/apis/serving/v1beta1"
+	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -113,9 +111,8 @@ func newConfigurableReconciler(
 	gpuResourceName string,
 ) reconcile.Reconciler {
 	return &ReconcileModelDeployment{
-		Client:   mgr.GetClient(),
-		scheme:   mgr.GetScheme(),
-		recorder: mgr.GetRecorder(controllerName),
+		Client: mgr.GetClient(),
+		scheme: mgr.GetScheme(),
 		connRepo: conn_http_repository.NewRepository(
 			operatorConfig.Auth.APIURL,
 			operatorConfig.Auth.APIToken,
@@ -142,7 +139,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &knservingv1alpha1.Configuration{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &knservingv1.Configuration{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &odahuflowv1alpha1.ModelDeployment{},
 	})
@@ -163,7 +160,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &knservingv1alpha1.Revision{}}, &EnqueueRequestForImplicitOwner{})
+	err = c.Watch(&source.Kind{Type: &knservingv1.Revision{}}, &EnqueueRequestForImplicitOwner{})
 	if err != nil {
 		return err
 	}
@@ -198,7 +195,6 @@ var _ reconcile.Reconciler = &ReconcileModelDeployment{}
 type ReconcileModelDeployment struct {
 	client.Client
 	scheme           *runtime.Scheme
-	recorder         record.EventRecorder
 	connRepo         conn_repository.Repository
 	deploymentConfig config.ModelDeploymentConfig
 	operatorConfig   config.OperatorConfig
@@ -297,13 +293,13 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 		serviceAccountName = odahuflow.GenerateDeploymentConnectionSecretName(modelDeploymentCR.Name)
 	}
 
-	knativeConfiguration := &knservingv1alpha1.Configuration{
+	knativeConfiguration := &knservingv1.Configuration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      knativeConfigurationName(modelDeploymentCR),
 			Namespace: modelDeploymentCR.Namespace,
 		},
-		Spec: knservingv1alpha1.ConfigurationSpec{
-			Template: &knservingv1alpha1.RevisionTemplateSpec{
+		Spec: knservingv1.ConfigurationSpec{
+			Template: knservingv1.RevisionTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						modelNameAnnotationKey: modelDeploymentCR.Name,
@@ -317,14 +313,12 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 						knativeAutoscalingTargetKey: knativeAutoscalingTargetDefaultValue,
 					},
 				},
-				Spec: knservingv1alpha1.RevisionSpec{
-					RevisionSpec: v1beta1.RevisionSpec{
-						TimeoutSeconds: &defaultTerminationPeriod,
-						PodSpec: v1beta1.PodSpec{
-							ServiceAccountName: serviceAccountName,
-							Containers: []corev1.Container{
-								*container,
-							},
+				Spec: knservingv1.RevisionSpec{
+					TimeoutSeconds: &defaultTerminationPeriod,
+					PodSpec: corev1.PodSpec{
+						ServiceAccountName: serviceAccountName,
+						Containers: []corev1.Container{
+							*container,
 						},
 					},
 				},
@@ -341,7 +335,7 @@ func (r *ReconcileModelDeployment) ReconcileKnativeConfiguration(
 		return err
 	}
 
-	found := &knservingv1alpha1.Configuration{}
+	found := &knservingv1.Configuration{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: knativeConfiguration.Name, Namespace: knativeConfiguration.Namespace,
 	}, found)
@@ -520,7 +514,7 @@ func (r *ReconcileModelDeployment) getLatestReadyRevision(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
 ) (string, bool, error) {
-	knativeConfiguration := &knservingv1alpha1.Configuration{}
+	knativeConfiguration := &knservingv1.Configuration{}
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Name: knativeConfigurationName(modelDeploymentCR), Namespace: modelDeploymentCR.Namespace,
 	}, knativeConfiguration); errors.IsNotFound(err) {
@@ -714,7 +708,7 @@ func (r *ReconcileModelDeployment) cleanupOldRevisions(
 		return nil
 	}
 
-	lastKnativeRevision := &knservingv1alpha1.Revision{}
+	lastKnativeRevision := &knservingv1.Revision{}
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Name: lastRevisionName, Namespace: modelDeploymentCR.Namespace,
 	}, lastKnativeRevision); err != nil {
@@ -736,7 +730,7 @@ func (r *ReconcileModelDeployment) cleanupOldRevisions(
 		return err
 	}
 
-	knativeRevisions := &knservingv1alpha1.RevisionList{}
+	knativeRevisions := &knservingv1.RevisionList{}
 
 	labelSelectorReq, err := labels.NewRequirement(
 		modelNameAnnotationKey,

@@ -24,7 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -42,7 +42,7 @@ const (
 func (r *ReconcileModelTraining) generateTrainerTaskSpec(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
 	toolchainIntegration *training.ToolchainIntegration,
-) (*tektonv1alpha1.TaskSpec, error) {
+) (*tektonv1beta1.TaskSpec, error) {
 	mtResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
 		log.Error(err, "The training resources is not valid",
@@ -52,8 +52,8 @@ func (r *ReconcileModelTraining) generateTrainerTaskSpec(
 	}
 
 	helperContainerResources := utils.CalculateHelperContainerResources(mtResources, r.gpuResourceName)
-	return &tektonv1alpha1.TaskSpec{
-		Steps: []tektonv1alpha1.Step{
+	return &tektonv1beta1.TaskSpec{
+		Steps: []tektonv1beta1.Step{
 			r.createInitTrainerStep(helperContainerResources, trainingCR.Name),
 			r.createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
 			r.createResultTrainerStep(helperContainerResources, trainingCR),
@@ -74,8 +74,8 @@ func (r *ReconcileModelTraining) generateTrainerTaskSpec(
 
 func (r *ReconcileModelTraining) createInitTrainerStep(
 	res corev1.ResourceRequirements, mtID string,
-) tektonv1alpha1.Step {
-	return tektonv1alpha1.Step{
+) tektonv1beta1.Step {
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerSetupStep,
 			Image:   r.trainingConfig.ModelTrainerImage,
@@ -105,7 +105,7 @@ func (r *ReconcileModelTraining) createInitTrainerStep(
 func (r *ReconcileModelTraining) createMainTrainerStep(
 	train *odahuflowv1alpha1.ModelTraining,
 	trainingIntegration *training.ToolchainIntegration,
-	trainResources *corev1.ResourceRequirements) tektonv1alpha1.Step {
+	trainResources *corev1.ResourceRequirements) tektonv1beta1.Step {
 
 	envs := make([]corev1.EnvVar, 0, len(trainingIntegration.Spec.AdditionalEnvironments)+len(train.Spec.CustomEnvs))
 	for name, value := range trainingIntegration.Spec.AdditionalEnvironments {
@@ -121,7 +121,7 @@ func (r *ReconcileModelTraining) createMainTrainerStep(
 		})
 	}
 
-	return tektonv1alpha1.Step{
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerTrainStep,
 			Image:   train.Spec.Image,
@@ -141,8 +141,8 @@ func (r *ReconcileModelTraining) createMainTrainerStep(
 
 func (r *ReconcileModelTraining) createArtifactValidationStep(
 	validatorResources corev1.ResourceRequirements, trainingCR *odahuflowv1alpha1.ModelTraining,
-) tektonv1alpha1.Step {
-	return tektonv1alpha1.Step{
+) tektonv1beta1.Step {
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerValidationStep,
 			Image:   trainingCR.Spec.Image,
@@ -160,8 +160,8 @@ func (r *ReconcileModelTraining) createArtifactValidationStep(
 
 func (r *ReconcileModelTraining) createResultTrainerStep(
 	res corev1.ResourceRequirements, mt *odahuflowv1alpha1.ModelTraining,
-) tektonv1alpha1.Step {
-	return tektonv1alpha1.Step{
+) tektonv1beta1.Step {
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.TrainerResultStep,
 			Image:   r.trainingConfig.ModelTrainerImage,

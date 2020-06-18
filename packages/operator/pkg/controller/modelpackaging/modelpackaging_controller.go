@@ -27,7 +27,7 @@ import (
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -127,7 +127,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &tektonv1alpha1.TaskRun{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &tektonv1beta1.TaskRun{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &odahuflowv1alpha1.ModelPackaging{},
 	})
@@ -164,7 +164,7 @@ var (
 // Determine crd state by child pod.
 // If pod has RUNNING state then we determine crd state by state of packager container in the pod
 func (r *ReconcileModelPackaging) syncCrdState(
-	taskRun *tektonv1alpha1.TaskRun,
+	taskRun *tektonv1beta1.TaskRun,
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
 ) error {
 	if len(taskRun.Status.Conditions) > 0 {
@@ -183,7 +183,7 @@ func (r *ReconcileModelPackaging) syncCrdState(
 }
 
 func (r *ReconcileModelPackaging) calculateStateByTaskRun(
-	taskRun *tektonv1alpha1.TaskRun,
+	taskRun *tektonv1beta1.TaskRun,
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
 ) error {
 	lastCondition := taskRun.Status.Conditions[len(taskRun.Status.Conditions)-1]
@@ -266,9 +266,9 @@ func (r *ReconcileModelPackaging) getPackagingIntegration(packagingCR *odahuflow
 
 func (r *ReconcileModelPackaging) reconcileTaskRun(
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
-) (*tektonv1alpha1.TaskRun, error) {
+) (*tektonv1beta1.TaskRun, error) {
 	if packagingCR.Status.State != "" && packagingCR.Status.State != odahuflowv1alpha1.ModelPackagingUnknown {
-		taskRun := &tektonv1alpha1.TaskRun{}
+		taskRun := &tektonv1beta1.TaskRun{}
 		err := r.Get(context.TODO(), types.NamespacedName{
 			Name: packagingCR.Name, Namespace: r.packagingConfig.Namespace,
 		}, taskRun)
@@ -305,7 +305,7 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 		return nil, err
 	}
 
-	taskRun := &tektonv1alpha1.TaskRun{
+	taskRun := &tektonv1beta1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      packagingCR.Name,
 			Namespace: packagingCR.Namespace,
@@ -313,10 +313,10 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 				packagingIDLabel: packagingCR.Name,
 			},
 		},
-		Spec: tektonv1alpha1.TaskRunSpec{
+		Spec: tektonv1beta1.TaskRunSpec{
 			TaskSpec: taskSpec,
 			Timeout:  &metav1.Duration{Duration: r.packagingConfig.Timeout},
-			PodTemplate: tektonv1alpha1.PodTemplate{
+			PodTemplate: &tektonv1beta1.PodTemplate{
 				NodeSelector: r.packagingConfig.NodeSelector,
 				Tolerations:  tolerations,
 			},
@@ -332,7 +332,7 @@ func (r *ReconcileModelPackaging) reconcileTaskRun(
 		return nil, err
 	}
 
-	found := &tektonv1alpha1.TaskRun{}
+	found := &tektonv1beta1.TaskRun{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: taskRun.Name, Namespace: r.packagingConfig.Namespace,
 	}, found)

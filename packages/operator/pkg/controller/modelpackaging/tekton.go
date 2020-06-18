@@ -22,7 +22,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"path"
 )
@@ -40,15 +40,15 @@ const (
 func (r *ReconcileModelPackaging) generatePackagerTaskSpec(
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
 	packagingIntegration *packaging.PackagingIntegration,
-) (*tektonv1alpha1.TaskSpec, error) {
+) (*tektonv1beta1.TaskSpec, error) {
 	mainPackagerStep, err := r.createMainPackagerStep(packagingCR, packagingIntegration)
 	if err != nil {
 		return nil, err
 	}
 
 	helperContainerResources := utils.CalculateHelperContainerResources(mainPackagerStep.Resources, r.gpuResourceName)
-	return &tektonv1alpha1.TaskSpec{
-		Steps: []tektonv1alpha1.Step{
+	return &tektonv1beta1.TaskSpec{
+		Steps: []tektonv1beta1.Step{
 			r.createInitPackagerStep(helperContainerResources, packagingCR),
 			mainPackagerStep,
 			r.createResultPackagerStep(helperContainerResources, packagingCR.Name),
@@ -68,8 +68,8 @@ func (r *ReconcileModelPackaging) generatePackagerTaskSpec(
 
 func (r *ReconcileModelPackaging) createInitPackagerStep(
 	res corev1.ResourceRequirements, packagingCR *odahuflowv1alpha1.ModelPackaging,
-) tektonv1alpha1.Step {
-	return tektonv1alpha1.Step{
+) tektonv1beta1.Step {
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerSetupStep,
 			Image:   r.packagingConfig.ModelPackagerImage,
@@ -98,16 +98,16 @@ func (r *ReconcileModelPackaging) createInitPackagerStep(
 
 func (r *ReconcileModelPackaging) createMainPackagerStep(
 	packagingCR *odahuflowv1alpha1.ModelPackaging,
-	packagingIntegration *packaging.PackagingIntegration) (tektonv1alpha1.Step, error) {
+	packagingIntegration *packaging.PackagingIntegration) (tektonv1beta1.Step, error) {
 	packResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(packagingCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
 		log.Error(err, "The packaging resources is not valid",
 			"mp id", packagingCR.Name, "resources", packagingCR.Namespace)
 
-		return tektonv1alpha1.Step{}, err
+		return tektonv1beta1.Step{}, err
 	}
 
-	return tektonv1alpha1.Step{
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerPackageStep,
 			Image:   packagingCR.Spec.Image,
@@ -127,8 +127,8 @@ func (r *ReconcileModelPackaging) createMainPackagerStep(
 
 func (r *ReconcileModelPackaging) createResultPackagerStep(
 	res corev1.ResourceRequirements, mpID string,
-) tektonv1alpha1.Step {
-	return tektonv1alpha1.Step{
+) tektonv1beta1.Step {
+	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:    odahuflow.PackagerResultStep,
 			Image:   r.packagingConfig.ModelPackagerImage,
