@@ -29,18 +29,16 @@ func init() {
 
 // AddToManagerTrainingFuncs is a list of functions to add all Controllers to the Manager
 var AddToManagerTrainingFuncs []func(
-	manager.Manager, config.ModelTrainingConfig, config.OperatorConfig, string,
+	manager.Manager, config.ModelTrainingConfig, config.OperatorConfig, config.CommonConfig, string,
 ) error
 
 // AddToManager adds all Controllers to the Manager
 func AddTrainingToManager(
-	m manager.Manager,
-	trainingConfig config.ModelTrainingConfig,
-	operatorConfig config.OperatorConfig,
-	gpuResourceName string,
+	m manager.Manager, trainingConfig config.ModelTrainingConfig, operatorConfig config.OperatorConfig,
+	commonConfig config.CommonConfig, gpuResourceName string,
 ) error {
 	for _, f := range AddToManagerTrainingFuncs {
-		if err := f(m, trainingConfig, operatorConfig, gpuResourceName); err != nil {
+		if err := f(m, trainingConfig, operatorConfig, commonConfig, gpuResourceName); err != nil {
 			return err
 		}
 	}

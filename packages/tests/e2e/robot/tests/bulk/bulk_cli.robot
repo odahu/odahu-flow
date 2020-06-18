@@ -41,7 +41,7 @@ Check toolchain integration not exist
     [Arguments]  ${name}
     ${res}=  Shell  odahuflowctl --verbose ti get --id ${name}
              Should not be equal  ${res.rc}      ${0}
-             Should contain       ${res.stderr}  "${name}" not found
+             Should contain       ${res.stderr}  "${name}" is not found
 
 Check packaging integration
     [Arguments]  ${name}
@@ -53,7 +53,7 @@ Check packaging integration not exist
     [Arguments]  ${name}
     ${res}=  Shell  odahuflowctl --verbose pi get --id ${name}
              Should not be equal  ${res.rc}      ${0}
-             Should contain       ${res.stderr}  "${name}" not found
+             Should contain       ${res.stderr}  "${name}" is not found
 
 Check connection
     [Arguments]  ${name}

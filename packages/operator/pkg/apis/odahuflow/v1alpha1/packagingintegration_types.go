@@ -17,6 +17,9 @@
 package v1alpha1
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -73,6 +76,19 @@ type PackagingIntegrationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []PackagingIntegration `json:"items"`
+}
+
+func (piStatus PackagingIntegrationStatus) Value() (driver.Value, error) {
+	return json.Marshal(piStatus)
+}
+
+func (piStatus *PackagingIntegrationStatus) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &piStatus)
+	return res
 }
 
 func init() {

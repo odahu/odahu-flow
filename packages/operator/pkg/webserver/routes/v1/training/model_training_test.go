@@ -144,11 +144,9 @@ func (s *ModelTrainingRouteSuite) SetupTest() {
 func (s *ModelTrainingRouteSuite) registerHandlers(trainingConfig config.ModelTrainingConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
+	trainGroup := v1Group.Group("", routes.DisableAPIMiddleware(trainingConfig.Enabled))
 	train_route.ConfigureRoutes(
-		v1Group,
-		s.mtRepository,
-		s.connRepository,
-		trainingConfig,
+		trainGroup, s.mtRepository, s.mtRepository, s.connRepository, trainingConfig,
 		config.NvidiaResourceName,
 	)
 }

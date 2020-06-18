@@ -14,6 +14,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+        rollme: {{ randAlphaNum 5 | quote }}
       labels:
         {{- include "odahuflow.helm-labels" (dict "component" "operator" "root" .) | nindent 8 }}
     spec:

@@ -58,7 +58,7 @@ var (
 )
 
 type MtValidator struct {
-	mtRepository         mt_repository.Repository
+	mtRepository         mt_repository.ToolchainRepository
 	connRepository       conn_repository.Repository
 	outputConnectionName string
 	gpuResourceName      string
@@ -66,7 +66,7 @@ type MtValidator struct {
 }
 
 func NewMtValidator(
-	mtRepository mt_repository.Repository,
+	mtRepository mt_repository.ToolchainRepository,
 	connRepository conn_repository.Repository,
 	defaultResources odahuflowv1alpha1.ResourceRequirements,
 	outputConnectionName string,

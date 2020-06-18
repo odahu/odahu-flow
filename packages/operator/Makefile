@@ -27,6 +27,10 @@ build-operator: generate
 build-api:
 	go build -o api github.com/odahu/odahu-flow/packages/operator/cmd/api
 
+## build-migrate: Build odahu-migrate executable binary
+build-odahu-migrate:
+	go build -o odahu-migrate github.com/odahu/odahu-flow/packages/operator/cmd/migrator
+
 ## build-model-trainer: Build model trainer executable binary
 build-model-trainer:
 	go build -o trainer github.com/odahu/odahu-flow/packages/operator/cmd/trainer
@@ -40,7 +44,7 @@ build-service-catalog:
 	go build -o service-catalog github.com/odahu/odahu-flow/packages/operator/cmd/service_catalog
 
 ## build-all: Build all executable binyries
-build-all: build-api build-model-trainer build-model-packager build-operator build-service-catalog
+build-all: build-api build-model-trainer build-model-packager build-operator build-service-catalog build-odahu-migrate
 
 ## run-operator: Start operator
 run-operator:
@@ -114,6 +118,11 @@ ifndef GOPATH
 	$(error GOPATH not defined, please define GOPATH. Run "go help gopath" to learn more about GOPATH)
 endif
 	go generate ./pkg/... ./cmd/...
+
+## generate-resources: Generate go-bindata
+generate-resources:
+	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go pkg/database/migrations/postgres/sources
+	git add pkg/database/migrations/postgres/bindata.go
 
 ## generate-all: Execute all code generators
 generate-all: generate manifests swag

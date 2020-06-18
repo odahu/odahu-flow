@@ -36,6 +36,10 @@ type Repository interface {
 	DeleteModelTraining(id string) error
 	UpdateModelTraining(md *training.ModelTraining) error
 	CreateModelTraining(md *training.ModelTraining) error
+	ToolchainRepository
+}
+
+type ToolchainRepository interface {
 	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
 	GetToolchainIntegrationList(options ...k8s_utils.ListOption) ([]training.ToolchainIntegration, error)
 	DeleteToolchainIntegration(name string) error

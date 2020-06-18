@@ -17,6 +17,7 @@
 package v1
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
@@ -24,9 +25,14 @@ import (
 	k8s_connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	vault_connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	deployment_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/kubernetes"
-	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
-	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
+	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	k8s_packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
+	postgres_packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
+	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	k8s_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
+	postgres_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/configuration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"
@@ -47,6 +53,8 @@ func SetupV1Routes(
 	k8sConfig *rest.Config,
 	odahuConfig config.Config) (err error) {
 	var connRepository connection_repository.Repository
+	var tiRepository training_repository.ToolchainRepository
+	var piRepository packaging_repository.PackagingIntegrationRepository
 
 	// Setup the connection repository
 	switch odahuConfig.Connection.RepositoryType {
@@ -65,29 +73,74 @@ func SetupV1Routes(
 	}
 
 	depRepository := deployment_repository.NewRepository(odahuConfig.Deployment.Namespace, k8sClient)
-	packRepository := packaging_repository.NewRepository(
+	packRepository := k8s_packaging_repository.NewRepository(
 		odahuConfig.Packaging.Namespace,
 		odahuConfig.Packaging.PackagingIntegrationNamespace,
 		k8sClient,
 		k8sConfig,
 	)
-	trainRepository := training_repository.NewRepository(
+	trainRepository := k8s_training_repository.NewRepository(
 		odahuConfig.Training.Namespace,
 		odahuConfig.Training.ToolchainIntegrationNamespace,
 		k8sClient,
 		k8sConfig,
 	)
 
+	// Setup the training toolchain repository
+	switch odahuConfig.Training.ToolchainIntegrationRepositoryType {
+	case config.RepositoryKubernetesType:
+		tiRepository = k8s_training_repository.NewRepository(
+			odahuConfig.Training.Namespace,
+			odahuConfig.Training.ToolchainIntegrationNamespace,
+			k8sClient,
+			k8sConfig,
+		)
+	case config.RepositoryPostgresType:
+		db, err := sql.Open("postgres", odahuConfig.Common.DatabaseConnectionString)
+		if err != nil {
+			return err
+		}
+		tiRepository = postgres_training_repository.ToolchainRepository{DB: db}
+	default:
+		return errors.New("unexpect toolchain repository type")
+	}
+
+	// Setup the packaging integration repository
+	switch odahuConfig.Packaging.PackagingIntegrationRepositoryType {
+	case config.RepositoryKubernetesType:
+		piRepository = k8s_packaging_repository.NewRepository(
+			odahuConfig.Packaging.Namespace,
+			odahuConfig.Packaging.PackagingIntegrationNamespace,
+			k8sClient,
+			k8sConfig,
+		)
+	case config.RepositoryPostgresType:
+		db, err := sql.Open("postgres", odahuConfig.Common.DatabaseConnectionString)
+		if err != nil {
+			return err
+		}
+		piRepository = postgres_packaging_repository.PackagingIntegrationRepository{DB: db}
+	default:
+		return errors.New("unexpect toolchain repository type")
+	}
+
 	connection.ConfigureRoutes(routeGroup, connRepository, utils.EvaluatePublicKey, odahuConfig.Connection)
 	deployment.ConfigureRoutes(
 		routeGroup, depRepository, odahuConfig.Deployment, odahuConfig.Common.ResourceGPUName,
 	)
-	packaging.ConfigureRoutes(
-		routeGroup, packRepository, connRepository, odahuConfig.Packaging, odahuConfig.Common.ResourceGPUName,
+
+	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(odahuConfig.Packaging.Enabled))
+	packaging.ConfigureRoutes(packagingRouteGroup, packRepository, piRepository, connRepository,
+		odahuConfig.Packaging, odahuConfig.Common.ResourceGPUName)
+	packaging.ConfigurePiRoutes(packagingRouteGroup, piRepository)
+
+	trainingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(odahuConfig.Training.Enabled))
+	training.ConfigureRoutes(trainingRouteGroup, trainRepository, tiRepository, connRepository,
+		odahuConfig.Training, odahuConfig.Common.ResourceGPUName)
+	training.ConfigureToolchainRoutes(
+		trainingRouteGroup, tiRepository,
 	)
-	training.ConfigureRoutes(
-		routeGroup, trainRepository, connRepository, odahuConfig.Training, odahuConfig.Common.ResourceGPUName,
-	)
+
 	configuration.ConfigureRoutes(routeGroup, odahuConfig)
 	userinfo.ConfigureRoutes(routeGroup, odahuConfig.Users.Claims)
 
