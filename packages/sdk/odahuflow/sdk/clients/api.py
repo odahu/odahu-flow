@@ -269,7 +269,7 @@ class Authenticator:
         login_result = do_refresh_token(odahuflow.sdk.config.API_REFRESH_TOKEN, odahuflow.sdk.config.API_ISSUING_URL)
         if not login_result:
             raise IncorrectAuthorizationToken(
-                'Refresh token in not correct. \n'
+                'Refresh token is not correct.\n'
                 'Please login again'
             )
         else:
