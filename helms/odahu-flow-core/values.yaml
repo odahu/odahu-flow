@@ -347,6 +347,9 @@ config:
     # The collection of external urls, for example: metrics, edge, service catalog and so on
     # Type: string->string map
     externalUrls: []
+    # Valid connection string (including schema) syntax: https://godoc.org/github.com/lib/pq
+    # Type: string
+    databaseConnectionString:
   # Operator configuration
   operator:
     auth:
@@ -432,6 +435,11 @@ config:
       # Required value
       # Type: string
       # image: "odahu/odahu-flow-сli:latest"
+    # Storage backend for toolchain integrations. Available options:
+    #   * kubernetes
+    #   * postgres
+    # Type: string
+    toolchainIntegrationRepositoryType: kubernetes
 
   # Packaging configuration
   packaging:
@@ -456,6 +464,11 @@ config:
       # Required value
       # Type: string
       # image: "odahu-flow-model-packager:latest"
+    # Storage backend for packaging integrations. Available options:
+    #   * kubernetes
+    #   * postgres
+    # Type: string
+    packagingIntegrationRepositoryType: kubernetes
 
   # Service catalog configuration
   serviceCatalog:
@@ -471,4 +484,15 @@ resource_uploader_sa: {}
 #  client_secret: client-secret
 
 # OpenID provider url
-oauth_oidc_issuer_url: ""
+oauth_oidc_issuer_url:
+
+
+# DB Migrations tool image
+migrate:
+  # migrations could be disabled
+  # Type: bool
+  enabled: true
+
+  # This variable can be uncommented to setup custom image name for odahu migrate (server)
+  # Type: string
+  # image: custom-image:1.0

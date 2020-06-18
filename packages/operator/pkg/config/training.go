@@ -49,6 +49,11 @@ type ModelTrainingConfig struct {
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for training pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
+
+	// Storage backend for toolchain integrations. Available options:
+	//   * kubernetes
+	//   * postgres
+	ToolchainIntegrationRepositoryType RepositoryType `json:"toolchainIntegrationRepositoryType"`
 }
 
 func NewDefaultModelTrainingConfig() ModelTrainingConfig {
@@ -70,5 +75,6 @@ func NewDefaultModelTrainingConfig() ModelTrainingConfig {
 				Memory: &defaultTrainingMemoryLimit,
 			},
 		},
+		ToolchainIntegrationRepositoryType: RepositoryKubernetesType,
 	}
 }

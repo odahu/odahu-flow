@@ -29,18 +29,16 @@ func init() {
 
 // AddToManagerPackagingFuncs is a list of functions to add all Controllers to the Manager
 var AddToManagerPackagingFuncs []func(
-	manager.Manager, config.ModelPackagingConfig, config.OperatorConfig, string,
+	manager.Manager, config.ModelPackagingConfig, config.OperatorConfig, config.CommonConfig, string,
 ) error
 
 // AddToManager adds all Controllers to the Manager
 func AddPackagingToManager(
-	m manager.Manager,
-	packagingConfig config.ModelPackagingConfig,
-	operatorConfig config.OperatorConfig,
-	gpuResourceName string,
+	m manager.Manager, packagingConfig config.ModelPackagingConfig,
+	operatorConfig config.OperatorConfig, commonConfig config.CommonConfig, gpuResourceName string,
 ) error {
 	for _, f := range AddToManagerPackagingFuncs {
-		if err := f(m, packagingConfig, operatorConfig, gpuResourceName); err != nil {
+		if err := f(m, packagingConfig, operatorConfig, commonConfig, gpuResourceName); err != nil {
 			return err
 		}
 	}

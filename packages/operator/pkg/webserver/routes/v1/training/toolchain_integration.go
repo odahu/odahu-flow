@@ -43,7 +43,7 @@ var (
 )
 
 type ToolchainIntegrationController struct {
-	repository mt_repository.Repository
+	repository mt_repository.ToolchainRepository
 	validator  *TiValidator
 }
 

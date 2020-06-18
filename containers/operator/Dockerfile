@@ -73,6 +73,23 @@ CMD ["./api"]
 #########################################################
 #########################################################
 
+FROM ubuntu:18.04 as odahu-migrate
+
+ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
+    GIN_MODE="release"
+RUN apt-get -yq update && \
+    apt-get -yqq install openssh-client ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/odahu-migrate "${ODAHUFLOW_DIR}/"
+
+WORKDIR "${ODAHUFLOW_DIR}"
+CMD ["./odahu-migrate"]
+
+#########################################################
+#########################################################
+#########################################################
+
 FROM ubuntu:18.04 as service-catalog
 
 ENV ODAHUFLOW_DIR="/opt/odahu-flow" \

@@ -21,27 +21,21 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 )
 
-func ConfigureRoutes(
-	routeGroup *gin.RouterGroup,
-	repository mp_repository.Repository,
-	connRepository conn_repository.Repository,
-	config config.ModelPackagingConfig,
-	gpuResourceName string,
-) {
+func ConfigureRoutes(routeGroup *gin.RouterGroup, repository mp_repository.Repository,
+	piRepository mp_repository.PackagingIntegrationRepository, connRepository conn_repository.Repository,
+	config config.ModelPackagingConfig, gpuResourceName string) {
 	mtController := ModelPackagingController{
 		repository: repository,
 		validator: NewMpValidator(
-			repository,
+			piRepository,
 			connRepository,
 			config.OutputConnectionID,
 			gpuResourceName,
 			config.DefaultResources,
 		),
 	}
-	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(config.Enabled))
 
 	routeGroup.GET(GetModelPackagingURL, mtController.getMP)
 	routeGroup.GET(GetAllModelPackagingURL, mtController.getAllMPs)
@@ -51,14 +45,4 @@ func ConfigureRoutes(
 	routeGroup.PUT(SaveModelPackagingResultURL, mtController.saveMPResults)
 	routeGroup.DELETE(DeleteModelPackagingURL, mtController.deleteMP)
 
-	tiController := &PackagingIntegrationController{
-		repository: repository,
-		validator:  NewPiValidator(),
-	}
-
-	routeGroup.GET(GetPackagingIntegrationURL, tiController.getPackagingIntegration)
-	routeGroup.GET(GetAllPackagingIntegrationURL, tiController.getAllPackagingIntegrations)
-	routeGroup.POST(CreatePackagingIntegrationURL, tiController.createPackagingIntegration)
-	routeGroup.PUT(UpdatePackagingIntegrationURL, tiController.updatePackagingIntegration)
-	routeGroup.DELETE(DeletePackagingIntegrationURL, tiController.deletePackagingIntegration)
 }

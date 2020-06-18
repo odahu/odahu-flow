@@ -46,6 +46,11 @@ type ModelPackagingConfig struct {
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for packaging pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
+
+	// Storage backend for packaging integrations. Available options:
+	//   * kubernetes
+	//   * postgres
+	PackagingIntegrationRepositoryType RepositoryType `json:"packagingIntegrationRepositoryType"`
 }
 
 func NewDefaultModelPackagingConfig() ModelPackagingConfig {
@@ -67,5 +72,6 @@ func NewDefaultModelPackagingConfig() ModelPackagingConfig {
 				Memory: &defaultPackagingMemoryLimit,
 			},
 		},
+		PackagingIntegrationRepositoryType: RepositoryKubernetesType,
 	}
 }

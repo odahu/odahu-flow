@@ -1,5 +1,6 @@
 *** Settings ***
 Documentation  Checking of airflow settings
+Test Timeout        60 minutes
 Resource            ../../resources/keywords.robot
 Force Tags  airflow
 

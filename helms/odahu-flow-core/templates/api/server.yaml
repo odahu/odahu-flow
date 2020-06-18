@@ -14,6 +14,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
+        rollme: {{ randAlphaNum 5 | quote }}
       labels:
         {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 8 }}
         odahu-flow-authorization: enabled

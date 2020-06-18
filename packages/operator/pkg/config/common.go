@@ -17,8 +17,13 @@
 package config
 
 const (
-	NvidiaResourceName = "nvidia.com/gpu"
+	NvidiaResourceName                      = "nvidia.com/gpu"
+	RepositoryKubernetesType RepositoryType = "kubernetes"
+	RepositoryVaultType      RepositoryType = "vault"
+	RepositoryPostgresType   RepositoryType = "postgres"
 )
+
+type RepositoryType string
 
 type ExternalUrl struct {
 	// Human readable name
@@ -37,6 +42,8 @@ type CommonConfig struct {
 	ResourceGPUName string `json:"resourceGpuName"`
 	// Version of ODAHU platform
 	Version string `json:"version"`
+	// Database connection string
+	DatabaseConnectionString string `json:"databaseConnectionString"`
 }
 
 func NewDefaultCommonConfig() CommonConfig {
