@@ -256,17 +256,12 @@ func (r *ReconcileModelPackaging) calculateStateByPod(
 func (r *ReconcileModelPackaging) getPackagingIntegration(packagingCR *odahuflowv1alpha1.ModelPackaging) (
 	*packaging.PackagingIntegration, error,
 ) {
-	var ti odahuflowv1alpha1.PackagingIntegration
-	if err := r.Get(context.TODO(), types.NamespacedName{
-		Name:      packagingCR.Spec.Type,
-		Namespace: r.packagingConfig.PackagingIntegrationNamespace,
-	}, &ti); err != nil {
-		log.Error(err, "Get toolchain integration", "mt name", packagingCR)
-
+	pi, err := r.piRepo.GetPackagingIntegration(packagingCR.Spec.Type)
+	if err != nil {
 		return nil, err
 	}
+	return &packaging.PackagingIntegration{Spec: pi.Spec}, nil
 
-	return mp_k8s_repository.TransformPackagingIntegrationFromK8s(&ti)
 }
 
 func (r *ReconcileModelPackaging) reconcileTaskRun(
