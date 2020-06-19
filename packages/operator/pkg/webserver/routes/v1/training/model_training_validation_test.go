@@ -59,7 +59,7 @@ func (s *ModelTrainingValidationSuite) SetupTest() {
 }
 
 func (s *ModelTrainingValidationSuite) SetupSuite() {
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		panic(err)
 	}

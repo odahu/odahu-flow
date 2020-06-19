@@ -129,10 +129,8 @@ func (pkr *packagingK8sRepository) GetPackagingIntegrationList(options ...kubern
 		if err := pkr.k8sClient.List(context.TODO(), &k8sMRList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     pkr.piNamespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
 		}); err != nil {
 			logPI.Error(err, "Get Packaging Integration from k8s")
 

@@ -55,7 +55,7 @@ func (s *ConnectionRouteK8sBackendSuite) SetupSuite() {
 		s.T().Fatalf("Cannot setup the test k8s api: %v", err)
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		s.T().Fatalf("Cannot setup the test k8s manager: %v", err)
 	}
