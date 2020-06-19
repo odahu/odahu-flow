@@ -41,6 +41,7 @@ require (
 	github.com/go-test/deep v1.0.4 // indirect
 	github.com/gobuffalo/envy v1.7.1 // indirect
 	github.com/gogo/protobuf v1.3.1
+	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/gomodule/redigo v1.7.0 // indirect
 	github.com/google/go-containerregistry v0.1.1 // indirect
 	github.com/google/go-github/v27 v27.0.6 // indirect
@@ -65,6 +66,7 @@ require (
 	github.com/klauspost/cpuid v1.2.2 // indirect
 	github.com/knative/build v0.1.2 // indirect
 	github.com/kubernetes-incubator/custom-metrics-apiserver v0.0.0-20190918110929-3d9be26a50eb // indirect
+	github.com/lib/pq v1.2.0
 	github.com/miekg/dns v1.1.29 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
 	github.com/nats-io/gnatsd v1.4.1 // indirect
