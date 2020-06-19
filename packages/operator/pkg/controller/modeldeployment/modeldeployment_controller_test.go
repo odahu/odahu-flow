@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -83,7 +83,7 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{})
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
 	g.Expect(err).NotTo(HaveOccurred())
 	c = mgr.GetClient()
 
@@ -107,7 +107,7 @@ func TestReconcile(t *testing.T) {
 	g.Eventually(requests, timeout).Should(Receive(Equal(expectedRequest)))
 	g.Eventually(requests, timeout).Should(Receive(Equal(expectedRequest)))
 
-	configuration := &knservingv1alpha1.Configuration{}
+	configuration := &knservingv1.Configuration{}
 	configurationKey := types.NamespacedName{Name: knativeConfigurationName(md), Namespace: mdNamespace}
 	g.Expect(c.Get(context.TODO(), configurationKey, configuration)).ToNot(HaveOccurred())
 

@@ -29,7 +29,7 @@ type TIK8SRouteSuite struct {
 }
 
 func (s *TIK8SRouteSuite) SetupSuite() {
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		panic(err)
 	}
