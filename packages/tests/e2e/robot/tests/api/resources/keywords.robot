@@ -44,12 +44,14 @@ Wait until command finishes and returns result
     END
     [Return]  ${result}
 
-Command response list should contain value
+Command response list should contain id
     [Arguments]             ${command}  ${value}
     ${result}              Call API  ${command} get
-    ${list_length}          get length  ${result}
-    FOR     ${i}   IN RANGE  ${list_length}
-
+    ${list_length}         get length  ${result}
+    FOR     ${i}   IN  @{result}
+        ${list_length}          set variable  ${list_length} - 1
+        exit for loop if        '${i.id}' == '${value}'
+        should not be equal     ${list_length}  0
     END
 
 Get This Value From Dictionary
