@@ -5,7 +5,7 @@
 Latest version of [documentation](https://docs.odahu.org/about.html)
 
 ## Changelog
-Latest updates in [CHANGELOG](CHANGELOG.md)
+Latest updates in [CHANGELOG](https://docs.odahu.org/ref_changelog.html)
 
 ## Backlog and Kanban Board
 * [Backlog](https://github.com/odahu/odahu/issues)
