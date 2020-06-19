@@ -28,7 +28,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
-	tektonv1alpha1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1alpha1"
+	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -162,7 +162,7 @@ func (s *ModelPackagingControllerSuite) TearDownSuite() {
 func (s *ModelPackagingControllerSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
 
-	mgr, err := manager.New(s.cfg, manager.Options{})
+	mgr, err := manager.New(s.cfg, manager.Options{MetricsBindAddress: "0"})
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.k8sClient = mgr.GetClient()
 	s.k8sManager = mgr
@@ -237,7 +237,7 @@ func (s *ModelPackagingControllerSuite) templateNodeSelectorTest(
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
-	tr := &tektonv1alpha1.TaskRun{}
+	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
@@ -337,7 +337,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
-	tr := &tektonv1alpha1.TaskRun{}
+	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
@@ -393,7 +393,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
-	tr := &tektonv1alpha1.TaskRun{}
+	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 

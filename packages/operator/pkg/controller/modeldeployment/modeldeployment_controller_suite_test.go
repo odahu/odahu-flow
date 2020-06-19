@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
-	knservingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
+	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 var cfg *rest.Config
@@ -52,7 +52,7 @@ func TestMain(m *testing.M) {
 
 	istioschema.AddToScheme(scheme.Scheme)
 
-	if err := knservingv1alpha1.AddToScheme(scheme.Scheme); err != nil {
+	if err := knservingv1.AddToScheme(scheme.Scheme); err != nil {
 		panic(err)
 	}
 

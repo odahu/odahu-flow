@@ -74,6 +74,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/onsi/gomega v1.9.0
 	github.com/openzipkin/zipkin-go v0.2.2 // indirect
+	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pborman/uuid v1.2.0
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
