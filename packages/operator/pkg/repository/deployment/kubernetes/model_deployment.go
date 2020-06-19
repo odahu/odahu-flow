@@ -91,10 +91,8 @@ func (kc *deploymentK8sRepository) GetModelDeploymentList(options ...kubernetes.
 		if err := kc.k8sClient.List(context.TODO(), &k8sMDList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
 		}); err != nil {
 			logMD.Error(err, "Get Model Deployment from k8s")
 

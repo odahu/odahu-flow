@@ -60,7 +60,7 @@ type ModelTrainingRouteSuite struct {
 }
 
 func (s *ModelTrainingRouteSuite) SetupSuite() {
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		panic(err)
 	}

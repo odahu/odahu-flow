@@ -115,10 +115,8 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 		if err := kc.k8sClient.List(context.TODO(), &k8sConnList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
 		}); err != nil {
 			logC.Error(err, "Get connection from k8s")
 

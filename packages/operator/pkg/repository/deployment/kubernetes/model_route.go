@@ -84,10 +84,8 @@ func (kc *deploymentK8sRepository) GetModelRouteList(options ...kubernetes.ListO
 		if err := kc.k8sClient.List(context.TODO(), &k8sMRList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
 		}); err != nil {
 			logC.Error(err, "Get Model Route from k8s")
 
