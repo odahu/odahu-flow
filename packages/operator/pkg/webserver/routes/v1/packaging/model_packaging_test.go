@@ -31,8 +31,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
@@ -84,7 +83,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "..", "..", "config", "crds")},
 	}
 
-	err := odahuflow_apis.AddToScheme(scheme.Scheme)
+	err := odahuflowv1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		s.T().Fatalf("Cannot setup the odahuflow schema: %v", err)
 	}

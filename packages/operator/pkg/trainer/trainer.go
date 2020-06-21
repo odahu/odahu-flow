@@ -21,8 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
@@ -148,7 +148,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 		return err
 	}
 
-	return ioutil.WriteFile(modelTrainingFile, mtBytes, 0644)
+	return ioutil.WriteFile(modelTrainingFile, mtBytes, 0644) //nolint file reads in another docker image
 }
 
 type trainingDescription struct {

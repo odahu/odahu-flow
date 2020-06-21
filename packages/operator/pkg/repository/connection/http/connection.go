@@ -28,8 +28,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
-	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1"
-	conn_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/connection"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -49,7 +47,7 @@ func NewRepository(
 			clientID,
 			clientSecret,
 			tokenURL,
-			v1Routes.OdahuflowV1ApiVersion,
+			"api/v1",
 		),
 	}
 }
@@ -64,7 +62,7 @@ func (hcr *httpConnectionRepository) GetDecryptedConnection(id string) (*connect
 	return hcr.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
-			Path: strings.Replace(conn_routes.GetDecryptedConnectionURL, ":id", id, 1),
+			Path: strings.Replace("/connection/:id/decrypted", ":id", id, 1),
 		},
 	})
 }
@@ -75,7 +73,7 @@ func (hcr *httpConnectionRepository) GetConnection(id string) (conn *connection.
 	return hcr.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
-			Path: strings.Replace(conn_routes.GetConnectionURL, ":id", id, 1),
+			Path: strings.Replace("/connection/:id", ":id", id, 1),
 		},
 	})
 }

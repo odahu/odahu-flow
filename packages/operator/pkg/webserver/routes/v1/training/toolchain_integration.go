@@ -85,7 +85,7 @@ func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Contex
 func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
 	if err != nil {
-		logTI.Error(err, fmt.Sprintf("Malformed url parameters of toolchain itergration request"))
+		logTI.Error(err, "Malformed url parameters of toolchain itergration request")
 		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
 
 		return
@@ -96,7 +96,7 @@ func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Co
 		kubernetes.Page(page),
 	)
 	if err != nil {
-		logTI.Error(err, fmt.Sprintf("Retrieving list of toolchain integrations"))
+		logTI.Error(err, "Retrieving list of toolchain integrations")
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
@@ -118,7 +118,7 @@ func (tic *ToolchainIntegrationController) createToolchainIntegration(c *gin.Con
 	var ti training.ToolchainIntegration
 
 	if err := c.ShouldBindJSON(&ti); err != nil {
-		logTI.Error(err, fmt.Sprintf("JSON binding of toolchain integration is failed"))
+		logTI.Error(err, "JSON binding of toolchain integration is failed")
 		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
 
 		return
@@ -155,7 +155,7 @@ func (tic *ToolchainIntegrationController) updateToolchainIntegration(c *gin.Con
 	var ti training.ToolchainIntegration
 
 	if err := c.ShouldBindJSON(&ti); err != nil {
-		logTI.Error(err, fmt.Sprintf("JSON binding of toolchain integration is failed"))
+		logTI.Error(err, "JSON binding of toolchain integration is failed")
 		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
 
 		return

@@ -18,7 +18,7 @@ package kubernetes
 
 import (
 	"context"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"

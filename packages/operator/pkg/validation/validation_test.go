@@ -1,6 +1,7 @@
-package validation
+package validation_test
 
 import (
+	. "github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"strings"
 	"testing"
 )

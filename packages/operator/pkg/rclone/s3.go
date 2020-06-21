@@ -18,8 +18,8 @@ package rclone
 
 import (
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
-	_ "github.com/rclone/rclone/backend/s3" //nolint
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	_ "github.com/rclone/rclone/backend/s3" // s3 specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/rc"

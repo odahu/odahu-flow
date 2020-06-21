@@ -17,7 +17,7 @@
 package kubernetes_test
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	md_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "..", "config", "crds")},
 	}
 
-	err := v1alpha1.SchemeBuilder.AddToScheme(scheme.Scheme)
+	err := v1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		log.Fatal(err)
 	}

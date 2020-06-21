@@ -20,8 +20,8 @@ import (
 	"net"
 	"testing"
 
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_vault_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"

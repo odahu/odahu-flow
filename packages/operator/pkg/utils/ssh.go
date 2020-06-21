@@ -34,7 +34,7 @@ var (
 // TODO: Need to find a better solution.
 // url.Parse can't find a host
 // url.Parse with git+ssh://url does not evaluate a valid host.
-func extractHost(gitURL string) (string, error) {
+func ExtractHost(gitURL string) (string, error) {
 	// [0] - full url, [1] - user, [2] - host
 	gitHost := SSHURLRegexp.FindStringSubmatch(gitURL)[2]
 
@@ -48,7 +48,7 @@ func extractHost(gitURL string) (string, error) {
 // TODO: Need to find a better solution.
 // The best way is use standard library.
 func EvaluatePublicKey(sshURL string) (string, error) {
-	sshHost, err := extractHost(sshURL)
+	sshHost, err := ExtractHost(sshURL)
 	if err != nil {
 		return "", err
 	}

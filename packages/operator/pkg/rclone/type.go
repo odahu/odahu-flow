@@ -19,10 +19,10 @@ package rclone
 import (
 	"context"
 	"fmt"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/pkg/errors"
-	_ "github.com/rclone/rclone/backend/local" //nolint
+	_ "github.com/rclone/rclone/backend/local" // local specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/cache"
 	"github.com/rclone/rclone/fs/operations"
@@ -77,8 +77,10 @@ func NewObjectStorage(conn *odahuflowv1alpha1.ConnectionSpec) (obj *ObjectStorag
 func newFsFile(remote string) (fs.Fs, string, error) {
 	_, _, fsPath, err := fs.ParseRemote(remote)
 	if err != nil {
-		fs.CountError(err)
-
+		cntRrr := fs.CountError(err)
+		if cntRrr != nil {
+			return nil, "", cntRrr
+		}
 		return nil, "", err
 	}
 
@@ -89,7 +91,10 @@ func newFsFile(remote string) (fs.Fs, string, error) {
 	case nil:
 		return f, "", nil
 	default:
-		fs.CountError(err)
+		cntRrr := fs.CountError(err)
+		if cntRrr != nil {
+			return nil, "", cntRrr
+		}
 
 		return nil, "", err
 	}

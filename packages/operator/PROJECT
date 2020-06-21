@@ -1,3 +1,25 @@
-version: "1"
 domain: odahu.org
 repo: github.com/odahu/odahu-flow/packages/operator
+resources:
+- group: odahuflow
+  kind: Connection
+  version: v1alpha1
+- group: odahuflow
+  kind: ModelTraining
+  version: v1alpha1
+- group: odahuflow
+  kind: ToolchainIntegration
+  version: v1alpha1
+- group: odahuflow
+  kind: PackagingIntegration
+  version: v1alpha1
+- group: odahuflow
+  kind: ModelPackaging
+  version: v1alpha1
+- group: odahuflow
+  kind: ModelDeployment
+  version: v1alpha1
+- group: odahuflow
+  kind: ModelRoute
+  version: v1alpha1
+version: "2"

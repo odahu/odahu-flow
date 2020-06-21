@@ -19,7 +19,7 @@ package http_test
 import (
 	"encoding/json"
 	"fmt"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	packaging_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/http"

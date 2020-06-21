@@ -19,7 +19,7 @@ package http_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	training_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/http"

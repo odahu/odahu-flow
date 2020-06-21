@@ -19,8 +19,8 @@ package kubernetes_test
 import (
 	"testing"
 
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	. "github.com/onsi/gomega"
 )
 

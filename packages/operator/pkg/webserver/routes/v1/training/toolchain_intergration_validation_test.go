@@ -17,7 +17,7 @@
 package training_test
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"

@@ -15,6 +15,11 @@ linters:
     - whitespace
     # TODO: enable later
     - gocognit
+    - nolintlint
+    - goerr113
+    - nestif
+    - gomnd
+    - godot
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.

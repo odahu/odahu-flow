@@ -18,11 +18,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/controller"
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"os"
@@ -66,16 +65,18 @@ var mainCmd = &cobra.Command{
 		log.Info("Registering Components.")
 
 		log.Info("Setting up odahu-flow scheme")
-		if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+		if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 			log.Error(err, "unable add odahu-flow APIs to scheme")
 			os.Exit(1)
 		}
 
 		log.Info("Setting up controller")
-		if err := controller.AddToManager(mgr, routeCatalog, odahuConfig.Deployment); err != nil {
+		r := servicecatalog.NewModelRouteReconciler(mgr, routeCatalog, odahuConfig.Deployment)
+		if err = r.SetupWithManager(mgr); err != nil {
 			log.Error(err, "unable to register controllers to the manager")
 			os.Exit(1)
 		}
+
 		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
 
 		if err != nil {
