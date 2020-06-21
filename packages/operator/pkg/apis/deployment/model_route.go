@@ -17,7 +17,7 @@
 package deployment
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 )
 
 type ModelRoute struct {

@@ -18,7 +18,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" //nolint
@@ -80,7 +80,7 @@ func newLocalManager(localConfig config.APILocalBackendConfig) (ManagerCloser, e
 		CRDDirectoryPaths: []string{localConfig.LocalBackendCRDPath},
 	}
 
-	err := apis.AddToScheme(scheme.Scheme)
+	err := v1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		logM.Error(err, "Cannot setup the odahuflow schema")
 		return nil, err
@@ -125,7 +125,7 @@ func newConfigManager() (ManagerCloser, error) {
 		return nil, err
 	}
 
-	if err := apis.AddToScheme(mgr.GetScheme()); err != nil {
+	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
 		logM.Error(err, "Update schema")
 		return nil, err
 	}

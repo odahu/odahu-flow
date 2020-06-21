@@ -17,7 +17,7 @@
 package connection_test
 
 import (
-	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis"
+	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/stretchr/testify/suite"

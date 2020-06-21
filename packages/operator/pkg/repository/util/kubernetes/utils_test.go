@@ -17,7 +17,7 @@
 package kubernetes
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	. "github.com/onsi/gomega"
 	"k8s.io/api/core/v1"

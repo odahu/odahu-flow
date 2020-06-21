@@ -67,7 +67,7 @@ RUN apt-get -yq update && \
 COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/api "${ODAHUFLOW_DIR}/"
 
 WORKDIR "${ODAHUFLOW_DIR}"
-CMD ["./api"]
+CMD ["./webserver"]
 
 #########################################################
 #########################################################

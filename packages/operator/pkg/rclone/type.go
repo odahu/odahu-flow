@@ -19,8 +19,8 @@ package rclone
 import (
 	"context"
 	"fmt"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/pkg/errors"
 	_ "github.com/rclone/rclone/backend/local" //nolint
 	"github.com/rclone/rclone/fs"

@@ -24,15 +24,13 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1"
-	mt_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -53,7 +51,7 @@ func NewRepository(
 			clientID,
 			clientSecret,
 			tokenURL,
-			v1Routes.OdahuflowV1ApiVersion,
+			"api/v1",
 		),
 	}
 }
@@ -67,7 +65,7 @@ func (htr *httpTrainingRepository) GetModelTraining(id string) (mt *training.Mod
 
 	response, err := htr.DoRequest(
 		http.MethodGet,
-		strings.Replace(mt_routes.GetModelTrainingURL, ":id", id, 1),
+		strings.Replace("/model/training/:id", ":id", id, 1),
 		nil,
 	)
 	if err != nil {
@@ -135,7 +133,7 @@ func (htr *httpTrainingRepository) SaveModelTrainingResult(
 
 	response, err := htr.DoRequest(
 		http.MethodPut,
-		strings.Replace(mt_routes.SaveModelTrainingResultURL, ":id", id, 1),
+		strings.Replace("/model/training/:id/result", ":id", id, 1),
 		result,
 	)
 	if err != nil {

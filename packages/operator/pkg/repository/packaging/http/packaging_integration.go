@@ -22,7 +22,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	packaging_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	"io/ioutil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -40,7 +39,7 @@ func (htr *httpPackagingRepository) GetPackagingIntegration(id string) (pi *pack
 
 	response, err := htr.DoRequest(
 		http.MethodGet,
-		strings.Replace(packaging_routes.GetPackagingIntegrationURL, ":id", id, 1),
+		strings.Replace("/packaging/integration/:id", ":id", id, 1),
 		nil,
 	)
 	if err != nil {
