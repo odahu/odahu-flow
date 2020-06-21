@@ -18,8 +18,8 @@ package deployment_test
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	dep_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	dep_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"

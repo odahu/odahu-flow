@@ -16,7 +16,7 @@
 
 package packaging
 
-import "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 
 type ModelPackaging struct {
 	// Model packaging id

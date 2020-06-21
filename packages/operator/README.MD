@@ -13,9 +13,9 @@ make generate-all
 make build-all
 
 # The API service will use the current kube config.
-./api
+./webserver
 # If you specify the local backend then the API service will startup etcd and kube API locally.
 # Download the the kubebuilder asset by link https://github.com/kubernetes-sigs/kubebuilder/releases/tag/v1.0.8
 # Specify the KUBEBUILDER_ASSETS environment variable that must point to the unzip asset dir.
-./api --backend-type local
+./webserver --backend-type local
 ```

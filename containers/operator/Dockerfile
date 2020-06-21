@@ -16,8 +16,8 @@
 
 FROM ubuntu:18.04 as builder
 
-ENV OPERATOR_DIR="/go/src/github.com/odahu/odahu-flow/packages/operator" \
-    PATH="$PATH:/go/bin:/usr/lib/go-1.12/bin" \
+ENV OPERATOR_DIR="/app" \
+    PATH="$PATH:/go/bin:/usr/lib/go-1.14/bin" \
     GOPATH="/go"
 
 WORKDIR "${OPERATOR_DIR}"
@@ -26,14 +26,9 @@ RUN apt-get update -qq && \
     apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:longsleep/golang-backports && \
     apt-get update -qq && \
-    apt-get install -y git gcc make golang-1.12-go wget && \
-    wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep && \
-    chmod +x /usr/local/bin/dep
+    apt-get install -y git gcc make golang-1.14-go
 
-COPY packages/operator/Gopkg.toml packages/operator/Gopkg.lock ./
-RUN dep ensure -v -vendor-only
-
-COPY packages/operator/ ./
+COPY packages/operator ./
 
 RUN GOOS=linux GOARCH=amd64 make build-all
 
@@ -48,7 +43,7 @@ RUN apt-get -yq update && \
     apt-get -yqq install ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/operator "${ODAHUFLOW_DIR}/"
+COPY --from=builder /app/operator "${ODAHUFLOW_DIR}/"
 WORKDIR "${ODAHUFLOW_DIR}"
 CMD ["./operator"]
 
@@ -64,10 +59,10 @@ RUN apt-get -yq update && \
     apt-get -yqq install openssh-client ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/api "${ODAHUFLOW_DIR}/"
+COPY --from=builder /app/webserver "${ODAHUFLOW_DIR}/"
 
 WORKDIR "${ODAHUFLOW_DIR}"
-CMD ["./api"]
+CMD ["./webserver"]
 
 #########################################################
 #########################################################
@@ -81,7 +76,7 @@ RUN apt-get -yq update && \
     apt-get -yqq install openssh-client ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/odahu-migrate "${ODAHUFLOW_DIR}/"
+COPY --from=builder /app/odahu-migrate "${ODAHUFLOW_DIR}/"
 
 WORKDIR "${ODAHUFLOW_DIR}"
 CMD ["./odahu-migrate"]
@@ -99,7 +94,7 @@ RUN apt-get -yq update && \
     apt-get -yqq install ca-certificates && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/service-catalog "${ODAHUFLOW_DIR}/"
+COPY --from=builder /app/service-catalog "${ODAHUFLOW_DIR}/"
 
 WORKDIR "${ODAHUFLOW_DIR}"
 CMD ["./service-catalog"]
@@ -120,7 +115,7 @@ RUN apt-get -yq update && \
     apt-get -yqq install ca-certificates pigz && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/trainer "${WORK_DIR}/"
+COPY --from=builder /app/trainer "${WORK_DIR}/"
 
 CMD ["./trainer"]
 
@@ -140,6 +135,6 @@ RUN apt-get -yq update && \
 
 WORKDIR "${WORK_DIR}/"
 
-COPY --from=builder /go/src/github.com/odahu/odahu-flow/packages/operator/packager "${WORK_DIR}/"
+COPY --from=builder /app/packager "${WORK_DIR}/"
 
 CMD ["./packager"]

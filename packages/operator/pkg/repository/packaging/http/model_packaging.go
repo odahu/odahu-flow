@@ -24,14 +24,12 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1"
-	mp_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -51,7 +49,7 @@ func NewRepository(apiURL string, token string, clientID string,
 			clientID,
 			clientSecret,
 			tokenURL,
-			v1Routes.OdahuflowV1ApiVersion,
+			"api/v1",
 		),
 	}
 }
@@ -65,7 +63,7 @@ func (htr *httpPackagingRepository) GetModelPackaging(id string) (mp *packaging.
 
 	response, err := htr.DoRequest(
 		http.MethodGet,
-		strings.Replace(mp_routes.GetModelPackagingURL, ":id", id, 1),
+		strings.Replace("/model/packaging/:id", ":id", id, 1),
 		nil,
 	)
 	if err != nil {
@@ -135,7 +133,7 @@ func (htr *httpPackagingRepository) SaveModelPackagingResult(
 
 	response, err := htr.DoRequest(
 		http.MethodPut,
-		strings.Replace(mp_routes.SaveModelPackagingResultURL, ":id", id, 1),
+		strings.Replace("/model/packaging/:id/result", ":id", id, 1),
 		result,
 	)
 	if err != nil {

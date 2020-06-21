@@ -22,7 +22,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	train_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/training"
 	"io/ioutil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -40,7 +39,7 @@ func (htr *httpTrainingRepository) GetToolchainIntegration(id string) (ti *train
 
 	response, err := htr.DoRequest(
 		http.MethodGet,
-		strings.Replace(train_routes.GetToolchainIntegrationURL, ":id", id, 1),
+		strings.Replace("/toolchain/integration/:id", ":id", id, 1),
 		nil,
 	)
 	if err != nil {
