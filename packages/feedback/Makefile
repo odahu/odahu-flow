@@ -1,3 +1,5 @@
+GO111MODULE=off
+
 all: help
 
 ## test: Run unit tests
