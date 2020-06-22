@@ -1,5 +1,7 @@
 *** Variables ***
 ${RES_DIR}             ${CURDIR}/resources/connections
+${GIT_CONN}            git-connection-valid
+${DOCKER_CONN}         docker-ci-connectio-valid
 
 *** Settings ***
 Documentation       API of conections
@@ -15,7 +17,7 @@ Suite Setup         Run Keywords
 #...                Cleanup All Resources (to be created)
 # Test Setup
 # Test Teardown
-Force Tags          api  testing
+Force Tags          api  connection
 
 
 *** Test Cases ***
@@ -29,39 +31,49 @@ Create GIT connection
     ${result}                   Call API  connection get
     length should be            ${result}  1
     ${result_id}                Log id  @{result}
-    Should Be Equal             ${result_id}  git-connection-valid
+    should be equal             ${result_id}  ${GIT_CONN}
 
-# Create Docker connection
-#     [Documentation]  create docker connection and check that one exists
-#     Call API                    connection post  ${RES_DIR}/valid/docker_connection_create.json
-#     ${result}                   Call API  connection get
-#     length should be            ${result}  2
-#     list should contain value   ${result}  docker-ci-connectio-valid
+Create Docker connection
+    [Documentation]  create docker connection and check that one exists
+    Call API                    connection post  ${RES_DIR}/valid/docker_connection_create.json
+    ${result}                   Call API  connection get
+    length should be            ${result}  2
+    Command response list should contain id  connection  ${DOCKER_CONN}
 
 Update GIT connection
     [Documentation]  updating GIT connection
     sleep                       1s  # waiting to have, for sure, different time between createdAt and updatedAt
     Call API                    connection put  ${RES_DIR}/valid/git_connection_update.yaml
-    ${result}                   Call API  connection get id  git-connection-valid
+    ${result}                   Call API  connection get id  ${GIT_CONN}
     ${result_id}                Log id  ${result}
-    Should Be Equal             ${result_id}  git-connection-valid
+    should be equal             ${result_id}  ${GIT_CONN}
+    keySecret connection should be equal  ${result}  *****
     ${result_status}            Log Status  ${result}
-    Should not be equal         ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
+    should not be equal         ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
-Put and Get Decrypted Docker connection
-    [Documentation]  update and get decrypted Docker connection
+Get GIT connection
+    [Documentation]  getting GIT connection
+    Call API                    connection get id  ${GIT_CONN}
+
+
+Put Docker connection
+    [Documentation]  update Docker connection
     Call API                    connection put  ${RES_DIR}/valid/docker_connection_create.json
-    ${result}                   Call API  connection get id decrypted  docker-ci-connectio-valid
-    Log                         ${result.spec.password}
-    should not be equal         ${result.spec.password}  *****
+    ${result}                   Call API  connection get id decrypted  ${DOCKER_CONN}
+    should be equal             ${result.id}  ${DOCKER_CONN}
+
+Get Decrypted Docker connection
+    [Documentation]  get decrypted Docker connection
+    ${result}                   Call API  connection get id decrypted  ${DOCKER_CONN}
+    Password connection should not be equal    ${result}  *****
 
 Delete GIT connection
-    Call API                    connection delete  git-connection-valid
+    Call API                    connection delete  ${GIT_CONN}
     ${result}                   Call API  connection get
     length should be            ${result}  1
 
 Delete Docker connection
-    Call API                    connection delete  docker-ci-connectio-valid
+    Call API                    connection delete  ${DOCKER_CONN}
     ${result}                   Call API  connection get
     length should be            ${result}  0
 

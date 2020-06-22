@@ -35,6 +35,22 @@ Status Reason Should Contain
     [Arguments]                  ${result}  ${exp_reason}
     should contain               ${result.status.reason}  ${exp_reason}
 
+keySecret connection should be equal
+    [Arguments]                  ${result}  ${exp_value}
+    should not be equal          ${result.spec.key_secret}  ${exp_value}
+
+keySecret connection should not be equal
+    [Arguments]                  ${result}  ${exp_value}
+    should not be equal          ${result.spec.key_secret}  ${exp_value}
+
+Password connection should be equal
+    [Arguments]                  ${result}  ${exp_value}
+    should be equal              ${result.spec.password}  ${exp_value}
+
+Password connection should not be equal
+    [Arguments]                  ${result}  ${exp_value}
+    should not be equal          ${result.spec.password}  ${exp_value}
+
 Wait until command finishes and returns result
     [Arguments]    ${command}  ${cycles}=20  ${sleep_time}=30s  ${result}=  ${exp_result}='succeeded'
     FOR     ${i}    IN RANGE   ${cycles}
