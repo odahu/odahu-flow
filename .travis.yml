@@ -74,7 +74,7 @@ matrix:
         - wget -q https://github.com/golangci/golangci-lint/releases/download/v1.27.0/golangci-lint-1.27.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
         - sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
         - sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
-        - wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v1.0.8/kubebuilder_1.0.8_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
+        - wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
         - sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
         - sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
         - wget -q https://github.com/swaggo/swag/releases/download/v1.6.5/swag_1.6.5_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
