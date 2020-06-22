@@ -80,7 +80,7 @@ matrix:
         - wget -q https://github.com/swaggo/swag/releases/download/v1.6.5/swag_1.6.5_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
         - sudo tar -zxvf /tmp/swag.tar.gz -C /usr/local/
         - sudo mv /usr/local/swag /usr/bin/
-        - wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+        - wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.5.0/gotestsum_0.5.0_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
         - sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
         - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
         - go get github.com/t-yuki/gocover-cobertura
