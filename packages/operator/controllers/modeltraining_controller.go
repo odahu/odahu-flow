@@ -384,7 +384,7 @@ func isTrainingFinished(mt *odahuflowv1alpha1.ModelTraining) bool {
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=modeltrainings/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=toolchainintegrations,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=toolchainintegrations/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+// +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 
 func (r *ModelTrainingReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	trainingCR := &odahuflowv1alpha1.ModelTraining{}

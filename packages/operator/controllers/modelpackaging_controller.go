@@ -339,8 +339,8 @@ func isPackagingFinished(mp *odahuflowv1alpha1.ModelPackaging) bool {
 // and what is in the ModelPackaging.Spec
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=,resources=configmaps/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=configmaps/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=pods/exec,verbs=create
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=modelpackagings,verbs=get;list;watch;create;update;patch;delete
@@ -350,7 +350,7 @@ func isPackagingFinished(mp *odahuflowv1alpha1.ModelPackaging) bool {
 // +kubebuilder:rbac:groups=tekton.dev,resources=taskruns,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=tekton.dev,resources=taskruns/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=connecitons,verbs=get;list
-// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+// +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 
 func (r *ModelPackagingReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	// Fetch the ModelPackaging

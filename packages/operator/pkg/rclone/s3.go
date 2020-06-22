@@ -22,7 +22,6 @@ import (
 	_ "github.com/rclone/rclone/backend/s3" // s3 specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
-	"github.com/rclone/rclone/fs/rc"
 	"net/url"
 )
 
@@ -33,8 +32,13 @@ func createS3config(configName string, conn *v1alpha1.ConnectionSpec) (*FileDesc
 		return nil, err
 	}
 
-	if err := config.CreateRemote(configName, "s3", rc.Params{
-		"sas_url": conn.KeySecret,
+	if err := config.CreateRemote(configName, "s3", map[string]interface{}{
+		fs.ConfigProvider:   "AWS",
+		"env_auth":          false,
+		"region":            conn.Region,
+		"bucket_acl":        "private",
+		"access_key_id":     conn.KeyID,
+		"secret_access_key": conn.KeySecret,
 	}, true, false); err != nil {
 		return nil, err
 	}
