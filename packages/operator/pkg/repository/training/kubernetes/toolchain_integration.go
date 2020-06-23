@@ -18,7 +18,7 @@ package kubernetes
 
 import (
 	"context"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
@@ -85,14 +85,12 @@ func (tkr *trainingK8sRepository) GetToolchainIntegrationList(options ...kuberne
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := tkr.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := tkr.k8sClient.List(context.TODO(), &k8sMRList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     tkr.tiNamespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
-		}, &k8sMRList); err != nil {
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
+		}); err != nil {
 			logC.Error(err, "Get Toolchain Integration from k8s")
 
 			return nil, err

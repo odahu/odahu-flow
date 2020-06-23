@@ -23,8 +23,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
 	. "github.com/onsi/gomega"

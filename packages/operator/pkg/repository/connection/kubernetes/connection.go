@@ -18,8 +18,8 @@ package kubernetes
 
 import (
 	"context"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
@@ -112,14 +112,12 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := kc.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := kc.k8sClient.List(context.TODO(), &k8sConnList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
-		}, &k8sConnList); err != nil {
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
+		}); err != nil {
 			logC.Error(err, "Get connection from k8s")
 
 			return nil, convertK8sErrToOdahuflowErr(err)

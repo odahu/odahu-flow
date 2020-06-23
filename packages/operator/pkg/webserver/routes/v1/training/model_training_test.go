@@ -30,8 +30,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
@@ -60,7 +60,7 @@ type ModelTrainingRouteSuite struct {
 }
 
 func (s *ModelTrainingRouteSuite) SetupSuite() {
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		panic(err)
 	}

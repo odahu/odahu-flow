@@ -49,7 +49,7 @@ spec:
           {{- end }}
         {{- end }}
         command:
-          - ./api
+          - ./webserver
         args:
           - --config
           - /etc/odahu-flow/config.yaml

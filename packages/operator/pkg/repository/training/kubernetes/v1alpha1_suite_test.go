@@ -17,7 +17,7 @@
 package kubernetes_test
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 

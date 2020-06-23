@@ -17,7 +17,7 @@
 package training_test
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -65,7 +65,7 @@ func TestMain(m *testing.M) {
 		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "..", "..", "config", "crds")},
 	}
 
-	err := apis.AddToScheme(scheme.Scheme)
+	err := v1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		// If we get a panic that we have a test configuration problem
 		panic(err)

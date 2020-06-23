@@ -1,7 +1,8 @@
-package utils
+package utils_test
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	. "github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	k8s_resource "k8s.io/apimachinery/pkg/api/resource"
 	"reflect"

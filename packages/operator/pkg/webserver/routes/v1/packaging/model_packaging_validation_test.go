@@ -23,8 +23,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
@@ -36,7 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
@@ -119,7 +118,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		CRDDirectoryPaths: []string{filepath.Join("..", "..", "..", "..", "..", "config", "crds")},
 	}
 
-	err := odahuflow_apis.AddToScheme(scheme.Scheme)
+	err := v1alpha1.AddToScheme(scheme.Scheme)
 	if err != nil {
 		s.T().Fatalf("Cannot setup the odahuflow schema: %v", err)
 	}
@@ -129,7 +128,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		s.T().Fatalf("Cannot setup the test k8s api: %v", err)
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		panic(err)
 	}

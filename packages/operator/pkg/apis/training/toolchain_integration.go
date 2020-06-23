@@ -16,7 +16,7 @@
 
 package training
 
-import "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 
 type ToolchainIntegration struct {
 	// Toolchain integration id

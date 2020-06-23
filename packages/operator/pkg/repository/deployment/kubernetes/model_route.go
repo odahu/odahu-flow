@@ -20,8 +20,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -81,14 +81,12 @@ func (kc *deploymentK8sRepository) GetModelRouteList(options ...kubernetes.ListO
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := kc.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := kc.k8sClient.List(context.TODO(), &k8sMRList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
-		}, &k8sMRList); err != nil {
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
+		}); err != nil {
 			logC.Error(err, "Get Model Route from k8s")
 
 			return nil, err

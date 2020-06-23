@@ -18,10 +18,10 @@ package rclone
 
 import (
 	"fmt"
-	_ "github.com/ncw/rclone/backend/s3" //nolint
-	"github.com/ncw/rclone/fs"
-	"github.com/ncw/rclone/fs/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	_ "github.com/rclone/rclone/backend/s3" // s3 specific handlers
+	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/config"
 	"net/url"
 )
 
@@ -39,7 +39,7 @@ func createS3config(configName string, conn *v1alpha1.ConnectionSpec) (*FileDesc
 		"bucket_acl":        "private",
 		"access_key_id":     conn.KeyID,
 		"secret_access_key": conn.KeySecret,
-	}); err != nil {
+	}, true, false); err != nil {
 		return nil, err
 	}
 

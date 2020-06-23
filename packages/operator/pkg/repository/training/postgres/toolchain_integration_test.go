@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	migrator_package "github.com/odahu/odahu-flow/packages/operator/pkg/database/migrators/postgres"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"

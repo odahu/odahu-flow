@@ -19,7 +19,7 @@ package packager
 import (
 	"encoding/json"
 	"github.com/go-logr/logr"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
@@ -82,7 +82,7 @@ func (p *Packager) SetupPackager() (err error) {
 		return err
 	}
 
-	return ioutil.WriteFile(modelPackagingFile, mtBytes, 0644)
+	return ioutil.WriteFile(modelPackagingFile, mtBytes, 0644) //nolint file reads in another docker image
 }
 
 // This function saves a packaging result. To do this, it performs the following steps:

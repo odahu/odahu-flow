@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
@@ -163,14 +163,12 @@ func (tkr *trainingK8sRepository) GetModelTrainingList(options ...kubernetes.Lis
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := tkr.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := tkr.k8sClient.List(context.TODO(), &k8sMDList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     tkr.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
-		}, &k8sMDList); err != nil {
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
+		}); err != nil {
 			logMT.Error(err, "Get Model Training from k8s")
 
 			return nil, err

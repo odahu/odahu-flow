@@ -17,7 +17,7 @@
 package packaging_test
 
 import (
-	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis"
+	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/stretchr/testify/suite"
@@ -51,7 +51,7 @@ func (s *PIK8Suite) SetupSuite() {
 		s.T().Fatalf("Cannot setup the test k8s api: %v", err)
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		s.T().Fatalf("Cannot setup the test k8s manager: %v", err)
 	}

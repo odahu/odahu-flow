@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package utils
+package utils_test
 
-import "testing"
+import (
+	. "github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"testing"
+)
 
 func TestExtractHost(t *testing.T) {
 	type args struct {
@@ -52,13 +55,13 @@ func TestExtractHost(t *testing.T) {
 		tt := tt
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := extractHost(tt.args.gitURL)
+			got, err := ExtractHost(tt.args.gitURL)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("extractHost() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("ExtractHost() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("extractHost() = %v, want %v", got, tt.want)
+				t.Errorf("ExtractHost() = %v, want %v", got, tt.want)
 			}
 		})
 	}

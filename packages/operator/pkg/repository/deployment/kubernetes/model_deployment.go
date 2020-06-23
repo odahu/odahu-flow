@@ -20,8 +20,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -88,14 +88,12 @@ func (kc *deploymentK8sRepository) GetModelDeploymentList(options ...kubernetes.
 	continueToken := ""
 
 	for i := 0; i < *listOptions.Page+1; i++ {
-		if err := kc.k8sClient.List(context.TODO(), &client.ListOptions{
+		if err := kc.k8sClient.List(context.TODO(), &k8sMDList, &client.ListOptions{
 			LabelSelector: labelSelector,
 			Namespace:     kc.namespace,
-			Raw: &metav1.ListOptions{
-				Limit:    int64(*listOptions.Size),
-				Continue: continueToken,
-			},
-		}, &k8sMDList); err != nil {
+			Limit:         int64(*listOptions.Size),
+			Continue:      continueToken,
+		}); err != nil {
 			logMD.Error(err, "Get Model Deployment from k8s")
 
 			return nil, err
