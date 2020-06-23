@@ -18,10 +18,10 @@ package rclone
 
 import (
 	"fmt"
-	_ "github.com/ncw/rclone/backend/googlecloudstorage" //nolint
-	"github.com/ncw/rclone/fs"
-	"github.com/ncw/rclone/fs/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	_ "github.com/rclone/rclone/backend/googlecloudstorage" // s3 specific handlers
+	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/config"
 	"net/url"
 )
 
@@ -42,7 +42,7 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		options["service_account_credentials"] = conn.KeySecret
 	}
 
-	if err := config.CreateRemote(configName, "googlecloudstorage", options); err != nil {
+	if err := config.CreateRemote(configName, "googlecloudstorage", options, true, false); err != nil {
 		return nil, err
 	}
 

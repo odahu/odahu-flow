@@ -17,15 +17,16 @@
 package rclone
 
 import (
+	"context"
 	"fmt"
-	_ "github.com/ncw/rclone/backend/local" //nolint
-	"github.com/ncw/rclone/fs"
-	"github.com/ncw/rclone/fs/cache"
-	"github.com/ncw/rclone/fs/operations"
-	"github.com/ncw/rclone/fs/sync"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/pkg/errors"
+	_ "github.com/rclone/rclone/backend/local" // local specific handlers
+	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/cache"
+	"github.com/rclone/rclone/fs/operations"
+	"github.com/rclone/rclone/fs/sync"
 	uuid "github.com/satori/go.uuid"
 	"path"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -76,8 +77,10 @@ func NewObjectStorage(conn *odahuflowv1alpha1.ConnectionSpec) (obj *ObjectStorag
 func newFsFile(remote string) (fs.Fs, string, error) {
 	_, _, fsPath, err := fs.ParseRemote(remote)
 	if err != nil {
-		fs.CountError(err)
-
+		cntRrr := fs.CountError(err)
+		if cntRrr != nil {
+			return nil, "", cntRrr
+		}
 		return nil, "", err
 	}
 
@@ -88,7 +91,10 @@ func newFsFile(remote string) (fs.Fs, string, error) {
 	case nil:
 		return f, "", nil
 	default:
-		fs.CountError(err)
+		cntRrr := fs.CountError(err)
+		if cntRrr != nil {
+			return nil, "", cntRrr
+		}
 
 		return nil, "", err
 	}
@@ -116,6 +122,9 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 	}
 
 	localDir, localFileName := path.Split(localPath)
+	if localDir == "" {
+		localDir = "./"
+	}
 
 	localFs, err := fs.NewFs(localDir)
 	if err != nil {
@@ -142,7 +151,7 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 		log.Info("Download directory from the remote bucket",
 			"local_dir", localDir, "remote_dir", remotePath,
 		)
-		return sync.CopyDir(localFs, remoteFs, copyEmptySrcDirs)
+		return sync.CopyDir(context.Background(), localFs, remoteFs, copyEmptySrcDirs)
 	}
 
 	if len(localFileName) == 0 {
@@ -152,7 +161,7 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 	log.Info("Download the file from the remote bucket",
 		"local_file", localPath, "remote_file", remotePath,
 	)
-	return operations.CopyFile(localFs, remoteFs, localFileName, srcFileName)
+	return operations.CopyFile(context.Background(), localFs, remoteFs, localFileName, srcFileName)
 }
 
 // Uploads files to connection specific storage from the local filesystem.
@@ -195,7 +204,7 @@ func (os *ObjectStorage) Upload(localPath, remotePath string) error {
 		log.Info("Upload the local directory to the remote bucket",
 			"local_dir", localPath, "remote_dir", remotePath,
 		)
-		return sync.CopyDir(rFs, lFs, copyEmptySrcDirs)
+		return sync.CopyDir(context.Background(), rFs, lFs, copyEmptySrcDirs)
 	}
 
 	if len(remoteFileName) == 0 {
@@ -205,5 +214,5 @@ func (os *ObjectStorage) Upload(localPath, remotePath string) error {
 	log.Info("Upload the file to the remote bucket",
 		"local_file", localPath, "remote_file", remotePath,
 	)
-	return operations.CopyFile(rFs, lFs, remoteFileName, srcFileName)
+	return operations.CopyFile(context.Background(), rFs, lFs, remoteFileName, srcFileName)
 }

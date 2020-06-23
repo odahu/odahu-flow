@@ -16,7 +16,7 @@
 
 package connection
 
-import "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 
 const (
 	S3Type            = v1alpha1.ConnectionType("s3")

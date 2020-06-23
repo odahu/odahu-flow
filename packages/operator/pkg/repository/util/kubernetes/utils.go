@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"reflect"
 
-	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

@@ -17,8 +17,8 @@
 package deployment_test
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/deployment"

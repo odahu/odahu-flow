@@ -122,9 +122,14 @@ docker-push-api:  check-tag
 	docker tag odahu/odahu-flow-api:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-api:${TAG}
 	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-api:${TAG}
 
-## docker-push-model-trainer: Push model builder docker image
+## docker-push-model-packager: Push model packager docker image
+docker-push-model-packager:  check-tag
+	docker tag odahu/odahu-flow-model-packager:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-model-packager:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-model-packager:${TAG}
+
+## docker-push-model-trainer: Push model trainer docker image
 docker-push-model-trainer:  check-tag
-	docker tag odahu/odahu-flow-model-trainer:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/model-trainer:${TAG}
+	docker tag odahu/odahu-flow-model-trainer:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-model-trainer:${TAG}
 	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-model-trainer:${TAG}
 
 ## docker-push-operator: Push operator docker image

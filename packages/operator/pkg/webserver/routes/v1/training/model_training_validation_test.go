@@ -18,8 +18,8 @@ package training_test
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
@@ -59,7 +59,7 @@ func (s *ModelTrainingValidationSuite) SetupTest() {
 }
 
 func (s *ModelTrainingValidationSuite) SetupSuite() {
-	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient})
+	mgr, err := manager.New(cfg, manager.Options{NewClient: utils.NewClient, MetricsBindAddress: "0"})
 	if err != nil {
 		panic(err)
 	}

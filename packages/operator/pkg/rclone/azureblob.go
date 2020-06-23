@@ -18,10 +18,11 @@ package rclone
 
 import (
 	"fmt"
-	_ "github.com/ncw/rclone/backend/azureblob" //nolint
-	"github.com/ncw/rclone/fs"
-	"github.com/ncw/rclone/fs/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	_ "github.com/rclone/rclone/backend/azureblob" // s3 specific handlers
+	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/config"
+	"github.com/rclone/rclone/fs/rc"
 	"net/url"
 	"strings"
 )
@@ -38,9 +39,9 @@ func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*F
 		return nil, err
 	}
 
-	if err := config.CreateRemote(configName, "azureblob", map[string]interface{}{
+	if err := config.CreateRemote(configName, "azureblob", rc.Params{
 		"sas_url": conn.KeySecret,
-	}); err != nil {
+	}, true, false); err != nil {
 		return nil, err
 	}
 

@@ -21,7 +21,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"testing"
 
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/packaging"
 	. "github.com/onsi/gomega"

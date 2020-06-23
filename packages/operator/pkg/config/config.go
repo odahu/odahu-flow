@@ -140,3 +140,19 @@ func PanicIfError(err error) {
 func setUpLogger() {
 	logf.SetLogger(logf.ZapLoggerTo(os.Stdout, true))
 }
+
+func NewDefaultConfig() *Config {
+	return &Config{
+		API:            NewDefaultAPIConfig(),
+		Common:         NewDefaultCommonConfig(),
+		Users:          NewDefaultUserConfig(),
+		Connection:     NewDefaultConnectionConfig(),
+		Deployment:     NewDefaultModelDeploymentConfig(),
+		ServiceCatalog: NewDefaultServiceCatalogConfig(),
+		Trainer:        NewDefaultTrainerConfig(),
+		Packager:       NewDefaultPackagerConfig(),
+		Training:       NewDefaultModelTrainingConfig(),
+		Packaging:      NewDefaultModelPackagingConfig(),
+		Operator:       NewDefaultOperatorConfig(),
+	}
+}

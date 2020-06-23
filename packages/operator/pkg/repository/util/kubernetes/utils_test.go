@@ -14,11 +14,12 @@
 //    limitations under the License.
 //
 
-package kubernetes
+package kubernetes_test
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	. "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	. "github.com/onsi/gomega"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

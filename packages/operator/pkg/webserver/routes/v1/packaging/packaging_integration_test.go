@@ -26,8 +26,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/odahuflow/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
