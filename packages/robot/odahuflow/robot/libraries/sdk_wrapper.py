@@ -20,10 +20,6 @@ class Configuration:
     def config_get():
         return ConfigurationClient().get()
 
-    @staticmethod
-    def config_put(payload_file):
-        return ConfigurationClient().put(payload_file)
-
 
 class Connection:
 

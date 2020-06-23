@@ -14,6 +14,9 @@ CONNECTION_RES = Connection(id='test', spec=ConnectionSpec(type="git"))
 
 logging.basicConfig(level=logging.DEBUG)
 
+# Because of fixtures are not recognized by pylint as special kind of variables
+# pylint: disable=redefined-outer-name
+
 
 @pytest.fixture()
 def conn_manifest_file() -> str:
