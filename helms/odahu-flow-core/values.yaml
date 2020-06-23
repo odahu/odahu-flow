@@ -32,7 +32,7 @@ logLevel: info
 edge:
   # Knative namespace name
   # Type: str
-  knative_namespace: knative-serving
+  knative_namespace: knative
 
   # Ingress object configuration
   ingress:
