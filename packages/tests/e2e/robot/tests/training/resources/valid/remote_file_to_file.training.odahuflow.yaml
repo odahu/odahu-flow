@@ -18,7 +18,7 @@ spec:
     - connName: test-valid-gppi-dir
       localPath: local/odahuflow.project.yaml
       remotePath: /test-data/data/valid_gppi/odahuflow.project.yaml
-    # We need need also to add model folder to pass gppi validation step further (beyond this test scope)
+    # We need also to add a model folder to pass gppi validation step further (beyond this test scope)
     - connName: test-valid-gppi-dir
       localPath: local/odahuflow_model/
       remotePath: /test-data/data/valid_gppi/odahuflow_model/
