@@ -85,7 +85,7 @@ func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Contex
 func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
 	if err != nil {
-		logTI.Error(err, "Malformed url parameters of toolchain itergration request")
+		logTI.Error(err, "Mailformed url parameters of toolchain integration request")
 		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
 
 		return
