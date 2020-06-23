@@ -116,9 +116,9 @@ type ModelTrainingStatus struct {
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="Toolchain",type="string",JSONPath=".spec.toolchain"
 // +kubebuilder:printcolumn:name="VCS name",type="string",JSONPath=".spec.vcsName"
-// +kubebuilder:printcolumn:name="Model name",type="string",JSONPath=".status.modelName"
-// +kubebuilder:printcolumn:name="Model version",type="string",JSONPath=".status.modelVersion"
-// +kubebuilder:printcolumn:name="Model image",type="string",JSONPath=".status.modelImage"
+// +kubebuilder:printcolumn:name="Model name",type="string",JSONPath=".spec.model.name"
+// +kubebuilder:printcolumn:name="Model version",type="string",JSONPath=".spec.model.version"
+// +kubebuilder:printcolumn:name="Model image",type="string",JSONPath=".spec.image"
 // +kubebuilder:resource:shortName=mt
 type ModelTraining struct {
 	metav1.TypeMeta   `json:",inline"`
