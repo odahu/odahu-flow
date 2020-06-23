@@ -29,6 +29,7 @@ import (
 
 const (
 	pathToPackagerBin = "/opt/odahu-flow/packager"
+	configPackagingSecretName  = "odahu-flow-packaging-config" //nolint:gosec
 )
 
 func (r *ModelPackagingReconciler) generatePackagerTaskSpec(
@@ -52,7 +53,7 @@ func (r *ModelPackagingReconciler) generatePackagerTaskSpec(
 				Name: configVolumeName,
 				VolumeSource: corev1.VolumeSource{
 					Secret: &corev1.SecretVolumeSource{
-						SecretName: configSecretName,
+						SecretName: configPackagingSecretName,
 					},
 				},
 			},
