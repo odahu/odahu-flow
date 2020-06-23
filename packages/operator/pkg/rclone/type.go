@@ -122,6 +122,9 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 	}
 
 	localDir, localFileName := path.Split(localPath)
+	if localDir == "" {
+		localDir = "./"
+	}
 
 	localFs, err := fs.NewFs(localDir)
 	if err != nil {
