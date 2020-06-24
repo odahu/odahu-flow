@@ -1,5 +1,5 @@
 *** Variables ***
-${RES_DIR}             ${CURDIR}/resources/connections
+${RES_DIR}             ${CURDIR}/resources/connection
 ${GIT_CONN}            git-connection-valid
 ${DOCKER_CONN}         docker-ci-connectio-valid
 
