@@ -68,7 +68,6 @@ Command response list should contain id
     ${list_length}                      get length  ${result}
     ${value_count}                      get length  ${value}
 
-
     FOR     ${i}   IN  @{result}
         log  ${value_count}
         ${value_count}                  run keyword if  $i.id in $value  Evaluate  ${value_count} - 1

@@ -4,7 +4,7 @@ ${MLFLOW}           mlflow-api-testing
 ${MLFLOW_GPU}       mlflow-gpu-api-testing
 
 *** Settings ***
-Documentation       API of conections
+Documentation       API of toolchains
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}

@@ -5,7 +5,7 @@ ${TRAIN_MLFLOW_NOT_DEFAULT}         wine-mlflow-not-default
 ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}     reuters-classifier-mlflow-gpu-not-default
 
 *** Settings ***
-Documentation       API of conections
+Documentation       API of training, packaging and deployment
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}

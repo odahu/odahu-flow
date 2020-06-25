@@ -4,7 +4,7 @@ ${DOCKER_CLI}          docker-cli-api-testing
 ${DOCKER_REST}         docker-rest-api-testing
 
 *** Settings ***
-Documentation       API of conections
+Documentation       API of packagers
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
