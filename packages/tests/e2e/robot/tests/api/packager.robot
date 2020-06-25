@@ -12,7 +12,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  testing  packager
+Force Tags          api  sdk  packager
 
 
 *** Test Cases ***
@@ -27,6 +27,7 @@ Create Docker REST packager
     Call API                    packager post  ${RES_DIR}/valid/docker_rest_create.json
 
 Update Docker CLI packager
+    sleep                       1s
     Call API                    packager put  ${RES_DIR}/valid/docker_cli_update.json
 
 Update Docker REST packager

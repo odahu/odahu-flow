@@ -1,7 +1,7 @@
 *** Variables ***
 ${RES_DIR}             ${CURDIR}/resources/connection
 ${GIT_CONN}            git-connection-valid
-${DOCKER_CONN}         docker-ci-connectio-valid
+${DOCKER_CONN}         docker-ci-connection-valid
 
 *** Settings ***
 Documentation       API of conections
@@ -12,7 +12,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  connection
+Force Tags          api  sdk  connection
 
 
 *** Test Cases ***

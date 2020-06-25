@@ -66,9 +66,14 @@ Command response list should contain id
     [Arguments]                         ${command}  @{value}
     ${result}                           Call API  ${command} get
     ${list_length}                      get length  ${result}
+    ${value_count}                      get length  ${value}
+
 
     FOR     ${i}   IN  @{result}
-        exit for loop if                $i.id in $value
+        log  ${value_count}
+        ${value_count}                  run keyword if  $i.id in $value  Evaluate  ${value_count} - 1
+        log  ${value_count}
+        exit for loop if                $i.id in $value and $value_count == 0
         ${list_length}                  evaluate  ${list_length} - 1
     END
     should not be equal as integers     ${list_length}  0

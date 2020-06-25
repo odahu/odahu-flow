@@ -15,7 +15,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelPackaging
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  testing  training  packaging  deployment
+Force Tags          api  training  packaging  deployment
 
 *** Test Cases ***
 Get list of model training
@@ -53,10 +53,11 @@ Get Model Training by id
     should be equal             ${result_id}  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
 Update Model Training, mlflow toolchain, not default
-    ${result}                   Call API  training put  ${RES_DIR}/valid/training.mlflow.not_default.update.yaml
+    ${result}                   Call API  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
+    log                         ${result.spec.model.version}
     @{exp_result}               set variable  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  result=${result}  exp_result=@{exp_result}
-    Call API                    training get log  ${TRAIN_MLFLOW_NOT_DEFAULT}
+    Call API                    training get log  ${TRAIN_MLFLOW_DEFAULT}
     should be equal             ${result.status.state}  succeeded
     ${result_status}            Log Status  ${result}
     should not be equal         ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
@@ -70,12 +71,12 @@ Get updated list of model training
     Command response list should contain id  training  ${TRAIN_MLFLOW_DEFAULT}
     ...                                          ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
-# Delete Model Trainings
-#     [Documentation]  delete model trainings
-#     Call API                    training delete  ${TRAIN_MLFLOW_DEFAULT}
-#     Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
-#     Call API                    training delete  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
-#
-# Check that Model Trainging do not exist
-#     Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}
-#     ...                                          ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+Delete Model Trainings
+    [Documentation]  delete model trainings
+    Call API                    training delete  ${TRAIN_MLFLOW_DEFAULT}
+    Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
+    Call API                    training delete  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+
+Check that Model Trainging do not exist
+    Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}
+    ...                                          ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}

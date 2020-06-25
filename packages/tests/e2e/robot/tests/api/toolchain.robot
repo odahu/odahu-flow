@@ -12,7 +12,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  testing  toolchain
+Force Tags          api  sdk  toolchain
 
 
 *** Test Cases ***
@@ -27,6 +27,7 @@ Create mlflow-gpu toolchain
     Call API                    toolchain post  ${RES_DIR}/valid/mlflow-gpu_create.json
 
 Update mlflow toolchain
+    sleep                       1s
     Call API                    toolchain put  ${RES_DIR}/valid/mlflow_update.json
 
 Update mlflow-gpu toolchain
