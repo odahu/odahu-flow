@@ -82,7 +82,7 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
     Create a model route.\n
     You should specify a path to file with a model route. The file must contain only one model route.
     For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples routes than you should use "odahuflowctl res apply" instead.
+    If you want to create multiples routes than you should use "odahuflowctl bulk apply" instead.
     If you provide the model route id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl route create -f route.yaml --id examples-git
@@ -118,7 +118,7 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
     Update a model route.\n
     You should specify a path to file with a model route. The file must contain only one model route.
     For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples routes than you should use "odahuflowctl res apply" instead.
+    If you want to update multiples routes than you should use "odahuflowctl bulk apply" instead.
     If you provide the model route id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl route update -f route.yaml --id examples-git
@@ -152,7 +152,7 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
     Delete a model route.\n
     For this command, you must provide a model route ID or path to file with one model route.
     The file must contain only one model route.
-    If you want to delete multiples routes than you should use "odahuflowctl res delete" instead.
+    If you want to delete multiples routes than you should use "odahuflowctl bulk delete" instead.
     For now, CLI supports yaml and JSON file formats.
     The command will be failed if you provide both arguments.\n
     Usage example:\n
