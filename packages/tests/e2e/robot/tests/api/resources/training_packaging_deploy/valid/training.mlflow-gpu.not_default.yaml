@@ -1,0 +1,25 @@
+kind: ModelTraining
+id: reuters-classifier-mlflow-gpu-not-default
+spec:
+  model:
+    name: reuters-classifier
+    version: 1.0
+  toolchain: mlflow-gpu  # MLFlow training toolchain integration
+  entrypoint: main
+  workDir: mlflow/tensorflow/reuters_classifier # MLproject location (in GitHub)
+  hyperParameters:
+    maxwords: "999"
+  data:
+    - connName: models-output
+      localPath: mlflow/tensorflow/reuters_classifier/data/
+      remotePath: /reuters/
+  resources:
+    limits:
+      cpu: 3
+      memory: 2Gi
+      gpu: 2
+    requests:
+      cpu: 3
+      memory: 2Gi
+      gpu: 2
+  vcsName: odahu-flow-examples

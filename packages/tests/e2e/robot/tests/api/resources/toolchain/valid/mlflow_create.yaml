@@ -1,0 +1,8 @@
+kind: ToolchainIntegration
+id: mlflow-api-testing
+spec:
+  entrypoint: /opt/conda/bin/odahu-flow-mlflow-runner
+  defaultImage: >-
+    gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:1.2.0-b1592953390068
+  additionalEnvironments:
+    MLFLOW_TRACKING_URI: 'http://mlflow.odahu-flow.svc.cluster.local'
