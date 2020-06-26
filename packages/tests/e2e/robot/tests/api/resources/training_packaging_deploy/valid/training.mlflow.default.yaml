@@ -19,5 +19,5 @@ spec:
       cpu: 2024m
       memory: 2024Mi
   data:
-    - connName: wine-examples
+    - connName: wine
       localPath: mlflow/sklearn/wine/
