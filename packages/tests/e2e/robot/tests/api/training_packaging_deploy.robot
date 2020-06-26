@@ -15,7 +15,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelPackaging
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  training  packaging  deployment
+Force Tags          api  sdk  training  packaging  deployment
 
 *** Test Cases ***
 Get list of model training

@@ -13,5 +13,5 @@ Force Tags          api  sdk  configuration
 *** Test Cases ***
 Get configuration
     [Documentation]  create git connection and check that one exists
-    ${result}                    Call API  config get
-    should not be empty          ${result}
+    ${result}                           Call API  config get
+    should not be equal as strings      ${result}  ${EMPTY}
