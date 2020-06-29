@@ -151,7 +151,7 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 		log.Info("Download directory from the remote bucket",
 			"local_dir", localDir, "remote_dir", remotePath,
 		)
-		result := sync.CopyDir(localFs, remoteFs, copyEmptySrcDirs)
+		result := sync.CopyDir(context.Background(), localFs, remoteFs, copyEmptySrcDirs)
                 _, ok := result.(error)
 		if ok == true {
 			return result
