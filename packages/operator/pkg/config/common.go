@@ -44,6 +44,8 @@ type CommonConfig struct {
 	Version string `json:"version"`
 	// Database connection string
 	DatabaseConnectionString string `json:"databaseConnectionString"`
+	// OpenID token url
+	OAuthOIDCTokenEndpoint string `json:"oauthOidcTokenEndpoint"`
 }
 
 func NewDefaultCommonConfig() CommonConfig {
