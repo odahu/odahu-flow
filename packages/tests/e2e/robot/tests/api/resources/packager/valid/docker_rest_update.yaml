@@ -1,8 +1,8 @@
 kind: PackagingIntegration
 id: docker-rest-api-testing
 spec:
-  entrypoint: created
-  defaultImage: created
+  entrypoint: updated
+  defaultImage: updated
   privileged: true
   schema:
     targets:

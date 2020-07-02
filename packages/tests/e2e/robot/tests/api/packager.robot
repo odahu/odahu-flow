@@ -22,29 +22,45 @@ Get list of packagers
 
 Create Docker CLI packager
     Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
+    ${check}                    Call API  packager get id  ${DOCKER_CLI}
+    should be equal             ${check.spec.default_image}  created
+    should be equal             ${check.spec.entrypoint}  created
 
 Create Docker REST packager
     Call API                    packager post  ${RES_DIR}/valid/docker_rest_create.json
+    ${check}                    Call API  packager get id  ${DOCKER_REST}
+    should be equal             ${check.spec.default_image}  created
+    should be equal             ${check.spec.entrypoint}  created
 
 Update Docker CLI packager
     sleep                       1s
     Call API                    packager put  ${RES_DIR}/valid/docker_cli_update.json
+    ${check}                    Call API  packager get id  ${DOCKER_CLI}
+    should be equal             ${check.spec.default_image}  updated
+    should be equal             ${check.spec.entrypoint}  updated
 
 Update Docker REST packager
     Call API                    packager put  ${RES_DIR}/valid/docker_rest_update.yaml
+    ${check}                    Call API  packager get id  ${DOCKER_REST}
+    should be equal             ${check.spec.default_image}  updated
+    should be equal             ${check.spec.entrypoint}  updated
 
 Get updated list of packagers
     Command response list should contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
 
 Get Docker CLI and REST packagers by id
-    Call API                    packager get id  ${DOCKER_CLI}
-    Call API                    packager get id  ${DOCKER_REST}
+    ${result}                   Call API  packager get id  ${DOCKER_CLI}
+    should be equal             ${result.id}  ${DOCKER_CLI}
+    ${result}                   Call API  packager get id  ${DOCKER_REST}
+    should be equal             ${result.id}  ${DOCKER_REST}
 
 Delete Docker CLI packager
-    Call API                    packager delete  ${DOCKER_CLI}
+    ${result}                   Call API   packager delete  ${DOCKER_CLI}
+    should be equal             ${result.get('message')}  Packaging integration ${DOCKER_CLI} was deleted
 
 Delete Docker REST packager
-    Call API                    packager delete  ${DOCKER_REST}
+    ${result}                   Call API  packager delete  ${DOCKER_REST}
+    should be equal             ${result.get('message')}  Packaging integration ${DOCKER_REST} was deleted
 
 Check that packagers do not exist
     Command response list should not contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
