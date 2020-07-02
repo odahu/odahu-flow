@@ -81,7 +81,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(up{namespace=\"$namespace\", pod_name=~\"$workload.*\"})",
+          "expr": "sum(up{namespace=\"$namespace\",pod_name=~\"$workload.*\"})",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -164,7 +164,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(irate(istio_tcp_sent_bytes_total{reporter=\"destination\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\"}[1m])) + sum(irate(istio_tcp_received_bytes_total{reporter=\"destination\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\"}[1m]))",
+          "expr": "sum(irate(istio_tcp_sent_bytes_total{reporter=\"destination\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\"}[1m])) + sum(irate(istio_tcp_received_bytes_total{reporter=\"destination\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\"}[1m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -500,10 +500,10 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\", pod_name=~\".*$workload.*\", container_name = \"user-container\"}[1m])) by (container_name, pod_name)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*$workload.*\",container=\"user-container\",service=\"prometheus-kubelet\"}[1m])) by (container, pod)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod_name}}",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -585,10 +585,10 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\", pod_name=~\".*$workload.*\", container_name = \"user-container\"}) by (pod_name)",
+              "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*$workload.*\",container=\"user-container\",service=\"prometheus-kubelet\"}) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{pod_name}}",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -685,7 +685,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "round(sum(irate(istio_requests_total{connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", reporter=\"destination\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
+              "expr": "round(sum(irate(istio_requests_total{connection_security_policy=\"mutual_tls\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",reporter=\"destination\",source_workload=~\"$srcwl\",source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "{{ source_workload }}.{{ source_workload_namespace }} : {{ response_code }} (🔐mTLS)",
@@ -693,7 +693,7 @@
               "step": 2
             },
             {
-              "expr": "round(sum(irate(istio_requests_total{connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", reporter=\"destination\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
+              "expr": "round(sum(irate(istio_requests_total{connection_security_policy!=\"mutual_tls\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",reporter=\"destination\",source_workload=~\"$srcwl\",source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -784,7 +784,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(irate(istio_requests_total{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\",response_code!~\"5.*\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace) / sum(rate(istio_requests_total{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace)",
+              "expr": "sum(irate(istio_requests_total{reporter=\"destination\",connection_security_policy=\"mutual_tls\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",response_code!~\"5.*\",source_workload=~\"$srcwl\",source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace) / sum(rate(istio_requests_total{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
@@ -793,7 +793,7 @@
               "step": 2
             },
             {
-              "expr": "sum(irate(istio_requests_total{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\",response_code!~\"5.*\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace) / sum(rate(istio_requests_total{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace)",
+              "expr": "sum(irate(istio_requests_total{reporter=\"destination\",connection_security_policy!=\"mutual_tls\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",response_code!~\"5.*\",source_workload=~\"$srcwl\",source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace) / sum(rate(istio_requests_total{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\"}[5m])) by (source_workload, source_workload_namespace)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 1,
