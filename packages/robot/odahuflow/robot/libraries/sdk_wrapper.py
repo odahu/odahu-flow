@@ -109,8 +109,11 @@ class ModelPackaging:
 
     @staticmethod
     def packaging_get_log(pack_id):
-        for msg in ModelPackagingClient().log(pack_id, follow=False):
-            print(msg)
+        log_generator = ModelPackagingClient().log(pack_id, follow=False)
+        # logs_list will be list of log lines
+        logs_list = list(log_generator)
+        text = "\n".join(logs_list)
+        return text
 
 
 class ModelTraining:
@@ -139,8 +142,11 @@ class ModelTraining:
 
     @staticmethod
     def training_get_log(train_id):
-        for msg in ModelTrainingClient().log(train_id, follow=False):
-            print(msg)
+        log_generator = ModelTrainingClient().log(train_id, follow=False)
+        # logs_list will be list of log lines
+        logs_list = list(log_generator)
+        text = "\n".join(logs_list)
+        return text
 
 
 class ModelRoute:
