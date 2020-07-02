@@ -1,9 +1,8 @@
 kind: PackagingIntegration
 id: docker-cli-api-testing
 spec:
-  entrypoint: /usr/local/bin/odahu-flow-pack-to-cli
-  defaultImage: >-
-    gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers:1.2.0-b1592953604635
+  entrypoint: created
+  defaultImage: created
   privileged: true
   schema:
     targets:

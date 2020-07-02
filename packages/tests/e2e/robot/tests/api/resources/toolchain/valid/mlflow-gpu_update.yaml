@@ -1,9 +1,8 @@
 kind: ToolchainIntegration
 id: mlflow-gpu-api-testing
 spec:
-  entrypoint: /opt/conda/bin/odahu-flow-mlflow-runner
-  defaultImage: >-
-    gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:1.2.0-b1592953390068
+  entrypoint: updated
+  defaultImage: updated
   additionalEnvironments:
     LD_LIBRARY_PATH: '/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}'
     MLFLOW_TRACKING_URI: 'http://mlflow.odahu-flow.svc.cluster.local'
