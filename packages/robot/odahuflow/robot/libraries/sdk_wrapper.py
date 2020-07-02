@@ -86,13 +86,21 @@ class ModelPackaging:
         return ModelPackagingClient().get(pack_id)
 
     @staticmethod
-    def packaging_put(payload_file):
+    def packaging_put(payload_file, artifact_name=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if artifact_name:
+            api_object.spec.artifact_name = artifact_name
+
         return ModelPackagingClient().edit(api_object)
 
     @staticmethod
-    def packaging_post(payload_file):
+    def packaging_post(payload_file, artifact_name=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if artifact_name:
+            api_object.spec.artifact_name = artifact_name
+
         return ModelPackagingClient().create(api_object)
 
     @staticmethod
