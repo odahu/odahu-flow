@@ -2151,12 +2151,15 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/ModelDeploymentSecurityConfig"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model deployments",
-                    "type": "object",
                     "additionalProperties": {
                         "type": "string"
-                    }
+                    },
+                    "items": {
+                        "type": "object"
+                    },
+                    "type": "array"
                 }
             }
         },
@@ -2229,12 +2232,15 @@ var doc = `{
                     "description": "Timeout for full training process",
                     "type": "string"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model packaging pods",
-                    "type": "object",
                     "additionalProperties": {
                         "type": "string"
-                    }
+                    },
+                    "items": {
+                        "type": "object"
+                    },
+                    "type": "array"
                 }
             }
         },
@@ -2256,12 +2262,15 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "gpuToleration": {
+                "gpuTolerations": {
                     "description": "Kubernetes tolerations for GPU model trainings pods",
-                    "type": "object",
                     "additionalProperties": {
                         "type": "string"
-                    }
+                    },
+                    "items": {
+                        "type": "object"
+                    },
+                    "type": "array"
                 },
                 "metricUrl": {
                     "type": "string"
@@ -2289,12 +2298,15 @@ var doc = `{
                     "description": "Timeout for full training process",
                     "type": "string"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model trainings pods",
-                    "type": "object",
                     "additionalProperties": {
                         "type": "string"
-                    }
+                    },
+                    "items": {
+                        "type": "object"
+                    },
+                    "type": "array"
                 },
                 "toolchainIntegrationNamespace": {
                     "type": "string"

@@ -191,11 +191,13 @@ definitions:
       security:
         $ref: '#/definitions/ModelDeploymentSecurityConfig'
         type: object
-      toleration:
+      tolerations:
         additionalProperties:
           type: string
         description: Kubernetes tolerations for model deployments
-        type: object
+        items:
+          type: object
+        type: array
     type: object
   ModelDeploymentIstioConfig:
     properties:
@@ -249,11 +251,13 @@ definitions:
       timeout:
         description: Timeout for full training process
         type: string
-      toleration:
+      tolerations:
         additionalProperties:
           type: string
         description: Kubernetes tolerations for model packaging pods
-        type: object
+        items:
+          type: object
+        type: array
     type: object
   ModelTrainingConfig:
     properties:
@@ -268,11 +272,13 @@ definitions:
         additionalProperties:
           type: string
         type: object
-      gpuToleration:
+      gpuTolerations:
         additionalProperties:
           type: string
         description: Kubernetes tolerations for GPU model trainings pods
-        type: object
+        items:
+          type: object
+        type: array
       metricUrl:
         type: string
       modelTrainerImage:
@@ -291,11 +297,13 @@ definitions:
       timeout:
         description: Timeout for full training process
         type: string
-      toleration:
+      tolerations:
         additionalProperties:
           type: string
         description: Kubernetes tolerations for model trainings pods
-        type: object
+        items:
+          type: object
+        type: array
       toolchainIntegrationNamespace:
         type: string
       toolchainIntegrationRepositoryType:
