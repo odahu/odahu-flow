@@ -405,7 +405,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
 			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		default:
-			s.T().Errorf("Unexpected spep name: %s", step.Name)
+			s.T().Errorf("Unexpected step name: %s", step.Name)
 		}
 	}
 }
