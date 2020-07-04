@@ -129,7 +129,7 @@ func TestReconcile(t *testing.T) {
 	))
 
 	configurationLabels := configuration.Spec.Template.ObjectMeta.Labels
-	g.Expect(configurationLabels).Should(HaveLen(2))
+	g.Expect(configurationLabels).Should(HaveLen(3))
 	g.Expect(configurationLabels).Should(HaveKeyWithValue(DodelNameAnnotationKey, md.Name))
 
 	podSpec := configuration.Spec.Template.Spec
