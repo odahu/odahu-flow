@@ -220,6 +220,12 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 					Labels: map[string]string{
 						DodelNameAnnotationKey: modelDeploymentCR.Name,
 						deploymentIDLabel:      modelDeploymentCR.Name,
+						// We must provide it because we don't use knative built-in routing
+						// And w/o this label revision is considered as "Unreachable" so then minScale is ignored and
+						// replicas are scaled to 0 even if user set minScale > 0
+						// TODO in future: move from creating knservingv1.Configuration -> knservingv1.Service
+						// https://github.com/knative/serving/blob/a333742324081d769d1b234622f3fc4cfd181ca4/pkg/apis/autoscaling/v1alpha1/pa_lifecycle.go#L85
+						serving.RouteLabelKey: modelDeploymentCR.Name,
 					},
 					Annotations: map[string]string{
 						KnativeAutoscalingClass:     DefaultKnativeAutoscalingClass,
