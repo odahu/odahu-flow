@@ -19,7 +19,7 @@ class ModelDeploymentConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_docker_pull_conn_name: str=None, default_resources: ResourceRequirements=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_selector: Dict[str, str]=None, security: ModelDeploymentSecurityConfig=None, toleration: Dict[str, str]=None):  # noqa: E501
+    def __init__(self, default_docker_pull_conn_name: str=None, default_resources: ResourceRequirements=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_selector: Dict[str, str]=None, security: ModelDeploymentSecurityConfig=None, tolerations: str=None):  # noqa: E501
         """ModelDeploymentConfig - a model defined in Swagger
 
         :param default_docker_pull_conn_name: The default_docker_pull_conn_name of this ModelDeploymentConfig.  # noqa: E501
@@ -38,8 +38,8 @@ class ModelDeploymentConfig(Model):
         :type node_selector: Dict[str, str]
         :param security: The security of this ModelDeploymentConfig.  # noqa: E501
         :type security: ModelDeploymentSecurityConfig
-        :param toleration: The toleration of this ModelDeploymentConfig.  # noqa: E501
-        :type toleration: Dict[str, str]
+        :param tolerations: The tolerations of this ModelDeploymentConfig.  # noqa: E501
+        :type tolerations: str
         """
         self.swagger_types = {
             'default_docker_pull_conn_name': str,
@@ -50,7 +50,7 @@ class ModelDeploymentConfig(Model):
             'namespace': str,
             'node_selector': Dict[str, str],
             'security': ModelDeploymentSecurityConfig,
-            'toleration': Dict[str, str]
+            'tolerations': str
         }
 
         self.attribute_map = {
@@ -62,7 +62,7 @@ class ModelDeploymentConfig(Model):
             'namespace': 'namespace',
             'node_selector': 'nodeSelector',
             'security': 'security',
-            'toleration': 'toleration'
+            'tolerations': 'tolerations'
         }
 
         self._default_docker_pull_conn_name = default_docker_pull_conn_name
@@ -73,7 +73,7 @@ class ModelDeploymentConfig(Model):
         self._namespace = namespace
         self._node_selector = node_selector
         self._security = security
-        self._toleration = toleration
+        self._tolerations = tolerations
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelDeploymentConfig':
@@ -265,24 +265,24 @@ class ModelDeploymentConfig(Model):
         self._security = security
 
     @property
-    def toleration(self) -> Dict[str, str]:
-        """Gets the toleration of this ModelDeploymentConfig.
+    def tolerations(self) -> str:
+        """Gets the tolerations of this ModelDeploymentConfig.
 
         Kubernetes tolerations for model deployments  # noqa: E501
 
-        :return: The toleration of this ModelDeploymentConfig.
-        :rtype: Dict[str, str]
+        :return: The tolerations of this ModelDeploymentConfig.
+        :rtype: str
         """
-        return self._toleration
+        return self._tolerations
 
-    @toleration.setter
-    def toleration(self, toleration: Dict[str, str]):
-        """Sets the toleration of this ModelDeploymentConfig.
+    @tolerations.setter
+    def tolerations(self, tolerations: str):
+        """Sets the tolerations of this ModelDeploymentConfig.
 
         Kubernetes tolerations for model deployments  # noqa: E501
 
-        :param toleration: The toleration of this ModelDeploymentConfig.
-        :type toleration: Dict[str, str]
+        :param tolerations: The tolerations of this ModelDeploymentConfig.
+        :type tolerations: str
         """
 
-        self._toleration = toleration
+        self._tolerations = tolerations

@@ -2086,7 +2086,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Human readable name",
+                    "description": "Human-readable name",
                     "type": "string"
                 },
                 "url": {
@@ -2153,13 +2153,7 @@ var doc = `{
                 },
                 "tolerations": {
                     "description": "Kubernetes tolerations for model deployments",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "items": {
-                        "type": "object"
-                    },
-                    "type": "array"
+                    "type": "string"
                 }
             }
         },
@@ -2234,13 +2228,7 @@ var doc = `{
                 },
                 "tolerations": {
                     "description": "Kubernetes tolerations for model packaging pods",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "items": {
-                        "type": "object"
-                    },
-                    "type": "array"
+                    "type": "string"
                 }
             }
         },
@@ -2264,13 +2252,7 @@ var doc = `{
                 },
                 "gpuTolerations": {
                     "description": "Kubernetes tolerations for GPU model trainings pods",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "items": {
-                        "type": "object"
-                    },
-                    "type": "array"
+                    "type": "string"
                 },
                 "metricUrl": {
                     "type": "string"
@@ -2300,13 +2282,7 @@ var doc = `{
                 },
                 "tolerations": {
                     "description": "Kubernetes tolerations for model trainings pods",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "items": {
-                        "type": "object"
-                    },
-                    "type": "array"
+                    "type": "string"
                 },
                 "toolchainIntegrationNamespace": {
                     "type": "string"
