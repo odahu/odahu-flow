@@ -1984,6 +1984,10 @@ var doc = `{
                         "$ref": "#/definitions/ExternalUrl"
                     }
                 },
+                "oauthOidcTokenEndpoint": {
+                    "description": "OpenID token url",
+                    "type": "string"
+                },
                 "resourceGpuName": {
                     "description": "Kubernetes can consume the GPU resource in the \u003cvendor\u003e.com/gpu format.\nFor example, amd.com/gpu or nvidia.com/gpu.",
                     "type": "string"

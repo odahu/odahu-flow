@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -15,9 +16,11 @@ class ModelTrainingConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, enabled: bool=None, gpu_node_selector: Dict[str, str]=None, gpu_toleration: Dict[str, str]=None, metric_url: str=None, model_trainer_image: str=None, namespace: str=None, node_selector: Dict[str, str]=None, output_connection_id: str=None, service_account: str=None, timeout: str=None, toleration: Dict[str, str]=None, toolchain_integration_namespace: str=None):  # noqa: E501
+    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, gpu_node_selector: Dict[str, str]=None, gpu_toleration: Dict[str, str]=None, metric_url: str=None, model_trainer_image: str=None, namespace: str=None, node_selector: Dict[str, str]=None, output_connection_id: str=None, service_account: str=None, timeout: str=None, toleration: Dict[str, str]=None, toolchain_integration_namespace: str=None, toolchain_integration_repository_type: str=None):  # noqa: E501
         """ModelTrainingConfig - a model defined in Swagger
 
+        :param default_resources: The default_resources of this ModelTrainingConfig.  # noqa: E501
+        :type default_resources: ResourceRequirements
         :param enabled: The enabled of this ModelTrainingConfig.  # noqa: E501
         :type enabled: bool
         :param gpu_node_selector: The gpu_node_selector of this ModelTrainingConfig.  # noqa: E501
@@ -42,8 +45,11 @@ class ModelTrainingConfig(Model):
         :type toleration: Dict[str, str]
         :param toolchain_integration_namespace: The toolchain_integration_namespace of this ModelTrainingConfig.  # noqa: E501
         :type toolchain_integration_namespace: str
+        :param toolchain_integration_repository_type: The toolchain_integration_repository_type of this ModelTrainingConfig.  # noqa: E501
+        :type toolchain_integration_repository_type: str
         """
         self.swagger_types = {
+            'default_resources': ResourceRequirements,
             'enabled': bool,
             'gpu_node_selector': Dict[str, str],
             'gpu_toleration': Dict[str, str],
@@ -55,10 +61,12 @@ class ModelTrainingConfig(Model):
             'service_account': str,
             'timeout': str,
             'toleration': Dict[str, str],
-            'toolchain_integration_namespace': str
+            'toolchain_integration_namespace': str,
+            'toolchain_integration_repository_type': str
         }
 
         self.attribute_map = {
+            'default_resources': 'defaultResources',
             'enabled': 'enabled',
             'gpu_node_selector': 'gpuNodeSelector',
             'gpu_toleration': 'gpuToleration',
@@ -70,9 +78,11 @@ class ModelTrainingConfig(Model):
             'service_account': 'serviceAccount',
             'timeout': 'timeout',
             'toleration': 'toleration',
-            'toolchain_integration_namespace': 'toolchainIntegrationNamespace'
+            'toolchain_integration_namespace': 'toolchainIntegrationNamespace',
+            'toolchain_integration_repository_type': 'toolchainIntegrationRepositoryType'
         }
 
+        self._default_resources = default_resources
         self._enabled = enabled
         self._gpu_node_selector = gpu_node_selector
         self._gpu_toleration = gpu_toleration
@@ -85,6 +95,7 @@ class ModelTrainingConfig(Model):
         self._timeout = timeout
         self._toleration = toleration
         self._toolchain_integration_namespace = toolchain_integration_namespace
+        self._toolchain_integration_repository_type = toolchain_integration_repository_type
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelTrainingConfig':
@@ -96,6 +107,29 @@ class ModelTrainingConfig(Model):
         :rtype: ModelTrainingConfig
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def default_resources(self) -> ResourceRequirements:
+        """Gets the default_resources of this ModelTrainingConfig.
+
+        Default resources for training pods  # noqa: E501
+
+        :return: The default_resources of this ModelTrainingConfig.
+        :rtype: ResourceRequirements
+        """
+        return self._default_resources
+
+    @default_resources.setter
+    def default_resources(self, default_resources: ResourceRequirements):
+        """Sets the default_resources of this ModelTrainingConfig.
+
+        Default resources for training pods  # noqa: E501
+
+        :param default_resources: The default_resources of this ModelTrainingConfig.
+        :type default_resources: ResourceRequirements
+        """
+
+        self._default_resources = default_resources
 
     @property
     def enabled(self) -> bool:
@@ -358,3 +392,26 @@ class ModelTrainingConfig(Model):
         """
 
         self._toolchain_integration_namespace = toolchain_integration_namespace
+
+    @property
+    def toolchain_integration_repository_type(self) -> str:
+        """Gets the toolchain_integration_repository_type of this ModelTrainingConfig.
+
+        Storage backend for toolchain integrations. Available options:   * kubernetes   * postgres  # noqa: E501
+
+        :return: The toolchain_integration_repository_type of this ModelTrainingConfig.
+        :rtype: str
+        """
+        return self._toolchain_integration_repository_type
+
+    @toolchain_integration_repository_type.setter
+    def toolchain_integration_repository_type(self, toolchain_integration_repository_type: str):
+        """Sets the toolchain_integration_repository_type of this ModelTrainingConfig.
+
+        Storage backend for toolchain integrations. Available options:   * kubernetes   * postgres  # noqa: E501
+
+        :param toolchain_integration_repository_type: The toolchain_integration_repository_type of this ModelTrainingConfig.
+        :type toolchain_integration_repository_type: str
+        """
+
+        self._toolchain_integration_repository_type = toolchain_integration_repository_type
