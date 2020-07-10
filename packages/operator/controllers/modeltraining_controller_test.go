@@ -44,6 +44,17 @@ const (
 
 	modelBuildImage = "model-image:builder"
 	toolchainImage  = "model-image:toolchain"
+
+	gpuTolerationKey      = "gpu-key"
+	gpuTolerationValue    = "gpu-value"
+	gpuTolerationOperator = "gpu-operator"
+	gpuTolerationEffect   = "gpu-effect"
+
+	tolerationKey      = "key"
+	tolerationValue    = "value"
+	tolerationOperator = "operator"
+	tolerationEffect   = "effect"
+
 )
 
 var (
@@ -65,6 +76,25 @@ var (
 			DefaultImage: toolchainImage,
 		},
 	}
+
+	tolerations = []v1.Toleration{
+		{
+			Key:               tolerationKey,
+			Operator:          tolerationOperator,
+			Value:             tolerationValue,
+			Effect:            tolerationEffect,
+		},
+	}
+
+	gpuTolerations = []v1.Toleration{
+		{
+			Key:               gpuTolerationKey,
+			Operator:          gpuTolerationOperator,
+			Value:             gpuTolerationValue,
+			Effect:            gpuTolerationEffect,
+		},
+	}
+
 )
 
 type ModelTrainingControllerSuite struct {
