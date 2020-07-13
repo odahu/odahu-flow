@@ -523,7 +523,7 @@ func (r *ModelDeploymentReconciler) reconcileService(
 	}
 
 	if !odahuflow.ObjsEqualByHash(service, found) {
-		log.Info(fmt.Sprintf("service hashes aren't equal. Update the %s service", service.Name))
+		log.Info(fmt.Sprintf("Service hashes aren't equal. Update the %s service", service.Name))
 
 		// ClusterIP must not change
 		clusterIP := found.Spec.ClusterIP
