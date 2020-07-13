@@ -600,7 +600,7 @@ func (r *ModelDeploymentReconciler) reconcileEndpoints(
 	}
 
 	if !odahuflow.ObjsEqualByHash(endpoints, found) {
-		log.Info(fmt.Sprintf("endpoints hashes aren't equal. Update the %s endpoints", endpoints.Name))
+		log.Info(fmt.Sprintf("Endpoints hashes aren't equal. Update the %s endpoints", endpoints.Name))
 
 		found.Subsets = endpoints.Subsets
 
