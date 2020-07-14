@@ -16,26 +16,41 @@ class CommonConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, external_urls: List[ExternalUrl]=None, resource_gpu_name: str=None):  # noqa: E501
+    def __init__(self, database_connection_string: str=None, external_urls: List[ExternalUrl]=None, oauth_oidc_token_endpoint: str=None, resource_gpu_name: str=None, version: str=None):  # noqa: E501
         """CommonConfig - a model defined in Swagger
 
+        :param database_connection_string: The database_connection_string of this CommonConfig.  # noqa: E501
+        :type database_connection_string: str
         :param external_urls: The external_urls of this CommonConfig.  # noqa: E501
         :type external_urls: List[ExternalUrl]
+        :param oauth_oidc_token_endpoint: The oauth_oidc_token_endpoint of this CommonConfig.  # noqa: E501
+        :type oauth_oidc_token_endpoint: str
         :param resource_gpu_name: The resource_gpu_name of this CommonConfig.  # noqa: E501
         :type resource_gpu_name: str
+        :param version: The version of this CommonConfig.  # noqa: E501
+        :type version: str
         """
         self.swagger_types = {
+            'database_connection_string': str,
             'external_urls': List[ExternalUrl],
-            'resource_gpu_name': str
+            'oauth_oidc_token_endpoint': str,
+            'resource_gpu_name': str,
+            'version': str
         }
 
         self.attribute_map = {
+            'database_connection_string': 'databaseConnectionString',
             'external_urls': 'externalUrls',
-            'resource_gpu_name': 'resourceGpuName'
+            'oauth_oidc_token_endpoint': 'oauthOidcTokenEndpoint',
+            'resource_gpu_name': 'resourceGpuName',
+            'version': 'version'
         }
 
+        self._database_connection_string = database_connection_string
         self._external_urls = external_urls
+        self._oauth_oidc_token_endpoint = oauth_oidc_token_endpoint
         self._resource_gpu_name = resource_gpu_name
+        self._version = version
 
     @classmethod
     def from_dict(cls, dikt) -> 'CommonConfig':
@@ -47,6 +62,29 @@ class CommonConfig(Model):
         :rtype: CommonConfig
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def database_connection_string(self) -> str:
+        """Gets the database_connection_string of this CommonConfig.
+
+        Database connection string  # noqa: E501
+
+        :return: The database_connection_string of this CommonConfig.
+        :rtype: str
+        """
+        return self._database_connection_string
+
+    @database_connection_string.setter
+    def database_connection_string(self, database_connection_string: str):
+        """Sets the database_connection_string of this CommonConfig.
+
+        Database connection string  # noqa: E501
+
+        :param database_connection_string: The database_connection_string of this CommonConfig.
+        :type database_connection_string: str
+        """
+
+        self._database_connection_string = database_connection_string
 
     @property
     def external_urls(self) -> List[ExternalUrl]:
@@ -72,6 +110,29 @@ class CommonConfig(Model):
         self._external_urls = external_urls
 
     @property
+    def oauth_oidc_token_endpoint(self) -> str:
+        """Gets the oauth_oidc_token_endpoint of this CommonConfig.
+
+        OpenID token url  # noqa: E501
+
+        :return: The oauth_oidc_token_endpoint of this CommonConfig.
+        :rtype: str
+        """
+        return self._oauth_oidc_token_endpoint
+
+    @oauth_oidc_token_endpoint.setter
+    def oauth_oidc_token_endpoint(self, oauth_oidc_token_endpoint: str):
+        """Sets the oauth_oidc_token_endpoint of this CommonConfig.
+
+        OpenID token url  # noqa: E501
+
+        :param oauth_oidc_token_endpoint: The oauth_oidc_token_endpoint of this CommonConfig.
+        :type oauth_oidc_token_endpoint: str
+        """
+
+        self._oauth_oidc_token_endpoint = oauth_oidc_token_endpoint
+
+    @property
     def resource_gpu_name(self) -> str:
         """Gets the resource_gpu_name of this CommonConfig.
 
@@ -93,3 +154,26 @@ class CommonConfig(Model):
         """
 
         self._resource_gpu_name = resource_gpu_name
+
+    @property
+    def version(self) -> str:
+        """Gets the version of this CommonConfig.
+
+        Version of ODAHU platform  # noqa: E501
+
+        :return: The version of this CommonConfig.
+        :rtype: str
+        """
+        return self._version
+
+    @version.setter
+    def version(self, version: str):
+        """Sets the version of this CommonConfig.
+
+        Version of ODAHU platform  # noqa: E501
+
+        :param version: The version of this CommonConfig.
+        :type version: str
+        """
+
+        self._version = version

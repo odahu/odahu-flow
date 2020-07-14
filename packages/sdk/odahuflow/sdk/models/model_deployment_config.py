@@ -9,6 +9,7 @@ from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.edge_config import EdgeConfig  # noqa: F401,E501
 from odahuflow.sdk.models.model_deployment_istio_config import ModelDeploymentIstioConfig  # noqa: F401,E501
 from odahuflow.sdk.models.model_deployment_security_config import ModelDeploymentSecurityConfig  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -18,11 +19,13 @@ class ModelDeploymentConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_docker_pull_conn_name: str=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_selector: Dict[str, str]=None, security: ModelDeploymentSecurityConfig=None, toleration: Dict[str, str]=None):  # noqa: E501
+    def __init__(self, default_docker_pull_conn_name: str=None, default_resources: ResourceRequirements=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_selector: Dict[str, str]=None, security: ModelDeploymentSecurityConfig=None, toleration: Dict[str, str]=None):  # noqa: E501
         """ModelDeploymentConfig - a model defined in Swagger
 
         :param default_docker_pull_conn_name: The default_docker_pull_conn_name of this ModelDeploymentConfig.  # noqa: E501
         :type default_docker_pull_conn_name: str
+        :param default_resources: The default_resources of this ModelDeploymentConfig.  # noqa: E501
+        :type default_resources: ResourceRequirements
         :param edge: The edge of this ModelDeploymentConfig.  # noqa: E501
         :type edge: EdgeConfig
         :param enabled: The enabled of this ModelDeploymentConfig.  # noqa: E501
@@ -40,6 +43,7 @@ class ModelDeploymentConfig(Model):
         """
         self.swagger_types = {
             'default_docker_pull_conn_name': str,
+            'default_resources': ResourceRequirements,
             'edge': EdgeConfig,
             'enabled': bool,
             'istio': ModelDeploymentIstioConfig,
@@ -51,6 +55,7 @@ class ModelDeploymentConfig(Model):
 
         self.attribute_map = {
             'default_docker_pull_conn_name': 'defaultDockerPullConnName',
+            'default_resources': 'defaultResources',
             'edge': 'edge',
             'enabled': 'enabled',
             'istio': 'istio',
@@ -61,6 +66,7 @@ class ModelDeploymentConfig(Model):
         }
 
         self._default_docker_pull_conn_name = default_docker_pull_conn_name
+        self._default_resources = default_resources
         self._edge = edge
         self._enabled = enabled
         self._istio = istio
@@ -102,6 +108,29 @@ class ModelDeploymentConfig(Model):
         """
 
         self._default_docker_pull_conn_name = default_docker_pull_conn_name
+
+    @property
+    def default_resources(self) -> ResourceRequirements:
+        """Gets the default_resources of this ModelDeploymentConfig.
+
+        Default resources for deployment pods  # noqa: E501
+
+        :return: The default_resources of this ModelDeploymentConfig.
+        :rtype: ResourceRequirements
+        """
+        return self._default_resources
+
+    @default_resources.setter
+    def default_resources(self, default_resources: ResourceRequirements):
+        """Sets the default_resources of this ModelDeploymentConfig.
+
+        Default resources for deployment pods  # noqa: E501
+
+        :param default_resources: The default_resources of this ModelDeploymentConfig.
+        :type default_resources: ResourceRequirements
+        """
+
+        self._default_resources = default_resources
 
     @property
     def edge(self) -> EdgeConfig:

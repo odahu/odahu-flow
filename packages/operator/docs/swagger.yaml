@@ -63,6 +63,9 @@ definitions:
         items:
           $ref: '#/definitions/ExternalUrl'
         type: array
+      oauthOidcTokenEndpoint:
+        description: OpenID token url
+        type: string
       resourceGpuName:
         description: |-
           Kubernetes can consume the GPU resource in the <vendor>.com/gpu format.

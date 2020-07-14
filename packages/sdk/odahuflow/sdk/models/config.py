@@ -26,7 +26,7 @@ class Config(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, api: APIConfig=None, common: CommonConfig=None, connection: ConnectionConfig=None, deployment: ModelDeploymentConfig=None, operator: OperatorConfig=None, packager: PackagerConfig=None, packaging: ModelPackagingConfig=None, service_catalog: ServiceCatalog=None, trainer: TrainerConfig=None, training: ModelTrainingConfig=None, user: UserConfig=None):  # noqa: E501
+    def __init__(self, api: APIConfig=None, common: CommonConfig=None, connection: ConnectionConfig=None, deployment: ModelDeploymentConfig=None, operator: OperatorConfig=None, packager: PackagerConfig=None, packaging: ModelPackagingConfig=None, service_catalog: ServiceCatalog=None, trainer: TrainerConfig=None, training: ModelTrainingConfig=None, users: UserConfig=None):  # noqa: E501
         """Config - a model defined in Swagger
 
         :param api: The api of this Config.  # noqa: E501
@@ -49,8 +49,8 @@ class Config(Model):
         :type trainer: TrainerConfig
         :param training: The training of this Config.  # noqa: E501
         :type training: ModelTrainingConfig
-        :param user: The user of this Config.  # noqa: E501
-        :type user: UserConfig
+        :param users: The users of this Config.  # noqa: E501
+        :type users: UserConfig
         """
         self.swagger_types = {
             'api': APIConfig,
@@ -63,7 +63,7 @@ class Config(Model):
             'service_catalog': ServiceCatalog,
             'trainer': TrainerConfig,
             'training': ModelTrainingConfig,
-            'user': UserConfig
+            'users': UserConfig
         }
 
         self.attribute_map = {
@@ -77,7 +77,7 @@ class Config(Model):
             'service_catalog': 'serviceCatalog',
             'trainer': 'trainer',
             'training': 'training',
-            'user': 'user'
+            'users': 'users'
         }
 
         self._api = api
@@ -90,7 +90,7 @@ class Config(Model):
         self._service_catalog = service_catalog
         self._trainer = trainer
         self._training = training
-        self._user = user
+        self._users = users
 
     @classmethod
     def from_dict(cls, dikt) -> 'Config':
@@ -314,22 +314,22 @@ class Config(Model):
         self._training = training
 
     @property
-    def user(self) -> UserConfig:
-        """Gets the user of this Config.
+    def users(self) -> UserConfig:
+        """Gets the users of this Config.
 
 
-        :return: The user of this Config.
+        :return: The users of this Config.
         :rtype: UserConfig
         """
-        return self._user
+        return self._users
 
-    @user.setter
-    def user(self, user: UserConfig):
-        """Sets the user of this Config.
+    @users.setter
+    def users(self, users: UserConfig):
+        """Sets the users of this Config.
 
 
-        :param user: The user of this Config.
-        :type user: UserConfig
+        :param users: The users of this Config.
+        :type users: UserConfig
         """
 
-        self._user = user
+        self._users = users
