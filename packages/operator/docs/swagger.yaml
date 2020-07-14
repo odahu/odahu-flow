@@ -143,7 +143,7 @@ definitions:
           for example the logo of Grafana
         type: string
       name:
-        description: Human readable name
+        description: Human-readable name
         type: string
       url:
         description: Link to a resource
@@ -191,11 +191,9 @@ definitions:
       security:
         $ref: '#/definitions/ModelDeploymentSecurityConfig'
         type: object
-      toleration:
-        additionalProperties:
-          type: string
+      tolerations:
         description: Kubernetes tolerations for model deployments
-        type: object
+        type: string
     type: object
   ModelDeploymentIstioConfig:
     properties:
@@ -249,11 +247,9 @@ definitions:
       timeout:
         description: Timeout for full training process
         type: string
-      toleration:
-        additionalProperties:
-          type: string
+      tolerations:
         description: Kubernetes tolerations for model packaging pods
-        type: object
+        type: string
     type: object
   ModelTrainingConfig:
     properties:
@@ -268,11 +264,9 @@ definitions:
         additionalProperties:
           type: string
         type: object
-      gpuToleration:
-        additionalProperties:
-          type: string
+      gpuTolerations:
         description: Kubernetes tolerations for GPU model trainings pods
-        type: object
+        type: string
       metricUrl:
         type: string
       modelTrainerImage:
@@ -291,11 +285,9 @@ definitions:
       timeout:
         description: Timeout for full training process
         type: string
-      toleration:
-        additionalProperties:
-          type: string
+      tolerations:
         description: Kubernetes tolerations for model trainings pods
-        type: object
+        type: string
       toolchainIntegrationNamespace:
         type: string
       toolchainIntegrationRepositoryType:

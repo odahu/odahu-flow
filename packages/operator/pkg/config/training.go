@@ -1,5 +1,5 @@
 //
-//    Copyright 2019 EPAM Systems
+//    Copyright 2020 EPAM Systems
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ package config
 
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	"os"
 	"time"
 )
 
 var (
 	defaultTrainingMemoryLimit    = "256Mi"
-	defaultTrainingCPULimit       = "256m"
+	defaultTrainingCPULimit       = "250m"
 	defaultTrainingMemoryRequests = "128Mi"
-	defaultTrainingCPURequests    = "128m"
+	defaultTrainingCPURequests    = "125m"
 )
 
 type ModelTrainingConfig struct {
@@ -39,12 +40,12 @@ type ModelTrainingConfig struct {
 	OutputConnectionID string            `json:"outputConnectionID"`
 	NodeSelector       map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model trainings pods
-	Toleration      map[string]string `json:"toleration"`
-	GPUNodeSelector map[string]string `json:"gpuNodeSelector"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+	GPUNodeSelector    map[string]string `json:"gpuNodeSelector"`
 	// Kubernetes tolerations for GPU model trainings pods
-	GPUToleration     map[string]string `json:"gpuToleration"`
-	MetricURL         string            `json:"metricUrl"`
-	ModelTrainerImage string            `json:"modelTrainerImage"`
+	GPUTolerations []corev1.Toleration `json:"gpuTolerations,omitempty"`
+	MetricURL          string            `json:"metricUrl"`
+	ModelTrainerImage  string            `json:"modelTrainerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for training pods

@@ -159,7 +159,7 @@ func TestModelPackagingControllerSuite(t *testing.T) {
 func (s *ModelPackagingControllerSuite) templateNodeSelectorTest(
 	mpResources *odahuflowv1alpha1.ResourceRequirements,
 	expectedNodeSelector map[string]string,
-	expectedToleration []v1.Toleration,
+	expectedTolerations []v1.Toleration,
 ) {
 	mp := &odahuflowv1alpha1.ModelPackaging{
 		ObjectMeta: metav1.ObjectMeta{
@@ -186,7 +186,7 @@ func (s *ModelPackagingControllerSuite) templateNodeSelectorTest(
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
 	s.g.Expect(tr.Spec.PodTemplate.NodeSelector).Should(Equal(expectedNodeSelector))
-	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedToleration))
+	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedTolerations))
 }
 
 func (s *ModelPackagingControllerSuite) TestEmptyNodePools() {
@@ -207,7 +207,7 @@ func (s *ModelPackagingControllerSuite) TestEmptyNodePools() {
 func (s *ModelPackagingControllerSuite) TestNodePools() {
 	packagingConfig := config.NewDefaultModelPackagingConfig()
 	packagingConfig.NodeSelector = nodeSelector
-	packagingConfig.Toleration = toleration
+	packagingConfig.Tolerations = tolerations
 	s.initReconciler(packagingConfig)
 
 	s.templateNodeSelectorTest(
@@ -217,12 +217,7 @@ func (s *ModelPackagingControllerSuite) TestNodePools() {
 			},
 		},
 		nodeSelector,
-		[]v1.Toleration{{
-			Key:      tolerationKey,
-			Operator: tolerationOperator,
-			Value:    tolerationValue,
-			Effect:   tolerationEffect,
-		}},
+		tolerations,
 	)
 }
 
@@ -308,7 +303,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 			s.g.Expect(step.Image).Should(Equal(modelPackageImage))
 			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		default:
-			s.T().Errorf("Unexpected spep name: %s", step.Name)
+			s.T().Errorf("Unexpected step name: %s", step.Name)
 		}
 	}
 }

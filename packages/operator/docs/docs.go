@@ -2086,7 +2086,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Human readable name",
+                    "description": "Human-readable name",
                     "type": "string"
                 },
                 "url": {
@@ -2151,12 +2151,9 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/ModelDeploymentSecurityConfig"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model deployments",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 }
             }
         },
@@ -2229,12 +2226,9 @@ var doc = `{
                     "description": "Timeout for full training process",
                     "type": "string"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model packaging pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 }
             }
         },
@@ -2256,12 +2250,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "gpuToleration": {
+                "gpuTolerations": {
                     "description": "Kubernetes tolerations for GPU model trainings pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "metricUrl": {
                     "type": "string"
@@ -2289,12 +2280,9 @@ var doc = `{
                     "description": "Timeout for full training process",
                     "type": "string"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model trainings pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "toolchainIntegrationNamespace": {
                     "type": "string"

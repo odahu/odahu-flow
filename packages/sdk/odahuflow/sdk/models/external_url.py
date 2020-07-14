@@ -79,7 +79,7 @@ class ExternalUrl(Model):
     def name(self) -> str:
         """Gets the name of this ExternalUrl.
 
-        Human readable name  # noqa: E501
+        Human-readable name  # noqa: E501
 
         :return: The name of this ExternalUrl.
         :rtype: str
@@ -90,7 +90,7 @@ class ExternalUrl(Model):
     def name(self, name: str):
         """Sets the name of this ExternalUrl.
 
-        Human readable name  # noqa: E501
+        Human-readable name  # noqa: E501
 
         :param name: The name of this ExternalUrl.
         :type name: str

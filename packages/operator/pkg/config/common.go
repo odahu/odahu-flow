@@ -26,7 +26,7 @@ const (
 type RepositoryType string
 
 type ExternalUrl struct {
-	// Human readable name
+	// Human-readable name
 	Name string `json:"name"`
 	// Link to a resource
 	URL string `json:"url"`

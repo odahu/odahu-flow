@@ -16,7 +16,7 @@ class ModelPackagingConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, model_packager_image: str=None, namespace: str=None, node_selector: Dict[str, str]=None, output_connection_id: str=None, packager_integration_namespace: str=None, packaging_integration_repository_type: str=None, service_account: str=None, timeout: str=None, toleration: Dict[str, str]=None):  # noqa: E501
+    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, model_packager_image: str=None, namespace: str=None, node_selector: Dict[str, str]=None, output_connection_id: str=None, packager_integration_namespace: str=None, packaging_integration_repository_type: str=None, service_account: str=None, timeout: str=None, tolerations: str=None):  # noqa: E501
         """ModelPackagingConfig - a model defined in Swagger
 
         :param default_resources: The default_resources of this ModelPackagingConfig.  # noqa: E501
@@ -39,8 +39,8 @@ class ModelPackagingConfig(Model):
         :type service_account: str
         :param timeout: The timeout of this ModelPackagingConfig.  # noqa: E501
         :type timeout: str
-        :param toleration: The toleration of this ModelPackagingConfig.  # noqa: E501
-        :type toleration: Dict[str, str]
+        :param tolerations: The tolerations of this ModelPackagingConfig.  # noqa: E501
+        :type tolerations: str
         """
         self.swagger_types = {
             'default_resources': ResourceRequirements,
@@ -53,7 +53,7 @@ class ModelPackagingConfig(Model):
             'packaging_integration_repository_type': str,
             'service_account': str,
             'timeout': str,
-            'toleration': Dict[str, str]
+            'tolerations': str
         }
 
         self.attribute_map = {
@@ -67,7 +67,7 @@ class ModelPackagingConfig(Model):
             'packaging_integration_repository_type': 'packagingIntegrationRepositoryType',
             'service_account': 'serviceAccount',
             'timeout': 'timeout',
-            'toleration': 'toleration'
+            'tolerations': 'tolerations'
         }
 
         self._default_resources = default_resources
@@ -80,7 +80,7 @@ class ModelPackagingConfig(Model):
         self._packaging_integration_repository_type = packaging_integration_repository_type
         self._service_account = service_account
         self._timeout = timeout
-        self._toleration = toleration
+        self._tolerations = tolerations
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelPackagingConfig':
@@ -316,24 +316,24 @@ class ModelPackagingConfig(Model):
         self._timeout = timeout
 
     @property
-    def toleration(self) -> Dict[str, str]:
-        """Gets the toleration of this ModelPackagingConfig.
+    def tolerations(self) -> str:
+        """Gets the tolerations of this ModelPackagingConfig.
 
         Kubernetes tolerations for model packaging pods  # noqa: E501
 
-        :return: The toleration of this ModelPackagingConfig.
-        :rtype: Dict[str, str]
+        :return: The tolerations of this ModelPackagingConfig.
+        :rtype: str
         """
-        return self._toleration
+        return self._tolerations
 
-    @toleration.setter
-    def toleration(self, toleration: Dict[str, str]):
-        """Sets the toleration of this ModelPackagingConfig.
+    @tolerations.setter
+    def tolerations(self, tolerations: str):
+        """Sets the tolerations of this ModelPackagingConfig.
 
         Kubernetes tolerations for model packaging pods  # noqa: E501
 
-        :param toleration: The toleration of this ModelPackagingConfig.
-        :type toleration: Dict[str, str]
+        :param tolerations: The tolerations of this ModelPackagingConfig.
+        :type tolerations: str
         """
 
-        self._toleration = toleration
+        self._tolerations = tolerations
