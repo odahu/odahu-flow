@@ -642,7 +642,7 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 	lastKnativeRevisionGenerationStr, ok := lastKnativeRevision.Labels[serving.ConfigurationGenerationLabelKey]
 	if !ok {
 		return fmt.Errorf(
-			"Cannot get the latest knative revision generation: %s",
+			"cannot get the latest knative revision generation: %s",
 			lastKnativeRevisionGenerationStr,
 		)
 	}
@@ -690,7 +690,7 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 
 		krGenerationStr, ok := kr.Labels[serving.ConfigurationGenerationLabelKey]
 		if !ok {
-			return fmt.Errorf("Cannot get the latest knative revision generation: %s", kr.Name)
+			return fmt.Errorf("cannot get the latest knative revision generation: %s", kr.Name)
 		}
 
 		krGeneration, err := strconv.Atoi(krGenerationStr)
