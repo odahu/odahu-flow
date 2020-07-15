@@ -9,6 +9,7 @@ Library             DateTime
 Library             odahuflow.robot.libraries.k8s.K8s  ${ODAHUFLOW_NAMESPACE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.process.Process
+Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 
 *** Keywords ***
 Shell
@@ -48,6 +49,7 @@ Run API deploy from model packaging
 
     ${res}=  StrictShell  odahuflowctl pack get --id ${mp_name} -o 'jsonpath=$[0].status.results[0].value'
     StrictShell  odahuflowctl --verbose dep create --id ${md_name} -f ${res_file} --image ${res.stdout}
+    report model deployment pods  ${md_name}
 
 Run API apply from model packaging
     [Arguments]  ${mp_name}  ${md_name}  ${res_file}  ${role_name}=${EMPTY}
@@ -135,12 +137,16 @@ Cleanup example resources
 Run example model
     [Arguments]  ${example_id}  ${manifests_dir}
     StrictShell  odahuflowctl --verbose train create -f ${manifests_dir}/training.odahuflow.yaml --id ${example_id}
+    report training pods  ${example_id}
+
     ${res}=  StrictShell  odahuflowctl train get --id ${example_id} -o 'jsonpath=$[0].status.artifacts[0].artifactName'
 
     StrictShell  odahuflowctl --verbose pack create -f ${manifests_dir}/packaging.odahuflow.yaml --artifact-name ${res.stdout} --id ${example_id}
+    report packaging pods  ${example_id}
     ${res}=  StrictShell  odahuflowctl pack get --id ${example_id} -o 'jsonpath=$[0].status.results[0].value'
 
     StrictShell  odahuflowctl --verbose dep create -f ${manifests_dir}/deployment.odahuflow.yaml --image ${res.stdout} --id ${example_id}
+    report model deployment pods  ${md_name}
 
     Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --mr ${example_id}
     Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --mr ${example_id} --json-file ${manifests_dir}/request.json
