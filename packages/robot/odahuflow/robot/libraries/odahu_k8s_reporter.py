@@ -69,7 +69,7 @@ class OdahuKubeReporter:
 
         mt_pod = model_training.get('status', {}).get('podName', '')
         if not mt_pod:
-            report += f'Training pod: unable to fetch pod name from model training status\n'
+            report += 'Training pod: unable to fetch pod name from model training status\n'
             return report
 
         try:
@@ -99,7 +99,7 @@ class OdahuKubeReporter:
 
         mt_pod = model_packaging.get('status', {}).get('podName', '')
         if not mt_pod:
-            report += f'Packaging pod: unable to fetch pod name from model packaging status\n'
+            report += 'Packaging pod: unable to fetch pod name from model packaging status\n'
             return report
 
         try:
