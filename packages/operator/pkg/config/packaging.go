@@ -1,5 +1,5 @@
 //
-//    Copyright 2019 EPAM Systems
+//    Copyright 2020 EPAM Systems
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ package config
 
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	"os"
 	"time"
 )
 
 var (
-	defaultPackagingMemoryLimit    = "2028Mi"
-	defaultPackagingCPULimit       = "2000m"
-	defaultPackagingMemoryRequests = "1024Mi"
-	defaultPackagingCPURequests    = "1000m"
+	defaultPackagingMemoryLimit    = "2Gi"
+	defaultPackagingCPULimit       = "2"
+	defaultPackagingMemoryRequests = "1Gi"
+	defaultPackagingCPURequests    = "1"
 )
 
 type ModelPackagingConfig struct {
@@ -40,8 +41,8 @@ type ModelPackagingConfig struct {
 	// Kubernetes node selectors for model packaging pods
 	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model packaging pods
-	Toleration         map[string]string `json:"toleration"`
-	ModelPackagerImage string            `json:"modelPackagerImage"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+	ModelPackagerImage string `json:"modelPackagerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for packaging pods

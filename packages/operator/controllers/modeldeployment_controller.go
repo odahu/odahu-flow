@@ -176,7 +176,7 @@ func (r *ModelDeploymentReconciler) ReconcileModelRoute(
 	}
 
 	if !odahuflow.ObjsEqualByHash(modelRoute, found) {
-		log.Info(fmt.Sprintf("Model Route hashes don't equal. Update the %s Model route", modelRoute.Name))
+		log.Info(fmt.Sprintf("Model Route hashes aren't equal. Update the %s Model route", modelRoute.Name))
 
 		found.Spec = modelRoute.Spec
 		found.ObjectMeta.Annotations = modelRoute.ObjectMeta.Annotations
@@ -271,7 +271,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 
 	if !odahuflow.ObjsEqualByHash(knativeConfiguration, found) {
 		log.Info(fmt.Sprintf(
-			"Knative Configuration hashes don't equal. Update the %s Knative Configuration",
+			"Knative Configuration hashes aren't equal. Update the %s Knative Configuration",
 			knativeConfiguration.Name,
 		))
 
@@ -409,7 +409,7 @@ func (r *ModelDeploymentReconciler) reconcileAuthPolicy(
 
 	if !odahuflow.ObjsEqualByHash(envoyAuthFilter, found) {
 		log.Info(fmt.Sprintf(
-			"Istio Auth Policy hashes don't equal. Update the %s Model route", envoyAuthFilter.Name,
+			"Istio Auth Policy hashes aren't equal. Update the %s Model route", envoyAuthFilter.Name,
 		))
 
 		found.Spec = envoyAuthFilter.Spec
@@ -523,7 +523,7 @@ func (r *ModelDeploymentReconciler) reconcileService(
 	}
 
 	if !odahuflow.ObjsEqualByHash(service, found) {
-		log.Info(fmt.Sprintf("service hashes don't equal. Update the %s service", service.Name))
+		log.Info(fmt.Sprintf("Service hashes aren't equal. Update the %s service", service.Name))
 
 		// ClusterIP must not change
 		clusterIP := found.Spec.ClusterIP
@@ -564,7 +564,7 @@ func (r *ModelDeploymentReconciler) reconcileEndpoints(
 		Namespace: modelDeploymentCR.Namespace,
 		Name:      lastRevisionName,
 	}, knativeEndpoints); err != nil {
-		log.Error(err, "Can not get the knative endpoints endpoints",
+		log.Error(err, "Cannot get the knative endpoints endpoints",
 			"last revision name", lastRevisionName)
 
 		return err
@@ -600,7 +600,7 @@ func (r *ModelDeploymentReconciler) reconcileEndpoints(
 	}
 
 	if !odahuflow.ObjsEqualByHash(endpoints, found) {
-		log.Info(fmt.Sprintf("endpoints hashes don't equal. Update the %s endpoints", endpoints.Name))
+		log.Info(fmt.Sprintf("Endpoints hashes aren't equal. Update the %s endpoints", endpoints.Name))
 
 		found.Subsets = endpoints.Subsets
 
@@ -642,7 +642,7 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 	lastKnativeRevisionGenerationStr, ok := lastKnativeRevision.Labels[serving.ConfigurationGenerationLabelKey]
 	if !ok {
 		return fmt.Errorf(
-			"can not get the lastest knative revision generation: %s",
+			"cannot get the latest knative revision generation: %s",
 			lastKnativeRevisionGenerationStr,
 		)
 	}
@@ -690,7 +690,7 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 
 		krGenerationStr, ok := kr.Labels[serving.ConfigurationGenerationLabelKey]
 		if !ok {
-			return fmt.Errorf("can not get the lastest knative revision generation: %s", kr.Name)
+			return fmt.Errorf("cannot get the latest knative revision generation: %s", kr.Name)
 		}
 
 		krGeneration, err := strconv.Atoi(krGenerationStr)

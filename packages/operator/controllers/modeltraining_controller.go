@@ -244,22 +244,12 @@ func (r *ModelTrainingReconciler) getNodeSelector(trainingCR *odahuflowv1alpha1.
 }
 
 func (r *ModelTrainingReconciler) getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
-	tolerations := []corev1.Toleration{}
+	var tolerations []corev1.Toleration
 
-	var tolerationConf map[string]string
 	if isGPUResourceSet(trainingCR) {
-		tolerationConf = r.trainingConfig.GPUToleration
+		tolerations = r.trainingConfig.GPUTolerations
 	} else {
-		tolerationConf = r.trainingConfig.Toleration
-	}
-
-	if len(tolerationConf) != 0 {
-		tolerations = append(tolerations, corev1.Toleration{
-			Key:      tolerationConf[config.TolerationKey],
-			Operator: corev1.TolerationOperator(tolerationConf[config.TolerationOperator]),
-			Value:    tolerationConf[config.TolerationValue],
-			Effect:   corev1.TaintEffect(tolerationConf[config.TolerationEffect]),
-		})
+		tolerations = r.trainingConfig.Tolerations
 	}
 
 	return tolerations
@@ -405,13 +395,13 @@ func (r *ModelTrainingReconciler) Reconcile(request reconcile.Request) (reconcil
 
 	// The configmap is used to save a training result.
 	if err := r.createResultConfigMap(trainingCR); err != nil {
-		log.Error(err, "Can not create result config map")
+		log.Error(err, "Cannot create result config map")
 
 		return reconcile.Result{}, err
 	}
 
 	if taskRun, err := r.reconcileTaskRun(trainingCR); err != nil {
-		log.Error(err, "Can not synchronize desired K8S instances state to cluster")
+		log.Error(err, "Cannot synchronize desired K8S instances state to cluster")
 
 		return reconcile.Result{}, err
 	} else if err := r.syncCrdState(taskRun, trainingCR); err != nil {

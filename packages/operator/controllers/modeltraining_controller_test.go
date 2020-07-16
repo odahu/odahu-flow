@@ -42,6 +42,9 @@ const (
 	mtName                     = "test-mt"
 	testToolchainIntegrationID = "ti"
 
+	modelBuildImage = "model-image:builder"
+	toolchainImage  = "model-image:toolchain"
+
 	gpuTolerationKey      = "gpu-key"
 	gpuTolerationValue    = "gpu-value"
 	gpuTolerationOperator = "gpu-operator"
@@ -52,8 +55,6 @@ const (
 	tolerationOperator = "operator"
 	tolerationEffect   = "effect"
 
-	modelBuildImage = "model-image:builder"
-	toolchainImage  = "model-image:toolchain"
 )
 
 var (
@@ -75,18 +76,25 @@ var (
 			DefaultImage: toolchainImage,
 		},
 	}
-	toleration = map[string]string{
-		config.TolerationKey:      tolerationKey,
-		config.TolerationValue:    tolerationValue,
-		config.TolerationOperator: tolerationOperator,
-		config.TolerationEffect:   tolerationEffect,
+
+	tolerations = []v1.Toleration{
+		{
+			Key:               tolerationKey,
+			Operator:          tolerationOperator,
+			Value:             tolerationValue,
+			Effect:            tolerationEffect,
+		},
 	}
-	gpuToleration = map[string]string{
-		config.TolerationKey:      gpuTolerationKey,
-		config.TolerationValue:    gpuTolerationValue,
-		config.TolerationOperator: gpuTolerationOperator,
-		config.TolerationEffect:   gpuTolerationEffect,
+
+	gpuTolerations = []v1.Toleration{
+		{
+			Key:               gpuTolerationKey,
+			Operator:          gpuTolerationOperator,
+			Value:             gpuTolerationValue,
+			Effect:            gpuTolerationEffect,
+		},
 	}
+
 )
 
 type ModelTrainingControllerSuite struct {
@@ -155,7 +163,7 @@ func TestModelTrainingControllerSuite(t *testing.T) {
 func (s *ModelTrainingControllerSuite) templateNodeSelectorTest(
 	mtResources *odahuflowv1alpha1.ResourceRequirements,
 	expectedNodeSelector map[string]string,
-	expectedToleration []v1.Toleration,
+	expectedTolerations []v1.Toleration,
 ) {
 	mt := &odahuflowv1alpha1.ModelTraining{
 		ObjectMeta: metav1.ObjectMeta{
@@ -182,7 +190,7 @@ func (s *ModelTrainingControllerSuite) templateNodeSelectorTest(
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
 	s.g.Expect(tr.Spec.PodTemplate.NodeSelector).Should(Equal(expectedNodeSelector))
-	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedToleration))
+	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedTolerations))
 }
 
 func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
@@ -203,7 +211,7 @@ func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
 func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.GPUNodeSelector = map[string]string{}
-	trainingConfig.GPUToleration = map[string]string{}
+	trainingConfig.GPUTolerations = []v1.Toleration{}
 	s.initReconciler(trainingConfig)
 
 	s.templateNodeSelectorTest(
@@ -220,7 +228,7 @@ func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
 func (s *ModelTrainingControllerSuite) TestGPUNodePools() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	trainingConfig.GPUToleration = gpuToleration
+	trainingConfig.GPUTolerations = gpuTolerations
 	s.initReconciler(trainingConfig)
 
 	s.templateNodeSelectorTest(
@@ -230,12 +238,7 @@ func (s *ModelTrainingControllerSuite) TestGPUNodePools() {
 			},
 		},
 		gpuNodeSelector,
-		[]v1.Toleration{{
-			Key:      gpuTolerationKey,
-			Operator: gpuTolerationOperator,
-			Value:    gpuTolerationValue,
-			Effect:   gpuTolerationEffect,
-		}},
+		gpuTolerations,
 	)
 }
 
@@ -273,7 +276,7 @@ func (s *ModelTrainingControllerSuite) TestEmptyNodePools() {
 func (s *ModelTrainingControllerSuite) TestNodePools() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.Toleration = toleration
+	trainingConfig.Tolerations = tolerations
 	s.initReconciler(trainingConfig)
 
 	s.templateNodeSelectorTest(
@@ -283,12 +286,7 @@ func (s *ModelTrainingControllerSuite) TestNodePools() {
 			},
 		},
 		nodeSelector,
-		[]v1.Toleration{{
-			Key:      tolerationKey,
-			Operator: tolerationOperator,
-			Value:    tolerationValue,
-			Effect:   tolerationEffect,
-		}},
+		tolerations,
 	)
 }
 
@@ -313,8 +311,8 @@ func (s *ModelTrainingControllerSuite) TestGPUandCPUNodePools() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.NodeSelector = nodeSelector
 	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	trainingConfig.Toleration = toleration
-	trainingConfig.GPUToleration = gpuToleration
+	trainingConfig.Tolerations = tolerations
+	trainingConfig.GPUTolerations = gpuTolerations
 	s.initReconciler(trainingConfig)
 
 	s.templateNodeSelectorTest(
@@ -325,12 +323,7 @@ func (s *ModelTrainingControllerSuite) TestGPUandCPUNodePools() {
 			},
 		},
 		gpuNodeSelector,
-		[]v1.Toleration{{
-			Key:      gpuTolerationKey,
-			Operator: gpuTolerationOperator,
-			Value:    gpuTolerationValue,
-			Effect:   gpuTolerationEffect,
-		}},
+		gpuTolerations,
 	)
 }
 

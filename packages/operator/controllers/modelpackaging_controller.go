@@ -236,16 +236,7 @@ func (r *ModelPackagingReconciler) reconcileTaskRun(
 		return nil, err
 	}
 
-	tolerations := []corev1.Toleration{}
-	tolerationConf := r.packagingConfig.Toleration
-	if len(tolerationConf) != 0 {
-		tolerations = append(tolerations, corev1.Toleration{
-			Key:      tolerationConf[config.TolerationKey],
-			Operator: corev1.TolerationOperator(tolerationConf[config.TolerationOperator]),
-			Value:    tolerationConf[config.TolerationValue],
-			Effect:   corev1.TaintEffect(tolerationConf[config.TolerationEffect]),
-		})
-	}
+	tolerations := r.packagingConfig.Tolerations
 
 	taskSpec, err := r.generatePackagerTaskSpec(packagingCR, packagingIntegration)
 	if err != nil {
@@ -374,13 +365,13 @@ func (r *ModelPackagingReconciler) Reconcile(request ctrl.Request) (ctrl.Result,
 
 	// The configmap is used to save a packaging result.
 	if err := r.createResultConfigMap(packagingCR); err != nil {
-		log.Error(err, "Can not create result config map")
+		log.Error(err, "Cannot create result config map")
 
 		return reconcile.Result{}, err
 	}
 
 	if taskRun, err := r.reconcileTaskRun(packagingCR); err != nil {
-		log.Error(err, "Can not synchronize desired K8S instances state to cluster")
+		log.Error(err, "Cannot synchronize desired K8S instances state to cluster")
 
 		return reconcile.Result{}, err
 	} else if err := r.syncCrdState(taskRun, packagingCR); err != nil {
