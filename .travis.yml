@@ -101,15 +101,12 @@ matrix:
         - wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
         - sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
         - sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
-        - sudo wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep
-        - sudo chmod +x /usr/local/bin/dep
         - wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
         - sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
         - sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
         - go get github.com/t-yuki/gocover-cobertura
       script:
         - cd packages/feedback
-        - dep ensure -v -vendor-only
         - make test
         - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint

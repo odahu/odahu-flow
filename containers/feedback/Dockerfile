@@ -14,17 +14,12 @@
 #    limitations under the License.
 #
 
-FROM golang:1.11.6-alpine3.9 as builder
+FROM golang:1.14-alpine as builder
 
 ENV FEEDBACK_DIR="/go/src/github.com/odahu/odahu-flow/packages/feedback"
 WORKDIR "${FEEDBACK_DIR}"
 
-RUN apk add -u ca-certificates git gcc musl-dev make && \
-    wget https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep && \
-    chmod +x /usr/local/bin/dep
-
-COPY packages/feedback/Gopkg.toml packages/feedback/Gopkg.lock ./
-RUN dep ensure -vendor-only
+RUN apk add -u ca-certificates git gcc musl-dev make
 
 COPY packages/feedback/ ./
 
@@ -34,7 +29,7 @@ RUN GOOS=linux GOARCH=amd64 make build-all
 #########################################################
 #########################################################
 
-FROM alpine:3.9 as collector
+FROM alpine:3.12 as collector
 
 ENV ODAHUFLOW_DIR="/opt/odahu-flow"
 
@@ -46,7 +41,7 @@ CMD ["./collector"]
 #########################################################
 #########################################################
 
-FROM alpine:3.9 as rq-catcher
+FROM alpine:3.12 as rq-catcher
 
 ENV ODAHUFLOW_DIR="/opt/odahu-flow"
 

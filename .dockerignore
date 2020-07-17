@@ -18,8 +18,8 @@
 !packages/feedback/cmd/**
 !packages/feedback/pkg/**
 !packages/feedback/templates/**
-!packages/feedback/Gopkg.toml
-!packages/feedback/Gopkg.lock
+!packages/feedback/go.mod
+!packages/feedback/go.sum
 !packages/feedback/Makefile
 !packages/robot/**
 !packages/sdk/**
