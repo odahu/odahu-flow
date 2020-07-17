@@ -7,6 +7,7 @@ ${TRAIN_ID}  test-downloading-training-data
 
 *** Settings ***
 Documentation       Check downloading of a training data
+Test Timeout        60 minutes
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Variables           ../../variables.py
 Resource            ../../resources/keywords.robot
