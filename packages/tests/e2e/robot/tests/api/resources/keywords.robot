@@ -84,8 +84,15 @@ Command response list should not contain id
     END
     should be equal as integers         ${list_length}  0
 
-Get Value From Dictionary
-    [Arguments]             ${Dictionary Name}      ${Key}
-    ${KeyIsPresent}=        Run Keyword And Return Status       Dictionary Should Contain Key       ${Dictionary Name}      ${Key}
-    ${Value}=               Run Keyword If      ${KeyIsPresent}     Get From Dictionary             ${Dictionary Name}      ${Key}
-    [Return]                ${Value}
+Pick artifact name
+    [Arguments]             ${input}
+    ${artifact}             set variable  ${input.status.artifacts[0]}
+    ${artifact_name}        set variable  ${artifact.artifact_name}
+    [Return]                ${artifact_name}
+
+Pick packaging image
+    [Arguments]             ${input}
+    ${image}                set variable  ${input.status.results[0]}
+    ${type_image}           evaluate  type($image)
+    ${image_value}          set variable  ${image.value}
+    [Return]                ${image_value}
