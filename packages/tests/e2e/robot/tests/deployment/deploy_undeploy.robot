@@ -98,9 +98,9 @@ Check setting of default resource values
     LOG  ${model_deployment}
 
     ${model_resources}=  Set variable  ${model_deployment.spec.template.spec.containers[0].resources}
-    Should be equal  256m  ${model_resources.limits["cpu"]}
+    Should be equal  250m  ${model_resources.limits["cpu"]}
     Should be equal  256Mi  ${model_resources.limits["memory"]}
-    Should be equal  128m  ${model_resources.requests["cpu"]}
+    Should be equal  125m  ${model_resources.requests["cpu"]}
     Should be equal  128Mi  ${model_resources.requests["memory"]}
 
 File with entitiy not found

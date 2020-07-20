@@ -50,9 +50,9 @@ var (
 			Namespace: mdNamespace,
 		},
 	}
-	reqMem      = "111Mi"
-	reqCPU      = "111m"
-	limMem      = "222Mi"
+	reqMem      = "128Mi"
+	reqCPU      = "125m"
+	limMem      = "256Mi"
 	mdResources = &odahuflowv1alpha1.ResourceRequirements{
 		Limits: &odahuflowv1alpha1.ResourceList{
 			CPU:    nil,
@@ -129,7 +129,7 @@ func TestReconcile(t *testing.T) {
 	))
 
 	configurationLabels := configuration.Spec.Template.ObjectMeta.Labels
-	g.Expect(configurationLabels).Should(HaveLen(2))
+	g.Expect(configurationLabels).Should(HaveLen(3))
 	g.Expect(configurationLabels).Should(HaveKeyWithValue(DodelNameAnnotationKey, md.Name))
 
 	podSpec := configuration.Spec.Template.Spec

@@ -26,7 +26,7 @@ const (
 type RepositoryType string
 
 type ExternalUrl struct {
-	// Human readable name
+	// Human-readable name
 	Name string `json:"name"`
 	// Link to a resource
 	URL string `json:"url"`
@@ -44,6 +44,8 @@ type CommonConfig struct {
 	Version string `json:"version"`
 	// Database connection string
 	DatabaseConnectionString string `json:"databaseConnectionString"`
+	// OpenID token url
+	OAuthOIDCTokenEndpoint string `json:"oauthOidcTokenEndpoint"`
 }
 
 func NewDefaultCommonConfig() CommonConfig {
