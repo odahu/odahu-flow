@@ -32,12 +32,14 @@ Undeploy. Nonexistent model service
 Deploy. Zero timeout parameter
     [Documentation]  The deploy command must fail if timeout parameter is zero
     ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/custom-resources.deployment.odahuflow.yaml --timeout=0
+             report model deployment pods  simple-model
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  must be positive integer
 
 Deploy. Negative timeout parameter
     [Documentation]  The deploy command must fail if it contains negative timeout parameter
     ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/custom-resources.deployment.odahuflow.yaml --timeout=-500
+             report model deployment pods  simple-model
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  must be positive integer
 
@@ -71,5 +73,6 @@ Login. Override login values
 Deploy fails when validation fails
     [Documentation]  Deploy fails when memory resource is incorect
     ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/validation-fail.deployment.odahuflow.yaml
+             report model deployment pods  simple-model
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  maximum number of replicas parameter must not be less than minimum number of replicas parameter

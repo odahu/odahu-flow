@@ -12,6 +12,7 @@ Resource            ../../resources/keywords.robot
 Library             Collections
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.model.Model
+Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
@@ -30,7 +31,9 @@ Cleanup resources
 Use user defined connection for trained model binary storage
     [Documentation]    This test emulate user who use `OutputConnection` ModelTraining and ModelPackaging parameter
     StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/custom-con/training.yaml
+    report training pods  ${TRAIN_ID}
     ${res}=  StrictShell  odahuflowctl train get --id ${TRAIN_ID} -o 'jsonpath=$[0].status.artifacts[0].artifactName'
 
     StrictShell  odahuflowctl --verbose pack create -f ${RES_DIR}/custom-con/pack.yaml --artifact-name ${res.stdout}
+    report packaging pods  ${PACK_ID}
     ${res}=  StrictShell  odahuflowctl pack get --id ${PACK_ID} -o 'jsonpath=$[0].status.results[0].value'

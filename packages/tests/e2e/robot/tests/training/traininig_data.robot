@@ -14,6 +14,7 @@ Resource            ../../resources/keywords.robot
 Library             Collections
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.model.Model
+Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
@@ -32,6 +33,7 @@ Train valid model
     Cleanup resources
 
     StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${TRAIN_ID}
+    report training pods  ${TRAIN_ID}
     ${res}=  StrictShell  odahuflowctl train get --id ${TRAIN_ID} -o 'jsonpath=$[0].status.artifacts[0].runId'
     should be equal  ${RUN_ID}  ${res.stdout}
 
@@ -40,6 +42,7 @@ Train invalid model
     Cleanup resources
 
     ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${TRAIN_ID}
+    report training pods  ${TRAIN_ID}
     should not be equal  ${0}  ${res.rc}
 
 Train model that create invalid GPPI artifact
@@ -47,6 +50,7 @@ Train model that create invalid GPPI artifact
     Cleanup resources
 
     ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${TRAIN_ID}
+    report training pods  ${TRAIN_ID}
     should not be equal  ${0}  ${res.rc}
     Should contain  ${res.stdout}  ${GPPI_VALIDATION_FAIL}
 
