@@ -16,4 +16,4 @@
 """
 Odahuflow CI package version
 """
-__version__ = '1.2.0-rc5'
+__version__ = '1.2.0-rc7'
