@@ -350,6 +350,9 @@ config:
     # Valid connection string (including schema) syntax: https://godoc.org/github.com/lib/pq
     # Type: string
     databaseConnectionString:
+    # OIDC Token endpoint
+    # Type: string
+    # oauthOidcTokenEndpoint: https://oauth2.googleapis.com/token
   # Operator configuration
   operator:
     auth:
@@ -357,7 +360,7 @@ config:
       # Type: string->string
       apiUrl: http://odahu-flow-api.odahu-flow.svc.cluster.local
     # OpenId Provider token url
-    # oauth_oidc_token_endpoint: https://oauth2.googleapis.com/token
+    # oauthOidcTokenEndpoint: https://oauth2.googleapis.com/token
 
   # Connection configuration
   connection:

@@ -1984,6 +1984,10 @@ var doc = `{
                         "$ref": "#/definitions/ExternalUrl"
                     }
                 },
+                "oauthOidcTokenEndpoint": {
+                    "description": "OpenID token url",
+                    "type": "string"
+                },
                 "resourceGpuName": {
                     "description": "Kubernetes can consume the GPU resource in the \u003cvendor\u003e.com/gpu format.\nFor example, amd.com/gpu or nvidia.com/gpu.",
                     "type": "string"
@@ -2082,7 +2086,7 @@ var doc = `{
                     "type": "string"
                 },
                 "name": {
-                    "description": "Human readable name",
+                    "description": "Human-readable name",
                     "type": "string"
                 },
                 "url": {
@@ -2147,12 +2151,9 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/ModelDeploymentSecurityConfig"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model deployments",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 }
             }
         },
@@ -2225,12 +2226,9 @@ var doc = `{
                     "description": "Timeout for full training process",
                     "type": "string"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model packaging pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 }
             }
         },
@@ -2252,12 +2250,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "gpuToleration": {
+                "gpuTolerations": {
                     "description": "Kubernetes tolerations for GPU model trainings pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "metricUrl": {
                     "type": "string"
@@ -2285,12 +2280,9 @@ var doc = `{
                     "description": "Timeout for full training process",
                     "type": "string"
                 },
-                "toleration": {
+                "tolerations": {
                     "description": "Kubernetes tolerations for model trainings pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "type": "string"
                 },
                 "toolchainIntegrationNamespace": {
                     "type": "string"

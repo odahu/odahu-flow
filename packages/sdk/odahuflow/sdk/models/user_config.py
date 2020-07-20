@@ -16,21 +16,26 @@ class UserConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, claims: Claims=None):  # noqa: E501
+    def __init__(self, claims: Claims=None, sign_out_url: str=None):  # noqa: E501
         """UserConfig - a model defined in Swagger
 
         :param claims: The claims of this UserConfig.  # noqa: E501
         :type claims: Claims
+        :param sign_out_url: The sign_out_url of this UserConfig.  # noqa: E501
+        :type sign_out_url: str
         """
         self.swagger_types = {
-            'claims': Claims
+            'claims': Claims,
+            'sign_out_url': str
         }
 
         self.attribute_map = {
-            'claims': 'claims'
+            'claims': 'claims',
+            'sign_out_url': 'signOutUrl'
         }
 
         self._claims = claims
+        self._sign_out_url = sign_out_url
 
     @classmethod
     def from_dict(cls, dikt) -> 'UserConfig':
@@ -63,3 +68,26 @@ class UserConfig(Model):
         """
 
         self._claims = claims
+
+    @property
+    def sign_out_url(self) -> str:
+        """Gets the sign_out_url of this UserConfig.
+
+        The sign out endpoint logs out the authenticated  # noqa: E501
+
+        :return: The sign_out_url of this UserConfig.
+        :rtype: str
+        """
+        return self._sign_out_url
+
+    @sign_out_url.setter
+    def sign_out_url(self, sign_out_url: str):
+        """Sets the sign_out_url of this UserConfig.
+
+        The sign out endpoint logs out the authenticated  # noqa: E501
+
+        :param sign_out_url: The sign_out_url of this UserConfig.
+        :type sign_out_url: str
+        """
+
+        self._sign_out_url = sign_out_url
