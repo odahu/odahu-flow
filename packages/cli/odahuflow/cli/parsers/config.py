@@ -42,7 +42,7 @@ def config_set(key: str, value: str):
         * odahuflowctl config set API_URL http://localhost:5000
     \f
     :param key: Configuration variable name
-    :param value: Configuration variable name
+    :param value: Configuration variable value
     """
     variable_name = key.upper()
     _check_variable_exists_or_exit(variable_name)

@@ -5,6 +5,7 @@ ${DOCKER_CONN}         docker-ci-connection-valid
 
 *** Settings ***
 Documentation       API of conections
+Resource            ../../resources/variables.robot
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
@@ -37,7 +38,7 @@ Update GIT connection
 Get GIT connection
     [Documentation]  getting GIT connection
     ${result}                   Call API  connection get id  ${GIT_CONN}
-    keySecret connection should be equal  ${result}  *****
+    keySecret connection should be equal  ${result}  ${CONN_SECRET_MASK}
 
 Update Docker connection
     [Documentation]  update Docker connection
@@ -48,7 +49,7 @@ Update Docker connection
 Get Decrypted Docker connection
     [Documentation]  get decrypted Docker connection
     ${result}                   Call API  connection get id decrypted  ${DOCKER_CONN}
-    Password connection should not be equal    ${result}  *****
+    Password connection should not be equal    ${result}  ${CONN_SECRET_MASK}
 
 Delete GIT connection
     Call API                    connection delete  ${GIT_CONN}

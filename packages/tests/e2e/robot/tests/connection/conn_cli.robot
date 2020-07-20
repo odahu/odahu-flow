@@ -37,7 +37,7 @@ Check conn
     should be equal  ${conn['id']}                 ${id}
     should be equal  ${conn['spec']['type']}       ${type}
     should be equal  ${conn['spec']['reference']}  ${reference}
-    should be equal  ${conn['spec']['keySecret']}  ${CONN_DECRYPTED_MASK}
+    should be equal  ${conn['spec']['keySecret']}  ${CONN_SECRET_MASK}
 
     ${res}=  Shell  odahuflowctl --verbose conn get --id ${id} -o json --decrypted
     Should be equal  ${res.rc}      ${0}
