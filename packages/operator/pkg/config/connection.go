@@ -26,6 +26,8 @@ type Vault struct {
 	// Optionally. Token for access to the vault server
 	// If it is empty then client will use the k8s auth
 	Token string `json:"token"`
+	// Can be used to debug and local development. Skip TLS verification
+	Insecure bool `json:"insecure"`
 }
 
 type ConnectionConfig struct {
@@ -51,6 +53,7 @@ func NewDefaultConnectionConfig() ConnectionConfig {
 			SecretEnginePath: "odahu-flow/connections",
 			Role:             "odahu-flow",
 			Token:            "",
+			Insecure:         false,
 		},
 	}
 }

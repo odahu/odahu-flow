@@ -18,6 +18,9 @@ package kubernetes
 
 import (
 	"fmt"
+	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"net/http"
 	"reflect"
 
 	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -67,32 +70,6 @@ func TransformFilter(filter interface{}, tagKey string) (selector labels.Selecto
 	}
 
 	return labelSelector, nil
-}
-
-type ListOptions struct {
-	Filter interface{}
-	Page   *int
-	Size   *int
-}
-
-type ListOption func(*ListOptions)
-
-func ListFilter(filter interface{}) ListOption {
-	return func(args *ListOptions) {
-		args.Filter = filter
-	}
-}
-
-func Page(page int) ListOption {
-	return func(args *ListOptions) {
-		args.Page = &page
-	}
-}
-
-func Size(size int) ListOption {
-	return func(args *ListOptions) {
-		args.Size = &size
-	}
 }
 
 func IsResourcePresent(value *string) bool {
@@ -175,4 +152,18 @@ func convertResource(odahuResource *string, k8sResource corev1.ResourceList,
 	}
 
 	return err
+}
+
+func ConvertK8sErrToOdahuflowErr(err error) error {
+	errStatus, ok := err.(*errors.StatusError)
+	if ok {
+		switch errStatus.Status().Code {
+		case http.StatusNotFound:
+			return odahu_errs.NotFoundError{Entity: errStatus.ErrStatus.Details.Name}
+		case http.StatusConflict:
+			return odahu_errs.AlreadyExistError{Entity: errStatus.ErrStatus.Details.Name}
+		}
+	}
+
+	return nil
 }

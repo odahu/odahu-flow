@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"io/ioutil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -76,7 +76,7 @@ func (htr *httpPackagingRepository) GetPackagingIntegration(id string) (pi *pack
 	return pi, nil
 }
 
-func (htr *httpPackagingRepository) GetPackagingIntegrationList(options ...kubernetes.ListOption) (
+func (htr *httpPackagingRepository) GetPackagingIntegrationList(options ...filter.ListOption) (
 	[]packaging.PackagingIntegration, error,
 ) {
 	panic("not implemented")

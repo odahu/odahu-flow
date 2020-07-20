@@ -47,7 +47,7 @@ type tiSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	ts           *httptest.Server
-	tiHTTPClient training_repository.Repository
+	tiHTTPClient training_repository.DeprecatedRepository
 }
 
 func (s *tiSuite) SetupSuite() {

@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	pathToPackagerBin = "/opt/odahu-flow/packager"
-	configPackagingSecretName  = "odahu-flow-packaging-config" //nolint:gosec
+	pathToPackagerBin         = "/opt/odahu-flow/packager"
+	configPackagingSecretName = "odahu-flow-packaging-config" //nolint:gosec
 )
 
 func (r *ModelPackagingReconciler) generatePackagerTaskSpec(

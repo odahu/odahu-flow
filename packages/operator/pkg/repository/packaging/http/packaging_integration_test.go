@@ -46,7 +46,7 @@ type piSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	ts           *httptest.Server
-	piHTTPClient packaging_repository.Repository
+	piHTTPClient packaging_repository.DeprecatedRepository
 }
 
 func (s *piSuite) SetupSuite() {

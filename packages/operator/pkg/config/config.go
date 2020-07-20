@@ -134,7 +134,7 @@ func PanicIfError(err error) {
 }
 
 func setUpLogger() {
-	logf.SetLogger(logf.ZapLoggerTo(os.Stdout, true))
+	logf.SetLogger(logf.ZapLoggerTo(os.Stdout, false))
 }
 
 func NewDefaultConfig() *Config {

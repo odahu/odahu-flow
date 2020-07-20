@@ -19,6 +19,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -28,7 +29,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -41,7 +41,7 @@ type httpPackagingRepository struct {
 
 // todo: doc
 func NewRepository(apiURL string, token string, clientID string,
-	clientSecret string, tokenURL string) packaging_repository.Repository {
+	clientSecret string, tokenURL string) packaging_repository.DeprecatedRepository {
 	return &httpPackagingRepository{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
@@ -100,7 +100,7 @@ func (htr *httpPackagingRepository) GetModelPackaging(id string) (mp *packaging.
 	return mp, nil
 }
 
-func (htr *httpPackagingRepository) GetModelPackagingList(options ...kubernetes.ListOption) (
+func (htr *httpPackagingRepository) GetModelPackagingList(options ...filter.ListOption) (
 	[]packaging.ModelPackaging, error,
 ) {
 	panic("not implemented")

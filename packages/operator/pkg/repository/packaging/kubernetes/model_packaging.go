@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -106,18 +107,18 @@ func (pkr *packagingK8sRepository) GetModelPackaging(id string) (*packaging.Mode
 	); err != nil {
 		logMP.Error(err, "Get Model Packaging from k8s", "id", id)
 
-		return nil, err
+		return nil, kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return TransformMpFromK8s(k8sMp)
 }
 
-func (pkr *packagingK8sRepository) GetModelPackagingList(options ...kubernetes.ListOption) (
+func (pkr *packagingK8sRepository) GetModelPackagingList(options ...filter.ListOption) (
 	[]packaging.ModelPackaging, error,
 ) {
 	var k8sMpList v1alpha1.ModelPackagingList
 
-	listOptions := &kubernetes.ListOptions{
+	listOptions := &filter.ListOptions{
 		Filter: nil,
 		Page:   &MpFirstPage,
 		Size:   &MpMaxSize,
@@ -177,7 +178,7 @@ func (pkr *packagingK8sRepository) DeleteModelPackaging(id string) error {
 	if err := pkr.k8sClient.Delete(context.TODO(), mp); err != nil {
 		logMP.Error(err, "Delete Model Packaging from k8s", "id", id)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return nil
@@ -191,7 +192,7 @@ func (pkr *packagingK8sRepository) UpdateModelPackaging(mp *packaging.ModelPacka
 	); err != nil {
 		logMP.Error(err, "Get Model Packaging from k8s", "id", mp.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	// TODO: think about update, not replacing as for now

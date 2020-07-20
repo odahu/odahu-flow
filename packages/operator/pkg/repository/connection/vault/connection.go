@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -44,6 +45,11 @@ func NewRepository(
 func NewRepositoryFromConfig(vaultConfig config.Vault) (conn_repository.Repository, error) {
 	vConfig := vaultapi.DefaultConfig()
 	vConfig.Address = vaultConfig.URL
+
+	// Disable HTTPS verification (for a local development)
+	if vaultConfig.Insecure {
+		vConfig.HttpClient.Transport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true} // #nosec
+	}
 
 	vClient, err := vaultapi.NewClient(vConfig)
 	if err != nil {

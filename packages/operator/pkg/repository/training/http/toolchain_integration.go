@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"io/ioutil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -76,7 +76,7 @@ func (htr *httpTrainingRepository) GetToolchainIntegration(id string) (ti *train
 	return ti, nil
 }
 
-func (htr *httpTrainingRepository) GetToolchainIntegrationList(options ...kubernetes.ListOption) (
+func (htr *httpTrainingRepository) GetToolchainIntegrationList(options ...filter.ListOption) (
 	[]training.ToolchainIntegration, error,
 ) {
 	panic("not implemented")

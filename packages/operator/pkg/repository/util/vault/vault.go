@@ -28,7 +28,7 @@ func CreateTestVault(t *testing.T, mountPath, mountEngine string) (*api.Client, 
 	// Create an in-memory, unsealed core (the "backend", if you will).
 	core, _, rootToken := vault.TestCoreUnsealed(t)
 
-	// Start an HTTP server for the core.
+	// Run an HTTP server for the core.
 	server, addr := http.TestServer(t, core)
 
 	// Create a client that talks to the server, initially authenticating with

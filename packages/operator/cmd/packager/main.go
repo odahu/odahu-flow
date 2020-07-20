@@ -82,14 +82,14 @@ func init() {
 }
 
 func newPackagerWithHTTPRepositories(config config.PackagerConfig) *packager.Packager {
-	packRepo := packaging_http_repository.NewRepository(
+	packDeprecatedHTTPClient := packaging_http_repository.NewRepository(
 		config.Auth.APIURL,
 		config.Auth.APIToken,
 		config.Auth.ClientID,
 		config.Auth.ClientSecret,
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
-	connRepo := connection_http_repository.NewRepository(
+	connHTTPClient := connection_http_repository.NewRepository(
 		config.Auth.APIURL,
 		config.Auth.APIToken,
 		config.Auth.ClientID,
@@ -97,7 +97,9 @@ func newPackagerWithHTTPRepositories(config config.PackagerConfig) *packager.Pac
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 
-	return packager.NewPackager(packRepo, connRepo, config)
+	return packager.NewPackager(
+		packDeprecatedHTTPClient, packDeprecatedHTTPClient, packDeprecatedHTTPClient, connHTTPClient, config,
+	)
 }
 
 func main() {

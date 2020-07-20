@@ -45,24 +45,30 @@ const (
 )
 
 type ModelTrainer struct {
-	trainRepo       train_repository.Repository
-	connRepo        conn_repository.Repository
+	trainClient     train_repository.Repository
+	resultClient    train_repository.ResultRepository
+	toolchainClient train_repository.ToolchainRepository
+	connClient      conn_repository.Repository
 	modelTrainingID string
 	log             logr.Logger
 	trainerConfig   config.TrainerConfig
 }
 
 func NewModelTrainer(
-	trainRepo train_repository.Repository,
-	connRepo conn_repository.Repository,
-	trainerConfig config.TrainerConfig,
-) *ModelTrainer {
+	trainClient train_repository.Repository,
+	toolchainClient train_repository.ToolchainRepository,
+	resultClient train_repository.ResultRepository,
+	connClient conn_repository.Repository,
+	trainerConfig config.TrainerConfig) *ModelTrainer {
+
 	trainingLogger := logf.Log.WithName("trainer").
 		WithValues(odahuflow.ModelTrainingIDLogPrefix, trainerConfig.ModelTrainingID)
 
 	return &ModelTrainer{
-		trainRepo:       trainRepo,
-		connRepo:        connRepo,
+		trainClient:     trainClient,
+		toolchainClient: toolchainClient,
+		resultClient:    resultClient,
+		connClient:      connClient,
 		modelTrainingID: trainerConfig.ModelTrainingID,
 		log:             trainingLogger,
 		trainerConfig:   trainerConfig,
@@ -106,7 +112,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 	)
 
 	// Saves some data before starting a training
-	if err := mt.trainRepo.SaveModelTrainingResult(
+	if err := mt.resultClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			CommitID: commitID,
@@ -180,7 +186,7 @@ func (mt *ModelTrainer) SaveResult() error {
 	}
 
 	outputTrainingDir := mt.trainerConfig.OutputDir
-	mt.log.Info("Start to zip the dir", "dir", outputTrainingDir, "archive_name",
+	mt.log.Info("Run to zip the dir", "dir", outputTrainingDir, "archive_name",
 		outputZipName)
 
 	jsonFile, err := os.Open(filepath.Join(outputTrainingDir, odahuflowProjectFile))
@@ -207,7 +213,7 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
-	mt.log.Info("Start to zip the dir", "dir", outputTrainingDir, "archive_name",
+	mt.log.Info("Run to zip the dir", "dir", outputTrainingDir, "archive_name",
 		outputZipName)
 
 	storage, err := rclone.NewObjectStorage(&k8sTraining.OutputConn.Spec)
@@ -219,7 +225,7 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
-	if err := mt.trainRepo.SaveModelTrainingResult(
+	if err := mt.resultClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			RunID:        trainingDesc.Output["run_id"],
@@ -239,7 +245,7 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 		return nil
 	}
 	for _, mtData := range k8sTraining.InputData {
-		mt.log.Info("Start download k8sTraining data",
+		mt.log.Info("Run download k8sTraining data",
 			"remote_path", mtData.RemotePath,
 			"local_path", mtData.LocalPath,
 			"connection_type", mtData.DataBinding.Type,

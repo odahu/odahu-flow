@@ -19,6 +19,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -29,7 +30,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -43,7 +43,7 @@ type httpTrainingRepository struct {
 // todo: doc
 func NewRepository(
 	apiURL string, token string, clientID string,
-	clientSecret string, tokenURL string) training_repository.Repository {
+	clientSecret string, tokenURL string) training_repository.DeprecatedRepository {
 	return &httpTrainingRepository{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
@@ -102,7 +102,7 @@ func (htr *httpTrainingRepository) GetModelTraining(id string) (mt *training.Mod
 	return mt, nil
 }
 
-func (htr *httpTrainingRepository) GetModelTrainingList(options ...kubernetes.ListOption) (
+func (htr *httpTrainingRepository) GetModelTrainingList(options ...filter.ListOption) (
 	[]training.ModelTraining, error,
 ) {
 	panic("not implemented")

@@ -48,7 +48,7 @@ type mpSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	ts           *httptest.Server
-	mpHTTPClient packaging_repository.Repository
+	mpHTTPClient packaging_repository.DeprecatedRepository
 }
 
 func NotFound(w http.ResponseWriter, r *http.Request) {

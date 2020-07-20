@@ -14,12 +14,12 @@
 //    limitations under the License.
 //
 
-package connection
+package training
 
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	k8s_utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 )
 
@@ -27,28 +27,48 @@ const (
 	TagKey = "name"
 )
 
+// This repository combine multiple interfaces
+type DeprecatedRepository interface {
+	Repository
+	LogStreamer
+	ToolchainRepository
+	ResultRepository
+}
+
+// CRUD
 type Repository interface {
 	GetModelTraining(id string) (*training.ModelTraining, error)
-	GetModelTrainingList(options ...k8s_utils.ListOption) ([]training.ModelTraining, error)
-	GetModelTrainingLogs(id string, writer utils.Writer, follow bool) error
-	SaveModelTrainingResult(id string, result *odahuflowv1alpha1.TrainingResult) error
-	GetModelTrainingResult(id string) (*odahuflowv1alpha1.TrainingResult, error)
+	GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error)
 	DeleteModelTraining(id string) error
 	UpdateModelTraining(md *training.ModelTraining) error
 	CreateModelTraining(md *training.ModelTraining) error
-	ToolchainRepository
+}
+
+type Service interface {
+	Repository
+	LogStreamer
+	ResultRepository
+}
+
+type LogStreamer interface {
+	GetModelTrainingLogs(id string, writer utils.Writer, follow bool) error
+}
+
+type ResultRepository interface {
+	SaveModelTrainingResult(id string, result *odahuflowv1alpha1.TrainingResult) error
+	GetModelTrainingResult(id string) (*odahuflowv1alpha1.TrainingResult, error)
 }
 
 type ToolchainRepository interface {
 	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
-	GetToolchainIntegrationList(options ...k8s_utils.ListOption) ([]training.ToolchainIntegration, error)
+	GetToolchainIntegrationList(options ...filter.ListOption) ([]training.ToolchainIntegration, error)
 	DeleteToolchainIntegration(name string) error
 	UpdateToolchainIntegration(md *training.ToolchainIntegration) error
 	CreateToolchainIntegration(md *training.ToolchainIntegration) error
 }
 
 type MTFilter struct {
-	Toolchain    []string `name:"toolchain"`
-	ModelName    []string `name:"model_name"`
-	ModelVersion []string `name:"model_version"`
+	Toolchain    []string `name:"toolchain" postgres:"spec->>'toolchain'"`
+	ModelName    []string `name:"model_name" postgres:"spec->'model'->>'name'"`
+	ModelVersion []string `name:"model_version" postgres:"spec->'model'->>'version'"`
 }

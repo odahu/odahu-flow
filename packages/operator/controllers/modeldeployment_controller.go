@@ -771,7 +771,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		}
 	}
 
-	log.Info("Start reconciling of model deployment")
+	log.Info("Run reconciling of model deployment")
 
 	if err := r.reconcileDeploymentPullConnection(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile deployment pull connection")

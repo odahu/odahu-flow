@@ -30,7 +30,7 @@ type packagingK8sRepository struct {
 }
 
 func NewRepository(namespace, piNamespace string, k8sClient client.Client,
-	k8sConfig *rest.Config) mp_repository.Repository {
+	k8sConfig *rest.Config) mp_repository.Service {
 	return &packagingK8sRepository{
 		namespace:   namespace,
 		k8sClient:   k8sClient,

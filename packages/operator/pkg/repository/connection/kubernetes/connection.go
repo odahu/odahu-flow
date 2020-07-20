@@ -20,13 +20,10 @@ import (
 	"context"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	k8_serror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"time"
@@ -81,7 +78,7 @@ func (kc *k8sConnectionRepository) getConnectionFromK8s(id string) (*connection.
 	); err != nil {
 		logC.Error(err, "Get connection from k8s", "id", id)
 
-		return nil, convertK8sErrToOdahuflowErr(err)
+		return nil, kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 	return transform(k8sConn), nil
 }
@@ -116,7 +113,7 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 		}); err != nil {
 			logC.Error(err, "Get connection from k8s")
 
-			return nil, convertK8sErrToOdahuflowErr(err)
+			return nil, kubernetes.ConvertK8sErrToOdahuflowErr(err)
 		}
 
 		continueToken = k8sConnList.ListMeta.Continue
@@ -153,7 +150,7 @@ func (kc *k8sConnectionRepository) DeleteConnection(id string) error {
 	); err != nil {
 		logC.Error(err, "Delete connection from k8s", "id", id)
 
-		return convertK8sErrToOdahuflowErr(err)
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return nil
@@ -167,7 +164,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	); err != nil {
 		logC.Error(err, "Get conn from k8s", "id", conn.ID)
 
-		return convertK8sErrToOdahuflowErr(err)
+		return kubernetes.convertK8sErrToOdahuflowErr(err)
 	}
 
 	// TODO: think about update, not replacing as for now
@@ -178,7 +175,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	if err := kc.k8sClient.Update(context.TODO(), &k8sConn); err != nil {
 		logC.Error(err, "Creation of the conn", "id", conn.ID)
 
-		return convertK8sErrToOdahuflowErr(err)
+		return kubernetes.convertK8sErrToOdahuflowErr(err)
 	}
 
 	conn.Status = k8sConn.Status
@@ -202,24 +199,10 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 	if err := kc.k8sClient.Create(context.TODO(), conn); err != nil {
 		logC.Error(err, "ConnectionName creation error from k8s", "name", connection.ID)
 
-		return convertK8sErrToOdahuflowErr(err)
+		return kubernetes.convertK8sErrToOdahuflowErr(err)
 	}
 
 	connection.Status = conn.Status
-
-	return nil
-}
-
-func convertK8sErrToOdahuflowErr(err error) error {
-	errStatus, ok := err.(*k8_serror.StatusError)
-	if ok {
-		switch errStatus.Status().Code {
-		case http.StatusNotFound:
-			return odahuflow_errors.NotFoundError{Entity: errStatus.ErrStatus.Details.Name}
-		case http.StatusConflict:
-			return odahuflow_errors.AlreadyExistError{Entity: errStatus.ErrStatus.Details.Name}
-		}
-	}
 
 	return nil
 }

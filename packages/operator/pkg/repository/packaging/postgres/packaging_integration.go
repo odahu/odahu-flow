@@ -22,7 +22,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
@@ -63,11 +63,11 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 
 }
 
-func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ...kubernetes.ListOption) (
+func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ...filter.ListOption) (
 	[]packaging.PackagingIntegration, error,
 ) {
 
-	listOptions := &kubernetes.ListOptions{
+	listOptions := &filter.ListOptions{
 		Filter: nil,
 		Page:   &FirstPage,
 		Size:   &MaxSize,

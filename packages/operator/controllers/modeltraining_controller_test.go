@@ -21,7 +21,10 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
+	training_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/stubclients"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -54,7 +57,6 @@ const (
 	tolerationValue    = "value"
 	tolerationOperator = "operator"
 	tolerationEffect   = "effect"
-
 )
 
 var (
@@ -67,11 +69,8 @@ var (
 	mtNamespacedName         = types.NamespacedName{Name: mtName, Namespace: testNamespace}
 	testResValue             = "5"
 	emptyValue               = ""
-	testToolchainIntegration = &odahuflowv1alpha1.ToolchainIntegration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      testToolchainIntegrationID,
-			Namespace: testNamespace,
-		},
+	testToolchainIntegration = &training_apis.ToolchainIntegration{
+		ID: testToolchainIntegrationID,
 		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
 			DefaultImage: toolchainImage,
 		},
@@ -79,32 +78,32 @@ var (
 
 	tolerations = []v1.Toleration{
 		{
-			Key:               tolerationKey,
-			Operator:          tolerationOperator,
-			Value:             tolerationValue,
-			Effect:            tolerationEffect,
+			Key:      tolerationKey,
+			Operator: tolerationOperator,
+			Value:    tolerationValue,
+			Effect:   tolerationEffect,
 		},
 	}
 
 	gpuTolerations = []v1.Toleration{
 		{
-			Key:               gpuTolerationKey,
-			Operator:          gpuTolerationOperator,
-			Value:             gpuTolerationValue,
-			Effect:            gpuTolerationEffect,
+			Key:      gpuTolerationKey,
+			Operator: gpuTolerationOperator,
+			Value:    gpuTolerationValue,
+			Effect:   gpuTolerationEffect,
 		},
 	}
-
 )
 
 type ModelTrainingControllerSuite struct {
 	suite.Suite
-	g          *GomegaWithT
-	k8sClient  client.Client
-	k8sManager manager.Manager
-	stopMgr    chan struct{}
-	mgrStopped *sync.WaitGroup
-	requests   chan reconcile.Request
+	g            *GomegaWithT
+	k8sClient    client.Client
+	k8sManager   manager.Manager
+	stubTIClient training.ToolchainRepository
+	stopMgr      chan struct{}
+	mgrStopped   *sync.WaitGroup
+	requests     chan reconcile.Request
 }
 
 func (s *ModelTrainingControllerSuite) SetupTest() {
@@ -114,6 +113,7 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.k8sClient = mgr.GetClient()
 	s.k8sManager = mgr
+	s.stubTIClient = stubclients.NewTIStubClient()
 
 	s.requests = make(chan reconcile.Request)
 
@@ -126,7 +126,7 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 	}()
 
 	// Create the toolchain integration that will be used for a training.
-	if err := s.k8sClient.Create(context.TODO(), testToolchainIntegration); err != nil {
+	if err := s.stubTIClient.CreateToolchainIntegration(testToolchainIntegration); err != nil {
 		s.T().Fatal(err)
 	}
 }
@@ -138,18 +138,17 @@ func (s *ModelTrainingControllerSuite) initReconciler(trainingConfig config.Mode
 	cfg := config.NewDefaultConfig()
 	cfg.Training = trainingConfig
 
-	reconciler := controllers.NewModelTrainingReconciler(s.k8sManager, *cfg)
+	reconciler := controllers.NewModelTrainingReconciler(s.k8sManager, *cfg, s.stubTIClient)
 	rw := NewReconcilerWrapper(reconciler, s.requests)
 	s.g.Expect(rw.SetupWithManager(s.k8sManager)).NotTo(HaveOccurred())
 
 }
 
 func (s *ModelTrainingControllerSuite) TearDownTest() {
-	if err := s.k8sClient.Delete(context.TODO(), testToolchainIntegration); err != nil {
+
+	if err := s.stubTIClient.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
 		s.T().Fatal(err)
 	}
-
-	testToolchainIntegration.ResourceVersion = ""
 
 	close(s.stopMgr)
 	s.mgrStopped.Wait()
@@ -444,11 +443,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 
 	s.initReconciler(config.NewDefaultModelTrainingConfig())
 
-	ti := &odahuflowv1alpha1.ToolchainIntegration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      testToolchainIntegrationID,
-			Namespace: testNamespace,
-		},
+	ti := &training_apis.ToolchainIntegration{
+		ID: testToolchainIntegrationID,
 		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
 			DefaultImage: toolchainImage,
 			AdditionalEnvironments: map[string]string{
@@ -471,9 +467,9 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	}
 
 	// Recreate the toolchain integration
-	err := s.k8sClient.Delete(context.TODO(), ti)
+	err := s.stubTIClient.DeleteToolchainIntegration(testToolchainIntegrationID)
 	s.g.Expect(err).NotTo(HaveOccurred())
-	err = s.k8sClient.Create(context.TODO(), ti)
+	err = s.stubTIClient.CreateToolchainIntegration(ti)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	err = s.k8sClient.Create(context.TODO(), mt)

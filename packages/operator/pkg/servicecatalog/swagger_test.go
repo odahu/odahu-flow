@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/appserver/routes"
 	. "github.com/onsi/gomega"
 	"github.com/rakyll/statik/fs"
 	"github.com/stretchr/testify/suite"

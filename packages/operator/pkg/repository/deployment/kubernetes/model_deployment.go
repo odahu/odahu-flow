@@ -18,6 +18,7 @@ package kubernetes
 
 import (
 	"context"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -58,18 +59,18 @@ func (kc *deploymentK8sRepository) GetModelDeployment(name string) (*deployment.
 	); err != nil {
 		logMD.Error(err, "Get Model Deployment from k8s", "name", name)
 
-		return nil, err
+		return nil, kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return mdTransform(k8sMD), nil
 }
 
-func (kc *deploymentK8sRepository) GetModelDeploymentList(options ...kubernetes.ListOption) (
+func (kc *deploymentK8sRepository) GetModelDeploymentList(options ...filter.ListOption) (
 	[]deployment.ModelDeployment, error,
 ) {
 	var k8sMDList v1alpha1.ModelDeploymentList
 
-	listOptions := &kubernetes.ListOptions{
+	listOptions := &filter.ListOptions{
 		Filter: nil,
 		Page:   &MDFirstPage,
 		Size:   &MDMaxSize,
@@ -130,7 +131,7 @@ func (kc *deploymentK8sRepository) DeleteModelDeployment(name string) error {
 	); err != nil {
 		logMD.Error(err, "Delete Model Deployment from k8s", "name", name)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return nil
@@ -144,7 +145,7 @@ func (kc *deploymentK8sRepository) UpdateModelDeployment(md *deployment.ModelDep
 	); err != nil {
 		logMD.Error(err, "Get Model Deployment from k8s", "name", md.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	// TODO: think about update, not replacing as for now
@@ -155,7 +156,7 @@ func (kc *deploymentK8sRepository) UpdateModelDeployment(md *deployment.ModelDep
 	if err := kc.k8sClient.Update(context.TODO(), &k8sMD); err != nil {
 		logMD.Error(err, "Creation of the Model Deployment", "name", md.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	md.Status = k8sMD.Status

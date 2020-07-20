@@ -39,21 +39,27 @@ const (
 )
 
 type Packager struct {
-	packRepo         packaging_repository.Repository
-	connRepo         connection_repository.Repository
-	log              logr.Logger
-	modelPackagingID string
-	packagerConfig   config.PackagerConfig
+	packagingClient       packaging_repository.Repository
+	packagingResultClient packaging_repository.ResultRepository
+	packagingIntClient    packaging_repository.PackagingIntegrationRepository
+	connClient            connection_repository.Repository
+	log                   logr.Logger
+	modelPackagingID      string
+	packagerConfig        config.PackagerConfig
 }
 
 func NewPackager(
-	packRepo packaging_repository.Repository,
-	connRepo connection_repository.Repository,
+	packagingClient packaging_repository.Repository,
+	packagingResultClient packaging_repository.ResultRepository,
+	packagingIntClient packaging_repository.PackagingIntegrationRepository,
+	connClient connection_repository.Repository,
 	config config.PackagerConfig,
 ) *Packager {
 	return &Packager{
-		packRepo: packRepo,
-		connRepo: connRepo,
+		packagingClient: packagingClient,
+		packagingResultClient: packagingResultClient,
+		packagingIntClient: packagingIntClient,
+		connClient: connClient,
 		log: logf.Log.WithName("packager").WithValues(
 			odahuflow.ModelPackagingIDLogPrefix, config.ModelPackagingID,
 		),
@@ -122,7 +128,7 @@ func (p *Packager) SaveResult() error {
 		})
 	}
 
-	return p.packRepo.SaveModelPackagingResult(k8sPackaging.ModelPackaging.ID, packResult)
+	return p.packagingResultClient.SaveModelPackagingResult(k8sPackaging.ModelPackaging.ID, packResult)
 }
 
 func (p *Packager) downloadData(packaging *packaging.K8sPackager) (err error) {

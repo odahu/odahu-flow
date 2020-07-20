@@ -52,7 +52,7 @@ type mtSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	ts           *httptest.Server
-	mtHTTPClient training_repository.Repository
+	mtHTTPClient training_repository.DeprecatedRepository
 }
 
 func NotFound(w http.ResponseWriter, r *http.Request) {

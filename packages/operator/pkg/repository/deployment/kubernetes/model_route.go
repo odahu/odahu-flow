@@ -18,6 +18,7 @@ package kubernetes
 
 import (
 	"context"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"time"
 
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -51,18 +52,18 @@ func (kc *deploymentK8sRepository) GetModelRoute(name string) (*deployment.Model
 	); err != nil {
 		logC.Error(err, "Get Model Route from k8s", "name", name)
 
-		return nil, err
+		return nil, kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return transform(k8sMR), nil
 }
 
-func (kc *deploymentK8sRepository) GetModelRouteList(options ...kubernetes.ListOption) (
+func (kc *deploymentK8sRepository) GetModelRouteList(options ...filter.ListOption) (
 	[]deployment.ModelRoute, error,
 ) {
 	var k8sMRList v1alpha1.ModelRouteList
 
-	listOptions := &kubernetes.ListOptions{
+	listOptions := &filter.ListOptions{
 		Filter: nil,
 		Page:   &FirstPage,
 		Size:   &MaxSize,
@@ -121,7 +122,7 @@ func (kc *deploymentK8sRepository) DeleteModelRoute(name string) error {
 	); err != nil {
 		logC.Error(err, "Delete connection from k8s", "name", name)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return nil
@@ -135,7 +136,7 @@ func (kc *deploymentK8sRepository) UpdateModelRoute(route *deployment.ModelRoute
 	); err != nil {
 		logC.Error(err, "Get route from k8s", "name", route.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	// TODO: think about update, not replacing as for now
@@ -145,7 +146,7 @@ func (kc *deploymentK8sRepository) UpdateModelRoute(route *deployment.ModelRoute
 	if err := kc.k8sClient.Update(context.TODO(), &k8sMR); err != nil {
 		logC.Error(err, "Creation of the route", "name", route.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	route.Status = k8sMR.Status
