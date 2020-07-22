@@ -93,6 +93,5 @@ Pick artifact name
 Pick packaging image
     [Arguments]             ${input}
     ${image}                set variable  ${input.status.results[0]}
-    ${type_image}           evaluate  type($image)
     ${image_value}          set variable  ${image.value}
     [Return]                ${image_value}
