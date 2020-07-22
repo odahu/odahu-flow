@@ -4,7 +4,7 @@ spec:
   model:
     name: wine-mlflow-default-updated
     version: '1.1_updated'
-    artifactNameTemplate: '{{.Name}}-{{.Version}}'
+    artifactNameTemplate: '{{.Name}}-{{.Version}}.zip'
   toolchain: mlflow
   hyperParameters:
     alpha: '1.0'
