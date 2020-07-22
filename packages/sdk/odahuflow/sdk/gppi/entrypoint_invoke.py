@@ -208,7 +208,7 @@ def self_check():
                         'Testing of a predicition API is impossible. '
                         'OpenAPI schema will not be generated for the model.')
 
-    print('Self check is successful')
+    print('Self-check is successful')
 
 
 def self_check_caller(args):
@@ -274,7 +274,7 @@ def _configure_arg_parser() -> argparse.ArgumentParser:
 
     subparsers = _parser.add_subparsers()
 
-    parser_self_check = subparsers.add_parser('self_check', help='Self check GPPI correctness')
+    parser_self_check = subparsers.add_parser('self_check', help='Self-check GPPI correctness')
     parser_self_check.set_defaults(func=self_check_caller)
 
     parser_predict = subparsers.add_parser('predict', help='Make predictions using GPPI model')
