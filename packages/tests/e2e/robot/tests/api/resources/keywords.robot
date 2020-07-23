@@ -4,15 +4,15 @@ Library             Collections
 
 *** Keywords ***
 Call API
-    [Arguments]                  ${keyword}  @{arguments}
-    ${result}                    Run Keyword  ${keyword}  @{arguments}
+    [Arguments]                  ${keyword}  @{arguments}  &{named arguments}
+    ${result}                    Run Keyword  ${keyword}  @{arguments}  &{named arguments}
     Log                          ${result}
     [Return]                     ${result}
 
 Log id
     [Arguments]                  ${input}
     ${output}                    set variable  ${input.id}
-    Log  ${output}
+    Log                          ${output}
     [Return]                     ${output}
 
 Log Status
@@ -85,13 +85,15 @@ Command response list should not contain id
     should be equal as integers         ${list_length}  0
 
 Pick artifact name
-    [Arguments]             ${input}
-    ${artifact}             set variable  ${input.status.artifacts[0]}
+    [Arguments]             ${training id}
+    ${result}               Call API  training get id  ${training id}
+    ${artifact}             set variable  ${result.status.artifacts[0]}
     ${artifact_name}        set variable  ${artifact.artifact_name}
     [Return]                ${artifact_name}
 
 Pick packaging image
-    [Arguments]             ${input}
-    ${image}                set variable  ${input.status.results[0]}
+    [Arguments]             ${packaging id}
+    ${result}               Call API  packaging get id  ${packaging id}
+    ${image}                set variable  ${result.status.results[0]}
     ${image_value}          set variable  ${image.value}
     [Return]                ${image_value}
