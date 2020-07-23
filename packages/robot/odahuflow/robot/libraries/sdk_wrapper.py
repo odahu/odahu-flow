@@ -231,13 +231,20 @@ class Toolchain:
     def toolchain_delete(ti_id: str):
         return ToolchainIntegrationClient().delete(ti_id)
 
+import json
+from odahuflow.sdk import config
+
 
 class Model:
 
     @staticmethod
-    def model_get():
-        return ModelClient().info()
+    def model_get(url=None, token=config.API_TOKEN, **kwargs):
+        return ModelClient(url, token, **kwargs).info()
 
     @staticmethod
-    def model_post(**parameters):
-        return ModelClient().invoke(**parameters)
+    def model_post(url=None, token=config.API_TOKEN, json_input=None, **kwargs):
+
+        json_input  = json.dumps(json_input)
+        result = ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
+
+        return json.dumps(result)
