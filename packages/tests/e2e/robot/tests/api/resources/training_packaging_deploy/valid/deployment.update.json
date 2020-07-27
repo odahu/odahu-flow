@@ -1,0 +1,19 @@
+kind: ModelDeployment
+id: wine-api-testing
+spec:
+  image:
+  resources:
+    limits:
+      gpu: ''
+      cpu: '2'
+      memory: '2Gi'
+    requests:
+      gpu: ''
+      cpu: '1'
+      memory: '1Gi'
+  minReplicas: 3
+  maxReplicas: 5
+  livenessProbeInitialDelay: 10
+  readinessProbeInitialDelay: 10
+  roleName: test_updated
+  imagePullConnID: docker-ci
