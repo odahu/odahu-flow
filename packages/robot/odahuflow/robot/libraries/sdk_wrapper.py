@@ -243,8 +243,4 @@ class Model:
 
     @staticmethod
     def model_post(url=None, token=config.API_TOKEN, json_input=None, **kwargs):
-
-        json_input  = json.dumps(json_input)
-        result = ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
-
-        return json.dumps(result)
+        return ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
