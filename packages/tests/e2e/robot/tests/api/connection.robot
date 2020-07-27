@@ -32,8 +32,7 @@ Update GIT connection
     sleep                       1s  # waiting to have, for sure, different time between createdAt and updatedAt
     Call API                    connection put  ${RES_DIR}/valid/git_connection_update.yaml
     ${result}                   Call API  connection get id  ${GIT_CONN}
-    ${result_status}            Log Status  ${result}
-    should not be equal         ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
+    CreatedAt and UpdatedAt times should not be equal  ${result}
 
 Get GIT connection
     [Documentation]  getting GIT connection
@@ -44,7 +43,7 @@ Update Docker connection
     [Documentation]  update Docker connection
     Call API                    connection put  ${RES_DIR}/valid/docker_connection_create.json
     ${result}                   Call API  connection get id  ${DOCKER_CONN}
-    should be equal             ${result.id}  ${DOCKER_CONN}
+    ID should be equal          ${result}  ${DOCKER_CONN}
 
 Get Decrypted Docker connection
     [Documentation]  get decrypted Docker connection

@@ -23,36 +23,36 @@ Get list of packagers
 Create Docker CLI packager
     Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
     ${check}                    Call API  packager get id  ${DOCKER_CLI}
-    should be equal             ${check.spec.default_image}  created
-    should be equal             ${check.spec.entrypoint}  created
+    Default Docker image should be equal  ${check}  created
+    Default Entrypoint should be equal  ${check}  created
 
 Create Docker REST packager
     Call API                    packager post  ${RES_DIR}/valid/docker_rest_create.json
     ${check}                    Call API  packager get id  ${DOCKER_REST}
-    should be equal             ${check.spec.default_image}  created
-    should be equal             ${check.spec.entrypoint}  created
+    Default Docker image should be equal  ${check}  created
+    Default Entrypoint should be equal  ${check}  created
 
 Update Docker CLI packager
     sleep                       1s
     Call API                    packager put  ${RES_DIR}/valid/docker_cli_update.json
     ${check}                    Call API  packager get id  ${DOCKER_CLI}
-    should be equal             ${check.spec.default_image}  updated
-    should be equal             ${check.spec.entrypoint}  updated
+    Default Docker image should be equal  ${check}  updated
+    Default Entrypoint should be equal  ${check}  updated
 
 Update Docker REST packager
     Call API                    packager put  ${RES_DIR}/valid/docker_rest_update.yaml
     ${check}                    Call API  packager get id  ${DOCKER_REST}
-    should be equal             ${check.spec.default_image}  updated
-    should be equal             ${check.spec.entrypoint}  updated
+    Default Docker image should be equal  ${check}  updated
+    Default Entrypoint should be equal  ${check}  updated
 
 Get updated list of packagers
     Command response list should contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
 
 Get Docker CLI and REST packagers by id
     ${result}                   Call API  packager get id  ${DOCKER_CLI}
-    should be equal             ${result.id}  ${DOCKER_CLI}
+    ID should be equal          ${result}  ${DOCKER_CLI}
     ${result}                   Call API  packager get id  ${DOCKER_REST}
-    should be equal             ${result.id}  ${DOCKER_REST}
+    ID should be equal          ${result}  ${DOCKER_REST}
 
 Delete Docker CLI packager
     ${result}                   Call API   packager delete  ${DOCKER_CLI}

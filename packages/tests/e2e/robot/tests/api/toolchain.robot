@@ -23,36 +23,36 @@ Get list of toolchains
 Create mlflow toolchain
     Call API                    toolchain post  ${RES_DIR}/valid/mlflow_create.yaml
     ${check}                    Call API  toolchain get id  ${MLFLOW}
-    should be equal             ${check.spec.default_image}  created
-    should be equal             ${check.spec.entrypoint}  created
+    Default Docker image should be equal  ${check}  created
+    Default Entrypoint should be equal  ${check}  created
 
 Create mlflow-gpu toolchain
     Call API                    toolchain post  ${RES_DIR}/valid/mlflow-gpu_create.json
     ${check}                    Call API  toolchain get id  ${MLFLOW_GPU}
-    should be equal             ${check.spec.default_image}  created
-    should be equal             ${check.spec.entrypoint}  created
+    Default Docker image should be equal  ${check}  created
+    Default Entrypoint should be equal  ${check}  created
 
 Update mlflow toolchain
     sleep                       1s
     Call API                    toolchain put  ${RES_DIR}/valid/mlflow_update.json
     ${check}                    Call API  toolchain get id  ${MLFLOW}
-    should be equal             ${check.spec.default_image}  updated
-    should be equal             ${check.spec.entrypoint}  updated
+    Default Docker image should be equal  ${check}  updated
+    Default Entrypoint should be equal  ${check}  updated
 
 Update mlflow-gpu toolchain
     Call API                    toolchain put  ${RES_DIR}/valid/mlflow-gpu_update.yaml
     ${check}                    Call API  toolchain get id  ${MLFLOW_GPU}
-    should be equal             ${check.spec.default_image}  updated
-    should be equal             ${check.spec.entrypoint}  updated
+    Default Docker image should be equal  ${check}  updated
+    Default Entrypoint should be equal  ${check}  updated
 
 Get updated list of toolchains
     Command response list should contain id  toolchain  ${MLFLOW}  ${MLFLOW_GPU}
 
 Get mlflow and mlflow-gpu toolchains by id
     ${result}                   Call API  toolchain get id  ${MLFLOW}
-    should be equal             ${result.id}  ${MLFLOW}
+    ID should be equal          ${result}  ${MLFLOW}
     ${result}                   Call API  toolchain get id  ${MLFLOW_GPU}
-    should be equal             ${result.id}  ${MLFLOW_GPU}
+    ID should be equal          ${result}  ${MLFLOW_GPU}
 
 Delete mlflow toolchain
     ${result}                   Call API  toolchain delete  ${MLFLOW}
