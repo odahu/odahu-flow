@@ -17,7 +17,6 @@
 Security commands for odahuflow cli
 """
 import logging
-import sys
 
 import click
 from click import UsageError
