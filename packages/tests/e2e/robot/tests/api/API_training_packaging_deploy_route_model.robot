@@ -13,6 +13,9 @@ ${REQUEST}                          SEPARATOR=
 ...                                 "residual sugar", "chlorides", "free sulfur dioxide", "total sulfur dioxide", "density",
 ...                                 "pH", "sulphates", "alcohol" ], "data": [ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ] }
 
+${WrongHttpStatusCode}              WrongHttpStatusCode: Got error from server: modeldeployments.odahuflow.odahu.org
+...                                 "wine-api-testing" not found (status: 404)
+
 *** Settings ***
 Documentation       API of training, packaging and deployment
 Resource            ../../resources/keywords.robot
@@ -40,7 +43,7 @@ Create Model Training, mlflow toolchain, default
     [Documentation]             create model training and check that one exists
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.default.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  result=${result}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
 Create Model Training, mlflow toolchain, not default
@@ -48,7 +51,7 @@ Create Model Training, mlflow toolchain, not default
     [Documentation]             create model training and check that one exists
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.not_default.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  result=${result}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
 Create Model Training, mlflow-gpu toolchain, not default
@@ -59,7 +62,7 @@ Create Model Training, mlflow-gpu toolchain, not default
 
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow-gpu.not_default.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  result=${result}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  training  40  30s  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
 Get Model Training by id
@@ -67,11 +70,11 @@ Get Model Training by id
     ${result}                   Call API  training get id  ${TRAIN_MLFLOW_NOT_DEFAULT}
     ID should be equal          ${result}  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
-Update Model Training, mlflow toolchain, not default
+Update Model Training, mlflow toolchain, default
     [Tags]                      training
     ${result}                   Call API  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  result=${result}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
@@ -87,18 +90,18 @@ Packaging's list doesn't contain packaging
 Create packaging
     [Tags]                      packaging
     ${artifact_name}            Pick artifact name  ${TRAIN_MLFLOW_DEFAULT}
-    ${result_pack}              Call API  packaging post  ${RES_DIR}/valid/packaging.yaml  ${artifact_name}
+    Call API                    packaging post  ${RES_DIR}/valid/packaging.create.yaml  ${artifact_name}
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  packaging  result=${result_pack}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  packaging  30  30s  entity=${PACKAGING}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
 Update packaging
     [Tags]                      packaging
     ${result}                   Call API  packaging put  ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
-    ${check_changes}            Call API  packaging get id  ${PACKAGING}
-    should be equal             ${check_changes.spec.integration_name}  docker-rest
+    ${result_pack}              Call API  packaging get id  ${PACKAGING}
+    should be equal             ${result_pack.spec.integration_name}  docker-rest
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  packaging  result=${result_pack}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  packaging  30  30s  entity=${PACKAGING}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
@@ -123,32 +126,32 @@ Check route doesn't exist before deployment
 Create deployment
     [Tags]                      deployment
     ${image}                    Pick packaging image  ${PACKAGING}
-    ${result_deploy}            Call API  deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${image}
+    Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${image}
     ${exp_result}               create List   Ready
-    ${result}                   Wait until command finishes and returns result  deployment  result=${result_deploy}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Status State Should Be      ${result}  Ready
 
 Update deployment
     [Tags]                      deployment
     ${image}                    Pick packaging image  ${PACKAGING}
-    ${result_deploy}            Call API  deployment put  ${RES_DIR}/valid/deployment.update.json  ${image}
+    Call API                    deployment put  ${RES_DIR}/valid/deployment.update.json  ${image}
     ${check_changes}            Call API  deployment get id  ${DEPLOYMENT}
     should be equal             ${check_changes.spec.role_name}  test_updated
     ${exp_result}               create List   Ready
-    ${result}                   Wait until command finishes and returns result  deployment  result=${result_deploy}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Status State Should Be      ${result}  Ready
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
-Get deployment by id
+Check by id that deployment exists
     [Tags]                      deployment
     ${result}                   Call API  deployment get id  ${DEPLOYMENT}
     ID should be equal          ${result}  ${DEPLOYMENT}
 
-Get list of routes
+Check that list of routes contains
     [Tags]                      route
     Command response list should contain id  route  ${MODEL}
 
-Get route by id
+Check by id that route exists
     [Tags]                      route
     ${result}                   Call API  route get id  ${MODEL}
     ID should be equal          ${result}  ${MODEL}
@@ -187,13 +190,12 @@ Delete Model Packaging and Check that Model Packaging does not exist
     Call API                    packaging delete  ${PACKAGING}
     Command response list should not contain id  packaging  ${PACKAGING}
 
-Delete Model Deployment and check that Model Deployment does not exist
+Delete Model Deployment and Check that Model Deployment does not exist
     [Tags]                      deployment
-    Command response list should contain id  ${DEPLOYMENT}
+    [Documentation]             check that after deletion of deployment the model, route is also deleted
+    Command response list should contain id  deployment  ${DEPLOYMENT}
     Call API                    deployment delete  ${DEPLOYMENT}
-    Command response list should not contain id  ${DEPLOYMENT}
-    Call API                    deployment get id  ${DEPLOYMENT}
-
-Check updated list of Models after delete
-    [Tags]                      model
-    Command response list should not contain id  model  ${MODEL}
+    Wait until delete finished  deployment  entity=${DEPLOYMENT}
+    Command response list should not contain id  deployment  ${DEPLOYMENT}
+    Command response list should not contain id  route  ${MODEL}
+    Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT}
