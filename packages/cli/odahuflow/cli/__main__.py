@@ -17,6 +17,6 @@
 CLI main entrypoint
 """
 
-from .main import base
+from .main import main
 
-base()
+main()
