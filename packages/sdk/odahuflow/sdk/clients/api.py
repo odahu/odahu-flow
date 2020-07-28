@@ -506,8 +506,8 @@ class RemoteAPIClient:
         """
         try:
             return self.query("/health")
-        except ValueError:
-            pass
+        except ValueError as e:
+            raise APIConnectionException(*e.args)
 
 
 class AsyncRemoteAPIClient:

@@ -96,16 +96,19 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
         fetch_openid_conf(config.ISSUER_URL)
 
     # login
+    api_client = api.RemoteAPIClient(api_host, token, client_id, client_secret,
+                                     non_interactive=not is_interactive_login)
     try:
-        api_client = api.RemoteAPIClient(api_host, token, client_id, client_secret,
-                                         non_interactive=not is_interactive_login)
-
         api_client.info()
-
-        print('Success! Credentials have been saved.')
     except api.IncorrectAuthorizationToken as wrong_token:
         LOG.error('Wrong authorization token\n%s', wrong_token)
-        sys.exit(1)
+        raise
+    except api.APIConnectionException as connection_exc:
+        LOG.error(f'Failed to connect to API host!'
+                  f'Error: {connection_exc}')
+        raise
+
+    print('Success! Credentials have been saved.')
 
 
 @click.command()
