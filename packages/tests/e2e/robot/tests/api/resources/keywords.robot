@@ -5,7 +5,13 @@ Library             Collections
 *** Keywords ***
 Call API
     [Arguments]                  ${keyword}  @{arguments}  &{named arguments}
-    ${result}                    Run Keyword  ${keyword}  @{arguments}  &{named arguments}
+    ${result}                    run keyword  ${keyword}  @{arguments}  &{named arguments}
+    Log                          ${result}
+    [Return]                     ${result}
+
+Call API and get Error
+    [Arguments]                  ${expected_error}  ${keyword}  @{arguments}  &{named arguments}
+    ${result}                    run keyword and expect error  ${expected_error}  ${keyword}  @{arguments}  &{named arguments}
     Log                          ${result}
     [Return]                     ${result}
 
@@ -57,11 +63,11 @@ Password connection should not be equal
 
 Default Docker image should be equal
     [Arguments]                  ${result}  ${exp_value}
-    should be equal              ${result.spec.default_image} ${exp_value}
+    should be equal              ${result.spec.default_image}  ${exp_value}
 
 Default Entrypoint should be equal
     [Arguments]                  ${result}  ${exp_value}
-    should be equal              ${result.spec.entrypoint} ${exp_value}
+    should be equal              ${result.spec.entrypoint}  ${exp_value}
 
 CreatedAt and UpdatedAt times should not be equal
     [Arguments]                  ${result}
@@ -69,15 +75,38 @@ CreatedAt and UpdatedAt times should not be equal
     should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
 Wait until command finishes and returns result
-    [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${result}=  @{exp_result}=succeeded
+    [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
     FOR     ${i}    IN RANGE     ${cycles}
-        ${result}                Call API  ${command} get id  ${result.id}
+        ${result}                Call API  ${command} get id  ${entity}
         ${list_contain}          get match count  ${exp_result}  ${result.status.state}
         log   ${list_contain}
         exit for loop if         '${list_contain}' != '0'
         Sleep                    ${sleep_time}
     END
     [Return]  ${result}
+
+Wait until delete finished
+    [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${entity}=  @{exp_result}=deleting
+    FOR     ${i}    IN RANGE     ${cycles}
+        ${check}                 Check command response list contains id  ${command}  ${entity}
+
+        exit for loop if         ${check} == ${FALSE}
+        sleep                    ${sleep_time}
+    END
+
+Check command response list contains id
+    [Arguments]                         ${command}  @{value}
+    ${result}                           Call API  ${command} get
+    ${list_length}                      get length  ${result}
+
+    FOR     ${i}  IN  @{result}
+        exit for loop if                $i.id in $value
+        ${list_length}                  evaluate  ${list_length} - 1
+    END
+
+    ${result}                           run keyword if  '${list_length}' != '0'  set variable  ${TRUE}
+    ...                                                            ELSE  set variable  ${FALSE}
+    [Return]                            ${result}
 
 Command response list should contain id
     [Arguments]                         ${command}  @{value}
