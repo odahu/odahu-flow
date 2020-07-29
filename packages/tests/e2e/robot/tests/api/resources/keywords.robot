@@ -86,7 +86,7 @@ Wait until command finishes and returns result
     [Return]  ${result}
 
 Wait until delete finished
-    [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${entity}=  @{exp_result}=deleting
+    [Arguments]    ${command}    ${cycles}=60  ${sleep_time}=30s  ${entity}=  @{exp_result}=deleting
     FOR     ${i}    IN RANGE     ${cycles}
         ${check}                 Check command response list contains id  ${command}  ${entity}
 
