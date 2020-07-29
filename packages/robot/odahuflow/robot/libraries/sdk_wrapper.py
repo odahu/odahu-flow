@@ -1,3 +1,7 @@
+# for class Model
+import json
+from odahuflow.sdk import config
+
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.configuration import ConfigurationClient
 from odahuflow.sdk.clients.connection import ConnectionClient
@@ -230,9 +234,6 @@ class Toolchain:
     @staticmethod
     def toolchain_delete(ti_id: str):
         return ToolchainIntegrationClient().delete(ti_id)
-
-import json
-from odahuflow.sdk import config
 
 
 class Model:
