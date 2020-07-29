@@ -16,7 +16,7 @@ class TrainerConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, auth: AuthConfig=None, model_training_id: str=None, mt_file: str=None, output_training_dir: str=None):  # noqa: E501
+    def __init__(self, auth: AuthConfig=None, model_training_id: str=None, mt_file: str=None, output_dir: str=None):  # noqa: E501
         """TrainerConfig - a model defined in Swagger
 
         :param auth: The auth of this TrainerConfig.  # noqa: E501
@@ -25,27 +25,27 @@ class TrainerConfig(Model):
         :type model_training_id: str
         :param mt_file: The mt_file of this TrainerConfig.  # noqa: E501
         :type mt_file: str
-        :param output_training_dir: The output_training_dir of this TrainerConfig.  # noqa: E501
-        :type output_training_dir: str
+        :param output_dir: The output_dir of this TrainerConfig.  # noqa: E501
+        :type output_dir: str
         """
         self.swagger_types = {
             'auth': AuthConfig,
             'model_training_id': str,
             'mt_file': str,
-            'output_training_dir': str
+            'output_dir': str
         }
 
         self.attribute_map = {
             'auth': 'auth',
             'model_training_id': 'modelTrainingId',
             'mt_file': 'mtFile',
-            'output_training_dir': 'outputTrainingDir'
+            'output_dir': 'outputDir'
         }
 
         self._auth = auth
         self._model_training_id = model_training_id
         self._mt_file = mt_file
-        self._output_training_dir = output_training_dir
+        self._output_dir = output_dir
 
     @classmethod
     def from_dict(cls, dikt) -> 'TrainerConfig':
@@ -126,24 +126,24 @@ class TrainerConfig(Model):
         self._mt_file = mt_file
 
     @property
-    def output_training_dir(self) -> str:
-        """Gets the output_training_dir of this TrainerConfig.
+    def output_dir(self) -> str:
+        """Gets the output_dir of this TrainerConfig.
 
         The path to the dir when a user trainer will save their result.  # noqa: E501
 
-        :return: The output_training_dir of this TrainerConfig.
+        :return: The output_dir of this TrainerConfig.
         :rtype: str
         """
-        return self._output_training_dir
+        return self._output_dir
 
-    @output_training_dir.setter
-    def output_training_dir(self, output_training_dir: str):
-        """Sets the output_training_dir of this TrainerConfig.
+    @output_dir.setter
+    def output_dir(self, output_dir: str):
+        """Sets the output_dir of this TrainerConfig.
 
         The path to the dir when a user trainer will save their result.  # noqa: E501
 
-        :param output_training_dir: The output_training_dir of this TrainerConfig.
-        :type output_training_dir: str
+        :param output_dir: The output_dir of this TrainerConfig.
+        :type output_dir: str
         """
 
-        self._output_training_dir = output_training_dir
+        self._output_dir = output_dir

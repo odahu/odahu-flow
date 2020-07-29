@@ -78,7 +78,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(up{job=~\".*api.*\", namespace=\"$namespace\"})",
+          "expr": "sum(up{job=~\".*api.*\",namespace=\"$namespace\"})",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -139,7 +139,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "time() - process_start_time_seconds{job=~\".*-api\", namespace=\"$namespace\"}",
+          "expr": "time() - process_start_time_seconds{job=~\".*-api\",namespace=\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Pod name = {{pod}}",
@@ -250,24 +250,24 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(pod) (kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\", pod=~\".*api.*\", container=\"api\"})",
+              "expr": "sum by(pod) (kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\".*api.*\",container=\"api\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Requests of memory: pod name = {{pod}}",
               "refId": "A"
             },
             {
-              "expr": "sum by(pod) (kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\", pod=~\".*api.*\", container=\"api\"})",
+              "expr": "sum by(pod) (kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\",pod=~\".*api.*\",container=\"api\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Limit of memory: pod name = {{pod}}",
               "refId": "B"
             },
             {
-              "expr": "sum by(pod_name) (container_memory_usage_bytes{namespace=\"$namespace\", pod_name=~\".*api.*\", container_name=\"api\"})",
+              "expr": "sum by(pod) (container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*api.*\",container=\"api\"})",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Usage of memory: pod name = {{pod_name}}",
+              "legendFormat": "Usage of memory: pod name = {{pod}}",
               "refId": "C"
             }
           ],
@@ -365,21 +365,21 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(pod) (kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\", pod=~\".*api.*\", container=\"api\"})",
+              "expr": "sum by(pod) (kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\",pod=~\".*api.*\",container=\"api\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Requests of cpu: pod name = {{pod}}",
               "refId": "A"
             },
             {
-              "expr": "sum by(pod) (kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\", pod=~\".*api.*\", container=\"api\"})",
+              "expr": "sum by(pod) (kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\",pod=~\".*api.*\",container=\"api\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Limit of cpu: pod name = {{pod}}",
               "refId": "B"
             },
             {
-              "expr": "sum by(pod_name) (rate(process_cpu_seconds_total{namespace=\"$namespace\", pod=~\".*api.*\"}[5m]))",
+              "expr": "sum by(pod) (rate(process_cpu_seconds_total{namespace=\"$namespace\",pod=~\".*api.*\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Usage of cpu: pod name = {{pod}}",
@@ -469,17 +469,17 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(pod_name) (rate(container_network_receive_bytes_total{namespace=\"$namespace\", pod_name=~\".*api.*\"}[5m]))",
+              "expr": "sum by(pod) (rate(container_network_receive_bytes_total{namespace=\"$namespace\",pod=~\".*api.*\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Recieve: pod name = {{pod_name}}",
+              "legendFormat": "Recieve: pod name = {{pod}}",
               "refId": "C"
             },
             {
-              "expr": "sum by(pod_name) (rate(container_network_transmit_bytes_total{namespace=\"$namespace\", pod_name=~\".*api.*\"}[5m]))",
+              "expr": "sum by(pod) (rate(container_network_transmit_bytes_total{namespace=\"$namespace\",pod=~\".*api.*\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "Transmit: pod name = {{pod_name}}",
+              "legendFormat": "Transmit: pod name = {{pod}}",
               "refId": "D"
             }
           ],
@@ -1018,7 +1018,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "go_memstats_next_gc_bytes{namespace=\"$namespace\", pod=~\".*api.*\"}",
+              "expr": "go_memstats_next_gc_bytes{namespace=\"$namespace\",pod=~\".*api.*\"}",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Pod name = {{pod}}",
@@ -1103,7 +1103,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "go_memstats_stack_sys_bytes{namespace=\"$namespace\", pod=~\".*api.*\"}\n",
+              "expr": "go_memstats_stack_sys_bytes{namespace=\"$namespace\",pod=~\".*api.*\"}\n",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Pod name = {{pod}}",

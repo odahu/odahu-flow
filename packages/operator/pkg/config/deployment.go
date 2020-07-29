@@ -1,5 +1,5 @@
 //
-//    Copyright 2019 EPAM Systems
+//    Copyright 2020 EPAM Systems
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package config
 
-import odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+import (
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+)
 
 var (
 	defaultDeploymentMemoryLimit    = "256Mi"
-	defaultDeploymentCPULimit       = "256m"
+	defaultDeploymentCPULimit       = "250m"
 	defaultDeploymentMemoryRequests = "128Mi"
-	defaultDeploymentCPURequests    = "128m"
+	defaultDeploymentCPURequests    = "125m"
 )
 
 type JWKS struct {
@@ -64,7 +67,7 @@ type ModelDeploymentConfig struct {
 	// Kubernetes node selector for model deployments
 	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model deployments
-	Toleration map[string]string          `json:"toleration"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 	Istio      ModelDeploymentIstioConfig `json:"istio"`
 	// Default resources for deployment pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
