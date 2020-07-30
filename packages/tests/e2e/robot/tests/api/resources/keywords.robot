@@ -78,7 +78,7 @@ Wait until command finishes and returns result
     [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
     FOR     ${i}    IN RANGE     ${cycles}
         ${result}                Call API  ${command} get id  ${entity}
-        ${list_contain}          get match count  ${exp_result}  ${result.status.state}
+        ${list_contain}          get match count  ${exp_result}  str(result.status.state or '')
         log   ${list_contain}
         exit for loop if         '${list_contain}' != '0'
         Sleep                    ${sleep_time}
