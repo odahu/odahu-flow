@@ -13,6 +13,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
 Force Tags          api  sdk  toolchain
+Test Timeout        5 minutes
 
 
 *** Test Cases ***

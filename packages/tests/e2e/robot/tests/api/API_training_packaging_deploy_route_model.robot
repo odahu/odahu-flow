@@ -17,7 +17,7 @@ ${WrongHttpStatusCode}              WrongHttpStatusCode: Got error from server: 
 ...                                 "wine-api-testing" not found (status: 404)
 
 *** Settings ***
-Documentation       API of training, packaging and deployment
+Documentation       API of training, packaging, deployment, route and model
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
@@ -29,7 +29,8 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  sdk  testing
+Force Tags          api  sdk
+Test Timeout        60 minutes
 
 *** Test Cases ***
 Check model trainings do not exist

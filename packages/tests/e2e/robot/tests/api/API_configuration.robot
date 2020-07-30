@@ -8,6 +8,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
 Force Tags          api  sdk  configuration
+Test Timeout        5 minutes
 
 
 *** Test Cases ***
