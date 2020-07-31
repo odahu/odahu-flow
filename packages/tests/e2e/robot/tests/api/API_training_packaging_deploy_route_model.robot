@@ -193,7 +193,7 @@ Delete Model Packaging and Check that Model Packaging does not exist
 
 Delete Model Deployment and Check that Model Deployment does not exist
     [Tags]                      deployment
-    [Documentation]             check that after deletion of deployment the model, route is also deleted
+    [Documentation]             check that after deletion of deployment the model and route are also deleted
     Command response list should contain id  deployment  ${DEPLOYMENT}
     Call API                    deployment delete  ${DEPLOYMENT}
     Wait until delete finished  deployment  entity=${DEPLOYMENT}
