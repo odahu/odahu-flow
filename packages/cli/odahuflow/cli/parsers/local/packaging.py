@@ -33,11 +33,11 @@ from odahuflow.sdk.models import K8sPackager, ModelPackaging, PackagingIntegrati
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group('packaging')
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context
-def packaging(ctx: click.core.Context, url: str, token: str):
+def packaging_group(ctx: click.core.Context, url: str, token: str):
     """
     Local packaging process.\n
     Alias for the command is pack.
@@ -45,7 +45,7 @@ def packaging(ctx: click.core.Context, url: str, token: str):
     ctx.obj = ModelPackagingClient(url, token)
 
 
-@packaging.command('cleanup-containers')
+@packaging_group.command('cleanup-containers')
 def cleanup_containers():
     """
     \b
@@ -58,7 +58,7 @@ def cleanup_containers():
     cleanup_packaging_docker_containers()
 
 
-@packaging.command()
+@packaging_group.command()
 @click.option('--pack-id', '--id', help='Model packaging ID', required=True)
 @click.option('--manifest-file', '-f', type=click.Path(), multiple=True,
               help='Path to a ODAHU-flow manifest file')

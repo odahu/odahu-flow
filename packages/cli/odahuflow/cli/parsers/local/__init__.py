@@ -17,8 +17,8 @@
 Group of local commands
 """
 import click
-from odahuflow.cli.parsers.local.packaging import packaging
-from odahuflow.cli.parsers.local.training import training
+from odahuflow.cli.parsers.local.packaging import packaging_group
+from odahuflow.cli.parsers.local.training import training_group
 from odahuflow.cli.utils.abbr import AbbreviationGroup
 
 
@@ -31,8 +31,8 @@ def local():
 
 
 LOCAL_GROUPS = [
-    training,
-    packaging,
+    training_group,
+    packaging_group,
 ]
 
 # Initialize local groups
