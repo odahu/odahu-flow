@@ -79,13 +79,9 @@ def test_local_training_relative_output_dir(mocker: MockFixture, cli_runner: Cli
 
         abs_path = os.path.abspath(temp_dir)
 
-        print(f'call args list: {docker_mock.containers.run.call_args_list}')
         for call in docker_mock.containers.run.call_args_list:
-            print(f'call: {call}, call type: {type(call)}, dir(call): {dir(call)}')
-            print(f'call kwargs: {call.kwargs}, call kwargs type: {type(call.kwargs)}')
-            print(f'call kwargs type: {type(call.kwargs)}')
-            mounts: List[Mount] = call.kwargs.get('mounts', [])
-            print(f'mounts object: {mounts}, type: {type(mounts)}')
+            call_kwargs = call[1]
+            mounts: List[Mount] = call_kwargs.get('mounts', [])
 
             for mount in filter(lambda m: m.get('Target') == MODEL_OUTPUT_CONTAINER_PATH, mounts):
                 assert mount.get('Source') == abs_path
