@@ -33,6 +33,7 @@ Update GIT connection
     sleep                       1s  # waiting to have, for sure, different time between createdAt and updatedAt
     Call API                    connection put  ${RES_DIR}/valid/git_connection_update.yaml
     ${result}                   Call API  connection get id  ${GIT_CONN}
+    should be equal             ${result.spec.description}  link to the Git repo odahu-flow-examples
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
 Get GIT connection
@@ -42,9 +43,11 @@ Get GIT connection
 
 Update Docker connection
     [Documentation]  update Docker connection
-    Call API                    connection put  ${RES_DIR}/valid/docker_connection_create.json
+    Call API                    connection put  ${RES_DIR}/valid/docker_connection_update.json
     ${result}                   Call API  connection get id  ${DOCKER_CONN}
     ID should be equal          ${result}  ${DOCKER_CONN}
+    should be equal             ${result.spec.description}  updated
+    CreatedAt and UpdatedAt times should not be equal  ${result}
 
 Get Decrypted Docker connection
     [Documentation]  get decrypted Docker connection
