@@ -79,7 +79,7 @@ def create(client: PackagingIntegrationClient, pi_id: str, file: str, output_for
     You should specify a path to file with a packaging integration.
     The file must contain only one packaging integration.
     For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples packaging integrations than you should use "odahuflowctl res apply" instead.
+    If you want to create multiples packaging integrations then you should use "odahuflowctl bulk apply" instead.
     If you provide the packaging integration id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl pack-integration create -f pi.yaml --id examples-git
@@ -111,7 +111,7 @@ def edit(client: PackagingIntegrationClient, pi_id: str, file: str, output_forma
     You should specify a path to file with a packaging integration.
     The file must contain only one packaging integration.
     For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples packaging integrations than you should use "odahuflowctl res apply" instead.
+    If you want to update multiples packaging integrations then you should use "odahuflowctl bulk apply" instead.
     If you provide the packaging integration id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl pack-integration update -f pi.yaml --id examples-git
@@ -142,7 +142,7 @@ def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not
     Delete a packaging integration.\n
     For this command, you must provide a packaging integration ID or path to file with one packaging integration.
     The file must contain only one packaging integration.
-    If you want to delete multiples packaging integrations than you should use "odahuflowctl res delete" instead.
+    If you want to delete multiples packaging integrations then you should use "odahuflowctl bulk delete" instead.
     For now, CLI supports yaml and JSON file formats.
     The command will be failed if you provide both arguments.\n
     Usage example:\n
