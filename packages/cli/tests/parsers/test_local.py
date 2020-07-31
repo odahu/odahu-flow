@@ -81,5 +81,5 @@ def test_local_training_relative_output_dir(mocker: MockFixture, cli_runner: Cli
 
         for call in docker_mock.containers.run.call_args_list:
             mounts: List[Mount] = call.kwargs.get('mounts', [])
-            for mount in filter(lambda mount: mount.get('Target') == MODEL_OUTPUT_CONTAINER_PATH, mounts):
+            for mount in filter(lambda m: m.get('Target') == MODEL_OUTPUT_CONTAINER_PATH, mounts):
                 assert mount.get('Source') == abs_path
