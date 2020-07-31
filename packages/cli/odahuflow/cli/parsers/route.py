@@ -82,7 +82,7 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
     Create a model route.\n
     You should specify a path to file with a model route. The file must contain only one model route.
     For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples routes than you should use "odahuflowctl bulk apply" instead.
+    If you want to create multiples routes then you should use "odahuflowctl bulk apply" instead.
     If you provide the model route id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl route create -f route.yaml --id examples-git
