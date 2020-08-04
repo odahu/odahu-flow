@@ -33,7 +33,7 @@ from odahuflow.sdk.models import K8sPackager, ModelPackaging, PackagingIntegrati
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group('packaging')
+@click.group(name='packaging')
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context
