@@ -36,11 +36,11 @@ from odahuflow.sdk.models import ToolchainIntegration, K8sTrainer
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(name='training')
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context
-def training(ctx: click.core.Context, url: str, token: str):
+def training_group(ctx: click.core.Context, url: str, token: str):
     """
     Local training process.\n
     Alias for the command is train.
@@ -48,7 +48,7 @@ def training(ctx: click.core.Context, url: str, token: str):
     ctx.obj = ModelTrainingClient(url, token)
 
 
-@training.command("list")
+@training_group.command("list")
 @click.option('--output-format', '-o', 'output_format',
               default=PLAIN_TEXT_OUTPUT_FORMAT, type=click.Choice([PLAIN_TEXT_OUTPUT_FORMAT, JSON_OUTPUT_FORMAT]))
 def training_list(output_format: str):
@@ -79,7 +79,7 @@ def training_list(output_format: str):
             click.echo(f'* {artifact}')
 
 
-@training.command('cleanup-artifacts')
+@training_group.command('cleanup-artifacts')
 def cleanup_artifacts():
     """
     \b
@@ -92,7 +92,7 @@ def cleanup_artifacts():
     cleanup_local_artifacts()
 
 
-@training.command('cleanup-containers')
+@training_group.command('cleanup-containers')
 def cleanup_containers():
     """
     \b
@@ -105,14 +105,14 @@ def cleanup_containers():
     cleanup_training_docker_containers()
 
 
-@training.command()
+@training_group.command()
 @click.option('--train-id', '--id', help='Model training ID', required=True)
 @click.option('--manifest-file', '-f', type=click.Path(), multiple=True,
               help='Path to a ODAHU-flow manifest file')
 @click.option('--manifest-dir', '-d', type=click.Path(), multiple=True,
               help='Path to a directory with ODAHU-flow manifest files')
-@click.option('--output-dir', '--output', type=click.Path(), help='Directory where model artifact will be saved.\
-                                                                  Training artifact name would be the same as the dir.')
+@click.option('--output-dir', '--output', type=click.Path(),
+              help='Directory where model artifact will be saved. Training artifact name would be the same as the dir.')
 @pass_obj
 def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], manifest_dir: List[str],
         output_dir: str):

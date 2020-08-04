@@ -97,7 +97,11 @@ def create_mt_config_file(trainer: K8sTrainer) -> None:
         LOGGER.debug(f"Saved the trainer configuration:\n{json.dumps(trainer_dict, indent=2)}")
 
 
-def start_train(trainer: K8sTrainer, output_dir: str):
+def start_train(trainer: K8sTrainer, output_dir: str) -> None:
+    """
+    :param trainer: container object for all configuration objects of a training
+    :param output_dir: path to directory to save result artifact (relative or absolute)
+    """
     create_mt_config_file(trainer)
 
     if not output_dir:
@@ -111,6 +115,7 @@ def start_train(trainer: K8sTrainer, output_dir: str):
         LOGGER.debug(f'Output model training directory is not provided. Generate the directory: {output_dir}')
 
     os.makedirs(output_dir, exist_ok=True)
+    output_dir = os.path.abspath(output_dir)
 
     launch_training_container(trainer, output_dir)
 
