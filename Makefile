@@ -161,7 +161,7 @@ helm-delete:
 ## install-python-linter: Install python test dependencies
 install-python-linter:
 	pip install pipenv pylint
-	cd containers/robot-tests && pipenv install --system --three --dev
+	cd packages/cli && pipenv install --system --three --dev
 
 ## python-lint: Lints python source code
 python-lint:
