@@ -360,7 +360,13 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnection() {
 
 	s.g.Expect(http.StatusCreated).Should(Equal(w.Code))
 	s.g.Expect(connResponse.ID).Should(Equal(connEntity.ID))
-	s.g.Expect(connResponse.Spec).Should(Equal(connEntity.Spec))
+	s.g.Expect(connResponse.Spec.URI).To(Equal(connEntity.Spec.URI))
+	s.g.Expect(connResponse.Spec.Type).To(Equal(connEntity.Spec.Type))
+
+	// Verify that secrets are masked
+	s.g.Expect(connResponse.Spec.Password).Should(Or(BeEmpty(), Equal(connection.DecryptedDataMask)))
+	s.g.Expect(connResponse.Spec.KeySecret).Should(Or(BeEmpty(), Equal(connection.DecryptedDataMask)))
+	s.g.Expect(connResponse.Spec.KeyID).Should(Or(BeEmpty(), Equal(connection.DecryptedDataMask)))
 
 	conn, err := s.connRepository.GetConnection(connID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())

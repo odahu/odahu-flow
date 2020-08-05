@@ -25,7 +25,7 @@ const (
 	GITType           = v1alpha1.ConnectionType("git")
 	DockerType        = v1alpha1.ConnectionType("docker")
 	EcrType           = v1alpha1.ConnectionType("ecr")
-	decryptedDataMask = "*****"
+	DecryptedDataMask = "*****"
 )
 
 var (
@@ -53,15 +53,15 @@ type Connection struct {
 // Replace sensitive data with mask in the connection
 func (c *Connection) DeleteSensitiveData() *Connection {
 	if len(c.Spec.Password) != 0 {
-		c.Spec.Password = decryptedDataMask
+		c.Spec.Password = DecryptedDataMask
 	}
 
 	if len(c.Spec.KeySecret) != 0 {
-		c.Spec.KeySecret = decryptedDataMask
+		c.Spec.KeySecret = DecryptedDataMask
 	}
 
 	if len(c.Spec.KeyID) != 0 {
-		c.Spec.KeyID = decryptedDataMask
+		c.Spec.KeyID = DecryptedDataMask
 	}
 
 	return c

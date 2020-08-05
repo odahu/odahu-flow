@@ -198,7 +198,7 @@ func (cc *controller) createConnection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, conn)
+	c.JSON(http.StatusCreated, conn.DeleteSensitiveData())
 }
 
 // @Summary Update a Connection
