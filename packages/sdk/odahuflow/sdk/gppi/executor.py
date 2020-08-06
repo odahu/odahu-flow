@@ -16,7 +16,7 @@
 
 """
 Helpers for working with `Trained Model Binary`
-Docs: https://odahu.github.io/gen_glossary.html#term-trained-model-binary
+Docs: https://docs.odahu.org/gen_glossary.html#term-trained-model-binary
 """
 import json
 import logging
@@ -197,7 +197,7 @@ class GPPITrainedModelBinary:
         * Run self-check `TrainedModelBinary`
 
     Additional Info:
-        * https://odahu.github.io/gen_glossary.html#term-general-python-prediction-interface
+        * https://docs.odahu.org/gen_glossary.html#term-general-python-prediction-interface
     """
 
     def __init__(self, manifest_path: str, use_current_env: bool = False, env_name: str = '', skip_deps=False):
