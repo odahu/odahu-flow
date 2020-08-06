@@ -191,14 +191,16 @@ func (cc *controller) createConnection(c *gin.Context) {
 		return
 	}
 
-	if err := cc.connRepository.CreateConnection(&conn); err != nil {
+	var createdConnection *connection.Connection
+	var err error
+	if createdConnection, err = cc.connRepository.CreateConnection(&conn); err != nil {
 		logC.Error(err, fmt.Sprintf("Creation of the connection: %+v", conn))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusCreated, conn.DeleteSensitiveData())
+	c.JSON(http.StatusCreated, createdConnection)
 }
 
 // @Summary Update a Connection
@@ -228,14 +230,15 @@ func (cc *controller) updateConnection(c *gin.Context) {
 		return
 	}
 
-	if err := cc.connRepository.UpdateConnection(&conn); err != nil {
+	updatedConnection, err := cc.connRepository.UpdateConnection(&conn)
+	if err != nil {
 		logC.Error(err, fmt.Sprintf("Update of the connection: %+v", conn))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, conn)
+	c.JSON(http.StatusOK, updatedConnection)
 }
 
 // @Summary Delete a Connection
