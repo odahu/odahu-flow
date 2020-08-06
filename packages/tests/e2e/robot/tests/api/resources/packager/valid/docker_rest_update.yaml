@@ -26,9 +26,6 @@ spec:
               value: Base image for Dockerfile.
             - name: type
               value: string
-            - name: default
-              value: >-
-                gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base:1.2.0-b1592953604635
         - name: host
           parameters:
             - name: description
