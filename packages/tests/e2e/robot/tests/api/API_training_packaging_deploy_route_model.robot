@@ -30,7 +30,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
-Force Tags          api  sdk  testing
+Force Tags          api  sdk
 Test Timeout        60 minutes
 
 *** Test Cases ***
