@@ -40,7 +40,8 @@ func TestConnectionRepository(t *testing.T) {
 		},
 	}
 
-	g.Expect(c.CreateConnection(created)).NotTo(HaveOccurred())
+	_, err := c.CreateConnection(created)
+	g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err := c.GetDecryptedConnection(connID)
 	g.Expect(err).NotTo(HaveOccurred())
@@ -59,7 +60,8 @@ func TestConnectionRepository(t *testing.T) {
 			Type: newConnType,
 		},
 	}
-	g.Expect(c.UpdateConnection(updated)).NotTo(HaveOccurred())
+	_, err = c.UpdateConnection(updated)
+	g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err = c.GetConnection(connID)
 	g.Expect(err).NotTo(HaveOccurred())

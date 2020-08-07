@@ -88,11 +88,13 @@ func (s *ConnectionRouteGenericSuite) registerHTTPHandlers(connectionConfig conf
 func (s *ConnectionRouteGenericSuite) newMultipleConnStubs() []*connection.Connection {
 	conn1 := newConnStub()
 	conn1.ID = connID1
-	s.g.Expect(s.connRepository.CreateConnection(conn1)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn1)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	conn2 := newConnStub()
 	conn2.ID = connID2
-	s.g.Expect(s.connRepository.CreateConnection(conn2)).NotTo(HaveOccurred())
+	_, err = s.connRepository.CreateConnection(conn2)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	return []*connection.Connection{conn1, conn2}
 }
@@ -111,7 +113,8 @@ func newConnStub() *connection.Connection {
 
 func (s *ConnectionRouteGenericSuite) TestGetConnection() {
 	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -150,7 +153,8 @@ func (s *ConnectionRouteGenericSuite) TestGetConnectionNotFound() {
 
 func (s *ConnectionRouteGenericSuite) TestGetAllConnections() {
 	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -199,7 +203,8 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsByType() {
 			KeySecret: creds,
 		},
 	}
-	s.g.Expect(s.connRepository.CreateConnection(connGit)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(connGit)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connDocker := &connection.Connection{
 		ID: connID2,
@@ -210,7 +215,8 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsByType() {
 			KeySecret: creds,
 		},
 	}
-	s.g.Expect(s.connRepository.CreateConnection(connDocker)).NotTo(HaveOccurred())
+	_, err = s.connRepository.CreateConnection(connDocker)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, conn_route.GetAllConnectionURL, nil)
@@ -243,7 +249,8 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsMultipleFiltersByType
 			KeySecret: creds,
 		},
 	}
-	s.g.Expect(s.connRepository.CreateConnection(connGit)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(connGit)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connDocker := &connection.Connection{
 		ID: connID2,
@@ -254,7 +261,8 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsMultipleFiltersByType
 			KeySecret: creds,
 		},
 	}
-	s.g.Expect(s.connRepository.CreateConnection(connDocker)).NotTo(HaveOccurred())
+	_, err = s.connRepository.CreateConnection(connDocker)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, conn_route.GetAllConnectionURL, nil)
@@ -360,13 +368,7 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnection() {
 
 	s.g.Expect(http.StatusCreated).Should(Equal(w.Code))
 	s.g.Expect(connResponse.ID).Should(Equal(connEntity.ID))
-	s.g.Expect(connResponse.Spec.URI).To(Equal(connEntity.Spec.URI))
-	s.g.Expect(connResponse.Spec.Type).To(Equal(connEntity.Spec.Type))
-
-	// Verify that secrets are masked
-	s.g.Expect(connResponse.Spec.Password).Should(Or(BeEmpty(), Equal(connection.DecryptedDataMask)))
-	s.g.Expect(connResponse.Spec.KeySecret).Should(Or(BeEmpty(), Equal(connection.DecryptedDataMask)))
-	s.g.Expect(connResponse.Spec.KeyID).Should(Or(BeEmpty(), Equal(connection.DecryptedDataMask)))
+	s.g.Expect(connResponse.Spec).To(Equal(connEntity.DeleteSensitiveData().Spec))
 
 	conn, err := s.connRepository.GetConnection(connID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
@@ -403,7 +405,8 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable() {
 func (s *ConnectionRouteGenericSuite) TestCreateDuplicateConnection() {
 	conn := newConnStub()
 
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connEntityBody, err := json.Marshal(conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -443,7 +446,8 @@ func (s *ConnectionRouteGenericSuite) TestValidateCreateConnection() {
 
 func (s *ConnectionRouteGenericSuite) TestUpdateConnection() {
 	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connEntity := newConnStub()
 	connEntity.Spec.URI = "new-uri"
@@ -462,7 +466,7 @@ func (s *ConnectionRouteGenericSuite) TestUpdateConnection() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(connResponse.ID).Should(Equal(connEntity.ID))
-	s.g.Expect(connResponse.Spec).Should(Equal(connEntity.Spec))
+	s.g.Expect(connResponse.Spec).Should(Equal(connEntity.DeleteSensitiveData().Spec))
 
 	conn, err = s.connRepository.GetConnection(connID)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -491,7 +495,8 @@ func (s *ConnectionRouteGenericSuite) TestUpdateConnectionNotFound() {
 func (s *ConnectionRouteGenericSuite) TestValidateUpdateConnection() {
 	conn := newConnStub()
 	conn.Spec.Type = "not-found-type"
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connEntityBody, err := json.Marshal(conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -511,7 +516,8 @@ func (s *ConnectionRouteGenericSuite) TestValidateUpdateConnection() {
 
 func (s *ConnectionRouteGenericSuite) TestDeleteConnection() {
 	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -554,7 +560,8 @@ func (s *ConnectionRouteGenericSuite) TestDeleteConnectionNotFound() {
 
 func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnection() {
 	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -630,7 +637,8 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetAllConnections() {
 	})
 
 	conn := newConnStub()
-	s.g.Expect(s.connRepository.CreateConnection(conn)).NotTo(HaveOccurred())
+	_, err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
