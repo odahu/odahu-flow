@@ -164,7 +164,7 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) (*
 		if err != nil {
 			conn.Status = existedConn.Status
 		}
-		return conn.DeleteSensitiveData(), err
+		return conn.DeleteSensitiveDataImmutable(), err
 	case odahuflow_errors.IsNotFoundError(err):
 		return nil, odahuflow_errors.NotFoundError{Entity: conn.ID}
 	default:
@@ -182,7 +182,7 @@ func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) (*
 	case odahuflow_errors.IsNotFoundError(err):
 		conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
 		conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
-		return conn.DeleteSensitiveData(), vcr.createOrUpdateConnection(conn)
+		return conn.DeleteSensitiveDataImmutable(), vcr.createOrUpdateConnection(conn)
 	default:
 		return nil, err
 	}

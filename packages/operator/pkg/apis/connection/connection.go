@@ -66,3 +66,8 @@ func (c *Connection) DeleteSensitiveData() *Connection {
 
 	return c
 }
+
+// The wrapper around DeleteSensitiveData, but it doesn't mutate the original object and returns a copy
+func (c Connection) DeleteSensitiveDataImmutable() *Connection {
+	return c.DeleteSensitiveData()
+}

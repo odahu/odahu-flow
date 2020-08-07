@@ -187,7 +187,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 
 	conn.Status = k8sConn.Status
 
-	return conn.DeleteSensitiveData(), nil
+	return conn.DeleteSensitiveDataImmutable(), nil
 }
 
 func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Connection) (*connection.Connection, error) {
@@ -211,7 +211,7 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 
 	connection.Status = conn.Status
 
-	return connection.DeleteSensitiveData(), nil
+	return connection.DeleteSensitiveDataImmutable(), nil
 }
 
 func convertK8sErrToOdahuflowErr(err error) error {
