@@ -200,12 +200,14 @@ python-unittests:
 	          packages/cli packages/sdk
 
 ## setup-e2e-robot: Prepare a test data for the e2e robot tests
+setup-e2e-robot: export VERBOSE=true
 setup-e2e-robot:
 	odahu-flow-authenticate-test-user ${CLUSTER_PROFILE}
 
 	./packages/tests/stuff/training_stuff.sh setup
 
 ## cleanup-e2e-robot: Delete a test data after the e2e robot tests
+cleanup-e2e-robot: export VERBOSE=true
 cleanup-e2e-robot:
 	odahu-flow-authenticate-test-user ${CLUSTER_PROFILE}
 
