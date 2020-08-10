@@ -129,7 +129,10 @@ def start_train(trainer: K8sTrainer, output_dir: str):
 
     model_dir_name_template = trainer.model_training.spec.model.artifact_name_template or DEFAULT_MODEL_DIR_TEMPLATE
 
-    model_dir_name_template = model_dir_name_template.rstrip('.zip')
+    # Removing .zip extension if there's one
+    model_dir_name_template = model_dir_name_template.strip()
+    if model_dir_name_template.endswith('.zip'):
+        model_dir_name_template = model_dir_name_template[:-4]
 
     model_dir_name = compile_artifact_name_template(
         go_template=model_dir_name_template,
