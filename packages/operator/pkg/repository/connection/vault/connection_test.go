@@ -99,7 +99,8 @@ func (s *VaultConnRepoSuite) TestConnectionRepository() {
 		},
 	}
 
-	s.g.Expect(s.connRepo.CreateConnection(created)).NotTo(HaveOccurred())
+	_, err := s.connRepo.CreateConnection(created)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err := s.connRepo.GetDecryptedConnection(connID)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -118,7 +119,9 @@ func (s *VaultConnRepoSuite) TestConnectionRepository() {
 			Type: newConnType,
 		},
 	}
-	s.g.Expect(s.connRepo.UpdateConnection(updated)).NotTo(HaveOccurred())
+
+	_, err = s.connRepo.UpdateConnection(updated)
+	s.g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err = s.connRepo.GetConnection(connID)
 	s.g.Expect(err).NotTo(HaveOccurred())
