@@ -14,11 +14,11 @@ ${FEEDBACK_LOCATION_MODELS_RESP_LOG}  model_log/response_body
 ${FEEDBACK_LOCATION_MODELS_FEEDBACK}  model_log/feedback
 ${FEEDBACK_PARTITIONING_PATTERN}      year=%Y/month=%m/day=%d/%Y%m%d%H
 ${TEST_VCS}                           odahuflow
-${ODAHUFLOW_ENTITIES_DIR}                ${CURDIR}/entities
+${ODAHUFLOW_ENTITIES_DIR}             ${CURDIR}/entities
 ${NODE_TAINT_KEY}                     dedicated
 ${NODE_TAINT_VALUE}                   jenkins-slave
 ${MP_SIMPLE_MODEL}                    simple-model
 ${MP_FAIL_MODEL}                      fail
 ${MP_COUNTER_MODEL}                   counter
 ${MP_FEEDBACK_MODEL}                  feedback
-${CONN_DECRYPTED_MASK}                *****
+${CONN_SECRET_MASK}                   *****

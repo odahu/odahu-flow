@@ -1,3 +1,7 @@
+# for class Model
+import json
+from odahuflow.sdk import config
+
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.configuration import ConfigurationClient
 from odahuflow.sdk.clients.connection import ConnectionClient
@@ -61,13 +65,21 @@ class ModelDeployment:
         return ModelDeploymentClient().get(dep_id)
 
     @staticmethod
-    def deployment_put(payload_file):
+    def deployment_put(payload_file, image=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if image:
+            api_object.spec.image = image
+
         return ModelDeploymentClient().edit(api_object)
 
     @staticmethod
-    def deployment_post(payload_file):
+    def deployment_post(payload_file, image=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if image:
+            api_object.spec.image = image
+
         return ModelDeploymentClient().create(api_object)
 
     @staticmethod
@@ -86,13 +98,21 @@ class ModelPackaging:
         return ModelPackagingClient().get(pack_id)
 
     @staticmethod
-    def packaging_put(payload_file):
+    def packaging_put(payload_file, artifact_name=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if artifact_name:
+            api_object.spec.artifact_name = artifact_name
+
         return ModelPackagingClient().edit(api_object)
 
     @staticmethod
-    def packaging_post(payload_file):
+    def packaging_post(payload_file, artifact_name=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if artifact_name:
+            api_object.spec.artifact_name = artifact_name
+
         return ModelPackagingClient().create(api_object)
 
     @staticmethod
@@ -101,8 +121,11 @@ class ModelPackaging:
 
     @staticmethod
     def packaging_get_log(pack_id):
-        for msg in ModelPackagingClient().log(pack_id, follow=False):
-            print(msg)
+        log_generator = ModelPackagingClient().log(pack_id, follow=False)
+        # logs_list will be list of log lines
+        logs_list = list(log_generator)
+        text = "\n".join(logs_list)
+        return text
 
 
 class ModelTraining:
@@ -131,8 +154,11 @@ class ModelTraining:
 
     @staticmethod
     def training_get_log(train_id):
-        for msg in ModelTrainingClient().log(train_id, follow=False):
-            print(msg)
+        log_generator = ModelTrainingClient().log(train_id, follow=False)
+        # logs_list will be list of log lines
+        logs_list = list(log_generator)
+        text = "\n".join(logs_list)
+        return text
 
 
 class ModelRoute:
@@ -213,9 +239,9 @@ class Toolchain:
 class Model:
 
     @staticmethod
-    def model_get():
-        return ModelClient().info()
+    def model_get(url=None, token=config.API_TOKEN, **kwargs):
+        return ModelClient(url, token, **kwargs).info()
 
     @staticmethod
-    def model_post(**parameters):
-        return ModelClient().invoke(**parameters)
+    def model_post(url=None, token=config.API_TOKEN, json_input=None, **kwargs):
+        return ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))

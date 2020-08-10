@@ -1,0 +1,9 @@
+kind: ToolchainIntegration
+id: mlflow-gpu-api-testing
+spec:
+  entrypoint: updated
+  defaultImage: updated
+  additionalEnvironments:
+    LD_LIBRARY_PATH: '/usr/local/nvidia/lib64:${LD_LIBRARY_PATH}'
+    MLFLOW_TRACKING_URI: 'http://mlflow.odahu-flow.svc.cluster.local'
+    PATH: '/usr/local/nvidia/bin:${PATH}'

@@ -1,0 +1,12 @@
+{
+  "kind": "Connection",
+  "id": "docker-ci-connection-valid",
+  "spec": {
+    "type": "docker",
+    "uri": "gcr.io/or2-msq-epmd-legn-t1iylu/gke-dev04",
+    "username": "docker_user",
+    "password": "{password}",
+    "description": "Default GCR docker repository for model packaging",
+    "webUILink": "https://gcr.io/or2-msq-epmd-legn-t1iylu/gke-dev04"
+  }
+}

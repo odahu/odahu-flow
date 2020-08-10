@@ -34,7 +34,7 @@ _logger = logging.getLogger(__name__)
 PROJECT_FILE = 'odahuflow.project.yaml'
 
 VALIDATION_FAILED_EXCEPTION_MESSAGE = 'Exception raised while invoke model entrypoint. ' \
-                                      'GPPI Self check is failed. ' \
+                                      'GPPI self-check failed. ' \
                                       'Fix your model and try again.'
 
 
@@ -245,7 +245,7 @@ class GPPITrainedModelBinary:
         :return:
         """
 
-        _logger.info('Start procedure of self checking for GPPI')
+        _logger.info('Start procedure of self-checking for GPPI')
         try:
             self.execute(
                 f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
@@ -255,7 +255,7 @@ class GPPITrainedModelBinary:
         except Exception as e:
             raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
 
-        _logger.info('Self check is successful. GPPI model is packed as expected.')
+        _logger.info('Self-check is successful. GPPI model is packed as expected.')
 
     def predict(self, input_file: str, output_dir: str, output_file_name):
         """
