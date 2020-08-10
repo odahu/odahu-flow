@@ -37,7 +37,7 @@ test_data = [
         'model_name-99-uuid_here'
     ),
     (
-        'Model {{ .Name }}',
+        'Model {{   .Name      }}',
         TemplateContext(Name=None, Version=None, RandomUUID=None),
         'Model None'
     )
@@ -85,7 +85,8 @@ def test_start_training__output_dir(output_dir: Optional[str], expected_output_d
 @pytest.mark.parametrize(['template', 'expected_template'],
                          [(None, DEFAULT_MODEL_DIR_TEMPLATE),
                           ('{{ .Prop1 }}__{{ .prop2 }}', '{{ .Prop1 }}__{{ .prop2 }}'),
-                          ('{{ .Prop1 }}_abc.zip', '{{ .Prop1 }}_abc')]
+                          ('{{ .Prop1 }}_abc.zip', '{{ .Prop1 }}_abc'),
+                          ('{{ .Prop1 }}_fizz.zip.zip', '{{ .Prop1 }}_fizz.zip')],
                          )
 def test_start_training__artifact_name_template(template: Optional[str],
                                                 expected_template: str, mocker: MockFixture):
