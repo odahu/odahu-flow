@@ -110,25 +110,25 @@ Check command response list contains id
 
 Command response list should contain id
     [Arguments]                         ${command}  @{value}
-    ${result}                           Call API  ${command} get
-    ${list_length}                      get length  ${result}
+    ${response list}                    Call API  ${command} get
+    ${value_length}                     get length  ${value}
 
-    FOR     ${i}  IN  @{result}
-        exit for loop if                $i.id in $value
-        ${list_length}                  evaluate  ${list_length} - 1
+    FOR     ${i}  IN  @{response list}
+        continue for loop if            $i.id not in $value
+        ${value_length}                 evaluate  ${value_length} - 1
     END
-    should not be equal as integers     ${list_length}  0
+    should be equal as integers         ${value_length}  0
 
 Command response list should not contain id
     [Arguments]                         ${command}  @{value}
-    ${result}                           Call API  ${command} get
-    ${list_length}                      get length  ${result}
+    ${response list}                    Call API  ${command} get
+    ${value_length}                     get length  ${value}
 
-    FOR     ${i}  IN  @{result}
-        exit for loop if                $i.id in $value
-        ${list_length}                  evaluate  ${list_length} - 1
+    FOR     ${i}  IN  @{response list}
+        continue for loop if            $i.id not in $value
+        ${value_length}                 evaluate  0
     END
-    should be equal as integers         ${list_length}  0
+    should not be equal as integers     ${value_length}  0
 
 Pick artifact name
     [Arguments]                   ${training id}
