@@ -75,11 +75,11 @@ CreatedAt and UpdatedAt times should not be equal
     should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
 Wait until command finishes and returns result
-    [Arguments]    ${command}    ${cycles}=120  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
+    [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
     FOR     ${i}    IN RANGE     ${cycles}
         ${result}                Call API  ${command} get id  ${entity}
-        ${result_state}          evaluate  str('${result.status.state}' or '')
-        ${list_contain}          count values in list  ${exp_result}  ${result_state}
+        ${list_contain}          get match count  ${exp_result}  str(result.status.state or '')
+        log   ${list_contain}
         exit for loop if         '${list_contain}' != '0'
         Sleep                    ${sleep_time}
     END
@@ -104,7 +104,8 @@ Check command response list contains id
         ${list_length}                  evaluate  ${list_length} - 1
     END
 
-    ${result}                           set variable if  '${list_length}' != '0'  ${TRUE}  ${FALSE}
+    ${result}                           run keyword if  '${list_length}' != '0'  set variable  ${TRUE}
+    ...                                                            ELSE  set variable  ${FALSE}
     [Return]                            ${result}
 
 Command response list should contain id
@@ -124,8 +125,8 @@ Command response list should not contain id
     ${value_length}                     get length  ${value}
 
     FOR     ${i}  IN  @{response list}
-        ${value_length}                 set variable if  $i.id in $value  0  ${value_length}
-        exit for loop if                $i.id in $value
+        continue for loop if            $i.id not in $value
+        ${value_length}                 evaluate  0
     END
     should not be equal as integers     ${value_length}  0
 
