@@ -120,7 +120,11 @@ def create_mt_config_file(trainer: K8sTrainer) -> None:
         LOGGER.debug(f"Saved the trainer configuration:\n{json.dumps(trainer_dict, indent=2)}")
 
 
-def start_train(trainer: K8sTrainer, output_dir: str):
+def start_train(trainer: K8sTrainer, output_dir: str) -> None:
+    """
+    :param trainer: container object for all configuration objects of a training
+    :param output_dir: path to directory to save result artifact (relative or absolute)
+    """
     create_mt_config_file(trainer)
 
     if not output_dir:
@@ -141,7 +145,7 @@ def start_train(trainer: K8sTrainer, output_dir: str):
                                 RandomUUID=uuid.uuid4())
     )
 
-    model_dir_path = os.path.join(output_dir, model_dir_name)
+    model_dir_path = os.path.abspath(os.path.join(output_dir, model_dir_name))
     os.makedirs(model_dir_path, exist_ok=True)
 
     launch_training_container(trainer, model_dir_path)

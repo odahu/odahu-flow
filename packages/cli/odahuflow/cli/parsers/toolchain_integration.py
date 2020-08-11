@@ -77,7 +77,7 @@ def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_for
     You should specify a path to file with a toolchain integration.
     The file must contain only one toolchain integration.
     For now, CLI supports yaml and JSON file formats.
-    If you want to create multiples toolchain integrations than you should use "odahuflowctl res apply" instead.
+    If you want to create multiples toolchain integrations then you should use "odahuflowctl bulk apply" instead.
     If you provide the toolchain integration id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl tn-integration create -f ti.yaml --id examples-git
@@ -109,7 +109,7 @@ def edit(client: ToolchainIntegrationClient, ti_id: str, file: str, output_forma
     You should specify a path to file with a toolchain integration.
     The file must contain only one toolchain integration.
     For now, CLI supports yaml and JSON file formats.
-    If you want to update multiples toolchain integrations than you should use "odahuflowctl res apply" instead.
+    If you want to update multiples toolchain integrations then you should use "odahuflowctl bulk apply" instead.
     If you provide the toolchain integration id parameter than it will be overridden before sending to API server.\n
     Usage example:\n
         * odahuflowctl tn-integration update -f ti.yaml --id examples-git
@@ -140,7 +140,7 @@ def delete(client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not
     Delete a toolchain integration.\n
     For this command, you must provide a toolchain integration ID or path to file with one toolchain integration.
     The file must contain only one toolchain integration.
-    If you want to delete multiples toolchain integrations than you should use "odahuflowctl res delete" instead.
+    If you want to delete multiples toolchain integrations then you should use "odahuflowctl bulk delete" instead.
     For now, CLI supports yaml and JSON file formats.
     The command will be failed if you provide both arguments.\n
     Usage example:\n

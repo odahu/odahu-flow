@@ -126,12 +126,12 @@ func (hcr *httpConnectionRepository) DeleteConnection(id string) error {
 	panic("not implemented")
 }
 
-func (hcr *httpConnectionRepository) UpdateConnection(connection *connection.Connection) error {
+func (hcr *httpConnectionRepository) UpdateConnection(connection *connection.Connection) (
+	*connection.Connection, error) {
 	panic("not implemented")
-
 }
 
-func (hcr *httpConnectionRepository) CreateConnection(connection *connection.Connection) error {
+func (hcr *httpConnectionRepository) CreateConnection(connection *connection.Connection) (
+	*connection.Connection, error) {
 	panic("not implemented")
-
 }

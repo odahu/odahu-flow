@@ -115,7 +115,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient)
 	// Create the connection that will be used as the outputConnection param for a training.
-	if err := s.connRepository.CreateConnection(&connection.Connection{
+	if _, err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testOutConn,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -125,7 +125,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the default outputConnection param for a training.
-	if err := s.connRepository.CreateConnection(&connection.Connection{
+	if _, err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testOutConnDefault,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,

@@ -1,0 +1,150 @@
+{
+  "kind": "PackagingIntegration",
+  "id": "docker-rest-api-testing",
+  "spec": {
+    "entrypoint": "created",
+    "defaultImage": "created",
+    "privileged": true,
+    "schema": {
+      "targets": [
+        {
+          "name": "docker-push",
+          "connectionTypes": [
+            "docker",
+            "ecr"
+          ],
+          "default": "docker-ci",
+          "required": true
+        },
+        {
+          "name": "docker-pull",
+          "connectionTypes": [
+            "docker",
+            "ecr"
+          ],
+          "default": "odahuflow-docker-repository",
+          "required": false
+        }
+      ],
+      "arguments": {
+        "properties": [
+          {
+            "name": "dockerfileBaseImage",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Base image for Dockerfile."
+              },
+              {
+                "name": "type",
+                "value": "string"
+              }
+            ]
+          },
+          {
+            "name": "host",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Host to bind."
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "0.0.0.0"
+              }
+            ]
+          },
+          {
+            "name": "port",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Port to bind."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 5000
+              }
+            ]
+          },
+          {
+            "name": "timeout",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Serving timeout in seconds."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 60
+              }
+            ]
+          },
+          {
+            "name": "workers",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Count of serving workers."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "name": "threads",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Count of serving threads."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 4
+              }
+            ]
+          },
+          {
+            "name": "imageName",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "This option provides a way to specify the Docker image name. You can hardcode the full name or specify a template. Available template values:\n  - Name (Model Name)\n  - Version (Model Version)\n  - RandomUUID\nThe default value is '{{ Name }}/{{ Version }}:{{ RandomUUID }}'.\nImage name examples:\n  - myservice:123\n  - {{ Name }}:{{ Version }}\n"
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

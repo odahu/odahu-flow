@@ -1,0 +1,48 @@
+kind: PackagingIntegration
+id: docker-cli-api-testing
+spec:
+  entrypoint: created
+  defaultImage: created
+  privileged: true
+  schema:
+    targets:
+      - name: docker-push
+        connectionTypes:
+          - docker
+          - ecr
+        default: docker-ci
+        required: true
+      - name: docker-pull
+        connectionTypes:
+          - docker
+          - ecr
+        default: odahuflow-docker-repository
+        required: false
+    arguments:
+      properties:
+        - name: dockerfileBaseImage
+          parameters:
+            - name: description
+              value: Base image for Dockerfile.
+            - name: type
+              value: string
+        - name: imageName
+          parameters:
+            - name: description
+              value: >
+                This option provides a way to specify the Docker image name. You
+                can hardcode the full name or specify a template. Available
+                template values:
+                  - Name (Model Name)
+                  - Version (Model Version)
+                  - RandomUUID
+                The default value is '{{ Name }}/{{ Version }}:{{ RandomUUID
+                }}'.
+
+                Image name examples:
+                  - myservice:123
+                  - {{ Name }}:{{ Version }}
+            - name: type
+              value: string
+            - name: default
+              value: '{{ Name }}-{{ Version }}:{{ RandomUUID }}'

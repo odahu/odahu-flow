@@ -1,0 +1,9 @@
+kind: Connection
+id: git-connection-valid
+spec:
+  type: git
+  uri: git@github.com:odahu/odahu-examples.git
+  reference: origin/master
+  keySecret: a2VrCg==
+  description: Git repository with odahu-flow-examples
+  webUILink: https://github.com/odahu/odahu-examples

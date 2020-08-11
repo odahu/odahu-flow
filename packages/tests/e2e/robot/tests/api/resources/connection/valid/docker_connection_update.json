@@ -1,0 +1,12 @@
+{
+  "kind": "Connection",
+  "id": "docker-ci-connection-valid",
+  "spec": {
+    "type": "docker",
+    "uri": "gcr.io/updated/",
+    "username": "docker_user",
+    "password": "{password}",
+    "description": "updated",
+    "webUILink": "https://gcr.io/updated/"
+  }
+}
