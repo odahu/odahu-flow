@@ -69,29 +69,17 @@ Default Entrypoint should be equal
     [Arguments]                  ${result}  ${exp_value}
     should be equal              ${result.spec.entrypoint}  ${exp_value}
 
-Requested resources should be equal
-    [Arguments]                  ${result}  ${CPU}  ${GPU}  ${MEMORY}
-    should be equal              ${result.spec.resources.requests.cpu}        ${CPU}
-    should be equal              ${result.spec.resources.requests.gpu}        ${GPU}
-    should be equal              ${result.spec.resources.requests.memory}     ${MEMORY}
-
-Limits resources should be equal
-    [Arguments]                 ${result}  ${CPU}  ${GPU}  ${MEMORY}
-    should be equal              ${result.spec.resources.limits.cpu}        ${CPU}
-    should be equal              ${result.spec.resources.limits.gpu}        ${GPU}
-    should be equal              ${result.spec.resources.limits.memory}     ${MEMORY}
-
 CreatedAt and UpdatedAt times should not be equal
     [Arguments]                  ${result}
     ${result_status}             Log Status  ${result}
     should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
 Wait until command finishes and returns result
-    [Arguments]    ${command}    ${cycles}=120  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
+    [Arguments]    ${command}    ${cycles}=20  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
     FOR     ${i}    IN RANGE     ${cycles}
         ${result}                Call API  ${command} get id  ${entity}
-        ${result_state}          evaluate  str('${result.status.state}' or '')
-        ${list_contain}          count values in list  ${exp_result}  ${result_state}
+        ${list_contain}          get match count  ${exp_result}  str(result.status.state or '')
+        log   ${list_contain}
         exit for loop if         '${list_contain}' != '0'
         Sleep                    ${sleep_time}
     END
@@ -116,7 +104,8 @@ Check command response list contains id
         ${list_length}                  evaluate  ${list_length} - 1
     END
 
-    ${result}                           set variable if  '${list_length}' != '0'  ${TRUE}  ${FALSE}
+    ${result}                           run keyword if  '${list_length}' != '0'  set variable  ${TRUE}
+    ...                                                            ELSE  set variable  ${FALSE}
     [Return]                            ${result}
 
 Command response list should contain id
@@ -136,26 +125,21 @@ Command response list should not contain id
     ${value_length}                     get length  ${value}
 
     FOR     ${i}  IN  @{response list}
-        ${value_length}                 set variable if  $i.id in $value  0  ${value_length}
-        exit for loop if                $i.id in $value
+        continue for loop if            $i.id not in $value
+        ${value_length}                 evaluate  0
     END
     should not be equal as integers     ${value_length}  0
 
 Pick artifact name
     [Arguments]                   ${training id}
     ${result}                     Call API  training get id  ${training id}
-    ${artifact}                   get variable value  ${result.status.artifacts[0]}  ${EMPTY}
-    ${artifact_name}              get variable value  ${artifact.artifact_name}  ${EMPTY}
+    ${artifact}                   set variable  ${result.status.artifacts[0]}
+    ${artifact_name}              set variable  ${artifact.artifact_name}
     [Return]                      ${artifact_name}
 
 Pick packaging image
     [Arguments]                   ${packaging id}
     ${result}                     Call API  packaging get id  ${packaging id}
-    ${image}                      get variable value  ${result.status.results[0]}  ${EMPTY}
-    ${image_value}                get variable value  ${image.value}  ${EMPTY}
+    ${image}                      set variable  ${result.status.results[0]}
+    ${image_value}                set variable  ${image.value}
     [Return]                      ${image_value}
-
-Format WrongHttpStatusCode
-    [Arguments]                     ${entity name}
-    ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)
-    [return]                        ${error output}
