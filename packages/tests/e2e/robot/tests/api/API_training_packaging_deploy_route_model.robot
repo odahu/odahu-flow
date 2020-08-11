@@ -29,21 +29,9 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
-...                 Login to the api and edge  AND
-...                 Cleanup Resources
-Suite Teardown      Cleanup Resources
+...                 Login to the api and edge
 Force Tags          api  sdk
 Test Timeout        60 minutes
-
-*** Keywords ***
-Cleanup Resources
-    [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW_DEFAULT} --ignore-not-found
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW_NOT_DEFAULT} --ignore-not-found
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW-GPU_NOT_DEFAULT} --ignore-not-found
-
-    StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING} --ignore-not-found
-    StrictShell  odahuflowctl --verbose dep delete --id ${DEPLOYMENT} --ignore-not-found
 
 *** Test Cases ***
 Check model trainings do not exist
@@ -59,11 +47,6 @@ Create Model Training, mlflow toolchain, default
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
-
-Get short-term Logs of training
-    [Tags]                      training  log
-    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
-    should contain              ${result}  INFO
 
 Create Model Training, mlflow toolchain, not default
     [Tags]                      training
@@ -81,10 +64,10 @@ Create and Delete Model Training, mlflow-gpu toolchain, not default
 
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow-gpu.not_default.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  training  40  30s  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
-    Command response list should contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+    Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
                                 Call API  training delete  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
     Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
@@ -100,6 +83,11 @@ Update Model Training, mlflow toolchain, default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
+
+Get Logs of training
+    [Tags]                      training  log
+    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
+    should contain              ${result}  INFO
 
 Packaging's list doesn't contain packaging
     [Tags]                      packaging
