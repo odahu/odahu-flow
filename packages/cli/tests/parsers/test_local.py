@@ -45,7 +45,8 @@ def test_local_training_relative_output_dir(mocker: MockFixture, cli_runner: Cli
     :param cli_runner: Click runner fixture
     """
 
-    mocker.patch.object(training, 'K8sTrainer', autospec=True)
+    trainer_mock = mocker.patch.object(training, 'K8sTrainer', autospec=True).return_value
+    trainer_mock.model_training.spec.model.artifact_name_template = 'model_dir_template'
     api_client = Mock()
 
     mocker.patch.object(training_sdk, 'create_mt_config_file')
@@ -84,4 +85,4 @@ def test_local_training_relative_output_dir(mocker: MockFixture, cli_runner: Cli
             mounts: List[Mount] = call_kwargs.get('mounts', [])
 
             for mount in filter(lambda m: m.get('Target') == MODEL_OUTPUT_CONTAINER_PATH, mounts):
-                assert mount.get('Source') == abs_path
+                assert os.path.dirname(mount.get('Source')) == abs_path
