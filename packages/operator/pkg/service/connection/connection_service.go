@@ -74,7 +74,7 @@ func (s *serviceImpl) UpdateConnection(connection *connection.Connection) (*conn
 	if err != nil {
 		return updatedConn, err
 	}
-	return updatedConn.DeleteSensitiveData(), err
+	return updatedConn.DeleteSensitiveDataImmutable(), err
 }
 
 func (s *serviceImpl) CreateConnection(connection *connection.Connection) (*connection.Connection, error) {
@@ -82,5 +82,5 @@ func (s *serviceImpl) CreateConnection(connection *connection.Connection) (*conn
 	if err != nil {
 		return createdConn, err
 	}
-	return createdConn.DeleteSensitiveData(), err
+	return createdConn.DeleteSensitiveDataImmutable(), err
 }
