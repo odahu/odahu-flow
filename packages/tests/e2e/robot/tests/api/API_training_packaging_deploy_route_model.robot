@@ -56,7 +56,7 @@ Create Model Training, mlflow toolchain, not default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
-Create Model Training, mlflow-gpu toolchain, not default
+Create and Delete Model Training, mlflow-gpu toolchain, not default
     [Tags]                      training
     [Documentation]             create model training with mlflow-gpu toolchain and not default values
     ...                         cluster with GPU node pools enabled
@@ -66,6 +66,10 @@ Create Model Training, mlflow-gpu toolchain, not default
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  40  30s  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
+
+    Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+                                Call API  training delete  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+    Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
 Get Model Training by id
     [Tags]                      training
@@ -177,15 +181,12 @@ Invoke model
 Delete Model Trainings and Check that Model Trainging do not exist
     [Tags]                      training
     [Documentation]             delete model trainings
-    Command response list should contain id  training  ${TRAIN_MLFLOW_DEFAULT}
-    ...                                          ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+    Command response list should contain id  training  ${TRAIN_MLFLOW_DEFAULT}  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
     Call API                    training delete  ${TRAIN_MLFLOW_DEFAULT}
     Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
-    Call API                    training delete  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
-    Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}
-    ...                                          ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+    Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
 Delete Model Packaging and Check that Model Packaging does not exist
     [Tags]                      packaging
