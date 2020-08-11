@@ -63,15 +63,6 @@ func NewRepositoryFromConfig(vaultConfig config.Vault) (conn_repository.Reposito
 }
 
 func (vcr *vaultConnRepository) GetConnection(connID string) (*connection.Connection, error) {
-	conn, err := vcr.getConnectionFromVault(connID)
-	if err != nil {
-		return nil, err
-	}
-
-	return conn.DeleteSensitiveData(), nil
-}
-
-func (vcr *vaultConnRepository) GetDecryptedConnection(connID string) (*connection.Connection, error) {
 	return vcr.getConnectionFromVault(connID)
 }
 
@@ -164,7 +155,7 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) (*
 		if err != nil {
 			conn.Status = existedConn.Status
 		}
-		return conn.DeleteSensitiveDataImmutable(), err
+		return conn, err
 	case odahuflow_errors.IsNotFoundError(err):
 		return nil, odahuflow_errors.NotFoundError{Entity: conn.ID}
 	default:
@@ -182,7 +173,7 @@ func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) (*
 	case odahuflow_errors.IsNotFoundError(err):
 		conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
 		conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
-		return conn.DeleteSensitiveDataImmutable(), vcr.createOrUpdateConnection(conn)
+		return conn, vcr.createOrUpdateConnection(conn)
 	default:
 		return nil, err
 	}

@@ -70,11 +70,7 @@ func (kc *k8sConnectionRepository) GetConnection(id string) (*connection.Connect
 		return nil, err
 	}
 
-	return connectionFromK8s.DeleteSensitiveData(), err
-}
-
-func (kc *k8sConnectionRepository) GetDecryptedConnection(id string) (*connection.Connection, error) {
-	return kc.getConnectionFromK8s(id)
+	return connectionFromK8s, err
 }
 
 func (kc *k8sConnectionRepository) getConnectionFromK8s(id string) (*connection.Connection, error) {
@@ -138,7 +134,7 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 			Spec:   currentConn.Spec,
 			Status: currentConn.Status,
 		}
-		conns[i] = *conn.DeleteSensitiveData()
+		conns[i] = conn
 	}
 
 	return conns, nil
@@ -187,7 +183,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 
 	conn.Status = k8sConn.Status
 
-	return conn.DeleteSensitiveDataImmutable(), nil
+	return conn, nil
 }
 
 func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Connection) (*connection.Connection, error) {
@@ -211,7 +207,7 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 
 	connection.Status = conn.Status
 
-	return connection.DeleteSensitiveDataImmutable(), nil
+	return connection, nil
 }
 
 func convertK8sErrToOdahuflowErr(err error) error {

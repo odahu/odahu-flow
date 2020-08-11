@@ -64,7 +64,7 @@ func (r *ModelDeploymentReconciler) reconcileDeploymentPullConnection(
 
 	log = log.WithValues(odahuflow.ConnectionIDLogPrefix, mdConnID)
 
-	mdConn, err := r.connRepo.GetDecryptedConnection(mdConnID)
+	mdConn, err := r.connService.GetConnection(mdConnID, false)
 	if err != nil {
 		log.Error(err, "Cannot retrieve connection")
 

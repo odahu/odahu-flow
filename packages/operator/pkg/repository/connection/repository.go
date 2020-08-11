@@ -26,7 +26,6 @@ const (
 
 type Repository interface {
 	GetConnection(id string) (*connection.Connection, error)
-	GetDecryptedConnection(id string) (*connection.Connection, error)
 	GetConnectionList(options ...ListOption) ([]connection.Connection, error)
 	DeleteConnection(id string) error
 	UpdateConnection(connection *connection.Connection) (*connection.Connection, error)

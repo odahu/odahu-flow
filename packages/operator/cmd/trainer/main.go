@@ -21,6 +21,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
 	train_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/http"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/trainer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -114,8 +115,9 @@ func newTrainerWithHTTPRepositories(config config.TrainerConfig) *trainer.ModelT
 		config.Auth.ClientSecret,
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
+	connService := conn_service.NewService(connRepo)
 
-	return trainer.NewModelTrainer(trainRepo, connRepo, config)
+	return trainer.NewModelTrainer(trainRepo, connService, config)
 }
 
 func main() {

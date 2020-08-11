@@ -29,7 +29,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
-	vcs, err := mt.connRepo.GetDecryptedConnection(modelTraining.Spec.VCSName)
+	vcs, err := mt.connService.GetConnection(modelTraining.Spec.VCSName, false)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	for _, trainData := range modelTraining.Spec.Data {
 		var trainDataConnSpec odahuflowv1alpha1.ConnectionSpec
 
-		trainDataConn, err := mt.connRepo.GetDecryptedConnection(trainData.Connection)
+		trainDataConn, err := mt.connService.GetConnection(trainData.Connection, false)
 		if err != nil {
 			mt.log.Error(err, "Get train data", odahuflow.ConnectionIDLogPrefix, trainData.Connection)
 
@@ -54,7 +54,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		})
 	}
 
-	outputConn, err := mt.connRepo.GetDecryptedConnection(modelTraining.Spec.OutputConnection)
+	outputConn, err := mt.connService.GetConnection(modelTraining.Spec.OutputConnection, false)
 	if err != nil {
 		return nil, err
 	}

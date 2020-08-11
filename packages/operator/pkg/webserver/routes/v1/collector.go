@@ -31,6 +31,7 @@ import (
 	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	k8s_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 	postgres_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	connection_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes/v1/configuration"
@@ -56,6 +57,8 @@ func SetupV1Routes(
 	var tiRepository training_repository.ToolchainRepository
 	var piRepository packaging_repository.PackagingIntegrationRepository
 
+	var connService connection_service.Service
+
 	// Setup the connection repository
 	switch odahuConfig.Connection.RepositoryType {
 	case config.RepositoryKubernetesType:
@@ -71,6 +74,8 @@ func SetupV1Routes(
 	default:
 		return errors.New("unexpect connection repository type")
 	}
+
+	connService = connection_service.NewService(connRepository)
 
 	depRepository := deployment_repository.NewRepository(odahuConfig.Deployment.Namespace, k8sClient)
 	packRepository := k8s_packaging_repository.NewRepository(
@@ -124,7 +129,7 @@ func SetupV1Routes(
 		return errors.New("unexpect toolchain repository type")
 	}
 
-	connection.ConfigureRoutes(routeGroup, connRepository, utils.EvaluatePublicKey, odahuConfig.Connection)
+	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, odahuConfig.Connection)
 	deployment.ConfigureRoutes(
 		routeGroup, depRepository, odahuConfig.Deployment, odahuConfig.Common.ResourceGPUName,
 	)

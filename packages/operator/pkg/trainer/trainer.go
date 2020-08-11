@@ -27,8 +27,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -46,7 +46,7 @@ const (
 
 type ModelTrainer struct {
 	trainRepo       train_repository.Repository
-	connRepo        conn_repository.Repository
+	connService     conn_service.Service
 	modelTrainingID string
 	log             logr.Logger
 	trainerConfig   config.TrainerConfig
@@ -54,7 +54,7 @@ type ModelTrainer struct {
 
 func NewModelTrainer(
 	trainRepo train_repository.Repository,
-	connRepo conn_repository.Repository,
+	connService conn_service.Service,
 	trainerConfig config.TrainerConfig,
 ) *ModelTrainer {
 	trainingLogger := logf.Log.WithName("trainer").
@@ -62,7 +62,7 @@ func NewModelTrainer(
 
 	return &ModelTrainer{
 		trainRepo:       trainRepo,
-		connRepo:        connRepo,
+		connService:     connService,
 		modelTrainingID: trainerConfig.ModelTrainingID,
 		log:             trainingLogger,
 		trainerConfig:   trainerConfig,

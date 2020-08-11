@@ -19,6 +19,7 @@ package connection_test
 import (
 	odahuflow_apis "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -61,7 +62,7 @@ func (s *ConnectionRouteK8sBackendSuite) SetupSuite() {
 	}
 
 	s.connDecryptToken = "some-token"
-	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient())
+	s.connService = conn_service.NewService(conn_k8s_repository.NewRepository(testNamespace, mgr.GetClient()))
 
 	s.ConnectionRouteGenericSuite.SetupSuite()
 }

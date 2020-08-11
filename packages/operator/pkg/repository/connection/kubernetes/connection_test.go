@@ -43,7 +43,7 @@ func TestConnectionRepository(t *testing.T) {
 	_, err := c.CreateConnection(created)
 	g.Expect(err).NotTo(HaveOccurred())
 
-	fetched, err := c.GetDecryptedConnection(connID)
+	fetched, err := c.GetConnection(connID)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(fetched.ID).To(Equal(created.ID))
 	g.Expect(fetched.Spec).To(Equal(created.Spec))
