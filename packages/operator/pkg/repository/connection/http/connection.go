@@ -62,7 +62,7 @@ func (hcr *httpConnectionRepository) GetConnection(id string) (conn *connection.
 	return hcr.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
-			Path: strings.Replace("/connection/:id", ":id", id, 1),
+			Path: strings.Replace("/connection/:id/decrypted", ":id", id, 1),
 		},
 	})
 }
