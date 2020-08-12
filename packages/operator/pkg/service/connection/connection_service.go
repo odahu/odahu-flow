@@ -34,7 +34,7 @@ type serviceImpl struct {
 	repo conn_repository.Repository
 }
 
-func NewService(repo conn_repository.Repository) *serviceImpl {
+func NewService(repo conn_repository.Repository) Service {
 	return &serviceImpl{repo: repo}
 }
 
