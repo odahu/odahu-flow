@@ -64,7 +64,7 @@ Create and Delete Model Training, mlflow-gpu toolchain, not default
 
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow-gpu.not_default.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  40  30s  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
     Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
