@@ -28,8 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
     apt-get install -y --no-install-recommends azure-cli google-cloud-sdk &&\
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
-ENV CLI_RCLONE_VERSION=v1.51.0 \
-    KUBECTL_VERSION=v1.14.10
+ENV CLI_RCLONE_VERSION=v1.52.3 \
+    KUBECTL_VERSION=v1.16.10
 
 RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     wget -qO /tmp/rclone.zip "https://downloads.rclone.org/${CLI_RCLONE_VERSION}/rclone-${CLI_RCLONE_VERSION}-linux-amd64.zip" && \

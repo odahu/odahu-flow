@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
-set -ox pipefail
+set -o pipefail
+
+[[ $VERBOSE == true ]] && set -x
 
 MODEL_NAMES=(simple-model fail counter feedback)
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
@@ -84,6 +86,7 @@ function wait_all_background_task() {
 }
 
 function configure_rclone() {
+  [[ $VERBOSE == true ]] && set +x
   case "${CLOUD_PROVIDER}" in
   aws)
     local access_key_id secret_access_key region
@@ -92,32 +95,32 @@ function configure_rclone() {
     region="$(jq -r .cloud.aws.region "${CLUSTER_PROFILE}")"
 
     rclone config create "${RCLONE_PROFILE_NAME}" "s3" \
-              provider AWS \
-              account bucket-owner-full-control \
-              sas_url true \
-              server_side_encryption AES256 \
-              storage_class STANDARD \
-              region "${region}" \
-              access_key_id "${access_key_id}" \
-              secret_access_key "${secret_access_key}"
+      provider AWS \
+      account bucket-owner-full-control \
+      server_side_encryption AES256 \
+      storage_class STANDARD \
+      region "${region}" \
+      access_key_id "${access_key_id}" \
+      secret_access_key "${secret_access_key}" \
+      1>/dev/null
     ;;
   azure)
-    local account sas_url
-    account="$(jq -r .cloud.azure.storage_account "${CLUSTER_PROFILE}")"
+    local sas_url
     sas_url="$(odahuflowctl conn get --id models-output --decrypted -o json | jq -r '.[0].spec.keySecret')"
 
     rclone config create "${RCLONE_PROFILE_NAME}" "azureblob" \
-              account "${account}" \
-              sas_url "${sas_url}"
+      sas_url "${sas_url}" \
+      1>/dev/null
     ;;
   gcp)
     local service_account_credentials
     service_account_credentials="$(jq -r .cloud.gcp.credentials.GOOGLE_CREDENTIALS "${CLUSTER_PROFILE}")"
     rclone config create "${RCLONE_PROFILE_NAME}" "google cloud storage" \
-              object_acl projectPrivate \
-              bucket_acl projectPrivate \
-              bucket_policy_only true \
-              service_account_credentials "${service_account_credentials}"
+      object_acl projectPrivate \
+      bucket_acl projectPrivate \
+      bucket_policy_only true \
+      service_account_credentials "${service_account_credentials}" \
+      1>/dev/null
     ;;
   *)
     echo "Unexpected CLOUD_PROVIDER: ${CLOUD_PROVIDER}"
@@ -125,6 +128,7 @@ function configure_rclone() {
     exit 1
     ;;
   esac
+  [[ $VERBOSE == true ]] && set -x
 }
 
 # Copy local directory or file to a bucket
