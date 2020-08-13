@@ -12,9 +12,16 @@ Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
+...                 Cleanup Resources
+Suite Teardown      Cleanup Resources
 Force Tags          api  sdk  packager
 Test Timeout        5 minutes
 
+*** Keywords ***
+Cleanup Resources
+    [Documentation]  Deletes of created resources
+    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${TRAIN_MLFLOW_DEFAULT} --ignore-not-found
+    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${TRAIN_MLFLOW_NOT_DEFAULT} --ignore-not-found
 
 *** Test Cases ***
 Get list of packagers

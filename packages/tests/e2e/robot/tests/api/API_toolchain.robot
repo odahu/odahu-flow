@@ -12,9 +12,16 @@ Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
+...                 Cleanup Resources
+Suite Teardown      Cleanup Resources
 Force Tags          api  sdk  toolchain
 Test Timeout        5 minutes
 
+*** Keywords ***
+Cleanup Resources
+    [Documentation]  Deletes of created resources
+    StrictShell  odahuflowctl --verbose toolchain-integration delete --id ${MLFLOW} --ignore-not-found
+    StrictShell  odahuflowctl --verbose toolchain-integration delete --id ${MLFLOW_GPU} --ignore-not-found
 
 *** Test Cases ***
 Get list of toolchains

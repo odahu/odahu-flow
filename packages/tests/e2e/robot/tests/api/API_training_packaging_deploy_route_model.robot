@@ -30,8 +30,20 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
+...                 Cleanup Resources
+Suite Teardown      Cleanup Resources
 Force Tags          api  sdk
 Test Timeout        60 minutes
+
+*** Keywords ***
+Cleanup Resources
+    [Documentation]  Deletes of created resources
+    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW_DEFAULT} --ignore-not-found
+    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW_NOT_DEFAULT} --ignore-not-found
+    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW-GPU_NOT_DEFAULT} --ignore-not-found
+
+    StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING} --ignore-not-found
+    StrictShell  odahuflowctl --verbose dep delete --id ${DEPLOYMENT} --ignore-not-found
 
 *** Test Cases ***
 Check model trainings do not exist
