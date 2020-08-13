@@ -1,8 +1,7 @@
 *** Variables ***
-${LOCAL_CONFIG}     odahuflow/api_packager
-${RES_DIR}          ${CURDIR}/resources/packager
-${DOCKER_CLI}       docker-cli-api-testing
-${DOCKER_REST}      docker-rest-api-testing
+${RES_DIR}             ${CURDIR}/resources/packager
+${DOCKER_CLI}          docker-cli-api-testing
+${DOCKER_REST}         docker-rest-api-testing
 
 *** Settings ***
 Documentation       API of packagers
@@ -12,20 +11,17 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
+...                 Login to the api and edge
 ...                 Cleanup Resources
-Suite Teardown      Run Keywords
-...                 Cleanup Resources  AND
-...                 Remove File  ${LOCAL_CONFIG}
+Suite Teardown      Cleanup Resources
 Force Tags          api  sdk  packager
 Test Timeout        5 minutes
 
 *** Keywords ***
 Cleanup Resources
     [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_CLI} --ignore-not-found
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_REST} --ignore-not-found
+    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${TRAIN_MLFLOW_DEFAULT} --ignore-not-found
+    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${TRAIN_MLFLOW_NOT_DEFAULT} --ignore-not-found
 
 *** Test Cases ***
 Get list of packagers

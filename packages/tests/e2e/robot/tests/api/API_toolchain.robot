@@ -1,5 +1,4 @@
 *** Variables ***
-${LOCAL_CONFIG}     odahuflow/api_toolchain
 ${RES_DIR}          ${CURDIR}/resources/toolchain
 ${MLFLOW}           mlflow-api-testing
 ${MLFLOW_GPU}       mlflow-gpu-api-testing
@@ -12,12 +11,9 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
+...                 Login to the api and edge
 ...                 Cleanup Resources
-Suite Teardown      Run Keywords
-...                 Cleanup Resources  AND
-...                 Remove File  ${LOCAL_CONFIG}
+Suite Teardown      Cleanup Resources
 Force Tags          api  sdk  toolchain
 Test Timeout        5 minutes
 
