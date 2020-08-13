@@ -104,8 +104,7 @@ Check command response list contains id
         ${list_length}                  evaluate  ${list_length} - 1
     END
 
-    ${result}                           run keyword if  '${list_length}' != '0'  set variable  ${TRUE}
-    ...                                             ELSE  set variable  ${FALSE}
+    ${result}                           set variable if  '${list_length}' != '0'  ${TRUE}  ${FALSE}
     [Return]                            ${result}
 
 Command response list should contain id
