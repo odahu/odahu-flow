@@ -13,9 +13,16 @@ Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
 Suite Setup         Run Keywords
 ...                 Login to the api and edge
+...                 Cleanup Resources
+Suite Teardown      Cleanup Resources
 Force Tags          api  sdk  connection
 Test Timeout        5 minutes
 
+*** Keywords ***
+Cleanup Resources
+    [Documentation]  Deletes of created resources
+    StrictShell  odahuflowctl --verbose conn delete --id ${GIT_CONN} --ignore-not-found
+    StrictShell  odahuflowctl --verbose conn delete --id ${DOCKER_CONN} --ignore-not-found
 
 *** Test Cases ***
 Create GIT connection
