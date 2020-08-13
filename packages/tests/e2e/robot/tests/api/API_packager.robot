@@ -20,8 +20,8 @@ Test Timeout        5 minutes
 *** Keywords ***
 Cleanup Resources
     [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${TRAIN_MLFLOW_DEFAULT} --ignore-not-found
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${TRAIN_MLFLOW_NOT_DEFAULT} --ignore-not-found
+    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_CLI} --ignore-not-found
+    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_REST} --ignore-not-found
 
 *** Test Cases ***
 Get list of packagers
