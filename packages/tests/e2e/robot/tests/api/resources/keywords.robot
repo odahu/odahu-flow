@@ -105,7 +105,7 @@ Check command response list contains id
     END
 
     ${result}                           run keyword if  '${list_length}' != '0'  set variable  ${TRUE}
-    ...                                                            ELSE  set variable  ${FALSE}
+    ...                                             ELSE  set variable  ${FALSE}
     [Return]                            ${result}
 
 Command response list should contain id
@@ -125,8 +125,8 @@ Command response list should not contain id
     ${value_length}                     get length  ${value}
 
     FOR     ${i}  IN  @{response list}
-        continue for loop if            $i.id not in $value
-        ${value_length}                 evaluate  0
+        ${value_length}                 set variable if  $i.id in $value  0  ${value_length}
+        exit for loop if                $i.id in $value
     END
     should not be equal as integers     ${value_length}  0
 
