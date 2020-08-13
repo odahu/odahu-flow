@@ -48,6 +48,11 @@ Create Model Training, mlflow toolchain, default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
 
+Get short-term Logs of training
+    [Tags]                      training  log
+    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
+    should contain              ${result}  INFO
+
 Create Model Training, mlflow toolchain, not default
     [Tags]                      training
     [Documentation]             create model training and check that one exists
@@ -83,11 +88,6 @@ Update Model Training, mlflow toolchain, default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
-
-Get Logs of training
-    [Tags]                      training  log
-    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
-    should contain              ${result}  INFO
 
 Packaging's list doesn't contain packaging
     [Tags]                      packaging
