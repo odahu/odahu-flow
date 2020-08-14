@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: test-training-data-remote-file-to-file
+id: test-downloading-training-data-remote-file-to-file
 spec:
   model:
     name: test-training-data

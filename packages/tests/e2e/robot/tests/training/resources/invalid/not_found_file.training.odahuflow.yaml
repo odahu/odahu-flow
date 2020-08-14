@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: test-training-data-not-found-file
+id: test-downloading-training-data-not-found-file
 spec:
   model:
     name: test-training-data
