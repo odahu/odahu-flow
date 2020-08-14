@@ -33,7 +33,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 
 	targets := make([]packaging.PackagerTarget, 0, len(modelPackaging.Spec.Targets))
 	for _, target := range modelPackaging.Spec.Targets {
-		conn, err := p.connService.GetConnection(target.ConnectionName, false)
+		conn, err := p.connRepo.GetConnection(target.ConnectionName)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +44,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 		})
 	}
 
-	modelHolder, err := p.connService.GetConnection(modelPackaging.Spec.OutputConnection, false)
+	modelHolder, err := p.connRepo.GetConnection(modelPackaging.Spec.OutputConnection)
 	if err != nil {
 		return nil, err
 	}

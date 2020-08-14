@@ -24,8 +24,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
+	connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
-	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"io/ioutil"
 	"os"
@@ -40,7 +40,7 @@ const (
 
 type Packager struct {
 	packRepo         packaging_repository.Repository
-	connService      conn_service.Service
+	connRepo         connection_repository.Repository
 	log              logr.Logger
 	modelPackagingID string
 	packagerConfig   config.PackagerConfig
@@ -48,12 +48,12 @@ type Packager struct {
 
 func NewPackager(
 	packRepo packaging_repository.Repository,
-	connService conn_service.Service,
+	connRepo connection_repository.Repository,
 	config config.PackagerConfig,
 ) *Packager {
 	return &Packager{
-		packRepo:    packRepo,
-		connService: connService,
+		packRepo: packRepo,
+		connRepo: connRepo,
 		log: logf.Log.WithName("packager").WithValues(
 			odahuflow.ModelPackagingIDLogPrefix, config.ModelPackagingID,
 		),

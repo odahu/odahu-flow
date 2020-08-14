@@ -23,9 +23,9 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
+	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	authv1alpha1_istio "istio.io/api/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -94,14 +94,12 @@ func NewModelDeploymentReconciler(
 	return &ModelDeploymentReconciler{
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		connService: conn_service.NewService(
-			conn_http_repository.NewRepository(
-				cfg.Operator.Auth.APIURL,
-				cfg.Operator.Auth.APIToken,
-				cfg.Operator.Auth.ClientID,
-				cfg.Operator.Auth.ClientSecret,
-				cfg.Operator.Auth.OAuthOIDCTokenEndpoint,
-			),
+		connRepo: conn_http_repository.NewRepository(
+			cfg.Operator.Auth.APIURL,
+			cfg.Operator.Auth.APIToken,
+			cfg.Operator.Auth.ClientID,
+			cfg.Operator.Auth.ClientSecret,
+			cfg.Operator.Auth.OAuthOIDCTokenEndpoint,
 		),
 		deploymentConfig: cfg.Deployment,
 		operatorConfig:   cfg.Operator,
@@ -113,7 +111,7 @@ func NewModelDeploymentReconciler(
 type ModelDeploymentReconciler struct {
 	client.Client
 	scheme           *runtime.Scheme
-	connService      conn_service.Service
+	connRepo         conn_repository.Repository
 	deploymentConfig config.ModelDeploymentConfig
 	operatorConfig   config.OperatorConfig
 	gpuResourceName  string
