@@ -17,40 +17,36 @@ Library             odahuflow.robot.libraries.model.Model
 Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
-...                 Cleanup resources
+...                 Login to the api and edge
 Suite Teardown      Run Keywords
-...                 Cleanup resources  AND
 ...                 Remove file  ${LOCAL_CONFIG}
 Force Tags          training  training-data
 
 *** Keywords ***
 Cleanup resources
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_ID} --ignore-not-found
+    [Arguments]  ${training id}
+    StrictShell  odahuflowctl --verbose train delete --id ${training id} --ignore-not-found
 
 Train valid model
-    [Arguments]  ${training_file}
-    Cleanup resources
-
-    StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${TRAIN_ID}
-    report training pods  ${TRAIN_ID}
+    [Arguments]  ${training id}  ${training_file}
+    [Teardown]  Cleanup resources  ${training id}
+    StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
+    report training pods  ${training id}
     ${res}=  StrictShell  odahuflowctl train get --id ${TRAIN_ID} -o 'jsonpath=$[0].status.artifacts[0].runId'
     should be equal  ${RUN_ID}  ${res.stdout}
 
 Train invalid model
-    [Arguments]  ${training_file}
-    Cleanup resources
-
-    ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${TRAIN_ID}
-    report training pods  ${TRAIN_ID}
+    [Arguments]  ${training id}  ${training_file}
+    [Teardown]  Cleanup resources  ${training id}
+    ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
+    report training pods  ${training id}
     should not be equal  ${0}  ${res.rc}
 
 Train model that create invalid GPPI artifact
-    [Arguments]  ${training_file}
-    Cleanup resources
-
-    ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${TRAIN_ID}
-    report training pods  ${TRAIN_ID}
+    [Arguments]  ${training id}  ${training_file}
+    [Teardown]  Cleanup resources  ${training id}
+    ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
+    report training pods  ${training id}
     should not be equal  ${0}  ${res.rc}
     Should contain  ${res.stdout}  ${GPPI_VALIDATION_FAIL}
 
@@ -59,22 +55,22 @@ Train model that create invalid GPPI artifact
 Vaild data downloading parameters
     [Documentation]  Verify various valid combination of connection uri, remote path and local path parameters
     [Template]  Train valid model
-    dir_to_dir.training.odahuflow.yaml
-    remote_dir_to_dir.training.odahuflow.yaml
-    file_to_file.training.odahuflow.yaml
-    remote_file_to_file.training.odahuflow.yaml
-    file_to_dir.training.odahuflow.yaml
-    remote_file_to_dir.training.odahuflow.yaml
+    ${TRAIN_ID}-dir-to-dir              dir_to_dir.training.odahuflow.yaml
+    ${TRAIN_ID}-remote-dir-to-dir       remote_dir_to_dir.training.odahuflow.yaml
+    ${TRAIN_ID}-file-to-file            file_to_file.training.odahuflow.yaml
+    ${TRAIN_ID}-remote-file-to-file     remote_file_to_file.training.odahuflow.yaml
+    ${TRAIN_ID}-file-to-dir             file_to_dir.training.odahuflow.yaml
+    ${TRAIN_ID}-remote-file-to-dir      remote_file_to_dir.training.odahuflow.yaml
 
 Invaild data downloading parameters
     [Documentation]  Verify various invalid combination of connection uri, remote path and local path parameters
     [Template]  Train invalid model
-    not_found_file.training.odahuflow.yaml
-    not_found_remote_file.training.odahuflow.yaml
-    not_valid_dir_path.training.odahuflow.yaml
-    not_valid_remote_dir.training.odahuflow.yaml
+    ${TRAIN_ID}-not-found-file          not_found_file.training.odahuflow.yaml
+    ${TRAIN_ID}-not-found-remote-file   not_found_remote_file.training.odahuflow.yaml
+    ${TRAIN_ID}-not-valid-dir-path      not_valid_dir_path.training.odahuflow.yaml
+    ${TRAIN_ID}-not-valid-remote-dir    not_valid_remote_dir.training.odahuflow.yaml
 
 Invalid GPPI output
     [Documentation]  Verify that validator step checks GPPI correctness and raise error if GPPI is not correct
     [Template]  Train model that create invalid GPPI artifact
-    invalid_gppi_artifact.training.odahuflow.yaml
+    ${TRAIN_ID}-invalid-gppi            invalid_gppi_artifact.training.odahuflow.yaml
