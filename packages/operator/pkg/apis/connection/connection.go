@@ -16,7 +16,11 @@
 
 package connection
 
-import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+import (
+	"encoding/base64"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"go.uber.org/multierr"
+)
 
 const (
 	S3Type            = v1alpha1.ConnectionType("s3")
@@ -67,7 +71,34 @@ func (c *Connection) DeleteSensitiveData() *Connection {
 	return c
 }
 
-// The wrapper around DeleteSensitiveData, but it doesn't mutate the original object and returns a copy
-func (c Connection) DeleteSensitiveDataImmutable() *Connection {
-	return c.DeleteSensitiveData()
+// Decodes sensitive data from base64
+func (c *Connection) DecodeBase64Secrets() error {
+	var err error
+
+	decoded, decodeErr := base64.StdEncoding.DecodeString(c.Spec.Password)
+	if decodeErr != nil {
+		err = multierr.Append(err, decodeErr)
+	}
+	c.Spec.Password = string(decoded)
+
+	decoded, decodeErr = base64.StdEncoding.DecodeString(c.Spec.KeySecret)
+	if decodeErr != nil {
+		err = multierr.Append(err, decodeErr)
+	}
+	c.Spec.KeySecret = string(decoded)
+
+	decoded, decodeErr = base64.StdEncoding.DecodeString(c.Spec.KeyID)
+	if decodeErr != nil {
+		err = multierr.Append(err, decodeErr)
+	}
+	c.Spec.KeyID = string(decoded)
+
+	return err
+}
+
+// Encodes sensitive data to base64
+func (c *Connection) EncodeBase64Secrets() {
+	c.Spec.Password = base64.StdEncoding.EncodeToString([]byte(c.Spec.Password))
+	c.Spec.KeySecret = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeySecret))
+	c.Spec.KeyID = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeyID))
 }

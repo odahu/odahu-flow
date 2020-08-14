@@ -17,8 +17,11 @@
 package connection
 
 import (
+	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	"go.uber.org/multierr"
 )
 
 // A layer on top of connection repository that prepares data, e.g. base64 decoding
@@ -26,8 +29,8 @@ type Service interface {
 	GetConnection(id string, encrypted bool) (*connection.Connection, error)
 	GetConnectionList(options ...conn_repository.ListOption) ([]connection.Connection, error)
 	DeleteConnection(id string) error
-	UpdateConnection(connection *connection.Connection) (*connection.Connection, error)
-	CreateConnection(connection *connection.Connection) (*connection.Connection, error)
+	UpdateConnection(connection connection.Connection) (*connection.Connection, error)
+	CreateConnection(connection connection.Connection) (*connection.Connection, error)
 }
 
 type serviceImpl struct {
@@ -46,6 +49,8 @@ func (s *serviceImpl) GetConnection(id string, encrypted bool) (*connection.Conn
 
 	if encrypted {
 		conn.DeleteSensitiveData()
+	} else {
+		conn.EncodeBase64Secrets()
 	}
 
 	return conn, nil
@@ -69,18 +74,25 @@ func (s *serviceImpl) DeleteConnection(id string) error {
 	return s.repo.DeleteConnection(id)
 }
 
-func (s *serviceImpl) UpdateConnection(connection *connection.Connection) (*connection.Connection, error) {
-	updatedConn, err := s.repo.UpdateConnection(connection)
+func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*connection.Connection, error) {
+	updatedConn, err := s.repo.UpdateConnection(&connection)
 	if err != nil {
 		return updatedConn, err
 	}
-	return updatedConn.DeleteSensitiveDataImmutable(), err
+	return updatedConn.DeleteSensitiveData(), err
 }
 
-func (s *serviceImpl) CreateConnection(connection *connection.Connection) (*connection.Connection, error) {
-	createdConn, err := s.repo.CreateConnection(connection)
+func (s *serviceImpl) CreateConnection(connection connection.Connection) (*connection.Connection, error) {
+	if err := connection.DecodeBase64Secrets(); err != nil {
+		return nil, errors.InvalidEntityError{
+			Entity:           fmt.Sprintf("Connection %s", connection.ID),
+			ValidationErrors: multierr.Errors(err),
+		}
+	}
+
+	createdConn, err := s.repo.CreateConnection(&connection)
 	if err != nil {
 		return createdConn, err
 	}
-	return createdConn.DeleteSensitiveDataImmutable(), err
+	return createdConn.DeleteSensitiveData(), err
 }

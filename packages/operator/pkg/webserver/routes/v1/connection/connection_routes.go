@@ -194,7 +194,7 @@ func (cc *controller) createConnection(c *gin.Context) {
 
 	var createdConnection *connection.Connection
 	var err error
-	if createdConnection, err = cc.connService.CreateConnection(&conn); err != nil {
+	if createdConnection, err = cc.connService.CreateConnection(conn); err != nil {
 		logC.Error(err, fmt.Sprintf("Creation of the connection: %+v", conn))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -231,7 +231,7 @@ func (cc *controller) updateConnection(c *gin.Context) {
 		return
 	}
 
-	updatedConnection, err := cc.connService.UpdateConnection(&conn)
+	updatedConnection, err := cc.connService.UpdateConnection(conn)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Update of the connection: %+v", conn))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})

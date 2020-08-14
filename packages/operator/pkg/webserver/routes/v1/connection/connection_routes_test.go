@@ -88,12 +88,12 @@ func (s *ConnectionRouteGenericSuite) registerHTTPHandlers(connectionConfig conf
 func (s *ConnectionRouteGenericSuite) newMultipleConnStubs() []*connection.Connection {
 	conn1 := newConnStub()
 	conn1.ID = connID1
-	_, err := s.connService.CreateConnection(conn1)
+	_, err := s.connService.CreateConnection(*conn1)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	conn2 := newConnStub()
 	conn2.ID = connID2
-	_, err = s.connService.CreateConnection(conn2)
+	_, err = s.connService.CreateConnection(*conn2)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	return []*connection.Connection{conn1, conn2}
@@ -106,14 +106,14 @@ func newConnStub() *connection.Connection {
 			Type:     connection.DockerType,
 			URI:      connURI,
 			Username: "username",
-			Password: "password",
+			Password: "cGFzc3dvcmQ=",
 		},
 	}
 }
 
 func (s *ConnectionRouteGenericSuite) TestGetConnection() {
 	conn := newConnStub()
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -153,7 +153,7 @@ func (s *ConnectionRouteGenericSuite) TestGetConnectionNotFound() {
 
 func (s *ConnectionRouteGenericSuite) TestGetAllConnections() {
 	conn := newConnStub()
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -203,7 +203,7 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsByType() {
 			KeySecret: creds,
 		},
 	}
-	_, err := s.connService.CreateConnection(connGit)
+	_, err := s.connService.CreateConnection(*connGit)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connDocker := &connection.Connection{
@@ -215,7 +215,7 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsByType() {
 			KeySecret: creds,
 		},
 	}
-	_, err = s.connService.CreateConnection(connDocker)
+	_, err = s.connService.CreateConnection(*connDocker)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -249,7 +249,7 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsMultipleFiltersByType
 			KeySecret: creds,
 		},
 	}
-	_, err := s.connService.CreateConnection(connGit)
+	_, err := s.connService.CreateConnection(*connGit)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connDocker := &connection.Connection{
@@ -261,7 +261,7 @@ func (s *ConnectionRouteGenericSuite) TestGetAllConnectionsMultipleFiltersByType
 			KeySecret: creds,
 		},
 	}
-	_, err = s.connService.CreateConnection(connDocker)
+	_, err = s.connService.CreateConnection(*connDocker)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -404,11 +404,10 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable() {
 
 func (s *ConnectionRouteGenericSuite) TestCreateDuplicateConnection() {
 	conn := newConnStub()
-
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
-	connEntityBody, err := json.Marshal(conn)
+	connEntityBody, err := json.Marshal(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -446,7 +445,7 @@ func (s *ConnectionRouteGenericSuite) TestValidateCreateConnection() {
 
 func (s *ConnectionRouteGenericSuite) TestUpdateConnection() {
 	conn := newConnStub()
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connEntity := newConnStub()
@@ -495,7 +494,7 @@ func (s *ConnectionRouteGenericSuite) TestUpdateConnectionNotFound() {
 func (s *ConnectionRouteGenericSuite) TestValidateUpdateConnection() {
 	conn := newConnStub()
 	conn.Spec.Type = "not-found-type"
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	connEntityBody, err := json.Marshal(conn)
@@ -516,7 +515,7 @@ func (s *ConnectionRouteGenericSuite) TestValidateUpdateConnection() {
 
 func (s *ConnectionRouteGenericSuite) TestDeleteConnection() {
 	conn := newConnStub()
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -560,7 +559,7 @@ func (s *ConnectionRouteGenericSuite) TestDeleteConnectionNotFound() {
 
 func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnection() {
 	conn := newConnStub()
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
@@ -637,7 +636,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetAllConnections() {
 	})
 
 	conn := newConnStub()
-	_, err := s.connService.CreateConnection(conn)
+	_, err := s.connService.CreateConnection(*conn)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
