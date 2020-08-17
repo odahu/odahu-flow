@@ -75,6 +75,13 @@ func (s *serviceImpl) DeleteConnection(id string) error {
 }
 
 func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*connection.Connection, error) {
+	if err := connection.DecodeBase64Secrets(); err != nil {
+		return nil, errors.InvalidEntityError{
+			Entity:           fmt.Sprintf("Connection %s", connection.ID),
+			ValidationErrors: multierr.Errors(err),
+		}
+	}
+
 	updatedConn, err := s.repo.UpdateConnection(&connection)
 	if err != nil {
 		return updatedConn, err
