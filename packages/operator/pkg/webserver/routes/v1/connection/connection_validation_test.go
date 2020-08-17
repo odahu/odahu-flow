@@ -413,7 +413,7 @@ func (s *ConnectionValidationSuite) TestValidateID() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }
 
-func (s *ConnectionValidationSuite) TestValidateBase64Secrets_all3Secrets() {
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_allValid() {
 	conn := &connection.Connection{
 		ID: "valid-id",
 		Spec: v1alpha1.ConnectionSpec{
@@ -422,6 +422,7 @@ func (s *ConnectionValidationSuite) TestValidateBase64Secrets_all3Secrets() {
 			KeySecret: "c2VjcmV0",
 			PublicKey: "c2VjcmV0",
 			KeyID:     "c2VjcmV0",
+			Password:  "c2VjcmV0",
 		},
 	}
 
@@ -480,6 +481,21 @@ func (s *ConnectionValidationSuite) TestValidateBase64Secrets_invalidPassword() 
 			Type:     connection.GITType,
 			URI:      "URI",
 			Password: "my secret",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_invalidPublicKey() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:      connection.GITType,
+			URI:       "URI",
+			PublicKey: "public key",
 		},
 	}
 
