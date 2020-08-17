@@ -38,6 +38,11 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 			return nil, err
 		}
 
+		// Since connRepo here is actually an HTTP client, it returns connection with some fields base64-encoded
+		if err := conn.DecodeBase64Fields(); err != nil {
+			return nil, err
+		}
+
 		targets = append(targets, packaging.PackagerTarget{
 			Name:       target.Name,
 			Connection: *conn,
@@ -46,6 +51,11 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 
 	modelHolder, err := p.connRepo.GetConnection(modelPackaging.Spec.OutputConnection)
 	if err != nil {
+		return nil, err
+	}
+
+	// Since connRepo here is actually an HTTP client, it returns connection with some fields base64-encoded
+	if err := modelHolder.DecodeBase64Fields(); err != nil {
 		return nil, err
 	}
 

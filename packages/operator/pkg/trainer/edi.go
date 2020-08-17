@@ -34,6 +34,11 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
+	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
+	if err := vcs.DecodeBase64Fields(); err != nil {
+		return nil, err
+	}
+
 	inputData := make([]training.InputDataBindingDir, 0, len(modelTraining.Spec.Data))
 	for _, trainData := range modelTraining.Spec.Data {
 		var trainDataConnSpec odahuflowv1alpha1.ConnectionSpec
@@ -42,6 +47,10 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		if err != nil {
 			mt.log.Error(err, "Get train data", odahuflow.ConnectionIDLogPrefix, trainData.Connection)
 
+			return nil, err
+		}
+		// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
+		if err := trainDataConn.DecodeBase64Fields(); err != nil {
 			return nil, err
 		}
 
@@ -56,6 +65,10 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 
 	outputConn, err := mt.connRepo.GetConnection(modelTraining.Spec.OutputConnection)
 	if err != nil {
+		return nil, err
+	}
+	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
+	if err := outputConn.DecodeBase64Fields(); err != nil {
 		return nil, err
 	}
 

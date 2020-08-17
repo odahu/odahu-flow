@@ -71,6 +71,11 @@ func (r *ModelDeploymentReconciler) reconcileDeploymentPullConnection(
 		return err
 	}
 
+	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
+	if err := mdConn.DecodeBase64Fields(); err != nil {
+		return err
+	}
+
 	switch mdConn.Spec.Type {
 	case connection.DockerType:
 		return r.reconcileDockerDeploymentSecret(log, md, mdConn, DockerSecret{
