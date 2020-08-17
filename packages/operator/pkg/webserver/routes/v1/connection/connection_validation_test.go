@@ -113,9 +113,7 @@ func (s *ConnectionValidationSuite) TestGitTypePublicKeyBase64() {
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(
-		conn_route.GitTypePublicKeyErrorMessage, "illegal base64 data",
-	)))
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
 }
 
 func (s *ConnectionValidationSuite) TestDockerTypeUsername() {
@@ -300,7 +298,7 @@ func (s *ConnectionValidationSuite) TestGitTypeInvalidPublicKey() {
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf(conn_route.GitTypePublicKeyErrorMessage, "")))
+	s.g.Expect(err.Error()).Should(ContainSubstring("must be base64-encoded"))
 }
 
 func (s *ConnectionValidationSuite) TestGitTypeGeneratePublicKey() {

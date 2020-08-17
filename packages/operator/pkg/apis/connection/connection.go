@@ -72,7 +72,7 @@ func (c *Connection) DeleteSensitiveData() *Connection {
 }
 
 // Decodes sensitive data from base64
-func (c *Connection) DecodeBase64Secrets() error {
+func (c *Connection) DecodeBase64Fields() error {
 	var err error
 
 	decoded, decodeErr := base64.StdEncoding.DecodeString(c.Spec.Password)
@@ -93,6 +93,12 @@ func (c *Connection) DecodeBase64Secrets() error {
 	}
 	c.Spec.KeyID = string(decoded)
 
+	decoded, decodeErr = base64.StdEncoding.DecodeString(c.Spec.PublicKey)
+	if decodeErr != nil {
+		err = multierr.Append(err, decodeErr)
+	}
+	c.Spec.PublicKey = string(decoded)
+
 	return err
 }
 
@@ -101,4 +107,5 @@ func (c *Connection) EncodeBase64Secrets() {
 	c.Spec.Password = base64.StdEncoding.EncodeToString([]byte(c.Spec.Password))
 	c.Spec.KeySecret = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeySecret))
 	c.Spec.KeyID = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeyID))
+	c.Spec.PublicKey = base64.StdEncoding.EncodeToString([]byte(c.Spec.PublicKey))
 }

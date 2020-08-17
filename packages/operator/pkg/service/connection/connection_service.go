@@ -75,7 +75,7 @@ func (s *serviceImpl) DeleteConnection(id string) error {
 }
 
 func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*connection.Connection, error) {
-	if err := connection.DecodeBase64Secrets(); err != nil {
+	if err := connection.DecodeBase64Fields(); err != nil {
 		return nil, errors.InvalidEntityError{
 			Entity:           fmt.Sprintf("Connection %s", connection.ID),
 			ValidationErrors: multierr.Errors(err),
@@ -90,7 +90,7 @@ func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*conne
 }
 
 func (s *serviceImpl) CreateConnection(connection connection.Connection) (*connection.Connection, error) {
-	if err := connection.DecodeBase64Secrets(); err != nil {
+	if err := connection.DecodeBase64Fields(); err != nil {
 		return nil, errors.InvalidEntityError{
 			Entity:           fmt.Sprintf("Connection %s", connection.ID),
 			ValidationErrors: multierr.Errors(err),
