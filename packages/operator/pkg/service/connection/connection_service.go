@@ -49,9 +49,8 @@ func (s *serviceImpl) GetConnection(id string, encrypted bool) (*connection.Conn
 
 	if encrypted {
 		conn.DeleteSensitiveData()
-	} else {
-		conn.EncodeBase64Secrets()
 	}
+	conn.EncodeBase64Fields()
 
 	return conn, nil
 }

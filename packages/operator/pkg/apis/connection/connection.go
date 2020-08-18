@@ -102,10 +102,18 @@ func (c *Connection) DecodeBase64Fields() error {
 	return err
 }
 
-// Encodes sensitive data to base64
-func (c *Connection) EncodeBase64Secrets() {
-	c.Spec.Password = base64.StdEncoding.EncodeToString([]byte(c.Spec.Password))
-	c.Spec.KeySecret = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeySecret))
-	c.Spec.KeyID = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeyID))
-	c.Spec.PublicKey = base64.StdEncoding.EncodeToString([]byte(c.Spec.PublicKey))
+// Encodes sensitive data and public key to base64
+func (c *Connection) EncodeBase64Fields() {
+	if c.Spec.Password != DecryptedDataMask {
+		c.Spec.Password = base64.StdEncoding.EncodeToString([]byte(c.Spec.Password))
+	}
+	if c.Spec.KeySecret != DecryptedDataMask {
+		c.Spec.KeySecret = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeySecret))
+	}
+	if c.Spec.KeyID != DecryptedDataMask {
+		c.Spec.KeyID = base64.StdEncoding.EncodeToString([]byte(c.Spec.KeyID))
+	}
+	if c.Spec.PublicKey != DecryptedDataMask {
+		c.Spec.PublicKey = base64.StdEncoding.EncodeToString([]byte(c.Spec.PublicKey))
+	}
 }
