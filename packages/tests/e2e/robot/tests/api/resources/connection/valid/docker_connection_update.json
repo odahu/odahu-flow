@@ -5,7 +5,7 @@
     "type": "docker",
     "uri": "gcr.io/updated/",
     "username": "docker_user",
-    "password": "{password}",
+    "password": "e3Bhc3N3b3JkfQ==",
     "description": "updated",
     "webUILink": "https://gcr.io/updated/"
   }
