@@ -22,6 +22,7 @@ import (
 	_ "github.com/rclone/rclone/backend/googlecloudstorage" // s3 specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
+	"io/ioutil"
 	"net/url"
 )
 
@@ -42,6 +43,9 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		options["service_account_credentials"] = conn.KeySecret
 	}
 
+	// TODO: remove debug prints
+	dat, err := ioutil.ReadFile(config.ConfigPath)
+	log.Info("RClone config content", "config", string(dat))
 	if err := config.CreateRemote(configName, "googlecloudstorage", options, true, false); err != nil {
 		return nil, err
 	}
