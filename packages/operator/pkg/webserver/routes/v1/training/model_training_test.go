@@ -70,7 +70,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient)
 
 	// Create the connection that will be used as the vcs param for a training.
-	if _, err := s.connRepository.CreateConnection(&connection.Connection{
+	if err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testMtVCSID,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
@@ -93,7 +93,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the outputConnection param for a training.
-	if _, err := s.connRepository.CreateConnection(&connection.Connection{
+	if err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testMtOutConn,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -104,7 +104,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the default outputConnection param for a training.
-	if _, err := s.connRepository.CreateConnection(&connection.Connection{
+	if err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testMtOutConnDefault,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,

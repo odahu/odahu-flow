@@ -75,7 +75,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 	)
 
 	// Create the connection that will be used as the vcs param for a training.
-	if _, err := s.connRepository.CreateConnection(&connection.Connection{
+	if err := s.connRepository.CreateConnection(&connection.Connection{
 		ID: testMtVCSID,
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
@@ -188,7 +188,7 @@ func (s *ModelTrainingValidationSuite) TestMtNotExplicitMTReference() {
 		},
 	}
 
-	_, err := s.connRepository.CreateConnection(conn)
+	err := s.connRepository.CreateConnection(conn)
 	s.g.Expect(err).Should(BeNil())
 	defer s.connRepository.DeleteConnection(conn.ID)
 
@@ -222,7 +222,7 @@ func (s *ModelTrainingValidationSuite) TestMtWrongVcsConnectionType() {
 		},
 	}
 
-	_, err := s.connRepository.CreateConnection(conn)
+	err := s.connRepository.CreateConnection(conn)
 	s.g.Expect(err).Should(BeNil())
 	defer s.connRepository.DeleteConnection(conn.ID)
 

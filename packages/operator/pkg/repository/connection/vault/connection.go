@@ -143,7 +143,7 @@ func (vcr *vaultConnRepository) DeleteConnection(connID string) error {
 	return convertVaultErrToOdahuflowErr(err)
 }
 
-func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) (*connection.Connection, error) {
+func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) error {
 	existedConn, err := vcr.GetConnection(conn.ID)
 
 	switch {
@@ -155,27 +155,27 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) (*
 		if err != nil {
 			conn.Status = existedConn.Status
 		}
-		return conn, err
+		return err
 	case odahuflow_errors.IsNotFoundError(err):
-		return nil, odahuflow_errors.NotFoundError{Entity: conn.ID}
+		return odahuflow_errors.NotFoundError{Entity: conn.ID}
 	default:
-		return nil, err
+		return err
 	}
 }
 
-func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) (*connection.Connection, error) {
+func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) error {
 	_, err := vcr.GetConnection(conn.ID)
 
 	switch {
 	case err == nil:
 		// If err is nil, then the connection already exists.
-		return nil, odahuflow_errors.AlreadyExistError{Entity: conn.ID}
+		return odahuflow_errors.AlreadyExistError{Entity: conn.ID}
 	case odahuflow_errors.IsNotFoundError(err):
 		conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
 		conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
-		return conn, vcr.createOrUpdateConnection(conn)
+		return vcr.createOrUpdateConnection(conn)
 	default:
-		return nil, err
+		return err
 	}
 }
 

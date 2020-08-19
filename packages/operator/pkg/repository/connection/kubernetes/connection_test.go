@@ -40,7 +40,7 @@ func TestConnectionRepository(t *testing.T) {
 		},
 	}
 
-	_, err := c.CreateConnection(created)
+	err := c.CreateConnection(created)
 	g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err := c.GetConnection(connID)
@@ -60,7 +60,7 @@ func TestConnectionRepository(t *testing.T) {
 			Type: newConnType,
 		},
 	}
-	_, err = c.UpdateConnection(updated)
+	err = c.UpdateConnection(updated)
 	g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err = c.GetConnection(connID)
