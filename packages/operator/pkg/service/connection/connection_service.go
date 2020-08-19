@@ -63,7 +63,7 @@ func (s *serviceImpl) GetConnectionList(options ...conn_repository.ListOption) (
 
 	for i := range connections {
 		connections[i].DeleteSensitiveData()
-		//conn.DeleteSensitiveData()
+		connections[i].EncodeBase64Fields()
 	}
 
 	return connections, err
@@ -81,11 +81,14 @@ func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*conne
 		}
 	}
 
-	updatedConn, err := s.repo.UpdateConnection(&connection)
+	err := s.repo.UpdateConnection(&connection)
 	if err != nil {
-		return updatedConn, err
+		return nil, err
 	}
-	return updatedConn.DeleteSensitiveData(), err
+
+	connection.DeleteSensitiveData()
+	connection.EncodeBase64Fields()
+	return &connection, err
 }
 
 func (s *serviceImpl) CreateConnection(connection connection.Connection) (*connection.Connection, error) {
@@ -96,9 +99,12 @@ func (s *serviceImpl) CreateConnection(connection connection.Connection) (*conne
 		}
 	}
 
-	createdConn, err := s.repo.CreateConnection(&connection)
+	err := s.repo.CreateConnection(&connection)
 	if err != nil {
-		return createdConn, err
+		return nil, err
 	}
-	return createdConn.DeleteSensitiveData(), err
+
+	connection.DeleteSensitiveData()
+	connection.EncodeBase64Fields()
+	return &connection, err
 }
