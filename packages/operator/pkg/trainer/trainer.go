@@ -208,7 +208,7 @@ func (mt *ModelTrainer) SaveResult() error {
 	}
 
 	mt.log.Info("Start to zip the dir", "dir", outputTrainingDir, "archive_name",
-		outputZipName)
+		outputZipName, "output_conn", k8sTraining.OutputConn.Spec)
 
 	storage, err := rclone.NewObjectStorage(&k8sTraining.OutputConn.Spec)
 	if err != nil {

@@ -33,17 +33,24 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	if err != nil {
 		return nil, err
 	}
+	// TODO: remove debug logs
+	mt.log.Info("VCS Connection before decoding", "connection", vcs)
 
 	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
 	if err := vcs.DecodeBase64Fields(); err != nil {
 		return nil, err
 	}
 
+	mt.log.Info("VCS Connection after decoding", "connection", vcs)
+
 	inputData := make([]training.InputDataBindingDir, 0, len(modelTraining.Spec.Data))
 	for _, trainData := range modelTraining.Spec.Data {
 		var trainDataConnSpec odahuflowv1alpha1.ConnectionSpec
 
+		// TODO: remove debug logs
 		trainDataConn, err := mt.connRepo.GetConnection(trainData.Connection)
+		mt.log.Info("Train data Connection before decoding", "connection", trainDataConn)
+
 		if err != nil {
 			mt.log.Error(err, "Get train data", odahuflow.ConnectionIDLogPrefix, trainData.Connection)
 
@@ -53,6 +60,8 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		if err := trainDataConn.DecodeBase64Fields(); err != nil {
 			return nil, err
 		}
+
+		mt.log.Info("Train data Connection after decoding", "connection", trainDataConn)
 
 		trainDataConnSpec = trainDataConn.Spec
 
@@ -67,10 +76,14 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	if err != nil {
 		return nil, err
 	}
+	// TODO: remove debug logs
+	mt.log.Info("Output Connection before decoding", "connection", outputConn)
+
 	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
 	if err := outputConn.DecodeBase64Fields(); err != nil {
 		return nil, err
 	}
+	mt.log.Info("Output Connection after decoding", "connection", outputConn)
 
 	ti, err := mt.trainRepo.GetToolchainIntegration(modelTraining.Spec.Toolchain)
 	if err != nil {
