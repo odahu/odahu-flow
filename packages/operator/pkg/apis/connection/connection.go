@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"go.uber.org/multierr"
+	"strings"
 )
 
 const (
@@ -116,4 +117,12 @@ func (c *Connection) EncodeBase64Fields() {
 	if c.Spec.PublicKey != DecryptedDataMask {
 		c.Spec.PublicKey = base64.StdEncoding.EncodeToString([]byte(c.Spec.PublicKey))
 	}
+}
+
+func (c *Connection) OneLinifyKeySecret() {
+	c.Spec.KeySecret = OneLinify(c.Spec.KeySecret)
+}
+
+func OneLinify(s string) string {
+	return strings.ReplaceAll(s, "\n", "")
 }
