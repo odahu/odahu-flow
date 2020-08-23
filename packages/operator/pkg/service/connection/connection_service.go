@@ -80,7 +80,6 @@ func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*conne
 			ValidationErrors: multierr.Errors(err),
 		}
 	}
-	connection.OneLinifyKeySecret()
 
 	err := s.repo.UpdateConnection(&connection)
 	if err != nil {
@@ -99,7 +98,6 @@ func (s *serviceImpl) CreateConnection(connection connection.Connection) (*conne
 			ValidationErrors: multierr.Errors(err),
 		}
 	}
-	connection.OneLinifyKeySecret()
 
 	err := s.repo.CreateConnection(&connection)
 	if err != nil {
