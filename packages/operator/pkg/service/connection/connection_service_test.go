@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connection
+package connection_test
 
 import (
 	"encoding/base64"
@@ -23,6 +23,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -38,13 +39,13 @@ func TestConnectionserviceSuite(t *testing.T) {
 
 type ConnectionServiceTestSuite struct {
 	suite.Suite
-	mockRepo          RepositoryMock
-	connectionService Service
+	mockRepo          conn_service.RepositoryMock
+	connectionService conn_service.Service
 }
 
 func (s *ConnectionServiceTestSuite) SetupTest() {
-	s.mockRepo = RepositoryMock{}
-	s.connectionService = NewService(&s.mockRepo)
+	s.mockRepo = conn_service.RepositoryMock{}
+	s.connectionService = conn_service.NewService(&s.mockRepo)
 }
 
 // Tests that Service retrieves a connection from repository by ID and masks secrets when
