@@ -22,14 +22,14 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type ConnectionRepositoryMock struct {
+type RepositoryMock struct {
 	mock.Mock
 	// fields to remember passed pointers state
 	UpdatedConnection connection.Connection
 	CreatedConnection connection.Connection
 }
 
-func (c *ConnectionRepositoryMock) GetConnection(id string) (*connection.Connection, error) {
+func (c *RepositoryMock) GetConnection(id string) (*connection.Connection, error) {
 	mockedResult := c.Called(id)
 	if conn, ok := mockedResult.Get(0).(*connection.Connection); ok {
 		return conn, mockedResult.Error(1)
@@ -37,24 +37,24 @@ func (c *ConnectionRepositoryMock) GetConnection(id string) (*connection.Connect
 	return nil, mockedResult.Error(1)
 }
 
-func (c *ConnectionRepositoryMock) GetConnectionList(options ...conn_repository.ListOption) ([]connection.Connection, error) {
+func (c *RepositoryMock) GetConnectionList(options ...conn_repository.ListOption) ([]connection.Connection, error) {
 	mockedResult := c.Called(options)
 	return mockedResult.Get(0).([]connection.Connection), mockedResult.Error(1)
 }
 
-func (c *ConnectionRepositoryMock) DeleteConnection(id string) error {
+func (c *RepositoryMock) DeleteConnection(id string) error {
 	mockedResult := c.Called(id)
 	return mockedResult.Error(0)
 }
 
-func (c *ConnectionRepositoryMock) UpdateConnection(conn *connection.Connection) error {
+func (c *RepositoryMock) UpdateConnection(conn *connection.Connection) error {
 	// Remember the state on passed connection for assertions
 	c.UpdatedConnection = *conn
 	mockedResult := c.Called(conn)
 	return mockedResult.Error(0)
 }
 
-func (c *ConnectionRepositoryMock) CreateConnection(conn *connection.Connection) error {
+func (c *RepositoryMock) CreateConnection(conn *connection.Connection) error {
 	// Remember the state on passed connection for assertions
 	c.CreatedConnection = *conn
 	mockedResult := c.Called(conn)

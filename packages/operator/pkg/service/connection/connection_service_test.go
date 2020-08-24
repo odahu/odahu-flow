@@ -23,14 +23,14 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	connection2 "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-const connId = "some-id"
+const connID = "some-id"
+const notBase64 = "not base64"
 
 func TestConnectionserviceSuite(t *testing.T) {
 	suite.Run(t, new(ConnectionServiceTestSuite))
@@ -38,13 +38,13 @@ func TestConnectionserviceSuite(t *testing.T) {
 
 type ConnectionServiceTestSuite struct {
 	suite.Suite
-	mockRepo          ConnectionRepositoryMock
-	connectionService connection2.Service
+	mockRepo          RepositoryMock
+	connectionService Service
 }
 
 func (s *ConnectionServiceTestSuite) SetupTest() {
-	s.mockRepo = ConnectionRepositoryMock{}
-	s.connectionService = connection2.NewService(&s.mockRepo)
+	s.mockRepo = RepositoryMock{}
+	s.connectionService = NewService(&s.mockRepo)
 }
 
 // Tests that Service retrieves a connection from repository by ID and masks secrets when
@@ -53,11 +53,11 @@ func (s *ConnectionServiceTestSuite) TestGetConnection_Encrypted() {
 	connectionFromRepo := stubConnection()
 	expectedPublicKey := base64.StdEncoding.EncodeToString([]byte(connectionFromRepo.Spec.PublicKey))
 
-	s.mockRepo.On("GetConnection", connId).Return(&connectionFromRepo, nil)
+	s.mockRepo.On("GetConnection", connID).Return(&connectionFromRepo, nil)
 
-	conn, err := s.connectionService.GetConnection(connId, true)
+	conn, err := s.connectionService.GetConnection(connID, true)
 	assert.Nil(s.T(), err)
-	assert.Equal(s.T(), connId, conn.ID)
+	assert.Equal(s.T(), connID, conn.ID)
 
 	assert.Equal(s.T(), connection.DecryptedDataMask, conn.Spec.Password)
 	assert.Equal(s.T(), connection.DecryptedDataMask, conn.Spec.KeySecret)
@@ -75,11 +75,11 @@ func (s *ConnectionServiceTestSuite) TestGetConnection_Decrypted() {
 	expectedKeyID := base64.StdEncoding.EncodeToString([]byte(connectionFromRepo.Spec.KeyID))
 	expectedPublicKey := base64.StdEncoding.EncodeToString([]byte(connectionFromRepo.Spec.PublicKey))
 
-	s.mockRepo.On("GetConnection", connId).Return(&connectionFromRepo, nil)
+	s.mockRepo.On("GetConnection", connID).Return(&connectionFromRepo, nil)
 
-	conn, err := s.connectionService.GetConnection(connId, false)
+	conn, err := s.connectionService.GetConnection(connID, false)
 	assert.Nil(s.T(), err)
-	assert.Equal(s.T(), connId, conn.ID)
+	assert.Equal(s.T(), connID, conn.ID)
 
 	assert.Equal(s.T(), expectedPassword, conn.Spec.Password)
 	assert.Equal(s.T(), expectedKeySecret, conn.Spec.KeySecret)
@@ -89,9 +89,9 @@ func (s *ConnectionServiceTestSuite) TestGetConnection_Decrypted() {
 
 func (s *ConnectionServiceTestSuite) TestGetConnection_ErrorFromRepo() {
 	errorFromRepo := errors.New("my error")
-	s.mockRepo.On("GetConnection", connId).Return(nil, errorFromRepo)
+	s.mockRepo.On("GetConnection", connID).Return(nil, errorFromRepo)
 
-	conn, err := s.connectionService.GetConnection(connId, false)
+	conn, err := s.connectionService.GetConnection(connID, false)
 	assert.Nil(s.T(), conn)
 	assert.Equal(s.T(), errorFromRepo, err)
 }
@@ -134,8 +134,8 @@ func (s *ConnectionServiceTestSuite) TestGetConnectionList_ErrorFromRepo() {
 // Tests that Service just proxies the call to repo
 func (s *ConnectionServiceTestSuite) TestDeleteConnection() {
 	errorFromRepo := errors.New("some error")
-	s.mockRepo.On("DeleteConnection", connId).Return(errorFromRepo)
-	err := s.connectionService.DeleteConnection(connId)
+	s.mockRepo.On("DeleteConnection", connID).Return(errorFromRepo)
+	err := s.connectionService.DeleteConnection(connID)
 	assert.Equal(s.T(), errorFromRepo, err)
 }
 
@@ -167,10 +167,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection() {
 
 func (s *ConnectionServiceTestSuite) TestUpdateConnection_DecodingFail() {
 	connectionForService := stubConnection()
-	connectionForService.Spec.Password = "not base64"
-	connectionForService.Spec.KeySecret = "not base64"
-	connectionForService.Spec.PublicKey = "not base64"
-	connectionForService.Spec.KeyID = "not base64"
+	connectionForService.Spec.Password = notBase64
+	connectionForService.Spec.KeySecret = notBase64
+	connectionForService.Spec.PublicKey = notBase64
+	connectionForService.Spec.KeyID = notBase64
 
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
@@ -222,10 +222,10 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection() {
 
 func (s *ConnectionServiceTestSuite) TestCreateConnection_DecodingFail() {
 	connectionForService := stubConnection()
-	connectionForService.Spec.Password = "not base64"
-	connectionForService.Spec.KeySecret = "not base64"
-	connectionForService.Spec.PublicKey = "not base64"
-	connectionForService.Spec.KeyID = "not base64"
+	connectionForService.Spec.Password = notBase64
+	connectionForService.Spec.KeySecret = notBase64
+	connectionForService.Spec.PublicKey = notBase64
+	connectionForService.Spec.KeyID = notBase64
 
 	createdConnection, err := s.connectionService.CreateConnection(connectionForService)
 
@@ -251,7 +251,7 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection_ErrorFromRepo() {
 
 func stubConnection() connection.Connection {
 	return connection.Connection{
-		ID: connId,
+		ID: connID,
 		Spec: v1alpha1.ConnectionSpec{
 			Password:  "123456",
 			KeySecret: "secret",
