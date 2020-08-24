@@ -49,9 +49,6 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		options["service_account_file"] = serviceAccountJsonPath
 	}
 
-	// TODO: remove debug prints
-	dat, err := ioutil.ReadFile(config.ConfigPath)
-	log.Info("RClone config content", "config", string(dat))
 	if err := config.CreateRemote(configName, "googlecloudstorage", options, true, false); err != nil {
 		return nil, err
 	}
