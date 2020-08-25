@@ -25,6 +25,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/webserver/routes"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -56,19 +57,19 @@ func init() {
 }
 
 type controller struct {
-	connRepository conn_repository.Repository
-	validator      *ConnValidator
+	connService conn_service.Service
+	validator   *ConnValidator
 }
 
 func ConfigureRoutes(
 	routeGroup *gin.RouterGroup,
-	connRepository conn_repository.Repository,
+	connService conn_service.Service,
 	keyEvaluator PublicKeyEvaluator,
 	connectionConfig config.ConnectionConfig,
 ) {
 	controller := &controller{
-		connRepository: connRepository,
-		validator:      NewConnValidator(keyEvaluator),
+		connService: connService,
+		validator:   NewConnValidator(keyEvaluator),
 	}
 	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(connectionConfig.Enabled))
 
@@ -94,7 +95,7 @@ func ConfigureRoutes(
 func (cc *controller) getConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
 
-	conn, err := cc.connRepository.GetConnection(connID)
+	conn, err := cc.connService.GetConnection(connID, true)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Retrieving %s connection", connID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -119,7 +120,7 @@ func (cc *controller) getConnection(c *gin.Context) {
 func (cc *controller) getDecryptedConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
 
-	conn, err := cc.connRepository.GetDecryptedConnection(connID)
+	conn, err := cc.connService.GetConnection(connID, false)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Retrieving %s connection", connID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -151,7 +152,7 @@ func (cc *controller) getAllConnections(c *gin.Context) {
 		return
 	}
 
-	connList, err := cc.connRepository.GetConnectionList(
+	connList, err := cc.connService.GetConnectionList(
 		conn_repository.ListFilter(filter),
 		conn_repository.Size(size),
 		conn_repository.Page(page),
@@ -193,7 +194,7 @@ func (cc *controller) createConnection(c *gin.Context) {
 
 	var createdConnection *connection.Connection
 	var err error
-	if createdConnection, err = cc.connRepository.CreateConnection(&conn); err != nil {
+	if createdConnection, err = cc.connService.CreateConnection(conn); err != nil {
 		logC.Error(err, fmt.Sprintf("Creation of the connection: %+v", conn))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -230,7 +231,7 @@ func (cc *controller) updateConnection(c *gin.Context) {
 		return
 	}
 
-	updatedConnection, err := cc.connRepository.UpdateConnection(&conn)
+	updatedConnection, err := cc.connService.UpdateConnection(conn)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Update of the connection: %+v", conn))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -255,7 +256,7 @@ func (cc *controller) updateConnection(c *gin.Context) {
 func (cc *controller) deleteConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
 
-	if err := cc.connRepository.DeleteConnection(connID); err != nil {
+	if err := cc.connService.DeleteConnection(connID); err != nil {
 		logC.Error(err, fmt.Sprintf("Deletion of %s connection is failed", connID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 

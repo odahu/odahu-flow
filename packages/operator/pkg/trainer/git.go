@@ -17,7 +17,6 @@
 package trainer
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"golang.org/x/crypto/ssh"
@@ -49,22 +48,12 @@ func (mt *ModelTrainer) cloneUserRepo(
 	k8sTraining *training.K8sTrainer, cloneDir string) (string, error) {
 	vcsConn := k8sTraining.VCS
 
-	decodedPublicHostKey, err := base64.StdEncoding.DecodeString(vcsConn.Spec.PublicKey)
+	err := ioutil.WriteFile(publicHostKeyFile, []byte(vcsConn.Spec.PublicKey), 0600)
 	if err != nil {
 		return "", err
 	}
 
-	err = ioutil.WriteFile(publicHostKeyFile, decodedPublicHostKey, 0600)
-	if err != nil {
-		return "", err
-	}
-
-	decodedKeySecret, err := base64.StdEncoding.DecodeString(vcsConn.Spec.KeySecret)
-	if err != nil {
-		return "", err
-	}
-
-	gitAuth, err := getSSHKeyAuth(decodedKeySecret, publicHostKeyFile)
+	gitAuth, err := getSSHKeyAuth([]byte(vcsConn.Spec.KeySecret), publicHostKeyFile)
 	if err != nil {
 		return "", err
 	}

@@ -63,6 +63,10 @@ func CalculateHTTPStatusCode(err error) int {
 		return http.StatusForbidden
 	}
 
+	if _, ok = err.(odahuflow_errors.InvalidEntityError); ok {
+		return http.StatusBadRequest
+	}
+
 	return http.StatusInternalServerError
 }
 

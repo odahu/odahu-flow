@@ -28,19 +28,19 @@ import (
 )
 
 const (
-	ErrorMessageTemplate           = "%s: %s"
-	EmptyURIErrorMessage           = "the uri parameter is empty"
-	ValidationConnErrorMessage     = "Validation of connection is failed"
-	UnknownTypeErrorMessage        = "unknown type: %s. Supported types: %s"
-	DockerTypePasswordErrorMessage = "docker type requires the password parameter" //nolint
-	DockerTypeUsernameErrorMessage = "docker type requires the username parameter"
-	GitTypePublicKeyErrorMessage   = "git type requires that publicKey parameter must be encoded" +
-		" in base64 format, error message: %s"
+	ErrorMessageTemplate                   = "%s: %s"
+	EmptyURIErrorMessage                   = "the uri parameter is empty"
+	ValidationConnErrorMessage             = "Validation of connection is failed"
+	UnknownTypeErrorMessage                = "unknown type: %s. Supported types: %s"
+	PasswordDecodeErrorMessage             = "password must be base64-encoded, error: %s"
+	KeyIDDecodeErrorMessage                = "key id must be base64-encoded, error: %s"
+	KeySecretDecodeErrorMessage            = "key secret must be base64-encoded, error: %s"
+	PublicKeyDecodeErrorMessage            = "public key must be base64-encoded, error: %s"
+	DockerTypePasswordErrorMessage         = "docker type requires the password parameter" //nolint
+	DockerTypeUsernameErrorMessage         = "docker type requires the username parameter"
 	GitTypePublicKeyExtractionErrorMessage = "can not extract the public SSH host key from URI: %s"
-	GitTypeKeySecretErrorMessage           = "git type requires that keySecret parameter must be encoded" +
-		" in base64 format, error message: %s"
-	GcsTypeRegionErrorMessage         = "gcs type requires that region must be non-empty"
-	GcsTypeKeySecretEmptyErrorMessage = "gcs type requires that keySecret parameter" +
+	GcsTypeRegionErrorMessage              = "gcs type requires that region must be non-empty"
+	GcsTypeKeySecretEmptyErrorMessage      = "gcs type requires that keySecret parameter" +
 		" must be non-empty"
 	GcsTypeRoleNotSupportedErrorMessage = "gcs type does not support role parameter yet" +
 		" must be non-empty"
@@ -79,6 +79,7 @@ func (cv *ConnValidator) ValidatesAndSetDefaults(conn *connection.Connection) (e
 	}
 
 	err = multierr.Append(validation.ValidateID(conn.ID), err)
+	err = multierr.Append(cv.validateBase64Fields(conn), err)
 
 	if len(conn.Spec.URI) == 0 {
 		err = multierr.Append(err, errors.New(EmptyURIErrorMessage))
@@ -103,6 +104,33 @@ func (cv *ConnValidator) ValidatesAndSetDefaults(conn *connection.Connection) (e
 
 	if err != nil {
 		return fmt.Errorf(ErrorMessageTemplate, ValidationConnErrorMessage, err.Error())
+	}
+
+	return err
+}
+
+// If any of secret fields provided, they must be base64-encoded
+func (cv *ConnValidator) validateBase64Fields(conn *connection.Connection) error {
+	var err error
+
+	_, decodeErr := base64.StdEncoding.DecodeString(conn.Spec.Password)
+	if decodeErr != nil {
+		err = multierr.Append(err, fmt.Errorf(PasswordDecodeErrorMessage, decodeErr.Error()))
+	}
+
+	_, decodeErr = base64.StdEncoding.DecodeString(conn.Spec.KeySecret)
+	if decodeErr != nil {
+		err = multierr.Append(err, fmt.Errorf(KeySecretDecodeErrorMessage, decodeErr.Error()))
+	}
+
+	_, decodeErr = base64.StdEncoding.DecodeString(conn.Spec.KeyID)
+	if decodeErr != nil {
+		err = multierr.Append(err, fmt.Errorf(KeyIDDecodeErrorMessage, decodeErr.Error()))
+	}
+
+	_, decodeErr = base64.StdEncoding.DecodeString(conn.Spec.PublicKey)
+	if decodeErr != nil {
+		err = multierr.Append(err, fmt.Errorf(PublicKeyDecodeErrorMessage, decodeErr.Error()))
 	}
 
 	return err
@@ -180,21 +208,7 @@ func (cv *ConnValidator) validateDockerType(conn *connection.Connection) (err er
 }
 
 func (cv *ConnValidator) validateGitType(conn *connection.Connection) (err error) {
-	if len(conn.Spec.KeySecret) != 0 {
-		_, base64err := base64.StdEncoding.DecodeString(conn.Spec.KeySecret)
-
-		if base64err != nil {
-			err = multierr.Append(base64err, fmt.Errorf(GitTypeKeySecretErrorMessage, base64err.Error()))
-		}
-	}
-
-	if len(conn.Spec.PublicKey) != 0 {
-		_, base64err := base64.StdEncoding.DecodeString(conn.Spec.PublicKey)
-
-		if base64err != nil {
-			err = multierr.Append(base64err, fmt.Errorf(GitTypePublicKeyErrorMessage, base64err.Error()))
-		}
-	} else if len(conn.Spec.URI) != 0 {
+	if len(conn.Spec.PublicKey) == 0 {
 		publicKey, keyError := cv.keyEvaluator(conn.Spec.URI)
 		if keyError != nil {
 			err = multierr.Append(keyError, fmt.Errorf(GitTypePublicKeyExtractionErrorMessage, keyError.Error()))

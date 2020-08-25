@@ -120,15 +120,3 @@ func (s *Suite) TestConnectionNotFound() {
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }
-
-func (s *Suite) TestDecryptedConnectionGet() {
-	connResult, err := s.connHTTPClient.GetDecryptedConnection(connID)
-	s.g.Expect(err).ShouldNot(HaveOccurred())
-	s.g.Expect(newStubConn()).Should(Equal(connResult))
-}
-
-func (s *Suite) TestDecryptedConnectionGetNotFound() {
-	_, err := s.connHTTPClient.GetDecryptedConnection("conn-not-found")
-	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
-}

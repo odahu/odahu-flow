@@ -70,11 +70,7 @@ func (kc *k8sConnectionRepository) GetConnection(id string) (*connection.Connect
 		return nil, err
 	}
 
-	return connectionFromK8s.DeleteSensitiveData(), err
-}
-
-func (kc *k8sConnectionRepository) GetDecryptedConnection(id string) (*connection.Connection, error) {
-	return kc.getConnectionFromK8s(id)
+	return connectionFromK8s, err
 }
 
 func (kc *k8sConnectionRepository) getConnectionFromK8s(id string) (*connection.Connection, error) {
@@ -138,7 +134,7 @@ func (kc *k8sConnectionRepository) GetConnectionList(options ...conn_repository.
 			Spec:   currentConn.Spec,
 			Status: currentConn.Status,
 		}
-		conns[i] = *conn.DeleteSensitiveData()
+		conns[i] = conn
 	}
 
 	return conns, nil
@@ -163,7 +159,7 @@ func (kc *k8sConnectionRepository) DeleteConnection(id string) error {
 	return nil
 }
 
-func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection) (*connection.Connection, error) {
+func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection) error {
 	var k8sConn v1alpha1.Connection
 	if err := kc.k8sClient.Get(context.TODO(),
 		types.NamespacedName{Name: conn.ID, Namespace: kc.namespace},
@@ -171,7 +167,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	); err != nil {
 		logC.Error(err, "Get conn from k8s", "id", conn.ID)
 
-		return nil, convertK8sErrToOdahuflowErr(err)
+		return convertK8sErrToOdahuflowErr(err)
 	}
 
 	// TODO: think about update, not replacing as for now
@@ -182,15 +178,15 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	if err := kc.k8sClient.Update(context.TODO(), &k8sConn); err != nil {
 		logC.Error(err, "Creation of the conn", "id", conn.ID)
 
-		return nil, convertK8sErrToOdahuflowErr(err)
+		return convertK8sErrToOdahuflowErr(err)
 	}
 
 	conn.Status = k8sConn.Status
 
-	return conn.DeleteSensitiveDataImmutable(), nil
+	return nil
 }
 
-func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Connection) (*connection.Connection, error) {
+func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Connection) error {
 	conn := &v1alpha1.Connection{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      connection.ID,
@@ -206,12 +202,12 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 	if err := kc.k8sClient.Create(context.TODO(), conn); err != nil {
 		logC.Error(err, "ConnectionName creation error from k8s", "name", connection.ID)
 
-		return nil, convertK8sErrToOdahuflowErr(err)
+		return convertK8sErrToOdahuflowErr(err)
 	}
 
 	connection.Status = conn.Status
 
-	return connection.DeleteSensitiveDataImmutable(), nil
+	return nil
 }
 
 func convertK8sErrToOdahuflowErr(err error) error {

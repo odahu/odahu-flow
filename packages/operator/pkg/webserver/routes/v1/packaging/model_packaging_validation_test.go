@@ -158,7 +158,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		s.T().Fatal(err)
 	}
 
-	_, err = s.connRepository.CreateConnection(&connection.Connection{
+	err = s.connRepository.CreateConnection(&connection.Connection{
 		ID: connDockerTypeMpValid,
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.DockerType,
@@ -169,7 +169,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		s.T().Fatal(err)
 	}
 
-	_, err = s.connRepository.CreateConnection(&connection.Connection{
+	err = s.connRepository.CreateConnection(&connection.Connection{
 		ID: connS3TypeMpValid,
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.S3Type,

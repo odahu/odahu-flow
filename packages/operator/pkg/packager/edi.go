@@ -33,8 +33,13 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 
 	targets := make([]packaging.PackagerTarget, 0, len(modelPackaging.Spec.Targets))
 	for _, target := range modelPackaging.Spec.Targets {
-		conn, err := p.connRepo.GetDecryptedConnection(target.ConnectionName)
+		conn, err := p.connRepo.GetConnection(target.ConnectionName)
 		if err != nil {
+			return nil, err
+		}
+
+		// Since connRepo here is actually an HTTP client, it returns connection with some fields base64-encoded
+		if err := conn.DecodeBase64Fields(); err != nil {
 			return nil, err
 		}
 
@@ -44,8 +49,13 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 		})
 	}
 
-	modelHolder, err := p.connRepo.GetDecryptedConnection(modelPackaging.Spec.OutputConnection)
+	modelHolder, err := p.connRepo.GetConnection(modelPackaging.Spec.OutputConnection)
 	if err != nil {
+		return nil, err
+	}
+
+	// Since connRepo here is actually an HTTP client, it returns connection with some fields base64-encoded
+	if err := modelHolder.DecodeBase64Fields(); err != nil {
 		return nil, err
 	}
 

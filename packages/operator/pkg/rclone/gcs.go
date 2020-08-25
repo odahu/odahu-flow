@@ -22,8 +22,11 @@ import (
 	_ "github.com/rclone/rclone/backend/googlecloudstorage" // s3 specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
+	"io/ioutil"
 	"net/url"
 )
+
+const serviceAccountJSONPath = "gcs_service_account.json"
 
 func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDescription, error) {
 	_, err := fs.Find("googlecloudstorage")
@@ -39,7 +42,11 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 	}
 
 	if len(conn.KeySecret) != 0 {
-		options["service_account_credentials"] = conn.KeySecret
+		if err = ioutil.WriteFile(serviceAccountJSONPath, []byte(conn.KeySecret), 0600); err != nil {
+			log.Error(err, "Failed to write service account JSON-file")
+			return nil, err
+		}
+		options["service_account_file"] = serviceAccountJSONPath
 	}
 
 	if err := config.CreateRemote(configName, "googlecloudstorage", options, true, false); err != nil {

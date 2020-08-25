@@ -19,6 +19,7 @@ package connection_test
 import (
 	conn_vault_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	odahuflow_vault_utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/vault"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/stretchr/testify/suite"
 	"net"
 	"testing"
@@ -42,7 +43,8 @@ func (s *ConnectionRouteVaultBackendSuite) SetupSuite() {
 		testSecretMountEngine,
 	)
 
-	s.connRepository = conn_vault_repository.NewRepository(vaultClient, testSecretMountPath)
+	connRepo := conn_vault_repository.NewRepository(vaultClient, testSecretMountPath)
+	s.connService = conn_service.NewService(connRepo)
 	s.vaultServer = vaultServer
 	s.connDecryptToken = testDecryptToken
 

@@ -16,7 +16,10 @@
 
 package errors
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type NotFoundError struct {
 	Entity string
@@ -64,4 +67,18 @@ func (aee ForbiddenError) Error() string {
 func IsForbiddenError(err error) bool {
 	_, ok := err.(ForbiddenError)
 	return ok
+}
+
+type InvalidEntityError struct {
+	Entity           string
+	ValidationErrors []error
+}
+
+func (iee InvalidEntityError) Error() string {
+	errorStrings := make([]string, 0, len(iee.ValidationErrors))
+	for _, err := range iee.ValidationErrors {
+		errorStrings = append(errorStrings, err.Error())
+	}
+
+	return fmt.Sprintf("entity %q is invalid; errors: %s", iee.Entity, strings.Join(errorStrings, ", "))
 }

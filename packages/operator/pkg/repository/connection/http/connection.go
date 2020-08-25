@@ -56,24 +56,13 @@ func wrapConnLogger(id string) logr.Logger {
 	return log.WithValues("conn_id", id)
 }
 
-func (hcr *httpConnectionRepository) GetDecryptedConnection(id string) (*connection.Connection, error) {
-	connLogger := wrapConnLogger(id)
-
-	return hcr.getConnectionFromAPI(connLogger, &http.Request{
-		Method: http.MethodGet,
-		URL: &url.URL{
-			Path: strings.Replace("/connection/:id/decrypted", ":id", id, 1),
-		},
-	})
-}
-
 func (hcr *httpConnectionRepository) GetConnection(id string) (conn *connection.Connection, err error) {
 	connLogger := wrapConnLogger(id)
 
 	return hcr.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
-			Path: strings.Replace("/connection/:id", ":id", id, 1),
+			Path: strings.Replace("/connection/:id/decrypted", ":id", id, 1),
 		},
 	})
 }
@@ -126,12 +115,10 @@ func (hcr *httpConnectionRepository) DeleteConnection(id string) error {
 	panic("not implemented")
 }
 
-func (hcr *httpConnectionRepository) UpdateConnection(connection *connection.Connection) (
-	*connection.Connection, error) {
+func (hcr *httpConnectionRepository) UpdateConnection(connection *connection.Connection) error {
 	panic("not implemented")
 }
 
-func (hcr *httpConnectionRepository) CreateConnection(connection *connection.Connection) (
-	*connection.Connection, error) {
+func (hcr *httpConnectionRepository) CreateConnection(connection *connection.Connection) error {
 	panic("not implemented")
 }

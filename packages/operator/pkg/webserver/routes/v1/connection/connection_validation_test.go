@@ -101,23 +101,6 @@ func (s *ConnectionValidationSuite) TestUnknownTypeType() {
 	)))
 }
 
-func (s *ConnectionValidationSuite) TestGitTypeKeySecretBase64() {
-	conn := &connection.Connection{
-		ID: connID,
-		Spec: v1alpha1.ConnectionSpec{
-			Type:      connection.GITType,
-			URI:       connURI,
-			Reference: connReference,
-			KeySecret: "not-base64-encoding",
-		},
-	}
-	err := s.v.ValidatesAndSetDefaults(conn)
-	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(
-		conn_route.GitTypeKeySecretErrorMessage, "illegal base64 data",
-	)))
-}
-
 func (s *ConnectionValidationSuite) TestGitTypePublicKeyBase64() {
 	conn := &connection.Connection{
 		ID: connID,
@@ -130,9 +113,7 @@ func (s *ConnectionValidationSuite) TestGitTypePublicKeyBase64() {
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(
-		conn_route.GitTypePublicKeyErrorMessage, "illegal base64 data",
-	)))
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
 }
 
 func (s *ConnectionValidationSuite) TestDockerTypeUsername() {
@@ -184,7 +165,7 @@ func (s *ConnectionValidationSuite) TestGcsTypeRegion() {
 			Type:      connection.GcsType,
 			URI:       connURI,
 			Role:      "role",
-			KeySecret: "key-secret",
+			KeySecret: "a2V5LXNlY3JldA==",
 		},
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
@@ -241,7 +222,7 @@ func (s *ConnectionValidationSuite) TestS3TypeRegion() {
 			Type:      connection.S3Type,
 			URI:       connURI,
 			Role:      "role",
-			KeySecret: "key-secret",
+			KeySecret: "a2V5LXNlY3JldA==",
 		},
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
@@ -284,27 +265,12 @@ func (s *ConnectionValidationSuite) TestGitTypeValid() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
 			URI:       connURI,
-			KeySecret: base64.StdEncoding.EncodeToString([]byte("key-secret")),
+			KeySecret: "a2V5LXNlY3JldA==",
 			Reference: "branch",
 		},
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
-}
-
-func (s *ConnectionValidationSuite) TestGitTypeInvalidKeySecret() {
-	conn := &connection.Connection{
-		ID: connID,
-		Spec: v1alpha1.ConnectionSpec{
-			Type:      connection.GITType,
-			URI:       connURI,
-			KeySecret: "not-base64-format",
-			Reference: "branch",
-		},
-	}
-	err := s.v.ValidatesAndSetDefaults(conn)
-	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf(conn_route.GitTypeKeySecretErrorMessage, "")))
 }
 
 func (s *ConnectionValidationSuite) TestGitTypeWithoutSecretIsValid() {
@@ -332,7 +298,7 @@ func (s *ConnectionValidationSuite) TestGitTypeInvalidPublicKey() {
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring(fmt.Sprintf(conn_route.GitTypePublicKeyErrorMessage, "")))
+	s.g.Expect(err.Error()).Should(ContainSubstring("must be base64-encoded"))
 }
 
 func (s *ConnectionValidationSuite) TestGitTypeGeneratePublicKey() {
@@ -372,8 +338,8 @@ func (s *ConnectionValidationSuite) TestS3ValidSecretParameter() {
 			Type:      connection.S3Type,
 			URI:       connURI,
 			Region:    "region",
-			KeySecret: "key-secret",
-			KeyID:     "key-id",
+			KeySecret: "a2V5LXNlY3JldA==",
+			KeyID:     "a2V5LWlk",
 		},
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
@@ -413,8 +379,8 @@ func (s *ConnectionValidationSuite) TestECRTypeRegionFromUrl() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.EcrType,
 			URI:       ecrValidUri,
-			KeySecret: "key-secret",
-			KeyID:     "key-id",
+			KeySecret: "a2V5LXNlY3JldA==",
+			KeyID:     "a2V5LWlk",
 		},
 	}
 	err := s.v.ValidatesAndSetDefaults(conn)
@@ -428,8 +394,8 @@ func (s *ConnectionValidationSuite) TestECRTypeValidParameters() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.EcrType,
 			URI:       ecrValidUri,
-			KeySecret: "key-secret",
-			KeyID:     "key-id",
+			KeySecret: "a2V5LXNlY3JldA==",
+			KeyID:     "a2V5LWlk",
 			Region:    "region",
 		},
 	}
@@ -445,4 +411,95 @@ func (s *ConnectionValidationSuite) TestValidateID() {
 	err := s.v.ValidatesAndSetDefaults(conn)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_allValid() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:      connection.GITType,
+			URI:       "URI",
+			KeySecret: "c2VjcmV0",
+			PublicKey: "c2VjcmV0",
+			KeyID:     "c2VjcmV0",
+			Password:  "c2VjcmV0",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_keySecretOnly() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:      connection.GITType,
+			URI:       "URI",
+			KeySecret: "c2VjcmV0",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).NotTo(HaveOccurred())
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_invalidKeySecret() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:      connection.GITType,
+			URI:       "URI",
+			KeySecret: "my secret",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_invalidKeyID() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:  connection.GITType,
+			URI:   "URI",
+			KeyID: "my secret",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_invalidPassword() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:     connection.GITType,
+			URI:      "URI",
+			Password: "my secret",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
+}
+
+func (s *ConnectionValidationSuite) TestValidateBase64Secrets_invalidPublicKey() {
+	conn := &connection.Connection{
+		ID: "valid-id",
+		Spec: v1alpha1.ConnectionSpec{
+			Type:      connection.GITType,
+			URI:       "URI",
+			PublicKey: "public key",
+		},
+	}
+
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring("must be base64-encoded"))
 }

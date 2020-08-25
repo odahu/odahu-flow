@@ -99,15 +99,10 @@ func (s *VaultConnRepoSuite) TestConnectionRepository() {
 		},
 	}
 
-	_, err := s.connRepo.CreateConnection(created)
+	err := s.connRepo.CreateConnection(created)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
-	fetched, err := s.connRepo.GetDecryptedConnection(connID)
-	s.g.Expect(err).NotTo(HaveOccurred())
-	s.g.Expect(fetched.ID).To(Equal(created.ID))
-	s.g.Expect(fetched.Spec).To(Equal(created.Spec))
-
-	fetched, err = s.connRepo.GetConnection(connID)
+	fetched, err := s.connRepo.GetConnection(connID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(fetched.ID).To(Equal(created.ID))
 	s.g.Expect(fetched.Spec).To(Equal(created.DeleteSensitiveData().Spec))
@@ -120,7 +115,7 @@ func (s *VaultConnRepoSuite) TestConnectionRepository() {
 		},
 	}
 
-	_, err = s.connRepo.UpdateConnection(updated)
+	err = s.connRepo.UpdateConnection(updated)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err = s.connRepo.GetConnection(connID)
