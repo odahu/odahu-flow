@@ -32,6 +32,7 @@ Service url stay the same after log in
     service_url=${JUPYTERLAB_URL}/lab
     service_url=${MLFLOW_URL}/
     service_url=${AIRFLOW_URL}/admin/
+    service_url=${KIBANA_URL}/app/kibana#/
 
 Invalid credentials raise Auth error
     [Tags]  apps  e2t
@@ -45,3 +46,4 @@ Invalid credentials raise Auth error
     service_url=${JUPYTERLAB_URL}/lab
     service_url=${MLFLOW_URL}/?a=1
     service_url=${AIRFLOW_URL}/admin/
+    service_url=${KIBANA_URL}/app/kibana#/
