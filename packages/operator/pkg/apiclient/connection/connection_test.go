@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http_test
+package connection_test
 
 import (
 	"encoding/json"
@@ -25,8 +25,7 @@ import (
 
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	conn_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 )
@@ -40,7 +39,7 @@ type Suite struct {
 	suite.Suite
 	g              *GomegaWithT
 	ts             *httptest.Server
-	connHTTPClient conn_repository.Repository
+	connHTTPClient conn_api_client.Client
 }
 
 func newStubConn() *connection.Connection {
@@ -75,7 +74,7 @@ func (s *Suite) SetupSuite() {
 		}
 	}))
 
-	s.connHTTPClient = conn_http_repository.NewRepository(s.ts.URL, testDecryptToken, "", "", "")
+	s.connHTTPClient = conn_api_client.NewClient(s.ts.URL, testDecryptToken, "", "", "")
 }
 
 func (s *Suite) processGetConnection(r *http.Request, w http.ResponseWriter, conn *connection.Connection) {

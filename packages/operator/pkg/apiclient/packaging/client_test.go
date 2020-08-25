@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package http_test
+package packaging_test
 
 import (
 	"encoding/json"
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
-	packaging_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/http"
+	packaging_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -32,6 +31,7 @@ import (
 
 const (
 	mpID = "test-mp-id"
+	piID = "test-pi-id"
 )
 
 var (
@@ -42,13 +42,20 @@ var (
 			Image:        "some:image",
 		},
 	}
+	pi = &packaging.PackagingIntegration{
+		ID: piID,
+		Spec: packaging.PackagingIntegrationSpec{
+			Entrypoint:   "/test/entrypoint",
+			DefaultImage: "default:image",
+		},
+	}
 )
 
 type mpSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	ts           *httptest.Server
-	mpHTTPClient packaging_repository.DeprecatedRepository
+	mpHTTPClient packaging_client.Client
 }
 
 func NotFound(w http.ResponseWriter, r *http.Request) {
@@ -99,12 +106,29 @@ func (s *mpSuite) SetupSuite() {
 				// Must not be occurred
 				panic(err)
 			}
+		case "/api/v1/packaging/integration/test-pi-id":
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				piBytes, err := json.Marshal(pi)
+				if err != nil {
+					// Must not be occurred
+					panic(err)
+				}
+
+				_, err = w.Write(piBytes)
+				if err != nil {
+					// Must not be occurred
+					panic(err)
+				}
+			} else {
+				NotFound(w, r)
+			}
 		default:
 			NotFound(w, r)
 		}
 	}))
 
-	s.mpHTTPClient = packaging_http_repository.NewRepository(s.ts.URL, "", "", "", "")
+	s.mpHTTPClient = packaging_client.NewClient(s.ts.URL, "", "", "", "")
 }
 
 func (s *mpSuite) TearDownSuite() {
@@ -140,4 +164,16 @@ func (s *mpSuite) TestModelPackagingResultSaving() {
 		}},
 	)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
+}
+
+func (s *mpSuite) TestPackagingIntegrationGet() {
+	piResult, err := s.mpHTTPClient.GetPackagingIntegration(piID)
+	s.g.Expect(err).ShouldNot(HaveOccurred())
+	s.g.Expect(pi).Should(Equal(piResult))
+}
+
+func (s *mpSuite) TestPackagingoIntegrationNotFound() {
+	_, err := s.mpHTTPClient.GetPackagingIntegration("pi-not-found")
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }

@@ -72,7 +72,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
-	ti, err := mt.toolchainClient.GetToolchainIntegration(modelTraining.Spec.Toolchain)
+	ti, err := mt.trainClient.GetToolchainIntegration(modelTraining.Spec.Toolchain)
 	if err != nil {
 		return nil, err
 	}

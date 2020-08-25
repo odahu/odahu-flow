@@ -23,6 +23,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	mp_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -53,7 +54,7 @@ var (
 // newReconciler returns a new reconcile.Reconciler
 func NewModelPackagingReconciler(
 	mgr manager.Manager, cfg config.Config,
-	piHTTPClient mp_repository.PackagingIntegrationRepository,
+	packAPIClient mp_api_client.Client,
 ) *ModelPackagingReconciler {
 
 	k8sClient := mgr.GetClient()
@@ -68,7 +69,7 @@ func NewModelPackagingReconciler(
 			k8sClient,
 			mgr.GetConfig(),
 		),
-		piHTTPClient:    piHTTPClient,
+		mpAPIClient:     packAPIClient,
 		packagingConfig: cfg.Packaging,
 		operatorConfig:  cfg.Operator,
 		gpuResourceName: cfg.Common.ResourceGPUName,
@@ -81,7 +82,7 @@ type ModelPackagingReconciler struct {
 	scheme          *runtime.Scheme
 	config          *rest.Config
 	packRepo        mp_repository.ResultRepository
-	piHTTPClient    mp_repository.PackagingIntegrationRepository
+	mpAPIClient     mp_api_client.Client
 	packagingConfig config.ModelPackagingConfig
 	operatorConfig  config.OperatorConfig
 	gpuResourceName string
@@ -182,7 +183,7 @@ func (r *ModelPackagingReconciler) calculateStateByPod(
 func (r *ModelPackagingReconciler) getPackagingIntegration(packagingCR *odahuflowv1alpha1.ModelPackaging) (
 	*packaging.PackagingIntegration, error,
 ) {
-	pi, err := r.piHTTPClient.GetPackagingIntegration(packagingCR.Spec.Type)
+	pi, err := r.mpAPIClient.GetPackagingIntegration(packagingCR.Spec.Type)
 	if err != nil {
 		return nil, err
 	}

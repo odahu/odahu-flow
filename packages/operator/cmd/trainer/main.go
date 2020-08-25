@@ -19,8 +19,8 @@ package main
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	conn_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
-	train_http_storage "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/http"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/trainer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -100,14 +100,14 @@ func init() {
 
 func newTrainerWithHTTPRepositories(config config.TrainerConfig) *trainer.ModelTrainer {
 	log.Info(fmt.Sprintf("OAuthOIDCTokenEndpoint: %s", viper.GetString(config.Auth.OAuthOIDCTokenEndpoint)))
-	trainHTTPDeprecatedClient := train_http_storage.NewRepository(
+	trainAPIClient := train_api_client.NewClient(
 		config.Auth.APIURL,
 		config.Auth.APIToken,
 		config.Auth.ClientID,
 		config.Auth.ClientSecret,
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
-	connHTTPClient := conn_http_storage.NewRepository(
+	connAPIClient := conn_api_client.NewClient(
 		config.Auth.APIURL,
 		config.Auth.APIToken,
 		config.Auth.ClientID,
@@ -115,9 +115,7 @@ func newTrainerWithHTTPRepositories(config config.TrainerConfig) *trainer.ModelT
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 
-	return trainer.NewModelTrainer(
-		trainHTTPDeprecatedClient, trainHTTPDeprecatedClient, trainHTTPDeprecatedClient, connHTTPClient, config,
-	)
+	return trainer.NewModelTrainer(trainAPIClient, connAPIClient, config)
 }
 
 func main() {

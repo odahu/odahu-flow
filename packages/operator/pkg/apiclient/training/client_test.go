@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package http_test
+package training_test
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
-	training_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/http"
+	training_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -32,6 +31,7 @@ import (
 
 const (
 	mtID = "test-mt-id"
+	tiID = "test-ti-id"
 )
 
 var (
@@ -46,13 +46,20 @@ var (
 			Toolchain: "mlflow",
 		},
 	}
+	ti = &training.ToolchainIntegration{
+		ID: tiID,
+		Spec: v1alpha1.ToolchainIntegrationSpec{
+			Entrypoint:   "/test/entrypoint",
+			DefaultImage: "default:image",
+		},
+	}
 )
 
 type mtSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	ts           *httptest.Server
-	mtHTTPClient training_repository.DeprecatedRepository
+	mtHTTPClient training_api_client.Client
 }
 
 func NotFound(w http.ResponseWriter, r *http.Request) {
@@ -85,12 +92,29 @@ func (s *mtSuite) SetupSuite() {
 				// Must not be occurred
 				panic(err)
 			}
+		case "/api/v1/toolchain/integration/test-ti-id":
+			if r.Method == http.MethodGet {
+				w.WriteHeader(http.StatusOK)
+				tiBytes, err := json.Marshal(ti)
+				if err != nil {
+					// Must not be occurred
+					panic(err)
+				}
+
+				_, err = w.Write(tiBytes)
+				if err != nil {
+					// Must not be occurred
+					panic(err)
+				}
+			} else {
+				NotFound(w, r)
+			}
 		default:
 			NotFound(w, r)
 		}
 	}))
 
-	s.mtHTTPClient = training_http_repository.NewRepository(s.ts.URL, "", "", "", "")
+	s.mtHTTPClient = training_api_client.NewClient(s.ts.URL, "", "", "", "")
 }
 
 func (s *mtSuite) TearDownSuite() {
@@ -113,6 +137,18 @@ func (s *mtSuite) TestModelTrainingGet() {
 
 func (s *mtSuite) TestModelTrainingNotFound() {
 	_, err := s.mtHTTPClient.GetModelTraining("mt-not-found")
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
+}
+
+func (s *mtSuite) TestToolchainIntegrationGet() {
+	tiResult, err := s.mtHTTPClient.GetToolchainIntegration(tiID)
+	s.g.Expect(err).ShouldNot(HaveOccurred())
+	s.g.Expect(ti).Should(Equal(tiResult))
+}
+
+func (s *mtSuite) TestToolchainIntegrationNotFound() {
+	_, err := s.mtHTTPClient.GetToolchainIntegration("ti-not-found")
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }

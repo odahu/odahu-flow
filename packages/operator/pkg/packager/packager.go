@@ -24,8 +24,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-	connection_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	pack_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"io/ioutil"
 	"os"
@@ -39,26 +39,20 @@ const (
 )
 
 type Packager struct {
-	packagingClient       packaging_repository.Repository
-	packagingResultClient packaging_repository.ResultRepository
-	packagingIntClient    packaging_repository.PackagingIntegrationRepository
-	connClient            connection_repository.Repository
+	packagingClient       pack_api_client.Client
+	connClient            conn_api_client.Client
 	log                   logr.Logger
 	modelPackagingID      string
 	packagerConfig        config.PackagerConfig
 }
 
 func NewPackager(
-	packagingClient packaging_repository.Repository,
-	packagingResultClient packaging_repository.ResultRepository,
-	packagingIntClient packaging_repository.PackagingIntegrationRepository,
-	connClient connection_repository.Repository,
+	packagingClient pack_api_client.Client,
+	connClient conn_api_client.Client,
 	config config.PackagerConfig,
 ) *Packager {
 	return &Packager{
 		packagingClient: packagingClient,
-		packagingResultClient: packagingResultClient,
-		packagingIntClient: packagingIntClient,
 		connClient: connClient,
 		log: logf.Log.WithName("packager").WithValues(
 			odahuflow.ModelPackagingIDLogPrefix, config.ModelPackagingID,
@@ -128,7 +122,7 @@ func (p *Packager) SaveResult() error {
 		})
 	}
 
-	return p.packagingResultClient.SaveModelPackagingResult(k8sPackaging.ModelPackaging.ID, packResult)
+	return p.packagingClient.SaveModelPackagingResult(k8sPackaging.ModelPackaging.ID, packResult)
 }
 
 func (p *Packager) downloadData(packaging *packaging.K8sPackager) (err error) {

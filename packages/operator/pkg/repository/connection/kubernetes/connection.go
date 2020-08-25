@@ -164,7 +164,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	); err != nil {
 		logC.Error(err, "Get conn from k8s", "id", conn.ID)
 
-		return kubernetes.convertK8sErrToOdahuflowErr(err)
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	// TODO: think about update, not replacing as for now
@@ -175,7 +175,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	if err := kc.k8sClient.Update(context.TODO(), &k8sConn); err != nil {
 		logC.Error(err, "Creation of the conn", "id", conn.ID)
 
-		return kubernetes.convertK8sErrToOdahuflowErr(err)
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	conn.Status = k8sConn.Status
@@ -199,7 +199,7 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 	if err := kc.k8sClient.Create(context.TODO(), conn); err != nil {
 		logC.Error(err, "ConnectionName creation error from k8s", "name", connection.ID)
 
-		return kubernetes.convertK8sErrToOdahuflowErr(err)
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	connection.Status = conn.Status

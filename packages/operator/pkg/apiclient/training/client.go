@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package http
+package training
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -28,23 +27,20 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
-var log = logf.Log.WithName("model_training_http_repository")
+var log = logf.Log.WithName("model_training_api_client")
 
-type httpTrainingRepository struct {
+type trainingAPIClient struct {
 	http_util.BaseAPIClient
 }
 
-// todo: doc
-func NewRepository(
+func NewClient(
 	apiURL string, token string, clientID string,
-	clientSecret string, tokenURL string) training_repository.DeprecatedRepository {
-	return &httpTrainingRepository{
+	clientSecret string, tokenURL string) Client {
+	return &trainingAPIClient{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
 			token,
@@ -60,10 +56,10 @@ func wrapMtLogger(id string) logr.Logger {
 	return log.WithValues(odahuflow.ModelTrainingIDLogPrefix, id)
 }
 
-func (htr *httpTrainingRepository) GetModelTraining(id string) (mt *training.ModelTraining, err error) {
+func (c *trainingAPIClient) GetModelTraining(id string) (mt *training.ModelTraining, err error) {
 	mtLogger := wrapMtLogger(id)
 
-	response, err := htr.DoRequest(
+	response, err := c.DoRequest(
 		http.MethodGet,
 		strings.Replace("/model/training/:id", ":id", id, 1),
 		nil,
@@ -102,36 +98,12 @@ func (htr *httpTrainingRepository) GetModelTraining(id string) (mt *training.Mod
 	return mt, nil
 }
 
-func (htr *httpTrainingRepository) GetModelTrainingList(options ...filter.ListOption) (
-	[]training.ModelTraining, error,
-) {
-	panic("not implemented")
-}
-
-func (htr *httpTrainingRepository) DeleteModelTraining(id string) error {
-	panic("not implemented")
-}
-
-func (htr *httpTrainingRepository) UpdateModelTraining(mt *training.ModelTraining) error {
-	panic("not implemented")
-}
-
-func (htr *httpTrainingRepository) CreateModelTraining(mt *training.ModelTraining) error {
-	panic("not implemented")
-}
-
-func (htr *httpTrainingRepository) GetModelTrainingLogs(
-	id string, writer utils.Writer, follow bool,
-) error {
-	panic("not implemented")
-}
-
-func (htr *httpTrainingRepository) SaveModelTrainingResult(
+func (c *trainingAPIClient) SaveModelTrainingResult(
 	id string, result *v1alpha1.TrainingResult,
 ) error {
 	mtLogger := wrapMtLogger(id)
 
-	response, err := htr.DoRequest(
+	response, err := c.DoRequest(
 		http.MethodPut,
 		strings.Replace("/model/training/:id/result", ":id", id, 1),
 		result,
@@ -165,6 +137,45 @@ func (htr *httpTrainingRepository) SaveModelTrainingResult(
 	return nil
 }
 
-func (htr *httpTrainingRepository) GetModelTrainingResult(id string) (*v1alpha1.TrainingResult, error) {
-	panic("not implemented")
+func (c *trainingAPIClient) GetToolchainIntegration(id string) (ti *training.ToolchainIntegration, err error) {
+	tiLogger := wrapMtLogger(id)
+
+	response, err := c.DoRequest(
+		http.MethodGet,
+		strings.Replace("/toolchain/integration/:id", ":id", id, 1),
+		nil,
+	)
+	if err != nil {
+		tiLogger.Error(err, "Retrieving of the toolchain integration from API failed")
+
+		return nil, err
+	}
+
+	ti = &training.ToolchainIntegration{}
+	tiBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		tiLogger.Error(err, "Read all data from API response")
+
+		return nil, err
+	}
+	defer func() {
+		bodyCloseError := response.Body.Close()
+		if bodyCloseError != nil {
+			tiLogger.Error(err, "Closing toolchain integration response body")
+		}
+	}()
+
+	if response.StatusCode >= 400 {
+		return nil, fmt.Errorf("error occures: %s", string(tiBytes))
+	}
+
+	err = json.Unmarshal(tiBytes, ti)
+	if err != nil {
+		tiLogger.Error(err, "Unmarshal the toolchain integration")
+
+		return nil, err
+	}
+
+	return ti, nil
 }
+

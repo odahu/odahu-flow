@@ -26,7 +26,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 	if err != nil {
 		return nil, err
 	}
-	packagingIntegration, err := p.packagingIntClient.GetPackagingIntegration(modelPackaging.Spec.IntegrationName)
+	packagingIntegration, err := p.packagingClient.GetPackagingIntegration(modelPackaging.Spec.IntegrationName)
 	if err != nil {
 		return nil, err
 	}

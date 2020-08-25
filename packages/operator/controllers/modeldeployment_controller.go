@@ -23,8 +23,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	conn_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	authv1alpha1_istio "istio.io/api/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -94,7 +93,7 @@ func NewModelDeploymentReconciler(
 	return &ModelDeploymentReconciler{
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
-		connRepo: conn_http_repository.NewRepository(
+		connAPIClient: conn_api_client.NewClient(
 			cfg.Operator.Auth.APIURL,
 			cfg.Operator.Auth.APIToken,
 			cfg.Operator.Auth.ClientID,
@@ -111,7 +110,7 @@ func NewModelDeploymentReconciler(
 type ModelDeploymentReconciler struct {
 	client.Client
 	scheme           *runtime.Scheme
-	connRepo         conn_repository.Repository
+	connAPIClient    conn_api_client.Client
 	deploymentConfig config.ModelDeploymentConfig
 	operatorConfig   config.OperatorConfig
 	gpuResourceName  string

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package http
+package packaging
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -27,22 +26,19 @@ import (
 	"github.com/go-logr/logr"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	packaging_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
-var log = logf.Log.WithName("model_packaging_http_repository")
+var log = logf.Log.WithName("model_packaging_api_client")
 
-type httpPackagingRepository struct {
+type packagingAPIClient struct {
 	http_util.BaseAPIClient
 }
 
-// todo: doc
-func NewRepository(apiURL string, token string, clientID string,
-	clientSecret string, tokenURL string) packaging_repository.DeprecatedRepository {
-	return &httpPackagingRepository{
+func NewClient(apiURL string, token string, clientID string,
+	clientSecret string, tokenURL string) Client {
+	return &packagingAPIClient{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
 			token,
@@ -58,10 +54,10 @@ func wrapMpLogger(id string) logr.Logger {
 	return log.WithValues("mp_id", id)
 }
 
-func (htr *httpPackagingRepository) GetModelPackaging(id string) (mp *packaging.ModelPackaging, err error) {
+func (c *packagingAPIClient) GetModelPackaging(id string) (mp *packaging.ModelPackaging, err error) {
 	mpLogger := wrapMpLogger(id)
 
-	response, err := htr.DoRequest(
+	response, err := c.DoRequest(
 		http.MethodGet,
 		strings.Replace("/model/packaging/:id", ":id", id, 1),
 		nil,
@@ -100,38 +96,13 @@ func (htr *httpPackagingRepository) GetModelPackaging(id string) (mp *packaging.
 	return mp, nil
 }
 
-func (htr *httpPackagingRepository) GetModelPackagingList(options ...filter.ListOption) (
-	[]packaging.ModelPackaging, error,
-) {
-	panic("not implemented")
-}
-
-func (htr *httpPackagingRepository) DeleteModelPackaging(id string) error {
-	panic("not implemented")
-}
-
-func (htr *httpPackagingRepository) UpdateModelPackaging(mp *packaging.ModelPackaging) error {
-	panic("not implemented")
-
-}
-
-func (htr *httpPackagingRepository) CreateModelPackaging(mp *packaging.ModelPackaging) error {
-	panic("not implemented")
-}
-
-func (htr *httpPackagingRepository) GetModelPackagingLogs(
-	id string, writer utils.Writer, follow bool,
-) error {
-	panic("not implemented")
-}
-
-func (htr *httpPackagingRepository) SaveModelPackagingResult(
+func (c *packagingAPIClient) SaveModelPackagingResult(
 	id string,
 	result []odahuflowv1alpha1.ModelPackagingResult,
 ) error {
 	mpLogger := wrapMpLogger(id)
 
-	response, err := htr.DoRequest(
+	response, err := c.DoRequest(
 		http.MethodPut,
 		strings.Replace("/model/packaging/:id/result", ":id", id, 1),
 		result,
@@ -165,8 +136,46 @@ func (htr *httpPackagingRepository) SaveModelPackagingResult(
 	return nil
 }
 
-func (htr *httpPackagingRepository) GetModelPackagingResult(id string) (
-	[]odahuflowv1alpha1.ModelPackagingResult, error,
-) {
-	panic("not implemented")
+func (c *packagingAPIClient) GetPackagingIntegration(id string) (pi *packaging.PackagingIntegration, err error) {
+	piLogger := wrapMpLogger(id)
+
+	response, err := c.DoRequest(
+		http.MethodGet,
+		strings.Replace("/packaging/integration/:id", ":id", id, 1),
+		nil,
+	)
+	if err != nil {
+		piLogger.Error(err, "Retrieving of the packaging integration from API failed")
+
+		return nil, err
+	}
+
+	pi = &packaging.PackagingIntegration{}
+	piBytes, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		piLogger.Error(err, "Read all data from API response")
+
+		return nil, err
+	}
+	defer func() {
+		bodyCloseError := response.Body.Close()
+		if bodyCloseError != nil {
+			piLogger.Error(err, "Closing packaging integration response body")
+		}
+	}()
+
+	if response.StatusCode >= 400 {
+		return nil, fmt.Errorf("error occures: %s", string(piBytes))
+	}
+
+	err = json.Unmarshal(piBytes, pi)
+	if err != nil {
+		piLogger.Error(err, "Unmarshal the packaging integration")
+
+		return nil, err
+	}
+
+	return pi, nil
 }
+
+

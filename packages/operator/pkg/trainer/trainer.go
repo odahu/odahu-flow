@@ -27,8 +27,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -45,30 +45,24 @@ const (
 )
 
 type ModelTrainer struct {
-	trainClient     train_repository.Repository
-	resultClient    train_repository.ResultRepository
-	toolchainClient train_repository.ToolchainRepository
-	connClient      conn_repository.Repository
+	trainClient     train_api_client.Client
+	connClient      conn_api_client.Client
 	modelTrainingID string
 	log             logr.Logger
 	trainerConfig   config.TrainerConfig
 }
 
 func NewModelTrainer(
-	trainClient train_repository.Repository,
-	toolchainClient train_repository.ToolchainRepository,
-	resultClient train_repository.ResultRepository,
-	connClient conn_repository.Repository,
+	trainAPIClient train_api_client.Client,
+	connAPIClient conn_api_client.Client,
 	trainerConfig config.TrainerConfig) *ModelTrainer {
 
 	trainingLogger := logf.Log.WithName("trainer").
 		WithValues(odahuflow.ModelTrainingIDLogPrefix, trainerConfig.ModelTrainingID)
 
 	return &ModelTrainer{
-		trainClient:     trainClient,
-		toolchainClient: toolchainClient,
-		resultClient:    resultClient,
-		connClient:      connClient,
+		trainClient:     trainAPIClient,
+		connClient:      connAPIClient,
 		modelTrainingID: trainerConfig.ModelTrainingID,
 		log:             trainingLogger,
 		trainerConfig:   trainerConfig,
@@ -112,7 +106,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 	)
 
 	// Saves some data before starting a training
-	if err := mt.resultClient.SaveModelTrainingResult(
+	if err := mt.trainClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			CommitID: commitID,
@@ -225,7 +219,7 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
-	if err := mt.resultClient.SaveModelTrainingResult(
+	if err := mt.trainClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			RunID:        trainingDesc.Output["run_id"],

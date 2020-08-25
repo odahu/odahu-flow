@@ -33,8 +33,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	train_http_client "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/http"
-	mp_http_client "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/http"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
+	mp_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
@@ -124,12 +124,12 @@ func start(cmd *cobra.Command, args []string) {
 	authCfg := odahuConfig.Operator.Auth
 
 	if odahuConfig.Training.Enabled {
-		trainHTTPClient := train_http_client.NewRepository(
+		trainAPIClient := train_api_client.NewClient(
 			authCfg.APIURL, authCfg.APIToken, authCfg.ClientID, authCfg.ClientSecret, authCfg.OAuthOIDCTokenEndpoint,
 		)
 
 		if err = controllers.NewModelTrainingReconciler(
-			mgr, *odahuConfig, trainHTTPClient,
+			mgr, *odahuConfig, trainAPIClient,
 		).SetupWithManager(mgr); err != nil {
 
 			setupLog.Error(err, "unable to create controller", "controller", "ModelTraining")
@@ -140,12 +140,12 @@ func start(cmd *cobra.Command, args []string) {
 
 	if odahuConfig.Packaging.Enabled {
 
-		packHTTPClient := mp_http_client.NewRepository(
+		packAPIClient := mp_api_client.NewClient(
 			authCfg.APIURL, authCfg.APIToken, authCfg.ClientID, authCfg.ClientSecret, authCfg.OAuthOIDCTokenEndpoint,
 		)
 
 		if err = controllers.NewModelPackagingReconciler(
-			mgr, *odahuConfig, packHTTPClient,
+			mgr, *odahuConfig, packAPIClient,
 		).SetupWithManager(mgr); err != nil {
 
 			setupLog.Error(err, "unable to create controller", "controller", "ModelPackaging")

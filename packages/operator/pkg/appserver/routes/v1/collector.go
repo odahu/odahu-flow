@@ -20,7 +20,8 @@ import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/services"
+	di "github.com/odahu/odahu-flow/packages/operator/pkg/services"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/appserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/appserver/routes/v1/configuration"
@@ -37,22 +38,23 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	k8sClient := kubeMgr.GetClient()
 	k8sConfig := kubeMgr.GetConfig()
 
-	connStorage, err := services.InitConnStorage(cfg, k8sClient)
+	connStorage, err := di.InitConnStorage(cfg, k8sClient)
 	if err != nil {
 		return err
 	}
-	toolchainStorage := services.InitToolchainStorage(cfg, db)
-	piStorage := services.InitPackagingIntStorage(cfg, db)
-	trainStorage := services.InitTrainStorage(cfg, db)
-	packStorage := services.InitPackStorage(cfg, db)
-	deployStorage := services.InitDeployStorage(cfg, db)
+	connService := conn_service.NewService(connStorage)
+	toolchainStorage := di.InitToolchainStorage(cfg, db)
+	piStorage := di.InitPackagingIntStorage(cfg, db)
+	trainStorage := di.InitTrainStorage(cfg, db)
+	packStorage := di.InitPackStorage(cfg, db)
+	deployStorage := di.InitDeployStorage(cfg, db)
 
-	trainService := services.InitTrainService(cfg, k8sClient, k8sConfig)
-	packService := services.InitPackService(cfg, k8sClient, k8sConfig)
-	deployService := services.InitDeployService(cfg, k8sClient)
+	trainService := di.InitTrainService(cfg, k8sClient, k8sConfig)
+	packService := di.InitPackService(cfg, k8sClient, k8sConfig)
+	deployService := di.InitDeployService(cfg, k8sClient)
 
 
-	connection.ConfigureRoutes(routeGroup, connStorage, utils.EvaluatePublicKey, cfg.Connection)
+	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 
 	deployment.ConfigureRoutes(routeGroup, deployStorage, deployService, cfg.Deployment, cfg.Common.ResourceGPUName)
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))

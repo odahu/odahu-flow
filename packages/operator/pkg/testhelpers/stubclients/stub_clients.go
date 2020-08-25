@@ -1,8 +1,9 @@
 package stubclients
 
 import (
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 )
@@ -17,21 +18,20 @@ func NewTIStubClient() TIStubClient{
 	}
 }
 
+func (t TIStubClient) GetModelTraining(id string) (*training.ModelTraining, error) {
+	panic("implement me")
+}
+
+func (t TIStubClient) SaveModelTrainingResult(id string, result *v1alpha1.TrainingResult) error {
+	panic("implement me")
+}
+
 func (t TIStubClient) GetToolchainIntegration(name string) (*training.ToolchainIntegration, error) {
 	entity, ok := t.db[name]
 	if !ok {
 		return nil, errors.NotFoundError{Entity: name}
 	}
-	return &training.ToolchainIntegration{
-		ID:     name,
-		Spec:   entity.Spec,
-		Status: entity.Status,
-	}, nil
-}
-
-func (t TIStubClient) GetToolchainIntegrationList(
-	options ...filter.ListOption) ([]training.ToolchainIntegration, error) {
-	panic("implement me")
+	return &entity, nil
 }
 
 func (t TIStubClient) DeleteToolchainIntegration(name string) error {
@@ -66,16 +66,20 @@ func NewPIStubClient() PIStubClient{
 	}
 }
 
+func (p PIStubClient) GetModelPackaging(id string) (*packaging.ModelPackaging, error) {
+	panic("implement me")
+}
+
+func (p PIStubClient) SaveModelPackagingResult(id string, result []v1alpha1.ModelPackagingResult) error {
+	panic("implement me")
+}
+
 func (p PIStubClient) GetPackagingIntegration(name string) (*packaging.PackagingIntegration, error) {
 	entity, ok := p.db[name]
 	if !ok {
 		return nil, errors.NotFoundError{Entity: name}
 	}
-	return &packaging.PackagingIntegration{
-		ID:     name,
-		Spec:   entity.Spec,
-		Status: entity.Status,
-	}, nil
+	return &entity, nil
 }
 
 func (p PIStubClient) GetPackagingIntegrationList(

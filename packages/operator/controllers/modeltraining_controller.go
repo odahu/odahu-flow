@@ -24,6 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -58,15 +59,15 @@ type ModelTrainingReconciler struct {
 	scheme          *runtime.Scheme
 	k8sConfig       *rest.Config
 	resultStorage   train_repository.ResultRepository
-	tiHTTPClient    train_repository.ToolchainRepository
+	trainAPIClient  train_api_client.Client
 	trainingConfig  config.ModelTrainingConfig
 	operatorConfig  config.OperatorConfig
 	gpuResourceName string
 }
 
-// newReconciler returns a new reconcile.Reco nciler
+// newReconciler returns a new reconcile.Reconciler
 func NewModelTrainingReconciler(
-	mgr manager.Manager, cfg config.Config, tiHTTPClient train_repository.ToolchainRepository,
+	mgr manager.Manager, cfg config.Config, trainAPIClient train_api_client.Client,
 ) *ModelTrainingReconciler {
 
 	k8sClient := mgr.GetClient()
@@ -81,7 +82,7 @@ func NewModelTrainingReconciler(
 			k8sClient,
 			mgr.GetConfig(),
 		),
-		tiHTTPClient:    tiHTTPClient,
+		trainAPIClient:  trainAPIClient,
 		trainingConfig:  cfg.Training,
 		operatorConfig:  cfg.Operator,
 		gpuResourceName: cfg.Common.ResourceGPUName,
@@ -198,7 +199,7 @@ func (r *ModelTrainingReconciler) getToolchainIntegration(trainingCR *odahuflowv
 	*training.ToolchainIntegration, error,
 ) {
 	var ti *training.ToolchainIntegration
-	ti, err := r.tiHTTPClient.GetToolchainIntegration(trainingCR.Spec.Toolchain)
+	ti, err := r.trainAPIClient.GetToolchainIntegration(trainingCR.Spec.Toolchain)
 	if err != nil {
 		return nil, err
 	}

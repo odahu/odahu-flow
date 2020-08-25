@@ -19,10 +19,9 @@ import (
 	"context"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/controllers"
+	training_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	training_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/stubclients"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
@@ -100,7 +99,7 @@ type ModelTrainingControllerSuite struct {
 	g            *GomegaWithT
 	k8sClient    client.Client
 	k8sManager   manager.Manager
-	stubTIClient training.ToolchainRepository
+	stubTIClient stubclients.TIStubClient
 	stopMgr      chan struct{}
 	mgrStopped   *sync.WaitGroup
 	requests     chan reconcile.Request

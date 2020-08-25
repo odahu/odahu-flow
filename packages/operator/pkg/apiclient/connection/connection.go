@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package http
+package connection
 
 import (
 	"encoding/json"
@@ -26,21 +26,20 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
-var log = logf.Log.WithName("connection-http-repository")
+var log = logf.Log.WithName("connection-api-Client")
 
-type httpConnectionRepository struct {
+type connAPIClient struct {
 	http_util.BaseAPIClient
 }
 
-func NewRepository(
+func NewClient(
 	apiURL string, token string, clientID string,
-	clientSecret string, tokenURL string) conn_repository.Repository {
-	return &httpConnectionRepository{
+	clientSecret string, tokenURL string) Client {
+	return &connAPIClient{
 		BaseAPIClient: http_util.NewBaseAPIClient(
 			apiURL,
 			token,
@@ -56,10 +55,10 @@ func wrapConnLogger(id string) logr.Logger {
 	return log.WithValues("conn_id", id)
 }
 
-func (hcr *httpConnectionRepository) GetConnection(id string) (conn *connection.Connection, err error) {
+func (c *connAPIClient) GetConnection(id string) (conn *connection.Connection, err error) {
 	connLogger := wrapConnLogger(id)
 
-	return hcr.getConnectionFromAPI(connLogger, &http.Request{
+	return c.getConnectionFromAPI(connLogger, &http.Request{
 		Method: http.MethodGet,
 		URL: &url.URL{
 			Path: strings.Replace("/connection/:id/decrypted", ":id", id, 1),
@@ -67,10 +66,10 @@ func (hcr *httpConnectionRepository) GetConnection(id string) (conn *connection.
 	})
 }
 
-func (hcr *httpConnectionRepository) getConnectionFromAPI(
+func (c *connAPIClient) getConnectionFromAPI(
 	connLogger logr.Logger, req *http.Request,
 ) (conn *connection.Connection, err error) {
-	response, err := hcr.Do(req)
+	response, err := c.Do(req)
 	if err != nil {
 		connLogger.Error(err, "Retrieving of the connection from API failed")
 
@@ -105,20 +104,3 @@ func (hcr *httpConnectionRepository) getConnectionFromAPI(
 	return conn, nil
 }
 
-func (hcr *httpConnectionRepository) GetConnectionList(options ...conn_repository.ListOption) (
-	[]connection.Connection, error,
-) {
-	panic("not implemented")
-}
-
-func (hcr *httpConnectionRepository) DeleteConnection(id string) error {
-	panic("not implemented")
-}
-
-func (hcr *httpConnectionRepository) UpdateConnection(connection *connection.Connection) error {
-	panic("not implemented")
-}
-
-func (hcr *httpConnectionRepository) CreateConnection(connection *connection.Connection) error {
-	panic("not implemented")
-}
