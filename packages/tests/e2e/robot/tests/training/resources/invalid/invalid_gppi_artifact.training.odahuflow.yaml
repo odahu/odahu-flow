@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: test-downloading-training-data-invalid-gppi
+id: test-training-data-invalid-gppi
 spec:
   model:
     name: test-training-data
