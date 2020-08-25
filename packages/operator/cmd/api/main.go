@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/appserver"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -49,7 +49,7 @@ var mainCmd = &cobra.Command{
 		cfg := config.MustLoadConfig()
 
 		// Run API Server
-		apiServer, err := appserver.NewAPIServer(cfg)
+		apiServer, err := apiserver.NewAPIServer(cfg)
 		if err != nil {
 			log.Error(err, "unable set up api server")
 			os.Exit(1)

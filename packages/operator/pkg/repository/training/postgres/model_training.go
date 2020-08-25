@@ -7,7 +7,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )

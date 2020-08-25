@@ -18,7 +18,7 @@ package deployment
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
 const (

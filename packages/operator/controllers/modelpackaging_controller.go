@@ -24,7 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
-	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
+	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -63,7 +63,7 @@ func NewModelPackagingReconciler(
 		Client: k8sClient,
 		scheme: mgr.GetScheme(),
 		config: mgr.GetConfig(),
-		packRepo: mp_k8s_repository.NewRepository(
+		kubePackClient: kube_client.NewClient(
 			cfg.Packaging.Namespace,
 			cfg.Packaging.PackagingIntegrationNamespace,
 			k8sClient,
@@ -81,7 +81,7 @@ type ModelPackagingReconciler struct {
 	client.Client
 	scheme          *runtime.Scheme
 	config          *rest.Config
-	packRepo        mp_repository.ResultRepository
+	kubePackClient  mp_repository.ResultRepository
 	mpAPIClient     mp_api_client.Client
 	packagingConfig config.ModelPackagingConfig
 	operatorConfig  config.OperatorConfig
@@ -129,7 +129,7 @@ func (r *ModelPackagingReconciler) calculateStateByTaskRun(
 		packagingCR.Status.Message = &lastCondition.Message
 		packagingCR.Status.Reason = &lastCondition.Reason
 
-		results, err := r.packRepo.GetModelPackagingResult(packagingCR.Name)
+		results, err := r.kubePackClient.GetModelPackagingResult(packagingCR.Name)
 		if err != nil {
 			return err
 		}

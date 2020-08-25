@@ -19,7 +19,7 @@ package packaging
 import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 )
 
