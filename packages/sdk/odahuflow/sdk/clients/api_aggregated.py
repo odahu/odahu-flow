@@ -188,8 +188,8 @@ def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateLis
             items = tuple(yaml.load_all(data_stream, Loader=yaml.SafeLoader))
 
             LOGGER.debug('Successfully parsed as YAML format')
-        except yaml.YAMLError:
-            raise Exception('not valid JSON or YAML')
+        except yaml.YAMLError as e:
+            raise Exception('not valid JSON or YAML') from e
 
     if not isinstance(items, (list, tuple)):
         items = [items]

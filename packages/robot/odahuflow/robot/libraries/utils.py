@@ -68,7 +68,7 @@ class Utils:
             return socket.gethostbyname(domain)
         except socket.gaierror as exception:
             if exception.errno == -2:
-                raise Exception('Unknown domain name: {}'.format(domain))
+                raise Exception('Unknown domain name: {}'.format(domain)) from exception
             else:
                 raise
 
