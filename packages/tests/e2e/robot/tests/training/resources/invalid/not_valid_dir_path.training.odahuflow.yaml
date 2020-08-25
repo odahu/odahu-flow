@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: test-downloading-training-data-not-valid-dir-path
+id: test-training-data-not-valid-dir-path
 spec:
   model:
     name: test-training-data
