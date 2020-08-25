@@ -50,7 +50,7 @@ def parse_model_training_entity(source_file: str) -> K8sTrainer:
             try:
                 mt = yaml.safe_load(mt)
             except json.JSONDecodeError as decode_error:
-                raise ValueError(f'Cannot decode ModelTraining resource file: {decode_error}')
+                raise ValueError(f'Cannot decode ModelTraining resource file: {decode_error}') from decode_error
 
     return K8sTrainer.from_dict(mt)
 

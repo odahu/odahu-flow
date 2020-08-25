@@ -101,12 +101,12 @@ def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
             try:
                 data = yaml.safe_load(data)
             except yaml.YAMLError as decode_error:
-                raise ValueError(f'Cannot decode ModelPacking resource file: {decode_error}')
+                raise ValueError(f'Cannot decode ModelPacking resource file: {decode_error}') from decode_error
 
         try:
             return OdahuflowProjectManifest(**data)
         except pydantic.ValidationError as valid_error:
-            raise Exception(f'Legion manifest file is in incorrect format: {valid_error}')
+            raise Exception(f'Legion manifest file is in incorrect format: {valid_error}') from valid_error
 
 
 class ExecutionEnvironment:

@@ -99,7 +99,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:
-            raise Exception("Can\'t get variable from cluster profile: {}".format(err))
+            raise Exception("Can\'t get variable from cluster profile: {}".format(err)) from err
 
         try:
             client_id = test_sa_admin.client_id
@@ -117,6 +117,6 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
             else:
                 variables[AUTH_TOKEN_PARAM_NAME] = ''
         except Exception as err:
-            raise Exception("Can\'t get dex authentication data: {}".format(err))
+            raise Exception("Can\'t get dex authentication data: {}".format(err)) from err
 
     return variables
