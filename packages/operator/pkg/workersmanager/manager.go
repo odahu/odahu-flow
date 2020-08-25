@@ -49,7 +49,6 @@ func (r *WorkersManager) Shutdown(ctx context.Context) error {
 	for {
 		select {
 		case <-t.C:
-			log.Info("Runners manager is trying to shutdown gracefully")
 			r.mu.Lock()
 			allStopped := r.running == 0
 			r.mu.Unlock()
@@ -113,6 +112,9 @@ func (r *WorkersManager) Run() error {
 		r.mu.Unlock()
 
 	}
+
+	// If runners == 0 we anyway should wait cancellation before return from function
+	<-ctx.Done()
 
 	return err
 }

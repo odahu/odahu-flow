@@ -16,7 +16,7 @@ const (
 
 func TestModelTrainingRepository(t *testing.T) {
 
-	tRepo := postgres_repo.TrainingPostgresRepo{DB: db}
+	tRepo := postgres_repo.TrainingRepo{DB: db}
 
 	g := NewGomegaWithT(t)
 
@@ -52,6 +52,12 @@ func TestModelTrainingRepository(t *testing.T) {
 	g.Expect(fetched.ID).To(Equal(updated.ID))
 	g.Expect(fetched.Spec).To(Equal(updated.Spec))
 	g.Expect(fetched.Spec.WorkDir).To(Equal("/foo-updated"))
+
+	g.Expect(fetched.DeletionMark).Should(BeFalse())
+	g.Expect(tRepo.SetDeletionMark(mtID, true)).Should(Not(HaveOccurred()))
+	fetched, err = tRepo.GetModelTraining(mtID)
+	g.Expect(err).Should(Not(HaveOccurred()))
+	g.Expect(fetched.DeletionMark).Should(BeTrue())
 
 	tis, err := tRepo.GetModelTrainingList()
 	g.Expect(err).NotTo(HaveOccurred())

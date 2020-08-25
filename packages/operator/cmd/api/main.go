@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/appserver"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -49,16 +49,18 @@ var mainCmd = &cobra.Command{
 		cfg := config.MustLoadConfig()
 
 		// Run API Server
-		apiServer, err := appserver.NewAPIServer(cfg)
+		apiServer, err := apiserver.NewAPIServer(cfg)
 		if err != nil {
 			log.Error(err, "unable set up api server")
 			os.Exit(1)
 		}
 		errCh := make(chan error, 4)
 		if startErr := apiServer.Run(errCh); startErr != nil {
-			log.Error(startErr, "Unable to start server")
+			log.Error(startErr, "Unable to start api server")
 			os.Exit(1)
 		}
+		log.Info("Api server is started")
+
 
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -70,13 +72,14 @@ var mainCmd = &cobra.Command{
 			log.Error(err, "Error during execution one of components")
 		}
 
-		log.Info("Shutdown Process ...")
+		log.Info("Graceful shutdown of api server components is started")
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.Common.GracefulTimeout)
 		defer cancel()
 		if closeErr := apiServer.Close(ctx); closeErr != nil {
-			log.Error(closeErr, "Unable to shutdown gracefully")
+			log.Error(closeErr, "Graceful shutdown of api server components is failed. Exit immediately")
 			os.Exit(1)
 		}
+		log.Info("Graceful shutdown of api server components is successful")
 	},
 }
 

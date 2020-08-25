@@ -7,8 +7,8 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -20,18 +20,18 @@ var (
 	log = logf.Log.WithName("model-training--repository--postgres")
 )
 
-type TrainingPostgresRepo struct {
+type TrainingRepo struct {
 	DB *sql.DB
 }
 
-func (repo TrainingPostgresRepo) GetModelTraining(name string) (*training.ModelTraining, error) {
+func (repo TrainingRepo) GetModelTraining(name string) (*training.ModelTraining, error) {
 
 	mt := new(training.ModelTraining)
 
 	err := repo.DB.QueryRow(
-		fmt.Sprintf("SELECT id, spec, status FROM %s WHERE id = $1", ModelTrainingTable),
+		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelTrainingTable),
 		name,
-	).Scan(&mt.ID, &mt.Spec, &mt.Status)
+	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -48,7 +48,7 @@ func (repo TrainingPostgresRepo) GetModelTraining(name string) (*training.ModelT
 
 }
 
-func (repo TrainingPostgresRepo) GetModelTrainingList(options ...filter.ListOption) (
+func (repo TrainingRepo) GetModelTrainingList(options ...filter.ListOption) (
 	[]training.ModelTraining, error,
 ) {
 
@@ -63,7 +63,7 @@ func (repo TrainingPostgresRepo) GetModelTrainingList(options ...filter.ListOpti
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("*").From("odahu_operator_training").
+	sb := sq.Select("id, spec, status, deletionmark").From("odahu_operator_training").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -92,7 +92,7 @@ func (repo TrainingPostgresRepo) GetModelTrainingList(options ...filter.ListOpti
 
 	for rows.Next() {
 		mt := new(training.ModelTraining)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (repo TrainingPostgresRepo) GetModelTrainingList(options ...filter.ListOpti
 
 }
 
-func (repo TrainingPostgresRepo) DeleteModelTraining(name string) error {
+func (repo TrainingRepo) DeleteModelTraining(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelTraining(name)
@@ -123,7 +123,11 @@ func (repo TrainingPostgresRepo) DeleteModelTraining(name string) error {
 	return nil
 }
 
-func (repo TrainingPostgresRepo) UpdateModelTraining(mt *training.ModelTraining) error {
+func (repo TrainingRepo) SetDeletionMark(id string, value bool) error {
+	return utils.SetDeletionMark(repo.DB, ModelTrainingTable, id, value)
+}
+
+func (repo TrainingRepo) UpdateModelTraining(mt *training.ModelTraining) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelTraining(mt.ID)
@@ -139,7 +143,7 @@ func (repo TrainingPostgresRepo) UpdateModelTraining(mt *training.ModelTraining)
 	return nil
 }
 
-func (repo TrainingPostgresRepo) CreateModelTraining(mt *training.ModelTraining) error {
+func (repo TrainingRepo) CreateModelTraining(mt *training.ModelTraining) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelTrainingTable),

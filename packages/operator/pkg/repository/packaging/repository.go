@@ -17,42 +17,21 @@
 package packaging
 
 import (
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
 const (
 	TagKey = "name"
 )
 
-type DeprecatedRepository interface {
-	Service
-	PackagingIntegrationRepository
-}
-
 type Repository interface {
 	GetModelPackaging(id string) (*packaging.ModelPackaging, error)
 	GetModelPackagingList(options ...filter.ListOption) ([]packaging.ModelPackaging, error)
 	DeleteModelPackaging(id string) error
+	SetDeletionMark(id string, value bool) error
 	UpdateModelPackaging(md *packaging.ModelPackaging) error
 	CreateModelPackaging(md *packaging.ModelPackaging) error
-}
-
-type LogStreamer interface {
-	GetModelPackagingLogs(id string, writer utils.Writer, follow bool) error
-}
-
-type Service interface {
-	Repository
-	LogStreamer
-	ResultRepository
-}
-
-type ResultRepository interface {
-	SaveModelPackagingResult(id string, result []odahuflowv1alpha1.ModelPackagingResult) error
-	GetModelPackagingResult(id string) ([]odahuflowv1alpha1.ModelPackagingResult, error)
 }
 
 type PackagingIntegrationRepository interface {

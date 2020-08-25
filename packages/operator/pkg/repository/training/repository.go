@@ -17,46 +17,21 @@
 package training
 
 import (
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
 const (
 	TagKey = "name"
 )
 
-// This repository combine multiple interfaces
-type DeprecatedRepository interface {
-	Repository
-	LogStreamer
-	ToolchainRepository
-	ResultRepository
-}
-
-// CRUD
 type Repository interface {
 	GetModelTraining(id string) (*training.ModelTraining, error)
 	GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error)
 	DeleteModelTraining(id string) error
+	SetDeletionMark(id string, value bool) error
 	UpdateModelTraining(md *training.ModelTraining) error
 	CreateModelTraining(md *training.ModelTraining) error
-}
-
-type Service interface {
-	Repository
-	LogStreamer
-	ResultRepository
-}
-
-type LogStreamer interface {
-	GetModelTrainingLogs(id string, writer utils.Writer, follow bool) error
-}
-
-type ResultRepository interface {
-	SaveModelTrainingResult(id string, result *odahuflowv1alpha1.TrainingResult) error
-	GetModelTrainingResult(id string) (*odahuflowv1alpha1.TrainingResult, error)
 }
 
 type ToolchainRepository interface {

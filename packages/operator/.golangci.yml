@@ -28,6 +28,7 @@ linters:
     - nlreturn
     - exhaustive
     - gofumpt
+    - interfacer
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.

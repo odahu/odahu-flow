@@ -52,10 +52,6 @@ type CommonConfig struct {
 	DatabaseConnectionString string `json:"databaseConnectionString"`
 	// OpenID token url
 	OAuthOIDCTokenEndpoint string `json:"oauthOidcTokenEndpoint"`
-	// Storage backend options:
-	//   * embedded DB like sqlite (TODO)
-	//   * postgres
-	StorageType StorageType `json:"storageType"`
 	// How often launch new training
 	LaunchPeriod time.Duration `json:"launchPeriod"`
 	// Graceful shutdown timeout
@@ -69,6 +65,5 @@ func NewDefaultCommonConfig() CommonConfig {
 		Version:         "develop",
 		LaunchPeriod:    time.Second * 3,
 		GracefulTimeout: time.Second * 5,
-		StorageType:     StoragePostgres,
 	}
 }

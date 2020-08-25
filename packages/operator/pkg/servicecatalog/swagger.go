@@ -21,7 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/odahu/odahu-flow/packages/operator/docs" //nolint
-	"github.com/odahu/odahu-flow/packages/operator/pkg/appserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 )
 
 func SetUpSwagger(rg *gin.RouterGroup, apiStaticFS http.FileSystem, reader routes.SwaggerDefinitionReader) {

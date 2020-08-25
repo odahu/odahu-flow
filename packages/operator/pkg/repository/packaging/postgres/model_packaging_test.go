@@ -69,7 +69,7 @@ func generateMP() *packaging.ModelPackaging {
 
 func (s *MPRepositorySuite) SetupSuite() {
 
-	s.rep = postgres_repo.PackagingPostgresRepo{DB: db}
+	s.rep = postgres_repo.PackagingRepo{DB: db}
 }
 
 func (s *MPRepositorySuite) TearDownTest() {
@@ -102,6 +102,13 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 	assert.Exactly(s.T(), fetched.ID, updated.ID)
 	assert.Exactly(s.T(), fetched.Spec, updated.Spec)
 	assert.Exactly(s.T(), fetched.Spec.Image, mpNewImage)
+
+	assert.False(s.T(), fetched.DeletionMark)
+	assert.NoError(s.T(), s.rep.SetDeletionMark(mpID, true))
+	fetched, err = s.rep.GetModelPackaging(mpID)
+	assert.NoError(s.T(), err)
+	assert.True(s.T(), fetched.DeletionMark)
+
 
 	assert.NoError(s.T(), s.rep.DeleteModelPackaging(mpID))
 	_, err = s.rep.GetModelPackaging(mpID)

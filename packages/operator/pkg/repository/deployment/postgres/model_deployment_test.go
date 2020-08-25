@@ -17,10 +17,9 @@ const (
 
 func TestModelDeploymentRepository(t *testing.T) {
 
-	repo := postgres_repo.DeploymentPostgresRepo{DB: db}
+	repo := postgres_repo.DeploymentRepo{DB: db}
 
 	as := assert.New(t)
-
 	created := &deployment.ModelDeployment{
 		ID: mdID,
 		Spec: v1alpha1.ModelDeploymentSpec{
@@ -55,6 +54,13 @@ func TestModelDeploymentRepository(t *testing.T) {
 	as.NoError(err)
 	as.Len(tis, 1)
 
+
+	as.False(fetched.DeletionMark)
+	as.NoError(repo.SetDeletionMark(mdID, true))
+	fetched, err = repo.GetModelDeployment(mdID)
+	as.NoError(err)
+	as.True(fetched.DeletionMark)
+	
 	as.NoError(repo.DeleteModelDeployment(mdID))
 	_, err = repo.GetModelDeployment(mdID)
 
@@ -64,7 +70,7 @@ func TestModelDeploymentRepository(t *testing.T) {
 
 func TestModelRouteRepository(t *testing.T) {
 
-	repo := postgres_repo.DeploymentPostgresRepo{DB: db}
+	repo := postgres_repo.DeploymentRepo{DB: db}
 
 	as := assert.New(t)
 

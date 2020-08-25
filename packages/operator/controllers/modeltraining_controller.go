@@ -23,9 +23,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
-	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
+	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -58,7 +57,7 @@ type ModelTrainingReconciler struct {
 	client.Client
 	scheme          *runtime.Scheme
 	k8sConfig       *rest.Config
-	resultStorage   train_repository.ResultRepository
+	trainKubeClient kube_client.Client
 	trainAPIClient  train_api_client.Client
 	trainingConfig  config.ModelTrainingConfig
 	operatorConfig  config.OperatorConfig
@@ -76,7 +75,7 @@ func NewModelTrainingReconciler(
 		Client:    k8sClient,
 		k8sConfig: mgr.GetConfig(),
 		scheme:    mgr.GetScheme(),
-		resultStorage: train_k8s_repository.NewRepository(
+		trainKubeClient: kube_client.NewClient(
 			cfg.Training.Namespace,
 			cfg.Training.ToolchainIntegrationNamespace,
 			k8sClient,
@@ -145,7 +144,7 @@ func (r *ModelTrainingReconciler) calculateStateByTaskRun(
 		trainingCR.Status.Message = &lastCondition.Message
 		trainingCR.Status.Reason = &lastCondition.Reason
 
-		result, err := r.resultStorage.GetModelTrainingResult(trainingCR.Name)
+		result, err := r.trainKubeClient.GetModelTrainingResult(trainingCR.Name)
 		if err != nil {
 			return err
 		}
