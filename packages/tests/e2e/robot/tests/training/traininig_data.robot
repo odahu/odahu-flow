@@ -3,7 +3,7 @@ ${RES_DIR}              ${CURDIR}/resources
 ${LOCAL_CONFIG}         odahuflow/config_training_training_data
 # This value locates in the odahuflow/tests/stuf/data/odahuflow.project.yaml file.
 ${RUN_ID}    training_data_test
-${TRAIN_ID}  test-downloading-training-data
+${TRAIN_ID}  test-training-data
 
 *** Settings ***
 Documentation       Check downloading of a training data
@@ -17,12 +17,28 @@ Library             odahuflow.robot.libraries.model.Model
 Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge
+...                 Login to the api and edge  AND
+...                 Cleanup all resources
 Suite Teardown      Run Keywords
-...                 Remove file  ${LOCAL_CONFIG}
+...                 Remove file  ${LOCAL_CONFIG}  AND
+...                 Cleanup all resources
 Force Tags          training  training-data
 
 *** Keywords ***
+Cleanup all resources
+    [Documentation]  cleanups resources created during whole test suite, hardcoded training IDs
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-dir-to-dir
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-remote-dir-to-dir
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-file-to-file
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-remote-file-to-file
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-file-to-dir
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-remote-file-to-dir
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-found-file
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-found-remote-file
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-valid-dir-path
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-valid-remote-dir
+    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-invalid-gppi
+
 Cleanup resources
     [Arguments]  ${training id}
     StrictShell  odahuflowctl --verbose train delete --id ${training id} --ignore-not-found
