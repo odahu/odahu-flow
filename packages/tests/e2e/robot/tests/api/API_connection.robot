@@ -1,7 +1,7 @@
 *** Variables ***
 ${RES_DIR}                          ${CURDIR}/resources/connection
-${GIT_VALID}                         git-connection-valid
-${DOCKER_VALID}                      docker-ci-connection-valid
+${GIT_VALID}                        git-connection-valid
+${DOCKER_VALID}                     docker-ci-connection-valid
 ${GIT_INVALID}                      git-connection-invalid
 ${CONN_SYNTAX_ERROR}                docker-ci-syntax-error
 
@@ -85,3 +85,21 @@ Try Update not existing and deleted connection
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.deleted.yaml
+
+Try Get id not existing and deleted connection
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
+    Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_VALID}
+
+Try Get id decrypted not existing and deleted connection
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
+    Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_VALID}
+
+Try Delete not existing and deleted connection
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
+    Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_VALID}
