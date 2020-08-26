@@ -106,7 +106,7 @@ function configure_rclone() {
     ;;
   azure)
     local sas_url
-    sas_url="$(odahuflowctl conn get --id models-output --decrypted -o json | jq -r '.[0].spec.keySecret')"
+    sas_url="$(odahuflowctl conn get --id models-output --decrypted -o json | jq -r '.[0].spec.keySecret' | base64 -d)"
 
     rclone config create "${RCLONE_PROFILE_NAME}" "azureblob" \
       sas_url "${sas_url}" \
