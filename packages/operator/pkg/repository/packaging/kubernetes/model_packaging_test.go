@@ -26,7 +26,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -59,7 +59,7 @@ type MPRepositorySuite struct {
 	suite.Suite
 	g         *GomegaWithT
 	k8sClient client.Client
-	rep       mp_repository.Repository
+	rep       mp_repository.Service
 }
 
 func generateMPResultCM() *corev1.ConfigMap {
@@ -108,7 +108,7 @@ func (s *MPRepositorySuite) SetupTest() {
 }
 
 func (s *MPRepositorySuite) TearDownTest() {
-	if err := s.rep.DeleteModelPackaging(mpID); err != nil && !errors.IsNotFound(err) {
+	if err := s.rep.DeleteModelPackaging(mpID); err != nil && !errors.IsNotFoundError(err) {
 		// If we get the panic that we have a test configuration problem
 		panic(err)
 	}
@@ -141,7 +141,7 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 	s.g.Expect(s.rep.DeleteModelPackaging(mpID)).NotTo(HaveOccurred())
 	_, err = s.rep.GetModelPackaging(mpID)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(errors.IsNotFound(err)).Should(BeTrue())
+	s.g.Expect(errors.IsNotFoundError(err)).Should(BeTrue())
 }
 
 func (s *MPRepositorySuite) TestModelPackagingResult() {

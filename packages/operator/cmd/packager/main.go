@@ -19,8 +19,8 @@ package main
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/packager"
-	connection_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/http"
-	packaging_http_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/http"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	packaging_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -82,14 +82,14 @@ func init() {
 }
 
 func newPackagerWithHTTPRepositories(config config.PackagerConfig) *packager.Packager {
-	packRepo := packaging_http_repository.NewRepository(
+	packAPIClient := packaging_api_client.NewClient(
 		config.Auth.APIURL,
 		config.Auth.APIToken,
 		config.Auth.ClientID,
 		config.Auth.ClientSecret,
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
-	connRepo := connection_http_repository.NewRepository(
+	connAPIClient := conn_api_client.NewClient(
 		config.Auth.APIURL,
 		config.Auth.APIToken,
 		config.Auth.ClientID,
@@ -97,7 +97,9 @@ func newPackagerWithHTTPRepositories(config config.PackagerConfig) *packager.Pac
 		config.Auth.OAuthOIDCTokenEndpoint,
 	)
 
-	return packager.NewPackager(packRepo, connRepo, config)
+	return packager.NewPackager(
+		packAPIClient, connAPIClient, config,
+	)
 }
 
 func main() {

@@ -67,8 +67,8 @@ type ModelDeploymentConfig struct {
 	// Kubernetes node selector for model deployments
 	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model deployments
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
-	Istio      ModelDeploymentIstioConfig `json:"istio"`
+	Tolerations []corev1.Toleration        `json:"tolerations,omitempty"`
+	Istio       ModelDeploymentIstioConfig `json:"istio"`
 	// Default resources for deployment pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
 }

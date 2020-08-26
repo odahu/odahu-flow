@@ -33,7 +33,7 @@ import (
 )
 
 var cfg *rest.Config
-var c mt_repository.Repository
+var c mt_repository.Service
 
 const (
 	testNamespace = "default"

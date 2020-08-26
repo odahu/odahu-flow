@@ -18,14 +18,13 @@ package controllers
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	mp_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	mp_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
-	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -54,30 +53,11 @@ var (
 
 // newReconciler returns a new reconcile.Reconciler
 func NewModelPackagingReconciler(
-	mgr manager.Manager,
-	cfg config.Config,
+	mgr manager.Manager, cfg config.Config,
+	packAPIClient mp_api_client.Client,
 ) *ModelPackagingReconciler {
-	k8sClient := mgr.GetClient()
 
-	// Setup the training toolchain repository
-	var piRepository mp_repository.PackagingIntegrationRepository
-	switch cfg.Packaging.PackagingIntegrationRepositoryType {
-	case config.RepositoryKubernetesType:
-		piRepository = mp_k8s_repository.NewRepository(
-			cfg.Packaging.Namespace,
-			cfg.Packaging.PackagingIntegrationNamespace,
-			k8sClient,
-			mgr.GetConfig(),
-		)
-	case config.RepositoryPostgresType:
-		db, err := sql.Open("postgres", cfg.Common.DatabaseConnectionString)
-		if err != nil {
-			panic(fmt.Sprintf("Cannot init postgres repository %v", err))
-		}
-		piRepository = mp_postgres_repository.PackagingIntegrationRepository{DB: db}
-	default:
-		panic("DI packaging repository failed")
-	}
+	k8sClient := mgr.GetClient()
 
 	return &ModelPackagingReconciler{
 		Client: k8sClient,
@@ -89,7 +69,7 @@ func NewModelPackagingReconciler(
 			k8sClient,
 			mgr.GetConfig(),
 		),
-		piRepo:          piRepository,
+		mpAPIClient:     packAPIClient,
 		packagingConfig: cfg.Packaging,
 		operatorConfig:  cfg.Operator,
 		gpuResourceName: cfg.Common.ResourceGPUName,
@@ -101,8 +81,8 @@ type ModelPackagingReconciler struct {
 	client.Client
 	scheme          *runtime.Scheme
 	config          *rest.Config
-	packRepo        mp_repository.Repository
-	piRepo          mp_repository.PackagingIntegrationRepository
+	packRepo        mp_repository.ResultRepository
+	mpAPIClient     mp_api_client.Client
 	packagingConfig config.ModelPackagingConfig
 	operatorConfig  config.OperatorConfig
 	gpuResourceName string
@@ -203,7 +183,7 @@ func (r *ModelPackagingReconciler) calculateStateByPod(
 func (r *ModelPackagingReconciler) getPackagingIntegration(packagingCR *odahuflowv1alpha1.ModelPackaging) (
 	*packaging.PackagingIntegration, error,
 ) {
-	pi, err := r.piRepo.GetPackagingIntegration(packagingCR.Spec.Type)
+	pi, err := r.mpAPIClient.GetPackagingIntegration(packagingCR.Spec.Type)
 	if err != nil {
 		return nil, err
 	}

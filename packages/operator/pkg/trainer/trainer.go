@@ -27,8 +27,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -45,24 +45,24 @@ const (
 )
 
 type ModelTrainer struct {
-	trainRepo       train_repository.Repository
-	connRepo        conn_repository.Repository
+	trainClient     train_api_client.Client
+	connClient      conn_api_client.Client
 	modelTrainingID string
 	log             logr.Logger
 	trainerConfig   config.TrainerConfig
 }
 
 func NewModelTrainer(
-	trainRepo train_repository.Repository,
-	connRepo conn_repository.Repository,
-	trainerConfig config.TrainerConfig,
-) *ModelTrainer {
+	trainAPIClient train_api_client.Client,
+	connAPIClient conn_api_client.Client,
+	trainerConfig config.TrainerConfig) *ModelTrainer {
+
 	trainingLogger := logf.Log.WithName("trainer").
 		WithValues(odahuflow.ModelTrainingIDLogPrefix, trainerConfig.ModelTrainingID)
 
 	return &ModelTrainer{
-		trainRepo:       trainRepo,
-		connRepo:        connRepo,
+		trainClient:     trainAPIClient,
+		connClient:      connAPIClient,
 		modelTrainingID: trainerConfig.ModelTrainingID,
 		log:             trainingLogger,
 		trainerConfig:   trainerConfig,
@@ -106,7 +106,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 	)
 
 	// Saves some data before starting a training
-	if err := mt.trainRepo.SaveModelTrainingResult(
+	if err := mt.trainClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			CommitID: commitID,
@@ -180,7 +180,7 @@ func (mt *ModelTrainer) SaveResult() error {
 	}
 
 	outputTrainingDir := mt.trainerConfig.OutputDir
-	mt.log.Info("Start to zip the dir", "dir", outputTrainingDir, "archive_name",
+	mt.log.Info("Run to zip the dir", "dir", outputTrainingDir, "archive_name",
 		outputZipName)
 
 	jsonFile, err := os.Open(filepath.Join(outputTrainingDir, odahuflowProjectFile))
@@ -207,7 +207,7 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
-	mt.log.Info("Start to zip the dir", "dir", outputTrainingDir, "archive_name",
+	mt.log.Info("Run to zip the dir", "dir", outputTrainingDir, "archive_name",
 		outputZipName)
 
 	storage, err := rclone.NewObjectStorage(&k8sTraining.OutputConn.Spec)
@@ -219,7 +219,7 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
-	if err := mt.trainRepo.SaveModelTrainingResult(
+	if err := mt.trainClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			RunID:        trainingDesc.Output["run_id"],
@@ -239,7 +239,7 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 		return nil
 	}
 	for _, mtData := range k8sTraining.InputData {
-		mt.log.Info("Start download k8sTraining data",
+		mt.log.Info("Run download k8sTraining data",
 			"remote_path", mtData.RemotePath,
 			"local_path", mtData.LocalPath,
 			"connection_type", mtData.DataBinding.Type,

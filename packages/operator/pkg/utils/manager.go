@@ -17,47 +17,18 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" //nolint
 	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	k8s_config "sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
 var logM = logf.Log.WithName("k8s-manager")
-
-type ManagerCloser interface {
-	manager.Manager
-	// Closing of a manager. The manager will be unusable after the execution of this function.
-	Close() error
-}
-
-// Cleanup the kubernetes environment if it is provided.
-type managerWrapper struct {
-	k8sEnvironment *envtest.Environment
-	manager.Manager
-}
-
-func (m *managerWrapper) Close() error {
-	if m.k8sEnvironment == nil {
-		return nil
-	}
-
-	if err := m.k8sEnvironment.Stop(); err != nil {
-		logM.Error(err, "Error during closing of local kubernetes environment")
-
-		return err
-	}
-
-	return nil
-}
 
 func NewClient(cache cache.Cache, config *rest.Config, options client.Options) (client.Client, error) {
 	c, err := client.New(config, options)
@@ -73,53 +44,20 @@ func NewClient(cache cache.Cache, config *rest.Config, options client.Options) (
 	}, nil
 }
 
-func newLocalManager(localConfig config.APILocalBackendConfig) (ManagerCloser, error) {
-	var cfg *rest.Config
-
-	k8sEnvironment := &envtest.Environment{
-		CRDDirectoryPaths: []string{localConfig.LocalBackendCRDPath},
-	}
-
-	err := v1alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		logM.Error(err, "Cannot setup the odahuflow schema")
-		return nil, err
-	}
-
-	cfg, err = k8sEnvironment.Start()
-	if err != nil {
-		logM.Error(err, "Cannot setup the test k8s api")
-		return nil, err
-	}
-
-	mgr, err := manager.New(cfg, manager.Options{NewClient: NewClient})
-	if err != nil {
-		logM.Error(err, "Cannot setup the test k8s manager")
-		return nil, err
-	}
-
-	return &managerWrapper{k8sEnvironment: k8sEnvironment, Manager: mgr}, nil
+func NewManager(opts ctrl.Options) (manager.Manager, error) {
+	return newConfigManager(opts)
 }
 
-func NewManager(backendConfig config.APIBackendConfig) (ManagerCloser, error) {
-	switch backendConfig.Type {
-	case config.ConfigBackendType:
-		return newConfigManager()
-	case config.LocalBackendType:
-		return newLocalManager(backendConfig.Local)
-	default:
-		return nil, fmt.Errorf("unexpected backend type: %s", backendConfig.Type)
-	}
-}
-
-func newConfigManager() (ManagerCloser, error) {
+func newConfigManager(opts ctrl.Options) (manager.Manager, error) {
 	cfg, err := k8s_config.GetConfig()
 	if err != nil {
 		logM.Error(err, "K8s config creation")
 		return nil, err
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{NewClient: NewClient})
+	opts.NewClient = NewClient
+
+	mgr, err := manager.New(cfg, opts)
 	if err != nil {
 		logM.Error(err, "Manager creation")
 		return nil, err
@@ -130,5 +68,5 @@ func newConfigManager() (ManagerCloser, error) {
 		return nil, err
 	}
 
-	return &managerWrapper{Manager: mgr}, nil
+	return mgr, nil
 }

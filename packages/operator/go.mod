@@ -4,12 +4,14 @@ go 1.14
 
 require (
 	github.com/Jeffail/gabs v1.4.0 // indirect
+	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/aspenmesh/istio-client-go v0.0.0-20190426173040-3e73c27b9ace
 	github.com/aws/aws-sdk-go v1.31.6
 	github.com/awslabs/amazon-ecr-credential-helper v0.3.1
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/emicklei/go-restful v2.9.5+incompatible
 	github.com/gin-gonic/gin v1.3.0
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
@@ -20,10 +22,12 @@ require (
 	github.com/hashicorp/vault/api v1.0.5-0.20200317185738-82f498082f02
 	github.com/hashicorp/vault/sdk v0.1.14-0.20200521112254-72d69106be02 // indirect
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
 	github.com/keybase/go-crypto v0.0.0-20190828182435-a05457805304 // indirect
 	github.com/lib/pq v1.2.0
+	github.com/mitchellh/hashstructure v1.0.0
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/gomega v1.10.1
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pborman/uuid v1.2.0
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
@@ -47,12 +51,11 @@ require (
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0
 	istio.io/api v0.0.0-20191115173247-e1a1952e5b81
-	k8s.io/api v0.17.6
-	k8s.io/apimachinery v0.17.6
+	k8s.io/api v0.17.8
+	k8s.io/apimachinery v0.17.8
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
-	k8s.io/utils v0.0.0-20200324210504-a9aa75ae1b89 // indirect
 	knative.dev/serving v0.15.0
-	sigs.k8s.io/controller-runtime v0.5.2
+	sigs.k8s.io/controller-runtime v0.5.9
 )
 
 replace k8s.io/client-go => k8s.io/client-go v0.17.6

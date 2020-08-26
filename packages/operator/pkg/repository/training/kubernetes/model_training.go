@@ -24,6 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
@@ -133,20 +134,18 @@ func (tkr *trainingK8sRepository) GetModelTraining(id string) (*training.ModelTr
 		types.NamespacedName{Name: id, Namespace: tkr.namespace},
 		k8sMD,
 	); err != nil {
-		logMT.Error(err, "Get Model Training from k8s", "id", id)
-
-		return nil, err
+		return nil, kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	return mtTransform(k8sMD), nil
 }
 
-func (tkr *trainingK8sRepository) GetModelTrainingList(options ...kubernetes.ListOption) (
+func (tkr *trainingK8sRepository) GetModelTrainingList(options ...filter.ListOption) (
 	[]training.ModelTraining, error,
 ) {
 	var k8sMDList v1alpha1.ModelTrainingList
 
-	listOptions := &kubernetes.ListOptions{
+	listOptions := &filter.ListOptions{
 		Filter: nil,
 		Page:   &MDFirstPage,
 		Size:   &MDMaxSize,
@@ -230,7 +229,7 @@ func (tkr *trainingK8sRepository) UpdateModelTraining(mt *training.ModelTraining
 	if err := tkr.k8sClient.Update(context.TODO(), &k8sMD); err != nil {
 		logMT.Error(err, "Update of the Model Training", "name", mt.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	mt.Status = k8sMD.Status
@@ -252,9 +251,9 @@ func (tkr *trainingK8sRepository) CreateModelTraining(mt *training.ModelTraining
 	k8sMd.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := tkr.k8sClient.Create(context.TODO(), k8sMd); err != nil {
-		logMT.Error(err, "ModelTraining creation error from k8s", "name", mt.ID)
+		logMT.Error(err, "StorageEntity creation error from k8s", "name", mt.ID)
 
-		return err
+		return kubernetes.ConvertK8sErrToOdahuflowErr(err)
 	}
 
 	mt.Status = k8sMd.Status

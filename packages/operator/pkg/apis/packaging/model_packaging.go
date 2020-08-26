@@ -16,7 +16,12 @@
 
 package packaging
 
-import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+)
 
 type ModelPackaging struct {
 	// Model packaging id
@@ -45,4 +50,17 @@ type ModelPackagingSpec struct {
 	// Name of Connection to storage where a packager obtain a model trained artifact.
 	// Permitted connection types are defined by specific PackagingIntegration
 	OutputConnection string `json:"outputConnection,omitempty"`
+}
+
+func (piSpec ModelPackagingSpec) Value() (driver.Value, error) {
+	return json.Marshal(piSpec)
+}
+
+func (piSpec *ModelPackagingSpec) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &piSpec)
+	return res
 }

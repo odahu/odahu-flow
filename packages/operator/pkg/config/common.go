@@ -16,14 +16,20 @@
 
 package config
 
+import "time"
+
 const (
 	NvidiaResourceName                      = "nvidia.com/gpu"
 	RepositoryKubernetesType RepositoryType = "kubernetes"
 	RepositoryVaultType      RepositoryType = "vault"
 	RepositoryPostgresType   RepositoryType = "postgres"
+
+	StoragePostgres StorageType = "postgres"
 )
 
 type RepositoryType string
+
+type StorageType string
 
 type ExternalUrl struct {
 	// Human-readable name
@@ -46,6 +52,14 @@ type CommonConfig struct {
 	DatabaseConnectionString string `json:"databaseConnectionString"`
 	// OpenID token url
 	OAuthOIDCTokenEndpoint string `json:"oauthOidcTokenEndpoint"`
+	// Storage backend options:
+	//   * embedded DB like sqlite (TODO)
+	//   * postgres
+	StorageType StorageType `json:"storageType"`
+	// How often launch new training
+	LaunchPeriod time.Duration `json:"launchPeriod"`
+	// Graceful shutdown timeout
+	GracefulTimeout time.Duration `json:"gracefulTimeout"`
 }
 
 func NewDefaultCommonConfig() CommonConfig {
@@ -53,5 +67,8 @@ func NewDefaultCommonConfig() CommonConfig {
 		ExternalURLs:    []ExternalUrl{},
 		ResourceGPUName: NvidiaResourceName,
 		Version:         "develop",
+		LaunchPeriod:    time.Second * 3,
+		GracefulTimeout: time.Second * 5,
+		StorageType:     StoragePostgres,
 	}
 }

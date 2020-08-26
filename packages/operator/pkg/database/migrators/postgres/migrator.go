@@ -3,7 +3,7 @@ package postgres
 import (
 	"github.com/golang-migrate/migrate"
 	_ "github.com/golang-migrate/migrate/database/postgres" // Skip lint
-	"github.com/golang-migrate/migrate/source/go_bindata"
+	"github.com/golang-migrate/migrate/source/go_bindata"  //nolint
 	migrations "github.com/odahu/odahu-flow/packages/operator/pkg/database/migrations/postgres"
 	"github.com/prometheus/common/log"
 )

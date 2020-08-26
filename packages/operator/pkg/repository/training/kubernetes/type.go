@@ -30,7 +30,7 @@ type trainingK8sRepository struct {
 }
 
 func NewRepository(namespace, tiNamespace string, k8sClient client.Client,
-	k8sConfig *rest.Config) mt_repository.Repository {
+	k8sConfig *rest.Config) mt_repository.Service {
 	return &trainingK8sRepository{
 		namespace:   namespace,
 		tiNamespace: tiNamespace,

@@ -17,60 +17,50 @@
 package controllers_test
 
 import (
-	stdlog "log"
+	"github.com/emicklei/go-restful/log"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/testenvs"
 	"os"
 	"path/filepath"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sync"
 	"testing"
 
-	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	. "github.com/onsi/gomega"
-	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
-	tektonschema "github.com/tektoncd/pipeline/pkg/client/clientset/versioned/scheme"
-	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-var cfg *rest.Config
+var (
+	cfg        *rest.Config
+)
+
+func testMainWrapper(m *testing.M) int {
+
+	var err error
+
+	var closeKube func() error
+
+	_, cfg, closeKube, _, err = testenvs.SetupTestKube(
+		filepath.Join("..", "config", "crds"),
+		filepath.Join("..", "hack", "tests", "thirdparty_crds"),
+	)
+
+	defer func() {
+		if err := closeKube(); err != nil {
+			log.Print("Error during release test Kube Environment resources")
+		}
+	}()
+	if err != nil {
+		return -1
+	}
+
+	return m.Run()
+}
 
 func TestMain(m *testing.M) {
-	t := &envtest.Environment{
-		CRDDirectoryPaths: []string{
-			filepath.Join("..", "config", "crds"),
-			filepath.Join("..", "hack", "tests", "thirdparty_crds"),
-		},
-	}
 
-	err := odahuv1alpha1.AddToScheme(scheme.Scheme)
-	if err != nil {
-		panic(err)
-	}
-	istioschema.AddToScheme(scheme.Scheme)
-
-	if err := knservingv1.AddToScheme(scheme.Scheme); err != nil {
-		panic(err)
-	}
-	if err := tektonschema.AddToScheme(scheme.Scheme); err != nil {
-		panic(err)
-	}
-
-	if cfg, err = t.Start(); err != nil {
-		stdlog.Fatal(err)
-	}
-
-	code := m.Run()
-
-	if err = t.Stop(); err != nil {
-		panic(err)
-	}
-
-	os.Exit(code)
+	os.Exit(testMainWrapper(m))
 }
 
 // StartTestManager adds recFn
