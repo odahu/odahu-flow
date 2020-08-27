@@ -1,4 +1,5 @@
 *** Variables ***
+${LOCAL_CONFIG}                     odahuflow/api_training_packaging_deploy_route_model
 ${RES_DIR}                          ${CURDIR}/resources/training_packaging_deploy
 ${TRAIN_MLFLOW_DEFAULT}             wine-mlflow-default
 ${TRAIN_MLFLOW_NOT_DEFAULT}         wine-mlflow-not-default
@@ -14,9 +15,6 @@ ${REQUEST}                          SEPARATOR=
 ...                                 "pH", "sulphates", "alcohol" ], "data": [ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ] ] }
 ${REQUEST_RESPONSE}                 {'prediction': [4.675934265196686], 'columns': ['quality']}
 
-${WrongHttpStatusCode}              WrongHttpStatusCode: Got error from server: modeldeployments.odahuflow.odahu.org
-...                                 "wine-api-testing" not found (status: 404)
-
 *** Settings ***
 Documentation       API of training, packaging, deployment, route and model
 Resource            ../../resources/keywords.robot
@@ -29,9 +27,12 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
 ...                 Cleanup Resources
-Suite Teardown      Cleanup Resources
+Suite Teardown      Run Keywords
+...                 Cleanup Resources
+...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk
 Test Timeout        60 minutes
 
@@ -190,21 +191,21 @@ Invoke model
     ${expected response}          evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result}  ${expected response}
 
-Delete Model Trainings and Check that Model Trainging do not exist
-    [Tags]                      training
-    [Documentation]             delete model trainings
-    Command response list should contain id  training  ${TRAIN_MLFLOW_DEFAULT}  ${TRAIN_MLFLOW_NOT_DEFAULT}
-
-    Call API                    training delete  ${TRAIN_MLFLOW_DEFAULT}
-    Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
-
-    Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}  ${TRAIN_MLFLOW_NOT_DEFAULT}
-
-Delete Model Packaging and Check that Model Packaging does not exist
-    [Tags]                      packaging
-    Command response list should contain id  packaging  ${PACKAGING}
-    Call API                    packaging delete  ${PACKAGING}
-    Command response list should not contain id  packaging  ${PACKAGING}
+# Delete Model Trainings and Check that Model Trainging do not exist
+#     [Tags]                      training
+#     [Documentation]             delete model trainings
+#     Command response list should contain id  training  ${TRAIN_MLFLOW_DEFAULT}  ${TRAIN_MLFLOW_NOT_DEFAULT}
+#
+#     Call API                    training delete  ${TRAIN_MLFLOW_DEFAULT}
+#     Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
+#
+#     Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}  ${TRAIN_MLFLOW_NOT_DEFAULT}
+#
+# Delete Model Packaging and Check that Model Packaging does not exist
+#     [Tags]                      packaging
+#     Command response list should contain id  packaging  ${PACKAGING}
+#     Call API                    packaging delete  ${PACKAGING}
+#     Command response list should not contain id  packaging  ${PACKAGING}
 
 Delete Model Deployment and Check that Model Deployment does not exist
     [Tags]                      deployment
@@ -214,4 +215,5 @@ Delete Model Deployment and Check that Model Deployment does not exist
     Wait until delete finished  deployment  entity=${DEPLOYMENT}
     Command response list should not contain id  deployment  ${DEPLOYMENT}
     Command response list should not contain id  route  ${MODEL}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
     Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT}
