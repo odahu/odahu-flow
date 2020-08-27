@@ -20,8 +20,8 @@ Suite Setup         Run Keywords
 ...                 Login to the api and edge  AND
 ...                 Cleanup all resources
 Suite Teardown      Run Keywords
-...                 Remove file  ${LOCAL_CONFIG}  AND
-...                 Cleanup all resources
+...                 Cleanup all resources  AND
+...                 Remove file  ${LOCAL_CONFIG}
 Force Tags          training  training-data
 
 *** Keywords ***
