@@ -12,7 +12,7 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
 Suite Setup         Run Keywords
-...                 Login to the api and edge
+...                 Login to the api and edge  AND
 ...                 Cleanup Resources
 Suite Teardown      Cleanup Resources
 Force Tags          api  sdk  connection
