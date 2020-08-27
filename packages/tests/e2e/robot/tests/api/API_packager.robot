@@ -16,7 +16,7 @@ Suite Setup         Run Keywords
 ...                 Login to the api and edge  AND
 ...                 Cleanup Resources
 Suite Teardown      Run Keywords
-...                 Cleanup Resources
+...                 Cleanup Resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  packager
 Test Timeout        5 minutes
