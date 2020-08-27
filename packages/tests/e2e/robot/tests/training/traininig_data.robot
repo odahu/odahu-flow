@@ -47,22 +47,22 @@ Train valid model
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
     StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
-    report training pods  ${TRAIN_ID}
-    ${res}=  StrictShell  odahuflowctl train get --id ${TRAIN_ID} -o 'jsonpath=$[0].status.artifacts[0].runId'
+    report training pods  ${training id}
+    ${res}=  StrictShell  odahuflowctl train get --id ${training id} -o 'jsonpath=$[0].status.artifacts[0].runId'
     should be equal  ${RUN_ID}  ${res.stdout}
 
 Train invalid model
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
     ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
-    report training pods  ${TRAIN_ID}
+    report training pods  ${training id}
     should not be equal  ${0}  ${res.rc}
 
 Train model that create invalid GPPI artifact
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
     ${res}=  Shell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
-    report training pods  ${TRAIN_ID}
+    report training pods  ${training id}
     should not be equal  ${0}  ${res.rc}
     Should contain  ${res.stdout}  ${GPPI_VALIDATION_FAIL}
 
