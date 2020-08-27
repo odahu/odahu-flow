@@ -29,7 +29,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
-...                 Login to the api and edge
+...                 Login to the api and edge  AND
 ...                 Cleanup Resources
 Suite Teardown      Cleanup Resources
 Force Tags          api  sdk
