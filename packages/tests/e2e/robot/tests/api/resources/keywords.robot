@@ -142,3 +142,8 @@ Pick packaging image
     ${image}                      set variable  ${result.status.results[0]}
     ${image_value}                set variable  ${image.value}
     [Return]                      ${image_value}
+
+Format WrongHttpStatusCode
+    [Arguments]                     ${entity name}
+    ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)
+    [return]                        ${error output}
