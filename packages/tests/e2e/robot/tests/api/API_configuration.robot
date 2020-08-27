@@ -11,8 +11,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge
-Suite Teardown      Run Keywords
-...                 Remove File  ${LOCAL_CONFIG}
+Suite Teardown      Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  configuration
 Test Timeout        5 minutes
 
