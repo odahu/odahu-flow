@@ -1,7 +1,8 @@
 *** Variables ***
-${RES_DIR}             ${CURDIR}/resources/packager
-${DOCKER_CLI}          docker-cli-api-testing
-${DOCKER_REST}         docker-rest-api-testing
+${LOCAL_CONFIG}     odahuflow/api_packager
+${RES_DIR}          ${CURDIR}/resources/packager
+${DOCKER_CLI}       docker-cli-api-testing
+${DOCKER_REST}      docker-rest-api-testing
 
 *** Settings ***
 Documentation       API of packagers
@@ -11,9 +12,12 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Suite Setup         Run Keywords
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
 ...                 Cleanup Resources
-Suite Teardown      Cleanup Resources
+Suite Teardown      Run Keywords
+...                 Cleanup Resources
+...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  packager
 Test Timeout        5 minutes
 
