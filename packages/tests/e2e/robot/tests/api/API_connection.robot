@@ -75,30 +75,33 @@ Delete Docker connection
     Call API                    connection delete  ${DOCKER_VALID}
     Command response list should not contain id  connection  ${DOCKER_VALID}
 
+#############################
+#    NEGATINE TEST CASES    #
+#############################
 Try Create Connection that already exists
     Call API                    connection post  ${RES_DIR}/valid/docker_connection_create.json
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_VALID}
     Call API and get Error      ${EntityAlreadyExists}  connection post  ${RES_DIR}/valid/docker_connection_create.json
 
-Try Update not existing and deleted connection
+Try Update not existing and deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.deleted.yaml
 
-Try Get id not existing and deleted connection
+Try Get id not existing and deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_INVALID}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_VALID}
 
-Try Get id decrypted not existing and deleted connection
+Try Get id decrypted not existing and deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_INVALID}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_VALID}
 
-Try Delete not existing and deleted connection
+Try Delete not existing and deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_INVALID}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
