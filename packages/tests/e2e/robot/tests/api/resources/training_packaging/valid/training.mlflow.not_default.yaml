@@ -22,3 +22,4 @@ spec:
   data:
     - connName: wine
       localPath: mlflow/sklearn/wine/
+      remotePath: /test-data/data/wine-quality.csv
