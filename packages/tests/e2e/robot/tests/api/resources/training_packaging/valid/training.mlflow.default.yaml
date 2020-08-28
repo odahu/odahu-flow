@@ -11,6 +11,13 @@ spec:
   entrypoint: main
   vcsName: odahu-flow-examples
   outputConnection: models-output
+  resources:
+    limits:
+      cpu: 4024m
+      memory: 4024Mi
+    requests:
+      cpu: 2024m
+      memory: 2024Mi
   data:
     - connName: wine
       localPath: mlflow/sklearn/wine/

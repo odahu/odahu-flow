@@ -37,12 +37,16 @@ Check model trainings do not exist
 
 Create Model Training, mlflow toolchain, default
     [Tags]                      training
-    [Documentation]             create model training with default resources and check that one exists
+    [Documentation]             create model training and check that one exists
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.default.yaml
-    @{exp_result}               create list  running  failed
+    @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
-    Limits resources should be equal     ${result}  250m  ${NONE}  256Mi
-    Requested resources should be equal  ${result}  125m  ${NONE}  128Mi
+    Status State Should Be      ${result}  succeeded
+
+Get short-term Logs of training
+    [Tags]                      training  log
+    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
+    should contain              ${result}  INFO
 
 Update Model Training, mlflow toolchain, default
     [Tags]                      training
@@ -51,13 +55,6 @@ Update Model Training, mlflow toolchain, default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
-    Limits resources should be equal     ${result}  3024m  ${NONE}  4024Mi
-    Requested resources should be equal  ${result}  3024m  ${NONE}  3024Mi
-
-Get short-term Logs of training
-    [Tags]                      training  log
-    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
-    should contain              ${result}  INFO
 
 Packaging's list doesn't contain packaging
     [Tags]                      packaging
