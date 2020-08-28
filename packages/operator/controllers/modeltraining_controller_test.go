@@ -159,176 +159,41 @@ func TestModelTrainingControllerSuite(t *testing.T) {
 }
 
 func (s *ModelTrainingControllerSuite) templateNodeSelectorTest(
-	mtResources *odahuflowv1alpha1.ResourceRequirements,
+	training *odahuflowv1alpha1.ModelTraining,
 	expectedNodeSelector map[string]string,
 	expectedTolerations []v1.Toleration,
 ) {
-	mt := &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mtName,
-			Namespace: testNamespace,
-		},
-		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			Resources: mtResources,
-			Toolchain: testToolchainIntegrationID,
-		},
-	}
-
-	err := s.k8sClient.Create(context.TODO(), mt)
+	err := s.k8sClient.Create(context.TODO(), training)
 	s.g.Expect(err).NotTo(HaveOccurred())
-	defer s.k8sClient.Delete(context.TODO(), mt)
+	defer s.k8sClient.Delete(context.TODO(), training)
 
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
 
-	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
+	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, training)).ToNot(HaveOccurred())
 
 	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
+	trKey := types.NamespacedName{Name: training.Name, Namespace: testNamespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
 	s.g.Expect(tr.Spec.PodTemplate.NodeSelector).Should(Equal(expectedNodeSelector))
 	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedTolerations))
 }
 
-func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-			},
-		},
-		nil,
-		nil,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.GPUNodeSelector = map[string]string{}
-	trainingConfig.GPUTolerations = []v1.Toleration{}
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &emptyValue,
-			},
-		},
-		nil,
-		nil,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestGPUNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	trainingConfig.GPUTolerations = gpuTolerations
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-			},
-		},
-		gpuNodeSelector,
-		gpuTolerations,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestOnlyGPUNodeSelector() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-			},
-		},
-		gpuNodeSelector,
-		nil,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestEmptyNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nil,
-		nil,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.Tolerations = tolerations
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nodeSelector,
-		tolerations,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestOnlyNodeSelector() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nodeSelector,
-		nil,
-	)
-}
-
-// If GPU and CPU resources setup on a one training, GPU node selector must be used
-func (s *ModelTrainingControllerSuite) TestGPUandCPUNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	trainingConfig.Tolerations = tolerations
-	trainingConfig.GPUTolerations = gpuTolerations
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-				CPU: &testResValue,
-			},
-		},
-		gpuNodeSelector,
-		gpuTolerations,
-	)
-}
+// TODO: write following tests!
+func (s *ModelTrainingControllerSuite) TestNodePool_Provided_Valid()              {}
+func (s *ModelTrainingControllerSuite) TestNodePool_Provided_NotFound()           {}
+func (s *ModelTrainingControllerSuite) TestNodePool_NotProvided_UseAffinity()     {}
+func (s *ModelTrainingControllerSuite) TestNodePool_GPU_Provided_Valid()          {}
+func (s *ModelTrainingControllerSuite) TestNodePool_GPU_Provided_NotFound()       {}
+func (s *ModelTrainingControllerSuite) TestNodePool_GPU_NotProvided_UseAffinity() {}
+func (s *ModelTrainingControllerSuite) TestToleration_Nil()                       {}
+func (s *ModelTrainingControllerSuite) TestToleration_Valid()                     {}
 
 func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
+	trainingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector}}
+	trainingConfig.GPUNodePools = []config.NodePool{{NodeSelector: gpuNodeSelector}}
 	trainingConfig.ModelTrainerImage = modelBuildImage
 	s.initReconciler(trainingConfig)
 

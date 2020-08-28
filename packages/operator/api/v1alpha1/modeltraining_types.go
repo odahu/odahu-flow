@@ -20,6 +20,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -70,6 +71,16 @@ type ModelTrainingSpec struct {
 	Resources *ResourceRequirements `json:"resources,omitempty"`
 	// Input data for a training
 	Data []DataBindingDir `json:"data,omitempty"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector"`
+}
+
+// The function returns true if one of the GPU resources is set up.
+func (mts *ModelTrainingSpec) IsGPUResourceSet() bool {
+	return mts.Resources != nil && ((mts.Resources.Limits != nil &&
+		kubernetes.IsResourcePresent(mts.Resources.Limits.GPU)) ||
+		(mts.Resources.Requests != nil &&
+			kubernetes.IsResourcePresent(mts.Resources.Requests.GPU)))
 }
 
 // ModelTrainingState defines current state

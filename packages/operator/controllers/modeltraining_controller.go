@@ -205,26 +205,51 @@ func (r *ModelTrainingReconciler) getToolchainIntegration(trainingCR *odahuflowv
 	return &training.ToolchainIntegration{Spec: ti.Spec}, nil
 }
 
-// The function returns true if one of the GPU resources is set up.
-func isGPUResourceSet(trainingCR *odahuflowv1alpha1.ModelTraining) bool {
-	return trainingCR.Spec.Resources != nil && ((trainingCR.Spec.Resources.Limits != nil &&
-		kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Limits.GPU)) ||
-		(trainingCR.Spec.Resources.Requests != nil &&
-			kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Requests.GPU)))
-}
+func (r *ModelTrainingReconciler) getNodeSelectorAndAffinity(trainingCR *odahuflowv1alpha1.ModelTraining) (
+	nodeSelector map[string]string, affinity corev1.Affinity) {
 
-func (r *ModelTrainingReconciler) getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {
-	if isGPUResourceSet(trainingCR) {
-		return r.trainingConfig.GPUNodeSelector
+	// Specific node pool was chosen
+	if len(trainingCR.Spec.NodeSelector) > 0 {
+		return trainingCR.Spec.NodeSelector, affinity
 	}
 
-	return r.trainingConfig.NodeSelector
+	// Node pool wasn't specified, define affinity to any of training pools
+	var nodePools []config.NodePool
+	if trainingCR.Spec.IsGPUResourceSet() {
+		nodePools = r.trainingConfig.GPUNodePools
+	} else {
+		nodePools = r.trainingConfig.NodePools
+	}
+
+	nodeSelectorTerms := make([]corev1.NodeSelectorTerm, 0, len(nodePools))
+	for _, nodePool := range nodePools {
+		selector := nodePool.NodeSelector
+		matchExpressions := make([]corev1.NodeSelectorRequirement, 0, len(selector))
+
+		for label, value := range selector {
+			matchExpressions = append(matchExpressions, corev1.NodeSelectorRequirement{
+				Key:      label,
+				Operator: corev1.NodeSelectorOpIn,
+				Values:   []string{value},
+			})
+		}
+
+		nodeSelectorTerms = append(nodeSelectorTerms, corev1.NodeSelectorTerm{
+			MatchExpressions: matchExpressions,
+		})
+	}
+
+	return nodeSelector, corev1.Affinity{
+		NodeAffinity: &corev1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{NodeSelectorTerms: nodeSelectorTerms},
+		},
+	}
 }
 
 func (r *ModelTrainingReconciler) getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
 	var tolerations []corev1.Toleration
 
-	if isGPUResourceSet(trainingCR) {
+	if trainingCR.Spec.IsGPUResourceSet() {
 		tolerations = r.trainingConfig.GPUTolerations
 	} else {
 		tolerations = r.trainingConfig.Tolerations
@@ -260,6 +285,8 @@ func (r *ModelTrainingReconciler) reconcileTaskRun(
 		return nil, err
 	}
 
+	nodeSelector, affinity := r.getNodeSelectorAndAffinity(trainingCR)
+
 	taskRun := &tektonv1beta1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      trainingCR.Name,
@@ -272,8 +299,9 @@ func (r *ModelTrainingReconciler) reconcileTaskRun(
 			TaskSpec: taskSpec,
 			Timeout:  &metav1.Duration{Duration: r.trainingConfig.Timeout},
 			PodTemplate: &tektonv1beta1.PodTemplate{
-				NodeSelector: r.getNodeSelector(trainingCR),
 				Tolerations:  r.getTolerations(trainingCR),
+				NodeSelector: nodeSelector,
+				Affinity:     &affinity,
 			},
 		},
 	}

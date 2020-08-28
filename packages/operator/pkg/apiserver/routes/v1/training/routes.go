@@ -37,10 +37,9 @@ func ConfigureRoutes(
 		trainRepo:  trainRepo,
 		kubeClient: trainKubeClient,
 		validator: NewMtValidator(
-			toolchainRepo,
-			connRepo,
-			config.DefaultResources,
-			config.OutputConnectionID,
+			services.ToolchainStorage,
+			services.ConnStorage,
+			config,
 			gpuResourceName,
 		),
 	}

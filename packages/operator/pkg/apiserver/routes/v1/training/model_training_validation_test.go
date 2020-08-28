@@ -21,6 +21,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/appserver/routes/v1/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
@@ -63,8 +64,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 	s.validator = train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		defaultTrainingResource,
-		outputConnectionName,
+		config.NewDefaultModelTrainingConfig(),
 		gpuResourceName,
 	)
 
@@ -419,44 +419,54 @@ func (s *ModelTrainingValidationSuite) TestMtResourcesValidation() {
 		"validation of gpu limit is failed: quantities must match the regular expression"))
 }
 
-func (s *ModelTrainingValidationSuite) TestOutputConnection() {
-
-	// If configuration output connection is not set then user must specify it as StorageEntity parameter
+// If default output connection is not set in config and user doesn't provide it, validation fails
+func (s *ModelTrainingValidationSuite) TestOutputConnection_NoDefault_NoParam() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{},
+	}
+	testConfig := config.ModelTrainingConfig{
+		DefaultResources:   defaultTrainingResource,
+		OutputConnectionID: "",
 	}
 	err := train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		defaultTrainingResource,
-		"",
+		testConfig,
 		gpuResourceName,
 	).ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
+}
 
-	// If configuration output connection is set and user has not passed output connection as training
-	// parameter then output connection value from configuration will be used as default
+// If default output connection is set in config and user doesn't pass output connection, use default
+func (s *ModelTrainingValidationSuite) TestOutputConnection_Default_NoParam() {
+	mt := &training.ModelTraining{}
+
+	testConfig := config.ModelTrainingConfig{OutputConnectionID: testMtOutConnDefault}
 	_ = train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		defaultTrainingResource,
-		testMtOutConnDefault,
+		testConfig,
 		gpuResourceName,
 	).ValidatesAndSetDefaults(mt)
 	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConnDefault))
+}
 
-	// If configuration output connection is set but user also has passed output connection as training
-	// parameter then user value is used
+// If output connection is set in both config and user request, use one from user
+func (s *ModelTrainingValidationSuite) TestOutputConnection_Both_Default_Param() {
+	mt := &training.ModelTraining{}
+
 	mt.Spec.OutputConnection = testMtOutConn
 	_ = s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConn))
+}
 
-	// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
-	mt = &training.ModelTraining{
+// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
+func (s *ModelTrainingValidationSuite) TestOutputConnection_ConnectionNotFound() {
+	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{OutputConnection: testMpOutConnNotFound},
 	}
-	err = s.validator.ValidatesAndSetDefaults(mt)
+	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
 
