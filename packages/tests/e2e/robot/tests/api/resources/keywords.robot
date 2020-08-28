@@ -132,15 +132,15 @@ Command response list should not contain id
 Pick artifact name
     [Arguments]                   ${training id}
     ${result}                     Call API  training get id  ${training id}
-    ${artifact}                   set variable  ${result.status.artifacts[0]}
-    ${artifact_name}              set variable  ${artifact.artifact_name}
+    ${artifact}                   get variable value  ${result.status.artifacts[0]}  ${EMPTY}
+    ${artifact_name}              get variable value  ${artifact.artifact_name}  ${EMPTY}
     [Return]                      ${artifact_name}
 
 Pick packaging image
     [Arguments]                   ${packaging id}
     ${result}                     Call API  packaging get id  ${packaging id}
-    ${image}                      set variable  ${result.status.results[0]}
-    ${image_value}                set variable  ${image.value}
+    ${image}                      get variable value  ${result.status.results[0]}  ${EMPTY}
+    ${image_value}                get variable value  ${image.value}  ${EMPTY}
     [Return]                      ${image_value}
 
 Format WrongHttpStatusCode
