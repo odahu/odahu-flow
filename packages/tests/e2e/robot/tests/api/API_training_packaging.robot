@@ -36,12 +36,13 @@ Check model trainings do not exist
     Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}
 
 Create Model Training, mlflow toolchain, default
-    [Tags]                      training
-    [Documentation]             create model training and check that one exists
+    [Tags]                      training  testing
+    [Documentation]             create model training with default resources and check that one exists
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.default.yaml
-    @{exp_result}               create list  succeeded  failed
+    @{exp_result}               create list  running  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
-    Status State Should Be      ${result}  succeeded
+    Limits resources should be equal     ${result}  250m  ${NONE}  256Mi
+    Requested resources should be equal  ${result}  125m  ${NONE}  128Mi
 
 Get short-term Logs of training
     [Tags]                      training  log

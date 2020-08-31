@@ -69,6 +69,18 @@ Default Entrypoint should be equal
     [Arguments]                  ${result}  ${exp_value}
     should be equal              ${result.spec.entrypoint}  ${exp_value}
 
+Requested resources should be equal
+    [Arguments]                  ${result}  ${CPU}  ${GPU}  ${MEMORY}
+    should be equal              ${result.spec.resources.requests.cpu}        ${CPU}
+    should be equal              ${result.spec.resources.requests.gpu}        ${GPU}
+    should be equal              ${result.spec.resources.requests.memory}     ${MEMORY}
+
+Limits resources should be equal
+    [Arguments]                 ${result}  ${CPU}  ${GPU}  ${MEMORY}
+    should be equal              ${result.spec.resources.limits.cpu}        ${CPU}
+    should be equal              ${result.spec.resources.limits.gpu}        ${GPU}
+    should be equal              ${result.spec.resources.limits.memory}     ${MEMORY}
+
 CreatedAt and UpdatedAt times should not be equal
     [Arguments]                  ${result}
     ${result_status}             Log Status  ${result}
