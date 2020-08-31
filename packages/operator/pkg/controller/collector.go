@@ -1,4 +1,4 @@
-package v1
+package controller
 
 import (
 	"database/sql"
@@ -9,14 +9,13 @@ import (
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/workers/v1/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/workers/v1/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/workers/v1/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/workersmanager"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-func SetupRunners(runMgr *workersmanager.WorkersManager, kubeMgr manager.Manager, db *sql.DB, cfg config.Config) {
+func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, cfg config.Config) {
 
 	kClient := kubeMgr.GetClient()
 	kConfig := kubeMgr.GetConfig()
@@ -31,8 +30,8 @@ func SetupRunners(runMgr *workersmanager.WorkersManager, kubeMgr manager.Manager
 		)
 
 		trainWorker := NewGenericWorker(
-			kubeMgr, "training", cfg.Common.LaunchPeriod,
-			training.NewSyncer(trainRepo, trainKubeClient),
+			"training", cfg.Common.LaunchPeriod,
+			training.NewAdapter(trainRepo, trainKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&trainWorker)
 	}
@@ -47,8 +46,8 @@ func SetupRunners(runMgr *workersmanager.WorkersManager, kubeMgr manager.Manager
 		)
 
 		packWorker := NewGenericWorker(
-			kubeMgr, "packaging", cfg.Common.LaunchPeriod,
-			packaging.NewSyncer(packRepo, packKubeClient),
+			"packaging", cfg.Common.LaunchPeriod,
+			packaging.NewAdapter(packRepo, packKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&packWorker)
 	}
@@ -58,8 +57,8 @@ func SetupRunners(runMgr *workersmanager.WorkersManager, kubeMgr manager.Manager
 		deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, kClient)
 
 		deployWorker := NewGenericWorker(
-			kubeMgr, "deployment", cfg.Common.LaunchPeriod,
-			deployment.NewSyncer(deployRepo, deployKubeClient),
+			"deployment", cfg.Common.LaunchPeriod,
+			deployment.NewAdapter(deployRepo, deployKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&deployWorker)
 	}

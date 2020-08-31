@@ -5,6 +5,7 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -127,32 +128,77 @@ func (repo PackagingRepo) SetDeletionMark(id string, value bool) error {
 	return utils.SetDeletionMark(repo.DB, ModelPackagingTable, id, value)
 }
 
-func (repo PackagingRepo) UpdateModelPackaging(mt *packaging.ModelPackaging) error {
+func (repo PackagingRepo) UpdateModelPackaging(mp *packaging.ModelPackaging) error {
 
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := repo.GetModelPackaging(mt.ID)
+	mp.Status.State = ""
+
+	stmt, args, err := sq.Update(ModelPackagingTable).
+		Set("spec", mp.Spec).
+		Set("status", mp.Status).
+		Where(sq.Eq{"id": mp.ID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
 	if err != nil {
 		return err
 	}
 
-	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", ModelPackagingTable)
-	_, err = repo.DB.Exec(sqlStatement, mt.Spec, mt.Status, mt.ID)
+	result, err := repo.DB.Exec(stmt, args...)
 	if err != nil {
 		return err
 	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: mp.ID}
+	}
+
 	return nil
 }
 
-func (repo PackagingRepo) CreateModelPackaging(mt *packaging.ModelPackaging) error {
+func (repo PackagingRepo) UpdateModelPackagingStatus(id string, s v1alpha1.ModelPackagingStatus) error {
+
+	stmt, args, err := sq.Update(ModelPackagingTable).
+		Set("status", s).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	result, err := repo.DB.Exec(stmt, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: id}
+	}
+
+	return nil
+}
+
+func (repo PackagingRepo) CreateModelPackaging(mp *packaging.ModelPackaging) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelPackagingTable),
-		mt.ID, mt.Spec, mt.Status,
+		mp.ID, mp.Spec, mp.Status,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
 		if ok && pqError.Code == uniqueViolationPostgresCode {
-			return odahuErrors.AlreadyExistError{Entity: mt.ID}
+			return odahuErrors.AlreadyExistError{Entity: mp.ID}
 		}
 		return err
 	}

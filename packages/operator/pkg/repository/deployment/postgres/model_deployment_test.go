@@ -50,6 +50,11 @@ func TestModelDeploymentRepository(t *testing.T) {
 	as.Exactly(fetched.Spec, updated.Spec)
 	as.Exactly(fetched.Spec.Image, "updated")
 
+	as.NoError(repo.UpdateModelDeploymentStatus(mdID, v1alpha1.ModelDeploymentStatus{Replicas: 42}))
+	fetched, err = repo.GetModelDeployment(mdID)
+	as.NoError(err)
+	as.Exactly(fetched.Status.Replicas, int32(42))
+
 	tis, err := repo.GetModelDeploymentList()
 	as.NoError(err)
 	as.Len(tis, 1)

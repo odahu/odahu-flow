@@ -17,6 +17,7 @@
 package training
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
@@ -30,8 +31,9 @@ type Repository interface {
 	GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error)
 	DeleteModelTraining(id string) error
 	SetDeletionMark(id string, value bool) error
-	UpdateModelTraining(md *training.ModelTraining) error
-	CreateModelTraining(md *training.ModelTraining) error
+	UpdateModelTraining(mt *training.ModelTraining) error
+	UpdateModelTrainingStatus(id string, s v1alpha1.ModelTrainingStatus) error
+	CreateModelTraining(mt *training.ModelTraining) error
 }
 
 type ToolchainRepository interface {

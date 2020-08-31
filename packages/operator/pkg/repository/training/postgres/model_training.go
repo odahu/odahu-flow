@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -129,17 +130,62 @@ func (repo TrainingRepo) SetDeletionMark(id string, value bool) error {
 
 func (repo TrainingRepo) UpdateModelTraining(mt *training.ModelTraining) error {
 
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := repo.GetModelTraining(mt.ID)
+	mt.Status.State = ""
+
+	stmt, args, err := sq.Update(ModelTrainingTable).
+		Set("spec", mt.Spec).
+		Set("status", mt.Status).
+		Where(sq.Eq{"id": mt.ID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
 	if err != nil {
 		return err
 	}
 
-	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", ModelTrainingTable)
-	_, err = repo.DB.Exec(sqlStatement, mt.Spec, mt.Status, mt.ID)
+	result, err := repo.DB.Exec(stmt, args...)
 	if err != nil {
 		return err
 	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: mt.ID}
+	}
+
+	return nil
+}
+
+func (repo TrainingRepo) UpdateModelTrainingStatus(id string, s v1alpha1.ModelTrainingStatus) error {
+
+	stmt, args, err := sq.Update(ModelTrainingTable).
+		Set("status", s).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	result, err := repo.DB.Exec(stmt, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: id}
+	}
+
 	return nil
 }
 

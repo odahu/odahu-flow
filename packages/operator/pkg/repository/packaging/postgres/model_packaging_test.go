@@ -103,6 +103,12 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 	assert.Exactly(s.T(), fetched.Spec, updated.Spec)
 	assert.Exactly(s.T(), fetched.Spec.Image, mpNewImage)
 
+	newStatus := odahuflowv1alpha1.ModelPackagingStatus{PodName: "Some name"}
+	assert.NoError(s.T(), s.rep.UpdateModelPackagingStatus(mpID, newStatus))
+	fetched, err = s.rep.GetModelPackaging(mpID)
+	assert.NoError(s.T(), err)
+	assert.Exactly(s.T(), fetched.Status.PodName, "Some name")
+
 	assert.False(s.T(), fetched.DeletionMark)
 	assert.NoError(s.T(), s.rep.SetDeletionMark(mpID, true))
 	fetched, err = s.rep.GetModelPackaging(mpID)

@@ -17,6 +17,7 @@
 package packaging
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
@@ -31,6 +32,7 @@ type Repository interface {
 	DeleteModelPackaging(id string) error
 	SetDeletionMark(id string, value bool) error
 	UpdateModelPackaging(md *packaging.ModelPackaging) error
+	UpdateModelPackagingStatus(id string, s v1alpha1.ModelPackagingStatus) error
 	CreateModelPackaging(md *packaging.ModelPackaging) error
 }
 
