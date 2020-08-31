@@ -7,7 +7,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -24,18 +24,18 @@ var (
 	FirstPage = 0
 )
 
-type DeploymentPostgresRepo struct {
+type DeploymentRepo struct {
 	DB *sql.DB
 }
 
-func (repo DeploymentPostgresRepo) GetModelDeployment(name string) (*deployment.ModelDeployment, error) {
+func (repo DeploymentRepo) GetModelDeployment(name string) (*deployment.ModelDeployment, error) {
 
 	mt := new(deployment.ModelDeployment)
 
 	err := repo.DB.QueryRow(
-		fmt.Sprintf("SELECT id, spec, status FROM %s WHERE id = $1", ModelDeploymentTable),
+		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelDeploymentTable),
 		name,
-	).Scan(&mt.ID, &mt.Spec, &mt.Status)
+	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -52,7 +52,7 @@ func (repo DeploymentPostgresRepo) GetModelDeployment(name string) (*deployment.
 
 }
 
-func (repo DeploymentPostgresRepo) GetModelDeploymentList(options ...filter.ListOption) (
+func (repo DeploymentRepo) GetModelDeploymentList(options ...filter.ListOption) (
 	[]deployment.ModelDeployment, error,
 ) {
 
@@ -67,7 +67,7 @@ func (repo DeploymentPostgresRepo) GetModelDeploymentList(options ...filter.List
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("*").From("odahu_operator_deployment").
+	sb := sq.Select("id, spec, status, deletionmark").From("odahu_operator_deployment").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -96,7 +96,7 @@ func (repo DeploymentPostgresRepo) GetModelDeploymentList(options ...filter.List
 
 	for rows.Next() {
 		mt := new(deployment.ModelDeployment)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +109,7 @@ func (repo DeploymentPostgresRepo) GetModelDeploymentList(options ...filter.List
 
 }
 
-func (repo DeploymentPostgresRepo) DeleteModelDeployment(name string) error {
+func (repo DeploymentRepo) DeleteModelDeployment(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelDeployment(name)
@@ -127,7 +127,11 @@ func (repo DeploymentPostgresRepo) DeleteModelDeployment(name string) error {
 	return nil
 }
 
-func (repo DeploymentPostgresRepo) UpdateModelDeployment(mt *deployment.ModelDeployment) error {
+func (repo DeploymentRepo) SetDeletionMark(id string, value bool) error {
+	return utils.SetDeletionMark(repo.DB, ModelDeploymentTable, id, value)
+}
+
+func (repo DeploymentRepo) UpdateModelDeployment(mt *deployment.ModelDeployment) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelDeployment(mt.ID)
@@ -143,7 +147,7 @@ func (repo DeploymentPostgresRepo) UpdateModelDeployment(mt *deployment.ModelDep
 	return nil
 }
 
-func (repo DeploymentPostgresRepo) CreateModelDeployment(mt *deployment.ModelDeployment) error {
+func (repo DeploymentRepo) CreateModelDeployment(mt *deployment.ModelDeployment) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelDeploymentTable),
@@ -160,7 +164,7 @@ func (repo DeploymentPostgresRepo) CreateModelDeployment(mt *deployment.ModelDep
 
 }
 
-func (repo DeploymentPostgresRepo) GetModelRoute(name string) (*deployment.ModelRoute, error) {
+func (repo DeploymentRepo) GetModelRoute(name string) (*deployment.ModelRoute, error) {
 
 	mt := new(deployment.ModelRoute)
 
@@ -184,7 +188,7 @@ func (repo DeploymentPostgresRepo) GetModelRoute(name string) (*deployment.Model
 
 }
 
-func (repo DeploymentPostgresRepo) GetModelRouteList(options ...filter.ListOption) (
+func (repo DeploymentRepo) GetModelRouteList(options ...filter.ListOption) (
 	[]deployment.ModelRoute, error,
 ) {
 
@@ -199,7 +203,7 @@ func (repo DeploymentPostgresRepo) GetModelRouteList(options ...filter.ListOptio
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("*").From("odahu_operator_route").
+	sb := sq.Select("id, spec, status").From("odahu_operator_route").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -241,7 +245,7 @@ func (repo DeploymentPostgresRepo) GetModelRouteList(options ...filter.ListOptio
 
 }
 
-func (repo DeploymentPostgresRepo) DeleteModelRoute(name string) error {
+func (repo DeploymentRepo) DeleteModelRoute(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelRoute(name)
@@ -259,7 +263,7 @@ func (repo DeploymentPostgresRepo) DeleteModelRoute(name string) error {
 	return nil
 }
 
-func (repo DeploymentPostgresRepo) UpdateModelRoute(mt *deployment.ModelRoute) error {
+func (repo DeploymentRepo) UpdateModelRoute(mt *deployment.ModelRoute) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelRoute(mt.ID)
@@ -275,7 +279,7 @@ func (repo DeploymentPostgresRepo) UpdateModelRoute(mt *deployment.ModelRoute) e
 	return nil
 }
 
-func (repo DeploymentPostgresRepo) CreateModelRoute(mt *deployment.ModelRoute) error {
+func (repo DeploymentRepo) CreateModelRoute(mt *deployment.ModelRoute) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelRouteTable),

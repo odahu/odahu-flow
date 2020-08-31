@@ -26,6 +26,8 @@ import (
 type ModelPackaging struct {
 	// Model packaging id
 	ID string `json:"id"`
+	// Deletion mark
+	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
 	// Model packaging specification
 	Spec ModelPackagingSpec `json:"spec,omitempty"`
 	// Model packaging status

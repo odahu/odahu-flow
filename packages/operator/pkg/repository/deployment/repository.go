@@ -18,7 +18,7 @@ package deployment
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
 const (
@@ -36,6 +36,7 @@ type Repository interface {
 	DeleteModelRoute(name string) error
 	UpdateModelRoute(md *deployment.ModelRoute) error
 	CreateModelRoute(md *deployment.ModelRoute) error
+	SetDeletionMark(id string, value bool) error
 }
 
 type MdFilter struct {

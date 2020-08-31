@@ -22,7 +22,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )

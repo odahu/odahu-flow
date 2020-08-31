@@ -16,13 +16,17 @@ class CommonConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, database_connection_string: str=None, external_urls: List[ExternalUrl]=None, oauth_oidc_token_endpoint: str=None, resource_gpu_name: str=None, version: str=None):  # noqa: E501
+    def __init__(self, database_connection_string: str=None, external_urls: List[ExternalUrl]=None, graceful_timeout: str=None, launch_period: str=None, oauth_oidc_token_endpoint: str=None, resource_gpu_name: str=None, version: str=None):  # noqa: E501
         """CommonConfig - a model defined in Swagger
 
         :param database_connection_string: The database_connection_string of this CommonConfig.  # noqa: E501
         :type database_connection_string: str
         :param external_urls: The external_urls of this CommonConfig.  # noqa: E501
         :type external_urls: List[ExternalUrl]
+        :param graceful_timeout: The graceful_timeout of this CommonConfig.  # noqa: E501
+        :type graceful_timeout: str
+        :param launch_period: The launch_period of this CommonConfig.  # noqa: E501
+        :type launch_period: str
         :param oauth_oidc_token_endpoint: The oauth_oidc_token_endpoint of this CommonConfig.  # noqa: E501
         :type oauth_oidc_token_endpoint: str
         :param resource_gpu_name: The resource_gpu_name of this CommonConfig.  # noqa: E501
@@ -33,6 +37,8 @@ class CommonConfig(Model):
         self.swagger_types = {
             'database_connection_string': str,
             'external_urls': List[ExternalUrl],
+            'graceful_timeout': str,
+            'launch_period': str,
             'oauth_oidc_token_endpoint': str,
             'resource_gpu_name': str,
             'version': str
@@ -41,6 +47,8 @@ class CommonConfig(Model):
         self.attribute_map = {
             'database_connection_string': 'databaseConnectionString',
             'external_urls': 'externalUrls',
+            'graceful_timeout': 'gracefulTimeout',
+            'launch_period': 'launchPeriod',
             'oauth_oidc_token_endpoint': 'oauthOidcTokenEndpoint',
             'resource_gpu_name': 'resourceGpuName',
             'version': 'version'
@@ -48,6 +56,8 @@ class CommonConfig(Model):
 
         self._database_connection_string = database_connection_string
         self._external_urls = external_urls
+        self._graceful_timeout = graceful_timeout
+        self._launch_period = launch_period
         self._oauth_oidc_token_endpoint = oauth_oidc_token_endpoint
         self._resource_gpu_name = resource_gpu_name
         self._version = version
@@ -108,6 +118,52 @@ class CommonConfig(Model):
         """
 
         self._external_urls = external_urls
+
+    @property
+    def graceful_timeout(self) -> str:
+        """Gets the graceful_timeout of this CommonConfig.
+
+        Graceful shutdown timeout  # noqa: E501
+
+        :return: The graceful_timeout of this CommonConfig.
+        :rtype: str
+        """
+        return self._graceful_timeout
+
+    @graceful_timeout.setter
+    def graceful_timeout(self, graceful_timeout: str):
+        """Sets the graceful_timeout of this CommonConfig.
+
+        Graceful shutdown timeout  # noqa: E501
+
+        :param graceful_timeout: The graceful_timeout of this CommonConfig.
+        :type graceful_timeout: str
+        """
+
+        self._graceful_timeout = graceful_timeout
+
+    @property
+    def launch_period(self) -> str:
+        """Gets the launch_period of this CommonConfig.
+
+        How often launch new training  # noqa: E501
+
+        :return: The launch_period of this CommonConfig.
+        :rtype: str
+        """
+        return self._launch_period
+
+    @launch_period.setter
+    def launch_period(self, launch_period: str):
+        """Sets the launch_period of this CommonConfig.
+
+        How often launch new training  # noqa: E501
+
+        :param launch_period: The launch_period of this CommonConfig.
+        :type launch_period: str
+        """
+
+        self._launch_period = launch_period
 
     @property
     def oauth_oidc_token_endpoint(self) -> str:

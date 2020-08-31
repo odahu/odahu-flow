@@ -18,7 +18,7 @@ const (
 
 func TestToolchainRepository(t *testing.T) {
 
-	tRepo := postgres_repo.ToolchainRepository{DB: db}
+	tRepo := postgres_repo.ToolchainRepo{DB: db}
 
 	g := NewGomegaWithT(t)
 

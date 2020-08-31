@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is an API Gateway server.",
+        "description": "This is an API Gateway webServer.",
         "title": "API Gateway",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {},
@@ -1902,6 +1902,10 @@
                     "type": "object",
                     "$ref": "#/definitions/APIBackendConfig"
                 },
+                "disableWorkers": {
+                    "description": "If true then only webserver will be setup.\nWithout background workers responsible to monitor storage and call services",
+                    "type": "boolean"
+                },
                 "port": {
                     "description": "API HTTP port",
                     "type": "integer"
@@ -1966,6 +1970,14 @@
                     "items": {
                         "$ref": "#/definitions/ExternalUrl"
                     }
+                },
+                "gracefulTimeout": {
+                    "description": "Graceful shutdown timeout",
+                    "type": "string"
+                },
+                "launchPeriod": {
+                    "description": "How often launch new training",
+                    "type": "string"
                 },
                 "oauthOidcTokenEndpoint": {
                     "description": "OpenID token url",
@@ -2355,6 +2367,10 @@
         "Vault": {
             "type": "object",
             "properties": {
+                "insecure": {
+                    "description": "Can be used to debug and local development. Skip TLS verification",
+                    "type": "boolean"
+                },
                 "role": {
                     "description": "Vault role for access to the secret engine path",
                     "type": "string"
