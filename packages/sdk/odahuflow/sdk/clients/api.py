@@ -25,6 +25,8 @@ import threading
 from collections.abc import AsyncIterable
 from typing import Any, Callable, Dict, Iterator, Mapping, Optional, Tuple, Union
 from urllib.parse import urlencode, urlparse
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 import aiohttp
 import requests
@@ -384,6 +386,16 @@ class RemoteAPIClient:
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
         self.conn_policy = HTTPConnectionPolicy(retries, timeout)
 
+        retry_strategy = Retry(
+            total=self.conn_policy.get_left_retries(),
+            status_forcelist=[429, 500, 502, 503, 504],
+            backoff_factor=1
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.default_client = requests.Session()
+        self.default_client.mount("https://", adapter)
+        self.default_client.mount("http://", adapter)
+
     @property
     def timeout(self):
         return self.conn_policy.default_timeout
@@ -428,35 +440,20 @@ class RemoteAPIClient:
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream,
                                                                token=self.authenticator.token)
         connection_timeout = self.conn_policy.get_conn_timeout(timeout)
-        left_retries = self.conn_policy.get_left_retries()
 
-        raised_exception = None
-        while left_retries > 0:
-            try:
-                LOGGER.debug('Requesting {}'.format(self.url_builder.build_url(url_template)))
-
-                if client:
-                    response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
-                else:
-                    response = requests.request(timeout=connection_timeout, stream=stream, **request_kwargs)
-
-                LOGGER.debug('Response status code: "{}"'.format(response.status_code))
-
-            except requests.exceptions.ConnectionError as exception:
-                LOGGER.error('Failed to connect to {}: {}. Retrying'.format(self._base_url, exception))
-                raised_exception = exception
+        try:
+            if client:
+                response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
             else:
-                LOGGER.debug('Got response. Breaking')
-                break
-            left_retries -= 1
-        else:
+                response = self.default_client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
+        except Exception as raised_exception:
             raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
 
         if self.authenticator.login_required(response):
             try:
                 self.authenticator.login(str(response.url), limit_stack=limit_stack)
             except IncorrectAuthorizationToken as login_exc:
-                raise login_exc from raised_exception
+                raise login_exc
             return self._request(
                 url_template,
                 payload=payload,
