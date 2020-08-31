@@ -9,6 +9,8 @@ ${MODEL_URL}                        ${EDGE_URL}/model/${MODEL}
 ${REQUEST}                          SEPARATOR=
 ...                                 { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 ${REQUEST_RESPONSE}                 { "prediction": [ [ 42 ] ], "columns": [ "result" ] }
+${WrongHttpStatusCode}              SEPARATOR=
+...                                 WrongHttpStatusCode: Got error from server: entity "{entity name}" is not found (status: 404)
 
 *** Settings ***
 Documentation       API of training, packaging, deployment, route and model
@@ -34,6 +36,11 @@ Test Timeout        15 minutes
 Cleanup Resources
     [Documentation]  Deletes of created resources
     StrictShell  odahuflowctl --verbose dep delete --id ${DEPLOYMENT} --ignore-not-found
+
+Format WrongHttpStatusCode
+    [Arguments]                     ${entity name}
+    ${error output}                 format string  ${WrongHttpStatusCode}  entity name=${entity name}
+    [return]                        ${error output}
 
 *** Test Cases ***
 Check deployment doesn't exist
@@ -101,5 +108,5 @@ Delete Model Deployment and Check that Model Deployment does not exist
     Wait until delete finished  deployment  entity=${DEPLOYMENT}
     Command response list should not contain id  deployment  ${DEPLOYMENT}
     Command response list should not contain id  route  ${MODEL}
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT}
+    ${StatusCode}               Format WrongHttpStatusCode  ${DEPLOYMENT}
+    Call API and get Error      ${StatusCode}  deployment get id  ${DEPLOYMENT}
