@@ -44,11 +44,6 @@ Create Model Training, mlflow toolchain, default
     Limits resources should be equal     ${result}  250m  ${NONE}  256Mi
     Requested resources should be equal  ${result}  125m  ${NONE}  128Mi
 
-Get short-term Logs of training
-    [Tags]                      training  log
-    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
-    should contain              ${result}  INFO
-
 Update Model Training, mlflow toolchain, default
     [Tags]                      training
     ${result}                   Call API  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
@@ -56,6 +51,13 @@ Update Model Training, mlflow toolchain, default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
+    Limits resources should be equal     ${result}  3024m  ${NONE}  4024Mi
+    Requested resources should be equal  ${result}  3024m  ${NONE}  3024Mi
+
+Get short-term Logs of training
+    [Tags]                      training  log
+    ${result}                   Call API  training get log  ${TRAIN_MLFLOW_DEFAULT}
+    should contain              ${result}  INFO
 
 Packaging's list doesn't contain packaging
     [Tags]                      packaging
