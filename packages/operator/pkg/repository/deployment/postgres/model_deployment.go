@@ -5,6 +5,7 @@ import (
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -131,32 +132,77 @@ func (repo DeploymentRepo) SetDeletionMark(id string, value bool) error {
 	return utils.SetDeletionMark(repo.DB, ModelDeploymentTable, id, value)
 }
 
-func (repo DeploymentRepo) UpdateModelDeployment(mt *deployment.ModelDeployment) error {
+func (repo DeploymentRepo) UpdateModelDeployment(md *deployment.ModelDeployment) error {
 
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := repo.GetModelDeployment(mt.ID)
+	md.Status.State = ""
+
+	stmt, args, err := sq.Update(ModelDeploymentTable).
+		Set("spec", md.Spec).
+		Set("status", md.Status).
+		Where(sq.Eq{"id": md.ID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
 	if err != nil {
 		return err
 	}
 
-	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", ModelDeploymentTable)
-	_, err = repo.DB.Exec(sqlStatement, mt.Spec, mt.Status, mt.ID)
+	result, err := repo.DB.Exec(stmt, args...)
 	if err != nil {
 		return err
 	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: md.ID}
+	}
+
 	return nil
 }
 
-func (repo DeploymentRepo) CreateModelDeployment(mt *deployment.ModelDeployment) error {
+func (repo DeploymentRepo) UpdateModelDeploymentStatus(id string, s v1alpha1.ModelDeploymentStatus) error {
+
+	stmt, args, err := sq.Update(ModelDeploymentTable).
+		Set("status", s).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	result, err := repo.DB.Exec(stmt, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: id}
+	}
+
+	return nil
+}
+
+func (repo DeploymentRepo) CreateModelDeployment(md *deployment.ModelDeployment) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelDeploymentTable),
-		mt.ID, mt.Spec, mt.Status,
+		md.ID, md.Spec, md.Status,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
 		if ok && pqError.Code == uniqueViolationPostgresCode {
-			return odahuErrors.AlreadyExistError{Entity: mt.ID}
+			return odahuErrors.AlreadyExistError{Entity: md.ID}
 		}
 		return err
 	}
@@ -263,32 +309,32 @@ func (repo DeploymentRepo) DeleteModelRoute(name string) error {
 	return nil
 }
 
-func (repo DeploymentRepo) UpdateModelRoute(mt *deployment.ModelRoute) error {
+func (repo DeploymentRepo) UpdateModelRoute(mr *deployment.ModelRoute) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := repo.GetModelRoute(mt.ID)
+	_, err := repo.GetModelRoute(mr.ID)
 	if err != nil {
 		return err
 	}
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", ModelRouteTable)
-	_, err = repo.DB.Exec(sqlStatement, mt.Spec, mt.Status, mt.ID)
+	_, err = repo.DB.Exec(sqlStatement, mr.Spec, mr.Status, mr.ID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (repo DeploymentRepo) CreateModelRoute(mt *deployment.ModelRoute) error {
+func (repo DeploymentRepo) CreateModelRoute(mr *deployment.ModelRoute) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelRouteTable),
-		mt.ID, mt.Spec, mt.Status,
+		mr.ID, mr.Spec, mr.Status,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
 		if ok && pqError.Code == uniqueViolationPostgresCode {
-			return odahuErrors.AlreadyExistError{Entity: mt.ID}
+			return odahuErrors.AlreadyExistError{Entity: mr.ID}
 		}
 		return err
 	}

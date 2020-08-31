@@ -64,6 +64,24 @@ COPY --from=builder /app/webserver "${ODAHUFLOW_DIR}/"
 WORKDIR "${ODAHUFLOW_DIR}"
 CMD ["./webserver"]
 
+
+#########################################################
+#########################################################
+#########################################################
+
+FROM ubuntu:18.04 as controller
+
+ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
+    GIN_MODE="release"
+RUN apt-get -yq update && \
+    apt-get -yqq install openssh-client ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/controller "${ODAHUFLOW_DIR}/"
+
+WORKDIR "${ODAHUFLOW_DIR}"
+CMD ["./controller"]
+
 #########################################################
 #########################################################
 #########################################################

@@ -36,9 +36,13 @@ test: generate manifests
 build-operator: generate
 	go build -o operator ./main.go
 
-## build-api: Build api executable binary
+## build-webserver: Build api executable binary
 build-webserver:
 	go build -o webserver ./cmd/api
+
+## build-controller: Build odahu system controller
+build-controller:
+	go build -o controller ./cmd/controller
 
 ## build-migrate: Build odahu-migrate executable binary
 build-odahu-migrate:
@@ -57,7 +61,7 @@ build-service-catalog:
 	go build -o service-catalog ./cmd/service_catalog
 
 ## build-all: Build all executable binyries
-build-all: build-webserver build-model-trainer build-model-packager build-operator build-service-catalog build-odahu-migrate
+build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog build-odahu-migrate
 
 ## run-operator: Start operator
 run-operator:

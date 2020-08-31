@@ -316,6 +316,31 @@ api:
   #  VAULT_CAPATH: /vault/tls
   env: []
 
+# Controller configuration
+# It provides controller that works in a infinite loop and tries to deliver desired state of a process stored in storage
+# to runtimes (e.g. Odahu Kubernetes Operator). It also deliver result of a process from runtime into storage
+controller:
+  # controller could be disabled
+  enabled: true
+
+  # Count of controller replicas
+  # Type: integer
+  replicas: 1
+
+  # Resources for each instance
+  # For declaration format see https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "256Mi"
+    limits:
+      cpu: "100m"
+      memory: "256Mi"
+
+  # This variable can be uncommented to setup custom image name for api (server)
+  # Type: string
+  # image: custom-image:1.0
+
 # Service catalog server configuration
 service_catalog:
   # service catalog could be disabled

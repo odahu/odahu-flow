@@ -53,6 +53,12 @@ func TestModelTrainingRepository(t *testing.T) {
 	g.Expect(fetched.Spec).To(Equal(updated.Spec))
 	g.Expect(fetched.Spec.WorkDir).To(Equal("/foo-updated"))
 
+	newStatus := v1alpha1.ModelTrainingStatus{PodName: "Some name"}
+	g.Expect(tRepo.UpdateModelTrainingStatus(mtID, newStatus)).NotTo(HaveOccurred())
+	fetched, err = tRepo.GetModelTraining(mtID)
+	g.Expect(err).NotTo(HaveOccurred())
+	g.Expect(fetched.Status.PodName).To(Equal(newStatus.PodName))
+
 	g.Expect(fetched.DeletionMark).Should(BeFalse())
 	g.Expect(tRepo.SetDeletionMark(mtID, true)).Should(Not(HaveOccurred()))
 	fetched, err = tRepo.GetModelTraining(mtID)

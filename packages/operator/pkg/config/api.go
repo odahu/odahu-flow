@@ -40,7 +40,6 @@ type APIConfig struct {
 	Port int `json:"port"`
 	// If true then only webserver will be setup.
 	// Without background workers responsible to monitor storage and call services
-	DisableWorkers bool `json:"disableWorkers"`
 }
 
 const (
@@ -50,7 +49,6 @@ const (
 
 func NewDefaultAPIConfig() APIConfig {
 	return APIConfig{
-		DisableWorkers: false,
 		Backend: APIBackendConfig{
 			Type: ConfigBackendType,
 			Local: APILocalBackendConfig{

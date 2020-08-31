@@ -114,7 +114,7 @@ pipeline {
                         }
                     }
                 }
-                stage("Build model trainer and operator images") {
+                stage("Build core images") {
                     steps {
                         script {
                             cicdLibrary.buildDockerImage('odahu-flow-operator-dependencies', ".", "containers/operator/Dockerfile", "--target builder")
@@ -124,6 +124,7 @@ pipeline {
                             cicdLibrary.buildDockerImage('odahu-flow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                             cicdLibrary.buildDockerImage('odahu-flow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                             cicdLibrary.buildDockerImage('odahu-flow-migrate', ".", "containers/operator/Dockerfile", "--target odahu-migrate --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                            cicdLibrary.buildDockerImage('odahu-flow-controller', ".", "containers/operator/Dockerfile", "--target controller --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                         }
                     }
                 }
@@ -216,6 +217,13 @@ pipeline {
                     steps {
                         script {
                             cicdLibrary.uploadDockerImage('odahu-flow-api', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        }
+                    }
+                }
+                stage('Upload Controller Docker image') {
+                    steps {
+                        script {
+                            cicdLibrary.uploadDockerImage('odahu-flow-controller', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                         }
                     }
                 }

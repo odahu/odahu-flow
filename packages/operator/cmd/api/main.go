@@ -35,10 +35,8 @@ var log = logf.Log.WithName("api-main")
 const (
 	BackendTypeParam    = "backend-type"
 	CRDPathParam        = "crd-path"
-	DisableWorkersParam = "disable-workers"
 	BackendType         = "api.backend.type"
 	LocalBackendCRDPath = "api.backend.local.crdPath"
-	DisableWorkers      = "api.disableWorkers"
 )
 
 var mainCmd = &cobra.Command{
@@ -54,7 +52,7 @@ var mainCmd = &cobra.Command{
 			log.Error(err, "unable set up api server")
 			os.Exit(1)
 		}
-		errCh := make(chan error, 4)
+		errCh := make(chan error)
 		if startErr := apiServer.Run(errCh); startErr != nil {
 			log.Error(startErr, "Unable to start api server")
 			os.Exit(1)
@@ -94,8 +92,6 @@ func init() {
 	)
 	config.PanicIfError(viper.BindPFlag(LocalBackendCRDPath, mainCmd.PersistentFlags().Lookup(CRDPathParam)))
 
-	mainCmd.PersistentFlags().Bool(DisableWorkersParam, false, "Do not setup background workers")
-	config.PanicIfError(viper.BindPFlag(DisableWorkers, mainCmd.PersistentFlags().Lookup(DisableWorkersParam)))
 }
 
 func main() {
