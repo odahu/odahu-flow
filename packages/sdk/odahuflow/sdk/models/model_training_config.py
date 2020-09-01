@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.node_pool import NodePool  # noqa: F401,E501
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
@@ -16,15 +17,15 @@ class ModelTrainingConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, gpu_node_selector: Dict[str, str]=None, gpu_tolerations: str=None, metric_url: str=None, model_trainer_image: str=None, namespace: str=None, node_selector: Dict[str, str]=None, output_connection_id: str=None, service_account: str=None, timeout: str=None, tolerations: str=None, toolchain_integration_namespace: str=None, toolchain_integration_repository_type: str=None):  # noqa: E501
+    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, gpu_node_pools: List[NodePool]=None, gpu_tolerations: str=None, metric_url: str=None, model_trainer_image: str=None, namespace: str=None, node_pools: List[NodePool]=None, output_connection_id: str=None, service_account: str=None, timeout: str=None, tolerations: str=None, toolchain_integration_namespace: str=None, toolchain_integration_repository_type: str=None):  # noqa: E501
         """ModelTrainingConfig - a model defined in Swagger
 
         :param default_resources: The default_resources of this ModelTrainingConfig.  # noqa: E501
         :type default_resources: ResourceRequirements
         :param enabled: The enabled of this ModelTrainingConfig.  # noqa: E501
         :type enabled: bool
-        :param gpu_node_selector: The gpu_node_selector of this ModelTrainingConfig.  # noqa: E501
-        :type gpu_node_selector: Dict[str, str]
+        :param gpu_node_pools: The gpu_node_pools of this ModelTrainingConfig.  # noqa: E501
+        :type gpu_node_pools: List[NodePool]
         :param gpu_tolerations: The gpu_tolerations of this ModelTrainingConfig.  # noqa: E501
         :type gpu_tolerations: str
         :param metric_url: The metric_url of this ModelTrainingConfig.  # noqa: E501
@@ -33,8 +34,8 @@ class ModelTrainingConfig(Model):
         :type model_trainer_image: str
         :param namespace: The namespace of this ModelTrainingConfig.  # noqa: E501
         :type namespace: str
-        :param node_selector: The node_selector of this ModelTrainingConfig.  # noqa: E501
-        :type node_selector: Dict[str, str]
+        :param node_pools: The node_pools of this ModelTrainingConfig.  # noqa: E501
+        :type node_pools: List[NodePool]
         :param output_connection_id: The output_connection_id of this ModelTrainingConfig.  # noqa: E501
         :type output_connection_id: str
         :param service_account: The service_account of this ModelTrainingConfig.  # noqa: E501
@@ -51,12 +52,12 @@ class ModelTrainingConfig(Model):
         self.swagger_types = {
             'default_resources': ResourceRequirements,
             'enabled': bool,
-            'gpu_node_selector': Dict[str, str],
+            'gpu_node_pools': List[NodePool],
             'gpu_tolerations': str,
             'metric_url': str,
             'model_trainer_image': str,
             'namespace': str,
-            'node_selector': Dict[str, str],
+            'node_pools': List[NodePool],
             'output_connection_id': str,
             'service_account': str,
             'timeout': str,
@@ -68,12 +69,12 @@ class ModelTrainingConfig(Model):
         self.attribute_map = {
             'default_resources': 'defaultResources',
             'enabled': 'enabled',
-            'gpu_node_selector': 'gpuNodeSelector',
+            'gpu_node_pools': 'gpuNodePools',
             'gpu_tolerations': 'gpuTolerations',
             'metric_url': 'metricUrl',
             'model_trainer_image': 'modelTrainerImage',
             'namespace': 'namespace',
-            'node_selector': 'nodeSelector',
+            'node_pools': 'nodePools',
             'output_connection_id': 'outputConnectionID',
             'service_account': 'serviceAccount',
             'timeout': 'timeout',
@@ -84,12 +85,12 @@ class ModelTrainingConfig(Model):
 
         self._default_resources = default_resources
         self._enabled = enabled
-        self._gpu_node_selector = gpu_node_selector
+        self._gpu_node_pools = gpu_node_pools
         self._gpu_tolerations = gpu_tolerations
         self._metric_url = metric_url
         self._model_trainer_image = model_trainer_image
         self._namespace = namespace
-        self._node_selector = node_selector
+        self._node_pools = node_pools
         self._output_connection_id = output_connection_id
         self._service_account = service_account
         self._timeout = timeout
@@ -155,25 +156,25 @@ class ModelTrainingConfig(Model):
         self._enabled = enabled
 
     @property
-    def gpu_node_selector(self) -> Dict[str, str]:
-        """Gets the gpu_node_selector of this ModelTrainingConfig.
+    def gpu_node_pools(self) -> List[NodePool]:
+        """Gets the gpu_node_pools of this ModelTrainingConfig.
 
 
-        :return: The gpu_node_selector of this ModelTrainingConfig.
-        :rtype: Dict[str, str]
+        :return: The gpu_node_pools of this ModelTrainingConfig.
+        :rtype: List[NodePool]
         """
-        return self._gpu_node_selector
+        return self._gpu_node_pools
 
-    @gpu_node_selector.setter
-    def gpu_node_selector(self, gpu_node_selector: Dict[str, str]):
-        """Sets the gpu_node_selector of this ModelTrainingConfig.
+    @gpu_node_pools.setter
+    def gpu_node_pools(self, gpu_node_pools: List[NodePool]):
+        """Sets the gpu_node_pools of this ModelTrainingConfig.
 
 
-        :param gpu_node_selector: The gpu_node_selector of this ModelTrainingConfig.
-        :type gpu_node_selector: Dict[str, str]
+        :param gpu_node_pools: The gpu_node_pools of this ModelTrainingConfig.
+        :type gpu_node_pools: List[NodePool]
         """
 
-        self._gpu_node_selector = gpu_node_selector
+        self._gpu_node_pools = gpu_node_pools
 
     @property
     def gpu_tolerations(self) -> str:
@@ -264,25 +265,25 @@ class ModelTrainingConfig(Model):
         self._namespace = namespace
 
     @property
-    def node_selector(self) -> Dict[str, str]:
-        """Gets the node_selector of this ModelTrainingConfig.
+    def node_pools(self) -> List[NodePool]:
+        """Gets the node_pools of this ModelTrainingConfig.
 
 
-        :return: The node_selector of this ModelTrainingConfig.
-        :rtype: Dict[str, str]
+        :return: The node_pools of this ModelTrainingConfig.
+        :rtype: List[NodePool]
         """
-        return self._node_selector
+        return self._node_pools
 
-    @node_selector.setter
-    def node_selector(self, node_selector: Dict[str, str]):
-        """Sets the node_selector of this ModelTrainingConfig.
+    @node_pools.setter
+    def node_pools(self, node_pools: List[NodePool]):
+        """Sets the node_pools of this ModelTrainingConfig.
 
 
-        :param node_selector: The node_selector of this ModelTrainingConfig.
-        :type node_selector: Dict[str, str]
+        :param node_pools: The node_pools of this ModelTrainingConfig.
+        :type node_pools: List[NodePool]
         """
 
-        self._node_selector = node_selector
+        self._node_pools = node_pools
 
     @property
     def output_connection_id(self) -> str:

@@ -268,10 +268,10 @@ definitions:
       enabled:
         description: Enable deployment API/operator
         type: boolean
-      gpuNodeSelector:
-        additionalProperties:
-          type: string
-        type: object
+      gpuNodePools:
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       gpuTolerations:
         description: Kubernetes tolerations for GPU model trainings pods
         type: string
@@ -282,10 +282,10 @@ definitions:
       namespace:
         description: Kubernetes namespace, where model trainings will be deployed
         type: string
-      nodeSelector:
-        additionalProperties:
-          type: string
-        type: object
+      nodePools:
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       outputConnectionID:
         type: string
       serviceAccount:
@@ -304,6 +304,17 @@ definitions:
             * kubernetes
             * postgres
         type: string
+    type: object
+  NodePool:
+    properties:
+      nodeSelector:
+        additionalProperties:
+          type: string
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
     type: object
   OperatorConfig:
     properties:
@@ -925,6 +936,11 @@ definitions:
       model:
         $ref: '#/definitions/ModelIdentity'
         description: Model Identity
+        type: object
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
         type: object
       outputConnection:
         description: |-

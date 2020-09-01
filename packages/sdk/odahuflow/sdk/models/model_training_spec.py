@@ -19,7 +19,7 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
         :param args: The args of this ModelTrainingSpec.  # noqa: E501
@@ -36,6 +36,8 @@ class ModelTrainingSpec(Model):
         :type image: str
         :param model: The model of this ModelTrainingSpec.  # noqa: E501
         :type model: ModelIdentity
+        :param node_selector: The node_selector of this ModelTrainingSpec.  # noqa: E501
+        :type node_selector: Dict[str, str]
         :param output_connection: The output_connection of this ModelTrainingSpec.  # noqa: E501
         :type output_connection: str
         :param reference: The reference of this ModelTrainingSpec.  # noqa: E501
@@ -57,6 +59,7 @@ class ModelTrainingSpec(Model):
             'hyper_parameters': Dict[str, str],
             'image': str,
             'model': ModelIdentity,
+            'node_selector': Dict[str, str],
             'output_connection': str,
             'reference': str,
             'resources': ResourceRequirements,
@@ -73,6 +76,7 @@ class ModelTrainingSpec(Model):
             'hyper_parameters': 'hyperParameters',
             'image': 'image',
             'model': 'model',
+            'node_selector': 'nodeSelector',
             'output_connection': 'outputConnection',
             'reference': 'reference',
             'resources': 'resources',
@@ -88,6 +92,7 @@ class ModelTrainingSpec(Model):
         self._hyper_parameters = hyper_parameters
         self._image = image
         self._model = model
+        self._node_selector = node_selector
         self._output_connection = output_connection
         self._reference = reference
         self._resources = resources
@@ -264,6 +269,29 @@ class ModelTrainingSpec(Model):
         """
 
         self._model = model
+
+    @property
+    def node_selector(self) -> Dict[str, str]:
+        """Gets the node_selector of this ModelTrainingSpec.
+
+        Node selector for specifying a node pool  # noqa: E501
+
+        :return: The node_selector of this ModelTrainingSpec.
+        :rtype: Dict[str, str]
+        """
+        return self._node_selector
+
+    @node_selector.setter
+    def node_selector(self, node_selector: Dict[str, str]):
+        """Sets the node_selector of this ModelTrainingSpec.
+
+        Node selector for specifying a node pool  # noqa: E501
+
+        :param node_selector: The node_selector of this ModelTrainingSpec.
+        :type node_selector: Dict[str, str]
+        """
+
+        self._node_selector = node_selector
 
     @property
     def output_connection(self) -> str:
