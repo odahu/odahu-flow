@@ -17,6 +17,11 @@ definitions:
       backend:
         $ref: '#/definitions/APIBackendConfig'
         type: object
+      disableWorkers:
+        description: |-
+          If true then only webserver will be setup.
+          Without background workers responsible to monitor storage and call services
+        type: boolean
       port:
         description: API HTTP port
         type: integer
@@ -58,11 +63,16 @@ definitions:
         description: Database connection string
         type: string
       externalUrls:
-        description: 'The collection of external urls, for example: metrics, edge,
-          service catalog and so on'
+        description: 'The collection of external urls, for example: metrics, edge, service catalog and so on'
         items:
           $ref: '#/definitions/ExternalUrl'
         type: array
+      gracefulTimeout:
+        description: Graceful shutdown timeout
+        type: string
+      launchPeriod:
+        description: How often launch new training
+        type: string
       oauthOidcTokenEndpoint:
         description: OpenID token url
         type: string
@@ -139,8 +149,7 @@ definitions:
   ExternalUrl:
     properties:
       imageUrl:
-        description: Optional link to an image which represents a type of the resource,
-          for example the logo of Grafana
+        description: Optional link to an image which represents a type of the resource, for example the logo of Grafana
         type: string
       name:
         description: Human-readable name
@@ -164,8 +173,7 @@ definitions:
   ModelDeploymentConfig:
     properties:
       defaultDockerPullConnName:
-        description: Default connection ID which will be used if a user doesn't specify
-          it in a model deployment
+        description: Default connection ID which will be used if a user doesn't specify it in a model deployment
         type: string
       defaultResources:
         $ref: '#/definitions/ResourceRequirements'
@@ -352,6 +360,9 @@ definitions:
     type: object
   Vault:
     properties:
+      insecure:
+        description: Can be used to debug and local development. Skip TLS verification
+        type: boolean
       role:
         description: Vault role for access to the secret engine path
         type: string
@@ -467,15 +478,13 @@ definitions:
     properties:
       arguments:
         additionalProperties: true
-        description: List of arguments. This parameter depends on the specific packaging
-          integration
+        description: List of arguments. This parameter depends on the specific packaging integration
         type: object
       artifactName:
         description: Training output artifact name
         type: string
       image:
-        description: Image name. Packaging integration image will be used if this
-          parameters is missed
+        description: Image name. Packaging integration image will be used if this parameters is missed
         type: string
       integrationName:
         description: Packaging integration ID
@@ -492,8 +501,7 @@ definitions:
           The same format like k8s uses for pod resources.
         type: object
       targets:
-        description: List of targets. This parameter depends on the specific packaging
-          integration
+        description: List of targets. This parameter depends on the specific packaging integration
         items:
           $ref: '#/definitions/Target'
         type: array
@@ -535,8 +543,7 @@ definitions:
         type: boolean
       schema:
         $ref: '#/definitions/Schema'
-        description: Schema which describes targets and arguments for specific packaging
-          integration
+        description: Schema which describes targets and arguments for specific packaging integration
         type: object
     type: object
   Parameter:
@@ -739,19 +746,16 @@ definitions:
         description: Model Docker image
         type: string
       imagePullConnID:
-        description: If pulling of your image requires authorization, then you should
-          specify the connection id
+        description: If pulling of your image requires authorization, then you should specify the connection id
         type: string
       livenessProbeInitialDelay:
         description: Initial delay for liveness probe of model pod
         type: integer
       maxReplicas:
-        description: Maximum number of pods for model. By default the max replicas
-          parameter equals 1.
+        description: Maximum number of pods for model. By default the max replicas parameter equals 1.
         type: integer
       minReplicas:
-        description: Minimum number of pods for model. By default the min replicas
-          parameter equals 0.
+        description: Minimum number of pods for model. By default the min replicas parameter equals 0.
         type: integer
       readinessProbeInitialDelay:
         description: Initial delay for readiness probe of model pod
@@ -826,8 +830,7 @@ definitions:
   ModelPackagingResult:
     properties:
       name:
-        description: Name of a result. It can be docker image, path to s3 artifact
-          and so on
+        description: Name of a result. It can be docker image, path to s3 artifact and so on
         type: string
       value:
         description: Specific value
@@ -904,12 +907,10 @@ definitions:
           $ref: '#/definitions/DataBindingDir'
         type: array
       entrypoint:
-        description: Model training file. It can be python\bash script or jupiter
-          notebook
+        description: Model training file. It can be python\bash script or jupiter notebook
         type: string
       envs:
-        description: Custom environment variables that should be set before entrypoint
-          invocation.
+        description: Custom environment variables that should be set before entrypoint invocation.
         items:
           $ref: '#/definitions/EnvironmentVariable'
         type: array
@@ -1061,7 +1062,7 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is an API Gateway server.
+  description: This is an API Gateway webServer.
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html

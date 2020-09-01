@@ -15,9 +15,11 @@ class Vault(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, role: str=None, secret_engine_path: str=None, token: str=None, url: str=None):  # noqa: E501
+    def __init__(self, insecure: bool=None, role: str=None, secret_engine_path: str=None, token: str=None, url: str=None):  # noqa: E501
         """Vault - a model defined in Swagger
 
+        :param insecure: The insecure of this Vault.  # noqa: E501
+        :type insecure: bool
         :param role: The role of this Vault.  # noqa: E501
         :type role: str
         :param secret_engine_path: The secret_engine_path of this Vault.  # noqa: E501
@@ -28,6 +30,7 @@ class Vault(Model):
         :type url: str
         """
         self.swagger_types = {
+            'insecure': bool,
             'role': str,
             'secret_engine_path': str,
             'token': str,
@@ -35,12 +38,14 @@ class Vault(Model):
         }
 
         self.attribute_map = {
+            'insecure': 'insecure',
             'role': 'role',
             'secret_engine_path': 'secretEnginePath',
             'token': 'token',
             'url': 'url'
         }
 
+        self._insecure = insecure
         self._role = role
         self._secret_engine_path = secret_engine_path
         self._token = token
@@ -56,6 +61,29 @@ class Vault(Model):
         :rtype: Vault
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def insecure(self) -> bool:
+        """Gets the insecure of this Vault.
+
+        Can be used to debug and local development. Skip TLS verification  # noqa: E501
+
+        :return: The insecure of this Vault.
+        :rtype: bool
+        """
+        return self._insecure
+
+    @insecure.setter
+    def insecure(self, insecure: bool):
+        """Sets the insecure of this Vault.
+
+        Can be used to debug and local development. Skip TLS verification  # noqa: E501
+
+        :param insecure: The insecure of this Vault.
+        :type insecure: bool
+        """
+
+        self._insecure = insecure
 
     @property
     def role(self) -> str:

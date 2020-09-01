@@ -7,7 +7,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -20,18 +20,18 @@ var (
 	log = logf.Log.WithName("model-packaging--repository--postgres")
 )
 
-type PackagingPostgresRepo struct {
+type PackagingRepo struct {
 	DB *sql.DB
 }
 
-func (repo PackagingPostgresRepo) GetModelPackaging(name string) (*packaging.ModelPackaging, error) {
+func (repo PackagingRepo) GetModelPackaging(name string) (*packaging.ModelPackaging, error) {
 
 	mt := new(packaging.ModelPackaging)
 
 	err := repo.DB.QueryRow(
-		fmt.Sprintf("SELECT id, spec, status FROM %s WHERE id = $1", ModelPackagingTable),
+		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelPackagingTable),
 		name,
-	).Scan(&mt.ID, &mt.Spec, &mt.Status)
+	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -48,7 +48,7 @@ func (repo PackagingPostgresRepo) GetModelPackaging(name string) (*packaging.Mod
 
 }
 
-func (repo PackagingPostgresRepo) GetModelPackagingList(options ...filter.ListOption) (
+func (repo PackagingRepo) GetModelPackagingList(options ...filter.ListOption) (
 	[]packaging.ModelPackaging, error,
 ) {
 
@@ -63,7 +63,7 @@ func (repo PackagingPostgresRepo) GetModelPackagingList(options ...filter.ListOp
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("*").From("odahu_operator_packaging").
+	sb := sq.Select("id, spec, status, deletionmark").From("odahu_operator_packaging").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -92,7 +92,7 @@ func (repo PackagingPostgresRepo) GetModelPackagingList(options ...filter.ListOp
 
 	for rows.Next() {
 		mt := new(packaging.ModelPackaging)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (repo PackagingPostgresRepo) GetModelPackagingList(options ...filter.ListOp
 
 }
 
-func (repo PackagingPostgresRepo) DeleteModelPackaging(name string) error {
+func (repo PackagingRepo) DeleteModelPackaging(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelPackaging(name)
@@ -123,7 +123,11 @@ func (repo PackagingPostgresRepo) DeleteModelPackaging(name string) error {
 	return nil
 }
 
-func (repo PackagingPostgresRepo) UpdateModelPackaging(mt *packaging.ModelPackaging) error {
+func (repo PackagingRepo) SetDeletionMark(id string, value bool) error {
+	return utils.SetDeletionMark(repo.DB, ModelPackagingTable, id, value)
+}
+
+func (repo PackagingRepo) UpdateModelPackaging(mt *packaging.ModelPackaging) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := repo.GetModelPackaging(mt.ID)
@@ -139,7 +143,7 @@ func (repo PackagingPostgresRepo) UpdateModelPackaging(mt *packaging.ModelPackag
 	return nil
 }
 
-func (repo PackagingPostgresRepo) CreateModelPackaging(mt *packaging.ModelPackaging) error {
+func (repo PackagingRepo) CreateModelPackaging(mt *packaging.ModelPackaging) error {
 
 	_, err := repo.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelPackagingTable),
