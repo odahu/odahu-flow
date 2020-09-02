@@ -79,7 +79,7 @@ Check that packagers do not exist
     Command response list should not contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
 
 #############################
-#    NEGATINE TEST CASES    #
+#    NEGATIVE TEST CASES    #
 #############################
 Try Create Packager that already exists
     [Tags]                      negative

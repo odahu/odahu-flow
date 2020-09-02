@@ -76,7 +76,7 @@ Delete Docker connection
     Command response list should not contain id  connection  ${DOCKER_VALID}
 
 #############################
-#    NEGATINE TEST CASES    #
+#    NEGATIVE TEST CASES    #
 #############################
 Try Create Connection that already exists
     [Tags]                      negative
