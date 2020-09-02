@@ -1,39 +1,35 @@
 *** Variables ***
-${RES_DIR}                          ${CURDIR}/resources/connection
-${GIT_VALID}                        git-connection-valid
-${DOCKER_VALID}                     docker-ci-connection-valid
-${GIT_INVALID}                      git-connection-invalid
-${CONN_SYNTAX_ERROR}                docker-ci-syntax-error
+${LOCAL_CONFIG}        odahuflow/api_connection
+${RES_DIR}             ${CURDIR}/resources/connection
+${GIT_VALID}           git-connection-valid
+${DOCKER_VALID}        docker-ci-connection-valid
+${GIT_INVALID}         git-connection-invalid
 
 *** Settings ***
-Documentation                       API of conections
-Resource                            ../../resources/variables.robot
-Resource                            ../../resources/keywords.robot
-Resource                            ./resources/keywords.robot
-Variables                           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library                             String
-Library                             odahuflow.robot.libraries.sdk_wrapper
-Library                             odahuflow.robot.libraries.sdk_wrapper.Connection
-Suite Setup                         Run Keywords
-...                                 Login to the api and edge
-Force Tags                          api  sdk  connection
-Test Timeout                        5 minutes
+Documentation          API of conections
+Resource               ../../resources/variables.robot
+Resource               ../../resources/keywords.robot
+Resource               ./resources/keywords.robot
+Variables              ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
+Library                String
+Library                odahuflow.robot.libraries.sdk_wrapper
+Library                odahuflow.robot.libraries.sdk_wrapper.Connection
+Suite Setup            Run Keywords
+...                    Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
+...                    Login to the api and edge  AND
+...                    Cleanup all Resources
+Suite Teardown         Run Keywords
+...                    Cleanup all Resources  AND
+...                    Remove File  ${LOCAL_CONFIG}
+Force Tags             api  sdk  connection
+Test Timeout           5 minutes
 
 *** Keywords ***
-Cleanup Resources
+Cleanup all Resources
     [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose conn delete --id ${GIT_CONN} --ignore-not-found
-    StrictShell  odahuflowctl --verbose conn delete --id ${DOCKER_CONN} --ignore-not-found
-
-Format WrongHttpStatusCode
-    [Arguments]                     ${entity name}
-    ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)
-    [return]                        ${error output}
-
-Format EntityAlreadyExists
-    [Arguments]                     ${entity name}
-    ${error output}                 format string  EntityAlreadyExists: Got error from server: entity "${entity name}" already exists (status: 409)
-    [return]                        ${error output}
+    Cleanup resource  connection  ${GIT_VALID}
+    Cleanup resource  connection  ${DOCKER_VALID}
+    Cleanup resource  connection  ${GIT_INVALID}
 
 *** Test Cases ***
 Create GIT connection
@@ -84,29 +80,35 @@ Delete Docker connection
 #    NEGATINE TEST CASES    #
 #############################
 Try Create Connection that already exists
+    [Tags]                      negative
+    [Teardown]                  cleanup resource  connection  ${GIT_INVALID}
     Call API                    connection post  ${RES_DIR}/valid/docker_connection_create.json
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_VALID}
     Call API and get Error      ${EntityAlreadyExists}  connection post  ${RES_DIR}/valid/docker_connection_create.json
 
 Try Update not existing and deleted Connection
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.yaml
+    Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/valid/git_connection_update.yaml
 
 Try Get id not existing and deleted Connection
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_INVALID}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_VALID}
 
 Try Get id decrypted not existing and deleted Connection
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_INVALID}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_VALID}
 
 Try Delete not existing and deleted Connection
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_INVALID}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
