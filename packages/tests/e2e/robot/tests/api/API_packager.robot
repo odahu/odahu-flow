@@ -3,6 +3,7 @@ ${LOCAL_CONFIG}     odahuflow/api_packager
 ${RES_DIR}          ${CURDIR}/resources/packager
 ${DOCKER_CLI}       docker-cli-api-testing
 ${DOCKER_REST}      docker-rest-api-testing
+${DOCKER_INVALID}   docker-rest-api-not-exist
 
 *** Settings ***
 Documentation       API of packagers
@@ -14,18 +15,19 @@ Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
-...                 Cleanup Resources
+...                 Cleanup All Resources
 Suite Teardown      Run Keywords
-...                 Cleanup Resources  AND
+...                 Cleanup All Resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  packager
 Test Timeout        5 minutes
 
 *** Keywords ***
-Cleanup Resources
+Cleanup All Resources
     [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_CLI} --ignore-not-found
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_REST} --ignore-not-found
+    Cleanup resource  packaging-integration  ${DOCKER_CLI}
+    Cleanup resource  packaging-integration  ${DOCKER_REST}
+    Cleanup resource  packaging-integration  ${DOCKER_INVALID}
 
 *** Test Cases ***
 Get list of packagers
@@ -76,3 +78,34 @@ Delete Docker REST packager
 
 Check that packagers do not exist
     Command response list should not contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
+
+#############################
+#    NEGATINE TEST CASES    #
+#############################
+Try Create Packager that already exists
+    [Tags]                      negative
+    [Teardown]                  Cleanup resource  packaging-integration  ${DOCKER_CLI}
+    Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
+    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_CLI}
+    Call API and get Error      ${EntityAlreadyExists}  packager post  ${RES_DIR}/valid/docker_cli_create.yaml
+
+Try Update not existing and deleted Packager
+    [Tags]                      negative
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
+    Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/valid/docker_cli_update.json
+
+Try Get id not existing and deleted Packager
+    [Tags]                      negative
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_REST}
+    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_REST}
+
+Try Delete not existing and deleted Packager
+    [Tags]                      negative
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
+    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_CLI}
