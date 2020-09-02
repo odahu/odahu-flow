@@ -26,7 +26,6 @@ Test Timeout           5 minutes
 
 *** Keywords ***
 Cleanup all Resources
-    [Documentation]  Deletes of created resources
     Cleanup resource  connection  ${GIT_VALID}
     Cleanup resource  connection  ${DOCKER_VALID}
     Cleanup resource  connection  ${GIT_INVALID}
