@@ -6,7 +6,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
@@ -21,11 +21,11 @@ var (
 	FirstPage = 0
 )
 
-type ToolchainRepository struct {
+type ToolchainRepo struct {
 	DB *sql.DB
 }
 
-func (tr ToolchainRepository) GetToolchainIntegration(name string) (*training.ToolchainIntegration, error) {
+func (tr ToolchainRepo) GetToolchainIntegration(name string) (*training.ToolchainIntegration, error) {
 
 	ti := new(training.ToolchainIntegration)
 
@@ -45,11 +45,11 @@ func (tr ToolchainRepository) GetToolchainIntegration(name string) (*training.To
 
 }
 
-func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.ListOption) (
+func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption) (
 	[]training.ToolchainIntegration, error,
 ) {
 
-	listOptions := &kubernetes.ListOptions{
+	listOptions := &filter.ListOptions{
 		Filter: nil,
 		Page:   &FirstPage,
 		Size:   &MaxSize,
@@ -86,7 +86,7 @@ func (tr ToolchainRepository) GetToolchainIntegrationList(options ...kubernetes.
 
 }
 
-func (tr ToolchainRepository) DeleteToolchainIntegration(name string) error {
+func (tr ToolchainRepo) DeleteToolchainIntegration(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := tr.GetToolchainIntegration(name)
@@ -104,7 +104,7 @@ func (tr ToolchainRepository) DeleteToolchainIntegration(name string) error {
 	return nil
 }
 
-func (tr ToolchainRepository) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	oldTi, err := tr.GetToolchainIntegration(md.ID)
@@ -123,7 +123,7 @@ func (tr ToolchainRepository) UpdateToolchainIntegration(md *training.ToolchainI
 	return nil
 }
 
-func (tr ToolchainRepository) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tr ToolchainRepo) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
 
 	md.Status.CreatedAt = &metav1.Time{Time: time.Now()}
 	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}

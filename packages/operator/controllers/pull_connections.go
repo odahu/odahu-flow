@@ -64,14 +64,14 @@ func (r *ModelDeploymentReconciler) reconcileDeploymentPullConnection(
 
 	log = log.WithValues(odahuflow.ConnectionIDLogPrefix, mdConnID)
 
-	mdConn, err := r.connRepo.GetConnection(mdConnID)
+	mdConn, err := r.connAPIClient.GetConnection(mdConnID)
 	if err != nil {
 		log.Error(err, "Cannot retrieve connection")
 
 		return err
 	}
 
-	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
+	// Since connAPIClient here is actually an HTTP client, it returns connection with base64-encoded secrets
 	if err := mdConn.DecodeBase64Fields(); err != nil {
 		return err
 	}

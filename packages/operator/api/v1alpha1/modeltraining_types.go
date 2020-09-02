@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -108,6 +111,32 @@ type ModelTrainingStatus struct {
 	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 	Modifiable `json:",inline"`
+}
+
+func (in ModelTrainingSpec) Value() (driver.Value, error) {
+	return json.Marshal(in)
+}
+
+func (in *ModelTrainingSpec) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &in)
+	return res
+}
+
+func (in ModelTrainingStatus) Value() (driver.Value, error) {
+	return json.Marshal(in)
+}
+
+func (in *ModelTrainingStatus) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &in)
+	return res
 }
 
 // +kubebuilder:object:root=true

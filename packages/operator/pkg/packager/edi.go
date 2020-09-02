@@ -22,18 +22,18 @@ import (
 
 // The function extracts data from a repository and creates the packaging entity.
 func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
-	modelPackaging, err := p.packRepo.GetModelPackaging(p.modelPackagingID)
+	modelPackaging, err := p.packagingClient.GetModelPackaging(p.modelPackagingID)
 	if err != nil {
 		return nil, err
 	}
-	packagingIntegration, err := p.packRepo.GetPackagingIntegration(modelPackaging.Spec.IntegrationName)
+	packagingIntegration, err := p.packagingClient.GetPackagingIntegration(modelPackaging.Spec.IntegrationName)
 	if err != nil {
 		return nil, err
 	}
 
 	targets := make([]packaging.PackagerTarget, 0, len(modelPackaging.Spec.Targets))
 	for _, target := range modelPackaging.Spec.Targets {
-		conn, err := p.connRepo.GetConnection(target.ConnectionName)
+		conn, err := p.connClient.GetConnection(target.ConnectionName)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func (p *Packager) getPackaging() (*packaging.K8sPackager, error) {
 		})
 	}
 
-	modelHolder, err := p.connRepo.GetConnection(modelPackaging.Spec.OutputConnection)
+	modelHolder, err := p.connClient.GetConnection(modelPackaging.Spec.OutputConnection)
 	if err != nil {
 		return nil, err
 	}

@@ -23,6 +23,8 @@ import (
 type ModelDeployment struct {
 	// Model deployment id
 	ID string `json:"id"`
+	// Deletion mark
+	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
 	// Model deployment specification
 	Spec v1alpha1.ModelDeploymentSpec `json:"spec,omitempty"`
 	// Model deployment status

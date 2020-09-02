@@ -20,6 +20,11 @@ Force Tags                          api  sdk  connection
 Test Timeout                        5 minutes
 
 *** Keywords ***
+Cleanup Resources
+    [Documentation]  Deletes of created resources
+    StrictShell  odahuflowctl --verbose conn delete --id ${GIT_CONN} --ignore-not-found
+    StrictShell  odahuflowctl --verbose conn delete --id ${DOCKER_CONN} --ignore-not-found
+
 Format WrongHttpStatusCode
     [Arguments]                     ${entity name}
     ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)

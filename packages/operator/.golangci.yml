@@ -1,5 +1,7 @@
 run:
   timeout: 5m
+  skip-dirs:
+    - pkg/database/migrations/postgres
 linters:
   enable-all: true
   disable:
@@ -20,6 +22,13 @@ linters:
     - nestif
     - gomnd
     - godot
+    - gci
+    - sqlclosecheck
+    - noctx
+    - nlreturn
+    - exhaustive
+    - gofumpt
+    - interfacer
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.

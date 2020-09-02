@@ -1,0 +1,16 @@
+kind: ModelTraining
+id: wine-mlflow-default
+spec:
+  model:
+    name: wine-mlflow-default
+    version: '1.0'
+  toolchain: mlflow
+  hyperParameters:
+    alpha: '1.0'
+  workDir: mlflow/sklearn/wine
+  entrypoint: main
+  vcsName: odahu-flow-examples
+  outputConnection: models-output
+  data:
+    - connName: wine
+      localPath: mlflow/sklearn/wine/

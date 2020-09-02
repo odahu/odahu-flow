@@ -41,8 +41,8 @@ type ModelPackagingConfig struct {
 	// Kubernetes node selectors for model packaging pods
 	NodeSelector map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model packaging pods
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
-	ModelPackagerImage string `json:"modelPackagerImage"`
+	Tolerations        []corev1.Toleration `json:"tolerations,omitempty"`
+	ModelPackagerImage string              `json:"modelPackagerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for packaging pods
@@ -73,6 +73,6 @@ func NewDefaultModelPackagingConfig() ModelPackagingConfig {
 				Memory: &defaultPackagingMemoryLimit,
 			},
 		},
-		PackagingIntegrationRepositoryType: RepositoryKubernetesType,
+		PackagingIntegrationRepositoryType: RepositoryPostgresType,
 	}
 }

@@ -98,10 +98,22 @@ func (bec *BaseAPIClient) Do(req *http.Request) (*http.Response, error) {
 		Timeout: defaultAPIRequestTimeout,
 	}
 
+	// We need store body bytes for retry in case of login
+	var bodyBytes []byte
+	var err error
+	if req.Body != nil {
+		bodyBytes, err = ioutil.ReadAll(req.Body)
+		if err != nil {
+			return nil, err
+		}
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+	}
 	resp, err := apiHTTPClient.Do(req)
 
 	// First attempt could finished by 401 response
 	if resp != nil && loginRequired(resp) {
+
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 
 		// If login required (401) let's login
 		loginErr := bec.Login()

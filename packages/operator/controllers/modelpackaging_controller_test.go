@@ -23,8 +23,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	pi_kubernetes "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/stubclients"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -59,15 +59,16 @@ type ModelPackagingControllerSuite struct {
 	suite.Suite
 	g *GomegaWithT
 
-	k8sClient  client.Client
-	k8sManager manager.Manager
-	stopMgr    chan struct{}
-	mgrStopped *sync.WaitGroup
-	requests   chan reconcile.Request
+	k8sClient    client.Client
+	k8sManager   manager.Manager
+	stubPIClient stubclients.PIStubClient
+	stopMgr      chan struct{}
+	mgrStopped   *sync.WaitGroup
+	requests     chan reconcile.Request
 }
 
-func (s *ModelPackagingControllerSuite) createPackagingIntegration() *odahuflowv1alpha1.PackagingIntegration {
-	testPackagingIntegration, err := pi_kubernetes.TransformPiToK8s(&packaging.PackagingIntegration{
+func (s *ModelPackagingControllerSuite) createPackagingIntegration() *packaging.PackagingIntegration {
+	testPackagingIntegration := &packaging.PackagingIntegration{
 		ID: testPackagingIntegrationID,
 		Spec: packaging.PackagingIntegrationSpec{
 			DefaultImage: integrationImage,
@@ -99,10 +100,6 @@ func (s *ModelPackagingControllerSuite) createPackagingIntegration() *odahuflowv
 				},
 			},
 		},
-	}, testNamespace)
-
-	if err != nil {
-		s.T().Fatal(err)
 	}
 
 	return testPackagingIntegration
@@ -115,6 +112,7 @@ func (s *ModelPackagingControllerSuite) SetupTest() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.k8sClient = mgr.GetClient()
 	s.k8sManager = mgr
+	s.stubPIClient = stubclients.NewPIStubClient()
 
 	s.requests = make(chan reconcile.Request)
 
@@ -126,7 +124,7 @@ func (s *ModelPackagingControllerSuite) SetupTest() {
 		s.g.Expect(mgr.Start(s.stopMgr)).NotTo(HaveOccurred())
 	}()
 
-	if err := s.k8sClient.Create(context.TODO(), s.createPackagingIntegration()); err != nil {
+	if err := s.stubPIClient.CreatePackagingIntegration(s.createPackagingIntegration()); err != nil {
 		s.T().Fatal(err)
 	}
 }
@@ -138,13 +136,14 @@ func (s *ModelPackagingControllerSuite) initReconciler(packagingConfig config.Mo
 	cfg := config.NewDefaultConfig()
 	cfg.Packaging = packagingConfig
 
-	reconciler := controllers.NewModelPackagingReconciler(s.k8sManager, *cfg)
+	reconciler := controllers.NewModelPackagingReconciler(s.k8sManager, *cfg, s.stubPIClient)
 	rw := NewReconcilerWrapper(reconciler, s.requests)
 	s.g.Expect(rw.SetupWithManager(s.k8sManager)).NotTo(HaveOccurred())
 }
 
 func (s *ModelPackagingControllerSuite) TearDownTest() {
-	if err := s.k8sClient.Delete(context.TODO(), s.createPackagingIntegration()); err != nil {
+
+	if err := s.stubPIClient.DeletePackagingIntegration(s.createPackagingIntegration().ID); err != nil {
 		s.T().Fatal(err)
 	}
 

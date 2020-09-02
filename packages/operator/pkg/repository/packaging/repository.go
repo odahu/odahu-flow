@@ -14,13 +14,11 @@
 //    limitations under the License.
 //
 
-package connection
+package packaging
 
 import (
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
 const (
@@ -28,25 +26,22 @@ const (
 )
 
 type Repository interface {
-	SaveModelPackagingResult(id string, result []odahuflowv1alpha1.ModelPackagingResult) error
-	GetModelPackagingResult(id string) ([]odahuflowv1alpha1.ModelPackagingResult, error)
 	GetModelPackaging(id string) (*packaging.ModelPackaging, error)
-	GetModelPackagingList(options ...kubernetes.ListOption) ([]packaging.ModelPackaging, error)
+	GetModelPackagingList(options ...filter.ListOption) ([]packaging.ModelPackaging, error)
 	DeleteModelPackaging(id string) error
-	GetModelPackagingLogs(id string, writer utils.Writer, follow bool) error
+	SetDeletionMark(id string, value bool) error
 	UpdateModelPackaging(md *packaging.ModelPackaging) error
 	CreateModelPackaging(md *packaging.ModelPackaging) error
-	PackagingIntegrationRepository
 }
 
 type PackagingIntegrationRepository interface {
 	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
-	GetPackagingIntegrationList(options ...kubernetes.ListOption) ([]packaging.PackagingIntegration, error)
+	GetPackagingIntegrationList(options ...filter.ListOption) ([]packaging.PackagingIntegration, error)
 	DeletePackagingIntegration(id string) error
 	UpdatePackagingIntegration(md *packaging.PackagingIntegration) error
 	CreatePackagingIntegration(md *packaging.PackagingIntegration) error
 }
 
 type MPFilter struct {
-	Type []string `name:"type"`
+	Type []string `name:"type" postgres:"spec->>'type'"`
 }

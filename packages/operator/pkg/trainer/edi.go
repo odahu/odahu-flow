@@ -24,12 +24,12 @@ import (
 
 // The function extracts data from a repository and creates the training entity.
 func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
-	modelTraining, err := mt.trainRepo.GetModelTraining(mt.modelTrainingID)
+	modelTraining, err := mt.trainClient.GetModelTraining(mt.modelTrainingID)
 	if err != nil {
 		return nil, err
 	}
 
-	vcs, err := mt.connRepo.GetConnection(modelTraining.Spec.VCSName)
+	vcs, err := mt.connClient.GetConnection(modelTraining.Spec.VCSName)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	for _, trainData := range modelTraining.Spec.Data {
 		var trainDataConnSpec odahuflowv1alpha1.ConnectionSpec
 
-		trainDataConn, err := mt.connRepo.GetConnection(trainData.Connection)
+		trainDataConn, err := mt.connClient.GetConnection(trainData.Connection)
 		if err != nil {
 			mt.log.Error(err, "Get train data", odahuflow.ConnectionIDLogPrefix, trainData.Connection)
 
@@ -63,7 +63,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		})
 	}
 
-	outputConn, err := mt.connRepo.GetConnection(modelTraining.Spec.OutputConnection)
+	outputConn, err := mt.connClient.GetConnection(modelTraining.Spec.OutputConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
-	ti, err := mt.trainRepo.GetToolchainIntegration(modelTraining.Spec.Toolchain)
+	ti, err := mt.trainClient.GetToolchainIntegration(modelTraining.Spec.Toolchain)
 	if err != nil {
 		return nil, err
 	}

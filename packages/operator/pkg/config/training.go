@@ -40,12 +40,12 @@ type ModelTrainingConfig struct {
 	OutputConnectionID string            `json:"outputConnectionID"`
 	NodeSelector       map[string]string `json:"nodeSelector"`
 	// Kubernetes tolerations for model trainings pods
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
-	GPUNodeSelector    map[string]string `json:"gpuNodeSelector"`
+	Tolerations     []corev1.Toleration `json:"tolerations,omitempty"`
+	GPUNodeSelector map[string]string   `json:"gpuNodeSelector"`
 	// Kubernetes tolerations for GPU model trainings pods
-	GPUTolerations []corev1.Toleration `json:"gpuTolerations,omitempty"`
-	MetricURL          string            `json:"metricUrl"`
-	ModelTrainerImage  string            `json:"modelTrainerImage"`
+	GPUTolerations    []corev1.Toleration `json:"gpuTolerations,omitempty"`
+	MetricURL         string              `json:"metricUrl"`
+	ModelTrainerImage string              `json:"modelTrainerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for training pods
@@ -76,6 +76,6 @@ func NewDefaultModelTrainingConfig() ModelTrainingConfig {
 				Memory: &defaultTrainingMemoryLimit,
 			},
 		},
-		ToolchainIntegrationRepositoryType: RepositoryKubernetesType,
+		ToolchainIntegrationRepositoryType: RepositoryPostgresType,
 	}
 }

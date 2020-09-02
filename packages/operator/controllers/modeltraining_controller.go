@@ -18,15 +18,13 @@ package controllers
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	train_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
-	train_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/kubernetes"
-	postgres_training_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
+	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -59,8 +57,8 @@ type ModelTrainingReconciler struct {
 	client.Client
 	scheme          *runtime.Scheme
 	k8sConfig       *rest.Config
-	trainRepo       train_repository.Repository
-	toolchainRepo   train_repository.ToolchainRepository
+	trainKubeClient kube_client.Client
+	trainAPIClient  train_api_client.Client
 	trainingConfig  config.ModelTrainingConfig
 	operatorConfig  config.OperatorConfig
 	gpuResourceName string
@@ -68,42 +66,22 @@ type ModelTrainingReconciler struct {
 
 // newReconciler returns a new reconcile.Reconciler
 func NewModelTrainingReconciler(
-	mgr manager.Manager,
-	cfg config.Config,
+	mgr manager.Manager, cfg config.Config, trainAPIClient train_api_client.Client,
 ) *ModelTrainingReconciler {
-	k8sClient := mgr.GetClient()
 
-	// Setup the training toolchain repository
-	var tiRepository train_repository.ToolchainRepository
-	switch cfg.Training.ToolchainIntegrationRepositoryType {
-	case config.RepositoryKubernetesType:
-		tiRepository = train_k8s_repository.NewRepository(
-			cfg.Training.Namespace,
-			cfg.Training.ToolchainIntegrationNamespace,
-			k8sClient,
-			mgr.GetConfig(),
-		)
-	case config.RepositoryPostgresType:
-		db, err := sql.Open("postgres", cfg.Common.DatabaseConnectionString)
-		if err != nil {
-			panic(fmt.Sprintf("Cannot init postgres repository %v", err))
-		}
-		tiRepository = postgres_training_repository.ToolchainRepository{DB: db}
-	default:
-		panic("DI toolchain repository failed")
-	}
+	k8sClient := mgr.GetClient()
 
 	return &ModelTrainingReconciler{
 		Client:    k8sClient,
 		k8sConfig: mgr.GetConfig(),
 		scheme:    mgr.GetScheme(),
-		trainRepo: train_k8s_repository.NewRepository(
+		trainKubeClient: kube_client.NewClient(
 			cfg.Training.Namespace,
 			cfg.Training.ToolchainIntegrationNamespace,
 			k8sClient,
 			mgr.GetConfig(),
 		),
-		toolchainRepo:   tiRepository,
+		trainAPIClient:  trainAPIClient,
 		trainingConfig:  cfg.Training,
 		operatorConfig:  cfg.Operator,
 		gpuResourceName: cfg.Common.ResourceGPUName,
@@ -166,7 +144,7 @@ func (r *ModelTrainingReconciler) calculateStateByTaskRun(
 		trainingCR.Status.Message = &lastCondition.Message
 		trainingCR.Status.Reason = &lastCondition.Reason
 
-		result, err := r.trainRepo.GetModelTrainingResult(trainingCR.Name)
+		result, err := r.trainKubeClient.GetModelTrainingResult(trainingCR.Name)
 		if err != nil {
 			return err
 		}
@@ -220,7 +198,7 @@ func (r *ModelTrainingReconciler) getToolchainIntegration(trainingCR *odahuflowv
 	*training.ToolchainIntegration, error,
 ) {
 	var ti *training.ToolchainIntegration
-	ti, err := r.toolchainRepo.GetToolchainIntegration(trainingCR.Spec.Toolchain)
+	ti, err := r.trainAPIClient.GetToolchainIntegration(trainingCR.Spec.Toolchain)
 	if err != nil {
 		return nil, err
 	}
@@ -364,8 +342,8 @@ func isTrainingFinished(mt *odahuflowv1alpha1.ModelTraining) bool {
 	return state == odahuflowv1alpha1.ModelTrainingSucceeded || state == odahuflowv1alpha1.ModelTrainingFailed
 }
 
-// Reconcile reads that state of the cluster for a ModelTraining object and makes changes based on the state read
-// and what is in the ModelTraining.Spec
+// Reconcile reads that state of the cluster for a StorageEntity object and makes changes based on the state read
+// and what is in the StorageEntity.Spec
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=pods/exec,verbs=create
