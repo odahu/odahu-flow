@@ -159,3 +159,8 @@ Format WrongHttpStatusCode
     [Arguments]                     ${entity name}
     ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)
     [return]                        ${error output}
+
+Format EntityAlreadyExists
+    [Arguments]                     ${entity name}
+    ${error output}                 format string  EntityAlreadyExists: Got error from server: entity "${entity name}" already exists (status: 409)
+    [return]                        ${error output}
