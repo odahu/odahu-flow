@@ -23,7 +23,7 @@ Force Tags          api  sdk  toolchain
 Test Timeout        5 minutes
 
 *** Keywords ***
-Cleanup Resources
+Cleanup All Resources
     Cleanup resource  toolchain-integration  ${MLFLOW}
     Cleanup resource  toolchain-integration  ${MLFLOW_GPU}
     Cleanup resource  toolchain-integration  ${MLFLOW_INVALID}
@@ -81,30 +81,30 @@ Check that toolchains do not exist
 #############################
 #    NEGATIVE TEST CASES    #
 #############################
-Try Create Packager that already exists
+Try Create Toolchain that already exists
     [Tags]                      negative
-    [Teardown]                  Cleanup resource  packaging-integration  ${DOCKER_CLI}
-    Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
-    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_CLI}
-    Call API and get Error      ${EntityAlreadyExists}  packager post  ${RES_DIR}/valid/docker_cli_create.yaml
+    [Teardown]                  Cleanup resource  toolchain-integration  ${MLFLOW}
+    Call API                    toolchain post  ${RES_DIR}/valid/mlflow_update.json
+    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${MLFLOW}
+    Call API and get Error      ${EntityAlreadyExists}  toolchain post  ${RES_DIR}/valid/mlflow_update.json
 
-Try Update not existing and deleted Packager
+Try Update not existing and deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
-    Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/valid/docker_cli_update.json
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/invalid/mlflow_gpu_update_not_exist.yaml
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/valid/mlflow-gpu_create.json
 
-Try Get id not existing and deleted Packager
+Try Get id not existing and deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_INVALID}
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_REST}
-    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_REST}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW}
 
-Try Delete not existing and deleted Packager
+Try Delete not existing and deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_INVALID}
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
-    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_CLI}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_INVALID}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_GPU}
