@@ -24,7 +24,6 @@ Test Timeout        5 minutes
 
 *** Keywords ***
 Cleanup All Resources
-    [Documentation]  Deletes of created resources
     Cleanup resource  packaging-integration  ${DOCKER_CLI}
     Cleanup resource  packaging-integration  ${DOCKER_REST}
     Cleanup resource  packaging-integration  ${DOCKER_INVALID}
