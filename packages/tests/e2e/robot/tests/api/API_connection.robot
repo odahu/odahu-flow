@@ -3,7 +3,7 @@ ${LOCAL_CONFIG}        odahuflow/api_connection
 ${RES_DIR}             ${CURDIR}/resources/connection
 ${GIT_VALID}           git-connection-valid
 ${DOCKER_VALID}        docker-ci-connection-valid
-${GIT_INVALID}         git-connection-invalid
+${GIT_NOT_EXIST}       git-connection-not-exist
 
 *** Settings ***
 Documentation          API of conections
@@ -28,7 +28,7 @@ Test Timeout           5 minutes
 Cleanup all Resources
     Cleanup resource  connection  ${GIT_VALID}
     Cleanup resource  connection  ${DOCKER_VALID}
-    Cleanup resource  connection  ${GIT_INVALID}
+    Cleanup resource  connection  ${GIT_NOT_EXIST}
 
 *** Test Cases ***
 Create GIT connection
@@ -80,35 +80,35 @@ Delete Docker connection
 #############################
 Try Create Connection that already exists
     [Tags]                      negative
-    [Teardown]                  cleanup resource  connection  ${GIT_INVALID}
+    [Teardown]                  cleanup resource  connection  ${GIT_NOT_EXIST}
     Call API                    connection post  ${RES_DIR}/valid/docker_connection_create.json
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_VALID}
     Call API and get Error      ${EntityAlreadyExists}  connection post  ${RES_DIR}/valid/docker_connection_create.json
 
 Try Update not existing and deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/valid/git_connection_update.yaml
 
 Try Get id not existing and deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_VALID}
 
 Try Get id decrypted not existing and deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_VALID}
 
 Try Delete not existing and deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_VALID}

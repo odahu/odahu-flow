@@ -1,9 +1,9 @@
 *** Variables ***
-${LOCAL_CONFIG}     odahuflow/api_toolchain
-${RES_DIR}          ${CURDIR}/resources/toolchain
-${MLFLOW}           mlflow-api-testing
-${MLFLOW_GPU}       mlflow-gpu-api-testing
-${MLFLOW_INVALID}   mlflow-gpu-api-not-exist
+${LOCAL_CONFIG}         odahuflow/api_toolchain
+${RES_DIR}              ${CURDIR}/resources/toolchain
+${MLFLOW}               mlflow-api-testing
+${MLFLOW_GPU}           mlflow-gpu-api-testing
+${MLFLOW_NOT_EXIST}     mlflow-gpu-api-not-exist
 
 *** Settings ***
 Documentation       API of toolchains
@@ -26,7 +26,7 @@ Test Timeout        5 minutes
 Cleanup All Resources
     Cleanup resource  toolchain-integration  ${MLFLOW}
     Cleanup resource  toolchain-integration  ${MLFLOW_GPU}
-    Cleanup resource  toolchain-integration  ${MLFLOW_INVALID}
+    Cleanup resource  toolchain-integration  ${MLFLOW_NOT_EXIST}
 
 *** Test Cases ***
 Get list of toolchains
@@ -90,21 +90,21 @@ Try Create Toolchain that already exists
 
 Try Update not existing and deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/invalid/mlflow_gpu_update_not_exist.yaml
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/valid/mlflow-gpu_create.json
 
 Try Get id not existing and deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW}
 
 Try Delete not existing and deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_GPU}
