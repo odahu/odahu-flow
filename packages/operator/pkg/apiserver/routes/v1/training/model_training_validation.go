@@ -71,17 +71,13 @@ type MtValidator struct {
 func NewMtValidator(
 	mtRepository mt_repository.ToolchainRepository,
 	connRepository conn_repository.Repository,
-	//defaultResources odahuflowv1alpha1.ResourceRequirements,
 	trainingConfig config.ModelTrainingConfig,
-	//outputConnectionName string,
 	gpuResourceName string,
 ) *MtValidator {
 	return &MtValidator{
-		mtRepository:   mtRepository,
-		connRepository: connRepository,
-		//defaultResources:     defaultResources,
-		trainingConfig: trainingConfig,
-		//outputConnectionName: outputConnectionName,
+		mtRepository:    mtRepository,
+		connRepository:  connRepository,
+		trainingConfig:  trainingConfig,
 		gpuResourceName: gpuResourceName,
 	}
 }
