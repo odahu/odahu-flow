@@ -1,6 +1,6 @@
 {
   "kind": "ModelDeployment",
-  "id": "wine-api-testing",
+  "id": "deployment-api-not-exist",
   "spec": {
     "image": null,
     "resources": {
