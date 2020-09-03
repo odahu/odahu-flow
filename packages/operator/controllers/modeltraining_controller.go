@@ -20,12 +20,11 @@ import (
 	"context"
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -206,11 +205,11 @@ func (r *ModelTrainingReconciler) getToolchainIntegration(trainingCR *odahuflowv
 }
 
 func (r *ModelTrainingReconciler) getNodeSelectorAndAffinity(trainingCR *odahuflowv1alpha1.ModelTraining) (
-	nodeSelector map[string]string, affinity corev1.Affinity) {
+	map[string]string, *corev1.Affinity) {
 
 	// Specific node pool was chosen
 	if len(trainingCR.Spec.NodeSelector) > 0 {
-		return trainingCR.Spec.NodeSelector, affinity
+		return trainingCR.Spec.NodeSelector, nil
 	}
 
 	// Node pool wasn't specified, define affinity to any of training pools
@@ -239,7 +238,7 @@ func (r *ModelTrainingReconciler) getNodeSelectorAndAffinity(trainingCR *odahufl
 		})
 	}
 
-	return nodeSelector, corev1.Affinity{
+	return nil, &corev1.Affinity{
 		NodeAffinity: &corev1.NodeAffinity{
 			RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{NodeSelectorTerms: nodeSelectorTerms},
 		},
@@ -301,7 +300,7 @@ func (r *ModelTrainingReconciler) reconcileTaskRun(
 			PodTemplate: &tektonv1beta1.PodTemplate{
 				Tolerations:  r.getTolerations(trainingCR),
 				NodeSelector: nodeSelector,
-				Affinity:     &affinity,
+				Affinity:     affinity,
 			},
 		},
 	}
