@@ -123,43 +123,6 @@ def get_authorization_redirect(web_redirect: str, after_login: Callable) -> str:
     return web_redirect
 
 
-class HTTPConnectionPolicy:
-    """
-    Define how many retries client should make in case of error
-    and connection timeout
-    """
-
-    def __init__(self,
-                 retries: Optional[int] = 3,
-                 timeout: Optional[Union[int, Tuple[int, int]]] = 10):
-
-        self._retries = retries
-        self._timeout = timeout
-
-    @property
-    def default_retries(self):
-        return self._retries
-
-    @property
-    def default_timeout(self):
-        return self._timeout
-
-    @default_timeout.setter
-    def default_timeout(self, value):
-        self._timeout = value
-
-    def get_conn_timeout(self, timeout: Optional[int] = None):
-        connection_timeout = timeout if timeout is not None else self.default_timeout
-
-        if connection_timeout == 0:
-            connection_timeout = None
-
-        return connection_timeout
-
-    def get_left_retries(self):
-        return self.default_retries if self.default_retries > 0 else 1
-
-
 class URLBuilder:
 
     def __init__(self, base_url: str = odahuflow.sdk.config.API_URL):
@@ -384,25 +347,24 @@ class RemoteAPIClient:
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
-        self.conn_policy = HTTPConnectionPolicy(retries, timeout)
+        self.timeout = timeout
 
         retry_strategy = Retry(
-            total=self.conn_policy.get_left_retries(),
+            total=retries,
             status_forcelist=[429, 500, 502, 503, 504],
             backoff_factor=1
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.default_client = requests.Session()
-        self.default_client.mount("https://", adapter)
-        self.default_client.mount("http://", adapter)
+        self.default_client.mount("", adapter)
 
     @property
     def timeout(self):
-        return self.conn_policy.default_timeout
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
-        self.conn_policy.default_timeout = value
+        self._timeout = value
 
     @classmethod
     def construct_from_other(cls, other):
@@ -439,7 +401,7 @@ class RemoteAPIClient:
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream,
                                                                token=self.authenticator.token)
-        connection_timeout = self.conn_policy.get_conn_timeout(timeout)
+        connection_timeout = self.timeout
 
         try:
             if client:
@@ -531,7 +493,8 @@ class AsyncRemoteAPIClient:
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
-        self.conn_policy = HTTPConnectionPolicy(retries, timeout)
+        self.timeout = timeout
+        self.retries = retries
 
     async def _request(
             self, url_template: str,
@@ -554,7 +517,7 @@ class AsyncRemoteAPIClient:
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream=False,
                                                                token=self.authenticator.token)
-        left_retries = self.conn_policy.get_left_retries()
+        left_retries = self.retries
         raised_exception = None
         while left_retries > 0:
             try:
@@ -632,7 +595,7 @@ class AsyncRemoteAPIClient:
         :param stream: use stream mode or not
         :return: AsyncIterable of data. If stream = False, only one line will be returned
         """
-        async with aiohttp.ClientSession(conn_timeout=self.conn_policy.get_conn_timeout(), trust_env=True) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.timeout, trust_env=True) as session:
             try:
                 async for data in self._request(url_template, payload, action, stream, session):
                     yield data
@@ -681,11 +644,11 @@ class AsyncRemoteAPIClient:
 
     @property
     def timeout(self):
-        return self.conn_policy.default_timeout
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
-        self.conn_policy.default_timeout = value
+        self._timeout = value
 
     @classmethod
     def construct_from_other(cls, other):
