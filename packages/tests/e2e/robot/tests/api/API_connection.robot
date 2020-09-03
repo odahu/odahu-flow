@@ -1,7 +1,8 @@
 *** Variables ***
-${RES_DIR}             ${CURDIR}/resources/connection
-${GIT_CONN}            git-connection-valid
-${DOCKER_CONN}         docker-ci-connection-valid
+${LOCAL_CONFIG}     odahuflow/api_connection
+${RES_DIR}          ${CURDIR}/resources/connection
+${GIT_CONN}         git-connection-valid
+${DOCKER_CONN}      docker-ci-connection-valid
 
 *** Settings ***
 Documentation       API of conections
@@ -12,10 +13,20 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
 Suite Setup         Run Keywords
-...                 Login to the api and edge
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
+...                 Login to the api and edge  AND
+...                 Cleanup Resources
+Suite Teardown      Run Keywords
+...                 Cleanup Resources  AND
+...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  connection
 Test Timeout        5 minutes
 
+*** Keywords ***
+Cleanup Resources
+    [Documentation]  Deletes of created resources
+    StrictShell  odahuflowctl --verbose conn delete --id ${GIT_CONN} --ignore-not-found
+    StrictShell  odahuflowctl --verbose conn delete --id ${DOCKER_CONN} --ignore-not-found
 
 *** Test Cases ***
 Create GIT connection
