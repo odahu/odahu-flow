@@ -348,6 +348,7 @@ class RemoteAPIClient:
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
         self.timeout = timeout
+        self.retries = retries
 
         retry_strategy = Retry(
             total=retries,
@@ -376,7 +377,7 @@ class RemoteAPIClient:
         """
         return cls(
             other.url_builder.base_url, other.authenticator.token,
-            other.conn_policy.default_retries, other.conn_policy.default_timeout
+            retries=other.retries, timeout=other.timeout
         )
 
     def _request(self,
@@ -660,5 +661,5 @@ class AsyncRemoteAPIClient:
         """
         return cls(
             other.url_builder.base_url, other.authenticator.token,
-            other.conn_policy.default_retries, other.conn_policy.default_timeout
+            retries=other.retries, timeout=other.timeout
         )
