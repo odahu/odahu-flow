@@ -30,18 +30,33 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/multierr"
 	"testing"
 )
 
 // TODO: add multiple test error
 
 const (
-	outputConnectionName = "conn-id"
-	gpuResourceName      = "nvidia"
+	gpuResourceName = "nvidia"
 )
 
 var (
 	defaultTrainingResource = config.NewDefaultModelTrainingConfig().DefaultResources
+	cpuNodeSelector         = map[string]string{"mode": "training"}
+	gpuNodeSelector         = map[string]string{"mode": "gpuTraining"}
+	validTraining           = training.ModelTraining{
+		ID: "model-id",
+		Spec: v1alpha1.ModelTrainingSpec{
+			Model: v1alpha1.ModelIdentity{
+				Name:    "model-name",
+				Version: "1",
+			},
+			OutputConnection: testMtOutConn,
+			Toolchain:        testToolchainIntegrationID,
+			VCSName:          testMtVCSID,
+			NodeSelector:     cpuNodeSelector,
+		},
+	}
 )
 
 type ModelTrainingValidationSuite struct {
@@ -60,10 +75,18 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 
 	s.mtRepository = mt_post_repository.ToolchainRepo{DB: db}
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, kubeClient)
+
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodePools = append(trainingConfig.NodePools, config.NodePool{
+		NodeSelector: cpuNodeSelector})
+	trainingConfig.GPUNodePools = append(trainingConfig.GPUNodePools, config.NodePool{
+		NodeSelector: gpuNodeSelector,
+	})
+
 	s.validator = train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		config.NewDefaultModelTrainingConfig(),
+		trainingConfig,
 		gpuResourceName,
 	)
 
@@ -73,6 +96,17 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
 			Reference: testVcsReference,
+		},
+	}); err != nil {
+		// If we get a panic that we have a test configuration problem
+		panic(err)
+	}
+
+	// Create the connection that will be used as the outputConnection param for a training.
+	if err := s.connRepository.CreateConnection(&connection.Connection{
+		ID: testMtOutConn,
+		Spec: v1alpha1.ConnectionSpec{
+			Type: connection.GcsType,
 		},
 	}); err != nil {
 		// If we get a panic that we have a test configuration problem
@@ -479,4 +513,53 @@ func (s *ModelTrainingValidationSuite) TestValidateID() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
+
+// Tests that nil node selector is considered valid
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_nil() {
+	mt := validTraining
+	mt.Spec.NodeSelector = nil
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// training object has valid node selector that exists in config
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_Valid() {
+	mt := validTraining
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// training object has invalid node selector that does not exist in config
+// Expect validator to return exactly one error
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_Invalid() {
+	mt := validTraining
+	mt.Spec.NodeSelector = map[string]string{"mode": "invalid"}
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
+}
+
+// GPU training has valid node selector that exists in config
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_GPU_Valid() {
+	mt := validTraining
+	gpuRequest := "1"
+	mt.Spec.Resources = &v1alpha1.ResourceRequirements{Requests: &v1alpha1.ResourceList{GPU: &gpuRequest}}
+	mt.Spec.NodeSelector = gpuNodeSelector
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// GPU training has invalid node selector that does not exist in config
+// Expect validator to return exactly one error
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_GPU_Invalid() {
+	mt := validTraining
+	gpuRequest := "1"
+	mt.Spec.Resources = &v1alpha1.ResourceRequirements{Requests: &v1alpha1.ResourceList{GPU: &gpuRequest}}
+	mt.Spec.NodeSelector = map[string]string{"mode": "gpu-invalid"}
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
 }
