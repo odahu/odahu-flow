@@ -25,6 +25,8 @@ import threading
 from collections.abc import AsyncIterable
 from typing import Any, Callable, Dict, Iterator, Mapping, Optional, Tuple, Union
 from urllib.parse import urlencode, urlparse
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 import aiohttp
 import requests
@@ -119,43 +121,6 @@ def get_authorization_redirect(web_redirect: str, after_login: Callable) -> str:
     }
     web_redirect = f'{loc.scheme}://{loc.netloc}{loc.path}?{urlencode(get_parameters)}'
     return web_redirect
-
-
-class HTTPConnectionPolicy:
-    """
-    Define how many retries client should make in case of error
-    and connection timeout
-    """
-
-    def __init__(self,
-                 retries: Optional[int] = 3,
-                 timeout: Optional[Union[int, Tuple[int, int]]] = 10):
-
-        self._retries = retries
-        self._timeout = timeout
-
-    @property
-    def default_retries(self):
-        return self._retries
-
-    @property
-    def default_timeout(self):
-        return self._timeout
-
-    @default_timeout.setter
-    def default_timeout(self, value):
-        self._timeout = value
-
-    def get_conn_timeout(self, timeout: Optional[int] = None):
-        connection_timeout = timeout if timeout is not None else self.default_timeout
-
-        if connection_timeout == 0:
-            connection_timeout = None
-
-        return connection_timeout
-
-    def get_left_retries(self):
-        return self.default_retries if self.default_retries > 0 else 1
 
 
 class URLBuilder:
@@ -382,15 +347,25 @@ class RemoteAPIClient:
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
-        self.conn_policy = HTTPConnectionPolicy(retries, timeout)
+        self.timeout = timeout
+        self.retries = retries
+
+        retry_strategy = Retry(
+            total=retries,
+            status_forcelist=[429, 500, 502, 503, 504],
+            backoff_factor=1
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.default_client = requests.Session()
+        self.default_client.mount("", adapter)
 
     @property
     def timeout(self):
-        return self.conn_policy.default_timeout
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
-        self.conn_policy.default_timeout = value
+        self._timeout = value
 
     @classmethod
     def construct_from_other(cls, other):
@@ -402,7 +377,7 @@ class RemoteAPIClient:
         """
         return cls(
             other.url_builder.base_url, other.authenticator.token,
-            other.conn_policy.default_retries, other.conn_policy.default_timeout
+            retries=other.retries, timeout=other.timeout
         )
 
     def _request(self,
@@ -427,36 +402,21 @@ class RemoteAPIClient:
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream,
                                                                token=self.authenticator.token)
-        connection_timeout = self.conn_policy.get_conn_timeout(timeout)
-        left_retries = self.conn_policy.get_left_retries()
+        connection_timeout = self.timeout
 
-        raised_exception = None
-        while left_retries > 0:
-            try:
-                LOGGER.debug('Requesting {}'.format(self.url_builder.build_url(url_template)))
-
-                if client:
-                    response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
-                else:
-                    response = requests.request(timeout=connection_timeout, stream=stream, **request_kwargs)
-
-                LOGGER.debug('Response status code: "{}"'.format(response.status_code))
-
-            except requests.exceptions.ConnectionError as exception:
-                LOGGER.error('Failed to connect to {}: {}. Retrying'.format(self._base_url, exception))
-                raised_exception = exception
+        try:
+            if client:
+                response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
             else:
-                LOGGER.debug('Got response. Breaking')
-                break
-            left_retries -= 1
-        else:
+                response = self.default_client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
+        except Exception as raised_exception:
             raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
 
         if self.authenticator.login_required(response):
             try:
                 self.authenticator.login(str(response.url), limit_stack=limit_stack)
             except IncorrectAuthorizationToken as login_exc:
-                raise login_exc from raised_exception
+                raise login_exc
             return self._request(
                 url_template,
                 payload=payload,
@@ -534,7 +494,8 @@ class AsyncRemoteAPIClient:
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
-        self.conn_policy = HTTPConnectionPolicy(retries, timeout)
+        self.timeout = timeout
+        self.retries = retries
 
     async def _request(
             self, url_template: str,
@@ -557,7 +518,7 @@ class AsyncRemoteAPIClient:
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream=False,
                                                                token=self.authenticator.token)
-        left_retries = self.conn_policy.get_left_retries()
+        left_retries = self.retries
         raised_exception = None
         while left_retries > 0:
             try:
@@ -635,7 +596,7 @@ class AsyncRemoteAPIClient:
         :param stream: use stream mode or not
         :return: AsyncIterable of data. If stream = False, only one line will be returned
         """
-        async with aiohttp.ClientSession(conn_timeout=self.conn_policy.get_conn_timeout(), trust_env=True) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.timeout, trust_env=True) as session:
             try:
                 async for data in self._request(url_template, payload, action, stream, session):
                     yield data
@@ -684,11 +645,11 @@ class AsyncRemoteAPIClient:
 
     @property
     def timeout(self):
-        return self.conn_policy.default_timeout
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
-        self.conn_policy.default_timeout = value
+        self._timeout = value
 
     @classmethod
     def construct_from_other(cls, other):
@@ -700,5 +661,5 @@ class AsyncRemoteAPIClient:
         """
         return cls(
             other.url_builder.base_url, other.authenticator.token,
-            other.conn_policy.default_retries, other.conn_policy.default_timeout
+            retries=other.retries, timeout=other.timeout
         )
