@@ -1,9 +1,9 @@
 *** Variables ***
-${LOCAL_CONFIG}     odahuflow/api_packager
-${RES_DIR}          ${CURDIR}/resources/packager
-${DOCKER_CLI}       docker-cli-api-testing
-${DOCKER_REST}      docker-rest-api-testing
-${DOCKER_INVALID}   docker-rest-api-not-exist
+${LOCAL_CONFIG}         odahuflow/api_packager
+${RES_DIR}              ${CURDIR}/resources/packager
+${DOCKER_CLI}           docker-cli-api-testing
+${DOCKER_REST}          docker-rest-api-testing
+${DOCKER_NOT_EXIST}     docker-rest-api-not-exist
 
 *** Settings ***
 Documentation       API of packagers
@@ -26,7 +26,7 @@ Test Timeout        5 minutes
 Cleanup All Resources
     Cleanup resource  packaging-integration  ${DOCKER_CLI}
     Cleanup resource  packaging-integration  ${DOCKER_REST}
-    Cleanup resource  packaging-integration  ${DOCKER_INVALID}
+    Cleanup resource  packaging-integration  ${DOCKER_NOT_EXIST}
 
 *** Test Cases ***
 Get list of packagers
@@ -90,21 +90,21 @@ Try Create Packager that already exists
 
 Try Update not existing and deleted Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
     Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/valid/docker_cli_update.json
 
 Try Get id not existing and deleted Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_REST}
     Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_REST}
 
 Try Delete not existing and deleted Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_INVALID}
-    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_INVALID}
+    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
     Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_CLI}

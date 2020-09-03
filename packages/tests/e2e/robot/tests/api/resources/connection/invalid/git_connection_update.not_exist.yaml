@@ -1,5 +1,5 @@
 kind: Connection
-id: git-connection-invalid
+id: git-connection-not-exist
 spec:
   type: git
   uri: git@github.com:odahu/odahu-examples.git
