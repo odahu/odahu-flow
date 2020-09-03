@@ -1,0 +1,35 @@
+{
+  "kind": "ModelTraining",
+  "id": "train-api-not-exist",
+  "spec": {
+    "model": {
+      "name": "test-training-data",
+      "version": "1.0",
+      "artifactNameTemplate": "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
+    },
+    "toolchain": "mlflow",
+    "hyperParameters": {
+      "alpha": "1.0"
+    },
+    "workDir": ".",
+    "entrypoint": "main",
+    "vcsName": "odahu-flow-examples",
+    "outputConnection": "models-output",
+    "image": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-robot-tests:1.2.0-b1599126332933",
+    "reference": "develop",
+    "resources": {
+      "limits": {
+        "memory": "1024Mi"
+      },
+      "requests": {
+        "memory": "512Mi"
+      }
+    },
+    "data": [
+      {
+        "connName": "wine",
+        "localPath": "mlflow/sklearn/wine/"
+      }
+    ]
+  }
+}
