@@ -37,7 +37,8 @@ import (
 // TODO: add multiple test error
 
 const (
-	gpuResourceName = "nvidia"
+	gpuResourceName     = "nvidia"
+	mtvOutputConnection = "training-validation-output-connection"
 )
 
 var (
@@ -51,7 +52,7 @@ var (
 				Name:    "model-name",
 				Version: "1",
 			},
-			OutputConnection: testMtOutConn,
+			OutputConnection: mtvOutputConnection,
 			Toolchain:        testToolchainIntegrationID,
 			VCSName:          testMtVCSID,
 			NodeSelector:     cpuNodeSelector,
@@ -104,7 +105,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 
 	// Create the connection that will be used as the outputConnection param for a training.
 	if err := s.connRepository.CreateConnection(&connection.Connection{
-		ID: testMtOutConn,
+		ID: mtvOutputConnection,
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
 		},
@@ -488,10 +489,9 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection_Default_NoParam() {
 // If output connection is set in both config and user request, use one from user
 func (s *ModelTrainingValidationSuite) TestOutputConnection_Both_Default_Param() {
 	mt := &training.ModelTraining{}
-
-	mt.Spec.OutputConnection = testMtOutConn
+	mt.Spec.OutputConnection = mtvOutputConnection
 	_ = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConn))
+	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(mtvOutputConnection))
 }
 
 // If connection repository doesn't contain connection with passed ID validation must raise NotFoundError

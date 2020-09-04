@@ -235,11 +235,11 @@ definitions:
       namespace:
         description: Kubernetes namespace, where model trainings will be deployed
         type: string
-      nodeSelector:
-        additionalProperties:
-          type: string
-        description: Kubernetes node selectors for model packaging pods
-        type: object
+      nodePools:
+        description: Node pools to run packaging tasks on
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       outputConnectionID:
         type: string
       packagerIntegrationNamespace:
@@ -269,6 +269,7 @@ definitions:
         description: Enable deployment API/operator
         type: boolean
       gpuNodePools:
+        description: Node pools to run GPU training tasks on
         items:
           $ref: '#/definitions/NodePool'
         type: array
@@ -283,6 +284,7 @@ definitions:
         description: Kubernetes namespace, where model trainings will be deployed
         type: string
       nodePools:
+        description: Node pools to run training tasks on
         items:
           $ref: '#/definitions/NodePool'
         type: array
@@ -500,6 +502,11 @@ definitions:
       integrationName:
         description: Packaging integration ID
         type: string
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
+        type: object
       outputConnection:
         description: |-
           Name of Connection to storage where a packager obtain a model trained artifact.

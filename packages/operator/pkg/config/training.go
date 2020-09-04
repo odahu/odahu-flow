@@ -39,14 +39,12 @@ type ModelTrainingConfig struct {
 	ServiceAccount     string `json:"serviceAccount"`
 	OutputConnectionID string `json:"outputConnectionID"`
 
-	// TODO: remove
-	//NodeSelector       map[string]string `json:"nodeSelector"`
-	//GPUNodeSelector map[string]string   `json:"gpuNodeSelector"`
-
+	// Node pools to run training tasks on
 	NodePools []NodePool `json:"nodePools"`
 	// Kubernetes tolerations for model trainings pods
-	Tolerations  []corev1.Toleration `json:"tolerations,omitempty"`
-	GPUNodePools []NodePool          `json:"gpuNodePools"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+	// Node pools to run GPU training tasks on
+	GPUNodePools []NodePool `json:"gpuNodePools"`
 	// Kubernetes tolerations for GPU model trainings pods
 	GPUTolerations []corev1.Toleration `json:"gpuTolerations,omitempty"`
 

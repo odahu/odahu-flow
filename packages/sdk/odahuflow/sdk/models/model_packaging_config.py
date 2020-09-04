@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.node_pool import NodePool  # noqa: F401,E501
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
@@ -16,7 +17,7 @@ class ModelPackagingConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, model_packager_image: str=None, namespace: str=None, node_selector: Dict[str, str]=None, output_connection_id: str=None, packager_integration_namespace: str=None, packaging_integration_repository_type: str=None, service_account: str=None, timeout: str=None, tolerations: str=None):  # noqa: E501
+    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, model_packager_image: str=None, namespace: str=None, node_pools: List[NodePool]=None, output_connection_id: str=None, packager_integration_namespace: str=None, packaging_integration_repository_type: str=None, service_account: str=None, timeout: str=None, tolerations: str=None):  # noqa: E501
         """ModelPackagingConfig - a model defined in Swagger
 
         :param default_resources: The default_resources of this ModelPackagingConfig.  # noqa: E501
@@ -27,8 +28,8 @@ class ModelPackagingConfig(Model):
         :type model_packager_image: str
         :param namespace: The namespace of this ModelPackagingConfig.  # noqa: E501
         :type namespace: str
-        :param node_selector: The node_selector of this ModelPackagingConfig.  # noqa: E501
-        :type node_selector: Dict[str, str]
+        :param node_pools: The node_pools of this ModelPackagingConfig.  # noqa: E501
+        :type node_pools: List[NodePool]
         :param output_connection_id: The output_connection_id of this ModelPackagingConfig.  # noqa: E501
         :type output_connection_id: str
         :param packager_integration_namespace: The packager_integration_namespace of this ModelPackagingConfig.  # noqa: E501
@@ -47,7 +48,7 @@ class ModelPackagingConfig(Model):
             'enabled': bool,
             'model_packager_image': str,
             'namespace': str,
-            'node_selector': Dict[str, str],
+            'node_pools': List[NodePool],
             'output_connection_id': str,
             'packager_integration_namespace': str,
             'packaging_integration_repository_type': str,
@@ -61,7 +62,7 @@ class ModelPackagingConfig(Model):
             'enabled': 'enabled',
             'model_packager_image': 'modelPackagerImage',
             'namespace': 'namespace',
-            'node_selector': 'nodeSelector',
+            'node_pools': 'nodePools',
             'output_connection_id': 'outputConnectionID',
             'packager_integration_namespace': 'packagerIntegrationNamespace',
             'packaging_integration_repository_type': 'packagingIntegrationRepositoryType',
@@ -74,7 +75,7 @@ class ModelPackagingConfig(Model):
         self._enabled = enabled
         self._model_packager_image = model_packager_image
         self._namespace = namespace
-        self._node_selector = node_selector
+        self._node_pools = node_pools
         self._output_connection_id = output_connection_id
         self._packager_integration_namespace = packager_integration_namespace
         self._packaging_integration_repository_type = packaging_integration_repository_type
@@ -184,27 +185,27 @@ class ModelPackagingConfig(Model):
         self._namespace = namespace
 
     @property
-    def node_selector(self) -> Dict[str, str]:
-        """Gets the node_selector of this ModelPackagingConfig.
+    def node_pools(self) -> List[NodePool]:
+        """Gets the node_pools of this ModelPackagingConfig.
 
-        Kubernetes node selectors for model packaging pods  # noqa: E501
+        Node pools to run packaging tasks on  # noqa: E501
 
-        :return: The node_selector of this ModelPackagingConfig.
-        :rtype: Dict[str, str]
+        :return: The node_pools of this ModelPackagingConfig.
+        :rtype: List[NodePool]
         """
-        return self._node_selector
+        return self._node_pools
 
-    @node_selector.setter
-    def node_selector(self, node_selector: Dict[str, str]):
-        """Sets the node_selector of this ModelPackagingConfig.
+    @node_pools.setter
+    def node_pools(self, node_pools: List[NodePool]):
+        """Sets the node_pools of this ModelPackagingConfig.
 
-        Kubernetes node selectors for model packaging pods  # noqa: E501
+        Node pools to run packaging tasks on  # noqa: E501
 
-        :param node_selector: The node_selector of this ModelPackagingConfig.
-        :type node_selector: Dict[str, str]
+        :param node_pools: The node_pools of this ModelPackagingConfig.
+        :type node_pools: List[NodePool]
         """
 
-        self._node_selector = node_selector
+        self._node_pools = node_pools
 
     @property
     def output_connection_id(self) -> str:

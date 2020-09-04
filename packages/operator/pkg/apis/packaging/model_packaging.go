@@ -52,6 +52,8 @@ type ModelPackagingSpec struct {
 	// Name of Connection to storage where a packager obtain a model trained artifact.
 	// Permitted connection types are defined by specific PackagingIntegration
 	OutputConnection string `json:"outputConnection,omitempty"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector"`
 }
 
 func (piSpec ModelPackagingSpec) Value() (driver.Value, error) {

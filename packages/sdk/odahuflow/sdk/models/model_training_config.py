@@ -159,6 +159,7 @@ class ModelTrainingConfig(Model):
     def gpu_node_pools(self) -> List[NodePool]:
         """Gets the gpu_node_pools of this ModelTrainingConfig.
 
+        Node pools to run GPU training tasks on  # noqa: E501
 
         :return: The gpu_node_pools of this ModelTrainingConfig.
         :rtype: List[NodePool]
@@ -169,6 +170,7 @@ class ModelTrainingConfig(Model):
     def gpu_node_pools(self, gpu_node_pools: List[NodePool]):
         """Sets the gpu_node_pools of this ModelTrainingConfig.
 
+        Node pools to run GPU training tasks on  # noqa: E501
 
         :param gpu_node_pools: The gpu_node_pools of this ModelTrainingConfig.
         :type gpu_node_pools: List[NodePool]
@@ -268,6 +270,7 @@ class ModelTrainingConfig(Model):
     def node_pools(self) -> List[NodePool]:
         """Gets the node_pools of this ModelTrainingConfig.
 
+        Node pools to run training tasks on  # noqa: E501
 
         :return: The node_pools of this ModelTrainingConfig.
         :rtype: List[NodePool]
@@ -278,6 +281,7 @@ class ModelTrainingConfig(Model):
     def node_pools(self, node_pools: List[NodePool]):
         """Sets the node_pools of this ModelTrainingConfig.
 
+        Node pools to run training tasks on  # noqa: E501
 
         :param node_pools: The node_pools of this ModelTrainingConfig.
         :type node_pools: List[NodePool]

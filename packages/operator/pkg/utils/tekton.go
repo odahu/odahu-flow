@@ -17,6 +17,7 @@
 package utils
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	corev1 "k8s.io/api/core/v1"
 	k8s_resource "k8s.io/apimachinery/pkg/api/resource"
 )
@@ -64,4 +65,31 @@ func CalculateHelperContainerResources(
 	clippedResources.Requests = EmptyHelperContainerRequestRes.DeepCopy()
 
 	return *clippedResources
+}
+
+// Build affinity that matches all nodes from nodePools list
+func BuildNodeAffinity(nodePools []config.NodePool) *corev1.Affinity {
+	nodeSelectorTerms := make([]corev1.NodeSelectorTerm, 0, len(nodePools))
+	for _, nodePool := range nodePools {
+		selector := nodePool.NodeSelector
+		matchExpressions := make([]corev1.NodeSelectorRequirement, 0, len(selector))
+
+		for label, value := range selector {
+			matchExpressions = append(matchExpressions, corev1.NodeSelectorRequirement{
+				Key:      label,
+				Operator: corev1.NodeSelectorOpIn,
+				Values:   []string{value},
+			})
+		}
+
+		nodeSelectorTerms = append(nodeSelectorTerms, corev1.NodeSelectorTerm{
+			MatchExpressions: matchExpressions,
+		})
+	}
+
+	return &corev1.Affinity{
+		NodeAffinity: &corev1.NodeAffinity{
+			RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{NodeSelectorTerms: nodeSelectorTerms},
+		},
+	}
 }

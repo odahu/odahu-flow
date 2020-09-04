@@ -63,7 +63,7 @@ var (
 	nodeSelector    = map[string]string{"node-key": "node-value"}
 
 	mtNamespacedName         = types.NamespacedName{Name: mtName, Namespace: testNamespace}
-	expectedRequest          = reconcile.Request{NamespacedName: mtNamespacedName}
+	expectedTrainingRequest  = reconcile.Request{NamespacedName: mtNamespacedName}
 	testResValue             = "5"
 	testToolchainIntegration = &training_apis.ToolchainIntegration{
 		ID: testToolchainIntegrationID,
@@ -377,8 +377,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -436,8 +436,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -491,8 +491,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -517,7 +517,7 @@ func (s *ModelTrainingControllerSuite) createTraining(training *odahuflowv1alpha
 		func() bool {
 			select {
 			case r := <-s.requests:
-				return r == expectedRequest
+				return r == expectedTrainingRequest
 			default:
 				return false
 			}

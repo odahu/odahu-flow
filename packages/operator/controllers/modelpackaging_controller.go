@@ -24,6 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -215,7 +216,10 @@ func (r *ModelPackagingReconciler) reconcileTaskRun(
 		return nil, err
 	}
 
-	tolerations := r.packagingConfig.Tolerations
+	var affinity *corev1.Affinity
+	if len(packagingCR.Spec.NodeSelector) == 0 {
+		affinity = utils.BuildNodeAffinity(r.packagingConfig.NodePools)
+	}
 
 	taskSpec, err := r.generatePackagerTaskSpec(packagingCR, packagingIntegration)
 	if err != nil {
@@ -234,8 +238,9 @@ func (r *ModelPackagingReconciler) reconcileTaskRun(
 			TaskSpec: taskSpec,
 			Timeout:  &metav1.Duration{Duration: r.packagingConfig.Timeout},
 			PodTemplate: &tektonv1beta1.PodTemplate{
-				NodeSelector: r.packagingConfig.NodeSelector,
-				Tolerations:  tolerations,
+				NodeSelector: packagingCR.Spec.NodeSelector,
+				Tolerations:  r.packagingConfig.Tolerations,
+				Affinity:     affinity,
 			},
 		},
 	}

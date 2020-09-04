@@ -60,12 +60,10 @@ var (
 )
 
 type MtValidator struct {
-	mtRepository   mt_repository.ToolchainRepository
-	connRepository conn_repository.Repository
-	//outputConnectionName string
+	mtRepository    mt_repository.ToolchainRepository
+	connRepository  conn_repository.Repository
 	gpuResourceName string
 	trainingConfig  config.ModelTrainingConfig
-	//defaultResources     odahuflowv1alpha1.ResourceRequirements
 }
 
 func NewMtValidator(
