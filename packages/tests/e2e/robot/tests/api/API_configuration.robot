@@ -18,6 +18,5 @@ Test Timeout        5 minutes
 
 *** Test Cases ***
 Get configuration
-    [Documentation]  create git connection and check that one exists
     ${result}                           Call API  config get
     should not be equal as strings      ${result}  ${EMPTY}
