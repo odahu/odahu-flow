@@ -31,6 +31,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -88,6 +89,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, k8sClient)
 
 	connService := conn_service.NewService(connRepository)
+	trainService := mt_service.NewService(trainRepo, db)
 
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
@@ -106,7 +108,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		trainingRouteGroup,
 		cfg.Training,
 		cfg.Common.ResourceGPUName,
-		trainRepo, toolchainRepo, connRepository, trainKubeClient)
+		trainService, toolchainRepo, connRepository, trainKubeClient)
 
 	training.ConfigureToolchainRoutes(
 		trainingRouteGroup, toolchainRepo,
