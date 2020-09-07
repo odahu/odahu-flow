@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -25,33 +26,29 @@ type TrainingRepo struct {
 	DB *sql.DB
 }
 
-func (repo TrainingRepo) GetModelTraining(name string) (*training.ModelTraining, error) {
+func (repo TrainingRepo) GetModelTraining(ctx context.Context, qrr utils.Querier, id string) (*training.ModelTraining, error) {
 
 	mt := new(training.ModelTraining)
 
-	err := repo.DB.QueryRow(
+	err := qrr.QueryRowContext(
+		ctx,
 		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelTrainingTable),
-		name,
+		id,
 	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 
 	switch {
 	case err == sql.ErrNoRows:
-
-		return nil, odahuErrors.NotFoundError{Entity: name}
+		return nil, odahuErrors.NotFoundError{Entity: id}
 	case err != nil:
 		log.Error(err, "error during sql query")
-
 		return nil, err
 	default:
-
 		return mt, nil
 	}
 
 }
 
-func (repo TrainingRepo) GetModelTrainingList(options ...filter.ListOption) (
-	[]training.ModelTraining, error,
-) {
+func (repo TrainingRepo) GetModelTrainingList(ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]training.ModelTraining, error) {
 
 	listOptions := &filter.ListOptions{
 		Filter: nil,
@@ -75,7 +72,7 @@ func (repo TrainingRepo) GetModelTrainingList(options ...filter.ListOption) (
 		return nil, err
 	}
 
-	rows, err := repo.DB.Query(stmt, args...)
+	rows, err := qrr.QueryContext(ctx, stmt, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,29 +103,37 @@ func (repo TrainingRepo) GetModelTrainingList(options ...filter.ListOption) (
 
 }
 
-func (repo TrainingRepo) DeleteModelTraining(name string) error {
+func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, qrr utils.Querier, id string) error {
 
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := repo.GetModelTraining(name)
+	stmt, args, err := sq.Delete(ModelTrainingTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return err
 	}
 
-	// If exists, delete it
+	result, err := qrr.ExecContext(ctx, stmt, args...)
 
-	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", ModelTrainingTable)
-	_, err = repo.DB.Exec(sqlStatement, name)
 	if err != nil {
 		return err
 	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: id}
+	}
+
 	return nil
+
 }
 
-func (repo TrainingRepo) SetDeletionMark(id string, value bool) error {
-	return utils.SetDeletionMark(repo.DB, ModelTrainingTable, id, value)
+func (repo TrainingRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
+	return utils.SetDeletionMark(ctx, repo.DB, ModelTrainingTable, id, value)
 }
 
-func (repo TrainingRepo) UpdateModelTraining(mt *training.ModelTraining) error {
+func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
 
 	mt.Status.State = ""
 
@@ -143,7 +148,7 @@ func (repo TrainingRepo) UpdateModelTraining(mt *training.ModelTraining) error {
 		return err
 	}
 
-	result, err := repo.DB.Exec(stmt, args...)
+	result, err := qrr.ExecContext(ctx, stmt, args...)
 	if err != nil {
 		return err
 	}
@@ -160,7 +165,7 @@ func (repo TrainingRepo) UpdateModelTraining(mt *training.ModelTraining) error {
 	return nil
 }
 
-func (repo TrainingRepo) UpdateModelTrainingStatus(id string, s v1alpha1.ModelTrainingStatus) error {
+func (repo TrainingRepo) UpdateModelTrainingStatus(ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelTrainingStatus) error {
 
 	stmt, args, err := sq.Update(ModelTrainingTable).
 		Set("status", s).
@@ -172,7 +177,7 @@ func (repo TrainingRepo) UpdateModelTrainingStatus(id string, s v1alpha1.ModelTr
 		return err
 	}
 
-	result, err := repo.DB.Exec(stmt, args...)
+	result, err := qrr.ExecContext(ctx, stmt, args...)
 	if err != nil {
 		return err
 	}
@@ -189,11 +194,23 @@ func (repo TrainingRepo) UpdateModelTrainingStatus(id string, s v1alpha1.ModelTr
 	return nil
 }
 
-func (repo TrainingRepo) CreateModelTraining(mt *training.ModelTraining) error {
+func (repo TrainingRepo) CreateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
 
-	_, err := repo.DB.Exec(
-		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelTrainingTable),
-		mt.ID, mt.Spec, mt.Status,
+	stmt, args, err := sq.
+		Insert(ModelTrainingTable).
+		Columns("id", "spec", "status").
+		Values(mt.ID, mt.Spec, mt.Status).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = qrr.ExecContext(
+		ctx,
+		stmt,
+		args...
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
