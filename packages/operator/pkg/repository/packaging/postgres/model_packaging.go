@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -125,7 +126,7 @@ func (repo PackagingRepo) DeleteModelPackaging(name string) error {
 }
 
 func (repo PackagingRepo) SetDeletionMark(id string, value bool) error {
-	return utils.SetDeletionMark(repo.DB, ModelPackagingTable, id, value)
+	return utils.SetDeletionMark(context.TODO(), repo.DB, ModelPackagingTable, id, value)
 }
 
 func (repo PackagingRepo) UpdateModelPackaging(mp *packaging.ModelPackaging) error {
