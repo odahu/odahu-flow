@@ -71,7 +71,7 @@ type ModelTrainingSpec struct {
 	// Input data for a training
 	Data []DataBindingDir `json:"data,omitempty"`
 	// Node selector for specifying a node pool
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // The function returns true if one of the GPU resources is set up.

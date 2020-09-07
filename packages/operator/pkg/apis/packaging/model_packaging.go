@@ -53,7 +53,7 @@ type ModelPackagingSpec struct {
 	// Permitted connection types are defined by specific PackagingIntegration
 	OutputConnection string `json:"outputConnection,omitempty"`
 	// Node selector for specifying a node pool
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 func (piSpec ModelPackagingSpec) Value() (driver.Value, error) {
