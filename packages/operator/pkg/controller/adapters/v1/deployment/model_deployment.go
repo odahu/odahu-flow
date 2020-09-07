@@ -1,7 +1,7 @@
 package deployment
 
 import (
-	"github.com/mitchellh/hashstructure"
+	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	deployment_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/types"
@@ -30,11 +30,11 @@ func (k KubeEntity) GetID() string {
 }
 
 func (k KubeEntity) GetSpecHash() (uint64, error) {
-	return hashstructure.Hash(k.obj.Spec, nil)
+	return hashutil.Hash(k.obj.Spec)
 }
 
 func (k KubeEntity) GetStatusHash() (uint64, error) {
-	return hashstructure.Hash(k.obj.Status, nil)
+	return hashutil.Hash(k.obj.Status)
 }
 
 func (k KubeEntity) Delete() error {
@@ -60,11 +60,11 @@ func (s *StorageEntity) GetID() string {
 }
 
 func (s *StorageEntity) GetSpecHash() (uint64, error) {
-	return hashstructure.Hash(s.obj.Spec, nil)
+	return hashutil.Hash(s.obj.Spec)
 }
 
 func (s *StorageEntity) GetStatusHash() (uint64, error) {
-	return hashstructure.Hash(s.obj.Status, nil)
+	return hashutil.Hash(s.obj.Status)
 }
 
 func (s *StorageEntity) IsFinished() bool {
