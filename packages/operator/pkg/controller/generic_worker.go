@@ -49,11 +49,14 @@ func (r *GenericWorker) SyncStatus(re types.RuntimeEntity, se types.StorageEntit
 		if odahu_errors.IsNotFoundError(err) {
 			return nil
 		}
-		eLog.Error(err, "Unable to update tStorage re")
+		if odahu_errors.IsSpecWasChangedError(err) {
+			return nil
+		}
+		eLog.Error(err, "Unable to report status")
 		return err
 	}
 
-	eLog.Info("Storage re was maybe updated")
+	eLog.Info("Storage entity was maybe updated")
 	return nil
 }
 

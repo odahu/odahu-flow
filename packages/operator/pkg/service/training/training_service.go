@@ -12,10 +12,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-const (
-	TagKey = "name"
-)
-
 var (
 	txOptions = &sql.TxOptions{
 		Isolation: sql.LevelRepeatableRead,
@@ -35,12 +31,6 @@ type Service interface {
 	CreateModelTraining(mt *training.ModelTraining) error
 }
 
-type MTFilter struct {
-	Toolchain    []string `name:"toolchain" postgres:"spec->>'toolchain'"`
-	ModelName    []string `name:"model_name" postgres:"spec->'model'->>'name'"`
-	ModelVersion []string `name:"model_version" postgres:"spec->'model'->>'version'"`
-}
-
 type serviceImpl struct {
 	db   *sql.DB
 	// Repository that has "database/sql" underlying storage
@@ -53,22 +43,24 @@ func (s serviceImpl) GetModelTraining(id string) (*training.ModelTraining, error
 }
 
 func (s serviceImpl) GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error) {
-	return s.repo.GetModelTrainingList(nil, nil)
+	return s.repo.GetModelTrainingList(context.TODO(), s.db, options...)
 }
 
 func (s serviceImpl) DeleteModelTraining(id string) error {
-	return s.repo.DeleteModelTraining(nil, nil, id)
+	return s.repo.DeleteModelTraining(context.TODO(), s.db, id)
 }
 
 func (s serviceImpl) SetDeletionMark(id string, value bool) error {
-	return s.repo.SetDeletionMark(nil, nil, id, value)
+	return s.repo.SetDeletionMark(context.TODO(), s.db, id, value)
 }
 
 func (s serviceImpl) UpdateModelTraining(mt *training.ModelTraining) error {
-	return s.repo.UpdateModelTraining(nil, nil, mt)
+	return s.repo.UpdateModelTraining(context.TODO(), s.db, mt)
 }
 
-func (s serviceImpl) UpdateModelTrainingStatus(id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec) error {
+func (s serviceImpl) UpdateModelTrainingStatus(
+	id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
+) error {
 
 	ctx := context.TODO()
 
@@ -112,7 +104,7 @@ func (s serviceImpl) UpdateModelTrainingStatus(id string, status v1alpha1.ModelT
 }
 
 func (s serviceImpl) CreateModelTraining(mt *training.ModelTraining) error {
-	return s.repo.CreateModelTraining(nil, nil, mt)
+	return s.repo.CreateModelTraining(context.TODO(), s.db, mt)
 }
 
 func NewService(repo repo.Repository, db *sql.DB) Service {

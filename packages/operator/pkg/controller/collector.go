@@ -9,6 +9,7 @@ import (
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
@@ -21,7 +22,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	kConfig := kubeMgr.GetConfig()
 
 	if cfg.Training.Enabled {
-		trainRepo := train_repo.TrainingRepo{DB: db}
+		trainService := train_service.NewService(train_repo.TrainingRepo{DB: db}, db)
 		trainKubeClient := train_kube_client.NewClient(
 			cfg.Training.Namespace,
 			cfg.Training.ToolchainIntegrationNamespace,
@@ -31,7 +32,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 
 		trainWorker := NewGenericWorker(
 			"training", cfg.Common.LaunchPeriod,
-			training.NewAdapter(trainRepo, trainKubeClient, kubeMgr),
+			training.NewAdapter(trainService, trainKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&trainWorker)
 	}
