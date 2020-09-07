@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -129,7 +130,7 @@ func (repo DeploymentRepo) DeleteModelDeployment(name string) error {
 }
 
 func (repo DeploymentRepo) SetDeletionMark(id string, value bool) error {
-	return utils.SetDeletionMark(repo.DB, ModelDeploymentTable, id, value)
+	return utils.SetDeletionMark(context.TODO(), repo.DB, ModelDeploymentTable, id, value)
 }
 
 func (repo DeploymentRepo) UpdateModelDeployment(md *deployment.ModelDeployment) error {

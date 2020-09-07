@@ -47,7 +47,7 @@ func TransformFilter(sqlBuilder sq.SelectBuilder, filter interface{}) sq.SelectB
 	return sqlBuilder
 }
 
-func SetDeletionMark(db *sql.DB, tableName string, id string, value bool) error {
+func SetDeletionMark(ctx context.Context, qrr Querier, tableName string, id string, value bool) error {
 	stmt, args, err := sq.
 		Update(tableName).
 		Set(deletionMarkColumn, value).
@@ -57,7 +57,7 @@ func SetDeletionMark(db *sql.DB, tableName string, id string, value bool) error 
 	if err != nil {
 		return err
 	}
-	res, err := db.Exec(stmt, args...)
+	res, err := qrr.ExecContext(ctx, stmt, args...)
 	if err != nil {
 		return err
 	}
