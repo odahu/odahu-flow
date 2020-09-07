@@ -47,11 +47,6 @@ const (
 	modelBuildImage = "model-image:builder"
 	toolchainImage  = "model-image:toolchain"
 
-	gpuTolerationKey      = "gpu-key"
-	gpuTolerationValue    = "gpu-value"
-	gpuTolerationOperator = "gpu-operator"
-	gpuTolerationEffect   = "gpu-effect"
-
 	tolerationKey      = "key"
 	tolerationValue    = "value"
 	tolerationOperator = "operator"

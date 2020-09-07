@@ -122,11 +122,11 @@ type ModelTrainingStatus struct {
 	Modifiable `json:",inline"`
 }
 
-func (in ModelTrainingSpec) Value() (driver.Value, error) {
+func (in ModelTrainingSpec) Value() (driver.Value, error) { //nolint
 	return json.Marshal(in)
 }
 
-func (in *ModelTrainingSpec) Scan(value interface{}) error {
+func (in *ModelTrainingSpec) Scan(value interface{}) error { //nolint
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
