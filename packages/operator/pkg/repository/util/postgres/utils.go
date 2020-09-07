@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -72,4 +73,11 @@ func SetDeletionMark(db *sql.DB, tableName string, id string, value bool) error 
 		return fmt.Errorf("more that one rows found for ID %s", id)
 	}
 	return nil
+}
+
+
+type Querier interface {
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 }
