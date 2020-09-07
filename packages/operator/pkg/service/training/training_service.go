@@ -21,14 +21,15 @@ var (
 )
 
 type Service interface {
-	GetModelTraining(id string) (*training.ModelTraining, error)
-	GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error)
-	DeleteModelTraining(id string) error
-	SetDeletionMark(id string, value bool) error
-	UpdateModelTraining(mt *training.ModelTraining) error
+	GetModelTraining(ctx context.Context, id string) (*training.ModelTraining, error)
+	GetModelTrainingList(ctx context.Context, options ...filter.ListOption) ([]training.ModelTraining, error)
+	DeleteModelTraining(ctx context.Context, id string) error
+	SetDeletionMark(ctx context.Context, id string, value bool) error
+	UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error
 	// Try to update status. If spec in storage differs from spec snapshot then update does not happen
-	UpdateModelTrainingStatus(id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec) error
-	CreateModelTraining(mt *training.ModelTraining) error
+	UpdateModelTrainingStatus(
+		ctx context.Context, id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec) error
+	CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error
 }
 
 type serviceImpl struct {
@@ -37,32 +38,31 @@ type serviceImpl struct {
 	repo repo.Repository
 }
 
-func (s serviceImpl) GetModelTraining(id string) (*training.ModelTraining, error) {
-	ctx := context.TODO()
+func (s serviceImpl) GetModelTraining(ctx context.Context, id string) (*training.ModelTraining, error) {
 	return s.repo.GetModelTraining(ctx, s.db, id)
 }
 
-func (s serviceImpl) GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error) {
-	return s.repo.GetModelTrainingList(context.TODO(), s.db, options...)
+func (s serviceImpl) GetModelTrainingList(
+	ctx context.Context, options ...filter.ListOption,
+) ([]training.ModelTraining, error) {
+	return s.repo.GetModelTrainingList(ctx, s.db, options...)
 }
 
-func (s serviceImpl) DeleteModelTraining(id string) error {
-	return s.repo.DeleteModelTraining(context.TODO(), s.db, id)
+func (s serviceImpl) DeleteModelTraining(ctx context.Context, id string) error {
+	return s.repo.DeleteModelTraining(ctx, s.db, id)
 }
 
-func (s serviceImpl) SetDeletionMark(id string, value bool) error {
-	return s.repo.SetDeletionMark(context.TODO(), s.db, id, value)
+func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
+	return s.repo.SetDeletionMark(ctx, s.db, id, value)
 }
 
-func (s serviceImpl) UpdateModelTraining(mt *training.ModelTraining) error {
-	return s.repo.UpdateModelTraining(context.TODO(), s.db, mt)
+func (s serviceImpl) UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
+	return s.repo.UpdateModelTraining(ctx, s.db, mt)
 }
 
 func (s serviceImpl) UpdateModelTrainingStatus(
-	id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
+	ctx context.Context, id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
 ) error {
-
-	ctx := context.TODO()
 
 	tx, err := s.db.BeginTx(ctx, txOptions)
 	defer func() {
@@ -103,8 +103,8 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 	return tx.Commit()
 }
 
-func (s serviceImpl) CreateModelTraining(mt *training.ModelTraining) error {
-	return s.repo.CreateModelTraining(context.TODO(), s.db, mt)
+func (s serviceImpl) CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
+	return s.repo.CreateModelTraining(ctx, s.db, mt)
 }
 
 func NewService(repo repo.Repository, db *sql.DB) Service {

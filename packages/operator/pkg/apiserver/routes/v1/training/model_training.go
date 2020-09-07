@@ -80,7 +80,7 @@ type ModelTrainingController struct {
 func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
 
-	mt, err := mtc.trainService.GetModelTraining(mtID)
+	mt, err := mtc.trainService.GetModelTraining(c.Request.Context(), mtID)
 	if err != nil {
 		logMT.Error(err, fmt.Sprintf("Retrieving of %s model training", mtID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -114,7 +114,9 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 		return
 	}
 
-	mtList, err := mtc.trainService.GetModelTrainingList(filter.ListFilter(f), filter.Size(size), filter.Page(page))
+	mtList, err := mtc.trainService.GetModelTrainingList(
+		c.Request.Context(), filter.ListFilter(f), filter.Size(size), filter.Page(page),
+	)
 	if err != nil {
 		logMT.Error(err, "Retrieving list of model trainings")
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -151,7 +153,7 @@ func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 		return
 	}
 
-	if err := mtc.trainService.CreateModelTraining(&mt); err != nil {
+	if err := mtc.trainService.CreateModelTraining(c.Request.Context(), &mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -188,7 +190,7 @@ func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 		return
 	}
 
-	if err := mtc.trainService.UpdateModelTraining(&mt); err != nil {
+	if err := mtc.trainService.UpdateModelTraining(c.Request.Context(), &mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -245,7 +247,7 @@ func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 func (mtc *ModelTrainingController) deleteMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
 
-	if err := mtc.trainService.DeleteModelTraining(mtID); err != nil {
+	if err := mtc.trainService.DeleteModelTraining(c.Request.Context(), mtID); err != nil {
 		logMT.Error(err, fmt.Sprintf("Deletion of %s model training is failed", mtID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
