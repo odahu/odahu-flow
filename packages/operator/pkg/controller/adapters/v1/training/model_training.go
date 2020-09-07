@@ -1,7 +1,6 @@
 package training
 
 import (
-	"github.com/mitchellh/hashstructure"
 	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	training_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/types"
@@ -9,6 +8,7 @@ import (
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	ctrl "sigs.k8s.io/controller-runtime"
+	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -36,11 +36,11 @@ func (k KubeEntity) GetID() string {
 }
 
 func (k KubeEntity) GetSpecHash() (uint64, error) {
-	return hashstructure.Hash(k.obj.Spec, nil)
+	return hashutil.Hash(k.obj.Spec)
 }
 
 func (k KubeEntity) GetStatusHash() (uint64, error) {
-	return hashstructure.Hash(k.obj.Status, nil)
+	return hashutil.Hash(k.obj.Status)
 }
 
 func (k KubeEntity) Delete() error {
@@ -67,11 +67,11 @@ func (s *StorageEntity) GetID() string {
 }
 
 func (s *StorageEntity) GetSpecHash() (uint64, error) {
-	return hashstructure.Hash(s.obj.Spec, nil)
+	return hashutil.Hash(s.obj.Spec)
 }
 
 func (s *StorageEntity) GetStatusHash() (uint64, error) {
-	return hashstructure.Hash(s.obj.Status, nil)
+	return hashutil.Hash(s.obj.Status)
 }
 
 func (s *StorageEntity) IsFinished() bool {
