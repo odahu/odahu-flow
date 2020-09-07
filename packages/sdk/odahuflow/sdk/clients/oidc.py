@@ -26,6 +26,20 @@ WELL_KNOWN_CONFIGURATION_URL = '.well-known/openid-configuration'
 TOKEN_ENDPOINT = 'token_endpoint'
 
 
+def fetch_openid_configuration(issuer: str) -> str:
+    """
+    returns token_endpoint (candidate for API_ISSUING_URL variable)
+    from ISSUER_URL variable
+
+    :param issuer: ISSUER_URL config variable
+    :return: token_endpoint
+    """
+    conf = OpenIdProviderConfiguration(issuer)
+    conf.fetch_configuration()
+
+    return conf.token_endpoint
+
+
 class OpenIdProviderConfiguration:
     """
     OpenID Provider Configuration according to https://openid.net/specs/openid-connect-discovery-1_0.html
