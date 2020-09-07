@@ -19,23 +19,24 @@ package training
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	mt_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	mt_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 )
 
 func ConfigureRoutes(
 	routeGroup *gin.RouterGroup,
 	config config.ModelTrainingConfig,
 	gpuResourceName string,
-	trainRepo mt_repository.Repository,
+	trainService mt_service.Service,
 	toolchainRepo mt_repository.ToolchainRepository,
 	connRepo conn_repository.Repository,
 	trainKubeClient mt_kube_client.Client) {
 
 	mtController := ModelTrainingController{
-		trainRepo:  trainRepo,
-		kubeClient: trainKubeClient,
+		trainService: trainService,
+		kubeClient:   trainKubeClient,
 		validator: NewMtValidator(
 			toolchainRepo,
 			connRepo,

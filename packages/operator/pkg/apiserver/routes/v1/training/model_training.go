@@ -27,6 +27,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -60,9 +61,9 @@ func init() {
 }
 
 type ModelTrainingController struct {
-	kubeClient kube_client.Client
-	trainRepo  mt_repository.Repository
-	validator  *MtValidator
+	kubeClient   kube_client.Client
+	trainService mt_service.Service
+	validator    *MtValidator
 }
 
 // @Summary Get a Model Training
@@ -79,7 +80,7 @@ type ModelTrainingController struct {
 func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
 
-	mt, err := mtc.trainRepo.GetModelTraining(mtID)
+	mt, err := mtc.trainService.GetModelTraining(mtID)
 	if err != nil {
 		logMT.Error(err, fmt.Sprintf("Retrieving of %s model training", mtID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -113,11 +114,7 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 		return
 	}
 
-	mtList, err := mtc.trainRepo.GetModelTrainingList(
-		filter.ListFilter(f),
-		filter.Size(size),
-		filter.Page(page),
-	)
+	mtList, err := mtc.trainService.GetModelTrainingList(filter.ListFilter(f), filter.Size(size), filter.Page(page))
 	if err != nil {
 		logMT.Error(err, "Retrieving list of model trainings")
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -154,7 +151,7 @@ func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 		return
 	}
 
-	if err := mtc.trainRepo.CreateModelTraining(&mt); err != nil {
+	if err := mtc.trainService.CreateModelTraining(&mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -191,7 +188,7 @@ func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 		return
 	}
 
-	if err := mtc.trainRepo.UpdateModelTraining(&mt); err != nil {
+	if err := mtc.trainService.UpdateModelTraining(&mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -248,7 +245,7 @@ func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 func (mtc *ModelTrainingController) deleteMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
 
-	if err := mtc.trainRepo.DeleteModelTraining(mtID); err != nil {
+	if err := mtc.trainService.DeleteModelTraining(mtID); err != nil {
 		logMT.Error(err, fmt.Sprintf("Deletion of %s model training is failed", mtID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
