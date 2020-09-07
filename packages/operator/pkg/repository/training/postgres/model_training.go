@@ -26,7 +26,9 @@ type TrainingRepo struct {
 	DB *sql.DB
 }
 
-func (repo TrainingRepo) GetModelTraining(ctx context.Context, qrr utils.Querier, id string) (*training.ModelTraining, error) {
+func (repo TrainingRepo) GetModelTraining(
+	ctx context.Context, qrr utils.Querier, id string,
+) (*training.ModelTraining, error) {
 
 	mt := new(training.ModelTraining)
 
@@ -48,7 +50,9 @@ func (repo TrainingRepo) GetModelTraining(ctx context.Context, qrr utils.Querier
 
 }
 
-func (repo TrainingRepo) GetModelTrainingList(ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]training.ModelTraining, error) {
+func (repo TrainingRepo) GetModelTrainingList(
+	ctx context.Context, qrr utils.Querier, options ...filter.ListOption,
+) ([]training.ModelTraining, error) {
 
 	listOptions := &filter.ListOptions{
 		Filter: nil,
@@ -165,7 +169,9 @@ func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Quer
 	return nil
 }
 
-func (repo TrainingRepo) UpdateModelTrainingStatus(ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelTrainingStatus) error {
+func (repo TrainingRepo) UpdateModelTrainingStatus(
+	ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelTrainingStatus,
+) error {
 
 	stmt, args, err := sq.Update(ModelTrainingTable).
 		Set("status", s).

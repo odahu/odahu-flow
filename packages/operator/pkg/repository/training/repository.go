@@ -30,7 +30,9 @@ const (
 
 type Repository interface {
 	GetModelTraining(ctx context.Context, qrr util.Querier, id string) (*training.ModelTraining, error)
-	GetModelTrainingList(ctx context.Context, qrr util.Querier, options ...filter.ListOption) ([]training.ModelTraining, error)
+	GetModelTrainingList(
+		ctx context.Context, qrr util.Querier, options ...filter.ListOption,
+	) ([]training.ModelTraining, error)
 	DeleteModelTraining(ctx context.Context, qrr util.Querier, id string) error
 	SetDeletionMark(ctx context.Context, qrr util.Querier, id string, value bool) error
 	UpdateModelTraining(ctx context.Context, qrr util.Querier, mt *training.ModelTraining) error

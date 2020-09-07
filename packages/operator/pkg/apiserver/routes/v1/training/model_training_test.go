@@ -557,7 +557,7 @@ func (s *ModelTrainingRouteSuite) TestDeleteMT() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
 
-	mtList, err := s.trainService.GetModelTrainingList(nil)
+	mtList, err := s.trainService.GetModelTrainingList()
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mtList).To(HaveLen(0))
 }
