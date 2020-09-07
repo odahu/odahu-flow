@@ -41,7 +41,8 @@ def _reset_credentials():
                        API_ISSUING_URL=None,
                        ODAHUFLOWCTL_OAUTH_CLIENT_ID=None,
                        ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=None,
-                       ISSUER_URL=None)
+                       ISSUER_URL=None,
+                       MODEL_HOST=None)
 
 
 def fetch_openid_conf(issuer: str) -> None:
