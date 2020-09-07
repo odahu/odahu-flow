@@ -66,15 +66,6 @@ var (
 			DefaultImage: toolchainImage,
 		},
 	}
-
-	tolerations = []v1.Toleration{
-		{
-			Key:      tolerationKey,
-			Operator: tolerationOperator,
-			Value:    tolerationValue,
-			Effect:   tolerationEffect,
-		},
-	}
 )
 
 type ModelTrainingControllerSuite struct {
