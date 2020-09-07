@@ -41,6 +41,7 @@ Create Model Training, mlflow toolchain, default
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.default.yaml
     @{exp_result}               create list  running  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
+    Get Logs                    training  ${TRAIN_MLFLOW_DEFAULT}
     Limits resources should be equal     ${result}  250m  ${NONE}  256Mi
     Requested resources should be equal  ${result}  125m  ${NONE}  128Mi
 
@@ -49,6 +50,7 @@ Update Model Training, mlflow toolchain, default
     ${result}                   Call API  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=@{exp_result}
+    Get Logs                    training  ${TRAIN_MLFLOW_DEFAULT}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
     Limits resources should be equal     ${result}  3024m  ${NONE}  4024Mi
@@ -69,6 +71,7 @@ Create packaging
     Call API                    packaging post  ${RES_DIR}/valid/packaging.create.yaml  ${artifact_name}
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  packaging  entity=${PACKAGING}  exp_result=@{exp_result}
+    Get Logs                    packaging  ${PACKAGING}
     Status State Should Be      ${result}  succeeded
 
 Update packaging
@@ -78,6 +81,7 @@ Update packaging
     should be equal             ${result_pack.spec.integration_name}  docker-rest
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  packaging  entity=${PACKAGING}  exp_result=@{exp_result}
+    Get Logs                    packaging  ${PACKAGING}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
