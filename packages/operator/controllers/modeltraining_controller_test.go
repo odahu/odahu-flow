@@ -46,11 +46,6 @@ const (
 
 	modelBuildImage = "model-image:builder"
 	toolchainImage  = "model-image:toolchain"
-
-	tolerationKey      = "key"
-	tolerationValue    = "value"
-	tolerationOperator = "operator"
-	tolerationEffect   = "effect"
 )
 
 var (
