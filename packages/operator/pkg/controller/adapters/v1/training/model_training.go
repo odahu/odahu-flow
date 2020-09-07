@@ -1,6 +1,7 @@
 package training
 
 import (
+	"context"
 	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	training_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/types"
@@ -48,7 +49,7 @@ func (k KubeEntity) Delete() error {
 }
 
 func (k KubeEntity) ReportStatus() error {
-	return k.service.UpdateModelTrainingStatus(k.obj.ID, k.obj.Status, k.obj.Spec)
+	return k.service.UpdateModelTrainingStatus(context.TODO(), k.obj.ID, k.obj.Status, k.obj.Spec)
 }
 
 func (k KubeEntity) IsDeleting() bool {
@@ -95,7 +96,7 @@ func (s *StorageEntity) DeleteInRuntime() error {
 }
 
 func (s *StorageEntity) DeleteInDB() error {
-	return s.service.DeleteModelTraining(s.GetID())
+	return s.service.DeleteModelTraining(context.TODO(), s.GetID())
 }
 
 
@@ -124,7 +125,7 @@ func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 		return ctrl.Result{}, nil
 	}
 
-	seObj, err := r.service.GetModelTraining(ID)
+	seObj, err := r.service.GetModelTraining(context.TODO(), ID)
 	if err != nil && !odahu_errors.IsNotFoundError(err) {
 		eLog.Error(err, "Unable to get entity from storage")
 		return result, err
@@ -165,7 +166,7 @@ func NewAdapter(service training.Service, kubeClient kube_client.Client, mgr ctr
 func (s *Adapter) ListStorage() ([]types.StorageEntity, error) {
 
 	result := make([]types.StorageEntity, 0)
-	enList, err := s.service.GetModelTrainingList()
+	enList, err := s.service.GetModelTrainingList(context.TODO())
 	if err != nil {
 		return result, err
 	}
@@ -213,7 +214,7 @@ func (s *Adapter) GetFromRuntime(id string) (types.RuntimeEntity, error) {
 }
 
 func (s *Adapter) GetFromStorage(id string) (types.StorageEntity, error) {
-	mt, err := s.service.GetModelTraining(id)
+	mt, err := s.service.GetModelTraining(context.TODO(), id)
 	if err != nil {
 		return nil, err
 	}
