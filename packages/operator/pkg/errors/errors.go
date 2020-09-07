@@ -82,3 +82,18 @@ func (iee InvalidEntityError) Error() string {
 
 	return fmt.Sprintf("entity %q is invalid; errors: %s", iee.Entity, strings.Join(errorStrings, ", "))
 }
+
+
+// Error means that spec of entity was changed. Could be raised in operations that require such behaviour
+type SpecWasChangedError struct {
+	Entity string
+}
+
+func (swc SpecWasChangedError) Error() string {
+	return fmt.Sprintf("entity %q spec was changed", swc.Entity)
+}
+
+func IsSpecWasChangedError(err error) bool {
+	_, ok := err.(SpecWasChangedError)
+	return ok
+}
