@@ -247,7 +247,7 @@ class Authenticator:
         )
         if not login_result:
             raise IncorrectClientCredentials(
-                'Client credentials in not correct. \n'
+                'Client credentials are not correct.\n'
                 'Please login again'
             )
         else:
