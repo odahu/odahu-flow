@@ -35,6 +35,7 @@ import requests.exceptions
 import odahuflow.sdk.config
 from odahuflow.sdk.clients.oauth_handler import OAuthLoginResult, do_client_cred_authentication, do_refresh_token, \
     start_oauth2_callback_handler
+from odahuflow.sdk.clients.oidc import fetch_openid_configuration
 from odahuflow.sdk.config import update_config_file
 from odahuflow.sdk.definitions import API_VERSION
 
@@ -165,7 +166,8 @@ class Authenticator:
 
     def __init__(self,
                  client_id: str, client_secret: str, non_interactive: bool, base_url: str,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN):
+                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
 
         self._client_id = client_id
         self._client_secret = client_secret
@@ -173,6 +175,8 @@ class Authenticator:
         self._base_url = base_url
         self._interactive_login_finished = threading.Event()
         self._token = token
+        self._issuer_url = issuer_url
+        self._api_issuing_url = fetch_openid_configuration(self._issuer_url)
 
         # Force if set
         if odahuflow.sdk.config.ODAHUFLOWCTL_NONINTERACTIVE:
@@ -204,7 +208,7 @@ class Authenticator:
         :return: None if success, IncorrectAuthorizationToken exception otherwise
         """
 
-        # If it is a error after refreshed token - fail
+        # If it is an error after refreshed token - fail
         if limit_stack:
             raise IncorrectAuthorizationToken(
                 f'{self._credentials_error_status} even after refreshing. \n'
@@ -215,7 +219,7 @@ class Authenticator:
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
             self._login_with_refresh_token()
-        elif self._client_id and self._client_secret and odahuflow.sdk.config.API_ISSUING_URL:
+        elif self._client_id and self._client_secret and self._api_issuing_url:
             self._login_with_client_credentials()
         elif self._interactive_mode_enabled:
             # Start interactive flow
@@ -242,7 +246,7 @@ class Authenticator:
 
     def _login_with_client_credentials(self):
         login_result = do_client_cred_authentication(
-            issue_token_url=odahuflow.sdk.config.API_ISSUING_URL, client_id=self._client_id,
+            issue_token_url=self._api_issuing_url, client_id=self._client_id,
             client_secret=self._client_secret
         )
         if not login_result:
@@ -287,6 +291,7 @@ class Authenticator:
                            API_TOKEN=login_result.id_token,
                            API_REFRESH_TOKEN=login_result.refresh_token,
                            API_ACCESS_TOKEN=login_result.access_token,
+                           ISSUER_URL=self._issuer_url,
                            API_ISSUING_URL=login_result.issuing_url)
 
     def _after_login(self, login_result: OAuthLoginResult) -> None:
@@ -332,7 +337,8 @@ class RemoteAPIClient:
                  client_secret: Optional[str] = '',
                  retries: Optional[int] = 3,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
-                 non_interactive: Optional[bool] = True):
+                 non_interactive: Optional[bool] = True,
+                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
         """
         Build client
 
@@ -346,7 +352,7 @@ class RemoteAPIClient:
         """
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
-        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
+        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)
         self.timeout = timeout
         self.retries = retries
 
@@ -479,7 +485,8 @@ class AsyncRemoteAPIClient:
                  client_secret: Optional[str] = '',
                  retries: Optional[int] = 3,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
-                 non_interactive: Optional[bool] = True):
+                 non_interactive: Optional[bool] = True,
+                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
         """
         Build client
 
@@ -493,7 +500,7 @@ class AsyncRemoteAPIClient:
         """
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
-        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
+        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)
         self.timeout = timeout
         self.retries = retries
 
