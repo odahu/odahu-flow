@@ -30,33 +30,37 @@ type DeploymentRepo struct {
 	DB *sql.DB
 }
 
-func (repo DeploymentRepo) GetModelDeployment(name string) (*deployment.ModelDeployment, error) {
+func (repo DeploymentRepo) GetModelDeployment(
+	ctx context.Context, qrr utils.Querier, id string) (*deployment.ModelDeployment, error) {
 
 	mt := new(deployment.ModelDeployment)
 
-	err := repo.DB.QueryRow(
-		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelDeploymentTable),
-		name,
-	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+	q, args, err := sq.
+		Select("id", "spec", "status", "deletionmark").
+		From(ModelDeploymentTable).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	err = qrr.QueryRowContext(ctx, q, args...).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
 
 	switch {
 	case err == sql.ErrNoRows:
-
-		return nil, odahuErrors.NotFoundError{Entity: name}
+		return nil, odahuErrors.NotFoundError{Entity: id}
 	case err != nil:
 		log.Error(err, "error during sql query")
-
 		return nil, err
 	default:
-
 		return mt, nil
 	}
 
 }
 
-func (repo DeploymentRepo) GetModelDeploymentList(options ...filter.ListOption) (
-	[]deployment.ModelDeployment, error,
-) {
+func (repo DeploymentRepo) GetModelDeploymentList(
+	ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]deployment.ModelDeployment, error) {
 
 	listOptions := &filter.ListOptions{
 		Filter: nil,
@@ -80,7 +84,7 @@ func (repo DeploymentRepo) GetModelDeploymentList(options ...filter.ListOption) 
 		return nil, err
 	}
 
-	rows, err := repo.DB.Query(stmt, args...)
+	rows, err := qrr.QueryContext(ctx, stmt, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -111,73 +115,15 @@ func (repo DeploymentRepo) GetModelDeploymentList(options ...filter.ListOption) 
 
 }
 
-func (repo DeploymentRepo) DeleteModelDeployment(name string) error {
+func (repo DeploymentRepo) DeleteModelDeployment(ctx context.Context, qrr utils.Querier, id string) error {
 
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := repo.GetModelDeployment(name)
+	stmt, args, err := sq.Delete(ModelDeploymentTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return err
 	}
 
-	// If exists, delete it
+	result, err := qrr.ExecContext(ctx, stmt, args...)
 
-	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", ModelDeploymentTable)
-	_, err = repo.DB.Exec(sqlStatement, name)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo DeploymentRepo) SetDeletionMark(id string, value bool) error {
-	return utils.SetDeletionMark(context.TODO(), repo.DB, ModelDeploymentTable, id, value)
-}
-
-func (repo DeploymentRepo) UpdateModelDeployment(md *deployment.ModelDeployment) error {
-
-	md.Status.State = ""
-
-	stmt, args, err := sq.Update(ModelDeploymentTable).
-		Set("spec", md.Spec).
-		Set("status", md.Status).
-		Where(sq.Eq{"id": md.ID}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
-	result, err := repo.DB.Exec(stmt, args...)
-	if err != nil {
-		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return odahuErrors.NotFoundError{Entity: md.ID}
-	}
-
-	return nil
-}
-
-func (repo DeploymentRepo) UpdateModelDeploymentStatus(id string, s v1alpha1.ModelDeploymentStatus) error {
-
-	stmt, args, err := sq.Update(ModelDeploymentTable).
-		Set("status", s).
-		Where(sq.Eq{"id": id}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
-	result, err := repo.DB.Exec(stmt, args...)
 	if err != nil {
 		return err
 	}
@@ -194,11 +140,91 @@ func (repo DeploymentRepo) UpdateModelDeploymentStatus(id string, s v1alpha1.Mod
 	return nil
 }
 
-func (repo DeploymentRepo) CreateModelDeployment(md *deployment.ModelDeployment) error {
+func (repo DeploymentRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
+	return utils.SetDeletionMark(ctx, qrr, ModelDeploymentTable, id, value)
+}
 
-	_, err := repo.DB.Exec(
-		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", ModelDeploymentTable),
-		md.ID, md.Spec, md.Status,
+func (repo DeploymentRepo) UpdateModelDeployment(
+	ctx context.Context, qrr utils.Querier, md *deployment.ModelDeployment) error {
+
+	md.Status.State = ""
+
+	stmt, args, err := sq.Update(ModelDeploymentTable).
+		Set("spec", md.Spec).
+		Set("status", md.Status).
+		Where(sq.Eq{"id": md.ID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	result, err := qrr.ExecContext(ctx, stmt, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: md.ID}
+	}
+
+	return nil
+}
+
+func (repo DeploymentRepo) UpdateModelDeploymentStatus(
+	ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelDeploymentStatus) error {
+
+	stmt, args, err := sq.Update(ModelDeploymentTable).
+		Set("status", s).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	result, err := qrr.ExecContext(ctx, stmt, args...)
+	if err != nil {
+		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return odahuErrors.NotFoundError{Entity: id}
+	}
+
+	return nil
+}
+
+func (repo DeploymentRepo) CreateModelDeployment(
+	ctx context.Context, qrr utils.Querier, md *deployment.ModelDeployment) error {
+
+	stmt, args, err := sq.
+		Insert(ModelDeploymentTable).
+		Columns("id", "spec", "status").
+		Values(md.ID, md.Spec, md.Status).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = qrr.ExecContext(
+		ctx,
+		stmt,
+		args...
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)

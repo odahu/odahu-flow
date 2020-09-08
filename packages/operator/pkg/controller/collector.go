@@ -11,6 +11,7 @@ import (
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	dep_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
@@ -55,12 +56,12 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	}
 
 	if cfg.Deployment.Enabled {
-		deployRepo := deploy_repo.DeploymentRepo{DB: db}
+		depService := dep_service.NewService(deploy_repo.DeploymentRepo{DB: db}, db)
 		deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, kClient)
 
 		deployWorker := NewGenericWorker(
 			"deployment", cfg.Common.LaunchPeriod,
-			deployment.NewAdapter(deployRepo, deployKubeClient, kubeMgr),
+			deployment.NewAdapter(depService, deployKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&deployWorker)
 	}

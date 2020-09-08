@@ -1,6 +1,7 @@
 package postgres_test
 
 import (
+	"context"
 	_ "github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
@@ -27,11 +28,11 @@ func TestModelDeploymentRepository(t *testing.T) {
 		},
 	}
 
-	as.NoError(repo.CreateModelDeployment(created))
+	as.NoError(repo.CreateModelDeployment(context.Background(), db, created))
 
-	as.Exactly(repo.CreateModelDeployment(created), odahuErrors.AlreadyExistError{Entity: mdID})
+	as.Exactly(repo.CreateModelDeployment(context.Background(), db, created), odahuErrors.AlreadyExistError{Entity: mdID})
 
-	fetched, err := repo.GetModelDeployment(mdID)
+	fetched, err := repo.GetModelDeployment(context.Background(), db, mdID)
 	as.NoError(err)
 	as.Exactly(fetched.ID, created.ID)
 	as.Exactly(fetched.Spec, created.Spec)
@@ -43,31 +44,32 @@ func TestModelDeploymentRepository(t *testing.T) {
 		},
 	}
 
-	as.NoError(repo.UpdateModelDeployment(updated))
+	as.NoError(repo.UpdateModelDeployment(context.Background(), db, updated))
 
-	fetched, err = repo.GetModelDeployment(mdID)
+	fetched, err = repo.GetModelDeployment(context.Background(), db, mdID)
 	as.NoError(err)
 	as.Exactly(fetched.Spec, updated.Spec)
 	as.Exactly(fetched.Spec.Image, "updated")
 
-	as.NoError(repo.UpdateModelDeploymentStatus(mdID, v1alpha1.ModelDeploymentStatus{Replicas: 42}))
-	fetched, err = repo.GetModelDeployment(mdID)
+	as.NoError(repo.UpdateModelDeploymentStatus(
+		context.Background(), db, mdID, v1alpha1.ModelDeploymentStatus{Replicas: 42}))
+	fetched, err = repo.GetModelDeployment(context.Background(), db, mdID)
 	as.NoError(err)
 	as.Exactly(fetched.Status.Replicas, int32(42))
 
-	tis, err := repo.GetModelDeploymentList()
+	tis, err := repo.GetModelDeploymentList(context.Background(), db)
 	as.NoError(err)
 	as.Len(tis, 1)
 
 
 	as.False(fetched.DeletionMark)
-	as.NoError(repo.SetDeletionMark(mdID, true))
-	fetched, err = repo.GetModelDeployment(mdID)
+	as.NoError(repo.SetDeletionMark(context.Background(), db, mdID, true))
+	fetched, err = repo.GetModelDeployment(context.Background(), db, mdID)
 	as.NoError(err)
 	as.True(fetched.DeletionMark)
 	
-	as.NoError(repo.DeleteModelDeployment(mdID))
-	_, err = repo.GetModelDeployment(mdID)
+	as.NoError(repo.DeleteModelDeployment(context.Background(), db, mdID))
+	_, err = repo.GetModelDeployment(context.Background(), db, mdID)
 
 	as.Error(err)
 	as.Exactly(err, odahuErrors.NotFoundError{Entity: mdID})
