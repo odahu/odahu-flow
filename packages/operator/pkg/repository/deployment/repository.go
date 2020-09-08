@@ -17,8 +17,10 @@
 package deployment
 
 import (
+	"context"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
@@ -27,18 +29,20 @@ const (
 )
 
 type Repository interface {
-	GetModelDeployment(name string) (*deployment.ModelDeployment, error)
-	GetModelDeploymentList(options ...filter.ListOption) ([]deployment.ModelDeployment, error)
-	DeleteModelDeployment(name string) error
-	UpdateModelDeployment(md *deployment.ModelDeployment) error
-	UpdateModelDeploymentStatus(id string, s v1alpha1.ModelDeploymentStatus) error
-	CreateModelDeployment(md *deployment.ModelDeployment) error
+	GetModelDeployment(ctx context.Context, qrr utils.Querier, id string) (*deployment.ModelDeployment, error)
+	GetModelDeploymentList(
+		ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]deployment.ModelDeployment, error)
+	DeleteModelDeployment(ctx context.Context, qrr utils.Querier, id string) error
+	UpdateModelDeployment(ctx context.Context, qrr utils.Querier, md *deployment.ModelDeployment) error
+	UpdateModelDeploymentStatus(
+		ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelDeploymentStatus) error
+	CreateModelDeployment(ctx context.Context, qrr utils.Querier, md *deployment.ModelDeployment) error
 	GetModelRoute(name string) (*deployment.ModelRoute, error)
 	GetModelRouteList(options ...filter.ListOption) ([]deployment.ModelRoute, error)
 	DeleteModelRoute(name string) error
 	UpdateModelRoute(md *deployment.ModelRoute) error
 	CreateModelRoute(md *deployment.ModelRoute) error
-	SetDeletionMark(id string, value bool) error
+	SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error
 }
 
 type MdFilter struct {

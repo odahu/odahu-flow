@@ -17,10 +17,11 @@
 package deployment
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
 	"strings"
@@ -46,12 +47,12 @@ var (
 )
 
 type MrValidator struct {
-	mdRepository md_repository.Repository
+	mdService md_service.Service
 }
 
-func NewMrValidator(mdRepository md_repository.Repository) *MrValidator {
+func NewMrValidator(mdService md_service.Service) *MrValidator {
 	return &MrValidator{
-		mdRepository: mdRepository,
+		mdService: mdService,
 	}
 }
 
@@ -81,7 +82,7 @@ func (mrv *MrValidator) validateMainParameters(mr *deployment.ModelRoute) (err e
 		}
 	}
 	if mr.Spec.Mirror != nil && len(*mr.Spec.Mirror) != 0 {
-		if _, k8sError := mrv.mdRepository.GetModelDeployment(*mr.Spec.Mirror); k8sError != nil {
+		if _, k8sError := mrv.mdService.GetModelDeployment( context.TODO(), *mr.Spec.Mirror); k8sError != nil {
 			err = multierr.Append(err, k8sError)
 		}
 	}
@@ -100,7 +101,7 @@ func (mrv *MrValidator) validateModelDeploymentTargets(mr *deployment.ModelRoute
 	case 1:
 		mdt := mr.Spec.ModelDeploymentTargets[0]
 
-		if _, k8sError := mrv.mdRepository.GetModelDeployment(mdt.Name); k8sError != nil {
+		if _, k8sError := mrv.mdService.GetModelDeployment(context.TODO(),  mdt.Name); k8sError != nil {
 			err = multierr.Append(err, k8sError)
 		}
 		if mdt.Weight == nil {
@@ -114,7 +115,7 @@ func (mrv *MrValidator) validateModelDeploymentTargets(mr *deployment.ModelRoute
 		weightSum := int32(0)
 
 		for _, mdt := range mr.Spec.ModelDeploymentTargets {
-			if _, k8sError := mrv.mdRepository.GetModelDeployment(mdt.Name); k8sError != nil {
+			if _, k8sError := mrv.mdService.GetModelDeployment(context.TODO(), mdt.Name); k8sError != nil {
 				err = multierr.Append(err, k8sError)
 			}
 

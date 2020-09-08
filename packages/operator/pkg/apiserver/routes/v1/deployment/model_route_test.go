@@ -18,6 +18,7 @@ package deployment_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -27,8 +28,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
-	dep_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	dep_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,7 +50,7 @@ type ModelRouteSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	server       *gin.Engine
-	mdRepo dep_repository.Repository
+	mdService    md_service.Service
 	mdKubeClient kube_client.Client
 }
 
@@ -59,9 +60,9 @@ func (s *ModelRouteSuite) SetupSuite() {
 		testNamespace, kubeClient, metav1.DeletePropagationBackground,
 	)
 
-	s.mdRepo = dep_repository_db.DeploymentRepo{DB: db}
+	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db}, db)
 
-	err := s.mdRepo.CreateModelDeployment(&deployment.ModelDeployment{
+	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      mdImage,
@@ -78,7 +79,7 @@ func (s *ModelRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	err = s.mdRepo.CreateModelDeployment(&deployment.ModelDeployment{
+	err = s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID2,
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      mdImage,
@@ -98,7 +99,7 @@ func (s *ModelRouteSuite) SetupSuite() {
 
 func (s *ModelRouteSuite) TearDownSuite() {
 	for _, mdID := range []string{mdID1, mdID2} {
-		if err := s.mdRepo.DeleteModelDeployment(mdID); err != nil && !errors.IsNotFoundError(err) {
+		if err := s.mdService.DeleteModelDeployment(context.Background(), mdID); err != nil && !errors.IsNotFoundError(err) {
 			panic(err)
 		}
 	}
@@ -113,7 +114,7 @@ func (s *ModelRouteSuite) SetupTest() {
 func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdRepo, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelRouteSuite) TearDownTest() {

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package packaging
+package deployment
 
 import (
 	"context"
 	"database/sql"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -33,19 +33,19 @@ var (
 		Isolation: sql.LevelRepeatableRead,
 		ReadOnly:  false,
 	}
-	log = logf.Log.WithName("model-packaging--service")
+	log = logf.Log.WithName("model-deployment--service")
 )
 
 type Service interface {
-	GetModelPackaging(ctx context.Context, id string) (*packaging.ModelPackaging, error)
-	GetModelPackagingList(ctx context.Context, options ...filter.ListOption) ([]packaging.ModelPackaging, error)
-	DeleteModelPackaging(ctx context.Context, id string) error
+	GetModelDeployment(ctx context.Context, id string) (*deployment.ModelDeployment, error)
+	GetModelDeploymentList(ctx context.Context, options ...filter.ListOption) ([]deployment.ModelDeployment, error)
+	DeleteModelDeployment(ctx context.Context, id string) error
 	SetDeletionMark(ctx context.Context, id string, value bool) error
-	UpdateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error
+	UpdateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error
 	// Try to update status. If spec in storage differs from spec snapshot then update does not happen
-	UpdateModelPackagingStatus(
-		ctx context.Context, id string, status v1alpha1.ModelPackagingStatus, spec packaging.ModelPackagingSpec) error
-	CreateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error
+	UpdateModelDeploymentStatus(
+		ctx context.Context, id string, status v1alpha1.ModelDeploymentStatus, spec v1alpha1.ModelDeploymentSpec) error
+	CreateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error
 }
 
 type serviceImpl struct {
@@ -54,30 +54,30 @@ type serviceImpl struct {
 	repo repo.Repository
 }
 
-func (s serviceImpl) GetModelPackaging(ctx context.Context, id string) (*packaging.ModelPackaging, error) {
-	return s.repo.GetModelPackaging(ctx, s.db, id)
+func (s serviceImpl) GetModelDeployment(ctx context.Context, id string) (*deployment.ModelDeployment, error) {
+	return s.repo.GetModelDeployment(ctx, s.db, id)
 }
 
-func (s serviceImpl) GetModelPackagingList(
+func (s serviceImpl) GetModelDeploymentList(
 	ctx context.Context, options ...filter.ListOption,
-) ([]packaging.ModelPackaging, error) {
-	return s.repo.GetModelPackagingList(ctx, s.db, options...)
+) ([]deployment.ModelDeployment, error) {
+	return s.repo.GetModelDeploymentList(ctx, s.db, options...)
 }
 
-func (s serviceImpl) DeleteModelPackaging(ctx context.Context, id string) error {
-	return s.repo.DeleteModelPackaging(ctx, s.db, id)
+func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) error {
+	return s.repo.DeleteModelDeployment(ctx, s.db, id)
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
 	return s.repo.SetDeletionMark(ctx, s.db, id, value)
 }
 
-func (s serviceImpl) UpdateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error {
-	return s.repo.UpdateModelPackaging(ctx, s.db, mt)
+func (s serviceImpl) UpdateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error {
+	return s.repo.UpdateModelDeployment(ctx, s.db, mt)
 }
 
-func (s serviceImpl) UpdateModelPackagingStatus(
-	ctx context.Context, id string, status v1alpha1.ModelPackagingStatus, spec packaging.ModelPackagingSpec,
+func (s serviceImpl) UpdateModelDeploymentStatus(
+	ctx context.Context, id string, status v1alpha1.ModelDeploymentStatus, spec v1alpha1.ModelDeploymentSpec,
 ) (err error) {
 
 	tx, err := s.db.BeginTx(ctx, txOptions)
@@ -97,7 +97,7 @@ func (s serviceImpl) UpdateModelPackagingStatus(
 		}
 	}()
 
-	oldMt, err := s.repo.GetModelPackaging(ctx, tx, id)
+	oldMt, err := s.repo.GetModelDeployment(ctx, tx, id)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (s serviceImpl) UpdateModelPackagingStatus(
 		return odahu_errors.SpecWasTouched{Entity: id}
 	}
 
-	err = s.repo.UpdateModelPackagingStatus(ctx, tx, id, status)
+	err = s.repo.UpdateModelDeploymentStatus(ctx, tx, id, status)
 	if err != nil {
 		return err
 	}
@@ -124,8 +124,8 @@ func (s serviceImpl) UpdateModelPackagingStatus(
 	return err
 }
 
-func (s serviceImpl) CreateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error {
-	return s.repo.CreateModelPackaging(ctx, s.db, mt)
+func (s serviceImpl) CreateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error {
+	return s.repo.CreateModelDeployment(ctx, s.db, mt)
 }
 
 func NewService(repo repo.Repository, db *sql.DB) Service {

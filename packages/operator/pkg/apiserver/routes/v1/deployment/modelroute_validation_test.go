@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/stretchr/testify/suite"
@@ -41,7 +42,7 @@ func (s *ModelRouteValidationSuite) SetupTest() {
 
 func (s *ModelRouteValidationSuite) SetupSuite() {
 
-	s.validator = dep_route.NewMrValidator(repo.DeploymentRepo{DB: db})
+	s.validator = dep_route.NewMrValidator(md_service.NewService(repo.DeploymentRepo{DB: db}, db))
 }
 
 func TestModelPackagingValidationSuite(t *testing.T) {
