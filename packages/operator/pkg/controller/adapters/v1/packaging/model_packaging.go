@@ -1,13 +1,14 @@
 package packaging
 
 import (
+	"context"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	packaging_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/types"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -26,7 +27,7 @@ func isPackagingFinished(mp *packaging_types.ModelPackaging) bool {
 
 type KubeEntity struct {
 	obj        *packaging_types.ModelPackaging
-	repo       packaging.Repository
+	service    packaging.Service
 	kubeClient kube_client.Client
 }
 
@@ -47,7 +48,7 @@ func (k KubeEntity) Delete() error {
 }
 
 func (k KubeEntity) ReportStatus() error {
-	return k.repo.UpdateModelPackagingStatus(k.obj.ID, k.obj.Status)
+	return k.service.UpdateModelPackagingStatus(context.TODO(), k.obj.ID, k.obj.Status, k.obj.Spec)
 }
 
 func (k KubeEntity) IsDeleting() bool {
@@ -58,7 +59,7 @@ func (k KubeEntity) IsDeleting() bool {
 type StorageEntity struct {
 	obj        *packaging_types.ModelPackaging
 	kubeClient kube_client.Client
-	repo packaging.Repository
+	service    packaging.Service
 }
 
 func (s *StorageEntity) GetID() string {
@@ -94,14 +95,14 @@ func (s *StorageEntity) DeleteInRuntime() error {
 }
 
 func (s *StorageEntity) DeleteInDB() error {
-	return s.repo.DeleteModelPackaging(s.GetID())
+	return s.service.DeleteModelPackaging(context.TODO(), s.GetID())
 }
 
 
 type statusReconciler struct {
 	kubeClient kube_client.Client
-	syncHook types.StatusPollingHookFunc
-	repo packaging.Repository
+	syncHook   types.StatusPollingHookFunc
+	service    packaging.Service
 }
 
 func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
@@ -124,7 +125,7 @@ func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 	}
 
 
-	seObj, err := r.repo.GetModelPackaging(ID)
+	seObj, err := r.service.GetModelPackaging(context.TODO(), ID)
 	if err != nil && !odahu_errors.IsNotFoundError(err) {
 		eLog.Error(err, "Unable to get entity from storage")
 		return result, err
@@ -135,12 +136,12 @@ func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 	se := &StorageEntity{
 		obj:        seObj,
 		kubeClient: r.kubeClient,
-		repo:       r.repo,
+		service:    r.service,
 	}
 
 	kubeEntity := &KubeEntity{
 		obj:        reObj,
-		repo:       r.repo,
+		service:    r.service,
 		kubeClient: r.kubeClient,
 	}
 
@@ -150,23 +151,23 @@ func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 
 
 type Adapter struct {
-	repo       packaging.Repository
+	service    packaging.Service
 	kubeClient kube_client.Client
 	mgr        ctrl.Manager
 }
 
-func NewAdapter(repo packaging.Repository, kubeClient kube_client.Client, mgr ctrl.Manager) *Adapter {
+func NewAdapter(service packaging.Service, kubeClient kube_client.Client, mgr ctrl.Manager) *Adapter {
 	return &Adapter{
-		repo:       repo,
+		service:    service,
 		kubeClient: kubeClient,
-		mgr: mgr,
+		mgr:        mgr,
 	}
 }
 
 func (s *Adapter) ListStorage() ([]types.StorageEntity, error) {
 
 	result := make([]types.StorageEntity, 0)
-	enList, err := s.repo.GetModelPackagingList()
+	enList, err := s.service.GetModelPackagingList(context.TODO())
 	if err != nil {
 		return result, err
 	}
@@ -176,7 +177,7 @@ func (s *Adapter) ListStorage() ([]types.StorageEntity, error) {
 		result = append(result, &StorageEntity{
 			obj:        &enList[i],
 			kubeClient: s.kubeClient,
-			repo: 		s.repo,
+			service:    s.service,
 		})
 	}
 
@@ -193,7 +194,7 @@ func (s *Adapter) ListRuntime() ([]types.RuntimeEntity, error) {
 	for i := range enList {
 		result = append(result, &KubeEntity{
 			obj:        &enList[i],
-			repo:       s.repo,
+			service:    s.service,
 			kubeClient: s.kubeClient,
 		})
 	}
@@ -208,13 +209,13 @@ func (s *Adapter) GetFromRuntime(id string) (types.RuntimeEntity, error) {
 
 	return &KubeEntity{
 		obj:        mt,
-		repo:       s.repo,
+		service:    s.service,
 		kubeClient: s.kubeClient,
 	}, nil
 }
 
 func (s *Adapter) GetFromStorage(id string) (types.StorageEntity, error) {
-	mt, err := s.repo.GetModelPackaging(id)
+	mt, err := s.service.GetModelPackaging(context.TODO(), id)
 	if err != nil {
 		return nil, err
 	}
@@ -222,13 +223,13 @@ func (s *Adapter) GetFromStorage(id string) (types.StorageEntity, error) {
 	return &StorageEntity{
 		obj:        mt,
 		kubeClient: s.kubeClient,
-		repo: 		s.repo,
+		service:    s.service,
 	}, nil
 }
 
 func (s *Adapter) SubscribeRuntimeUpdates(syncHook types.StatusPollingHookFunc) error {
 
-	sr := &statusReconciler{repo: s.repo, kubeClient: s.kubeClient, syncHook: syncHook}
+	sr := &statusReconciler{service: s.service, kubeClient: s.kubeClient, syncHook: syncHook}
 	return ctrl.NewControllerManagedBy(s.mgr).
 		For(&odahuv1alpha1.ModelPackaging{}).
 		WithEventFilter(predicate.Funcs{

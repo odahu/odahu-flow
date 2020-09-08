@@ -134,7 +134,7 @@ func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, qrr utils.Quer
 }
 
 func (repo TrainingRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
-	return utils.SetDeletionMark(ctx, repo.DB, ModelTrainingTable, id, value)
+	return utils.SetDeletionMark(ctx, qrr, ModelTrainingTable, id, value)
 }
 
 func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
