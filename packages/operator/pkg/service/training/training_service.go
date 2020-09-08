@@ -62,19 +62,24 @@ func (s serviceImpl) UpdateModelTraining(ctx context.Context, mt *training.Model
 
 func (s serviceImpl) UpdateModelTrainingStatus(
 	ctx context.Context, id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
-) error {
+) (err error) {
 
 	tx, err := s.db.BeginTx(ctx, txOptions)
-	defer func() {
-		err := tx.Rollback()
-		if err != nil {
-			log.Error(err, "Error while rollback transaction")
-		}
-	}()
-
 	if err != nil {
 		return err
 	}
+
+	defer func() {
+		if err == nil {
+			if err := tx.Commit(); err != nil {
+				log.Error(err, "Error while commit transaction")
+			}
+		} else {
+			if err := tx.Rollback(); err != nil {
+				log.Error(err, "Error while rollback transaction")
+			}
+		}
+	}()
 
 	oldMt, err := s.repo.GetModelTraining(ctx, tx, id)
 	if err != nil {
@@ -100,7 +105,7 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 		return err
 	}
 
-	return tx.Commit()
+	return err
 }
 
 func (s serviceImpl) CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error {

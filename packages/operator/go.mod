@@ -3,6 +3,7 @@ module github.com/odahu/odahu-flow/packages/operator
 go 1.14
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Jeffail/gabs v1.4.0 // indirect
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
@@ -22,7 +23,6 @@ require (
 	github.com/hashicorp/vault/api v1.0.5-0.20200317185738-82f498082f02
 	github.com/hashicorp/vault/sdk v0.1.14-0.20200521112254-72d69106be02 // indirect
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
-	github.com/jteeuwen/go-bindata v3.0.7+incompatible // indirect
 	github.com/keybase/go-crypto v0.0.0-20190828182435-a05457805304 // indirect
 	github.com/lib/pq v1.2.0
 	github.com/mitchellh/hashstructure v1.0.0
