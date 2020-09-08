@@ -92,7 +92,7 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 	}
 
 	if oldHash != specHash {
-		return odahu_errors.SpecWasChangedError{Entity: id}
+		return odahu_errors.SpecWasTouched{Entity: id}
 	}
 
 	err = s.repo.UpdateModelTrainingStatus(ctx, tx, id, status)
