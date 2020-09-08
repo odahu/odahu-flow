@@ -32,6 +32,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
+	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -90,6 +91,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 
 	connService := conn_service.NewService(connRepository)
 	trainService := mt_service.NewService(trainRepo, db)
+	packService := mp_service.NewService(packRepo, db)
 
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
@@ -97,7 +99,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	deployment.ConfigureRoutes(routeGroup, deployRepo, deployKubeClient, cfg.Deployment, cfg.Common.ResourceGPUName)
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))
 	packaging.ConfigureRoutes(
-		packagingRouteGroup, packKubeClient, packRepo,
+		packagingRouteGroup, packKubeClient, packService,
 		piRepo, connRepository, cfg.Packaging, cfg.Common.ResourceGPUName,
 	)
 	packaging.ConfigurePiRoutes(packagingRouteGroup, piRepo)

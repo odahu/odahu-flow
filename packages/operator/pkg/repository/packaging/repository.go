@@ -17,8 +17,10 @@
 package packaging
 
 import (
+	"context"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
@@ -27,13 +29,14 @@ const (
 )
 
 type Repository interface {
-	GetModelPackaging(id string) (*packaging.ModelPackaging, error)
-	GetModelPackagingList(options ...filter.ListOption) ([]packaging.ModelPackaging, error)
-	DeleteModelPackaging(id string) error
-	SetDeletionMark(id string, value bool) error
-	UpdateModelPackaging(md *packaging.ModelPackaging) error
-	UpdateModelPackagingStatus(id string, s v1alpha1.ModelPackagingStatus) error
-	CreateModelPackaging(md *packaging.ModelPackaging) error
+	GetModelPackaging(ctx context.Context, qrr utils.Querier, id string) (*packaging.ModelPackaging, error)
+	GetModelPackagingList(
+		ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]packaging.ModelPackaging, error)
+	DeleteModelPackaging(ctx context.Context, qrr utils.Querier, id string) error
+	SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error
+	UpdateModelPackaging(ctx context.Context, qrr utils.Querier, mp *packaging.ModelPackaging) error
+	UpdateModelPackagingStatus(ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelPackagingStatus) error
+	CreateModelPackaging(ctx context.Context, qrr utils.Querier, mp *packaging.ModelPackaging) error
 }
 
 type PackagingIntegrationRepository interface {

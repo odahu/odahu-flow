@@ -10,6 +10,7 @@ import (
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
+	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
@@ -38,7 +39,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	}
 
 	if cfg.Packaging.Enabled {
-		packRepo := pack_repo.PackagingRepo{DB: db}
+		packService := pack_service.NewService(pack_repo.PackagingRepo{DB: db}, db)
 		packKubeClient := pack_kube_client.NewClient(
 			cfg.Packaging.Namespace,
 			cfg.Packaging.PackagingIntegrationNamespace,
@@ -48,7 +49,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 
 		packWorker := NewGenericWorker(
 			"packaging", cfg.Common.LaunchPeriod,
-			packaging.NewAdapter(packRepo, packKubeClient, kubeMgr),
+			packaging.NewAdapter(packService, packKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&packWorker)
 	}

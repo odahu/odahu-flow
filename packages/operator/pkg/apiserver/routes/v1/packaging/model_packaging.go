@@ -23,6 +23,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
+	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"net/http"
@@ -59,9 +60,9 @@ func init() {
 }
 
 type ModelPackagingController struct {
-	kubeClient kube_client.Client
-	packRepo   mp_repository.Repository
-	validator  *MpValidator
+	kubeClient  kube_client.Client
+	packService mp_service.Service
+	validator   *MpValidator
 }
 
 // @Summary Get a Model Packaging
@@ -78,7 +79,7 @@ type ModelPackagingController struct {
 func (mpc *ModelPackagingController) getMP(c *gin.Context) {
 	mpID := c.Param(IDMpURLParam)
 
-	mp, err := mpc.packRepo.GetModelPackaging(mpID)
+	mp, err := mpc.packService.GetModelPackaging(c.Request.Context(), mpID)
 	if err != nil {
 		logMP.Error(err, fmt.Sprintf("Retrieving %s model packaging", mpID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -109,7 +110,8 @@ func (mpc *ModelPackagingController) getAllMPs(c *gin.Context) {
 		return
 	}
 
-	mpList, err := mpc.packRepo.GetModelPackagingList(
+	mpList, err := mpc.packService.GetModelPackagingList(
+		c.Request.Context(),
 		filter.ListFilter(f),
 		filter.Size(size),
 		filter.Page(page),
@@ -150,7 +152,7 @@ func (mpc *ModelPackagingController) createMP(c *gin.Context) {
 		return
 	}
 
-	if err := mpc.packRepo.CreateModelPackaging(&mp); err != nil {
+	if err := mpc.packService.CreateModelPackaging(c.Request.Context(), &mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Creation of the model packaging: %+v", mp))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -187,7 +189,7 @@ func (mpc *ModelPackagingController) updateMP(c *gin.Context) {
 		return
 	}
 
-	if err := mpc.packRepo.UpdateModelPackaging(&mp); err != nil {
+	if err := mpc.packService.UpdateModelPackaging(c.Request.Context(), &mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Update of the model packaging: %+v", mp))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -244,7 +246,7 @@ func (mpc *ModelPackagingController) saveMPResults(c *gin.Context) {
 func (mpc *ModelPackagingController) deleteMP(c *gin.Context) {
 	mpID := c.Param(IDMpURLParam)
 
-	if err := mpc.packRepo.DeleteModelPackaging(mpID); err != nil {
+	if err := mpc.packService.DeleteModelPackaging(c.Request.Context(), mpID); err != nil {
 		logMP.Error(err, fmt.Sprintf("Deletion of %s model packaging is failed", mpID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
