@@ -84,9 +84,9 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
         # update config
         update_config_file(
             API_URL=api_host,
+            API_TOKEN=token,
             ODAHUFLOWCTL_OAUTH_CLIENT_ID=client_id,
             ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=client_secret,
-            API_TOKEN=token,
             ISSUER_URL=issuer
         )
 
