@@ -38,8 +38,8 @@ type ModelPackagingConfig struct {
 	Enabled            bool   `json:"enabled"`
 	ServiceAccount     string `json:"serviceAccount"`
 	OutputConnectionID string `json:"outputConnectionID"`
-	// Kubernetes node selectors for model packaging pods
-	NodeSelector map[string]string `json:"nodeSelector"`
+	// Node pools to run packaging tasks on
+	NodePools []NodePool `json:"nodePools"`
 	// Kubernetes tolerations for model packaging pods
 	Tolerations        []corev1.Toleration `json:"tolerations,omitempty"`
 	ModelPackagerImage string              `json:"modelPackagerImage"`

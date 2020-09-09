@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
+	"go.uber.org/multierr"
 	"testing"
 
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -30,10 +31,10 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
-	mp_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
+	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	mp_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 )
 
 var (
@@ -44,7 +45,7 @@ var (
 	connDockerTypeMpValid            = "docker-conn"
 	connS3TypeMpValid                = "s3-conn"
 	defaultTargetArgument1Connection = "default-conn-id"
-	defaultResources                 = config.NewDefaultModelTrainingConfig().DefaultResources
+	defaultResources                 = config.NewDefaultModelPackagingConfig().DefaultResources
 	piArgumentsMpValid               = packaging.JsonSchema{
 		Properties: []packaging.Property{
 			{
@@ -91,6 +92,24 @@ var (
 			Required: true,
 		},
 	}
+	validNodeSelector = map[string]string{"mode": "valid"}
+	validPackaging    = packaging.ModelPackaging{
+		Spec: packaging.ModelPackagingSpec{
+			IntegrationName:  piIDMpValid,
+			ArtifactName:     "test",
+			OutputConnection: connS3TypeMpValid,
+			Arguments: map[string]interface{}{
+				"argument-1": 5,
+			},
+			Targets: []v1alpha1.Target{
+				{
+					Name:           "target-2",
+					ConnectionName: connDockerTypeMpValid,
+				},
+			},
+			NodeSelector: validNodeSelector,
+		},
+	}
 )
 
 type ModelPackagingValidationSuite struct {
@@ -116,12 +135,14 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 
 	s.connRepo = conn_k8s_repository.NewRepository(testNamespace, kubeClient)
 
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.NodePools = append(packagingConfig.NodePools, config.NodePool{NodeSelector: validNodeSelector})
+
 	s.validator = pack_route.NewMpValidator(
 		s.mpiRepo,
 		s.connRepo,
-		"conn-id",
+		packagingConfig,
 		config.NvidiaResourceName,
-		defaultResources,
 	)
 
 	err := s.mpiRepo.CreatePackagingIntegration(&packaging.PackagingIntegration{
@@ -493,33 +514,34 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 	err := pack_route.NewMpValidator(
 		s.mpiRepo,
 		s.connRepo,
-		"",
+		config.NewDefaultModelPackagingConfig(),
 		config.NvidiaResourceName,
-		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
 
 	// If configuration output connection is set and user has not passed output connection as training
 	// parameter then output connection value from configuration will be used as default
+	packConfig := config.NewDefaultModelPackagingConfig()
+	packConfig.OutputConnectionID = testMpOutConnDefault
 	_ = pack_route.NewMpValidator(
 		s.mpiRepo,
 		s.connRepo,
-		testMpOutConnDefault,
+		packConfig,
 		config.NvidiaResourceName,
-		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConnDefault))
 
 	// If configuration output connection is set but user also has passed output connection as training
 	// parameter then user value is used
+	packConfig = config.NewDefaultModelPackagingConfig()
+	packConfig.OutputConnectionID = "default-output-connection"
 	mp.Spec.OutputConnection = testMpOutConn
 	_ = pack_route.NewMpValidator(
 		s.mpiRepo,
 		s.connRepo,
-		testMpOutConn,
+		config.NewDefaultModelPackagingConfig(),
 		config.NvidiaResourceName,
-		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(mp.Spec.OutputConnection).Should(Equal(testMpOutConn))
 
@@ -530,9 +552,8 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 	err = pack_route.NewMpValidator(
 		s.mpiRepo,
 		s.connRepo,
-		testMpOutConn,
+		config.NewDefaultModelPackagingConfig(),
 		config.NvidiaResourceName,
-		defaultResources,
 	).ValidateAndSetDefaults(mp)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
@@ -546,4 +567,29 @@ func (s *ModelPackagingValidationSuite) TestValidateID() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
+
+// Tests that nil node selector is considered valid
+func (s *ModelPackagingValidationSuite) TestValidateNodeSelector_nil() {
+	mp := validPackaging
+	mp.Spec.NodeSelector = nil
+	err := s.validator.ValidateAndSetDefaults(&mp)
+	s.Assertions.Nil(err)
+}
+
+// Packaging object has valid node selector that exists in config
+func (s *ModelPackagingValidationSuite) TestValidateNodeSelector_Valid() {
+	mt := validPackaging
+	err := s.validator.ValidateAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// Packaging object has invalid node selector that does not exist in config
+// Expect validator to return exactly one error
+func (s *ModelPackagingValidationSuite) TestValidateNodeSelector_Invalid() {
+	mt := validPackaging
+	mt.Spec.NodeSelector = map[string]string{"mode": "invalid"}
+	err := s.validator.ValidateAndSetDefaults(&mt)
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
 }

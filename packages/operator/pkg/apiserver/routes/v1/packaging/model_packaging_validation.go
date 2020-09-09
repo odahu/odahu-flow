@@ -19,7 +19,9 @@ package packaging
 import (
 	"errors"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
+	"reflect"
 
 	uuid "github.com/nu7hatch/gouuid"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -39,29 +41,27 @@ const (
 	TargetNotFoundErrorMessage           = "cannot find %s target in packaging integration %s"
 	NotValidConnTypeErrorMessage         = "%s target has not valid connection type %s for packaging integration %s"
 	defaultIDTemplate                    = "%s-%s-%s"
+	UnknownNodeSelector                  = "node selector %v is not presented in ODAHU config"
 )
 
 type MpValidator struct {
-	piRepo               mp_repository.PackagingIntegrationRepository
-	connRepo             conn_repository.Repository
-	outputConnectionName string
-	gpuResourceName      string
-	defaultResources     odahuflowv1alpha1.ResourceRequirements
+	piRepo          mp_repository.PackagingIntegrationRepository
+	connRepo        conn_repository.Repository
+	gpuResourceName string
+	packagingConfig config.ModelPackagingConfig
 }
 
 func NewMpValidator(
 	piRepo mp_repository.PackagingIntegrationRepository,
 	connRepo conn_repository.Repository,
-	outputConnectionName string,
+	packagingConfig config.ModelPackagingConfig,
 	gpuResourceName string,
-	defaultResources odahuflowv1alpha1.ResourceRequirements,
 ) *MpValidator {
 	return &MpValidator{
-		piRepo:               piRepo,
-		connRepo:             connRepo,
-		outputConnectionName: outputConnectionName,
-		gpuResourceName:      gpuResourceName,
-		defaultResources:     defaultResources,
+		piRepo:          piRepo,
+		connRepo:        connRepo,
+		packagingConfig: packagingConfig,
+		gpuResourceName: gpuResourceName,
 	}
 }
 
@@ -82,6 +82,8 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 	}
 
 	err = multierr.Append(err, mpv.validateOutputConnection(mp))
+
+	err = multierr.Append(err, mpv.validateNodeSelector(mp))
 
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMpErrorMessage, err.Error())
@@ -120,8 +122,8 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 
 	if mp.Spec.Resources == nil {
 		logMP.Info("Packaging resource parameter is nil. Set the default value",
-			"name", mp.ID, "resources", mpv.defaultResources)
-		mp.Spec.Resources = mpv.defaultResources.DeepCopy()
+			"name", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
+		mp.Spec.Resources = mpv.packagingConfig.DefaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources, mpv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
@@ -237,8 +239,8 @@ func (mpv *MpValidator) validateTargets(pi *packaging.PackagingIntegration, mp *
 
 func (mpv *MpValidator) validateOutputConnection(mp *packaging.ModelPackaging) (err error) {
 	if len(mp.Spec.OutputConnection) == 0 {
-		if len(mpv.outputConnectionName) > 0 {
-			mp.Spec.OutputConnection = mpv.outputConnectionName
+		if len(mpv.packagingConfig.OutputConnectionID) > 0 {
+			mp.Spec.OutputConnection = mpv.packagingConfig.OutputConnectionID
 			logMP.Info("OutputConnection is empty. Use connection from configuration")
 		} else {
 			logMP.Info("OutputConnection is empty. Configuration doesn't contain default value")
@@ -260,4 +262,20 @@ func (mpv *MpValidator) validateOutputConnection(mp *packaging.ModelPackaging) (
 	}
 
 	return
+}
+
+func (mpv *MpValidator) validateNodeSelector(mp *packaging.ModelPackaging) error {
+	if len(mp.Spec.NodeSelector) == 0 {
+		return nil
+	}
+
+	nodePools := mpv.packagingConfig.NodePools
+
+	for _, nodePool := range nodePools {
+		if reflect.DeepEqual(mp.Spec.NodeSelector, nodePool.NodeSelector) {
+			return nil
+		}
+	}
+
+	return fmt.Errorf(UnknownNodeSelector, mp.Spec.NodeSelector)
 }

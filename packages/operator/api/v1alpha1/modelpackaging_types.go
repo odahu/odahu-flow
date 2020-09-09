@@ -37,6 +37,8 @@ type ModelPackagingSpec struct {
 	Targets          []Target              `json:"targets,omitempty"`
 	Resources        *ResourceRequirements `json:"resources,omitempty"`
 	OutputConnection string                `json:"outputConnection,omitempty"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ModelPackagingResult struct {

@@ -19,9 +19,9 @@ package packaging
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	mp_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
-	mp_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 )
 
 func ConfigureRoutes(
@@ -39,9 +39,8 @@ func ConfigureRoutes(
 		validator: NewMpValidator(
 			piRepo,
 			connRepo,
-			config.OutputConnectionID,
+			config,
 			gpuResourceName,
-			config.DefaultResources,
 		),
 	}
 

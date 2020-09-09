@@ -2213,11 +2213,11 @@ var doc = `{
                     "description": "Kubernetes namespace, where model trainings will be deployed",
                     "type": "string"
                 },
-                "nodeSelector": {
-                    "description": "Kubernetes node selectors for model packaging pods",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
+                "nodePools": {
+                    "description": "Node pools to run packaging tasks on",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NodePool"
                     }
                 },
                 "outputConnectionID": {
@@ -2255,10 +2255,11 @@ var doc = `{
                     "description": "Enable deployment API/operator",
                     "type": "boolean"
                 },
-                "gpuNodeSelector": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
+                "gpuNodePools": {
+                    "description": "Node pools to run GPU training tasks on",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NodePool"
                     }
                 },
                 "gpuTolerations": {
@@ -2275,10 +2276,11 @@ var doc = `{
                     "description": "Kubernetes namespace, where model trainings will be deployed",
                     "type": "string"
                 },
-                "nodeSelector": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
+                "nodePools": {
+                    "description": "Node pools to run training tasks on",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NodePool"
                     }
                 },
                 "outputConnectionID": {
@@ -2301,6 +2303,23 @@ var doc = `{
                 "toolchainIntegrationRepositoryType": {
                     "description": "Storage backend for toolchain integrations. Available options:\n  * kubernetes\n  * postgres",
                     "type": "string"
+                }
+            }
+        },
+        "NodePool": {
+            "type": "object",
+            "properties": {
+                "nodeSelector": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -2556,6 +2575,13 @@ var doc = `{
                 "integrationName": {
                     "description": "Packaging integration ID",
                     "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for specifying a node pool",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "outputConnection": {
                     "description": "Name of Connection to storage where a packager obtain a model trained artifact.\nPermitted connection types are defined by specific PackagingIntegration",
@@ -3136,6 +3162,13 @@ var doc = `{
                     "description": "Model Identity",
                     "type": "object",
                     "$ref": "#/definitions/ModelIdentity"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for specifying a node pool",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "outputConnection": {
                     "description": "Name of Connection to storage where training output artifact will be stored.\nPermitted connection types are defined by specific toolchain",

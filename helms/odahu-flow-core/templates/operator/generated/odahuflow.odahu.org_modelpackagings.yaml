@@ -40,6 +40,11 @@ spec:
               type: string
             image:
               type: string
+            nodeSelector:
+              additionalProperties:
+                type: string
+              description: Node selector for specifying a node pool
+              type: object
             outputConnection:
               type: string
             resources:

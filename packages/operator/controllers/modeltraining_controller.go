@@ -20,12 +20,12 @@ import (
 	"context"
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -205,26 +205,10 @@ func (r *ModelTrainingReconciler) getToolchainIntegration(trainingCR *odahuflowv
 	return &training.ToolchainIntegration{Spec: ti.Spec}, nil
 }
 
-// The function returns true if one of the GPU resources is set up.
-func isGPUResourceSet(trainingCR *odahuflowv1alpha1.ModelTraining) bool {
-	return trainingCR.Spec.Resources != nil && ((trainingCR.Spec.Resources.Limits != nil &&
-		kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Limits.GPU)) ||
-		(trainingCR.Spec.Resources.Requests != nil &&
-			kubernetes.IsResourcePresent(trainingCR.Spec.Resources.Requests.GPU)))
-}
-
-func (r *ModelTrainingReconciler) getNodeSelector(trainingCR *odahuflowv1alpha1.ModelTraining) map[string]string {
-	if isGPUResourceSet(trainingCR) {
-		return r.trainingConfig.GPUNodeSelector
-	}
-
-	return r.trainingConfig.NodeSelector
-}
-
 func (r *ModelTrainingReconciler) getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
 	var tolerations []corev1.Toleration
 
-	if isGPUResourceSet(trainingCR) {
+	if trainingCR.Spec.IsGPUResourceSet() {
 		tolerations = r.trainingConfig.GPUTolerations
 	} else {
 		tolerations = r.trainingConfig.Tolerations
@@ -260,6 +244,17 @@ func (r *ModelTrainingReconciler) reconcileTaskRun(
 		return nil, err
 	}
 
+	var affinity *corev1.Affinity
+	if len(trainingCR.Spec.NodeSelector) == 0 {
+		var availableNodePools []config.NodePool
+		if trainingCR.Spec.IsGPUResourceSet() {
+			availableNodePools = r.trainingConfig.GPUNodePools
+		} else {
+			availableNodePools = r.trainingConfig.NodePools
+		}
+		affinity = utils.BuildNodeAffinity(availableNodePools)
+	}
+
 	taskRun := &tektonv1beta1.TaskRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      trainingCR.Name,
@@ -272,8 +267,9 @@ func (r *ModelTrainingReconciler) reconcileTaskRun(
 			TaskSpec: taskSpec,
 			Timeout:  &metav1.Duration{Duration: r.trainingConfig.Timeout},
 			PodTemplate: &tektonv1beta1.PodTemplate{
-				NodeSelector: r.getNodeSelector(trainingCR),
 				Tolerations:  r.getTolerations(trainingCR),
+				NodeSelector: trainingCR.Spec.NodeSelector,
+				Affinity:     affinity,
 			},
 		},
 	}

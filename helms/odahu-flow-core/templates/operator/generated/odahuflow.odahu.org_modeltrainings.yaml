@@ -122,6 +122,11 @@ spec:
               - name
               - version
               type: object
+            nodeSelector:
+              additionalProperties:
+                type: string
+              description: Node selector for specifying a node pool
+              type: object
             outputConnection:
               description: Name of Connection to storage where training output artifact
                 will be stored. Permitted connection types are defined by specific

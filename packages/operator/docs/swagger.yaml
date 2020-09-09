@@ -235,11 +235,11 @@ definitions:
       namespace:
         description: Kubernetes namespace, where model trainings will be deployed
         type: string
-      nodeSelector:
-        additionalProperties:
-          type: string
-        description: Kubernetes node selectors for model packaging pods
-        type: object
+      nodePools:
+        description: Node pools to run packaging tasks on
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       outputConnectionID:
         type: string
       packagerIntegrationNamespace:
@@ -268,10 +268,11 @@ definitions:
       enabled:
         description: Enable deployment API/operator
         type: boolean
-      gpuNodeSelector:
-        additionalProperties:
-          type: string
-        type: object
+      gpuNodePools:
+        description: Node pools to run GPU training tasks on
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       gpuTolerations:
         description: Kubernetes tolerations for GPU model trainings pods
         type: string
@@ -282,10 +283,11 @@ definitions:
       namespace:
         description: Kubernetes namespace, where model trainings will be deployed
         type: string
-      nodeSelector:
-        additionalProperties:
-          type: string
-        type: object
+      nodePools:
+        description: Node pools to run training tasks on
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       outputConnectionID:
         type: string
       serviceAccount:
@@ -304,6 +306,17 @@ definitions:
             * kubernetes
             * postgres
         type: string
+    type: object
+  NodePool:
+    properties:
+      nodeSelector:
+        additionalProperties:
+          type: string
+        type: object
+      tags:
+        items:
+          type: string
+        type: array
     type: object
   OperatorConfig:
     properties:
@@ -489,6 +502,11 @@ definitions:
       integrationName:
         description: Packaging integration ID
         type: string
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
+        type: object
       outputConnection:
         description: |-
           Name of Connection to storage where a packager obtain a model trained artifact.
@@ -925,6 +943,11 @@ definitions:
       model:
         $ref: '#/definitions/ModelIdentity'
         description: Model Identity
+        type: object
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
         type: object
       outputConnection:
         description: |-

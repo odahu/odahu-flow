@@ -46,50 +46,19 @@ const (
 
 	modelBuildImage = "model-image:builder"
 	toolchainImage  = "model-image:toolchain"
-
-	gpuTolerationKey      = "gpu-key"
-	gpuTolerationValue    = "gpu-value"
-	gpuTolerationOperator = "gpu-operator"
-	gpuTolerationEffect   = "gpu-effect"
-
-	tolerationKey      = "key"
-	tolerationValue    = "value"
-	tolerationOperator = "operator"
-	tolerationEffect   = "effect"
 )
 
 var (
 	gpuNodeSelector = map[string]string{"gpu-key": "gpu-value"}
 	nodeSelector    = map[string]string{"node-key": "node-value"}
 
-	expectedRequest = reconcile.Request{
-		NamespacedName: types.NamespacedName{Name: mtName, Namespace: testNamespace},
-	}
 	mtNamespacedName         = types.NamespacedName{Name: mtName, Namespace: testNamespace}
+	expectedTrainingRequest  = reconcile.Request{NamespacedName: mtNamespacedName}
 	testResValue             = "5"
-	emptyValue               = ""
 	testToolchainIntegration = &training_apis.ToolchainIntegration{
 		ID: testToolchainIntegrationID,
 		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
 			DefaultImage: toolchainImage,
-		},
-	}
-
-	tolerations = []v1.Toleration{
-		{
-			Key:      tolerationKey,
-			Operator: tolerationOperator,
-			Value:    tolerationValue,
-			Effect:   tolerationEffect,
-		},
-	}
-
-	gpuTolerations = []v1.Toleration{
-		{
-			Key:      gpuTolerationKey,
-			Operator: gpuTolerationOperator,
-			Value:    gpuTolerationValue,
-			Effect:   gpuTolerationEffect,
 		},
 	}
 )
@@ -154,181 +123,209 @@ func (s *ModelTrainingControllerSuite) TearDownTest() {
 }
 
 func TestModelTrainingControllerSuite(t *testing.T) {
-
 	suite.Run(t, new(ModelTrainingControllerSuite))
 }
 
-func (s *ModelTrainingControllerSuite) templateNodeSelectorTest(
-	mtResources *odahuflowv1alpha1.ResourceRequirements,
-	expectedNodeSelector map[string]string,
-	expectedTolerations []v1.Toleration,
-) {
-	mt := &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mtName,
-			Namespace: testNamespace,
+// Node pool provided in training request, use it for tekton task
+func (s *ModelTrainingControllerSuite) TestNodePool_Provided() {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector}}
+	s.initReconciler(trainingConfig)
+
+	mt := createTrainingWithNodeSelector(nodeSelector)
+
+	cleanF := s.createTraining(mt)
+	defer cleanF()
+	tektonTask := s.getTektonTrainingTask(mt.Name)
+
+	s.Assertions.Nil(tektonTask.Spec.PodTemplate.Affinity)
+	s.Assertions.Equal(nodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
+}
+
+// Node pool not provided, build affinity for all CPU pools from config
+func (s *ModelTrainingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	nodeSelector1 := map[string]string{"node-key": "node-value", "another": "another-value"}
+	nodeSelector2 := map[string]string{"node-key2": "node-value2"}
+	trainingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector1}, {NodeSelector: nodeSelector2}}
+	s.initReconciler(trainingConfig)
+
+	expectedNodeSelectorRequirement1 := []v1.NodeSelectorRequirement{
+		{
+			Key:      "node-key",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"node-value"},
 		},
+		{
+			Key:      "another",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"another-value"},
+		},
+	}
+	expectedNodeSelectorRequirement2 := []v1.NodeSelectorRequirement{{
+		Key:      "node-key2",
+		Operator: v1.NodeSelectorOpIn,
+		Values:   []string{"node-value2"},
+	}}
+
+	mt := createTrainingWithNodeSelector(nil)
+	cleanF := s.createTraining(mt)
+	defer cleanF()
+	tektonTask := s.getTektonTrainingTask(mt.Name)
+
+	actualAffinity := tektonTask.Spec.PodTemplate.Affinity
+	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+	s.Assertions.Len(actualNodeSelectorTerms, 2)
+
+	for i, expectedNodeSelectorRequirement := range [][]v1.NodeSelectorRequirement{
+		expectedNodeSelectorRequirement1, expectedNodeSelectorRequirement2} {
+		s.Assertions.ElementsMatch(expectedNodeSelectorRequirement, actualNodeSelectorTerms[i].MatchExpressions)
+	}
+
+	s.Assertions.Nil(tektonTask.Spec.PodTemplate.NodeSelector)
+}
+
+// Node pool provided in GPU training request, use it for tekton task
+func (s *ModelTrainingControllerSuite) TestNodePool_GPU_Provided() {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.GPUNodePools = []config.NodePool{{NodeSelector: gpuNodeSelector}}
+	s.initReconciler(trainingConfig)
+
+	mt := createGPUTrainingWithNodeSelector(gpuNodeSelector)
+
+	cleanF := s.createTraining(mt)
+	defer cleanF()
+	tektonTask := s.getTektonTrainingTask(mt.Name)
+
+	s.Assertions.Nil(tektonTask.Spec.PodTemplate.Affinity)
+	s.Assertions.Equal(gpuNodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
+}
+
+// Node pool not provided for GPU training, build affinity for all GPU pools from config
+func (s *ModelTrainingControllerSuite) TestNodePool_GPU_NotProvided_UseAffinity() {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	nodeSelector1 := map[string]string{"gpu-node-key": "gpu-node-value", "gpu-another": "gpu-another-value"}
+	nodeSelector2 := map[string]string{"gpu-node-key2": "gpu-node-value2"}
+	trainingConfig.GPUNodePools = []config.NodePool{{NodeSelector: nodeSelector1}, {NodeSelector: nodeSelector2}}
+	s.initReconciler(trainingConfig)
+
+	expectedNodeSelectorRequirement1 := []v1.NodeSelectorRequirement{
+		{
+			Key:      "gpu-node-key",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"gpu-node-value"},
+		},
+		{
+			Key:      "gpu-another",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"gpu-another-value"},
+		},
+	}
+	expectedNodeSelectorRequirement2 := []v1.NodeSelectorRequirement{{
+		Key:      "gpu-node-key2",
+		Operator: v1.NodeSelectorOpIn,
+		Values:   []string{"gpu-node-value2"},
+	}}
+
+	mt := createGPUTrainingWithNodeSelector(nil)
+
+	cleanF := s.createTraining(mt)
+	defer cleanF()
+	tektonTask := s.getTektonTrainingTask(mt.Name)
+
+	actualAffinity := tektonTask.Spec.PodTemplate.Affinity
+	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+	s.Assertions.Len(actualNodeSelectorTerms, 2)
+
+	for i, expectedNodeSelectorRequirement := range [][]v1.NodeSelectorRequirement{
+		expectedNodeSelectorRequirement1, expectedNodeSelectorRequirement2} {
+		s.Assertions.ElementsMatch(expectedNodeSelectorRequirement, actualNodeSelectorTerms[i].MatchExpressions)
+	}
+
+	s.Assertions.Nil(tektonTask.Spec.PodTemplate.NodeSelector)
+}
+
+// Template tolerations tests (CPU)
+func (s *ModelTrainingControllerSuite) templateTestTolerations(input []v1.Toleration) {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.Tolerations = input
+	s.initReconciler(trainingConfig)
+
+	mt := &odahuflowv1alpha1.ModelTraining{
+		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
+		Spec:       odahuflowv1alpha1.ModelTrainingSpec{Toolchain: testToolchainIntegrationID},
+	}
+
+	cleanF := s.createTraining(mt)
+	defer cleanF()
+	tektonTask := s.getTektonTrainingTask(mt.Name)
+	s.Assertions.Equal(input, tektonTask.Spec.PodTemplate.Tolerations)
+}
+
+// Toleration is nil in config, expect nil toleration in tekton task
+func (s *ModelTrainingControllerSuite) TestToleration_nil() {
+	s.templateTestTolerations(nil)
+}
+
+// Single toleration in config, expect it in tekton task
+func (s *ModelTrainingControllerSuite) TestToleration_Single() {
+	s.templateTestTolerations([]v1.Toleration{{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"}})
+}
+
+// Multiple tolerations in config, expect them in tekton task
+func (s *ModelTrainingControllerSuite) TestToleration_Multiple() {
+	s.templateTestTolerations([]v1.Toleration{
+		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
+		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
+	})
+}
+
+// Template tolerations tests (GPU)
+func (s *ModelTrainingControllerSuite) templateTestGPUTolerations(input []v1.Toleration) {
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.GPUTolerations = input
+	s.initReconciler(trainingConfig)
+
+	mt := &odahuflowv1alpha1.ModelTraining{
+		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
 		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			Resources: mtResources,
 			Toolchain: testToolchainIntegrationID,
+			Resources: &odahuflowv1alpha1.ResourceRequirements{
+				Limits: &odahuflowv1alpha1.ResourceList{
+					GPU: &testResValue,
+				},
+			},
 		},
 	}
 
-	err := s.k8sClient.Create(context.TODO(), mt)
-	s.g.Expect(err).NotTo(HaveOccurred())
-	defer s.k8sClient.Delete(context.TODO(), mt)
-
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-
-	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
-
-	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
-
-	s.g.Expect(tr.Spec.PodTemplate.NodeSelector).Should(Equal(expectedNodeSelector))
-	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedTolerations))
+	cleanF := s.createTraining(mt)
+	defer cleanF()
+	tektonTask := s.getTektonTrainingTask(mt.Name)
+	s.Assertions.Equal(input, tektonTask.Spec.PodTemplate.Tolerations)
 }
 
-func (s *ModelTrainingControllerSuite) TestEmptyGPUNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-			},
-		},
-		nil,
-		nil,
-	)
+// GPU Tolerations is nil in config, expect nil toleration in tekton task
+func (s *ModelTrainingControllerSuite) TestGPUToleration_nil() {
+	s.templateTestGPUTolerations(nil)
 }
 
-func (s *ModelTrainingControllerSuite) TestEmptyGPUValue() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.GPUNodeSelector = map[string]string{}
-	trainingConfig.GPUTolerations = []v1.Toleration{}
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &emptyValue,
-			},
-		},
-		nil,
-		nil,
-	)
+// Single GPU toleration in config, expect it in tekton task
+func (s *ModelTrainingControllerSuite) TestGPUToleration_Single() {
+	s.templateTestGPUTolerations([]v1.Toleration{{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"}})
 }
 
-func (s *ModelTrainingControllerSuite) TestGPUNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	trainingConfig.GPUTolerations = gpuTolerations
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-			},
-		},
-		gpuNodeSelector,
-		gpuTolerations,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestOnlyGPUNodeSelector() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-			},
-		},
-		gpuNodeSelector,
-		nil,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestEmptyNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nil,
-		nil,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.Tolerations = tolerations
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nodeSelector,
-		tolerations,
-	)
-}
-
-func (s *ModelTrainingControllerSuite) TestOnlyNodeSelector() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nodeSelector,
-		nil,
-	)
-}
-
-// If GPU and CPU resources setup on a one training, GPU node selector must be used
-func (s *ModelTrainingControllerSuite) TestGPUandCPUNodePools() {
-	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
-	trainingConfig.Tolerations = tolerations
-	trainingConfig.GPUTolerations = gpuTolerations
-	s.initReconciler(trainingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				GPU: &testResValue,
-				CPU: &testResValue,
-			},
-		},
-		gpuNodeSelector,
-		gpuTolerations,
-	)
+// Multiple GPU tolerations in config, expect them in tekton task
+func (s *ModelTrainingControllerSuite) TestGPUToleration_Multiple() {
+	s.templateTestGPUTolerations([]v1.Toleration{
+		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
+		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
+	})
 }
 
 func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
-	trainingConfig.NodeSelector = nodeSelector
-	trainingConfig.GPUNodeSelector = gpuNodeSelector
+	trainingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector}}
+	trainingConfig.GPUNodePools = []config.NodePool{{NodeSelector: gpuNodeSelector}}
 	trainingConfig.ModelTrainerImage = modelBuildImage
 	s.initReconciler(trainingConfig)
 
@@ -361,8 +358,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -420,8 +417,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -475,8 +472,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -491,4 +488,63 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 		{Name: toolchainEnvKey, Value: toolchainEnvValue},
 		{Name: trainingEnvKey, Value: trainingEnvValue},
 	}))
+}
+
+func (s *ModelTrainingControllerSuite) createTraining(training *odahuflowv1alpha1.ModelTraining) (cleanF func()) {
+	err := s.k8sClient.Create(context.TODO(), training)
+	s.Assertions.Nil(err, "Failed to create training in K8s")
+
+	s.Assertions.Eventually(
+		func() bool {
+			select {
+			case r := <-s.requests:
+				return r == expectedTrainingRequest
+			default:
+				return false
+			}
+		},
+		5*time.Second,
+		10*time.Millisecond)
+
+	s.Assertions.Nil(s.k8sClient.Get(context.TODO(), mtNamespacedName, training))
+
+	return func() { s.k8sClient.Delete(context.TODO(), training) }
+}
+
+func (s *ModelTrainingControllerSuite) getTektonTrainingTask(trainingName string) *tektonv1beta1.TaskRun {
+	tr := &tektonv1beta1.TaskRun{}
+	trKey := types.NamespacedName{Name: trainingName, Namespace: testNamespace}
+	err := s.k8sClient.Get(context.TODO(), trKey, tr)
+	s.Assertions.Nil(err, "Tekton task retrieval failed")
+	return tr
+}
+
+func createTrainingWithNodeSelector(nodeSelector map[string]string) *odahuflowv1alpha1.ModelTraining {
+	return &odahuflowv1alpha1.ModelTraining{
+		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
+		Spec: odahuflowv1alpha1.ModelTrainingSpec{
+			NodeSelector: nodeSelector,
+			Toolchain:    testToolchainIntegrationID,
+			Resources: &odahuflowv1alpha1.ResourceRequirements{
+				Limits: &odahuflowv1alpha1.ResourceList{
+					CPU: &testResValue,
+				},
+			},
+		},
+	}
+}
+
+func createGPUTrainingWithNodeSelector(nodeSelector map[string]string) *odahuflowv1alpha1.ModelTraining {
+	return &odahuflowv1alpha1.ModelTraining{
+		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
+		Spec: odahuflowv1alpha1.ModelTrainingSpec{
+			NodeSelector: nodeSelector,
+			Toolchain:    testToolchainIntegrationID,
+			Resources: &odahuflowv1alpha1.ResourceRequirements{
+				Limits: &odahuflowv1alpha1.ResourceList{
+					GPU: &testResValue,
+				},
+			},
+		},
+	}
 }
