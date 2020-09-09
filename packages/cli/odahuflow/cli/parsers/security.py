@@ -56,6 +56,18 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
     Check that credentials is correct and save to the config
     """
 
+    # clean config from previous credentials
+    _reset_credentials()
+
+    # update config
+    update_config_file(
+        API_URL=api_host,
+        API_TOKEN=token,
+        ODAHUFLOWCTL_OAUTH_CLIENT_ID=client_id,
+        ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=client_secret,
+        ISSUER_URL=issuer
+    )
+
     # set predicates
     is_token_login = bool(token)
     is_client_cred_login = bool(client_id) or bool(client_secret)
@@ -77,19 +89,6 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
                                      issuer_url=issuer)
     try:
         api_client.info()
-
-        # clean config from previous credentials
-        _reset_credentials()
-
-        # update config
-        update_config_file(
-            API_URL=api_host,
-            API_TOKEN=token,
-            ODAHUFLOWCTL_OAUTH_CLIENT_ID=client_id,
-            ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=client_secret,
-            ISSUER_URL=issuer
-        )
-
         print('Success! Credentials have been saved.')
     except api.IncorrectAuthorizationToken as wrong_token:
         LOG.error('Wrong authorization token\n%s', wrong_token)
