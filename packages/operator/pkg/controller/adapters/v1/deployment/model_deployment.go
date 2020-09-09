@@ -161,7 +161,7 @@ func NewAdapter(service deployment.Service, kubeClient kube_client.Client, mgr c
 func (s *Adapter) ListStorage() ([]types.StorageEntity, error) {
 
 	result := make([]types.StorageEntity, 0)
-	enList, err := s.service.GetModelDeploymentList(context.TODO(), nil)
+	enList, err := s.service.GetModelDeploymentList(context.TODO())
 	if err != nil {
 		return result, err
 	}
