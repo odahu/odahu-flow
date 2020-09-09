@@ -21,7 +21,6 @@ import logging
 import click
 from click import UsageError
 
-import odahuflow.sdk.config as config
 from odahuflow.sdk.clients import api
 from odahuflow.sdk.config import update_config_file
 
