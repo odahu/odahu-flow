@@ -140,12 +140,12 @@ class URLBuilder:
         return target_url
 
     def build_request_kwargs(self,
-                              url_template: str,
-                              payload: Mapping[Any, Any] = None,
-                              action: str = 'GET',
-                              stream: bool = False,
-                              token: Optional[str] = None
-                              ) -> Dict[str, Any]:
+                             url_template: str,
+                             payload: Mapping[Any, Any] = None,
+                             action: str = 'GET',
+                             stream: bool = False,
+                             token: Optional[str] = None
+                             ) -> Dict[str, Any]:
         target_url = self.build_url(url_template)
         headers = {}
         if token:
@@ -184,10 +184,11 @@ class Authenticator:
     @staticmethod
     def login_required(response):
         """
-        Check whether the login is required or client is already is authorised
+        Check whether the login is required or a client is already authorised
         :param response:
         :return:
         """
+
         # We assume if there were redirects then credentials are out of date and we can refresh or build auth url
 
         def not_authorized_resp_code():
@@ -214,6 +215,9 @@ class Authenticator:
                 'Please try to log in again'
             )
 
+        # use default value if self._issuer_url is empty
+        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
+
         LOGGER.debug('Redirect has been detected. Trying to refresh a token')
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
@@ -225,7 +229,7 @@ class Authenticator:
             self._login_interactive_mode(url)
         else:
             raise IncorrectAuthorizationToken(
-                f'{self._credentials_error_status}. \n'
+                f'{self._credentials_error_status}.\n'
                 'Please provide correct temporary token or disable non interactive mode'
             )
 
@@ -244,6 +248,10 @@ class Authenticator:
             self._update_config_with_new_oauth_config(login_result)
 
     def _login_with_client_credentials(self):
+
+        # use default value if self._issuer_url is empty
+        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
+
         login_result = do_client_cred_authentication(
             issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
             client_secret=self._client_secret
@@ -572,7 +580,6 @@ class AsyncRemoteAPIClient:
             chunk = bytes_chunk.decode(encoding)
 
             if pending is not None:
-
                 chunk = pending + chunk
 
             lines = chunk.splitlines()
