@@ -354,10 +354,11 @@ func (r *ModelDeploymentReconciler) reconcileAuthPolicy(
 					{
 						// The value does not matter.
 						Name: defaultTargetName,
-						Labels: map[string]string{
-							// We assign the same labels for our model deployments
-							DodelNameAnnotationKey: modelDeploymentCR.Name,
-						},
+						// TODO: sort this out!
+						//Labels: map[string]string{
+						//	// We assign the same labels for our model deployments
+						//	DodelNameAnnotationKey: modelDeploymentCR.Name,
+						//},
 					},
 				},
 				Origins: []*authv1alpha1_istio.OriginAuthenticationMethod{
