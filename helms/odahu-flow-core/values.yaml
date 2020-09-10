@@ -446,19 +446,19 @@ config:
     # This section defines available training CPU node pools. A training request can have a nodeSelector,
     # that exactly matches a node pool to enforce the training to run on that node pool.
     # List of tags is just for user-friendly display on UI and basically optional.
-    nodePools:
-      - nodeSelector:
-          some_label: some_value
-        tags:
-          - tag1
-          - tag2
+    # nodePools:
+    #   - nodeSelector:
+    #       some_label: some_value
+    #     tags:
+    #       - tag1
+    #       - tag2
     # Same as nodePools, but for GPU trainings.
-    gpuNodePools:
-      - nodeSelector:
-          another_label: another_value
-        tags:
-          - tag3
-          - tag4
+    # gpuNodePools:
+    #   - nodeSelector:
+    #       another_label: another_value
+    #     tags:
+    #       - tag3
+    #       - tag4
 
   # Packaging configuration
   packaging:
@@ -491,12 +491,12 @@ config:
     # This section defines available packaging node pools. A training request can have a nodeSelector,
     # that exactly matches a node pool to enforce the packaging to run on that node pool.
     # List of tags is just for user-friendly display on UI and basically optional.
-    nodePools:
-      - nodeSelector:
-          some_label: some_value
-        tags:
-          - tag1
-          - tag2
+    # nodePools:
+    #   - nodeSelector:
+    #       some_label: some_value
+    #     tags:
+    #       - tag1
+    #       - tag2
 
   # Service catalog configuration
   serviceCatalog:
