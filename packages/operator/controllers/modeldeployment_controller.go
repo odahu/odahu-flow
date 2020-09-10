@@ -21,10 +21,11 @@ import (
 	"fmt"
 	authv1alpha1 "github.com/aspenmesh/istio-client-go/pkg/apis/authentication/v1alpha1"
 	"github.com/go-logr/logr"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	authv1alpha1_istio "istio.io/api/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -208,6 +209,11 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 		serviceAccountName = odahuflow.GenerateDeploymentConnectionSecretName(modelDeploymentCR.Name)
 	}
 
+	var affinity *corev1.Affinity
+	if len(modelDeploymentCR.Spec.NodeSelector) == 0 {
+		affinity = utils.BuildNodeAffinity(r.deploymentConfig.NodePools)
+	}
+
 	knativeConfiguration := &knservingv1.Configuration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      KnativeConfigurationName(modelDeploymentCR),
@@ -241,6 +247,9 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 						Containers: []corev1.Container{
 							*container,
 						},
+						NodeSelector: modelDeploymentCR.Spec.NodeSelector,
+						Tolerations:  r.deploymentConfig.Tolerations,
+						Affinity:     affinity,
 					},
 				},
 			},

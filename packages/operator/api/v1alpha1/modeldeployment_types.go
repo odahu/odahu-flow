@@ -44,6 +44,8 @@ type ModelDeploymentSpec struct {
 	RoleName *string `json:"roleName,omitempty"`
 	// If pulling of your image requires authorization, then you should specify the connection id
 	ImagePullConnectionID *string `json:"imagePullConnID,omitempty"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ModelDeploymentState string
