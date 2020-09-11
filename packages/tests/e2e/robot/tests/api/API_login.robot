@@ -21,7 +21,7 @@ Verify login with client id, client secret and issuer
     Log                 ${SA_CLIENT_ID}
     Log                 ${SA_CLIENT_SECRET}
     Log                 ${ISSUER}
-    ${result}           Call API  config get  base_url=${API_URL}  client_id=${SA_CLIENT_ID}, client_secret=${SA_CLIENT_SECRET}, issuer_url=${ISSUER}
+    ${result}           Call API  config get  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
 
 Try login with not valid token
     ${result}           Call API  config get  base_url=${API_URL}  token="not-valid-token"
