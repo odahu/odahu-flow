@@ -25,7 +25,9 @@ class Configuration:
 
     @staticmethod
     def config_get(base_url=None, token=None, client_id=None, client_secret=None, issuer_url=None):
-        return ConfigurationClient(base_url, token, client_id, client_secret, issuer_url).get()
+        return ConfigurationClient(
+            base_url, token, client_id, client_secret, issuer_url=issuer_url
+        ).get()
 
 
 class Connection:
