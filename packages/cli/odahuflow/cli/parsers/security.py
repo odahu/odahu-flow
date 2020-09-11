@@ -21,9 +21,7 @@ import logging
 import click
 from click import UsageError
 
-import odahuflow.sdk.config as config
 from odahuflow.sdk.clients import api
-from odahuflow.sdk.clients.oidc import OpenIdProviderConfiguration
 from odahuflow.sdk.config import update_config_file
 
 LOG = logging.getLogger(__name__)
@@ -41,14 +39,8 @@ def _reset_credentials():
                        API_ISSUING_URL=None,
                        ODAHUFLOWCTL_OAUTH_CLIENT_ID=None,
                        ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=None,
-                       ISSUER_URL=None)
-
-
-def fetch_openid_conf(issuer: str) -> None:
-    conf = OpenIdProviderConfiguration(issuer)
-    conf.fetch_configuration()
-
-    config.API_ISSUING_URL = conf.token_endpoint
+                       ISSUER_URL=None,
+                       MODEL_HOST=None)
 
 
 @click.command()
@@ -69,9 +61,9 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
     # update config
     update_config_file(
         API_URL=api_host,
+        API_TOKEN=token,
         ODAHUFLOWCTL_OAUTH_CLIENT_ID=client_id,
         ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=client_secret,
-        API_TOKEN=token,
         ISSUER_URL=issuer
     )
 
@@ -86,19 +78,17 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
                          'Otherwise skipp all options to launch interactive login mode')
     if is_client_cred_login and (not client_id or not client_secret):
         raise UsageError('You must pass both client_id and client_secret to client_credentials login')
-    if is_client_cred_login and not config.ISSUER_URL:
+    if is_client_cred_login and not issuer:
         raise UsageError('You must provide --issuer parameter to do client_credentials login. '
                          'Or set ISSUER_URL option in config file')
 
-    # fetch openid configuration
-    if config.ISSUER_URL:
-        fetch_openid_conf(config.ISSUER_URL)
-
     # login
     api_client = api.RemoteAPIClient(api_host, token, client_id, client_secret,
-                                     non_interactive=not is_interactive_login)
+                                     non_interactive=not is_interactive_login,
+                                     issuer_url=issuer)
     try:
         api_client.info()
+        print('Success! Credentials have been saved.')
     except api.IncorrectAuthorizationToken as wrong_token:
         LOG.error('Wrong authorization token\n%s', wrong_token)
         raise
@@ -106,8 +96,6 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
         LOG.error(f'Failed to connect to API host!'
                   f'Error: {connection_exc}')
         raise
-
-    print('Success! Credentials have been saved.')
 
 
 @click.command()

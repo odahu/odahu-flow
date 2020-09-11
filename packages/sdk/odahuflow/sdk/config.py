@@ -339,7 +339,6 @@ DEBUG = ConfigVariableDeclaration('DEBUG', False, cast_bool,
                                   'Enable verbose program output',
                                   True)
 
-
 # Model invocation testing
 MODEL_SERVER_URL = ConfigVariableDeclaration('MODEL_SERVER_URL', '', str, 'Default url of model server', True)
 
@@ -348,7 +347,6 @@ MODEL_HOST = ConfigVariableDeclaration('MODEL_HOST', '', str, 'Default host of m
 MODEL_DEPLOYMENT_NAME = ConfigVariableDeclaration('MODEL_DEPLOYMENT_NAME', '', str, 'Model deployment name', True)
 
 MODEL_ROUTE_NAME = ConfigVariableDeclaration('MODEL_ROUTE_NAME', '', str, 'Model deployment name', True)
-
 
 # API endpoint
 API_URL = ConfigVariableDeclaration('API_URL', 'http://localhost:5000', str,
@@ -368,27 +366,27 @@ ISSUER_URL = ConfigVariableDeclaration('ISSUER_URL', None, str, 'OIDC Issuer URL
 
 # Auth
 ODAHUFLOWCTL_OAUTH_CLIENT_ID = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLIENT_ID', 'legion-cli', str,
-                                                      'Set OAuth2 Client id',
-                                                      True)
+                                                         'Set OAuth2 Client id',
+                                                         True)
 
 ODAHUFLOWCTL_OAUTH_CLIENT_SECRET = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLIENT_SECRET', '', str,
-                                                          'Set OAuth2 Client id',
-                                                          True)
+                                                             'Set OAuth2 Client id',
+                                                             True)
 
 ODAHUFLOWCTL_OAUTH_SCOPE = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_SCOPE',
-                                                  'openid profile email offline_access groups', str,
-                                                  'Set OAuth2 scope',
-                                                  True)
+                                                     'openid profile email offline_access groups', str,
+                                                     'Set OAuth2 scope',
+                                                     True)
 
 ODAHUFLOWCTL_OAUTH_LOOPBACK_HOST = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_LOOPBACK_HOST',
-                                                          '127.0.0.1', str,
-                                                          'Target redirect for OAuth2 interactive authorization',
-                                                          True)
+                                                             '127.0.0.1', str,
+                                                             'Target redirect for OAuth2 interactive authorization',
+                                                             True)
 
 ODAHUFLOWCTL_OAUTH_LOOPBACK_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_LOOPBACK_URL',
-                                                         '/oauth/callback', str,
-                                                         'Target redirect url for OAuth2 interactive authorization',
-                                                         True)
+                                                            '/oauth/callback', str,
+                                                            'Target redirect url for OAuth2 interactive authorization',
+                                                            True)
 
 ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL',
                                                                  '', str,
@@ -407,7 +405,7 @@ JUPYTER_REDIRECT_URL = ConfigVariableDeclaration('JUPYTER_REDIRECT_URL',
                                                  True)
 
 ODAHUFLOWCTL_NONINTERACTIVE = ConfigVariableDeclaration('ODAHUFLOWCTL_NONINTERACTIVE', False,
-                                                     bool, 'Disable any interaction (e.g. authorization)', True)
+                                                        bool, 'Disable any interaction (e.g. authorization)', True)
 
 # Local
 

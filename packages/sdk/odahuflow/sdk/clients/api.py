@@ -25,6 +25,8 @@ import threading
 from collections.abc import AsyncIterable
 from typing import Any, Callable, Dict, Iterator, Mapping, Optional, Tuple, Union
 from urllib.parse import urlencode, urlparse
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 import aiohttp
 import requests
@@ -33,6 +35,7 @@ import requests.exceptions
 import odahuflow.sdk.config
 from odahuflow.sdk.clients.oauth_handler import OAuthLoginResult, do_client_cred_authentication, do_refresh_token, \
     start_oauth2_callback_handler
+from odahuflow.sdk.clients.oidc import fetch_openid_configuration
 from odahuflow.sdk.config import update_config_file
 from odahuflow.sdk.definitions import API_VERSION
 
@@ -121,43 +124,6 @@ def get_authorization_redirect(web_redirect: str, after_login: Callable) -> str:
     return web_redirect
 
 
-class HTTPConnectionPolicy:
-    """
-    Define how many retries client should make in case of error
-    and connection timeout
-    """
-
-    def __init__(self,
-                 retries: Optional[int] = 3,
-                 timeout: Optional[Union[int, Tuple[int, int]]] = 10):
-
-        self._retries = retries
-        self._timeout = timeout
-
-    @property
-    def default_retries(self):
-        return self._retries
-
-    @property
-    def default_timeout(self):
-        return self._timeout
-
-    @default_timeout.setter
-    def default_timeout(self, value):
-        self._timeout = value
-
-    def get_conn_timeout(self, timeout: Optional[int] = None):
-        connection_timeout = timeout if timeout is not None else self.default_timeout
-
-        if connection_timeout == 0:
-            connection_timeout = None
-
-        return connection_timeout
-
-    def get_left_retries(self):
-        return self.default_retries if self.default_retries > 0 else 1
-
-
 class URLBuilder:
 
     def __init__(self, base_url: str = odahuflow.sdk.config.API_URL):
@@ -174,12 +140,12 @@ class URLBuilder:
         return target_url
 
     def build_request_kwargs(self,
-                              url_template: str,
-                              payload: Mapping[Any, Any] = None,
-                              action: str = 'GET',
-                              stream: bool = False,
-                              token: Optional[str] = None
-                              ) -> Dict[str, Any]:
+                             url_template: str,
+                             payload: Mapping[Any, Any] = None,
+                             action: str = 'GET',
+                             stream: bool = False,
+                             token: Optional[str] = None
+                             ) -> Dict[str, Any]:
         target_url = self.build_url(url_template)
         headers = {}
         if token:
@@ -200,7 +166,8 @@ class Authenticator:
 
     def __init__(self,
                  client_id: str, client_secret: str, non_interactive: bool, base_url: str,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN):
+                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
 
         self._client_id = client_id
         self._client_secret = client_secret
@@ -208,6 +175,7 @@ class Authenticator:
         self._base_url = base_url
         self._interactive_login_finished = threading.Event()
         self._token = token
+        self._issuer_url = issuer_url
 
         # Force if set
         if odahuflow.sdk.config.ODAHUFLOWCTL_NONINTERACTIVE:
@@ -216,10 +184,11 @@ class Authenticator:
     @staticmethod
     def login_required(response):
         """
-        Check whether the login is required or client is already is authorised
+        Check whether the login is required or a client is already authorised
         :param response:
         :return:
         """
+
         # We assume if there were redirects then credentials are out of date and we can refresh or build auth url
 
         def not_authorized_resp_code():
@@ -239,25 +208,28 @@ class Authenticator:
         :return: None if success, IncorrectAuthorizationToken exception otherwise
         """
 
-        # If it is a error after refreshed token - fail
+        # If it is an error after refreshed token - fail
         if limit_stack:
             raise IncorrectAuthorizationToken(
                 f'{self._credentials_error_status} even after refreshing. \n'
                 'Please try to log in again'
             )
 
+        # use default value if self._issuer_url is empty
+        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
+
         LOGGER.debug('Redirect has been detected. Trying to refresh a token')
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
             self._login_with_refresh_token()
-        elif self._client_id and self._client_secret and odahuflow.sdk.config.API_ISSUING_URL:
+        elif self._client_id and self._client_secret and fetch_openid_configuration(self._issuer_url):
             self._login_with_client_credentials()
         elif self._interactive_mode_enabled:
             # Start interactive flow
             self._login_interactive_mode(url)
         else:
             raise IncorrectAuthorizationToken(
-                f'{self._credentials_error_status}. \n'
+                f'{self._credentials_error_status}.\n'
                 'Please provide correct temporary token or disable non interactive mode'
             )
 
@@ -276,13 +248,17 @@ class Authenticator:
             self._update_config_with_new_oauth_config(login_result)
 
     def _login_with_client_credentials(self):
+
+        # use default value if self._issuer_url is empty
+        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
+
         login_result = do_client_cred_authentication(
-            issue_token_url=odahuflow.sdk.config.API_ISSUING_URL, client_id=self._client_id,
+            issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
             client_secret=self._client_secret
         )
         if not login_result:
             raise IncorrectClientCredentials(
-                'Client credentials in not correct. \n'
+                'Client credentials are not correct.\n'
                 'Please login again'
             )
         else:
@@ -322,6 +298,7 @@ class Authenticator:
                            API_TOKEN=login_result.id_token,
                            API_REFRESH_TOKEN=login_result.refresh_token,
                            API_ACCESS_TOKEN=login_result.access_token,
+                           ISSUER_URL=self._issuer_url,
                            API_ISSUING_URL=login_result.issuing_url)
 
     def _after_login(self, login_result: OAuthLoginResult) -> None:
@@ -367,7 +344,8 @@ class RemoteAPIClient:
                  client_secret: Optional[str] = '',
                  retries: Optional[int] = 3,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
-                 non_interactive: Optional[bool] = True):
+                 non_interactive: Optional[bool] = True,
+                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
         """
         Build client
 
@@ -381,16 +359,26 @@ class RemoteAPIClient:
         """
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
-        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
-        self.conn_policy = HTTPConnectionPolicy(retries, timeout)
+        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)
+        self.timeout = timeout
+        self.retries = retries
+
+        retry_strategy = Retry(
+            total=retries,
+            status_forcelist=[429, 500, 502, 503, 504],
+            backoff_factor=1
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.default_client = requests.Session()
+        self.default_client.mount("", adapter)
 
     @property
     def timeout(self):
-        return self.conn_policy.default_timeout
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
-        self.conn_policy.default_timeout = value
+        self._timeout = value
 
     @classmethod
     def construct_from_other(cls, other):
@@ -402,7 +390,7 @@ class RemoteAPIClient:
         """
         return cls(
             other.url_builder.base_url, other.authenticator.token,
-            other.conn_policy.default_retries, other.conn_policy.default_timeout
+            retries=other.retries, timeout=other.timeout
         )
 
     def _request(self,
@@ -427,36 +415,21 @@ class RemoteAPIClient:
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream,
                                                                token=self.authenticator.token)
-        connection_timeout = self.conn_policy.get_conn_timeout(timeout)
-        left_retries = self.conn_policy.get_left_retries()
+        connection_timeout = self.timeout
 
-        raised_exception = None
-        while left_retries > 0:
-            try:
-                LOGGER.debug('Requesting {}'.format(self.url_builder.build_url(url_template)))
-
-                if client:
-                    response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
-                else:
-                    response = requests.request(timeout=connection_timeout, stream=stream, **request_kwargs)
-
-                LOGGER.debug('Response status code: "{}"'.format(response.status_code))
-
-            except requests.exceptions.ConnectionError as exception:
-                LOGGER.error('Failed to connect to {}: {}. Retrying'.format(self._base_url, exception))
-                raised_exception = exception
+        try:
+            if client:
+                response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
             else:
-                LOGGER.debug('Got response. Breaking')
-                break
-            left_retries -= 1
-        else:
+                response = self.default_client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
+        except Exception as raised_exception:
             raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
 
         if self.authenticator.login_required(response):
             try:
                 self.authenticator.login(str(response.url), limit_stack=limit_stack)
             except IncorrectAuthorizationToken as login_exc:
-                raise login_exc from raised_exception
+                raise login_exc
             return self._request(
                 url_template,
                 payload=payload,
@@ -489,7 +462,7 @@ class RemoteAPIClient:
         :param action: HTTP method (GET, POST, PUT, DELETE)
         :return: response content
         """
-        response = self._request(url_template, action=action, stream=True, payload=params)
+        response = self._request(url_template, payload=params, action=action, stream=True)
 
         with response:
             if not response.ok:
@@ -519,7 +492,8 @@ class AsyncRemoteAPIClient:
                  client_secret: Optional[str] = '',
                  retries: Optional[int] = 3,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
-                 non_interactive: Optional[bool] = True):
+                 non_interactive: Optional[bool] = True,
+                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
         """
         Build client
 
@@ -533,8 +507,9 @@ class AsyncRemoteAPIClient:
         """
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
-        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token)
-        self.conn_policy = HTTPConnectionPolicy(retries, timeout)
+        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)
+        self.timeout = timeout
+        self.retries = retries
 
     async def _request(
             self, url_template: str,
@@ -557,7 +532,7 @@ class AsyncRemoteAPIClient:
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream=False,
                                                                token=self.authenticator.token)
-        left_retries = self.conn_policy.get_left_retries()
+        left_retries = self.retries
         raised_exception = None
         while left_retries > 0:
             try:
@@ -605,7 +580,6 @@ class AsyncRemoteAPIClient:
             chunk = bytes_chunk.decode(encoding)
 
             if pending is not None:
-
                 chunk = pending + chunk
 
             lines = chunk.splitlines()
@@ -635,7 +609,7 @@ class AsyncRemoteAPIClient:
         :param stream: use stream mode or not
         :return: AsyncIterable of data. If stream = False, only one line will be returned
         """
-        async with aiohttp.ClientSession(conn_timeout=self.conn_policy.get_conn_timeout(), trust_env=True) as session:
+        async with aiohttp.ClientSession(conn_timeout=self.timeout, trust_env=True) as session:
             try:
                 async for data in self._request(url_template, payload, action, stream, session):
                     yield data
@@ -684,11 +658,11 @@ class AsyncRemoteAPIClient:
 
     @property
     def timeout(self):
-        return self.conn_policy.default_timeout
+        return self._timeout
 
     @timeout.setter
     def timeout(self, value):
-        self.conn_policy.default_timeout = value
+        self._timeout = value
 
     @classmethod
     def construct_from_other(cls, other):
@@ -700,5 +674,5 @@ class AsyncRemoteAPIClient:
         """
         return cls(
             other.url_builder.base_url, other.authenticator.token,
-            other.conn_policy.default_retries, other.conn_policy.default_timeout
+            retries=other.retries, timeout=other.timeout
         )

@@ -185,7 +185,7 @@ def do_client_cred_authentication(
         issue_token_url: str = config.API_ISSUING_URL
 ):
     """
-    Get access and id token using oauth2 client credentials fow
+    Get access and id token using oauth2 client credentials flow
     :param client_id:
     :param client_secret:
     :param issue_token_url:
