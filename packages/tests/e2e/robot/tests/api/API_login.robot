@@ -45,12 +45,17 @@ Try login with invalid credentials
     [Template]  Try login
     ${IncorrectToken}  base_url=${API_URL}  token=${EMPTY}
     ${IncorrectToken}  base_url=${API_URL}  token=${invalid_token}
+
     ${IncorrectToken}  base_url=${API_URL}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
     ${IncorrectToken}  base_url=${API_URL}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
+
+    ${IncorrectToken}  base_url=${API_URL}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  issuer_url=${ISSUER}
+    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}
 
 Try login with empty url and valid token
     ${error}        Format Error  ${APIConnectionException}  base url=${EMPTY}
