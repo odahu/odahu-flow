@@ -180,6 +180,9 @@ func (repo *TrainingRepo) UpdateModelTraining(ctx context.Context, mt *training.
 }
 
 func (repo *TrainingRepo) BeginTransaction(ctx context.Context) error {
+	if _, ok := repo.qeurier.(*sql.DB); !ok {
+		return errors.New("complete transaction before starting a new one")
+	}
 	tx, err := repo.DB.BeginTx(ctx, txOptions)
 	if err != nil {
 		return err
@@ -191,7 +194,7 @@ func (repo *TrainingRepo) BeginTransaction(ctx context.Context) error {
 func (repo *TrainingRepo) Commit() error {
 	tx, ok := repo.qeurier.(*sql.Tx)
 	if !ok {
-		return errors.New("Start transaction first!")
+		return errors.New("start transaction first")
 	}
 	repo.qeurier = repo.DB
 	return tx.Commit()
