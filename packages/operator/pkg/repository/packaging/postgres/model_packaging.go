@@ -41,7 +41,7 @@ func (repo PackagingRepo) GetModelPackaging(
 	mt := new(packaging.ModelPackaging)
 
 	q, args, err := sq.
-		Select("id", "spec", "status", "deletionmark").
+		Select("id", "spec", "status", "deletionmark", "created", "updated").
 		From(ModelPackagingTable).
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Dollar).
@@ -50,7 +50,8 @@ func (repo PackagingRepo) GetModelPackaging(
 		return nil, err
 	}
 
-	err = qrr.QueryRowContext(ctx, q, args...).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+	err = qrr.QueryRowContext(ctx, q, args...).
+		Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -83,7 +84,7 @@ func (repo PackagingRepo) GetModelPackagingList(
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("id, spec, status, deletionmark").From("odahu_operator_packaging").
+	sb := sq.Select("id, spec, status, deletionmark, created, updated").From("odahu_operator_packaging").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -112,7 +113,7 @@ func (repo PackagingRepo) GetModelPackagingList(
 
 	for rows.Next() {
 		mt := new(packaging.ModelPackaging)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -180,6 +181,7 @@ func (repo PackagingRepo) UpdateModelPackaging(ctx context.Context, tx *sql.Tx, 
 	stmt, args, err := sq.Update(ModelPackagingTable).
 		Set("spec", mp.Spec).
 		Set("status", mp.Status).
+		Set("updated", mp.UpdatedAt).
 		Where(sq.Eq{"id": mp.ID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -251,8 +253,8 @@ func (repo PackagingRepo) CreateModelPackaging(ctx context.Context, tx *sql.Tx, 
 
 	stmt, args, err := sq.
 		Insert(ModelPackagingTable).
-		Columns("id", "spec", "status").
-		Values(mp.ID, mp.Spec, mp.Status).
+		Columns("id", "spec", "status", "created", "updated").
+		Values(mp.ID, mp.Spec, mp.Status, mp.CreatedAt, mp.UpdatedAt).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 

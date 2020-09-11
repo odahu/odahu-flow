@@ -16,30 +16,25 @@ class APIConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, backend: APIBackendConfig=None, disable_workers: bool=None, port: int=None):  # noqa: E501
+    def __init__(self, backend: APIBackendConfig=None, port: int=None):  # noqa: E501
         """APIConfig - a model defined in Swagger
 
         :param backend: The backend of this APIConfig.  # noqa: E501
         :type backend: APIBackendConfig
-        :param disable_workers: The disable_workers of this APIConfig.  # noqa: E501
-        :type disable_workers: bool
         :param port: The port of this APIConfig.  # noqa: E501
         :type port: int
         """
         self.swagger_types = {
             'backend': APIBackendConfig,
-            'disable_workers': bool,
             'port': int
         }
 
         self.attribute_map = {
             'backend': 'backend',
-            'disable_workers': 'disableWorkers',
             'port': 'port'
         }
 
         self._backend = backend
-        self._disable_workers = disable_workers
         self._port = port
 
     @classmethod
@@ -73,29 +68,6 @@ class APIConfig(Model):
         """
 
         self._backend = backend
-
-    @property
-    def disable_workers(self) -> bool:
-        """Gets the disable_workers of this APIConfig.
-
-        If true then only webserver will be setup. Without background workers responsible to monitor storage and call services  # noqa: E501
-
-        :return: The disable_workers of this APIConfig.
-        :rtype: bool
-        """
-        return self._disable_workers
-
-    @disable_workers.setter
-    def disable_workers(self, disable_workers: bool):
-        """Sets the disable_workers of this APIConfig.
-
-        If true then only webserver will be setup. Without background workers responsible to monitor storage and call services  # noqa: E501
-
-        :param disable_workers: The disable_workers of this APIConfig.
-        :type disable_workers: bool
-        """
-
-        self._disable_workers = disable_workers
 
     @property
     def port(self) -> int:

@@ -25,6 +25,7 @@ import (
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"time"
 )
 
 var (
@@ -66,8 +67,13 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	return s.repo.SetDeletionMark(ctx, nil, id, value)
 }
 
-func (s serviceImpl) UpdateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error {
-	return s.repo.UpdateModelPackaging(ctx, nil, mt)
+func (s serviceImpl) UpdateModelPackaging(ctx context.Context, mp *packaging.ModelPackaging) error {
+	mp.UpdatedAt = time.Now()
+	mp.DeletionMark = false
+	mp.Status = v1alpha1.ModelPackagingStatus{
+		State: v1alpha1.ModelPackagingUnknown,
+	}
+	return s.repo.UpdateModelPackaging(ctx, nil, mp)
 }
 
 func (s serviceImpl) UpdateModelPackagingStatus(
@@ -118,8 +124,14 @@ func (s serviceImpl) UpdateModelPackagingStatus(
 	return err
 }
 
-func (s serviceImpl) CreateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error {
-	return s.repo.CreateModelPackaging(ctx, nil, mt)
+func (s serviceImpl) CreateModelPackaging(ctx context.Context, mp *packaging.ModelPackaging) error {
+	mp.CreatedAt = time.Now()
+	mp.UpdatedAt = time.Now()
+	mp.DeletionMark = false
+	mp.Status = v1alpha1.ModelPackagingStatus{
+		State: v1alpha1.ModelPackagingUnknown,
+	}
+	return s.repo.CreateModelPackaging(ctx, nil, mp)
 }
 
 func NewService(repo repo.Repository) Service {

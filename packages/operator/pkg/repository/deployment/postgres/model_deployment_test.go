@@ -9,6 +9,7 @@ import (
 	postgres_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 const (
@@ -23,6 +24,8 @@ func TestModelDeploymentRepository(t *testing.T) {
 	as := assert.New(t)
 	created := &deployment.ModelDeployment{
 		ID: mdID,
+		CreatedAt: time.Now().Round(time.Microsecond),
+		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: v1alpha1.ModelDeploymentSpec{
 			Image: "not-updated",
 		},
@@ -36,6 +39,9 @@ func TestModelDeploymentRepository(t *testing.T) {
 	as.NoError(err)
 	as.Exactly(fetched.ID, created.ID)
 	as.Exactly(fetched.Spec, created.Spec)
+	as.True(fetched.CreatedAt.Equal(created.CreatedAt))
+	t.Logf("fetched createdAt: %+v, initial: %+v", fetched.CreatedAt, created.CreatedAt)
+	as.True(fetched.UpdatedAt.Equal(created.UpdatedAt))
 
 	updated := &deployment.ModelDeployment{
 		ID: mdID,
@@ -50,6 +56,7 @@ func TestModelDeploymentRepository(t *testing.T) {
 	as.NoError(err)
 	as.Exactly(fetched.Spec, updated.Spec)
 	as.Exactly(fetched.Spec.Image, "updated")
+	as.True(fetched.UpdatedAt.Equal(updated.UpdatedAt))
 
 	as.NoError(repo.UpdateModelDeploymentStatus(
 		context.Background(), nil, mdID, v1alpha1.ModelDeploymentStatus{Replicas: 42}))

@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 const (
@@ -145,6 +146,22 @@ func (s *TestSuite) TestUpdateModelDeployment() {
 	s.mockRepo.AssertExpectations(s.T())
 }
 
+func (s *TestSuite) TestUpdateModelDeployment_UpdatedAt() {
+	as := assert.New(s.T())
+
+	ctx := context.Background()
+	en := newStubMT()
+	s.mockRepo.On("UpdateModelDeployment", ctx, s.nilTx, en).Return(nil)
+
+	timeBeforeCall := time.Now()
+	as.NoError(s.service.UpdateModelDeployment(ctx, en))
+	// UpdatedAt field must be updated on now during the invocation
+	as.True(timeBeforeCall.Before(en.UpdatedAt))
+	// UpdatedAt field must be not updated on now during the invocation
+	as.True(timeBeforeCall.After(en.CreatedAt))
+	s.mockRepo.AssertExpectations(s.T())
+}
+
 func (s *TestSuite) TestUpdateModelDeploymentStatus() {
 	as := assert.New(s.T())
 
@@ -222,6 +239,21 @@ func (s *TestSuite) TestCreateModelDeployment() {
 	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(nil)
 
 	as.NoError(s.service.CreateModelDeployment(ctx, en))
+	s.mockRepo.AssertExpectations(s.T())
+}
+
+func (s *TestSuite) TestCreateModelDeployment_CreatedAt() {
+	as := assert.New(s.T())
+
+	en := newStubMT()
+	ctx := context.Background()
+	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(nil)
+
+	timeBeforeCall := time.Now()
+	as.NoError(s.service.CreateModelDeployment(ctx, en))
+	// CreatedAt, UpdatedAt fields must be updated on now during the invocation
+	as.True(timeBeforeCall.Before(en.CreatedAt))
+	as.True(timeBeforeCall.Before(en.UpdatedAt))
 	s.mockRepo.AssertExpectations(s.T())
 }
 

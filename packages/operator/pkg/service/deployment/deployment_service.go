@@ -25,6 +25,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"time"
 )
 
 var (
@@ -66,8 +67,12 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	return s.repo.SetDeletionMark(ctx, nil, id, value)
 }
 
-func (s serviceImpl) UpdateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error {
-	return s.repo.UpdateModelDeployment(ctx, nil, mt)
+func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.ModelDeployment) error {
+	md.UpdatedAt = time.Now()
+	md.DeletionMark = false
+	md.Status = v1alpha1.ModelDeploymentStatus{
+	}
+	return s.repo.UpdateModelDeployment(ctx, nil, md)
 }
 
 func (s serviceImpl) UpdateModelDeploymentStatus(
@@ -118,8 +123,12 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 	return err
 }
 
-func (s serviceImpl) CreateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error {
-	return s.repo.CreateModelDeployment(ctx, nil, mt)
+func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.ModelDeployment) error {
+	md.CreatedAt = time.Now()
+	md.UpdatedAt = time.Now()
+	md.DeletionMark = false
+	md.Status = v1alpha1.ModelDeploymentStatus{}
+	return s.repo.CreateModelDeployment(ctx, nil, md)
 }
 
 func NewService(repo repo.Repository) Service {

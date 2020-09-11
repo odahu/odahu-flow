@@ -31,6 +31,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 const (
@@ -146,6 +147,25 @@ func (s *TestSuite) TestUpdateModelTraining() {
 	s.mockRepo.AssertExpectations(s.T())
 }
 
+func (s *TestSuite) TestUpdateModelTraining_UpdatedAt() {
+	as := assert.New(s.T())
+
+	ctx := context.Background()
+	en := newStubMT()
+
+	s.mockRepo.On("UpdateModelTraining", ctx, s.nilTx, en).Return(nil)
+
+	timeBeforeCall := time.Now()
+	as.NoError(s.service.UpdateModelTraining(ctx, en))
+
+	// UpdatedAt field must be updated on now during the invocation
+	as.True(timeBeforeCall.Before(en.UpdatedAt))
+	// UpdatedAt field must be not updated on now during the invocation
+	as.True(timeBeforeCall.After(en.CreatedAt))
+
+	s.mockRepo.AssertExpectations(s.T())
+}
+
 func (s *TestSuite) TestUpdateModelTrainingStatus() {
 	as := assert.New(s.T())
 
@@ -221,8 +241,21 @@ func (s *TestSuite) TestCreateModelTraining() {
 	en := newStubMT()
 	ctx := context.Background()
 	s.mockRepo.On("CreateModelTraining", ctx, s.nilTx, en).Return(nil)
-
 	as.NoError(s.service.CreateModelTraining(ctx, en))
+	s.mockRepo.AssertExpectations(s.T())
+}
+
+func (s *TestSuite) TestCreateModelTraining_CreatedAt() {
+	as := assert.New(s.T())
+
+	en := newStubMT()
+	ctx := context.Background()
+	s.mockRepo.On("CreateModelTraining", ctx, s.nilTx, en).Return(nil)
+	timeBeforeCall := time.Now()
+	as.NoError(s.service.CreateModelTraining(ctx, en))
+	// CreatedAt, UpdatedAt fields must be updated on now during the invocation
+	as.True(timeBeforeCall.Before(en.CreatedAt))
+	as.True(timeBeforeCall.Before(en.UpdatedAt))
 	s.mockRepo.AssertExpectations(s.T())
 }
 
