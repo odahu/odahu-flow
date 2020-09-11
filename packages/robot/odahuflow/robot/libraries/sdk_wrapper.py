@@ -1,6 +1,5 @@
 # for class Model
 import json
-from typing import Any, Callable, Dict, Iterator, Mapping, Optional, Tuple, Union
 from odahuflow.sdk import config
 
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
@@ -15,69 +14,46 @@ from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClie
 from odahuflow.sdk.clients.training import ModelTrainingClient
 
 from odahuflow.sdk.clients.api import RemoteAPIClient
+from odahuflow.sdk.clients.api import Authenticator
+
+
+def login(base_url=None, token=None, client_id=None, client_secret=None, issuer_url=None):
+    return RemoteAPIClient(base_url, token, client_id, client_secret, issuer_url)
 
 
 class Configuration:
 
     @staticmethod
-    def config_get(**kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id=None,
-                        client_secret=None)
-        return ConfigurationClient().get()
+    def config_get(base_url=None, token=None, client_id=None, client_secret=None, issuer_url=None):
+        return ConfigurationClient(base_url, token, client_id, client_secret, issuer_url).get()
 
 
 class Connection:
 
     @staticmethod
-    def connection_get(**kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id=None,
-                        client_secret=None)
+    def connection_get():
         return ConnectionClient().get_all()
 
     @staticmethod
-    def connection_get_id(conn_id: str, **kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id=None,
-                        client_secret=None)
+    def connection_get_id(conn_id: str):
         return ConnectionClient().get(conn_id)
 
     @staticmethod
-    def connection_get_id_decrypted(conn_id: str, **kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id='',
-                        client_secret='')
+    def connection_get_id_decrypted(conn_id: str):
         return ConnectionClient().get_decrypted(conn_id)
 
     @staticmethod
-    def connection_put(payload_file, **kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id='',
-                        client_secret='')
+    def connection_put(payload_file):
         api_object = parse_resources_file_with_one_item(payload_file).resource
         return ConnectionClient().edit(api_object)
 
     @staticmethod
-    def connection_post(payload_file, **kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id='',
-                        client_secret='')
+    def connection_post(payload_file):
         api_object = parse_resources_file_with_one_item(payload_file).resource
         return ConnectionClient().create(api_object)
 
     @staticmethod
-    def connection_delete(conn_id: str, **kwargs):
-        RemoteAPIClient(base_url=None,
-                        token=None,
-                        client_id='',
-                        client_secret='')
+    def connection_delete(conn_id: str):
         return ConnectionClient().delete(conn_id)
 
 
