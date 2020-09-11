@@ -22,17 +22,13 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	repo"github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var (
-	txOptions = &sql.TxOptions{
-		Isolation: sql.LevelRepeatableRead,
-		ReadOnly:  false,
-	}
 	log = logf.Log.WithName("model-training--service")
 )
 
@@ -49,55 +45,55 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	db   *sql.DB
+	//db   *sql.DB
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
 }
 
 func (s serviceImpl) GetModelTraining(ctx context.Context, id string) (*training.ModelTraining, error) {
-	return s.repo.GetModelTraining(ctx, s.db, id)
+	return s.repo.GetModelTraining(ctx, id)
 }
 
 func (s serviceImpl) GetModelTrainingList(
 	ctx context.Context, options ...filter.ListOption,
 ) ([]training.ModelTraining, error) {
-	return s.repo.GetModelTrainingList(ctx, s.db, options...)
+	return s.repo.GetModelTrainingList(ctx, options...)
 }
 
 func (s serviceImpl) DeleteModelTraining(ctx context.Context, id string) error {
-	return s.repo.DeleteModelTraining(ctx, s.db, id)
+	return s.repo.DeleteModelTraining(ctx, id)
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
-	return s.repo.SetDeletionMark(ctx, s.db, id, value)
+	return s.repo.SetDeletionMark(ctx, id, value)
 }
 
 func (s serviceImpl) UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
-	return s.repo.UpdateModelTraining(ctx, s.db, mt)
+	return s.repo.UpdateModelTraining(ctx, mt)
 }
 
 func (s serviceImpl) UpdateModelTrainingStatus(
 	ctx context.Context, id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
 ) (err error) {
 
-	tx, err := s.db.BeginTx(ctx, txOptions)
+	err = s.repo.BeginTransaction(ctx)
 	if err != nil {
 		return err
 	}
 
 	defer func() {
 		if err == nil {
-			if err := tx.Commit(); err != nil {
+			if err := s.repo.Commit(); err != nil {
 				log.Error(err, "Error while commit transaction")
 			}
 		} else {
-			if err := tx.Rollback(); err != nil {
+			if err := s.repo.Rollback(); err != nil {
 				log.Error(err, "Error while rollback transaction")
 			}
 		}
 	}()
 
-	oldMt, err := s.repo.GetModelTraining(ctx, tx, id)
+	oldMt, err := s.repo.GetModelTraining(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -116,7 +112,7 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 		return odahu_errors.SpecWasTouched{Entity: id}
 	}
 
-	err = s.repo.UpdateModelTrainingStatus(ctx, tx, id, status)
+	err = s.repo.UpdateModelTrainingStatus(ctx, id, status)
 	if err != nil {
 		return err
 	}
@@ -125,10 +121,9 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 }
 
 func (s serviceImpl) CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
-	return s.repo.CreateModelTraining(ctx, s.db, mt)
+	return s.repo.CreateModelTraining(ctx, mt)
 }
 
-func NewService(repo repo.Repository, db *sql.DB) Service {
-	return &serviceImpl{repo: repo, db: db}
+func NewService(repo repo.Repository, _ *sql.DB) Service {
+	return &serviceImpl{repo: repo}
 }
-

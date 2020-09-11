@@ -32,8 +32,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
-	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -69,9 +69,8 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		return errors.New("unexpect connection repository type")
 	}
 
-
 	toolchainRepo := train_repo.ToolchainRepo{DB: db}
-	trainRepo := train_repo.TrainingRepo{DB: db}
+	trainRepo := train_repo.NewRepository(db)
 	piRepo := pack_repo.PackagingIntegrationRepository{DB: db}
 	packRepo := pack_repo.PackagingRepo{DB: db}
 	deployRepo := deploy_repo.DeploymentRepo{DB: db}
@@ -94,7 +93,6 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	trainService := mt_service.NewService(trainRepo, db)
 	packService := mp_service.NewService(packRepo, db)
 	depService := md_service.NewService(deployRepo, db)
-
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 

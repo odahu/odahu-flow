@@ -25,16 +25,16 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
-	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -64,7 +64,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 
 	s.k8sClient = kubeClient
 
-	s.trainService = mt_service.NewService(mt_postgres_repository.TrainingRepo{DB: db}, db)
+	s.trainService = mt_service.NewService(mt_postgres_repository.NewRepository(db), db)
 	s.toolchainRepo = mt_postgres_repository.ToolchainRepo{DB: db}
 	s.kubeTrainClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 

@@ -3,11 +3,12 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -19,20 +20,29 @@ const (
 )
 
 var (
-	log = logf.Log.WithName("model-training--repository--postgres")
+	log       = logf.Log.WithName("model-training--repository--postgres")
+	txOptions = &sql.TxOptions{
+		Isolation: sql.LevelRepeatableRead,
+		ReadOnly:  false,
+	}
 )
 
 type TrainingRepo struct {
-	DB *sql.DB
+	DB      *sql.DB
+	qeurier utils.Querier
 }
 
-func (repo TrainingRepo) GetModelTraining(
-	ctx context.Context, qrr utils.Querier, id string,
+func NewRepository(db *sql.DB) *TrainingRepo {
+	return &TrainingRepo{DB: db, qeurier: db}
+}
+
+func (repo *TrainingRepo) GetModelTraining(
+	ctx context.Context, id string,
 ) (*training.ModelTraining, error) {
 
 	mt := new(training.ModelTraining)
 
-	err := qrr.QueryRowContext(
+	err := repo.qeurier.QueryRowContext(
 		ctx,
 		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelTrainingTable),
 		id,
@@ -50,8 +60,8 @@ func (repo TrainingRepo) GetModelTraining(
 
 }
 
-func (repo TrainingRepo) GetModelTrainingList(
-	ctx context.Context, qrr utils.Querier, options ...filter.ListOption,
+func (repo *TrainingRepo) GetModelTrainingList(
+	ctx context.Context, options ...filter.ListOption,
 ) ([]training.ModelTraining, error) {
 
 	listOptions := &filter.ListOptions{
@@ -76,7 +86,7 @@ func (repo TrainingRepo) GetModelTrainingList(
 		return nil, err
 	}
 
-	rows, err := qrr.QueryContext(ctx, stmt, args...)
+	rows, err := repo.qeurier.QueryContext(ctx, stmt, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -107,14 +117,14 @@ func (repo TrainingRepo) GetModelTrainingList(
 
 }
 
-func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, qrr utils.Querier, id string) error {
+func (repo *TrainingRepo) DeleteModelTraining(ctx context.Context, id string) error {
 
 	stmt, args, err := sq.Delete(ModelTrainingTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return err
 	}
 
-	result, err := qrr.ExecContext(ctx, stmt, args...)
+	result, err := repo.qeurier.ExecContext(ctx, stmt, args...)
 
 	if err != nil {
 		return err
@@ -133,11 +143,11 @@ func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, qrr utils.Quer
 
 }
 
-func (repo TrainingRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
-	return utils.SetDeletionMark(ctx, qrr, ModelTrainingTable, id, value)
+func (repo *TrainingRepo) SetDeletionMark(ctx context.Context, id string, value bool) error {
+	return utils.SetDeletionMark(ctx, repo.qeurier, ModelTrainingTable, id, value)
 }
 
-func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
+func (repo *TrainingRepo) UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
 
 	mt.Status.State = ""
 
@@ -152,7 +162,7 @@ func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Quer
 		return err
 	}
 
-	result, err := qrr.ExecContext(ctx, stmt, args...)
+	result, err := repo.qeurier.ExecContext(ctx, stmt, args...)
 	if err != nil {
 		return err
 	}
@@ -169,8 +179,35 @@ func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Quer
 	return nil
 }
 
-func (repo TrainingRepo) UpdateModelTrainingStatus(
-	ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelTrainingStatus,
+func (repo *TrainingRepo) BeginTransaction(ctx context.Context) error {
+	tx, err := repo.DB.BeginTx(ctx, txOptions)
+	if err != nil {
+		return err
+	}
+	repo.qeurier = tx
+	return nil
+}
+
+func (repo *TrainingRepo) Commit() error {
+	tx, ok := repo.qeurier.(*sql.Tx)
+	if !ok {
+		return errors.New("Start transaction first!")
+	}
+	repo.qeurier = repo.DB
+	return tx.Commit()
+}
+
+func (repo *TrainingRepo) Rollback() error {
+	tx, ok := repo.qeurier.(*sql.Tx)
+	if !ok {
+		return errors.New("Start transaction first!")
+	}
+	repo.qeurier = repo.DB
+	return tx.Rollback()
+}
+
+func (repo *TrainingRepo) UpdateModelTrainingStatus(
+	ctx context.Context, id string, s v1alpha1.ModelTrainingStatus,
 ) error {
 
 	stmt, args, err := sq.Update(ModelTrainingTable).
@@ -183,7 +220,7 @@ func (repo TrainingRepo) UpdateModelTrainingStatus(
 		return err
 	}
 
-	result, err := qrr.ExecContext(ctx, stmt, args...)
+	result, err := repo.qeurier.ExecContext(ctx, stmt, args...)
 	if err != nil {
 		return err
 	}
@@ -200,7 +237,7 @@ func (repo TrainingRepo) UpdateModelTrainingStatus(
 	return nil
 }
 
-func (repo TrainingRepo) CreateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
+func (repo *TrainingRepo) CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
 
 	stmt, args, err := sq.
 		Insert(ModelTrainingTable).
@@ -213,10 +250,10 @@ func (repo TrainingRepo) CreateModelTraining(ctx context.Context, qrr utils.Quer
 		return err
 	}
 
-	_, err = qrr.ExecContext(
+	_, err = repo.qeurier.ExecContext(
 		ctx,
 		stmt,
-		args...
+		args...,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)

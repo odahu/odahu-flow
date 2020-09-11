@@ -20,7 +20,6 @@ import (
 	"context"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
@@ -29,15 +28,18 @@ const (
 )
 
 type Repository interface {
-	GetModelTraining(ctx context.Context, qrr util.Querier, id string) (*training.ModelTraining, error)
+	GetModelTraining(ctx context.Context, id string) (*training.ModelTraining, error)
 	GetModelTrainingList(
-		ctx context.Context, qrr util.Querier, options ...filter.ListOption,
+		ctx context.Context, options ...filter.ListOption,
 	) ([]training.ModelTraining, error)
-	DeleteModelTraining(ctx context.Context, qrr util.Querier, id string) error
-	SetDeletionMark(ctx context.Context, qrr util.Querier, id string, value bool) error
-	UpdateModelTraining(ctx context.Context, qrr util.Querier, mt *training.ModelTraining) error
-	UpdateModelTrainingStatus(ctx context.Context, qrr util.Querier, id string, s v1alpha1.ModelTrainingStatus) error
-	CreateModelTraining(ctx context.Context, qrr util.Querier, mt *training.ModelTraining) error
+	DeleteModelTraining(ctx context.Context, id string) error
+	SetDeletionMark(ctx context.Context, id string, value bool) error
+	UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error
+	UpdateModelTrainingStatus(ctx context.Context, id string, s v1alpha1.ModelTrainingStatus) error
+	CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error
+	BeginTransaction(ctx context.Context) error
+	Commit() error
+	Rollback() error
 }
 
 type ToolchainRepository interface {

@@ -3,18 +3,18 @@ package controller
 import (
 	"database/sql"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
 	deploy_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
-	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	dep_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
+	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -24,7 +24,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	kConfig := kubeMgr.GetConfig()
 
 	if cfg.Training.Enabled {
-		trainService := train_service.NewService(train_repo.TrainingRepo{DB: db}, db)
+		trainService := train_service.NewService(train_repo.NewRepository(db), db)
 		trainKubeClient := train_kube_client.NewClient(
 			cfg.Training.Namespace,
 			cfg.Training.ToolchainIntegrationNamespace,
