@@ -13,13 +13,6 @@ from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
 
-from odahuflow.sdk.clients.api import RemoteAPIClient
-from odahuflow.sdk.clients.api import Authenticator
-
-
-def login(base_url=None, token=None, client_id=None, client_secret=None, issuer_url=None):
-    return RemoteAPIClient(base_url, token, client_id, client_secret, issuer_url)
-
 
 class Configuration:
 
