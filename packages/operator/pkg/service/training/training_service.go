@@ -18,7 +18,6 @@ package training
 
 import (
 	"context"
-	"database/sql"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
@@ -29,10 +28,6 @@ import (
 )
 
 var (
-	txOptions = &sql.TxOptions{
-		Isolation: sql.LevelRepeatableRead,
-		ReadOnly:  false,
-	}
 	log = logf.Log.WithName("model-training--service")
 )
 
@@ -49,38 +44,37 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	db   *sql.DB
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
 }
 
 func (s serviceImpl) GetModelTraining(ctx context.Context, id string) (*training.ModelTraining, error) {
-	return s.repo.GetModelTraining(ctx, s.db, id)
+	return s.repo.GetModelTraining(ctx, nil, id)
 }
 
 func (s serviceImpl) GetModelTrainingList(
 	ctx context.Context, options ...filter.ListOption,
 ) ([]training.ModelTraining, error) {
-	return s.repo.GetModelTrainingList(ctx, s.db, options...)
+	return s.repo.GetModelTrainingList(ctx, nil, options...)
 }
 
 func (s serviceImpl) DeleteModelTraining(ctx context.Context, id string) error {
-	return s.repo.DeleteModelTraining(ctx, s.db, id)
+	return s.repo.DeleteModelTraining(ctx, nil, id)
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
-	return s.repo.SetDeletionMark(ctx, s.db, id, value)
+	return s.repo.SetDeletionMark(ctx, nil, id, value)
 }
 
 func (s serviceImpl) UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
-	return s.repo.UpdateModelTraining(ctx, s.db, mt)
+	return s.repo.UpdateModelTraining(ctx, nil, mt)
 }
 
 func (s serviceImpl) UpdateModelTrainingStatus(
 	ctx context.Context, id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
 ) (err error) {
 
-	tx, err := s.db.BeginTx(ctx, txOptions)
+	tx, err := s.repo.BeginTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -125,10 +119,10 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 }
 
 func (s serviceImpl) CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
-	return s.repo.CreateModelTraining(ctx, s.db, mt)
+	return s.repo.CreateModelTraining(ctx, nil, mt)
 }
 
-func NewService(repo repo.Repository, db *sql.DB) Service {
-	return &serviceImpl{repo: repo, db: db}
+func NewService(repo repo.Repository) Service {
+	return &serviceImpl{repo: repo}
 }
 

@@ -91,7 +91,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, k8sClient)
 
 	connService := conn_service.NewService(connRepository)
-	trainService := mt_service.NewService(trainRepo, db)
+	trainService := mt_service.NewService(trainRepo)
 	packService := mp_service.NewService(packRepo, db)
 	depService := md_service.NewService(deployRepo, db)
 

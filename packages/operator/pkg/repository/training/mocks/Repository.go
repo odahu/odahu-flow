@@ -5,12 +5,13 @@ package mocks
 import (
 	context "context"
 
+	apistraining "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+
 	filter "github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+
 	mock "github.com/stretchr/testify/mock"
 
-	postgres "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
-
-	training "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	sql "database/sql"
 
 	v1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 )
@@ -20,50 +21,22 @@ type Repository struct {
 	mock.Mock
 }
 
-// CreateModelTraining provides a mock function with given fields: ctx, qrr, mt
-func (_m *Repository) CreateModelTraining(ctx context.Context, qrr postgres.Querier, mt *training.ModelTraining) error {
-	ret := _m.Called(ctx, qrr, mt)
+// BeginTransaction provides a mock function with given fields: ctx
+func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	ret := _m.Called(ctx)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, *training.ModelTraining) error); ok {
-		r0 = rf(ctx, qrr, mt)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// DeleteModelTraining provides a mock function with given fields: ctx, qrr, id
-func (_m *Repository) DeleteModelTraining(ctx context.Context, qrr postgres.Querier, id string) error {
-	ret := _m.Called(ctx, qrr, id)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string) error); ok {
-		r0 = rf(ctx, qrr, id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// GetModelTraining provides a mock function with given fields: ctx, qrr, id
-func (_m *Repository) GetModelTraining(ctx context.Context, qrr postgres.Querier, id string) (*training.ModelTraining, error) {
-	ret := _m.Called(ctx, qrr, id)
-
-	var r0 *training.ModelTraining
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string) *training.ModelTraining); ok {
-		r0 = rf(ctx, qrr, id)
+	var r0 *sql.Tx
+	if rf, ok := ret.Get(0).(func(context.Context) *sql.Tx); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*training.ModelTraining)
+			r0 = ret.Get(0).(*sql.Tx)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, postgres.Querier, string) error); ok {
-		r1 = rf(ctx, qrr, id)
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,29 +44,80 @@ func (_m *Repository) GetModelTraining(ctx context.Context, qrr postgres.Querier
 	return r0, r1
 }
 
-// GetModelTrainingList provides a mock function with given fields: ctx, qrr, options
-func (_m *Repository) GetModelTrainingList(ctx context.Context, qrr postgres.Querier, options ...filter.ListOption) ([]training.ModelTraining, error) {
+// CreateModelTraining provides a mock function with given fields: ctx, tx, mt
+func (_m *Repository) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt *apistraining.ModelTraining) error {
+	ret := _m.Called(ctx, tx, mt)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *apistraining.ModelTraining) error); ok {
+		r0 = rf(ctx, tx, mt)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteModelTraining provides a mock function with given fields: ctx, tx, id
+func (_m *Repository) DeleteModelTraining(ctx context.Context, tx *sql.Tx, id string) error {
+	ret := _m.Called(ctx, tx, id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) error); ok {
+		r0 = rf(ctx, tx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetModelTraining provides a mock function with given fields: ctx, tx, id
+func (_m *Repository) GetModelTraining(ctx context.Context, tx *sql.Tx, id string) (*apistraining.ModelTraining, error) {
+	ret := _m.Called(ctx, tx, id)
+
+	var r0 *apistraining.ModelTraining
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) *apistraining.ModelTraining); ok {
+		r0 = rf(ctx, tx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*apistraining.ModelTraining)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, string) error); ok {
+		r1 = rf(ctx, tx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetModelTrainingList provides a mock function with given fields: ctx, tx, options
+func (_m *Repository) GetModelTrainingList(ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]apistraining.ModelTraining, error) {
 	_va := make([]interface{}, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, qrr)
+	_ca = append(_ca, ctx, tx)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 []training.ModelTraining
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, ...filter.ListOption) []training.ModelTraining); ok {
-		r0 = rf(ctx, qrr, options...)
+	var r0 []apistraining.ModelTraining
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, ...filter.ListOption) []apistraining.ModelTraining); ok {
+		r0 = rf(ctx, tx, options...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]training.ModelTraining)
+			r0 = ret.Get(0).([]apistraining.ModelTraining)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, postgres.Querier, ...filter.ListOption) error); ok {
-		r1 = rf(ctx, qrr, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, ...filter.ListOption) error); ok {
+		r1 = rf(ctx, tx, options...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -101,13 +125,13 @@ func (_m *Repository) GetModelTrainingList(ctx context.Context, qrr postgres.Que
 	return r0, r1
 }
 
-// SetDeletionMark provides a mock function with given fields: ctx, qrr, id, value
-func (_m *Repository) SetDeletionMark(ctx context.Context, qrr postgres.Querier, id string, value bool) error {
-	ret := _m.Called(ctx, qrr, id, value)
+// SetDeletionMark provides a mock function with given fields: ctx, tx, id, value
+func (_m *Repository) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
+	ret := _m.Called(ctx, tx, id, value)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string, bool) error); ok {
-		r0 = rf(ctx, qrr, id, value)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, bool) error); ok {
+		r0 = rf(ctx, tx, id, value)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -115,13 +139,13 @@ func (_m *Repository) SetDeletionMark(ctx context.Context, qrr postgres.Querier,
 	return r0
 }
 
-// UpdateModelTraining provides a mock function with given fields: ctx, qrr, mt
-func (_m *Repository) UpdateModelTraining(ctx context.Context, qrr postgres.Querier, mt *training.ModelTraining) error {
-	ret := _m.Called(ctx, qrr, mt)
+// UpdateModelTraining provides a mock function with given fields: ctx, tx, mt
+func (_m *Repository) UpdateModelTraining(ctx context.Context, tx *sql.Tx, mt *apistraining.ModelTraining) error {
+	ret := _m.Called(ctx, tx, mt)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, *training.ModelTraining) error); ok {
-		r0 = rf(ctx, qrr, mt)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *apistraining.ModelTraining) error); ok {
+		r0 = rf(ctx, tx, mt)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -129,13 +153,13 @@ func (_m *Repository) UpdateModelTraining(ctx context.Context, qrr postgres.Quer
 	return r0
 }
 
-// UpdateModelTrainingStatus provides a mock function with given fields: ctx, qrr, id, s
-func (_m *Repository) UpdateModelTrainingStatus(ctx context.Context, qrr postgres.Querier, id string, s v1alpha1.ModelTrainingStatus) error {
-	ret := _m.Called(ctx, qrr, id, s)
+// UpdateModelTrainingStatus provides a mock function with given fields: ctx, tx, id, s
+func (_m *Repository) UpdateModelTrainingStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelTrainingStatus) error {
+	ret := _m.Called(ctx, tx, id, s)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string, v1alpha1.ModelTrainingStatus) error); ok {
-		r0 = rf(ctx, qrr, id, s)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, v1alpha1.ModelTrainingStatus) error); ok {
+		r0 = rf(ctx, tx, id, s)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -64,7 +64,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 
 	s.k8sClient = kubeClient
 
-	s.trainService = mt_service.NewService(mt_postgres_repository.TrainingRepo{DB: db}, db)
+	s.trainService = mt_service.NewService(mt_postgres_repository.TrainingRepo{DB: db})
 	s.toolchainRepo = mt_postgres_repository.ToolchainRepo{DB: db}
 	s.kubeTrainClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 

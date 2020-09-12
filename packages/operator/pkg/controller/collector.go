@@ -24,7 +24,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	kConfig := kubeMgr.GetConfig()
 
 	if cfg.Training.Enabled {
-		trainService := train_service.NewService(train_repo.TrainingRepo{DB: db}, db)
+		trainService := train_service.NewService(train_repo.TrainingRepo{DB: db})
 		trainKubeClient := train_kube_client.NewClient(
 			cfg.Training.Namespace,
 			cfg.Training.ToolchainIntegrationNamespace,

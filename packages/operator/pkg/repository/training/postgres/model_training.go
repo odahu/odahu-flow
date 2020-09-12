@@ -20,15 +20,23 @@ const (
 
 var (
 	log = logf.Log.WithName("model-training--repository--postgres")
+	txOptions = &sql.TxOptions{
+		Isolation: sql.LevelRepeatableRead,
+		ReadOnly:  false,
+	}
 )
 
 type TrainingRepo struct {
 	DB *sql.DB
 }
 
-func (repo TrainingRepo) GetModelTraining(
-	ctx context.Context, qrr utils.Querier, id string,
-) (*training.ModelTraining, error) {
+func (repo TrainingRepo) GetModelTraining(ctx context.Context, tx *sql.Tx, id string) (*training.ModelTraining, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	mt := new(training.ModelTraining)
 
@@ -51,8 +59,13 @@ func (repo TrainingRepo) GetModelTraining(
 }
 
 func (repo TrainingRepo) GetModelTrainingList(
-	ctx context.Context, qrr utils.Querier, options ...filter.ListOption,
-) ([]training.ModelTraining, error) {
+	ctx context.Context, tx *sql.Tx, options ...filter.ListOption, ) ([]training.ModelTraining, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	listOptions := &filter.ListOptions{
 		Filter: nil,
@@ -107,7 +120,13 @@ func (repo TrainingRepo) GetModelTrainingList(
 
 }
 
-func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, qrr utils.Querier, id string) error {
+func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, tx *sql.Tx, id string) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.Delete(ModelTrainingTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
@@ -133,11 +152,24 @@ func (repo TrainingRepo) DeleteModelTraining(ctx context.Context, qrr utils.Quer
 
 }
 
-func (repo TrainingRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
+func (repo TrainingRepo) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
+
 	return utils.SetDeletionMark(ctx, qrr, ModelTrainingTable, id, value)
 }
 
-func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
+func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	mt.Status.State = ""
 
@@ -170,8 +202,13 @@ func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, qrr utils.Quer
 }
 
 func (repo TrainingRepo) UpdateModelTrainingStatus(
-	ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelTrainingStatus,
-) error {
+	ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelTrainingStatus) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.Update(ModelTrainingTable).
 		Set("status", s).
@@ -200,7 +237,13 @@ func (repo TrainingRepo) UpdateModelTrainingStatus(
 	return nil
 }
 
-func (repo TrainingRepo) CreateModelTraining(ctx context.Context, qrr utils.Querier, mt *training.ModelTraining) error {
+func (repo TrainingRepo) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.
 		Insert(ModelTrainingTable).
@@ -227,4 +270,9 @@ func (repo TrainingRepo) CreateModelTraining(ctx context.Context, qrr utils.Quer
 	}
 	return nil
 
+}
+
+
+func (repo TrainingRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	return repo.DB.BeginTx(ctx, txOptions)
 }
