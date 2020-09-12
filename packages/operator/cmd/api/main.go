@@ -53,11 +53,7 @@ var mainCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		errCh := make(chan error)
-		if startErr := apiServer.Run(errCh); startErr != nil {
-			log.Error(startErr, "Unable to start api server")
-			os.Exit(1)
-		}
-		log.Info("Api server is started")
+		apiServer.Run(errCh)
 
 
 		quit := make(chan os.Signal, 1)

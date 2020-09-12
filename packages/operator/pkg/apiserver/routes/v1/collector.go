@@ -92,7 +92,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 
 	connService := conn_service.NewService(connRepository)
 	trainService := mt_service.NewService(trainRepo)
-	packService := mp_service.NewService(packRepo, db)
+	packService := mp_service.NewService(packRepo)
 	depService := md_service.NewService(deployRepo, db)
 
 

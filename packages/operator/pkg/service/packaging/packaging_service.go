@@ -18,7 +18,6 @@ package packaging
 
 import (
 	"context"
-	"database/sql"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
@@ -29,10 +28,6 @@ import (
 )
 
 var (
-	txOptions = &sql.TxOptions{
-		Isolation: sql.LevelRepeatableRead,
-		ReadOnly:  false,
-	}
 	log = logf.Log.WithName("model-packaging--service")
 )
 
@@ -49,38 +44,37 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	db   *sql.DB
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
 }
 
 func (s serviceImpl) GetModelPackaging(ctx context.Context, id string) (*packaging.ModelPackaging, error) {
-	return s.repo.GetModelPackaging(ctx, s.db, id)
+	return s.repo.GetModelPackaging(ctx, nil, id)
 }
 
 func (s serviceImpl) GetModelPackagingList(
 	ctx context.Context, options ...filter.ListOption,
 ) ([]packaging.ModelPackaging, error) {
-	return s.repo.GetModelPackagingList(ctx, s.db, options...)
+	return s.repo.GetModelPackagingList(ctx, nil, options...)
 }
 
 func (s serviceImpl) DeleteModelPackaging(ctx context.Context, id string) error {
-	return s.repo.DeleteModelPackaging(ctx, s.db, id)
+	return s.repo.DeleteModelPackaging(ctx, nil, id)
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
-	return s.repo.SetDeletionMark(ctx, s.db, id, value)
+	return s.repo.SetDeletionMark(ctx, nil, id, value)
 }
 
 func (s serviceImpl) UpdateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error {
-	return s.repo.UpdateModelPackaging(ctx, s.db, mt)
+	return s.repo.UpdateModelPackaging(ctx, nil, mt)
 }
 
 func (s serviceImpl) UpdateModelPackagingStatus(
 	ctx context.Context, id string, status v1alpha1.ModelPackagingStatus, spec packaging.ModelPackagingSpec,
 ) (err error) {
 
-	tx, err := s.db.BeginTx(ctx, txOptions)
+	tx, err := s.repo.BeginTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -125,10 +119,10 @@ func (s serviceImpl) UpdateModelPackagingStatus(
 }
 
 func (s serviceImpl) CreateModelPackaging(ctx context.Context, mt *packaging.ModelPackaging) error {
-	return s.repo.CreateModelPackaging(ctx, s.db, mt)
+	return s.repo.CreateModelPackaging(ctx, nil, mt)
 }
 
-func NewService(repo repo.Repository, db *sql.DB) Service {
-	return &serviceImpl{repo: repo, db: db}
+func NewService(repo repo.Repository) Service {
+	return &serviceImpl{repo: repo}
 }
 

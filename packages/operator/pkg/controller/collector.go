@@ -40,7 +40,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	}
 
 	if cfg.Packaging.Enabled {
-		packService := pack_service.NewService(pack_repo.PackagingRepo{DB: db}, db)
+		packService := pack_service.NewService(pack_repo.PackagingRepo{DB: db})
 		packKubeClient := pack_kube_client.NewClient(
 			cfg.Packaging.Namespace,
 			cfg.Packaging.PackagingIntegrationNamespace,

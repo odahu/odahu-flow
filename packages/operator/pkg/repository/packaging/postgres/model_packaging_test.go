@@ -75,7 +75,7 @@ func (s *MPRepositorySuite) SetupSuite() {
 
 func (s *MPRepositorySuite) TearDownTest() {
 	ctx := context.Background()
-	if err := s.rep.DeleteModelPackaging(ctx, db, mpID); err != nil && !odahuErrors.IsNotFoundError(err) {
+	if err := s.rep.DeleteModelPackaging(ctx, nil, mpID); err != nil && !odahuErrors.IsNotFoundError(err) {
 		// If we get the panic that we have a test configuration problem
 		panic(err)
 	}
@@ -90,38 +90,38 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 
 	ctx := context.Background()
 
-	assert.NoError(s.T(), s.rep.CreateModelPackaging(ctx, db, created))
+	assert.NoError(s.T(), s.rep.CreateModelPackaging(ctx, nil, created))
 
-	fetched, err := s.rep.GetModelPackaging(ctx, db, mpID)
+	fetched, err := s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.ID, created.ID)
 	assert.Exactly(s.T(), fetched.Spec, created.Spec)
 
 	updated := fetched
 	updated.Spec.Image = mpNewImage
-	assert.NoError(s.T(), s.rep.UpdateModelPackaging(ctx, db, updated))
+	assert.NoError(s.T(), s.rep.UpdateModelPackaging(ctx, nil, updated))
 
-	fetched, err = s.rep.GetModelPackaging(ctx, db, mpID)
+	fetched, err = s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.ID, updated.ID)
 	assert.Exactly(s.T(), fetched.Spec, updated.Spec)
 	assert.Exactly(s.T(), fetched.Spec.Image, mpNewImage)
 
 	newStatus := odahuflowv1alpha1.ModelPackagingStatus{PodName: "Some name"}
-	assert.NoError(s.T(), s.rep.UpdateModelPackagingStatus(ctx, db, mpID, newStatus))
-	fetched, err = s.rep.GetModelPackaging(ctx, db,  mpID)
+	assert.NoError(s.T(), s.rep.UpdateModelPackagingStatus(ctx, nil, mpID, newStatus))
+	fetched, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.Status.PodName, "Some name")
 
 	assert.False(s.T(), fetched.DeletionMark)
-	assert.NoError(s.T(), s.rep.SetDeletionMark(ctx, db,  mpID, true))
-	fetched, err = s.rep.GetModelPackaging(ctx, db,  mpID)
+	assert.NoError(s.T(), s.rep.SetDeletionMark(ctx, nil,  mpID, true))
+	fetched, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), fetched.DeletionMark)
 
 
-	assert.NoError(s.T(), s.rep.DeleteModelPackaging(ctx, db,  mpID))
-	_, err = s.rep.GetModelPackaging(ctx, db,  mpID)
+	assert.NoError(s.T(), s.rep.DeleteModelPackaging(ctx, nil,  mpID))
+	_, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
 	assert.Error(s.T(), err)
 	assert.Exactly(s.T(), err, odahuErrors.NotFoundError{Entity: mpID})
 }

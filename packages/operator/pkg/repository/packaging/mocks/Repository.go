@@ -5,12 +5,13 @@ package mocks
 import (
 	context "context"
 
+	apispackaging "github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+
 	filter "github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+
 	mock "github.com/stretchr/testify/mock"
 
-	packaging "github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-
-	postgres "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
+	sql "database/sql"
 
 	v1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 )
@@ -20,50 +21,22 @@ type Repository struct {
 	mock.Mock
 }
 
-// CreateModelPackaging provides a mock function with given fields: ctx, qrr, mp
-func (_m *Repository) CreateModelPackaging(ctx context.Context, qrr postgres.Querier, mp *packaging.ModelPackaging) error {
-	ret := _m.Called(ctx, qrr, mp)
+// BeginTransaction provides a mock function with given fields: ctx
+func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	ret := _m.Called(ctx)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, *packaging.ModelPackaging) error); ok {
-		r0 = rf(ctx, qrr, mp)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// DeleteModelPackaging provides a mock function with given fields: ctx, qrr, id
-func (_m *Repository) DeleteModelPackaging(ctx context.Context, qrr postgres.Querier, id string) error {
-	ret := _m.Called(ctx, qrr, id)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string) error); ok {
-		r0 = rf(ctx, qrr, id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// GetModelPackaging provides a mock function with given fields: ctx, qrr, id
-func (_m *Repository) GetModelPackaging(ctx context.Context, qrr postgres.Querier, id string) (*packaging.ModelPackaging, error) {
-	ret := _m.Called(ctx, qrr, id)
-
-	var r0 *packaging.ModelPackaging
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string) *packaging.ModelPackaging); ok {
-		r0 = rf(ctx, qrr, id)
+	var r0 *sql.Tx
+	if rf, ok := ret.Get(0).(func(context.Context) *sql.Tx); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*packaging.ModelPackaging)
+			r0 = ret.Get(0).(*sql.Tx)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, postgres.Querier, string) error); ok {
-		r1 = rf(ctx, qrr, id)
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -71,29 +44,80 @@ func (_m *Repository) GetModelPackaging(ctx context.Context, qrr postgres.Querie
 	return r0, r1
 }
 
-// GetModelPackagingList provides a mock function with given fields: ctx, qrr, options
-func (_m *Repository) GetModelPackagingList(ctx context.Context, qrr postgres.Querier, options ...filter.ListOption) ([]packaging.ModelPackaging, error) {
+// CreateModelPackaging provides a mock function with given fields: ctx, tx, mp
+func (_m *Repository) CreateModelPackaging(ctx context.Context, tx *sql.Tx, mp *apispackaging.ModelPackaging) error {
+	ret := _m.Called(ctx, tx, mp)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *apispackaging.ModelPackaging) error); ok {
+		r0 = rf(ctx, tx, mp)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteModelPackaging provides a mock function with given fields: ctx, tx, id
+func (_m *Repository) DeleteModelPackaging(ctx context.Context, tx *sql.Tx, id string) error {
+	ret := _m.Called(ctx, tx, id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) error); ok {
+		r0 = rf(ctx, tx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetModelPackaging provides a mock function with given fields: ctx, tx, id
+func (_m *Repository) GetModelPackaging(ctx context.Context, tx *sql.Tx, id string) (*apispackaging.ModelPackaging, error) {
+	ret := _m.Called(ctx, tx, id)
+
+	var r0 *apispackaging.ModelPackaging
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) *apispackaging.ModelPackaging); ok {
+		r0 = rf(ctx, tx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*apispackaging.ModelPackaging)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, string) error); ok {
+		r1 = rf(ctx, tx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetModelPackagingList provides a mock function with given fields: ctx, tx, options
+func (_m *Repository) GetModelPackagingList(ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]apispackaging.ModelPackaging, error) {
 	_va := make([]interface{}, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, qrr)
+	_ca = append(_ca, ctx, tx)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 []packaging.ModelPackaging
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, ...filter.ListOption) []packaging.ModelPackaging); ok {
-		r0 = rf(ctx, qrr, options...)
+	var r0 []apispackaging.ModelPackaging
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, ...filter.ListOption) []apispackaging.ModelPackaging); ok {
+		r0 = rf(ctx, tx, options...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]packaging.ModelPackaging)
+			r0 = ret.Get(0).([]apispackaging.ModelPackaging)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, postgres.Querier, ...filter.ListOption) error); ok {
-		r1 = rf(ctx, qrr, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, ...filter.ListOption) error); ok {
+		r1 = rf(ctx, tx, options...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -101,13 +125,13 @@ func (_m *Repository) GetModelPackagingList(ctx context.Context, qrr postgres.Qu
 	return r0, r1
 }
 
-// SetDeletionMark provides a mock function with given fields: ctx, qrr, id, value
-func (_m *Repository) SetDeletionMark(ctx context.Context, qrr postgres.Querier, id string, value bool) error {
-	ret := _m.Called(ctx, qrr, id, value)
+// SetDeletionMark provides a mock function with given fields: ctx, tx, id, value
+func (_m *Repository) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
+	ret := _m.Called(ctx, tx, id, value)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string, bool) error); ok {
-		r0 = rf(ctx, qrr, id, value)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, bool) error); ok {
+		r0 = rf(ctx, tx, id, value)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -115,13 +139,13 @@ func (_m *Repository) SetDeletionMark(ctx context.Context, qrr postgres.Querier,
 	return r0
 }
 
-// UpdateModelPackaging provides a mock function with given fields: ctx, qrr, mp
-func (_m *Repository) UpdateModelPackaging(ctx context.Context, qrr postgres.Querier, mp *packaging.ModelPackaging) error {
-	ret := _m.Called(ctx, qrr, mp)
+// UpdateModelPackaging provides a mock function with given fields: ctx, tx, mp
+func (_m *Repository) UpdateModelPackaging(ctx context.Context, tx *sql.Tx, mp *apispackaging.ModelPackaging) error {
+	ret := _m.Called(ctx, tx, mp)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, *packaging.ModelPackaging) error); ok {
-		r0 = rf(ctx, qrr, mp)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *apispackaging.ModelPackaging) error); ok {
+		r0 = rf(ctx, tx, mp)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -129,13 +153,13 @@ func (_m *Repository) UpdateModelPackaging(ctx context.Context, qrr postgres.Que
 	return r0
 }
 
-// UpdateModelPackagingStatus provides a mock function with given fields: ctx, qrr, id, s
-func (_m *Repository) UpdateModelPackagingStatus(ctx context.Context, qrr postgres.Querier, id string, s v1alpha1.ModelPackagingStatus) error {
-	ret := _m.Called(ctx, qrr, id, s)
+// UpdateModelPackagingStatus provides a mock function with given fields: ctx, tx, id, s
+func (_m *Repository) UpdateModelPackagingStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelPackagingStatus) error {
+	ret := _m.Called(ctx, tx, id, s)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string, v1alpha1.ModelPackagingStatus) error); ok {
-		r0 = rf(ctx, qrr, id, s)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, v1alpha1.ModelPackagingStatus) error); ok {
+		r0 = rf(ctx, tx, id, s)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -19,6 +19,10 @@ const (
 
 var (
 	log = logf.Log.WithName("model-packaging--repository--postgres")
+	txOptions = &sql.TxOptions{
+		Isolation: sql.LevelRepeatableRead,
+		ReadOnly:  false,
+	}
 )
 
 type PackagingRepo struct {
@@ -26,7 +30,13 @@ type PackagingRepo struct {
 }
 
 func (repo PackagingRepo) GetModelPackaging(
-	ctx context.Context, qrr utils.Querier, id string) (*packaging.ModelPackaging, error) {
+	ctx context.Context, tx *sql.Tx, id string) (*packaging.ModelPackaging, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	mt := new(packaging.ModelPackaging)
 
@@ -54,7 +64,13 @@ func (repo PackagingRepo) GetModelPackaging(
 }
 
 func (repo PackagingRepo) GetModelPackagingList(
-	ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]packaging.ModelPackaging, error) {
+	ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]packaging.ModelPackaging, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	listOptions := &filter.ListOptions{
 		Filter: nil,
@@ -109,7 +125,13 @@ func (repo PackagingRepo) GetModelPackagingList(
 
 }
 
-func (repo PackagingRepo) DeleteModelPackaging(ctx context.Context, qrr utils.Querier, id string) error {
+func (repo PackagingRepo) DeleteModelPackaging(ctx context.Context, tx *sql.Tx, id string) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.Delete(ModelPackagingTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
@@ -134,12 +156,24 @@ func (repo PackagingRepo) DeleteModelPackaging(ctx context.Context, qrr utils.Qu
 	return nil
 }
 
-func (repo PackagingRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
+func (repo PackagingRepo) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
+
 	return utils.SetDeletionMark(ctx, qrr, ModelPackagingTable, id, value)
 }
 
-func (repo PackagingRepo) UpdateModelPackaging(
-	ctx context.Context, qrr utils.Querier, mp *packaging.ModelPackaging) error {
+func (repo PackagingRepo) UpdateModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	mp.Status.State = ""
 
@@ -172,7 +206,13 @@ func (repo PackagingRepo) UpdateModelPackaging(
 }
 
 func (repo PackagingRepo) UpdateModelPackagingStatus(
-	ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelPackagingStatus) error {
+	ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelPackagingStatus) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.Update(ModelPackagingTable).
 		Set("status", s).
@@ -201,8 +241,13 @@ func (repo PackagingRepo) UpdateModelPackagingStatus(
 	return nil
 }
 
-func (repo PackagingRepo) CreateModelPackaging(
-	ctx context.Context, qrr utils.Querier, mp *packaging.ModelPackaging) error {
+func (repo PackagingRepo) CreateModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.
 		Insert(ModelPackagingTable).
@@ -230,3 +275,8 @@ func (repo PackagingRepo) CreateModelPackaging(
 	return nil
 
 }
+
+func (repo PackagingRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	return repo.DB.BeginTx(ctx, txOptions)
+}
+

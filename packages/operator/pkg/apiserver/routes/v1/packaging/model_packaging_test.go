@@ -78,7 +78,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	s.kubePackClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 	s.piRepo = mp_postgres_repository.PackagingIntegrationRepository{DB: db}
 	s.packRepo = mp_postgres_repository.PackagingRepo{DB: db}
-	s.packService = mp_service.NewService(s.packRepo, db)
+	s.packService = mp_service.NewService(s.packRepo)
 
 	err := s.piRepo.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpRoute,

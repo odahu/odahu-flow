@@ -89,7 +89,7 @@ func NewAPIServer(config *config.Config) (*Server, error) {
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-func (s *Server) Run(errorCh chan<- error) error {
+func (s *Server) Run(errorCh chan<- error) {
 	
 	go func() {
 		if cerr := s.webServer.ListenAndServe(); cerr != nil && cerr != http.ErrServerClosed {
@@ -99,7 +99,7 @@ func (s *Server) Run(errorCh chan<- error) error {
 			errorCh <- nil
 		}
 	}()
-	return nil
+	return
 
 
 }
