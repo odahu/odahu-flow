@@ -18,21 +18,16 @@ package deployment
 
 import (
 	"context"
-	"database/sql"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 var (
-	txOptions = &sql.TxOptions{
-		Isolation: sql.LevelRepeatableRead,
-		ReadOnly:  false,
-	}
 	log = logf.Log.WithName("model-deployment--service")
 )
 
@@ -49,38 +44,37 @@ type Service interface {
 }
 
 type serviceImpl struct {
-	db   *sql.DB
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
 }
 
 func (s serviceImpl) GetModelDeployment(ctx context.Context, id string) (*deployment.ModelDeployment, error) {
-	return s.repo.GetModelDeployment(ctx, s.db, id)
+	return s.repo.GetModelDeployment(ctx, nil, id)
 }
 
 func (s serviceImpl) GetModelDeploymentList(
 	ctx context.Context, options ...filter.ListOption,
 ) ([]deployment.ModelDeployment, error) {
-	return s.repo.GetModelDeploymentList(ctx, s.db, options...)
+	return s.repo.GetModelDeploymentList(ctx, nil, options...)
 }
 
 func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) error {
-	return s.repo.DeleteModelDeployment(ctx, s.db, id)
+	return s.repo.DeleteModelDeployment(ctx, nil, id)
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
-	return s.repo.SetDeletionMark(ctx, s.db, id, value)
+	return s.repo.SetDeletionMark(ctx, nil, id, value)
 }
 
 func (s serviceImpl) UpdateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error {
-	return s.repo.UpdateModelDeployment(ctx, s.db, mt)
+	return s.repo.UpdateModelDeployment(ctx, nil, mt)
 }
 
 func (s serviceImpl) UpdateModelDeploymentStatus(
 	ctx context.Context, id string, status v1alpha1.ModelDeploymentStatus, spec v1alpha1.ModelDeploymentSpec,
 ) (err error) {
 
-	tx, err := s.db.BeginTx(ctx, txOptions)
+	tx, err := s.repo.BeginTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -125,10 +119,10 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 }
 
 func (s serviceImpl) CreateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error {
-	return s.repo.CreateModelDeployment(ctx, s.db, mt)
+	return s.repo.CreateModelDeployment(ctx, nil, mt)
 }
 
-func NewService(repo repo.Repository, db *sql.DB) Service {
-	return &serviceImpl{repo: repo, db: db}
+func NewService(repo repo.Repository) Service {
+	return &serviceImpl{repo: repo}
 }
 

@@ -42,7 +42,7 @@ func (s *ModelRouteValidationSuite) SetupTest() {
 
 func (s *ModelRouteValidationSuite) SetupSuite() {
 
-	s.validator = dep_route.NewMrValidator(md_service.NewService(repo.DeploymentRepo{DB: db}, db))
+	s.validator = dep_route.NewMrValidator(md_service.NewService(repo.DeploymentRepo{DB: db}))
 }
 
 func TestModelPackagingValidationSuite(t *testing.T) {

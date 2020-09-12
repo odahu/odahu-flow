@@ -79,7 +79,7 @@ type ModelDeploymentRouteSuite struct {
 }
 
 func (s *ModelDeploymentRouteSuite) SetupSuite() {
-	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db}, db)
+	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db})
 	s.mdKubeClient = kube_client.NewClientWithOptions(
 		testNamespace, kubeClient, metav1.DeletePropagationBackground,
 	)

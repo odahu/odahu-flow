@@ -24,6 +24,10 @@ var (
 	log = logf.Log.WithName("model-deployment--repository--postgres")
 	MaxSize   = 500
 	FirstPage = 0
+	txOptions = &sql.TxOptions{
+		Isolation: sql.LevelRepeatableRead,
+		ReadOnly:  false,
+	}
 )
 
 type DeploymentRepo struct {
@@ -31,7 +35,13 @@ type DeploymentRepo struct {
 }
 
 func (repo DeploymentRepo) GetModelDeployment(
-	ctx context.Context, qrr utils.Querier, id string) (*deployment.ModelDeployment, error) {
+	ctx context.Context, tx *sql.Tx, id string) (*deployment.ModelDeployment, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	mt := new(deployment.ModelDeployment)
 
@@ -60,7 +70,13 @@ func (repo DeploymentRepo) GetModelDeployment(
 }
 
 func (repo DeploymentRepo) GetModelDeploymentList(
-	ctx context.Context, qrr utils.Querier, options ...filter.ListOption) ([]deployment.ModelDeployment, error) {
+	ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]deployment.ModelDeployment, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	listOptions := &filter.ListOptions{
 		Filter: nil,
@@ -115,7 +131,13 @@ func (repo DeploymentRepo) GetModelDeploymentList(
 
 }
 
-func (repo DeploymentRepo) DeleteModelDeployment(ctx context.Context, qrr utils.Querier, id string) error {
+func (repo DeploymentRepo) DeleteModelDeployment(ctx context.Context, tx *sql.Tx, id string) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.Delete(ModelDeploymentTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
@@ -140,12 +162,25 @@ func (repo DeploymentRepo) DeleteModelDeployment(ctx context.Context, qrr utils.
 	return nil
 }
 
-func (repo DeploymentRepo) SetDeletionMark(ctx context.Context, qrr utils.Querier, id string, value bool) error {
+func (repo DeploymentRepo) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
+
 	return utils.SetDeletionMark(ctx, qrr, ModelDeploymentTable, id, value)
 }
 
 func (repo DeploymentRepo) UpdateModelDeployment(
-	ctx context.Context, qrr utils.Querier, md *deployment.ModelDeployment) error {
+	ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	md.Status.State = ""
 
@@ -178,7 +213,13 @@ func (repo DeploymentRepo) UpdateModelDeployment(
 }
 
 func (repo DeploymentRepo) UpdateModelDeploymentStatus(
-	ctx context.Context, qrr utils.Querier, id string, s v1alpha1.ModelDeploymentStatus) error {
+	ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelDeploymentStatus) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.Update(ModelDeploymentTable).
 		Set("status", s).
@@ -208,7 +249,13 @@ func (repo DeploymentRepo) UpdateModelDeploymentStatus(
 }
 
 func (repo DeploymentRepo) CreateModelDeployment(
-	ctx context.Context, qrr utils.Querier, md *deployment.ModelDeployment) error {
+	ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
 
 	stmt, args, err := sq.
 		Insert(ModelDeploymentTable).
@@ -367,4 +414,8 @@ func (repo DeploymentRepo) CreateModelRoute(mr *deployment.ModelRoute) error {
 	}
 	return nil
 
+}
+
+func (repo DeploymentRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	return repo.DB.BeginTx(ctx, txOptions)
 }

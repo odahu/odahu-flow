@@ -56,7 +56,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	}
 
 	if cfg.Deployment.Enabled {
-		depService := dep_service.NewService(deploy_repo.DeploymentRepo{DB: db}, db)
+		depService := dep_service.NewService(deploy_repo.DeploymentRepo{DB: db})
 		deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, kClient)
 
 		deployWorker := NewGenericWorker(

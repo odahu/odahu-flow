@@ -48,8 +48,8 @@ type TestSuite struct {
 	db *sql.DB
 	dbMock sqlmock.Sqlmock
 	as *assert.Assertions
+	nilTx *sql.Tx
 }
-
 
 func (s *TestSuite) SetupSuite() {
 	s.as = assert.New(s.T())
@@ -65,7 +65,7 @@ func (s *TestSuite) SetupTest() {
 	s.mockRepo = mockRepo
 	s.db = db
 	s.dbMock = dbMock
-	s.service = service.NewService(mockRepo, db)
+	s.service = service.NewService(mockRepo)
 }
 
 func (s *TestSuite) TestGetModelDeployment() {
@@ -73,7 +73,7 @@ func (s *TestSuite) TestGetModelDeployment() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("GetModelDeployment", ctx, s.db, enID).Return(en, nil)
+	s.mockRepo.On("GetModelDeployment", ctx, s.nilTx, enID).Return(en, nil)
 
 	actEn, err := s.service.GetModelDeployment(ctx, enID)
 	as.NoError(err)
@@ -88,7 +88,7 @@ func (s *TestSuite) TestGetModelDeploymentList() {
 	ctx := context.Background()
 	stubFilter := newStubFilter()
 	s.mockRepo.
-		On("GetModelDeploymentList", ctx, s.db, mock.AnythingOfType("filter.ListOption")).
+		On("GetModelDeploymentList", ctx, s.nilTx, mock.AnythingOfType("filter.ListOption")).
 		Return(ens, nil)
 
 	actualEns, err := s.service.GetModelDeploymentList(ctx, stubFilter)
@@ -104,7 +104,7 @@ func (s *TestSuite) TestGetModelDeploymentList_Error() {
 	stubFilter := newStubFilter()
 	anyError := errors.New("any error")
 	s.mockRepo.
-		On("GetModelDeploymentList", ctx, s.db, mock.AnythingOfType("filter.ListOption")).
+		On("GetModelDeploymentList", ctx, s.nilTx, mock.AnythingOfType("filter.ListOption")).
 		Return(nil, anyError)
 
 	actualEns, err := s.service.GetModelDeploymentList(ctx, stubFilter)
@@ -118,7 +118,7 @@ func (s *TestSuite) TestDeleteModelDeployment() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
-	s.mockRepo.On("DeleteModelDeployment", ctx, s.db, enID).Return(nil)
+	s.mockRepo.On("DeleteModelDeployment", ctx, s.nilTx, enID).Return(nil)
 
 	as.NoError(s.service.DeleteModelDeployment(ctx, enID))
 	s.mockRepo.AssertExpectations(s.T())
@@ -128,7 +128,7 @@ func (s *TestSuite) TestSetDeletionMark() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
-	s.mockRepo.On("SetDeletionMark", ctx, s.db, enID, true).Return(nil)
+	s.mockRepo.On("SetDeletionMark", ctx, s.nilTx, enID, true).Return(nil)
 
 	as.NoError(s.service.SetDeletionMark(ctx, enID, true))
 	s.mockRepo.AssertExpectations(s.T())
@@ -139,7 +139,7 @@ func (s *TestSuite) TestUpdateModelDeployment() {
 
 	ctx := context.Background()
 	en := newStubMT()
-	s.mockRepo.On("UpdateModelDeployment", ctx, s.db, en).Return(nil)
+	s.mockRepo.On("UpdateModelDeployment", ctx, s.nilTx, en).Return(nil)
 
 	as.NoError(s.service.UpdateModelDeployment(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -148,15 +148,19 @@ func (s *TestSuite) TestUpdateModelDeployment() {
 func (s *TestSuite) TestUpdateModelDeploymentStatus() {
 	as := assert.New(s.T())
 
-	// Assume entity exists in repository
-	ctx := context.Background()
-	mockTx := mock.AnythingOfType("*sql.Tx")
-	repoEn := newStubMT()
-	s.mockRepo.On("GetModelDeployment", ctx, mockTx, enID).Return(repoEn, nil)
-
 	// Assume transaction commit
 	s.dbMock.ExpectBegin()
 	s.dbMock.ExpectCommit()
+
+	// Assume entity exists in repository
+	ctx := context.Background()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	repoEn := newStubMT()
+	s.mockRepo.On("GetModelDeployment", ctx, mockTx, enID).Return(repoEn, nil)
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
@@ -175,15 +179,20 @@ func (s *TestSuite) TestUpdateModelDeploymentStatus() {
 func (s *TestSuite) TestUpdateModelDeploymentStatusSpecTouched() {
 	as := assert.New(s.T())
 
-	// Assume entity exists in repository
-	ctx := context.Background()
-	mockTx := mock.AnythingOfType("*sql.Tx")
-	repoEn := newStubMT()
-	s.mockRepo.On("GetModelDeployment", ctx, mockTx, enID).Return(repoEn, nil)
-
 	// Assume transaction rollback
 	s.dbMock.ExpectBegin()
 	s.dbMock.ExpectRollback()
+
+	// Assume entity exists in repository
+	ctx := context.Background()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	repoEn := newStubMT()
+	s.mockRepo.On("GetModelDeployment", ctx, mockTx, enID).Return(repoEn, nil)
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+
 
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
@@ -192,7 +201,7 @@ func (s *TestSuite) TestUpdateModelDeploymentStatusSpecTouched() {
 	// Call service with the same spec snapshot as in repository and new status
 	specSnapshot := repoEn.Spec
 	specSnapshot.Image = "image in spec was changed"
-	err := s.service.UpdateModelDeploymentStatus(ctx, enID, newStatus, specSnapshot)
+	err = s.service.UpdateModelDeploymentStatus(ctx, enID, newStatus, specSnapshot)
 	as.Error(err)
 
 	// Error about spec was touched must be raised
@@ -210,7 +219,7 @@ func (s *TestSuite) TestCreateModelDeployment() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelDeployment", ctx, s.db, en).Return(nil)
+	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(nil)
 
 	as.NoError(s.service.CreateModelDeployment(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -222,7 +231,7 @@ func (s *TestSuite) TestCreateModelDeployment_Error() {
 	en := newStubMT()
 	ctx := context.Background()
 	anyError := errors.New("any error")
-	s.mockRepo.On("CreateModelDeployment", ctx, s.db, en).Return(anyError)
+	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(anyError)
 
 	as.Error(s.service.CreateModelDeployment(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())

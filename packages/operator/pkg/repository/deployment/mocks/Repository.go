@@ -5,12 +5,13 @@ package mocks
 import (
 	context "context"
 
-	deployment "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	apisdeployment "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+
 	filter "github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 
 	mock "github.com/stretchr/testify/mock"
 
-	postgres "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
+	sql "database/sql"
 
 	v1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 )
@@ -20,13 +21,36 @@ type Repository struct {
 	mock.Mock
 }
 
-// CreateModelDeployment provides a mock function with given fields: ctx, qrr, md
-func (_m *Repository) CreateModelDeployment(ctx context.Context, qrr postgres.Querier, md *deployment.ModelDeployment) error {
-	ret := _m.Called(ctx, qrr, md)
+// BeginTransaction provides a mock function with given fields: ctx
+func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	ret := _m.Called(ctx)
+
+	var r0 *sql.Tx
+	if rf, ok := ret.Get(0).(func(context.Context) *sql.Tx); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*sql.Tx)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateModelDeployment provides a mock function with given fields: ctx, tx, md
+func (_m *Repository) CreateModelDeployment(ctx context.Context, tx *sql.Tx, md *apisdeployment.ModelDeployment) error {
+	ret := _m.Called(ctx, tx, md)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, *deployment.ModelDeployment) error); ok {
-		r0 = rf(ctx, qrr, md)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *apisdeployment.ModelDeployment) error); ok {
+		r0 = rf(ctx, tx, md)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -35,11 +59,11 @@ func (_m *Repository) CreateModelDeployment(ctx context.Context, qrr postgres.Qu
 }
 
 // CreateModelRoute provides a mock function with given fields: md
-func (_m *Repository) CreateModelRoute(md *deployment.ModelRoute) error {
+func (_m *Repository) CreateModelRoute(md *apisdeployment.ModelRoute) error {
 	ret := _m.Called(md)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*deployment.ModelRoute) error); ok {
+	if rf, ok := ret.Get(0).(func(*apisdeployment.ModelRoute) error); ok {
 		r0 = rf(md)
 	} else {
 		r0 = ret.Error(0)
@@ -48,13 +72,13 @@ func (_m *Repository) CreateModelRoute(md *deployment.ModelRoute) error {
 	return r0
 }
 
-// DeleteModelDeployment provides a mock function with given fields: ctx, qrr, id
-func (_m *Repository) DeleteModelDeployment(ctx context.Context, qrr postgres.Querier, id string) error {
-	ret := _m.Called(ctx, qrr, id)
+// DeleteModelDeployment provides a mock function with given fields: ctx, tx, id
+func (_m *Repository) DeleteModelDeployment(ctx context.Context, tx *sql.Tx, id string) error {
+	ret := _m.Called(ctx, tx, id)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string) error); ok {
-		r0 = rf(ctx, qrr, id)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) error); ok {
+		r0 = rf(ctx, tx, id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -76,22 +100,22 @@ func (_m *Repository) DeleteModelRoute(name string) error {
 	return r0
 }
 
-// GetModelDeployment provides a mock function with given fields: ctx, qrr, id
-func (_m *Repository) GetModelDeployment(ctx context.Context, qrr postgres.Querier, id string) (*deployment.ModelDeployment, error) {
-	ret := _m.Called(ctx, qrr, id)
+// GetModelDeployment provides a mock function with given fields: ctx, tx, id
+func (_m *Repository) GetModelDeployment(ctx context.Context, tx *sql.Tx, id string) (*apisdeployment.ModelDeployment, error) {
+	ret := _m.Called(ctx, tx, id)
 
-	var r0 *deployment.ModelDeployment
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string) *deployment.ModelDeployment); ok {
-		r0 = rf(ctx, qrr, id)
+	var r0 *apisdeployment.ModelDeployment
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) *apisdeployment.ModelDeployment); ok {
+		r0 = rf(ctx, tx, id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*deployment.ModelDeployment)
+			r0 = ret.Get(0).(*apisdeployment.ModelDeployment)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, postgres.Querier, string) error); ok {
-		r1 = rf(ctx, qrr, id)
+	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, string) error); ok {
+		r1 = rf(ctx, tx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -99,29 +123,29 @@ func (_m *Repository) GetModelDeployment(ctx context.Context, qrr postgres.Queri
 	return r0, r1
 }
 
-// GetModelDeploymentList provides a mock function with given fields: ctx, qrr, options
-func (_m *Repository) GetModelDeploymentList(ctx context.Context, qrr postgres.Querier, options ...filter.ListOption) ([]deployment.ModelDeployment, error) {
+// GetModelDeploymentList provides a mock function with given fields: ctx, tx, options
+func (_m *Repository) GetModelDeploymentList(ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]apisdeployment.ModelDeployment, error) {
 	_va := make([]interface{}, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx, qrr)
+	_ca = append(_ca, ctx, tx)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 []deployment.ModelDeployment
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, ...filter.ListOption) []deployment.ModelDeployment); ok {
-		r0 = rf(ctx, qrr, options...)
+	var r0 []apisdeployment.ModelDeployment
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, ...filter.ListOption) []apisdeployment.ModelDeployment); ok {
+		r0 = rf(ctx, tx, options...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]deployment.ModelDeployment)
+			r0 = ret.Get(0).([]apisdeployment.ModelDeployment)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, postgres.Querier, ...filter.ListOption) error); ok {
-		r1 = rf(ctx, qrr, options...)
+	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, ...filter.ListOption) error); ok {
+		r1 = rf(ctx, tx, options...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -130,15 +154,15 @@ func (_m *Repository) GetModelDeploymentList(ctx context.Context, qrr postgres.Q
 }
 
 // GetModelRoute provides a mock function with given fields: name
-func (_m *Repository) GetModelRoute(name string) (*deployment.ModelRoute, error) {
+func (_m *Repository) GetModelRoute(name string) (*apisdeployment.ModelRoute, error) {
 	ret := _m.Called(name)
 
-	var r0 *deployment.ModelRoute
-	if rf, ok := ret.Get(0).(func(string) *deployment.ModelRoute); ok {
+	var r0 *apisdeployment.ModelRoute
+	if rf, ok := ret.Get(0).(func(string) *apisdeployment.ModelRoute); ok {
 		r0 = rf(name)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*deployment.ModelRoute)
+			r0 = ret.Get(0).(*apisdeployment.ModelRoute)
 		}
 	}
 
@@ -153,7 +177,7 @@ func (_m *Repository) GetModelRoute(name string) (*deployment.ModelRoute, error)
 }
 
 // GetModelRouteList provides a mock function with given fields: options
-func (_m *Repository) GetModelRouteList(options ...filter.ListOption) ([]deployment.ModelRoute, error) {
+func (_m *Repository) GetModelRouteList(options ...filter.ListOption) ([]apisdeployment.ModelRoute, error) {
 	_va := make([]interface{}, len(options))
 	for _i := range options {
 		_va[_i] = options[_i]
@@ -162,12 +186,12 @@ func (_m *Repository) GetModelRouteList(options ...filter.ListOption) ([]deploym
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 []deployment.ModelRoute
-	if rf, ok := ret.Get(0).(func(...filter.ListOption) []deployment.ModelRoute); ok {
+	var r0 []apisdeployment.ModelRoute
+	if rf, ok := ret.Get(0).(func(...filter.ListOption) []apisdeployment.ModelRoute); ok {
 		r0 = rf(options...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]deployment.ModelRoute)
+			r0 = ret.Get(0).([]apisdeployment.ModelRoute)
 		}
 	}
 
@@ -181,13 +205,13 @@ func (_m *Repository) GetModelRouteList(options ...filter.ListOption) ([]deploym
 	return r0, r1
 }
 
-// SetDeletionMark provides a mock function with given fields: ctx, qrr, id, value
-func (_m *Repository) SetDeletionMark(ctx context.Context, qrr postgres.Querier, id string, value bool) error {
-	ret := _m.Called(ctx, qrr, id, value)
+// SetDeletionMark provides a mock function with given fields: ctx, tx, id, value
+func (_m *Repository) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
+	ret := _m.Called(ctx, tx, id, value)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string, bool) error); ok {
-		r0 = rf(ctx, qrr, id, value)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, bool) error); ok {
+		r0 = rf(ctx, tx, id, value)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -195,13 +219,13 @@ func (_m *Repository) SetDeletionMark(ctx context.Context, qrr postgres.Querier,
 	return r0
 }
 
-// UpdateModelDeployment provides a mock function with given fields: ctx, qrr, md
-func (_m *Repository) UpdateModelDeployment(ctx context.Context, qrr postgres.Querier, md *deployment.ModelDeployment) error {
-	ret := _m.Called(ctx, qrr, md)
+// UpdateModelDeployment provides a mock function with given fields: ctx, tx, md
+func (_m *Repository) UpdateModelDeployment(ctx context.Context, tx *sql.Tx, md *apisdeployment.ModelDeployment) error {
+	ret := _m.Called(ctx, tx, md)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, *deployment.ModelDeployment) error); ok {
-		r0 = rf(ctx, qrr, md)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *apisdeployment.ModelDeployment) error); ok {
+		r0 = rf(ctx, tx, md)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -209,13 +233,13 @@ func (_m *Repository) UpdateModelDeployment(ctx context.Context, qrr postgres.Qu
 	return r0
 }
 
-// UpdateModelDeploymentStatus provides a mock function with given fields: ctx, qrr, id, s
-func (_m *Repository) UpdateModelDeploymentStatus(ctx context.Context, qrr postgres.Querier, id string, s v1alpha1.ModelDeploymentStatus) error {
-	ret := _m.Called(ctx, qrr, id, s)
+// UpdateModelDeploymentStatus provides a mock function with given fields: ctx, tx, id, s
+func (_m *Repository) UpdateModelDeploymentStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelDeploymentStatus) error {
+	ret := _m.Called(ctx, tx, id, s)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, postgres.Querier, string, v1alpha1.ModelDeploymentStatus) error); ok {
-		r0 = rf(ctx, qrr, id, s)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, v1alpha1.ModelDeploymentStatus) error); ok {
+		r0 = rf(ctx, tx, id, s)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -224,11 +248,11 @@ func (_m *Repository) UpdateModelDeploymentStatus(ctx context.Context, qrr postg
 }
 
 // UpdateModelRoute provides a mock function with given fields: md
-func (_m *Repository) UpdateModelRoute(md *deployment.ModelRoute) error {
+func (_m *Repository) UpdateModelRoute(md *apisdeployment.ModelRoute) error {
 	ret := _m.Called(md)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*deployment.ModelRoute) error); ok {
+	if rf, ok := ret.Get(0).(func(*apisdeployment.ModelRoute) error); ok {
 		r0 = rf(md)
 	} else {
 		r0 = ret.Error(0)

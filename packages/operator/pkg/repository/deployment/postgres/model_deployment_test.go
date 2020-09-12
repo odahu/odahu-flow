@@ -28,11 +28,11 @@ func TestModelDeploymentRepository(t *testing.T) {
 		},
 	}
 
-	as.NoError(repo.CreateModelDeployment(context.Background(), db, created))
+	as.NoError(repo.CreateModelDeployment(context.Background(), nil, created))
 
-	as.Exactly(repo.CreateModelDeployment(context.Background(), db, created), odahuErrors.AlreadyExistError{Entity: mdID})
+	as.Exactly(repo.CreateModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{Entity: mdID})
 
-	fetched, err := repo.GetModelDeployment(context.Background(), db, mdID)
+	fetched, err := repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)
 	as.Exactly(fetched.ID, created.ID)
 	as.Exactly(fetched.Spec, created.Spec)
@@ -44,32 +44,32 @@ func TestModelDeploymentRepository(t *testing.T) {
 		},
 	}
 
-	as.NoError(repo.UpdateModelDeployment(context.Background(), db, updated))
+	as.NoError(repo.UpdateModelDeployment(context.Background(), nil, updated))
 
-	fetched, err = repo.GetModelDeployment(context.Background(), db, mdID)
+	fetched, err = repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)
 	as.Exactly(fetched.Spec, updated.Spec)
 	as.Exactly(fetched.Spec.Image, "updated")
 
 	as.NoError(repo.UpdateModelDeploymentStatus(
-		context.Background(), db, mdID, v1alpha1.ModelDeploymentStatus{Replicas: 42}))
-	fetched, err = repo.GetModelDeployment(context.Background(), db, mdID)
+		context.Background(), nil, mdID, v1alpha1.ModelDeploymentStatus{Replicas: 42}))
+	fetched, err = repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)
 	as.Exactly(fetched.Status.Replicas, int32(42))
 
-	tis, err := repo.GetModelDeploymentList(context.Background(), db)
+	tis, err := repo.GetModelDeploymentList(context.Background(), nil)
 	as.NoError(err)
 	as.Len(tis, 1)
 
 
 	as.False(fetched.DeletionMark)
-	as.NoError(repo.SetDeletionMark(context.Background(), db, mdID, true))
-	fetched, err = repo.GetModelDeployment(context.Background(), db, mdID)
+	as.NoError(repo.SetDeletionMark(context.Background(), nil, mdID, true))
+	fetched, err = repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)
 	as.True(fetched.DeletionMark)
 	
-	as.NoError(repo.DeleteModelDeployment(context.Background(), db, mdID))
-	_, err = repo.GetModelDeployment(context.Background(), db, mdID)
+	as.NoError(repo.DeleteModelDeployment(context.Background(), nil, mdID))
+	_, err = repo.GetModelDeployment(context.Background(), nil, mdID)
 
 	as.Error(err)
 	as.Exactly(err, odahuErrors.NotFoundError{Entity: mdID})

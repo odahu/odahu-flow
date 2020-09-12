@@ -99,9 +99,6 @@ func (s *Server) Run(errorCh chan<- error) {
 			errorCh <- nil
 		}
 	}()
-	return
-
-
 }
 
 // Shutdown gracefully

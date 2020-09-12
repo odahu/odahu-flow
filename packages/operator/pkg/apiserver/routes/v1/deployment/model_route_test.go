@@ -60,7 +60,7 @@ func (s *ModelRouteSuite) SetupSuite() {
 		testNamespace, kubeClient, metav1.DeletePropagationBackground,
 	)
 
-	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db}, db)
+	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db})
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
