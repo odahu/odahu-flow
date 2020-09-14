@@ -83,6 +83,7 @@ Check that toolchains do not exist
 #############################
 Try Create Toolchain that already exists
     [Tags]                      negative
+    [Setup]                     Cleanup resource  toolchain-integration  ${MLFLOW}
     [Teardown]                  Cleanup resource  toolchain-integration  ${MLFLOW}
     Call API                    toolchain post  ${RES_DIR}/valid/mlflow_update.json
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${MLFLOW}
