@@ -21,7 +21,6 @@ Documentation       API of training, packaging, deployment, route and model
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelPackaging
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
