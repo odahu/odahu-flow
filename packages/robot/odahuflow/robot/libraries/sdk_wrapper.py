@@ -14,13 +14,21 @@ from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClie
 from odahuflow.sdk.clients.training import ModelTrainingClient
 
 
-class Configuration:
+class Login:
 
     @staticmethod
     def config_get(base_url=None, token=None, client_id=None, client_secret=None, issuer_url=None):
         return ConfigurationClient(
-            base_url, token, client_id, client_secret, issuer_url=issuer_url
+            base_url=base_url, token=token,
+            client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
         ).get()
+
+
+class Configuration:
+
+    @staticmethod
+    def config_get():
+        return ConfigurationClient().get()
 
 
 class Connection:
