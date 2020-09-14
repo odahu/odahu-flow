@@ -18,7 +18,7 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Suite Setup         Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 Suite Teardown      Remove file  ${LOCAL_CONFIG}
-Force Tags          api  sdk  security  authn
+Force Tags          api  sdk  security  login
 
 *** Keywords ***
 Format Error
