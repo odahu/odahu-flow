@@ -21,6 +21,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"net/http"
@@ -53,7 +54,7 @@ func init() {
 }
 
 type ModelDeploymentController struct {
-	mdRepo      md_repository.Repository
+	mdService   md_service.Service
 	mdValidator *ModelDeploymentValidator
 }
 
@@ -71,7 +72,7 @@ type ModelDeploymentController struct {
 func (mdc *ModelDeploymentController) getMD(c *gin.Context) {
 	mdID := c.Param(IDMdURLParam)
 
-	md, err := mdc.mdRepo.GetModelDeployment(mdID)
+	md, err := mdc.mdService.GetModelDeployment(c.Request.Context(), mdID)
 	if err != nil {
 		logMD.Error(err, fmt.Sprintf("Retrieving %s model deployment", mdID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -102,7 +103,8 @@ func (mdc *ModelDeploymentController) getAllMDs(c *gin.Context) {
 		return
 	}
 
-	mdList, err := mdc.mdRepo.GetModelDeploymentList(
+	mdList, err := mdc.mdService.GetModelDeploymentList(
+		c.Request.Context(),
 		filter.ListFilter(f),
 		filter.Size(size),
 		filter.Page(page),
@@ -143,7 +145,7 @@ func (mdc *ModelDeploymentController) createMD(c *gin.Context) {
 		return
 	}
 
-	if err := mdc.mdRepo.CreateModelDeployment(&md); err != nil {
+	if err := mdc.mdService.CreateModelDeployment(c.Request.Context(), &md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Creation of the model deployment: %+v", md))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -180,7 +182,7 @@ func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 		return
 	}
 
-	if err := mdc.mdRepo.UpdateModelDeployment(&md); err != nil {
+	if err := mdc.mdService.UpdateModelDeployment(c.Request.Context(), &md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Update of the model deployment: %+v", md))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -204,7 +206,7 @@ func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 func (mdc *ModelDeploymentController) deleteMD(c *gin.Context) {
 	mdID := c.Param(IDMdURLParam)
 
-	if err := mdc.mdRepo.SetDeletionMark(mdID, true); err != nil {
+	if err := mdc.mdService.SetDeletionMark(c.Request.Context(), mdID, true); err != nil {
 		logMD.Error(err, fmt.Sprintf("Deletion of %s model deployment is failed", mdID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 

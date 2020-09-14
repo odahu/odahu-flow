@@ -81,6 +81,10 @@ docker-build-robot-tests:
 docker-build-api:
 	docker build --target api -t odahu/odahu-flow-api:${BUILD_TAG} -f containers/operator/Dockerfile .
 
+## docker-build-controller: Build controller docker image
+docker-build-controller:
+	docker build --target controller -t odahu/odahu-flow-controller:${BUILD_TAG} -f containers/operator/Dockerfile .
+
 ## docker-build-odahu-migrate: Build odahu migrate image
 docker-build-odahu-migrate:
 	docker build --target odahu-migrate -t odahu/odahu-flow-migrate:${BUILD_TAG} -f containers/operator/Dockerfile .
@@ -110,7 +114,7 @@ docker-build-feedback-rq-catcher:
 	docker build --target rq-catcher -t odahu/odahu-flow-feedback-rq-catcher:${BUILD_TAG} -f containers/feedback/Dockerfile .
 
 ## docker-build-all: Build all docker images
-docker-build-all:  docker-build-robot-tests docker-build-api  docker-build-model-trainer  docker-build-operator  docker-build-feedback-collector docker-build-service-catalog docker-build-odahu-migrate
+docker-build-all:  docker-build-robot-tests docker-build-api docker-build-controller  docker-build-model-trainer  docker-build-operator  docker-build-feedback-collector docker-build-service-catalog docker-build-odahu-migrate
 
 ## docker-push-robot-tests: Push pipeline agent docker image
 docker-push-robot-tests:
@@ -121,6 +125,11 @@ docker-push-robot-tests:
 docker-push-api:  check-tag
 	docker tag odahu/odahu-flow-api:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-api:${TAG}
 	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-api:${TAG}
+
+## docker-push-api: Push controller docker image
+docker-push-controller:  check-tag
+	docker tag odahu/odahu-flow-controller:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-controller:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-controller:${TAG}
 
 ## docker-push-model-packager: Push model packager docker image
 docker-push-model-packager:  check-tag

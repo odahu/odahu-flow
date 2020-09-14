@@ -31,6 +31,9 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
+	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -88,14 +91,17 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, k8sClient)
 
 	connService := conn_service.NewService(connRepository)
+	trainService := mt_service.NewService(trainRepo)
+	packService := mp_service.NewService(packRepo)
+	depService := md_service.NewService(deployRepo)
 
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 
-	deployment.ConfigureRoutes(routeGroup, deployRepo, deployKubeClient, cfg.Deployment, cfg.Common.ResourceGPUName)
+	deployment.ConfigureRoutes(routeGroup, depService, deployKubeClient, cfg.Deployment, cfg.Common.ResourceGPUName)
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))
 	packaging.ConfigureRoutes(
-		packagingRouteGroup, packKubeClient, packRepo,
+		packagingRouteGroup, packKubeClient, packService,
 		piRepo, connRepository, cfg.Packaging, cfg.Common.ResourceGPUName,
 	)
 	packaging.ConfigurePiRoutes(packagingRouteGroup, piRepo)
@@ -106,7 +112,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		trainingRouteGroup,
 		cfg.Training,
 		cfg.Common.ResourceGPUName,
-		trainRepo, toolchainRepo, connRepository, trainKubeClient)
+		trainService, toolchainRepo, connRepository, trainKubeClient)
 
 	training.ConfigureToolchainRoutes(
 		trainingRouteGroup, toolchainRepo,

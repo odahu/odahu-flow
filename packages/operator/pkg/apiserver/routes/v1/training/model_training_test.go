@@ -35,6 +35,7 @@ import (
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
@@ -52,7 +53,7 @@ type ModelTrainingRouteSuite struct {
 	g      *GomegaWithT
 	server *gin.Engine
 
-	trainRepo       mt_repository.Repository
+	trainService    mt_service.Service
 	toolchainRepo   mt_repository.ToolchainRepository
 	connRepo        conn_repository.Repository
 	kubeTrainClient kube_client.Client
@@ -63,7 +64,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 
 	s.k8sClient = kubeClient
 
-	s.trainRepo = mt_postgres_repository.TrainingRepo{DB: db}
+	s.trainService = mt_service.NewService(mt_postgres_repository.TrainingRepo{DB: db})
 	s.toolchainRepo = mt_postgres_repository.ToolchainRepo{DB: db}
 	s.kubeTrainClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 
@@ -135,7 +136,9 @@ func (s *ModelTrainingRouteSuite) TearDownSuite() {
 
 func (s *ModelTrainingRouteSuite) TearDownTest() {
 	for _, mpID := range []string{testMtID, testMtID1, testMtID2} {
-		if err := s.trainRepo.DeleteModelTraining(mpID); err != nil && !odahu_errs.IsNotFoundError(err) {
+		if err := s.
+			trainService.
+			DeleteModelTraining(context.TODO(), mpID); err != nil && !odahu_errs.IsNotFoundError(err) {
 			// If a model training is not found then it was not created during a test case
 			// All other errors propagate as a panic
 			panic(err)
@@ -156,19 +159,19 @@ func (s *ModelTrainingRouteSuite) registerHandlers(trainingConfig config.ModelTr
 
 	train_route.ConfigureRoutes(
 		trainGroup, trainingConfig, config.NvidiaResourceName,
-		s.trainRepo, s.toolchainRepo, s.connRepo, s.kubeTrainClient)
+		s.trainService, s.toolchainRepo, s.connRepo, s.kubeTrainClient)
 }
 
 func (s *ModelTrainingRouteSuite) newMultipleMtStubs() {
 	mt1 := newMtStub()
 	mt1.ID = testMtID1
 	mt1.Spec.Model.Version = testModelVersion1
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt1)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt1)).NotTo(HaveOccurred())
 
 	mt2 := newMtStub()
 	mt2.ID = testMtID2
 	mt2.Spec.Model.Version = testModelVersion2
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt2)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt2)).NotTo(HaveOccurred())
 }
 
 func TestModelTrainingRouteSuite(t *testing.T) {
@@ -198,7 +201,7 @@ func newMtStub() *training.ModelTraining {
 
 func (s *ModelTrainingRouteSuite) TestGetMT() {
 	mt := newMtStub()
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, strings.Replace(train_route.GetModelTrainingURL, ":id", mt.ID, -1), nil)
@@ -415,7 +418,7 @@ func (s *ModelTrainingRouteSuite) TestCreateMT() {
 	s.g.Expect(mtResponse.ID).Should(Equal(initialMT.ID))
 	s.g.Expect(mtResponse.Spec).Should(Equal(initialMT.Spec))
 
-	mt, err := s.trainRepo.GetModelTraining(testMtID)
+	mt, err := s.trainService.GetModelTraining(context.Background(), testMtID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(mt.ID).Should(Equal(initialMT.ID))
 	s.g.Expect(mt.Spec).Should(Equal(initialMT.Spec))
@@ -445,7 +448,7 @@ func (s *ModelTrainingRouteSuite) TestCreateMTCheckValidation() {
 func (s *ModelTrainingRouteSuite) TestCreateDuplicateMT() {
 	mt := newMtStub()
 
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt)).NotTo(HaveOccurred())
 
 	mtEntityBody, err := json.Marshal(mt)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -465,7 +468,7 @@ func (s *ModelTrainingRouteSuite) TestCreateDuplicateMT() {
 
 func (s *ModelTrainingRouteSuite) TestUpdateMT() {
 	mt := newMtStub()
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt)).NotTo(HaveOccurred())
 
 	newMt := &training.ModelTraining{
 		ID:   mt.ID,
@@ -489,14 +492,14 @@ func (s *ModelTrainingRouteSuite) TestUpdateMT() {
 	s.g.Expect(mtResponse.ID).Should(Equal(newMt.ID))
 	s.g.Expect(mtResponse.Spec).Should(Equal(newMt.Spec))
 
-	mt, err = s.trainRepo.GetModelTraining(testMtID)
+	mt, err = s.trainService.GetModelTraining(context.Background(), testMtID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mt.Spec).To(Equal(newMt.Spec))
 }
 
 func (s *ModelTrainingRouteSuite) TestUpdateMTCheckValidation() {
 	mt := newMtStub()
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt)).NotTo(HaveOccurred())
 
 	newMt := &training.ModelTraining{
 		ID:   mt.ID,
@@ -540,7 +543,7 @@ func (s *ModelTrainingRouteSuite) TestUpdateMTNotFound() {
 
 func (s *ModelTrainingRouteSuite) TestDeleteMT() {
 	mt := newMtStub()
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, strings.Replace(
@@ -556,7 +559,7 @@ func (s *ModelTrainingRouteSuite) TestDeleteMT() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
 
-	mtList, err := s.trainRepo.GetModelTrainingList()
+	mtList, err := s.trainService.GetModelTrainingList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mtList).To(HaveLen(0))
 }
@@ -687,7 +690,7 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIGetMT() {
 	s.registerHandlers(trainingConfig)
 
 	mt := newMtStub()
-	s.g.Expect(s.trainRepo.CreateModelTraining(mt)).NotTo(HaveOccurred())
+	s.g.Expect(s.trainService.CreateModelTraining(context.Background(), mt)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, strings.Replace(train_route.GetModelTrainingURL, ":id", mt.ID, -1), nil)

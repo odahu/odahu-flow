@@ -1,34 +1,27 @@
-package v1
+package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/workers/v1/types"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/types"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/utils"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	ctrl "sigs.k8s.io/controller-runtime"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
 
-var (
-	log = logf.Log.WithName("generic-worker")
-)
-
 type GenericWorker struct {
-	mgr          ctrl.Manager
 	name         string
 	launchPeriod time.Duration
-	syncer       types.StorageServiceSyncer
+	syncer       types.RuntimeAdapter
 }
 
 func NewGenericWorker(
-	mgr ctrl.Manager,
 	name string,
 	launchPeriod time.Duration,
-	syncer types.StorageServiceSyncer,
+	syncer types.RuntimeAdapter,
 ) GenericWorker {
 	return GenericWorker{
-		mgr:          mgr,
 		name:         name,
 		launchPeriod: launchPeriod,
 		syncer:       syncer,
@@ -40,41 +33,40 @@ func (r *GenericWorker) String() string {
 	return r.name
 }
 
-func (r *GenericWorker) Reconcile(request ctrl.Request) (ctrl.Result, error) {
+func (r *GenericWorker) SyncStatus(re types.RuntimeEntity, se types.StorageEntity) error {
 
-	ID := request.Name
-	eLog := log.WithValues("ID", ID, "Flow", "Storage <- Service", "worker-name", r.String())
-	// We need periodically check kube entities even if there are have no updates
-	// So we can remove them if corresponding entity in storage is deleted yet
-	periodicCheck := ctrl.Result{RequeueAfter: time.Second * 10}
+	eLog := log.WithValues("ID", re.GetID(), "Flow", "Storage <- Service", "worker-name", r.String())
 
-	kubeEntity, err := r.syncer.GetFromService(ID)
-	if odahu_errors.IsNotFoundError(err) {
-		return periodicCheck, nil
-	}
+	eq, err := utils.SpecsEqual(re, se)
 	if err != nil {
-		eLog.Error(err, "Unable to get entity from kubernetes")
-		return ctrl.Result{}, err
+		return err
+	}
+	if !eq {
+		return errors.New("spec in runtime not equal spec in storage. Skip status delivery")
 	}
 
-	if err := kubeEntity.ReportStatus(); err != nil {
-
+	if err := re.ReportStatus(); err != nil {
 		if odahu_errors.IsNotFoundError(err) {
-			return periodicCheck, nil
+			eLog.Info("Entity in storage is not found. Forget about update")
+			return nil
 		}
-		eLog.Error(err, "Unable to update storage entity")
-		return ctrl.Result{}, err
+		if odahu_errors.IsSpecWasTouchedError(err) {
+			eLog.Info("Entity spec in storage was touched. Forget about update (Not actual)")
+			return nil
+		}
+		eLog.Error(err, "Unable to report status")
+		return err
 	}
-	eLog.Info("Storage entity was maybe updated")
-	return periodicCheck, nil
 
+	eLog.Info("Storage entity was maybe updated")
+	return nil
 }
 
-func (r *GenericWorker) syncSpecs(_ context.Context) error {
+func (r *GenericWorker) SyncSpecs(_ context.Context) error {
 
 	eLog := log.WithValues("Flow", "Storage -> Service", "worker-name", r.String())
 
-	create, update, del, delDB, err := r.getNotSynced()
+	create, update, del, delDB, err := r.GetNotSynced()
 
 	if len(create) > 0 || len(update) > 0 || len(del) > 0|| len(delDB) > 0 {
 		log.Info(
@@ -88,7 +80,7 @@ func (r *GenericWorker) syncSpecs(_ context.Context) error {
 	}
 
 	for _, storeEn := range create {
-		crErr := storeEn.CreateInService()
+		crErr := storeEn.CreateInRuntime()
 		if crErr != nil {
 			eLog.Error(err, "Unable to create service entity", "ID", storeEn.GetID())
 		} else {
@@ -98,7 +90,7 @@ func (r *GenericWorker) syncSpecs(_ context.Context) error {
 	}
 
 	for _, storeEn := range update {
-		upErr := storeEn.UpdateInService()
+		upErr := storeEn.UpdateInRuntime()
 		if upErr != nil {
 			eLog.Error(err, "Unable to update service entity", "ID", storeEn.GetID())
 		} else {
@@ -129,24 +121,24 @@ func (r *GenericWorker) syncSpecs(_ context.Context) error {
 	return nil
 }
 
-func (r *GenericWorker) getNotSynced() (
+func (r *GenericWorker) GetNotSynced() (
 	toCreateInService []types.StorageEntity,
 	toUpdateInService []types.StorageEntity,
-	toDeleteInService []types.ExternalServiceEntity,
+	toDeleteInService []types.RuntimeEntity,
 	toDeleteInDB []types.StorageEntity, err error, ) {
 
-	servEnsList, err := r.syncer.ListService()
+	servEnsList, err := r.syncer.ListRuntime()
 	if err != nil {
-		return nil, nil, nil, toDeleteInDB, err
+		return toCreateInService, toUpdateInService, toDeleteInService, toDeleteInDB, err
 	}
 
 	storeEnsList, err := r.syncer.ListStorage()
 	if err != nil {
-		return nil, nil, nil, toDeleteInDB, err
+		return toCreateInService, toUpdateInService, toDeleteInService, toDeleteInDB, err
 	}
 
-	// Find all entities that are exist only in storage or their spec in storage is different with service
-	servEnsIndex := make(map[string]types.ExternalServiceEntity)
+	// Find all entities that are exist only in tStorage or their spec in tStorage is different with service
+	servEnsIndex := make(map[string]types.RuntimeEntity)
 	for _, en := range servEnsList {
 		servEnsIndex[en.GetID()] = en
 	}
@@ -154,32 +146,36 @@ func (r *GenericWorker) getNotSynced() (
 
 		servEn, existsInService := servEnsIndex[storeEn.GetID()]
 
-		if storeEn.IsFinished(){
+		if !existsInService && !storeEn.HasDeletionMark() && !storeEn.IsFinished() {
+			toCreateInService = append(toCreateInService, storeEn)
 			continue
 		}
 
-		if !existsInService && !storeEn.HasDeletionMark() {
-			toCreateInService = append(toCreateInService, storeEn)
+		if !existsInService && !storeEn.HasDeletionMark() && storeEn.IsFinished() {
 			continue
 		}
 		if !existsInService && storeEn.HasDeletionMark() {
 			toDeleteInDB = append(toDeleteInDB, storeEn)
 			continue
 		}
+
+		eq, eqErr := utils.SpecsEqual(servEn, storeEn)
+		if eqErr != nil {
+			log.Error(
+				eqErr,
+				fmt.Sprintf("unable compare specs tStorage: %+v; service: %+v", storeEn, servEn),
+			)
+			continue
+		}
+		if storeEn.IsFinished() && eq{
+			continue
+		}
+
 		if existsInService && !servEn.IsDeleting() && storeEn.HasDeletionMark() {
 			toDeleteInService = append(toDeleteInService, servEn)
 			continue
 		}
 		if existsInService && servEn.IsDeleting() && storeEn.HasDeletionMark() {
-			continue
-		}
-
-		eq, eqErr := specsEqual(servEn, storeEn)
-		if eqErr != nil {
-			log.Error(
-				eqErr,
-				fmt.Sprintf("unable compare specs storage: %+v; service: %+v", storeEn, servEn),
-			)
 			continue
 		}
 
@@ -208,24 +204,21 @@ func (r *GenericWorker) Run(ctx context.Context) (err error) {
 
 	log.Info(fmt.Sprintf("%v is running", r.String()))
 
-	// Attach controller to manager
-	// This controller get updates from K8S resource and update state in DB
-	err = r.syncer.AttachController(r.mgr, r)
-	if err != nil {
-		log.Error(err, "unable to initialize controller")
+	// Register callback for status sync on tRuntime updates
+	if err := r.syncer.SubscribeRuntimeUpdates(r.SyncStatus); err != nil {
+		log.Error(err, "Unable to run status polling")
 		return err
 	}
-	log.Info("Persistence controller for attached to kube manager")
 
-	// We sync entities in service from storage every `launchPeriod` seconds
+	// We sync entities in service from tStorage every `launchPeriod` seconds
 	t := time.NewTicker(r.launchPeriod)
 	defer t.Stop()
 	for {
 		select {
 		case <-t.C:
-			err = r.syncSpecs(ctx)
+			err = r.SyncSpecs(ctx)
 			if err != nil {
-				log.Error(err, "Error while syncSpecs")
+				log.Error(err, "Error while SyncSpecs")
 			}
 			continue
 

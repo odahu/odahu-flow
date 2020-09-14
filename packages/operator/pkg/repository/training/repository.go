@@ -17,6 +17,9 @@
 package training
 
 import (
+	"context"
+	"database/sql"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
@@ -26,12 +29,15 @@ const (
 )
 
 type Repository interface {
-	GetModelTraining(id string) (*training.ModelTraining, error)
-	GetModelTrainingList(options ...filter.ListOption) ([]training.ModelTraining, error)
-	DeleteModelTraining(id string) error
-	SetDeletionMark(id string, value bool) error
-	UpdateModelTraining(md *training.ModelTraining) error
-	CreateModelTraining(md *training.ModelTraining) error
+	GetModelTraining(ctx context.Context, tx *sql.Tx, id string) (*training.ModelTraining, error)
+	GetModelTrainingList(
+		ctx context.Context, tx *sql.Tx, options ...filter.ListOption, ) ([]training.ModelTraining, error)
+	DeleteModelTraining(ctx context.Context, tx *sql.Tx, id string) error
+	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
+	UpdateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error
+	UpdateModelTrainingStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelTrainingStatus) error
+	CreateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error
+	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }
 
 type ToolchainRepository interface {

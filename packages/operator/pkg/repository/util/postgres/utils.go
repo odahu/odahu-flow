@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
@@ -46,7 +47,7 @@ func TransformFilter(sqlBuilder sq.SelectBuilder, filter interface{}) sq.SelectB
 	return sqlBuilder
 }
 
-func SetDeletionMark(db *sql.DB, tableName string, id string, value bool) error {
+func SetDeletionMark(ctx context.Context, qrr Querier, tableName string, id string, value bool) error {
 	stmt, args, err := sq.
 		Update(tableName).
 		Set(deletionMarkColumn, value).
@@ -56,7 +57,7 @@ func SetDeletionMark(db *sql.DB, tableName string, id string, value bool) error 
 	if err != nil {
 		return err
 	}
-	res, err := db.Exec(stmt, args...)
+	res, err := qrr.ExecContext(ctx, stmt, args...)
 	if err != nil {
 		return err
 	}
@@ -72,4 +73,11 @@ func SetDeletionMark(db *sql.DB, tableName string, id string, value bool) error 
 		return fmt.Errorf("more that one rows found for ID %s", id)
 	}
 	return nil
+}
+
+
+type Querier interface {
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
 }

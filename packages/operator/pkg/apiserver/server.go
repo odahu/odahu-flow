@@ -23,46 +23,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	v1Routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1"
-	v1Runners "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/workers/v1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/workersmanager"
 	"github.com/rakyll/statik/fs"
-	"k8s.io/apimachinery/pkg/util/uuid"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/leaderelection"
-	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"net/http"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sync"
-	"time"
 )
 
 const (
 	URLPrefix = "/api/v1"
-	leaderElectionLockName = "odahu-flow-api-le-lock"
-
-	defaultLeaseDuration = 15 * time.Second
-	defaultRenewDeadline = 10 * time.Second
-	defaultRetryPeriod   = 2 * time.Second
 )
 
 var log = logf.Log.WithName("api-server")
 
 type Server struct {
 	webServer   *http.Server
-	runManager  *workersmanager.WorkersManager
 	kubeManager manager.Manager
-
-	kubeMgrStop    chan struct{}
-	kubeMgrStopped chan struct{}
-
-	leNamespace  string
-	disableWorkers bool
 }
 
 func NewAPIServer(config *config.Config) (*Server, error) {
@@ -95,21 +73,12 @@ func NewAPIServer(config *config.Config) (*Server, error) {
 	v1Group := server.Group(URLPrefix)
 	err = v1Routes.SetupV1Routes(v1Group, kubeMgr, db, *config)
 
-	runManager := workersmanager.NewWorkersManager()
-
-	v1Runners.SetupRunners(runManager, kubeMgr, db, *config)
-
 	return &Server{
 		webServer: &http.Server{
 			Addr:    fmt.Sprintf(":%d", config.API.Port),
 			Handler: server,
 		},
-		runManager:     runManager,
 		kubeManager:    kubeMgr,
-		kubeMgrStopped: make(chan struct{}),
-		kubeMgrStop:    make(chan struct{}),
-		leNamespace:    "odahu-flow",
-		disableWorkers: config.API.DisableWorkers,
 	}, err
 }
 
@@ -120,76 +89,8 @@ func NewAPIServer(config *config.Config) (*Server, error) {
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-func (s *Server) Run(errorCh chan<- error) error {
-
-
-	// Construct client for leader election
-	client, err := kubernetes.NewForConfig(rest.AddUserAgent(s.kubeManager.GetConfig(), "leader-election"))
-	if err != nil {
-		return err
-	}
-	// Leader id, needs to be unique
-	id, err := os.Hostname()
-	if err != nil {
-		return err
-	}
-	id = id + "_" + string(uuid.NewUUID())
-
-	lock, err := resourcelock.New(resourcelock.ConfigMapsResourceLock,
-		s.leNamespace,
-		leaderElectionLockName,
-		client.CoreV1(),
-		client.CoordinationV1(),
-		resourcelock.ResourceLockConfig{
-			Identity: id,
-		})
-
-	if err != nil {
-		return err
-	}
-
-	leaderElector, err := leaderelection.NewLeaderElector(leaderelection.LeaderElectionConfig{
-		Lock:          lock,
-		LeaseDuration: defaultLeaseDuration,
-		RenewDeadline: defaultRenewDeadline,
-		RetryPeriod:   defaultRetryPeriod,
-		Callbacks:     leaderelection.LeaderCallbacks{
-			OnStartedLeading: func(_ context.Context) {
-				go func() {
-					if cerr := s.runManager.Run(); cerr != nil {
-						log.Error(cerr, "error in runners manager")
-						errorCh <- cerr
-					} else {
-						errorCh <- nil
-					}
-				}()
-				go func() {
-					if cerr := s.kubeManager.Start(s.kubeMgrStop); cerr != nil {
-						log.Error(cerr, "error in kubernetes manager")
-						errorCh <- cerr
-					} else {
-						errorCh <- nil
-					}
-					close(s.kubeMgrStopped) // We need a way to notify Shutdown function about completed stop
-				}()
-			},
-			OnStoppedLeading: func() {
-				errorCh <- fmt.Errorf("leader election lost")
-			},
-		},
-	})
-	if err != nil {
-		return err
-	}
-
-	// Workers can be disabled
-	if !s.disableWorkers {
-		go leaderElector.Run(context.Background())
-	} else {
-		log.Info("Sync storage is disabled")
-	}
-
-
+func (s *Server) Run(errorCh chan<- error) {
+	
 	go func() {
 		if cerr := s.webServer.ListenAndServe(); cerr != nil && cerr != http.ErrServerClosed {
 			log.Error(cerr, "error in web webServer")
@@ -198,55 +99,14 @@ func (s *Server) Run(errorCh chan<- error) error {
 			errorCh <- nil
 		}
 	}()
-
-
-	return nil
-
-
 }
 
 // Shutdown gracefully
 func (s *Server) Close(ctx context.Context) error {
-	wg := sync.WaitGroup{}
-	var err error
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		if cerr := s.webServer.Shutdown(ctx); cerr != nil {
-			log.Error(cerr, "Unable to shutdown web server")
-			err = cerr
-		} else {
-			log.Info("Web server is stopped")
-		}
-	}()
-
-	if !s.disableWorkers {
-		wg.Add(2)
-		go func() {
-
-			defer wg.Done()
-			if cerr := s.runManager.Shutdown(ctx); cerr != nil {
-				log.Error(cerr, "Unable to shutdown runners manager")
-				err = cerr
-			} else {
-				log.Info("Runners manager is stopped")
-			}
-		}()
-		go func() {
-			defer wg.Done()
-			close(s.kubeMgrStop)
-			select {
-			case <-s.kubeMgrStopped:
-				log.Info("Kube manager is stopped")
-			case <-ctx.Done():
-				log.Error(ctx.Err(), "Unable to shutdown kube manager")
-				err = ctx.Err()
-			}
-
-		}()
+	if cerr := s.webServer.Shutdown(ctx); cerr != nil {
+		log.Error(cerr, "Unable to shutdown web server")
+		return cerr
 	}
-
-	wg.Wait()
-	return err
+	log.Info("Web server is stopped")
+	return nil
 }

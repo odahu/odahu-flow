@@ -1,0 +1,52 @@
+{{- if .Values.controller.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-controller
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "controller" "root" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.controller.replicas }}
+  selector:
+    matchLabels:
+      {{- include "odahuflow.helm-labels-for-search" (dict "component" "controller" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        {{- include "odahuflow.helm-labels" (dict "component" "controller" "root" .) | nindent 8 }}
+    spec:
+      volumes:
+        - name: config
+          secret:
+            secretName: "{{ .Release.Name }}-controller-config"
+      containers:
+      - name: controller
+        image: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.controller "tpl" "%sodahu-flow-controller:%s") }}"
+        resources:
+          {{- toYaml .Values.controller.resources | nindent 10 }}
+        volumeMounts:
+          - mountPath: "/etc/odahu-flow"
+            name: config
+            readOnly: true
+        command:
+          - ./controller
+        args:
+          - --config
+          - /etc/odahu-flow/config.yaml
+      {{- if .Values.rbac}}
+      serviceAccountName: "{{ .Release.Name }}-controller"
+      {{- end}}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ .Release.Name }}-controller-config"
+  labels:
+  {{- include "odahuflow.helm-labels" (dict "component" "controller" "root" .) | nindent 4 }}
+data:
+  "config.yaml": |
+    {{ toYaml .Values.config | b64enc }}
+{{- end }}
