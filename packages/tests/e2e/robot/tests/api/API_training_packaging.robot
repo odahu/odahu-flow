@@ -117,6 +117,7 @@ Delete Model Packaging and Check that Model Packaging does not exist
 #############
 Try Create Training that already exists
     [Tags]                      negative
+    [Setup]                     Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     [Teardown]                  Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     Call API                    training post  ${RES_DIR}/valid/training.mlflow.default.yaml
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${TRAIN_MLFLOW_DEFAULT}
@@ -147,6 +148,7 @@ Try Delete not existing and deleted Training
 #############
 Try Create Packaging that already exists
     [Tags]                      negative
+    [Setup]                     Cleanup resource  packaging  ${PACKAGING}
     [Teardown]                  Cleanup resource  packaging  ${PACKAGING}
     Call API                    packaging post  ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${PACKAGING}

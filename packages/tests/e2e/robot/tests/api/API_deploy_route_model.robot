@@ -135,6 +135,7 @@ Delete Model Deployment and Check that Model Deployment does not exist
 #############
 Try Create Deployment that already exists
     [Tags]                      negative
+    [Setup]                     Cleanup resource  deployment  ${DEPLOYMENT}
     [Teardown]                  Cleanup resource  deployment  ${DEPLOYMENT}
     Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  packaging_image
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DEPLOYMENT}

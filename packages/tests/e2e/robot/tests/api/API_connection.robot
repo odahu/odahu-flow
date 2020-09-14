@@ -80,7 +80,8 @@ Delete Docker connection
 #############################
 Try Create Connection that already exists
     [Tags]                      negative
-    [Teardown]                  cleanup resource  connection  ${GIT_NOT_EXIST}
+    [Setup]                     cleanup resource  connection  ${DOCKER_VALID}
+    [Teardown]                  cleanup resource  connection  ${DOCKER_VALID}
     Call API                    connection post  ${RES_DIR}/valid/docker_connection_create.json
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_VALID}
     Call API and get Error      ${EntityAlreadyExists}  connection post  ${RES_DIR}/valid/docker_connection_create.json

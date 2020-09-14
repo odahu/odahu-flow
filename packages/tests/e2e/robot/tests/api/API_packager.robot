@@ -83,6 +83,7 @@ Check that packagers do not exist
 #############################
 Try Create Packager that already exists
     [Tags]                      negative
+    [Setup]                     Cleanup resource  packaging-integration  ${DOCKER_CLI}
     [Teardown]                  Cleanup resource  packaging-integration  ${DOCKER_CLI}
     Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_CLI}
