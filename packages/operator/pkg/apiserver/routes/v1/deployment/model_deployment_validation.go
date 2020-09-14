@@ -18,12 +18,14 @@ package deployment
 
 import (
 	"errors"
+	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
+	"reflect"
 )
 
 const (
@@ -34,6 +36,7 @@ const (
 		"of replicas parameter"
 	ReadinessProbeErrorMessage = "readiness probe must be positive number"
 	LivenessProbeErrorMessage  = "liveness probe parameter must be positive number"
+	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
 )
 
 var (
@@ -135,5 +138,23 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 		md.Spec.ImagePullConnectionID = &mdv.modelDeploymentConfig.DefaultDockerPullConnName
 	}
 
+	err = multierr.Append(mdv.validateNodeSelector(md), err)
+
 	return err
+}
+
+func (mdv *ModelDeploymentValidator) validateNodeSelector(md *deployment.ModelDeployment) error {
+	if len(md.Spec.NodeSelector) == 0 {
+		return nil
+	}
+
+	nodePools := mdv.modelDeploymentConfig.NodePools
+
+	for _, nodePool := range nodePools {
+		if reflect.DeepEqual(md.Spec.NodeSelector, nodePool.NodeSelector) {
+			return nil
+		}
+	}
+
+	return fmt.Errorf(UnknownNodeSelector, md.Spec.NodeSelector)
 }
