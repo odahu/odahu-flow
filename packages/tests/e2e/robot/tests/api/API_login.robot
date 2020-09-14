@@ -15,8 +15,7 @@ Documentation       API for login
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library             odahuflow.robot.libraries.sdk_wrapper
-Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
+Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Suite Setup         Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 Suite Teardown      Remove file  ${LOCAL_CONFIG}
 Force Tags          api  sdk  security  authn
