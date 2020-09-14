@@ -53,10 +53,6 @@ Try login with invalid credentials
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
 
-    ${IncorrectToken}  base_url=${API_URL}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  issuer_url=${ISSUER}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}
-
 Try login with empty url and valid token
     ${error}        Format Error  ${APIConnectionException}  base url=${EMPTY}
     Call API and get Error      ${error}  config get  base_url=${EMPTY}  token=${AUTH_TOKEN}
