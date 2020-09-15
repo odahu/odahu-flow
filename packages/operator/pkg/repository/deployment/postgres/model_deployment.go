@@ -46,7 +46,7 @@ func (repo DeploymentRepo) GetModelDeployment(
 	mt := new(deployment.ModelDeployment)
 
 	q, args, err := sq.
-		Select("id", "spec", "status", "deletionmark").
+		Select("id", "spec", "status", "deletionmark", "created", "updated").
 		From(ModelDeploymentTable).
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Dollar).
@@ -55,7 +55,8 @@ func (repo DeploymentRepo) GetModelDeployment(
 		return nil, err
 	}
 
-	err = qrr.QueryRowContext(ctx, q, args...).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+	err = qrr.QueryRowContext(ctx, q, args...).
+		Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -89,7 +90,9 @@ func (repo DeploymentRepo) GetModelDeploymentList(
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("id, spec, status, deletionmark").From("odahu_operator_deployment").
+	sb := sq.
+		Select("id, spec, status, deletionmark, created, updated").
+		From("odahu_operator_deployment").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -118,7 +121,7 @@ func (repo DeploymentRepo) GetModelDeploymentList(
 
 	for rows.Next() {
 		mt := new(deployment.ModelDeployment)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -187,6 +190,7 @@ func (repo DeploymentRepo) UpdateModelDeployment(
 	stmt, args, err := sq.Update(ModelDeploymentTable).
 		Set("spec", md.Spec).
 		Set("status", md.Status).
+		Set("updated", md.UpdatedAt).
 		Where(sq.Eq{"id": md.ID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -259,8 +263,8 @@ func (repo DeploymentRepo) CreateModelDeployment(
 
 	stmt, args, err := sq.
 		Insert(ModelDeploymentTable).
-		Columns("id", "spec", "status").
-		Values(md.ID, md.Spec, md.Status).
+		Columns("id", "spec", "status", "created", "updated").
+		Values(md.ID, md.Spec, md.Status, md.CreatedAt, md.UpdatedAt).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 

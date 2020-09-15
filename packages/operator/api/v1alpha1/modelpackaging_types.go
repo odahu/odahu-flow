@@ -62,7 +62,7 @@ type ModelPackagingStatus struct {
 	Message *string `json:"message,omitempty"`
 	// List of packaing results
 	Results []ModelPackagingResult `json:"results,omitempty"`
-	// Info about create and update
+	// DEPRECATED Info about create and update
 	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 	Modifiable `json:",inline"`

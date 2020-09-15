@@ -38,7 +38,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
-	github.com/stretchr/testify v1.5.1
+	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.5.0
 	github.com/tektoncd/pipeline v0.13.0
 	github.com/ugorji/go v1.1.7 // indirect

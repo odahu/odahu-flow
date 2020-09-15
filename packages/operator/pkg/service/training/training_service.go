@@ -25,6 +25,7 @@ import (
 	repo"github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"time"
 )
 
 var (
@@ -67,6 +68,11 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 }
 
 func (s serviceImpl) UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
+	mt.UpdatedAt = time.Now()
+	mt.DeletionMark = false
+	mt.Status = v1alpha1.ModelTrainingStatus{
+		State: v1alpha1.ModelTrainingUnknown,
+	}
 	return s.repo.UpdateModelTraining(ctx, nil, mt)
 }
 
@@ -119,6 +125,12 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 }
 
 func (s serviceImpl) CreateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
+	mt.CreatedAt = time.Now()
+	mt.UpdatedAt = time.Now()
+	mt.DeletionMark = false
+	mt.Status = v1alpha1.ModelTrainingStatus{
+		State: v1alpha1.ModelTrainingUnknown,
+	}
 	return s.repo.CreateModelTraining(ctx, nil, mt)
 }
 

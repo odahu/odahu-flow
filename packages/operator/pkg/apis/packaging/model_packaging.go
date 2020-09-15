@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"time"
 )
 
 type ModelPackaging struct {
@@ -28,6 +29,10 @@ type ModelPackaging struct {
 	ID string `json:"id"`
 	// Deletion mark
 	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
+	// CreatedAt
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Model packaging specification
 	Spec ModelPackagingSpec `json:"spec,omitempty"`
 	// Model packaging status

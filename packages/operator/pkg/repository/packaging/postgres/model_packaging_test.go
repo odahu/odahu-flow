@@ -26,6 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 const (
@@ -58,6 +59,8 @@ type MPRepositorySuite struct {
 func generateMP() *packaging.ModelPackaging {
 	return &packaging.ModelPackaging{
 		ID: mpID,
+		CreatedAt: time.Now().Round(time.Microsecond),
+		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: packaging.ModelPackagingSpec{
 			ArtifactName:    mpArtifactName,
 			IntegrationName: mpType,
@@ -96,9 +99,12 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.ID, created.ID)
 	assert.Exactly(s.T(), fetched.Spec, created.Spec)
+	assert.True(s.T(), fetched.CreatedAt.Equal(created.CreatedAt))
+	assert.True(s.T(), fetched.UpdatedAt.Equal(created.UpdatedAt))
 
 	updated := fetched
 	updated.Spec.Image = mpNewImage
+	updated.UpdatedAt = updated.UpdatedAt.Add(time.Hour)
 	assert.NoError(s.T(), s.rep.UpdateModelPackaging(ctx, nil, updated))
 
 	fetched, err = s.rep.GetModelPackaging(ctx, nil, mpID)
@@ -106,6 +112,7 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 	assert.Exactly(s.T(), fetched.ID, updated.ID)
 	assert.Exactly(s.T(), fetched.Spec, updated.Spec)
 	assert.Exactly(s.T(), fetched.Spec.Image, mpNewImage)
+	assert.True(s.T(), fetched.UpdatedAt.Equal(updated.UpdatedAt))
 
 	newStatus := odahuflowv1alpha1.ModelPackagingStatus{PodName: "Some name"}
 	assert.NoError(s.T(), s.rep.UpdateModelPackagingStatus(ctx, nil, mpID, newStatus))

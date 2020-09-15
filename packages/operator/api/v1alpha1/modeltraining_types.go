@@ -116,7 +116,7 @@ type ModelTrainingStatus struct {
 	Message *string `json:"message,omitempty"`
 	// List of training results
 	Artifacts []TrainingResult `json:"artifacts,omitempty"`
-	// Info about create and update
+	// DEPRECATED Info about create and update
 	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 	Modifiable `json:",inline"`

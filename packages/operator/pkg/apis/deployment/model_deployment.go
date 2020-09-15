@@ -18,6 +18,7 @@ package deployment
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"time"
 )
 
 type ModelDeployment struct {
@@ -25,6 +26,10 @@ type ModelDeployment struct {
 	ID string `json:"id"`
 	// Deletion mark
 	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
+	// CreatedAt
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Model deployment specification
 	Spec v1alpha1.ModelDeploymentSpec `json:"spec,omitempty"`
 	// Model deployment status

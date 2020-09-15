@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is an API Gateway webServer.",
+        "description": "This is an API Gateway webServer",
         "title": "API Gateway",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {},
@@ -1902,10 +1902,6 @@
                     "type": "object",
                     "$ref": "#/definitions/APIBackendConfig"
                 },
-                "disableWorkers": {
-                    "description": "If true then only webserver will be setup.\nWithout background workers responsible to monitor storage and call services",
-                    "type": "boolean"
-                },
                 "port": {
                     "description": "API HTTP port",
                     "type": "integer"
@@ -2430,6 +2426,10 @@
         "ModelDeployment": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Model deployment id",
                     "type": "string"
@@ -2443,6 +2443,10 @@
                     "description": "Model deployment status",
                     "type": "object",
                     "$ref": "#/definitions/ModelDeploymentStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -2524,6 +2528,10 @@
         "ModelPackaging": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Model packaging id",
                     "type": "string"
@@ -2537,6 +2545,10 @@
                     "description": "Model packaging status",
                     "type": "object",
                     "$ref": "#/definitions/ModelPackagingStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -2748,6 +2760,10 @@
         "ModelTraining": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Model training ID",
                     "type": "string"
@@ -2761,6 +2777,10 @@
                     "description": "Model training status",
                     "type": "object",
                     "$ref": "#/definitions/ModelTrainingStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },

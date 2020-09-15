@@ -17,31 +17,41 @@ class ModelPackaging(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, spec: ModelPackagingSpec=None, status: ModelPackagingStatus=None):  # noqa: E501
+    def __init__(self, created_at: str=None, id: str=None, spec: ModelPackagingSpec=None, status: ModelPackagingStatus=None, updated_at: str=None):  # noqa: E501
         """ModelPackaging - a model defined in Swagger
 
+        :param created_at: The created_at of this ModelPackaging.  # noqa: E501
+        :type created_at: str
         :param id: The id of this ModelPackaging.  # noqa: E501
         :type id: str
         :param spec: The spec of this ModelPackaging.  # noqa: E501
         :type spec: ModelPackagingSpec
         :param status: The status of this ModelPackaging.  # noqa: E501
         :type status: ModelPackagingStatus
+        :param updated_at: The updated_at of this ModelPackaging.  # noqa: E501
+        :type updated_at: str
         """
         self.swagger_types = {
+            'created_at': str,
             'id': str,
             'spec': ModelPackagingSpec,
-            'status': ModelPackagingStatus
+            'status': ModelPackagingStatus,
+            'updated_at': str
         }
 
         self.attribute_map = {
+            'created_at': 'createdAt',
             'id': 'id',
             'spec': 'spec',
-            'status': 'status'
+            'status': 'status',
+            'updated_at': 'updatedAt'
         }
 
+        self._created_at = created_at
         self._id = id
         self._spec = spec
         self._status = status
+        self._updated_at = updated_at
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelPackaging':
@@ -53,6 +63,29 @@ class ModelPackaging(Model):
         :rtype: ModelPackaging
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def created_at(self) -> str:
+        """Gets the created_at of this ModelPackaging.
+
+        CreatedAt  # noqa: E501
+
+        :return: The created_at of this ModelPackaging.
+        :rtype: str
+        """
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, created_at: str):
+        """Sets the created_at of this ModelPackaging.
+
+        CreatedAt  # noqa: E501
+
+        :param created_at: The created_at of this ModelPackaging.
+        :type created_at: str
+        """
+
+        self._created_at = created_at
 
     @property
     def id(self) -> str:
@@ -122,3 +155,26 @@ class ModelPackaging(Model):
         """
 
         self._status = status
+
+    @property
+    def updated_at(self) -> str:
+        """Gets the updated_at of this ModelPackaging.
+
+        UpdatedAt  # noqa: E501
+
+        :return: The updated_at of this ModelPackaging.
+        :rtype: str
+        """
+        return self._updated_at
+
+    @updated_at.setter
+    def updated_at(self, updated_at: str):
+        """Sets the updated_at of this ModelPackaging.
+
+        UpdatedAt  # noqa: E501
+
+        :param updated_at: The updated_at of this ModelPackaging.
+        :type updated_at: str
+        """
+
+        self._updated_at = updated_at

@@ -17,11 +17,6 @@ definitions:
       backend:
         $ref: '#/definitions/APIBackendConfig'
         type: object
-      disableWorkers:
-        description: |-
-          If true then only webserver will be setup.
-          Without background workers responsible to monitor storage and call services
-        type: boolean
       port:
         description: API HTTP port
         type: integer
@@ -407,6 +402,9 @@ definitions:
     type: object
   ModelDeployment:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
       id:
         description: Model deployment id
         type: string
@@ -418,6 +416,9 @@ definitions:
         $ref: '#/definitions/ModelDeploymentStatus'
         description: Model deployment status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
     type: object
   ModelRoute:
     properties:
@@ -475,6 +476,9 @@ definitions:
     type: object
   ModelPackaging:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
       id:
         description: Model packaging id
         type: string
@@ -486,6 +490,9 @@ definitions:
         $ref: '#/definitions/ModelPackagingStatus'
         description: Model packaging status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
     type: object
   ModelPackagingSpec:
     properties:
@@ -641,6 +648,9 @@ definitions:
     type: object
   ModelTraining:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
       id:
         description: Model training ID
         type: string
@@ -652,6 +662,9 @@ definitions:
         $ref: '#/definitions/ModelTrainingStatus'
         description: Model training status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
     type: object
   ToolchainIntegration:
     properties:

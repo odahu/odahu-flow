@@ -3,11 +3,10 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	utils "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -40,11 +39,22 @@ func (repo TrainingRepo) GetModelTraining(ctx context.Context, tx *sql.Tx, id st
 
 	mt := new(training.ModelTraining)
 
-	err := qrr.QueryRowContext(
+	query, args, err := sq.
+		Select("id", "spec", "status", "deletionmark", "created", "updated").
+		From(ModelTrainingTable).
+		Where(sq.Eq{"id": id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = qrr.QueryRowContext(
 		ctx,
-		fmt.Sprintf("SELECT id, spec, status, deletionmark FROM %s WHERE id = $1", ModelTrainingTable),
-		id,
-	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+		query,
+		args...,
+	).Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -78,7 +88,7 @@ func (repo TrainingRepo) GetModelTrainingList(
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	sb := sq.Select("id, spec, status, deletionmark").From("odahu_operator_training").
+	sb := sq.Select("id, spec, status, deletionmark, created, updated").From("odahu_operator_training").
 		OrderBy("id").
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
@@ -107,7 +117,7 @@ func (repo TrainingRepo) GetModelTrainingList(
 
 	for rows.Next() {
 		mt := new(training.ModelTraining)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -171,11 +181,10 @@ func (repo TrainingRepo) UpdateModelTraining(ctx context.Context, tx *sql.Tx, mt
 		qrr = tx
 	}
 
-	mt.Status.State = ""
-
 	stmt, args, err := sq.Update(ModelTrainingTable).
 		Set("spec", mt.Spec).
 		Set("status", mt.Status).
+		Set("updated", mt.UpdatedAt).
 		Where(sq.Eq{"id": mt.ID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -247,8 +256,8 @@ func (repo TrainingRepo) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt
 
 	stmt, args, err := sq.
 		Insert(ModelTrainingTable).
-		Columns("id", "spec", "status").
-		Values(mt.ID, mt.Spec, mt.Status).
+		Columns("id", "spec", "status", "created", "updated").
+		Values(mt.ID, mt.Spec, mt.Status, mt.CreatedAt, mt.UpdatedAt).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 

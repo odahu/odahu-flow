@@ -1918,10 +1918,6 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/APIBackendConfig"
                 },
-                "disableWorkers": {
-                    "description": "If true then only webserver will be setup.\nWithout background workers responsible to monitor storage and call services",
-                    "type": "boolean"
-                },
                 "port": {
                     "description": "API HTTP port",
                     "type": "integer"
@@ -2446,6 +2442,10 @@ var doc = `{
         "ModelDeployment": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Model deployment id",
                     "type": "string"
@@ -2459,6 +2459,10 @@ var doc = `{
                     "description": "Model deployment status",
                     "type": "object",
                     "$ref": "#/definitions/ModelDeploymentStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -2540,6 +2544,10 @@ var doc = `{
         "ModelPackaging": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Model packaging id",
                     "type": "string"
@@ -2553,6 +2561,10 @@ var doc = `{
                     "description": "Model packaging status",
                     "type": "object",
                     "$ref": "#/definitions/ModelPackagingStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -2764,6 +2776,10 @@ var doc = `{
         "ModelTraining": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Model training ID",
                     "type": "string"
@@ -2777,6 +2793,10 @@ var doc = `{
                     "description": "Model training status",
                     "type": "object",
                     "$ref": "#/definitions/ModelTrainingStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },

@@ -16,13 +16,20 @@
 
 package training
 
-import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+import (
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"time"
+)
 
 type ModelTraining struct {
 	// Model training ID
 	ID string `json:"id"`
 	// Deletion mark
 	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
+	// CreatedAt
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Model training specification
 	Spec v1alpha1.ModelTrainingSpec `json:"spec,omitempty"`
 	// Model training status
