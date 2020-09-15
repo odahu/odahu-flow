@@ -2151,11 +2151,11 @@ var doc = `{
                     "description": "Kubernetes namespace, where model deployments will be deployed",
                     "type": "string"
                 },
-                "nodeSelector": {
-                    "description": "Kubernetes node selector for model deployments",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
+                "nodePools": {
+                    "description": "Node pools to run training tasks on",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NodePool"
                     }
                 },
                 "security": {
@@ -2941,6 +2941,13 @@ var doc = `{
                 "minReplicas": {
                     "description": "Minimum number of pods for model. By default the min replicas parameter equals 0.",
                     "type": "integer"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for specifying a node pool",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "readinessProbeInitialDelay": {
                     "description": "Initial delay for readiness probe of model pod",

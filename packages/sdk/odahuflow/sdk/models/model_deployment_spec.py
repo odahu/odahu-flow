@@ -16,7 +16,7 @@ class ModelDeploymentSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, annotations: Dict[str, str]=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
+    def __init__(self, annotations: Dict[str, str]=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, node_selector: Dict[str, str]=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
         """ModelDeploymentSpec - a model defined in Swagger
 
         :param annotations: The annotations of this ModelDeploymentSpec.  # noqa: E501
@@ -31,6 +31,8 @@ class ModelDeploymentSpec(Model):
         :type max_replicas: int
         :param min_replicas: The min_replicas of this ModelDeploymentSpec.  # noqa: E501
         :type min_replicas: int
+        :param node_selector: The node_selector of this ModelDeploymentSpec.  # noqa: E501
+        :type node_selector: Dict[str, str]
         :param readiness_probe_initial_delay: The readiness_probe_initial_delay of this ModelDeploymentSpec.  # noqa: E501
         :type readiness_probe_initial_delay: int
         :param resources: The resources of this ModelDeploymentSpec.  # noqa: E501
@@ -45,6 +47,7 @@ class ModelDeploymentSpec(Model):
             'liveness_probe_initial_delay': int,
             'max_replicas': int,
             'min_replicas': int,
+            'node_selector': Dict[str, str],
             'readiness_probe_initial_delay': int,
             'resources': ResourceRequirements,
             'role_name': str
@@ -57,6 +60,7 @@ class ModelDeploymentSpec(Model):
             'liveness_probe_initial_delay': 'livenessProbeInitialDelay',
             'max_replicas': 'maxReplicas',
             'min_replicas': 'minReplicas',
+            'node_selector': 'nodeSelector',
             'readiness_probe_initial_delay': 'readinessProbeInitialDelay',
             'resources': 'resources',
             'role_name': 'roleName'
@@ -68,6 +72,7 @@ class ModelDeploymentSpec(Model):
         self._liveness_probe_initial_delay = liveness_probe_initial_delay
         self._max_replicas = max_replicas
         self._min_replicas = min_replicas
+        self._node_selector = node_selector
         self._readiness_probe_initial_delay = readiness_probe_initial_delay
         self._resources = resources
         self._role_name = role_name
@@ -220,6 +225,29 @@ class ModelDeploymentSpec(Model):
         """
 
         self._min_replicas = min_replicas
+
+    @property
+    def node_selector(self) -> Dict[str, str]:
+        """Gets the node_selector of this ModelDeploymentSpec.
+
+        Node selector for specifying a node pool  # noqa: E501
+
+        :return: The node_selector of this ModelDeploymentSpec.
+        :rtype: Dict[str, str]
+        """
+        return self._node_selector
+
+    @node_selector.setter
+    def node_selector(self, node_selector: Dict[str, str]):
+        """Sets the node_selector of this ModelDeploymentSpec.
+
+        Node selector for specifying a node pool  # noqa: E501
+
+        :param node_selector: The node_selector of this ModelDeploymentSpec.
+        :type node_selector: Dict[str, str]
+        """
+
+        self._node_selector = node_selector
 
     @property
     def readiness_probe_initial_delay(self) -> int:
