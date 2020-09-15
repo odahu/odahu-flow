@@ -17,7 +17,8 @@ from odahuflow.sdk.clients.training import ModelTrainingClient
 class Login:
 
     @staticmethod
-    def config_get(base_url=None, token=None, client_id=None, client_secret=None, issuer_url=None):
+    def config_get(base_url: str = config.API_URL, token=None,
+                   client_id=None, client_secret=None, issuer_url=None):
         return ConfigurationClient(
             base_url=base_url, token=token,
             client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
