@@ -1,7 +1,7 @@
 *** Variables ***
-${LOCAL_CONFIG}         odahuflow/api_authn
+${LOCAL_CONFIG}         odahuflow/api_login
 
-${invalid_url}          -invalid-url
+${invalid_url}          https://invalid-url
 ${invalid_token}        _not-valid-token
 ${invalid_id}           12invalid-id
 ${invalid_secret}       234-invalid-client-secret
