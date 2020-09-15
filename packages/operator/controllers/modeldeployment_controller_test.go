@@ -141,7 +141,7 @@ func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1
 		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
 		5*time.Second,
 		10*time.Millisecond,
-		"Knative configuraiton not found!")
+		"Knative configuration not found!")
 	return configuration
 }
 
