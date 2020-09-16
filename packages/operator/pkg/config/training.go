@@ -35,17 +35,21 @@ type ModelTrainingConfig struct {
 	Namespace                     string `json:"namespace"`
 	ToolchainIntegrationNamespace string `json:"toolchainIntegrationNamespace"`
 	// Enable deployment API/operator
-	Enabled            bool              `json:"enabled"`
-	ServiceAccount     string            `json:"serviceAccount"`
-	OutputConnectionID string            `json:"outputConnectionID"`
-	NodeSelector       map[string]string `json:"nodeSelector"`
+	Enabled            bool   `json:"enabled"`
+	ServiceAccount     string `json:"serviceAccount"`
+	OutputConnectionID string `json:"outputConnectionID"`
+
+	// Node pools to run training tasks on
+	NodePools []NodePool `json:"nodePools"`
 	// Kubernetes tolerations for model trainings pods
-	Tolerations     []corev1.Toleration `json:"tolerations,omitempty"`
-	GPUNodeSelector map[string]string   `json:"gpuNodeSelector"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+	// Node pools to run GPU training tasks on
+	GPUNodePools []NodePool `json:"gpuNodePools"`
 	// Kubernetes tolerations for GPU model trainings pods
-	GPUTolerations    []corev1.Toleration `json:"gpuTolerations,omitempty"`
-	MetricURL         string              `json:"metricUrl"`
-	ModelTrainerImage string              `json:"modelTrainerImage"`
+	GPUTolerations []corev1.Toleration `json:"gpuTolerations,omitempty"`
+
+	MetricURL         string `json:"metricUrl"`
+	ModelTrainerImage string `json:"modelTrainerImage"`
 	// Timeout for full training process
 	Timeout time.Duration `json:"timeout"`
 	// Default resources for training pods
@@ -78,4 +82,9 @@ func NewDefaultModelTrainingConfig() ModelTrainingConfig {
 		},
 		ToolchainIntegrationRepositoryType: RepositoryPostgresType,
 	}
+}
+
+type NodePool struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
+	Tags         []string          `json:"tags"`
 }

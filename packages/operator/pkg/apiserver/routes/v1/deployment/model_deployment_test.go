@@ -18,6 +18,7 @@ package deployment_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -27,8 +28,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
-	dep_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	dep_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -73,12 +74,12 @@ type ModelDeploymentRouteSuite struct {
 	suite.Suite
 	g            *GomegaWithT
 	server       *gin.Engine
-	mdStorage    dep_repository.Repository
+	mdService    md_service.Service
 	mdKubeClient kube_client.Client
 }
 
 func (s *ModelDeploymentRouteSuite) SetupSuite() {
-	s.mdStorage = dep_post_repository.DeploymentRepo{DB: db}
+	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db})
 	s.mdKubeClient = kube_client.NewClientWithOptions(
 		testNamespace, kubeClient, metav1.DeletePropagationBackground,
 	)
@@ -87,7 +88,7 @@ func (s *ModelDeploymentRouteSuite) SetupSuite() {
 func (s *ModelDeploymentRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdStorage, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelDeploymentRouteSuite) SetupTest() {
@@ -96,8 +97,9 @@ func (s *ModelDeploymentRouteSuite) SetupTest() {
 }
 
 func (s *ModelDeploymentRouteSuite) TearDownTest() {
+	ctx := context.Background()
 	for _, currMdID := range []string{mdID, mdID1, mdID2} {
-		if err := s.mdStorage.DeleteModelDeployment(currMdID); err != nil && !errors.IsNotFoundError(err) {
+		if err := s.mdService.DeleteModelDeployment(ctx, currMdID); err != nil && !errors.IsNotFoundError(err) {
 			panic(err)
 		}
 	}
@@ -121,15 +123,16 @@ func newStubMd() *deployment.ModelDeployment {
 }
 
 func (s *ModelDeploymentRouteSuite) newMultipleMds() []*deployment.ModelDeployment {
+	ctx := context.Background()
 	md1 := newStubMd()
 	md1.ID = mdID1
 	md1.Spec.RoleName = &mdRoleName1
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md1)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md1)).NotTo(HaveOccurred())
 
 	md2 := newStubMd()
 	md2.ID = mdID2
 	md2.Spec.RoleName = &mdRoleName2
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md2)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md2)).NotTo(HaveOccurred())
 
 	return []*deployment.ModelDeployment{md1, md2}
 }
@@ -139,8 +142,9 @@ func TestModelDeploymentRouteSuite(t *testing.T) {
 }
 
 func (s *ModelDeploymentRouteSuite) TestGetMD() {
+	ctx := context.Background()
 	md := newStubMd()
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -336,6 +340,7 @@ func (s *ModelDeploymentRouteSuite) TestGetAllMdPaging() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestCreateMD() {
+	ctx := context.Background()
 	mdEntity := newStubMd()
 	mdEntityBody, err := json.Marshal(mdEntity)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -353,7 +358,7 @@ func (s *ModelDeploymentRouteSuite) TestCreateMD() {
 	s.g.Expect(mdEntity.ID).To(Equal(mdResponse.ID))
 	s.g.Expect(mdEntity.Spec).To(Equal(mdResponse.Spec))
 
-	md, err := s.mdStorage.GetModelDeployment(mdID)
+	md, err := s.mdService.GetModelDeployment(ctx, mdID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(md.Spec).To(Equal(mdEntity.Spec))
 }
@@ -378,9 +383,10 @@ func (s *ModelDeploymentRouteSuite) TestCreateMDValidation() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestCreateDuplicateMD() {
+	ctx := context.Background()
 	md := newStubMd()
 
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	mdEntityBody, err := json.Marshal(md)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -399,8 +405,9 @@ func (s *ModelDeploymentRouteSuite) TestCreateDuplicateMD() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestUpdateMD() {
+	ctx := context.Background()
 	md := newStubMd()
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	newMaxReplicas := mdMaxReplicas + 1
 	newMDLivenessIninitialDelay := mdLivenessInitialDelay + 1
@@ -427,15 +434,16 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMD() {
 	s.g.Expect(mdEntity.ID).To(Equal(mdResponse.ID))
 	s.g.Expect(mdEntity.Spec).To(Equal(mdResponse.Spec))
 
-	md, err = s.mdStorage.GetModelDeployment(mdID)
+	md, err = s.mdService.GetModelDeployment(ctx, mdID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mdEntity.ID).To(Equal(md.ID))
 	s.g.Expect(mdEntity.Spec).To(Equal(md.Spec))
 }
 
 func (s *ModelDeploymentRouteSuite) TestUpdateMDValidation() {
+	ctx := context.Background()
 	md := newStubMd()
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	mdEntity := newStubMd()
 	mdEntity.Spec.Image = ""
@@ -476,8 +484,9 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMDNotFound() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDeleteMD() {
+	ctx := context.Background()
 	md := newStubMd()
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -495,10 +504,10 @@ func (s *ModelDeploymentRouteSuite) TestDeleteMD() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
 
-	mdList, err := s.mdStorage.GetModelDeploymentList()
+	mdList, err := s.mdService.GetModelDeploymentList(ctx)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mdList).To(HaveLen(1))
-	fetchedMd, err := s.mdStorage.GetModelDeployment(mdID)
+	fetchedMd, err := s.mdService.GetModelDeployment(ctx, mdID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(fetchedMd.DeletionMark).Should(BeTrue())
 }
@@ -522,12 +531,13 @@ func (s *ModelDeploymentRouteSuite) TestDeleteMDNotFound() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetMD() {
+	ctx := context.Background()
 	deploymentConfig := config.NewDefaultModelDeploymentConfig()
 	deploymentConfig.Enabled = false
 	s.registerHTTPHandlers(deploymentConfig)
 
 	md := newStubMd()
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -581,12 +591,13 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetAllMD() {
 }
 
 func (s *ModelDeploymentRouteSuite) TestDisabledAPICreateMD() {
+	ctx := context.Background()
 	deploymentConfig := config.NewDefaultModelDeploymentConfig()
 	deploymentConfig.Enabled = false
 	s.registerHTTPHandlers(deploymentConfig)
 	md := newStubMd()
 
-	s.g.Expect(s.mdStorage.CreateModelDeployment(md)).NotTo(HaveOccurred())
+	s.g.Expect(s.mdService.CreateModelDeployment(ctx, md)).NotTo(HaveOccurred())
 
 	mdEntityBody, err := json.Marshal(md)
 	s.g.Expect(err).NotTo(HaveOccurred())

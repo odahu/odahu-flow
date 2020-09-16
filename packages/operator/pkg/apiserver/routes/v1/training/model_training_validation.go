@@ -23,6 +23,7 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
@@ -45,6 +46,7 @@ const (
 	WrongDataBindingTypeErrorMessage = "%s data binding has wrong data type. Currently supported the following types" +
 		" of connections for data bindings: %v"
 	ToolchainEmptyErrorMessage = "toolchain parameter is empty"
+	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
 	defaultIDTemplate          = "%s-%s-%s"
 )
 
@@ -58,26 +60,23 @@ var (
 )
 
 type MtValidator struct {
-	mtRepository         mt_repository.ToolchainRepository
-	connRepository       conn_repository.Repository
-	outputConnectionName string
-	gpuResourceName      string
-	defaultResources     odahuflowv1alpha1.ResourceRequirements
+	mtRepository    mt_repository.ToolchainRepository
+	connRepository  conn_repository.Repository
+	gpuResourceName string
+	trainingConfig  config.ModelTrainingConfig
 }
 
 func NewMtValidator(
 	mtRepository mt_repository.ToolchainRepository,
 	connRepository conn_repository.Repository,
-	defaultResources odahuflowv1alpha1.ResourceRequirements,
-	outputConnectionName string,
+	trainingConfig config.ModelTrainingConfig,
 	gpuResourceName string,
 ) *MtValidator {
 	return &MtValidator{
-		mtRepository:         mtRepository,
-		connRepository:       connRepository,
-		defaultResources:     defaultResources,
-		outputConnectionName: outputConnectionName,
-		gpuResourceName:      gpuResourceName,
+		mtRepository:    mtRepository,
+		connRepository:  connRepository,
+		trainingConfig:  trainingConfig,
+		gpuResourceName: gpuResourceName,
 	}
 }
 
@@ -91,6 +90,8 @@ func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err
 	err = multierr.Append(err, mtv.validateToolchain(mt))
 
 	err = multierr.Append(err, mtv.validateOutputConnection(mt))
+
+	err = multierr.Append(err, mtv.validateNodeSelector(mt))
 
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMtErrorMessage, err.Error())
@@ -128,8 +129,8 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 
 	if mt.Spec.Resources == nil {
 		logMT.Info("Training resource parameter is nil. Set the default value",
-			"name", mt.ID, "resources", mtv.defaultResources)
-		mt.Spec.Resources = mtv.defaultResources.DeepCopy()
+			"name", mt.ID, "resources", mtv.trainingConfig.DefaultResources)
+		mt.Spec.Resources = mtv.trainingConfig.DefaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mt.Spec.Resources, mtv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
@@ -221,8 +222,8 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 
 func (mtv *MtValidator) validateOutputConnection(mt *training.ModelTraining) (err error) {
 	if len(mt.Spec.OutputConnection) == 0 {
-		if len(mtv.outputConnectionName) > 0 {
-			mt.Spec.OutputConnection = mtv.outputConnectionName
+		if len(mtv.trainingConfig.OutputConnectionID) > 0 {
+			mt.Spec.OutputConnection = mtv.trainingConfig.OutputConnectionID
 			logMT.Info("OutputConnection is empty. Use connection from configuration")
 		} else {
 			logMT.Info("OutputConnection is empty. Configuration doesn't contain default value")
@@ -245,4 +246,36 @@ func (mtv *MtValidator) validateOutputConnection(mt *training.ModelTraining) (er
 
 	return
 
+}
+
+func (mtv *MtValidator) validateNodeSelector(mt *training.ModelTraining) error {
+	if len(mt.Spec.NodeSelector) == 0 {
+		return nil
+	}
+
+	selectorFound := false
+	var nodePools []config.NodePool
+	if mt.Spec.IsGPUResourceSet() {
+		nodePools = mtv.trainingConfig.GPUNodePools
+	} else {
+		nodePools = mtv.trainingConfig.NodePools
+	}
+
+NodePoolsLoop:
+	for _, nodePool := range nodePools {
+		if len(nodePool.NodeSelector) != len(mt.Spec.NodeSelector) {
+			continue
+		}
+		for key, value := range nodePool.NodeSelector {
+			if mt.Spec.NodeSelector[key] != value {
+				continue NodePoolsLoop
+			}
+		}
+		selectorFound = true
+	}
+
+	if !selectorFound {
+		return fmt.Errorf(UnknownNodeSelector, mt.Spec.NodeSelector)
+	}
+	return nil
 }

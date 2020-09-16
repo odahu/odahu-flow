@@ -37,6 +37,8 @@ type ModelPackagingSpec struct {
 	Targets          []Target              `json:"targets,omitempty"`
 	Resources        *ResourceRequirements `json:"resources,omitempty"`
 	OutputConnection string                `json:"outputConnection,omitempty"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ModelPackagingResult struct {
@@ -60,7 +62,7 @@ type ModelPackagingStatus struct {
 	Message *string `json:"message,omitempty"`
 	// List of packaing results
 	Results []ModelPackagingResult `json:"results,omitempty"`
-	// Info about create and update
+	// DEPRECATED Info about create and update
 	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 	Modifiable `json:",inline"`

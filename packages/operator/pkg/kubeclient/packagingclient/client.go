@@ -26,8 +26,8 @@ import (
 
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	kube_utils "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +39,6 @@ import (
 const (
 	TagKey = "name"
 )
-
 
 var (
 	logMP       = logf.Log.WithName("model-packaging-kube-client")
@@ -70,6 +69,7 @@ func TransformMpFromK8s(mp *v1alpha1.ModelPackaging) (*packaging.ModelPackaging,
 			Targets:          mp.Spec.Targets,
 			Resources:        mp.Spec.Resources,
 			OutputConnection: mp.Spec.OutputConnection,
+			NodeSelector:     mp.Spec.NodeSelector,
 		},
 		Status: mp.Status,
 	}, nil
@@ -99,6 +99,7 @@ func TransformMpToK8s(mp *packaging.ModelPackaging, k8sNamespace string) (*v1alp
 			Targets:          mp.Spec.Targets,
 			Resources:        mp.Spec.Resources,
 			OutputConnection: mp.Spec.OutputConnection,
+			NodeSelector:     mp.Spec.NodeSelector,
 		},
 	}, nil
 }
@@ -119,7 +120,6 @@ func NewClient(namespace, piNamespace string, k8sClient client.Client,
 		k8sConfig:   k8sConfig,
 	}
 }
-
 
 func (c *packagingK8SClient) GetModelPackaging(id string) (*packaging.ModelPackaging, error) {
 	k8sMp := &v1alpha1.ModelPackaging{}

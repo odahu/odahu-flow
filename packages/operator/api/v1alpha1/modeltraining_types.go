@@ -70,6 +70,15 @@ type ModelTrainingSpec struct {
 	Resources *ResourceRequirements `json:"resources,omitempty"`
 	// Input data for a training
 	Data []DataBindingDir `json:"data,omitempty"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+// The function returns true if one of the GPU resources is set up.
+func (spec *ModelTrainingSpec) IsGPUResourceSet() bool {
+	isPresent := func(s *string) bool { return s != nil && *s != "" }
+	return spec.Resources != nil && ((spec.Resources.Limits != nil && isPresent(spec.Resources.Limits.GPU)) ||
+		(spec.Resources.Requests != nil && isPresent(spec.Resources.Requests.GPU)))
 }
 
 // ModelTrainingState defines current state
@@ -107,22 +116,22 @@ type ModelTrainingStatus struct {
 	Message *string `json:"message,omitempty"`
 	// List of training results
 	Artifacts []TrainingResult `json:"artifacts,omitempty"`
-	// Info about create and update
+	// DEPRECATED Info about create and update
 	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
 	Modifiable `json:",inline"`
 }
 
-func (in ModelTrainingSpec) Value() (driver.Value, error) {
-	return json.Marshal(in)
+func (spec ModelTrainingSpec) Value() (driver.Value, error) {
+	return json.Marshal(spec)
 }
 
-func (in *ModelTrainingSpec) Scan(value interface{}) error {
+func (spec *ModelTrainingSpec) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
 	}
-	res := json.Unmarshal(b, &in)
+	res := json.Unmarshal(b, &spec)
 	return res
 }
 

@@ -21,27 +21,43 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/multierr"
 	"testing"
 )
 
 // TODO: add multiple test error
 
 const (
-	outputConnectionName = "conn-id"
-	gpuResourceName      = "nvidia"
+	gpuResourceName     = "nvidia"
+	mtvOutputConnection = "training-validation-output-connection"
 )
 
 var (
 	defaultTrainingResource = config.NewDefaultModelTrainingConfig().DefaultResources
+	cpuNodeSelector         = map[string]string{"mode": "training"}
+	gpuNodeSelector         = map[string]string{"mode": "gpuTraining"}
+	validTraining           = training.ModelTraining{
+		ID: "model-id",
+		Spec: v1alpha1.ModelTrainingSpec{
+			Model: v1alpha1.ModelIdentity{
+				Name:    "model-name",
+				Version: "1",
+			},
+			OutputConnection: mtvOutputConnection,
+			Toolchain:        testToolchainIntegrationID,
+			VCSName:          testMtVCSID,
+			NodeSelector:     cpuNodeSelector,
+		},
+	}
 )
 
 type ModelTrainingValidationSuite struct {
@@ -60,11 +76,18 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 
 	s.mtRepository = mt_post_repository.ToolchainRepo{DB: db}
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, kubeClient)
+
+	trainingConfig := config.NewDefaultModelTrainingConfig()
+	trainingConfig.NodePools = append(trainingConfig.NodePools, config.NodePool{
+		NodeSelector: cpuNodeSelector})
+	trainingConfig.GPUNodePools = append(trainingConfig.GPUNodePools, config.NodePool{
+		NodeSelector: gpuNodeSelector,
+	})
+
 	s.validator = train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		defaultTrainingResource,
-		outputConnectionName,
+		trainingConfig,
 		gpuResourceName,
 	)
 
@@ -74,6 +97,17 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
 			Reference: testVcsReference,
+		},
+	}); err != nil {
+		// If we get a panic that we have a test configuration problem
+		panic(err)
+	}
+
+	// Create the connection that will be used as the outputConnection param for a training.
+	if err := s.connRepository.CreateConnection(&connection.Connection{
+		ID: mtvOutputConnection,
+		Spec: v1alpha1.ConnectionSpec{
+			Type: connection.GcsType,
 		},
 	}); err != nil {
 		// If we get a panic that we have a test configuration problem
@@ -419,44 +453,53 @@ func (s *ModelTrainingValidationSuite) TestMtResourcesValidation() {
 		"validation of gpu limit is failed: quantities must match the regular expression"))
 }
 
-func (s *ModelTrainingValidationSuite) TestOutputConnection() {
-
-	// If configuration output connection is not set then user must specify it as StorageEntity parameter
+// If default output connection is not set in config and user doesn't provide it, validation fails
+func (s *ModelTrainingValidationSuite) TestOutputConnection_NoDefault_NoParam() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{},
+	}
+	testConfig := config.ModelTrainingConfig{
+		DefaultResources:   defaultTrainingResource,
+		OutputConnectionID: "",
 	}
 	err := train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		defaultTrainingResource,
-		"",
+		testConfig,
 		gpuResourceName,
 	).ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(validation.EmptyValueStringError, "OutputConnection")))
+}
 
-	// If configuration output connection is set and user has not passed output connection as training
-	// parameter then output connection value from configuration will be used as default
+// If default output connection is set in config and user doesn't pass output connection, use default
+func (s *ModelTrainingValidationSuite) TestOutputConnection_Default_NoParam() {
+	mt := &training.ModelTraining{}
+
+	testConfig := config.ModelTrainingConfig{OutputConnectionID: testMtOutConnDefault}
 	_ = train_route.NewMtValidator(
 		s.mtRepository,
 		s.connRepository,
-		defaultTrainingResource,
-		testMtOutConnDefault,
+		testConfig,
 		gpuResourceName,
 	).ValidatesAndSetDefaults(mt)
 	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConnDefault))
+}
 
-	// If configuration output connection is set but user also has passed output connection as training
-	// parameter then user value is used
-	mt.Spec.OutputConnection = testMtOutConn
+// If output connection is set in both config and user request, use one from user
+func (s *ModelTrainingValidationSuite) TestOutputConnection_Both_Default_Param() {
+	mt := &training.ModelTraining{}
+	mt.Spec.OutputConnection = mtvOutputConnection
 	_ = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(testMtOutConn))
+	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(mtvOutputConnection))
+}
 
-	// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
-	mt = &training.ModelTraining{
+// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
+func (s *ModelTrainingValidationSuite) TestOutputConnection_ConnectionNotFound() {
+	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{OutputConnection: testMpOutConnNotFound},
 	}
-	err = s.validator.ValidatesAndSetDefaults(mt)
+	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring("entity %q is not found", testMpOutConnNotFound))
 
@@ -470,4 +513,53 @@ func (s *ModelTrainingValidationSuite) TestValidateID() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
+
+// Tests that nil node selector is considered valid
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_nil() {
+	mt := validTraining
+	mt.Spec.NodeSelector = nil
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// training object has valid node selector that exists in config
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_Valid() {
+	mt := validTraining
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// training object has invalid node selector that does not exist in config
+// Expect validator to return exactly one error
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_Invalid() {
+	mt := validTraining
+	mt.Spec.NodeSelector = map[string]string{"mode": "invalid"}
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
+}
+
+// GPU training has valid node selector that exists in config
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_GPU_Valid() {
+	mt := validTraining
+	gpuRequest := "1"
+	mt.Spec.Resources = &v1alpha1.ResourceRequirements{Requests: &v1alpha1.ResourceList{GPU: &gpuRequest}}
+	mt.Spec.NodeSelector = gpuNodeSelector
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Nil(err)
+}
+
+// GPU training has invalid node selector that does not exist in config
+// Expect validator to return exactly one error
+func (s *ModelTrainingValidationSuite) TestValidateNodeSelector_GPU_Invalid() {
+	mt := validTraining
+	gpuRequest := "1"
+	mt.Spec.Resources = &v1alpha1.ResourceRequirements{Requests: &v1alpha1.ResourceList{GPU: &gpuRequest}}
+	mt.Spec.NodeSelector = map[string]string{"mode": "gpu-invalid"}
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
 }

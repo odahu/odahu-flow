@@ -17,7 +17,7 @@ class ModelPackagingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, arguments: object=None, artifact_name: str=None, image: str=None, integration_name: str=None, output_connection: str=None, resources: ResourceRequirements=None, targets: List[Target]=None):  # noqa: E501
+    def __init__(self, arguments: object=None, artifact_name: str=None, image: str=None, integration_name: str=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, targets: List[Target]=None):  # noqa: E501
         """ModelPackagingSpec - a model defined in Swagger
 
         :param arguments: The arguments of this ModelPackagingSpec.  # noqa: E501
@@ -28,6 +28,8 @@ class ModelPackagingSpec(Model):
         :type image: str
         :param integration_name: The integration_name of this ModelPackagingSpec.  # noqa: E501
         :type integration_name: str
+        :param node_selector: The node_selector of this ModelPackagingSpec.  # noqa: E501
+        :type node_selector: Dict[str, str]
         :param output_connection: The output_connection of this ModelPackagingSpec.  # noqa: E501
         :type output_connection: str
         :param resources: The resources of this ModelPackagingSpec.  # noqa: E501
@@ -40,6 +42,7 @@ class ModelPackagingSpec(Model):
             'artifact_name': str,
             'image': str,
             'integration_name': str,
+            'node_selector': Dict[str, str],
             'output_connection': str,
             'resources': ResourceRequirements,
             'targets': List[Target]
@@ -50,6 +53,7 @@ class ModelPackagingSpec(Model):
             'artifact_name': 'artifactName',
             'image': 'image',
             'integration_name': 'integrationName',
+            'node_selector': 'nodeSelector',
             'output_connection': 'outputConnection',
             'resources': 'resources',
             'targets': 'targets'
@@ -59,6 +63,7 @@ class ModelPackagingSpec(Model):
         self._artifact_name = artifact_name
         self._image = image
         self._integration_name = integration_name
+        self._node_selector = node_selector
         self._output_connection = output_connection
         self._resources = resources
         self._targets = targets
@@ -165,6 +170,29 @@ class ModelPackagingSpec(Model):
         """
 
         self._integration_name = integration_name
+
+    @property
+    def node_selector(self) -> Dict[str, str]:
+        """Gets the node_selector of this ModelPackagingSpec.
+
+        Node selector for specifying a node pool  # noqa: E501
+
+        :return: The node_selector of this ModelPackagingSpec.
+        :rtype: Dict[str, str]
+        """
+        return self._node_selector
+
+    @node_selector.setter
+    def node_selector(self, node_selector: Dict[str, str]):
+        """Sets the node_selector of this ModelPackagingSpec.
+
+        Node selector for specifying a node pool  # noqa: E501
+
+        :param node_selector: The node_selector of this ModelPackagingSpec.
+        :type node_selector: Dict[str, str]
+        """
+
+        self._node_selector = node_selector
 
     @property
     def output_connection(self) -> str:

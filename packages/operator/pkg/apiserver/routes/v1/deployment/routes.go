@@ -18,19 +18,18 @@ package deployment
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
-	md_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	md_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
+	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 )
 
-func ConfigureRoutes(
-	routeGroup *gin.RouterGroup, mdRepo md_repository.Repository,
-	deployKubeClient md_kube_client.Client, deploymentConfig config.ModelDeploymentConfig,
-	gpuResourceName string, ) {
+func ConfigureRoutes(routeGroup *gin.RouterGroup,
+	mdService md_service.Service, deployKubeClient md_kube_client.Client,
+	deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
 
 	mdController := ModelDeploymentController{
-		mdRepo:      mdRepo,
+		mdService:   mdService,
 		mdValidator: NewModelDeploymentValidator(deploymentConfig, gpuResourceName),
 	}
 	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(deploymentConfig.Enabled))
@@ -43,7 +42,7 @@ func ConfigureRoutes(
 
 	mrController := ModelRouteController{
 		deployKubeClient: deployKubeClient,
-		validator:        NewMrValidator(mdRepo),
+		validator:        NewMrValidator(mdService),
 	}
 	routeGroup.GET(GetModelRouteURL, mrController.getMR)
 	routeGroup.GET(GetAllModelRouteURL, mrController.getAllMRs)

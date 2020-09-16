@@ -82,3 +82,19 @@ func (iee InvalidEntityError) Error() string {
 
 	return fmt.Sprintf("entity %q is invalid; errors: %s", iee.Entity, strings.Join(errorStrings, ", "))
 }
+
+
+// Error means that spec of entity was touched (any field was changed).
+// Could be raised in operations that require such behaviour
+type SpecWasTouched struct {
+	Entity string
+}
+
+func (swc SpecWasTouched) Error() string {
+	return fmt.Sprintf("entity %q spec was changed", swc.Entity)
+}
+
+func IsSpecWasTouchedError(err error) bool {
+	_, ok := err.(SpecWasTouched)
+	return ok
+}

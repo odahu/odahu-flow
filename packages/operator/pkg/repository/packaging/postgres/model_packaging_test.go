@@ -17,6 +17,7 @@
 package postgres_test
 
 import (
+	"context"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
@@ -25,6 +26,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 const (
@@ -57,6 +59,8 @@ type MPRepositorySuite struct {
 func generateMP() *packaging.ModelPackaging {
 	return &packaging.ModelPackaging{
 		ID: mpID,
+		CreatedAt: time.Now().Round(time.Microsecond),
+		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: packaging.ModelPackagingSpec{
 			ArtifactName:    mpArtifactName,
 			IntegrationName: mpType,
@@ -73,7 +77,8 @@ func (s *MPRepositorySuite) SetupSuite() {
 }
 
 func (s *MPRepositorySuite) TearDownTest() {
-	if err := s.rep.DeleteModelPackaging(mpID); err != nil && !odahuErrors.IsNotFoundError(err) {
+	ctx := context.Background()
+	if err := s.rep.DeleteModelPackaging(ctx, nil, mpID); err != nil && !odahuErrors.IsNotFoundError(err) {
 		// If we get the panic that we have a test configuration problem
 		panic(err)
 	}
@@ -86,32 +91,44 @@ func TestSuiteMP(t *testing.T) {
 func (s *MPRepositorySuite) TestModelPackagingRepository() {
 	created := generateMP()
 
-	assert.NoError(s.T(), s.rep.CreateModelPackaging(created))
+	ctx := context.Background()
 
-	fetched, err := s.rep.GetModelPackaging(mpID)
+	assert.NoError(s.T(), s.rep.CreateModelPackaging(ctx, nil, created))
+
+	fetched, err := s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.ID, created.ID)
 	assert.Exactly(s.T(), fetched.Spec, created.Spec)
+	assert.True(s.T(), fetched.CreatedAt.Equal(created.CreatedAt))
+	assert.True(s.T(), fetched.UpdatedAt.Equal(created.UpdatedAt))
 
 	updated := fetched
 	updated.Spec.Image = mpNewImage
-	assert.NoError(s.T(), s.rep.UpdateModelPackaging(updated))
+	updated.UpdatedAt = updated.UpdatedAt.Add(time.Hour)
+	assert.NoError(s.T(), s.rep.UpdateModelPackaging(ctx, nil, updated))
 
-	fetched, err = s.rep.GetModelPackaging(mpID)
+	fetched, err = s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.ID, updated.ID)
 	assert.Exactly(s.T(), fetched.Spec, updated.Spec)
 	assert.Exactly(s.T(), fetched.Spec.Image, mpNewImage)
+	assert.True(s.T(), fetched.UpdatedAt.Equal(updated.UpdatedAt))
+
+	newStatus := odahuflowv1alpha1.ModelPackagingStatus{PodName: "Some name"}
+	assert.NoError(s.T(), s.rep.UpdateModelPackagingStatus(ctx, nil, mpID, newStatus))
+	fetched, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
+	assert.NoError(s.T(), err)
+	assert.Exactly(s.T(), fetched.Status.PodName, "Some name")
 
 	assert.False(s.T(), fetched.DeletionMark)
-	assert.NoError(s.T(), s.rep.SetDeletionMark(mpID, true))
-	fetched, err = s.rep.GetModelPackaging(mpID)
+	assert.NoError(s.T(), s.rep.SetDeletionMark(ctx, nil,  mpID, true))
+	fetched, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), fetched.DeletionMark)
 
 
-	assert.NoError(s.T(), s.rep.DeleteModelPackaging(mpID))
-	_, err = s.rep.GetModelPackaging(mpID)
+	assert.NoError(s.T(), s.rep.DeleteModelPackaging(ctx, nil,  mpID))
+	_, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
 	assert.Error(s.T(), err)
 	assert.Exactly(s.T(), err, odahuErrors.NotFoundError{Entity: mpID})
 }

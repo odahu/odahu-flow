@@ -34,6 +34,7 @@ import (
 	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
+	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
@@ -64,6 +65,7 @@ type ModelPackagingRouteSuite struct {
 	g              *GomegaWithT
 	server         *gin.Engine
 	packRepo       mp_repository.Repository
+	packService    mp_service.Service
 	piRepo         mp_repository.PackagingIntegrationRepository
 	kubePackClient kube_client.Client
 	connStorage    conn_repository.Repository
@@ -76,6 +78,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	s.kubePackClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 	s.piRepo = mp_postgres_repository.PackagingIntegrationRepository{DB: db}
 	s.packRepo = mp_postgres_repository.PackagingRepo{DB: db}
+	s.packService = mp_service.NewService(s.packRepo)
 
 	err := s.piRepo.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpRoute,
@@ -130,7 +133,7 @@ func (s *ModelPackagingRouteSuite) registerHandlers(packagingConfig config.Model
 	packGroup := v1Group.Group("", routes.DisableAPIMiddleware(packagingConfig.Enabled))
 
 	pack_route.ConfigureRoutes(
-		packGroup, s.kubePackClient, s.packRepo,
+		packGroup, s.kubePackClient, s.packService,
 		s.piRepo, s.connStorage, packagingConfig,
 		config.NvidiaResourceName,
 	)
@@ -138,7 +141,8 @@ func (s *ModelPackagingRouteSuite) registerHandlers(packagingConfig config.Model
 
 func (s *ModelPackagingRouteSuite) TearDownTest() {
 	for _, mpID := range []string{mpIDRoute, testMpID1, testMpID2} {
-		if err := s.packRepo.DeleteModelPackaging(mpID); err != nil && !errors.IsNotFoundError(err) {
+		if err := s.packService.DeleteModelPackaging(
+			context.Background(), mpID); err != nil && !errors.IsNotFoundError(err) {
 			// If a model packaging is not found then it was not created during a test case
 			s.T().Fatalf("Cannot delete ModelPackaging: %v", err)
 		}
@@ -162,11 +166,11 @@ func newModelPackaging() *packaging.ModelPackaging {
 func (s *ModelPackagingRouteSuite) createModelPackagings() {
 	mp1 := newModelPackaging()
 	mp1.ID = testMpID1
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp1)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp1)).NotTo(HaveOccurred())
 
 	mp2 := newModelPackaging()
 	mp2.ID = testMpID2
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp2)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp2)).NotTo(HaveOccurred())
 }
 
 func TestModelPackagingRouteSuite(t *testing.T) {
@@ -175,7 +179,7 @@ func TestModelPackagingRouteSuite(t *testing.T) {
 
 func (s *ModelPackagingRouteSuite) TestGetMP() {
 	mp := newModelPackaging()
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -332,14 +336,14 @@ func (s *ModelPackagingRouteSuite) TestCreateMP() {
 	s.g.Expect(mpResponse.ID).Should(Equal(mpEntity.ID))
 	s.g.Expect(mpResponse.Spec).Should(Equal(mpEntity.Spec))
 
-	mp, err := s.packRepo.GetModelPackaging(mpIDRoute)
+	mp, err := s.packService.GetModelPackaging(context.Background(), mpIDRoute)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(mp.Spec).To(Equal(mpEntity.Spec))
 }
 
 func (s *ModelPackagingRouteSuite) TestCreateDuplicateMP() {
 	mp := newModelPackaging()
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp)).NotTo(HaveOccurred())
 
 	mpEntityBody, err := json.Marshal(mp)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -359,7 +363,7 @@ func (s *ModelPackagingRouteSuite) TestCreateDuplicateMP() {
 
 func (s *ModelPackagingRouteSuite) TestUpdateMP() {
 	mp := newModelPackaging()
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp)).NotTo(HaveOccurred())
 
 	updatedMp := newModelPackaging()
 	updatedMp.Spec.Image += "123"
@@ -379,7 +383,7 @@ func (s *ModelPackagingRouteSuite) TestUpdateMP() {
 	s.g.Expect(mpResponse.ID).Should(Equal(updatedMp.ID))
 	s.g.Expect(mpResponse.Spec).Should(Equal(updatedMp.Spec))
 
-	mp, err = s.packRepo.GetModelPackaging(mpIDRoute)
+	mp, err = s.packService.GetModelPackaging(context.Background(), mpIDRoute)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mp.Spec).To(Equal(updatedMp.Spec))
 }
@@ -405,7 +409,7 @@ func (s *ModelPackagingRouteSuite) TestUpdateMPNotFound() {
 
 func (s *ModelPackagingRouteSuite) TestDeleteMP() {
 	mp := newModelPackaging()
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -423,7 +427,7 @@ func (s *ModelPackagingRouteSuite) TestDeleteMP() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
 
-	mpList, err := s.packRepo.GetModelPackagingList()
+	mpList, err := s.packService.GetModelPackagingList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mpList).To(HaveLen(0))
 }
@@ -562,7 +566,7 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPIGetMP() {
 	s.registerHandlers(packagingConfig)
 
 	mp := newModelPackaging()
-	s.g.Expect(s.packRepo.CreateModelPackaging(mp)).NotTo(HaveOccurred())
+	s.g.Expect(s.packService.CreateModelPackaging(context.Background(), mp)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(

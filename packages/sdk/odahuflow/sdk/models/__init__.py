@@ -47,6 +47,7 @@ from odahuflow.sdk.models.model_training import ModelTraining
 from odahuflow.sdk.models.model_training_config import ModelTrainingConfig
 from odahuflow.sdk.models.model_training_spec import ModelTrainingSpec
 from odahuflow.sdk.models.model_training_status import ModelTrainingStatus
+from odahuflow.sdk.models.node_pool import NodePool
 from odahuflow.sdk.models.operator_config import OperatorConfig
 from odahuflow.sdk.models.packager_config import PackagerConfig
 from odahuflow.sdk.models.packager_target import PackagerTarget

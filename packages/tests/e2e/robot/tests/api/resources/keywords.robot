@@ -15,6 +15,10 @@ Call API and get Error
     Log                          ${result}
     [Return]                     ${result}
 
+Get Logs
+    [Arguments]                  ${entity type}  ${entity id}
+    Call API                     ${entity type} get log  ${entity id}
+
 Log id
     [Arguments]                  ${input}
     ${output}                    set variable  ${input.id}

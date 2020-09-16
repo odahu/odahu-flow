@@ -155,85 +155,103 @@ func TestModelPackagingControllerSuite(t *testing.T) {
 	suite.Run(t, new(ModelPackagingControllerSuite))
 }
 
-func (s *ModelPackagingControllerSuite) templateNodeSelectorTest(
-	mpResources *odahuflowv1alpha1.ResourceRequirements,
-	expectedNodeSelector map[string]string,
-	expectedTolerations []v1.Toleration,
-) {
-	mp := &odahuflowv1alpha1.ModelPackaging{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mpName,
-			Namespace: testNamespace,
+// Node pool provided in packaging request, use it for tekton task
+func (s *ModelPackagingControllerSuite) TestNodePool_Provided() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector}}
+	s.initReconciler(packagingConfig)
+
+	mp := buildPackagingWithNodeSelector(nodeSelector)
+
+	cleanF := s.createPackaging(mp)
+	defer cleanF()
+	tektonTask := s.getTektonPackagingTask(mp.Name)
+
+	s.Assertions.Nil(tektonTask.Spec.PodTemplate.Affinity)
+	s.Assertions.Equal(nodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
+}
+
+// Node pool not provided, build affinity for all CPU pools from config
+func (s *ModelPackagingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	nodeSelector1 := map[string]string{"node-key": "node-value", "another": "another-value"}
+	nodeSelector2 := map[string]string{"node-key2": "node-value2"}
+	packagingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector1}, {NodeSelector: nodeSelector2}}
+	s.initReconciler(packagingConfig)
+
+	expectedNodeSelectorRequirement1 := []v1.NodeSelectorRequirement{
+		{
+			Key:      "node-key",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"node-value"},
 		},
+		{
+			Key:      "another",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"another-value"},
+		},
+	}
+	expectedNodeSelectorRequirement2 := []v1.NodeSelectorRequirement{{
+		Key:      "node-key2",
+		Operator: v1.NodeSelectorOpIn,
+		Values:   []string{"node-value2"},
+	}}
+
+	mp := buildPackagingWithNodeSelector(nil)
+	cleanF := s.createPackaging(mp)
+	defer cleanF()
+	tektonTask := s.getTektonPackagingTask(mp.Name)
+
+	actualAffinity := tektonTask.Spec.PodTemplate.Affinity
+	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+	s.Assertions.Len(actualNodeSelectorTerms, 2)
+
+	for i, expectedNodeSelectorRequirement := range [][]v1.NodeSelectorRequirement{
+		expectedNodeSelectorRequirement1, expectedNodeSelectorRequirement2} {
+		s.Assertions.ElementsMatch(expectedNodeSelectorRequirement, actualNodeSelectorTerms[i].MatchExpressions)
+	}
+
+	s.Assertions.Nil(tektonTask.Spec.PodTemplate.NodeSelector)
+}
+
+// Template tolerations tests
+func (s *ModelPackagingControllerSuite) templateTestTolerations(input []v1.Toleration) {
+	packagingConfig := config.NewDefaultModelPackagingConfig()
+	packagingConfig.Tolerations = input
+	s.initReconciler(packagingConfig)
+
+	mp := &odahuflowv1alpha1.ModelPackaging{
+		ObjectMeta: metav1.ObjectMeta{Name: mpName, Namespace: testNamespace},
 		Spec: odahuflowv1alpha1.ModelPackagingSpec{
-			Resources: mpResources,
-			Type:      testPackagingIntegrationID,
+			Type: testPackagingIntegrationID,
+			Resources: &odahuflowv1alpha1.ResourceRequirements{
+				Limits: &odahuflowv1alpha1.ResourceList{CPU: &testResValue},
+			},
 		},
 	}
 
-	err := s.k8sClient.Create(context.TODO(), mp)
-	s.g.Expect(err).NotTo(HaveOccurred())
-	defer s.k8sClient.Delete(context.TODO(), mp)
-
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
-
-	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
-
-	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
-
-	s.g.Expect(tr.Spec.PodTemplate.NodeSelector).Should(Equal(expectedNodeSelector))
-	s.g.Expect(tr.Spec.PodTemplate.Tolerations).Should(Equal(expectedTolerations))
+	cleanF := s.createPackaging(mp)
+	defer cleanF()
+	tektonTask := s.getTektonPackagingTask(mp.Name)
+	s.Assertions.Equal(input, tektonTask.Spec.PodTemplate.Tolerations)
 }
 
-func (s *ModelPackagingControllerSuite) TestEmptyNodePools() {
-	packagingConfig := config.NewDefaultModelPackagingConfig()
-	s.initReconciler(packagingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nil,
-		nil,
-	)
+// Toleration is nil in config, expect nil toleration in tekton task
+func (s *ModelPackagingControllerSuite) TestToleration_nil() {
+	s.templateTestTolerations(nil)
 }
 
-func (s *ModelPackagingControllerSuite) TestNodePools() {
-	packagingConfig := config.NewDefaultModelPackagingConfig()
-	packagingConfig.NodeSelector = nodeSelector
-	packagingConfig.Tolerations = tolerations
-	s.initReconciler(packagingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nodeSelector,
-		tolerations,
-	)
+// Single toleration in config, expect it in tekton task
+func (s *ModelPackagingControllerSuite) TestToleration_Single() {
+	s.templateTestTolerations([]v1.Toleration{{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"}})
 }
 
-func (s *ModelPackagingControllerSuite) TestOnlyNodeSelector() {
-	packagingConfig := config.NewDefaultModelPackagingConfig()
-	packagingConfig.NodeSelector = nodeSelector
-	s.initReconciler(packagingConfig)
-
-	s.templateNodeSelectorTest(
-		&odahuflowv1alpha1.ResourceRequirements{
-			Limits: &odahuflowv1alpha1.ResourceList{
-				CPU: &testResValue,
-			},
-		},
-		nodeSelector,
-		nil,
-	)
+// Multiple tolerations in config, expect them in tekton task
+func (s *ModelPackagingControllerSuite) TestToleration_Multiple() {
+	s.templateTestTolerations([]v1.Toleration{
+		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
+		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
+	})
 }
 
 func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
@@ -336,4 +354,46 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
+}
+
+func (s *ModelPackagingControllerSuite) createPackaging(mp *odahuflowv1alpha1.ModelPackaging) (
+	cleanF func()) {
+	err := s.k8sClient.Create(context.TODO(), mp)
+	s.Assertions.Nil(err, "Failed to create packaging in K8s")
+
+	s.Assertions.Eventually(
+		func() bool {
+			select {
+			case r := <-s.requests:
+				return r == mpExpectedRequest
+			default:
+				return false
+			}
+		},
+		5*time.Second,
+		10*time.Millisecond)
+
+	s.Assertions.Nil(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp))
+	return func() { s.k8sClient.Delete(context.TODO(), mp) }
+}
+
+func (s *ModelPackagingControllerSuite) getTektonPackagingTask(packagingName string) *tektonv1beta1.TaskRun {
+	tr := &tektonv1beta1.TaskRun{}
+	trKey := types.NamespacedName{Name: packagingName, Namespace: testNamespace}
+	err := s.k8sClient.Get(context.TODO(), trKey, tr)
+	s.Assertions.Nil(err, "Tekton task retrieval failed")
+	return tr
+}
+
+func buildPackagingWithNodeSelector(nodeSelector map[string]string) *odahuflowv1alpha1.ModelPackaging {
+	return &odahuflowv1alpha1.ModelPackaging{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      mpName,
+			Namespace: testNamespace,
+		},
+		Spec: odahuflowv1alpha1.ModelPackagingSpec{
+			Type:         testPackagingIntegrationID,
+			NodeSelector: nodeSelector,
+		},
+	}
 }

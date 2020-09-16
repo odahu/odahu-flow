@@ -22,26 +22,26 @@ import (
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
+	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 )
 
 func ConfigureRoutes(
 	routeGroup *gin.RouterGroup,
 	packKubeClient mp_kube_client.Client,
-	packRepo mp_repository.Repository,
+	packService mp_service.Service,
 	piRepo mp_repository.PackagingIntegrationRepository,
 	connRepo conn_repository.Repository,
 	config config.ModelPackagingConfig,
 	gpuResourceName string) {
 
 	mtController := ModelPackagingController{
-		kubeClient: packKubeClient,
-		packRepo:   packRepo,
+		kubeClient:  packKubeClient,
+		packService: packService,
 		validator: NewMpValidator(
 			piRepo,
 			connRepo,
-			config.OutputConnectionID,
+			config,
 			gpuResourceName,
-			config.DefaultResources,
 		),
 	}
 

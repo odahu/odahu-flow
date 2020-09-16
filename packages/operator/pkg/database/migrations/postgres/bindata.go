@@ -97,6 +97,24 @@ func _000004_deletionmark_up_sql() ([]byte, error) {
 	)
 }
 
+var __000005_created_updated_down_sql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x9c\xcd\x31\x0a\xc2\x50\x0c\x06\xe0\xdd\x53\xe4\x1e\xdd\x14\x91\x0e\xd5\xc5\xbd\xfc\xbe\x84\x5a\x7c\x4d\x42\xc8\x1b\xbc\xbd\x9b\x93\xa2\xed\x01\x3e\xbe\xfd\xf1\xd4\x9f\xbb\x1d\x6a\x4a\x50\xe2\x56\x85\x8c\x71\x6f\xa3\xb9\x04\xd2\x62\xcc\xc0\xac\xb3\x4e\xc4\x61\x4e\xc5\x6a\x5b\x94\x4a\x08\x52\x78\x3d\x6c\xce\x3f\xa1\xa3\x3c\x30\x6d\x29\x3f\xcb\x7f\x4e\x16\xaf\xf6\x5c\x44\x73\x75\xfa\x85\xbe\xd7\xc3\x65\x18\xfa\x6b\xf7\x0a\x00\x00\xff\xff\x24\xd4\x8a\xba\x6a\x01\x00\x00")
+
+func _000005_created_updated_down_sql() ([]byte, error) {
+	return bindata_read(
+		__000005_created_updated_down_sql,
+		"000005_created_updated.down.sql",
+	)
+}
+
+var __000005_created_updated_up_sql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xa4\xce\x3d\x0e\x82\x40\x10\x05\xe0\x9e\x53\xcc\x3d\xe8\x34\xc6\x50\xa0\x8d\x3d\x79\x32\x13\xdc\xb8\x7f\x19\x1f\x85\x9e\xde\x03\x48\xb3\x72\x81\x2f\xdf\xe1\x74\x1e\x2e\x7d\x87\x48\x73\x21\xee\xd1\xa4\x28\x1e\xeb\x54\xaa\x39\x58\x7c\xa2\x23\xe4\x90\x97\x4e\x44\x04\xaa\x32\xbb\x81\xa6\xc2\x90\xec\x45\xa4\xca\x4f\x1b\xb0\x56\x6d\x02\x2a\xe6\x27\x96\x3d\x85\x5f\xa1\xf5\xa0\x56\x63\x79\x27\xcb\xfc\x3b\xb1\x41\x6c\x2e\x8e\xd7\x71\x1c\x6e\xfd\x37\x00\x00\xff\xff\x66\x6f\xf8\x11\x9a\x01\x00\x00")
+
+func _000005_created_updated_up_sql() ([]byte, error) {
+	return bindata_read(
+		__000005_created_updated_up_sql,
+		"000005_created_updated.up.sql",
+	)
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -127,6 +145,8 @@ var _bindata = map[string]func() ([]byte, error){
 	"000003_route.up.sql": _000003_route_up_sql,
 	"000004_deletionmark.down.sql": _000004_deletionmark_down_sql,
 	"000004_deletionmark.up.sql": _000004_deletionmark_up_sql,
+	"000005_created_updated.down.sql": _000005_created_updated_down_sql,
+	"000005_created_updated.up.sql": _000005_created_updated_up_sql,
 }
 // AssetDir returns the file names below a certain
 // directory embedded in the file by go-bindata.
@@ -183,5 +203,9 @@ var _bintree = &_bintree_t{nil, map[string]*_bintree_t{
 	"000004_deletionmark.down.sql": &_bintree_t{_000004_deletionmark_down_sql, map[string]*_bintree_t{
 	}},
 	"000004_deletionmark.up.sql": &_bintree_t{_000004_deletionmark_up_sql, map[string]*_bintree_t{
+	}},
+	"000005_created_updated.down.sql": &_bintree_t{_000005_created_updated_down_sql, map[string]*_bintree_t{
+	}},
+	"000005_created_updated.up.sql": &_bintree_t{_000005_created_updated_up_sql, map[string]*_bintree_t{
 	}},
 }}
