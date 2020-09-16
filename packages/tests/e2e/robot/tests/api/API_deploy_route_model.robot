@@ -17,7 +17,7 @@ ${DEPLOYMENT_NOT_EXIST}             deployment-api-not-exist
 ${MODEL_NOT_EXIST}                  ${DEPLOYMENT_NOT_EXIST}
 
 *** Settings ***
-Documentation       API of training, packaging, deployment, route and model
+Documentation       API of deployment, route and model
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}

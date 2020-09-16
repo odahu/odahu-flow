@@ -8,7 +8,7 @@ ${TRAIN_NOT_EXIST}                  train-api-not-exist
 ${PACKAGING_NOT_EXIST}              packaging-api-not-exist
 
 *** Settings ***
-Documentation       API of training, packaging, deployment, route and model
+Documentation       API of training and packaging
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
