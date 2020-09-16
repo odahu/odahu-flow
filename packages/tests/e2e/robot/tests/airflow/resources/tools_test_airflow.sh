@@ -58,15 +58,25 @@ function wait_dags_finish() {
     echo "Wait for the finishing of ${dag_id} and ${dag_run_id} its run"
 
     while true; do
-      # Extract a dag state from the following output table.
-      #------------------------------------------------------------------------------------------------------------------------
-      #DAG RUNS
-      #------------------------------------------------------------------------------------------------------------------------
-      #id  | run_id               | state      | execution_date       | state_date           |
-      #152 | manual__2019-12-25T14:53:03+00:00 | success    | 2019-12-25T14:53:03+00:00 | 2019-12-25T14:53:03.236701+00:00 |
-      #152 | manual__2019-12-25T13:52:01+00:00 | success    | 2019-12-25T14:53:03+00:00 | 2019-12-25T14:53:03.236701+00:00 |
-      state=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow list_dag_runs "${dag_id}" | awk "/${dag_run_id}/ {print \$5}")
-
+      # Extract a dag state from the following output json.
+      #[
+      # ...,
+      #  {
+      #    "dag_id": "health_check",
+      #    "dag_run_url": "/airflow/admin/airflow/graph?dag_id=health_check&execution_date=2020-09-16+09%3A55%3A00%2B00%3A00",
+      #    "execution_date": "2020-09-16T09:55:00+00:00",
+      #    "id": 43,
+      #    "run_id": "scheduled__2020-09-16T09:55:00+00:00",
+      #    "start_date": "2020-09-16T10:00:01.489937+00:00",
+      #    "state": "success"
+      #  }
+      #]
+      state=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
+      curl -X GET  http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs \
+           -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' \
+           -d "{\"run_id\": \"${dag_id}\"}" --silent \
+           | jq -r -c ".[] | select(.run_id == \"${dag_run_id}\") | .state")
+      echo "${state}"
       case "${state}" in
       "success")
         echo "DAG run ${dag_run_id} finished"
@@ -100,7 +110,11 @@ for dag_id in "${TEST_DAG_IDS[@]}"; do
   TEST_DAG_RUN_IDS+=("${dag_run_id}")
 
   echo "Run the ${dag_run_id} of ${dag_id} dag"
-  ${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- airflow trigger_dag -r "${dag_run_id}" "${dag_id}"
+  ${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
+  curl -X POST   http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs  \
+       -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json'  \
+       -d "{\"run_id\": \"${dag_run_id}\"}" --silent
+
 done
 
 wait_dags_finish
