@@ -19,14 +19,12 @@ package controllers
 import (
 	"context"
 	"fmt"
-	authv1alpha1 "github.com/aspenmesh/istio-client-go/pkg/apis/authentication/v1alpha1"
 	"github.com/go-logr/logr"
 	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	authv1alpha1_istio "istio.io/api/authentication/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -343,100 +341,6 @@ func (r *ModelDeploymentReconciler) createModelContainer(
 			TimeoutSeconds:      defaultReadinessTimeout,
 		},
 	}, nil
-}
-
-// Reconcile the Istio Policy for model authorization
-// Read more about in Istio docs https://istio.io/docs/tasks/security/rbac-groups/#configure-json-web-token-jwt-authentication-with-mutual-tls
-// Configuration https://istio.io/docs/reference/config/istio.authentication.v1alpha1/
-func (r *ModelDeploymentReconciler) reconcileAuthPolicy(
-	log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-) error {
-	envoyAuthFilter := &authv1alpha1.Policy{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      modelDeploymentCR.Name,
-			Namespace: modelDeploymentCR.Namespace,
-		},
-		Spec: authv1alpha1.PolicySpec{
-			Policy: authv1alpha1_istio.Policy{
-				Targets: []*authv1alpha1_istio.TargetSelector{
-					{
-						// The value does not matter.
-						Name: defaultTargetName,
-						// TODO: sort this out!
-						//Labels: map[string]string{
-						//	// We assign the same labels for our model deployments
-						//	DodelNameAnnotationKey: modelDeploymentCR.Name,
-						//},
-					},
-				},
-				Origins: []*authv1alpha1_istio.OriginAuthenticationMethod{
-					{
-						Jwt: &authv1alpha1_istio.Jwt{
-							Issuer:  r.deploymentConfig.Security.JWKS.Issuer,
-							JwksUri: r.deploymentConfig.Security.JWKS.URL,
-							TriggerRules: []*authv1alpha1_istio.Jwt_TriggerRule{
-								{
-									// Healthcheck paths must be ignored
-									IncludedPaths: []*authv1alpha1_istio.StringMatch{
-										{
-											MatchType: &authv1alpha1_istio.StringMatch_Prefix{
-												Prefix: includedAuthPrefixPath,
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				PrincipalBinding: authv1alpha1_istio.PrincipalBinding_USE_ORIGIN,
-			},
-		},
-	}
-
-	if err := controllerutil.SetControllerReference(modelDeploymentCR, envoyAuthFilter, r.scheme); err != nil {
-		return err
-	}
-
-	if err := odahuflow.StoreHash(envoyAuthFilter); err != nil {
-		log.Error(err, "Cannot apply obj hash")
-		return err
-	}
-
-	found := &authv1alpha1.Policy{}
-	err := r.Get(context.TODO(), types.NamespacedName{
-		Name: envoyAuthFilter.Name, Namespace: envoyAuthFilter.Namespace,
-	}, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s Istio Auth Policy", envoyAuthFilter.ObjectMeta.Name))
-
-		return r.Create(context.TODO(), envoyAuthFilter)
-	} else if err != nil {
-		return err
-	}
-
-	if !odahuflow.ObjsEqualByHash(envoyAuthFilter, found) {
-		log.Info(fmt.Sprintf(
-			"Istio Auth Policy hashes aren't equal. Update the %s Model route", envoyAuthFilter.Name,
-		))
-
-		found.Spec = envoyAuthFilter.Spec
-		found.ObjectMeta.Annotations = envoyAuthFilter.ObjectMeta.Annotations
-		found.ObjectMeta.Labels = envoyAuthFilter.ObjectMeta.Labels
-
-		log.Info(fmt.Sprintf("Updating %s k8s Istio Auth Policy", envoyAuthFilter.ObjectMeta.Name))
-
-		if err := r.Update(context.TODO(), found); err != nil {
-			return err
-		}
-	} else {
-		log.Info(fmt.Sprintf(
-			"Istio Auth Policy hashes equal. Skip updating of the %s Istio Auth Policy", envoyAuthFilter.Name,
-		))
-	}
-
-	return nil
 }
 
 // Retrieve current configuration and return last revision name.
@@ -786,15 +690,6 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		log.Error(err, "Reconcile deployment pull connection")
 
 		return reconcile.Result{}, nil
-	}
-
-	if r.deploymentConfig.Security.JWKS.Enabled {
-		log.Info("Reconcile Auth Filter")
-
-		if err := r.reconcileAuthPolicy(log, modelDeploymentCR); err != nil {
-			log.Error(err, "Reconcile Istio Auth Policy")
-			return reconcile.Result{}, err
-		}
 	}
 
 	if err := r.ReconcileKnativeConfiguration(log, modelDeploymentCR); err != nil {
