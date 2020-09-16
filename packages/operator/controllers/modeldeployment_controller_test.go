@@ -120,31 +120,6 @@ func (s *ModelDeploymentControllerSuite) TearDownTest() {
 	s.mgrStopped.Wait()
 }
 
-func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.ModelDeployment) (
-	cleanF func(),
-) {
-	err := s.k8sClient.Create(context.TODO(), md)
-	s.Assertions.NoError(err)
-
-	namespacedName := types.NamespacedName{Name: md.Name, Namespace: md.Namespace}
-	s.Assertions.Eventually(
-		func() bool { return s.k8sClient.Get(context.TODO(), namespacedName, md) == nil },
-		5*time.Second,
-		10*time.Millisecond)
-	return func() { s.k8sClient.Delete(context.TODO(), md) }
-}
-
-func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) *knservingv1.Configuration {
-	configuration := &knservingv1.Configuration{}
-	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
-	s.Assertions.Eventually(
-		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
-		5*time.Second,
-		10*time.Millisecond,
-		"Knative configuration not found!")
-	return configuration
-}
-
 // TODO: break one super-test into separate tests
 func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	s.initReconciler(config.NewDefaultModelDeploymentConfig())
@@ -209,7 +184,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 }
 
 // Node pool provided in packaging request, use it for knative configuration
-func (s *ModelDeploymentControllerSuite) TestNodePool_Provided() {
+func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolProvided() {
 	deploymentConfig := config.NewDefaultModelDeploymentConfig()
 	someNodeSelector := map[string]string{"mode": "deployment"}
 	deploymentConfig.NodePools = []config.NodePool{{NodeSelector: someNodeSelector}}
@@ -227,7 +202,7 @@ func (s *ModelDeploymentControllerSuite) TestNodePool_Provided() {
 }
 
 // Node pool not provided, build affinity for all deployment pools from config
-func (s *ModelDeploymentControllerSuite) TestNodePool_NotProvided_UseAffinity() {
+func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolNotProvided_UseAffinity() {
 	deploymentConfig := config.NewDefaultModelDeploymentConfig()
 	nodeSelector1 := map[string]string{"mode": "deployment"}
 	nodeSelector2 := map[string]string{"mode": "deployment2", "label": "value"}
@@ -275,7 +250,7 @@ func (s *ModelDeploymentControllerSuite) TestNodePool_NotProvided_UseAffinity() 
 	s.Assertions.Nil(knativeConfiguration.Spec.Template.Spec.NodeSelector)
 }
 
-func (s *ModelDeploymentControllerSuite) TestTolerations() {
+func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_Tolerations() {
 	deploymentConfig := config.NewDefaultModelDeploymentConfig()
 	tolerations := []v1.Toleration{{Key: "dedicated", Operator: v1.TolerationOpEqual, Value: "deploy"}}
 	deploymentConfig.Tolerations = tolerations
@@ -290,6 +265,34 @@ func (s *ModelDeploymentControllerSuite) TestTolerations() {
 	s.Assertions.Equal(tolerations, knativeConfiguration.Spec.Template.Spec.Tolerations)
 }
 
+// Test utilities
+
+func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.ModelDeployment) (
+	cleanF func(),
+) {
+	err := s.k8sClient.Create(context.TODO(), md)
+	s.Assertions.NoError(err)
+
+	namespacedName := types.NamespacedName{Name: md.Name, Namespace: md.Namespace}
+	s.Assertions.Eventually(
+		func() bool { return s.k8sClient.Get(context.TODO(), namespacedName, md) == nil },
+		5*time.Second,
+		10*time.Millisecond)
+	return func() { s.k8sClient.Delete(context.TODO(), md) }
+}
+
+func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) *knservingv1.Configuration {
+	configuration := &knservingv1.Configuration{}
+	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
+	s.Assertions.Eventually(
+		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
+		5*time.Second,
+		10*time.Millisecond,
+		"Knative configuration not found!")
+	return configuration
+}
+
+// Returns validDeployment with random Name to avoid collisions when running in parallel
 func newValidDeployment() *odahuflowv1alpha1.ModelDeployment {
 	md := validDeployment
 	md.Name = fmt.Sprintf("deployment-%d", rand.Int())
