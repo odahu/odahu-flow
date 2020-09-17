@@ -295,6 +295,6 @@ func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1
 // Returns validDeployment with random Name to avoid collisions when running in parallel
 func newValidDeployment() *odahuflowv1alpha1.ModelDeployment {
 	md := validDeployment.DeepCopy()
-	md.Name = fmt.Sprintf("deployment-%d", rand.Int())
+	md.Name = fmt.Sprintf("deployment-%d", rand.Int()) //nolint
 	return md
 }

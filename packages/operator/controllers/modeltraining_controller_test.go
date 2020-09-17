@@ -526,6 +526,6 @@ func (s *ModelTrainingControllerSuite) getTektonTrainingTask(mt *odahuflowv1alph
 // Returns validTraining with random Name to avoid collisions when running in parallel
 func newValidTraining() *odahuflowv1alpha1.ModelTraining {
 	mt := validTraining.DeepCopy()
-	mt.Name = fmt.Sprintf("training-%d", rand.Int())
+	mt.Name = fmt.Sprintf("training-%d", rand.Int()) //nolint
 	return mt
 }

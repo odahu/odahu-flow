@@ -394,6 +394,6 @@ func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1al
 // Returns validPackaging with random Name to avoid collisions when running in parallel
 func newValidPackaging() *odahuflowv1alpha1.ModelPackaging {
 	mp := validPackaging.DeepCopy()
-	mp.Name = fmt.Sprintf("packaging-%d", rand.Int())
+	mp.Name = fmt.Sprintf("packaging-%d", rand.Int()) //nolint
 	return mp
 }
