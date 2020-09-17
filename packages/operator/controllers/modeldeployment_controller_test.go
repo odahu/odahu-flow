@@ -292,6 +292,6 @@ func (s *ModelDeploymentControllerSuite) TestTolerations() {
 
 func newValidDeployment() *odahuflowv1alpha1.ModelDeployment {
 	md := validDeployment
-	md.Name = fmt.Sprintf("deployment-%d", rand.Int())
+	md.Name = fmt.Sprintf("deployment-%d", rand.Int()) //nolint
 	return &md
 }
