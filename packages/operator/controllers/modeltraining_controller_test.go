@@ -17,6 +17,7 @@ package controllers_test
 
 import (
 	"context"
+	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/controllers"
 	training_apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
@@ -32,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"math/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -59,6 +61,18 @@ var (
 		ID: testToolchainIntegrationID,
 		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
 			DefaultImage: toolchainImage,
+		},
+	}
+	validTraining = odahuflowv1alpha1.ModelTraining{
+		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
+		Spec: odahuflowv1alpha1.ModelTrainingSpec{
+			NodeSelector: nodeSelector,
+			Toolchain:    testToolchainIntegrationID,
+			Resources: &odahuflowv1alpha1.ResourceRequirements{
+				Limits: &odahuflowv1alpha1.ResourceList{
+					CPU: &testResValue,
+				},
+			},
 		},
 	}
 )
@@ -127,23 +141,24 @@ func TestModelTrainingControllerSuite(t *testing.T) {
 }
 
 // Node pool provided in training request, use it for tekton task
-func (s *ModelTrainingControllerSuite) TestNodePool_Provided() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_NodePoolProvided() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector}}
 	s.initReconciler(trainingConfig)
 
-	mt := createTrainingWithNodeSelector(nodeSelector)
+	mt := newValidTraining()
+	mt.Spec.NodeSelector = nodeSelector
 
 	cleanF := s.createTraining(mt)
 	defer cleanF()
-	tektonTask := s.getTektonTrainingTask(mt.Name)
+	tektonTask := s.getTektonTrainingTask(mt)
 
 	s.Assertions.Nil(tektonTask.Spec.PodTemplate.Affinity)
 	s.Assertions.Equal(nodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
 }
 
 // Node pool not provided, build affinity for all CPU pools from config
-func (s *ModelTrainingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_NodePoolNotProvided_UseAffinity() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	nodeSelector1 := map[string]string{"node-key": "node-value", "another": "another-value"}
 	nodeSelector2 := map[string]string{"node-key2": "node-value2"}
@@ -168,10 +183,11 @@ func (s *ModelTrainingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
 		Values:   []string{"node-value2"},
 	}}
 
-	mt := createTrainingWithNodeSelector(nil)
+	mt := newValidTraining()
+	mt.Spec.NodeSelector = nil
 	cleanF := s.createTraining(mt)
 	defer cleanF()
-	tektonTask := s.getTektonTrainingTask(mt.Name)
+	tektonTask := s.getTektonTrainingTask(mt)
 
 	actualAffinity := tektonTask.Spec.PodTemplate.Affinity
 	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
@@ -186,23 +202,25 @@ func (s *ModelTrainingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
 }
 
 // Node pool provided in GPU training request, use it for tekton task
-func (s *ModelTrainingControllerSuite) TestNodePool_GPU_Provided() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_GPU_NodePoolProvided() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	trainingConfig.GPUNodePools = []config.NodePool{{NodeSelector: gpuNodeSelector}}
 	s.initReconciler(trainingConfig)
 
-	mt := createGPUTrainingWithNodeSelector(gpuNodeSelector)
+	mt := newValidTraining()
+	mt.Spec.Resources.Limits = &odahuflowv1alpha1.ResourceList{GPU: &testResValue}
+	mt.Spec.NodeSelector = gpuNodeSelector
 
 	cleanF := s.createTraining(mt)
 	defer cleanF()
-	tektonTask := s.getTektonTrainingTask(mt.Name)
+	tektonTask := s.getTektonTrainingTask(mt)
 
 	s.Assertions.Nil(tektonTask.Spec.PodTemplate.Affinity)
 	s.Assertions.Equal(gpuNodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
 }
 
 // Node pool not provided for GPU training, build affinity for all GPU pools from config
-func (s *ModelTrainingControllerSuite) TestNodePool_GPU_NotProvided_UseAffinity() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_GPU_NodePoolNotProvided_UseAffinity() {
 	trainingConfig := config.NewDefaultModelTrainingConfig()
 	nodeSelector1 := map[string]string{"gpu-node-key": "gpu-node-value", "gpu-another": "gpu-another-value"}
 	nodeSelector2 := map[string]string{"gpu-node-key2": "gpu-node-value2"}
@@ -227,11 +245,13 @@ func (s *ModelTrainingControllerSuite) TestNodePool_GPU_NotProvided_UseAffinity(
 		Values:   []string{"gpu-node-value2"},
 	}}
 
-	mt := createGPUTrainingWithNodeSelector(nil)
+	mt := newValidTraining()
+	mt.Spec.Resources.Limits = &odahuflowv1alpha1.ResourceList{GPU: &testResValue}
+	mt.Spec.NodeSelector = nil
 
 	cleanF := s.createTraining(mt)
 	defer cleanF()
-	tektonTask := s.getTektonTrainingTask(mt.Name)
+	tektonTask := s.getTektonTrainingTask(mt)
 
 	actualAffinity := tektonTask.Spec.PodTemplate.Affinity
 	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
@@ -251,29 +271,25 @@ func (s *ModelTrainingControllerSuite) templateTestTolerations(input []v1.Tolera
 	trainingConfig.Tolerations = input
 	s.initReconciler(trainingConfig)
 
-	mt := &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
-		Spec:       odahuflowv1alpha1.ModelTrainingSpec{Toolchain: testToolchainIntegrationID},
-	}
-
+	mt := newValidTraining()
 	cleanF := s.createTraining(mt)
 	defer cleanF()
-	tektonTask := s.getTektonTrainingTask(mt.Name)
+	tektonTask := s.getTektonTrainingTask(mt)
 	s.Assertions.Equal(input, tektonTask.Spec.PodTemplate.Tolerations)
 }
 
 // Toleration is nil in config, expect nil toleration in tekton task
-func (s *ModelTrainingControllerSuite) TestToleration_nil() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_Tolerations_nil() {
 	s.templateTestTolerations(nil)
 }
 
 // Single toleration in config, expect it in tekton task
-func (s *ModelTrainingControllerSuite) TestToleration_Single() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_Tolerations_Single() {
 	s.templateTestTolerations([]v1.Toleration{{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"}})
 }
 
 // Multiple tolerations in config, expect them in tekton task
-func (s *ModelTrainingControllerSuite) TestToleration_Multiple() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_Tolerations_Multiple() {
 	s.templateTestTolerations([]v1.Toleration{
 		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
 		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
@@ -286,36 +302,27 @@ func (s *ModelTrainingControllerSuite) templateTestGPUTolerations(input []v1.Tol
 	trainingConfig.GPUTolerations = input
 	s.initReconciler(trainingConfig)
 
-	mt := &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
-		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			Toolchain: testToolchainIntegrationID,
-			Resources: &odahuflowv1alpha1.ResourceRequirements{
-				Limits: &odahuflowv1alpha1.ResourceList{
-					GPU: &testResValue,
-				},
-			},
-		},
-	}
+	mt := newValidTraining()
+	mt.Spec.Resources.Limits = &odahuflowv1alpha1.ResourceList{GPU: &testResValue}
 
 	cleanF := s.createTraining(mt)
 	defer cleanF()
-	tektonTask := s.getTektonTrainingTask(mt.Name)
+	tektonTask := s.getTektonTrainingTask(mt)
 	s.Assertions.Equal(input, tektonTask.Spec.PodTemplate.Tolerations)
 }
 
 // GPU Tolerations is nil in config, expect nil toleration in tekton task
-func (s *ModelTrainingControllerSuite) TestGPUToleration_nil() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_GPU_Tolerations_nil() {
 	s.templateTestGPUTolerations(nil)
 }
 
 // Single GPU toleration in config, expect it in tekton task
-func (s *ModelTrainingControllerSuite) TestGPUToleration_Single() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_GPU_Tolerations_Single() {
 	s.templateTestGPUTolerations([]v1.Toleration{{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"}})
 }
 
 // Multiple GPU tolerations in config, expect them in tekton task
-func (s *ModelTrainingControllerSuite) TestGPUToleration_Multiple() {
+func (s *ModelTrainingControllerSuite) TestTrainingReconcile_GPU_Tolerations_Multiple() {
 	s.templateTestGPUTolerations([]v1.Toleration{
 		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
 		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
@@ -490,61 +497,35 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	}))
 }
 
+// Test utilities
+
 func (s *ModelTrainingControllerSuite) createTraining(training *odahuflowv1alpha1.ModelTraining) (cleanF func()) {
 	err := s.k8sClient.Create(context.TODO(), training)
 	s.Assertions.Nil(err, "Failed to create training in K8s")
 
+	mtNamespacedName := types.NamespacedName{Name: training.Name, Namespace: training.Namespace}
 	s.Assertions.Eventually(
-		func() bool {
-			select {
-			case r := <-s.requests:
-				return r == expectedTrainingRequest
-			default:
-				return false
-			}
-		},
+		func() bool { return s.k8sClient.Get(context.TODO(), mtNamespacedName, training) == nil },
 		5*time.Second,
 		10*time.Millisecond)
-
-	s.Assertions.Nil(s.k8sClient.Get(context.TODO(), mtNamespacedName, training))
 
 	return func() { s.k8sClient.Delete(context.TODO(), training) }
 }
 
-func (s *ModelTrainingControllerSuite) getTektonTrainingTask(trainingName string) *tektonv1beta1.TaskRun {
+func (s *ModelTrainingControllerSuite) getTektonTrainingTask(mt *odahuflowv1alpha1.ModelTraining) *tektonv1beta1.TaskRun {
 	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: trainingName, Namespace: testNamespace}
-	err := s.k8sClient.Get(context.TODO(), trKey, tr)
-	s.Assertions.Nil(err, "Tekton task retrieval failed")
+	trKey := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
+	s.Assertions.Eventually(
+		func() bool { return s.k8sClient.Get(context.TODO(), trKey, tr) == nil },
+		5*time.Second,
+		10*time.Millisecond,
+		"Task run not found!")
 	return tr
 }
 
-func createTrainingWithNodeSelector(nodeSelector map[string]string) *odahuflowv1alpha1.ModelTraining {
-	return &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
-		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			NodeSelector: nodeSelector,
-			Toolchain:    testToolchainIntegrationID,
-			Resources: &odahuflowv1alpha1.ResourceRequirements{
-				Limits: &odahuflowv1alpha1.ResourceList{
-					CPU: &testResValue,
-				},
-			},
-		},
-	}
-}
-
-func createGPUTrainingWithNodeSelector(nodeSelector map[string]string) *odahuflowv1alpha1.ModelTraining {
-	return &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
-		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			NodeSelector: nodeSelector,
-			Toolchain:    testToolchainIntegrationID,
-			Resources: &odahuflowv1alpha1.ResourceRequirements{
-				Limits: &odahuflowv1alpha1.ResourceList{
-					GPU: &testResValue,
-				},
-			},
-		},
-	}
+// Returns validTraining with random Name to avoid collisions when running in parallel
+func newValidTraining() *odahuflowv1alpha1.ModelTraining {
+	mt := validTraining.DeepCopy()
+	mt.Name = fmt.Sprintf("training-%d", rand.Int())
+	return mt
 }
