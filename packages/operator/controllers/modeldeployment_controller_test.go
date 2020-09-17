@@ -281,7 +281,9 @@ func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.
 	return func() { s.k8sClient.Delete(context.TODO(), md) }
 }
 
-func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) *knservingv1.Configuration {
+func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) (
+	*knservingv1.Configuration,
+) {
 	configuration := &knservingv1.Configuration{}
 	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
 	s.Assertions.Eventually(

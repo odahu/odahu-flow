@@ -512,7 +512,9 @@ func (s *ModelTrainingControllerSuite) createTraining(training *odahuflowv1alpha
 	return func() { s.k8sClient.Delete(context.TODO(), training) }
 }
 
-func (s *ModelTrainingControllerSuite) getTektonTrainingTask(mt *odahuflowv1alpha1.ModelTraining) *tektonv1beta1.TaskRun {
+func (s *ModelTrainingControllerSuite) getTektonTrainingTask(mt *odahuflowv1alpha1.ModelTraining) (
+	*tektonv1beta1.TaskRun,
+) {
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
 	s.Assertions.Eventually(
