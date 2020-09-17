@@ -72,8 +72,6 @@ const (
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	DodelNameAnnotationKey               = "modelName"
 	latestReadyRevisionKey               = "latestReadyRevision"
-	defaultTargetName                    = "model"
-	includedAuthPrefixPath               = "/api/model/invoke"
 )
 
 var (
