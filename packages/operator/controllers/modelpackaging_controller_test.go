@@ -374,7 +374,7 @@ func (s *ModelPackagingControllerSuite) createPackaging(mp *odahuflowv1alpha1.Mo
 
 	s.Assertions.Eventually(
 		func() bool { return s.k8sClient.Get(context.TODO(), mpNamespacedName, mp) == nil },
-		5*time.Second,
+		10*time.Second,
 		10*time.Millisecond)
 
 	return func() { s.k8sClient.Delete(context.TODO(), mp) }
@@ -385,7 +385,7 @@ func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1al
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.Assertions.Eventually(
 		func() bool { return s.k8sClient.Get(context.TODO(), trKey, tr) == nil },
-		5*time.Second,
+		10*time.Second,
 		10*time.Millisecond,
 		"Task run not found!")
 	return tr

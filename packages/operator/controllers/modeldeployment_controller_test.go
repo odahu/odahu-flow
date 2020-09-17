@@ -276,7 +276,7 @@ func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.
 	namespacedName := types.NamespacedName{Name: md.Name, Namespace: md.Namespace}
 	s.Assertions.Eventually(
 		func() bool { return s.k8sClient.Get(context.TODO(), namespacedName, md) == nil },
-		5*time.Second,
+		10*time.Second,
 		10*time.Millisecond)
 	return func() { s.k8sClient.Delete(context.TODO(), md) }
 }
@@ -286,7 +286,7 @@ func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1
 	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
 	s.Assertions.Eventually(
 		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
-		5*time.Second,
+		10*time.Second,
 		10*time.Millisecond,
 		"Knative configuration not found!")
 	return configuration
