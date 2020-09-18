@@ -22,6 +22,7 @@ import os
 from pathlib import Path
 
 # Get list of all variables
+
 ALL_VARIABLES = {}
 
 _LOGGER = logging.getLogger()
@@ -333,6 +334,18 @@ class ConfigVariableDeclaration:
         ALL_VARIABLES[information.name] = information
         return value
 
+
+# Transport (HTTP)
+
+RETRY_ATTEMPTS = ConfigVariableDeclaration(
+    'RETRY_ATTEMPTS', 3, int,
+    'How many retries HTTP client should make in case of transient error', True
+)
+
+BACKOFF_FACTOR = ConfigVariableDeclaration(
+    'BACKOFF_FACTOR', 1, int,
+    'Backoff factor for retries (See https://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html)', True
+)
 
 # Verbose tracing
 DEBUG = ConfigVariableDeclaration('DEBUG', False, cast_bool,

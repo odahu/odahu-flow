@@ -23,6 +23,7 @@ import typing
 
 from odahuflow.sdk.clients.oauth_handler import do_client_cred_authentication
 from odahuflow.sdk.clients.oidc import OpenIdProviderConfiguration
+from odahuflow.sdk import config
 
 API_URL_PARAM_NAME = 'API_URL'
 AUTH_TOKEN_PARAM_NAME = 'AUTH_TOKEN'
@@ -118,5 +119,9 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 variables[AUTH_TOKEN_PARAM_NAME] = ''
         except Exception as err:
             raise Exception("Can\'t get dex authentication data: {}".format(err)) from err
+
+    # Increase retries and backoff for robot tests aganist defaults
+    config.RETRY_ATTEMPTS = 10
+    config.BACKOFF_FACTOR = 3
 
     return variables

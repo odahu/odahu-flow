@@ -342,7 +342,7 @@ class RemoteAPIClient:
                  token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
                  client_id: Optional[str] = '',
                  client_secret: Optional[str] = '',
-                 retries: Optional[int] = 3,
+                 retries: Optional[int] = odahuflow.sdk.config.RETRY_ATTEMPTS,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
                  non_interactive: Optional[bool] = True,
                  issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
@@ -366,11 +366,12 @@ class RemoteAPIClient:
         retry_strategy = Retry(
             total=retries,
             status_forcelist=[429, 500, 502, 503, 504],
-            backoff_factor=1
+            backoff_factor=odahuflow.sdk.config.BACKOFF_FACTOR
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.default_client = requests.Session()
-        self.default_client.mount("", adapter)
+        self.default_client.mount("http://", adapter)
+        self.default_client.mount("https://", adapter)
 
     @property
     def timeout(self):
