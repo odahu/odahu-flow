@@ -9,6 +9,7 @@ from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.edge_config import EdgeConfig  # noqa: F401,E501
 from odahuflow.sdk.models.model_deployment_istio_config import ModelDeploymentIstioConfig  # noqa: F401,E501
 from odahuflow.sdk.models.model_deployment_security_config import ModelDeploymentSecurityConfig  # noqa: F401,E501
+from odahuflow.sdk.models.node_pool import NodePool  # noqa: F401,E501
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
@@ -19,7 +20,7 @@ class ModelDeploymentConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_docker_pull_conn_name: str=None, default_resources: ResourceRequirements=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_selector: Dict[str, str]=None, security: ModelDeploymentSecurityConfig=None, tolerations: str=None):  # noqa: E501
+    def __init__(self, default_docker_pull_conn_name: str=None, default_resources: ResourceRequirements=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_pools: List[NodePool]=None, security: ModelDeploymentSecurityConfig=None, tolerations: str=None):  # noqa: E501
         """ModelDeploymentConfig - a model defined in Swagger
 
         :param default_docker_pull_conn_name: The default_docker_pull_conn_name of this ModelDeploymentConfig.  # noqa: E501
@@ -34,8 +35,8 @@ class ModelDeploymentConfig(Model):
         :type istio: ModelDeploymentIstioConfig
         :param namespace: The namespace of this ModelDeploymentConfig.  # noqa: E501
         :type namespace: str
-        :param node_selector: The node_selector of this ModelDeploymentConfig.  # noqa: E501
-        :type node_selector: Dict[str, str]
+        :param node_pools: The node_pools of this ModelDeploymentConfig.  # noqa: E501
+        :type node_pools: List[NodePool]
         :param security: The security of this ModelDeploymentConfig.  # noqa: E501
         :type security: ModelDeploymentSecurityConfig
         :param tolerations: The tolerations of this ModelDeploymentConfig.  # noqa: E501
@@ -48,7 +49,7 @@ class ModelDeploymentConfig(Model):
             'enabled': bool,
             'istio': ModelDeploymentIstioConfig,
             'namespace': str,
-            'node_selector': Dict[str, str],
+            'node_pools': List[NodePool],
             'security': ModelDeploymentSecurityConfig,
             'tolerations': str
         }
@@ -60,7 +61,7 @@ class ModelDeploymentConfig(Model):
             'enabled': 'enabled',
             'istio': 'istio',
             'namespace': 'namespace',
-            'node_selector': 'nodeSelector',
+            'node_pools': 'nodePools',
             'security': 'security',
             'tolerations': 'tolerations'
         }
@@ -71,7 +72,7 @@ class ModelDeploymentConfig(Model):
         self._enabled = enabled
         self._istio = istio
         self._namespace = namespace
-        self._node_selector = node_selector
+        self._node_pools = node_pools
         self._security = security
         self._tolerations = tolerations
 
@@ -221,27 +222,27 @@ class ModelDeploymentConfig(Model):
         self._namespace = namespace
 
     @property
-    def node_selector(self) -> Dict[str, str]:
-        """Gets the node_selector of this ModelDeploymentConfig.
+    def node_pools(self) -> List[NodePool]:
+        """Gets the node_pools of this ModelDeploymentConfig.
 
-        Kubernetes node selector for model deployments  # noqa: E501
+        Node pools to run training tasks on  # noqa: E501
 
-        :return: The node_selector of this ModelDeploymentConfig.
-        :rtype: Dict[str, str]
+        :return: The node_pools of this ModelDeploymentConfig.
+        :rtype: List[NodePool]
         """
-        return self._node_selector
+        return self._node_pools
 
-    @node_selector.setter
-    def node_selector(self, node_selector: Dict[str, str]):
-        """Sets the node_selector of this ModelDeploymentConfig.
+    @node_pools.setter
+    def node_pools(self, node_pools: List[NodePool]):
+        """Sets the node_pools of this ModelDeploymentConfig.
 
-        Kubernetes node selector for model deployments  # noqa: E501
+        Node pools to run training tasks on  # noqa: E501
 
-        :param node_selector: The node_selector of this ModelDeploymentConfig.
-        :type node_selector: Dict[str, str]
+        :param node_pools: The node_pools of this ModelDeploymentConfig.
+        :type node_pools: List[NodePool]
         """
 
-        self._node_selector = node_selector
+        self._node_pools = node_pools
 
     @property
     def security(self) -> ModelDeploymentSecurityConfig:

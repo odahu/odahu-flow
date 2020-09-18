@@ -17,6 +17,7 @@ package controllers_test
 
 import (
 	"context"
+	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
@@ -33,6 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"math/rand"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -49,9 +51,18 @@ const (
 )
 
 var (
-	mpNamespacedName  = types.NamespacedName{Name: mpName, Namespace: testNamespace}
 	mpExpectedRequest = reconcile.Request{
 		NamespacedName: types.NamespacedName{Name: mpName, Namespace: testNamespace},
+	}
+	validPackaging = odahuflowv1alpha1.ModelPackaging{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      mpName,
+			Namespace: testNamespace,
+		},
+		Spec: odahuflowv1alpha1.ModelPackagingSpec{
+			Type:         testPackagingIntegrationID,
+			NodeSelector: nodeSelector,
+		},
 	}
 )
 
@@ -156,23 +167,25 @@ func TestModelPackagingControllerSuite(t *testing.T) {
 }
 
 // Node pool provided in packaging request, use it for tekton task
-func (s *ModelPackagingControllerSuite) TestNodePool_Provided() {
+func (s *ModelPackagingControllerSuite) TestPackagingReconcile_NodePoolProvided() {
+	someNodeSelector := map[string]string{"label": "value"}
 	packagingConfig := config.NewDefaultModelPackagingConfig()
-	packagingConfig.NodePools = []config.NodePool{{NodeSelector: nodeSelector}}
+	packagingConfig.NodePools = []config.NodePool{{NodeSelector: someNodeSelector}}
 	s.initReconciler(packagingConfig)
 
-	mp := buildPackagingWithNodeSelector(nodeSelector)
+	mp := newValidPackaging()
+	mp.Spec.NodeSelector = someNodeSelector
 
 	cleanF := s.createPackaging(mp)
 	defer cleanF()
-	tektonTask := s.getTektonPackagingTask(mp.Name)
+	tektonTask := s.getTektonPackagingTask(mp)
 
 	s.Assertions.Nil(tektonTask.Spec.PodTemplate.Affinity)
-	s.Assertions.Equal(nodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
+	s.Assertions.Equal(someNodeSelector, tektonTask.Spec.PodTemplate.NodeSelector)
 }
 
-// Node pool not provided, build affinity for all CPU pools from config
-func (s *ModelPackagingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
+// Node pool not provided, build affinity for all packaging pools from config
+func (s *ModelPackagingControllerSuite) TestPackagingReconcile_NodePoolNotProvided_UseAffinity() {
 	packagingConfig := config.NewDefaultModelPackagingConfig()
 	nodeSelector1 := map[string]string{"node-key": "node-value", "another": "another-value"}
 	nodeSelector2 := map[string]string{"node-key2": "node-value2"}
@@ -197,10 +210,11 @@ func (s *ModelPackagingControllerSuite) TestNodePool_NotProvided_UseAffinity() {
 		Values:   []string{"node-value2"},
 	}}
 
-	mp := buildPackagingWithNodeSelector(nil)
+	mp := newValidPackaging()
+	mp.Spec.NodeSelector = nil
 	cleanF := s.createPackaging(mp)
 	defer cleanF()
-	tektonTask := s.getTektonPackagingTask(mp.Name)
+	tektonTask := s.getTektonPackagingTask(mp)
 
 	actualAffinity := tektonTask.Spec.PodTemplate.Affinity
 	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
@@ -220,34 +234,25 @@ func (s *ModelPackagingControllerSuite) templateTestTolerations(input []v1.Toler
 	packagingConfig.Tolerations = input
 	s.initReconciler(packagingConfig)
 
-	mp := &odahuflowv1alpha1.ModelPackaging{
-		ObjectMeta: metav1.ObjectMeta{Name: mpName, Namespace: testNamespace},
-		Spec: odahuflowv1alpha1.ModelPackagingSpec{
-			Type: testPackagingIntegrationID,
-			Resources: &odahuflowv1alpha1.ResourceRequirements{
-				Limits: &odahuflowv1alpha1.ResourceList{CPU: &testResValue},
-			},
-		},
-	}
-
+	mp := newValidPackaging()
 	cleanF := s.createPackaging(mp)
 	defer cleanF()
-	tektonTask := s.getTektonPackagingTask(mp.Name)
+	tektonTask := s.getTektonPackagingTask(mp)
 	s.Assertions.Equal(input, tektonTask.Spec.PodTemplate.Tolerations)
 }
 
 // Toleration is nil in config, expect nil toleration in tekton task
-func (s *ModelPackagingControllerSuite) TestToleration_nil() {
+func (s *ModelPackagingControllerSuite) TestPackagingReconcile_Tolerations_nil() {
 	s.templateTestTolerations(nil)
 }
 
 // Single toleration in config, expect it in tekton task
-func (s *ModelPackagingControllerSuite) TestToleration_Single() {
+func (s *ModelPackagingControllerSuite) TestPackagingReconcile_Tolerations_Single() {
 	s.templateTestTolerations([]v1.Toleration{{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"}})
 }
 
 // Multiple tolerations in config, expect them in tekton task
-func (s *ModelPackagingControllerSuite) TestToleration_Multiple() {
+func (s *ModelPackagingControllerSuite) TestPackagingReconcile_Tolerations_Multiple() {
 	s.templateTestTolerations([]v1.Toleration{
 		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
 		{Key: "taint-key", Operator: v1.TolerationOpEqual, Value: "taint-val"},
@@ -291,6 +296,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 
+	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
 	tr := &tektonv1beta1.TaskRun{}
@@ -347,6 +353,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 
+	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
 	tr := &tektonv1beta1.TaskRun{}
@@ -356,44 +363,39 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
 }
 
+// Test utilities
+
 func (s *ModelPackagingControllerSuite) createPackaging(mp *odahuflowv1alpha1.ModelPackaging) (
 	cleanF func()) {
 	err := s.k8sClient.Create(context.TODO(), mp)
 	s.Assertions.Nil(err, "Failed to create packaging in K8s")
 
+	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
+
 	s.Assertions.Eventually(
-		func() bool {
-			select {
-			case r := <-s.requests:
-				return r == mpExpectedRequest
-			default:
-				return false
-			}
-		},
-		5*time.Second,
+		func() bool { return s.k8sClient.Get(context.TODO(), mpNamespacedName, mp) == nil },
+		10*time.Second,
 		10*time.Millisecond)
 
-	s.Assertions.Nil(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp))
 	return func() { s.k8sClient.Delete(context.TODO(), mp) }
 }
 
-func (s *ModelPackagingControllerSuite) getTektonPackagingTask(packagingName string) *tektonv1beta1.TaskRun {
+func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1alpha1.ModelPackaging) (
+	*tektonv1beta1.TaskRun,
+) {
 	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: packagingName, Namespace: testNamespace}
-	err := s.k8sClient.Get(context.TODO(), trKey, tr)
-	s.Assertions.Nil(err, "Tekton task retrieval failed")
+	trKey := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
+	s.Assertions.Eventually(
+		func() bool { return s.k8sClient.Get(context.TODO(), trKey, tr) == nil },
+		10*time.Second,
+		10*time.Millisecond,
+		"Task run not found!")
 	return tr
 }
 
-func buildPackagingWithNodeSelector(nodeSelector map[string]string) *odahuflowv1alpha1.ModelPackaging {
-	return &odahuflowv1alpha1.ModelPackaging{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mpName,
-			Namespace: testNamespace,
-		},
-		Spec: odahuflowv1alpha1.ModelPackagingSpec{
-			Type:         testPackagingIntegrationID,
-			NodeSelector: nodeSelector,
-		},
-	}
+// Returns validPackaging with random Name to avoid collisions when running in parallel
+func newValidPackaging() *odahuflowv1alpha1.ModelPackaging {
+	mp := validPackaging.DeepCopy()
+	mp.Name = fmt.Sprintf("packaging-%d", rand.Int()) //nolint
+	return mp
 }

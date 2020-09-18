@@ -186,11 +186,11 @@ definitions:
       namespace:
         description: Kubernetes namespace, where model deployments will be deployed
         type: string
-      nodeSelector:
-        additionalProperties:
-          type: string
-        description: Kubernetes node selector for model deployments
-        type: object
+      nodePools:
+        description: Node pools to run training tasks on
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
       security:
         $ref: '#/definitions/ModelDeploymentSecurityConfig'
         type: object
@@ -788,6 +788,11 @@ definitions:
       minReplicas:
         description: Minimum number of pods for model. By default the min replicas parameter equals 0.
         type: integer
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
+        type: object
       readinessProbeInitialDelay:
         description: Initial delay for readiness probe of model pod
         type: integer

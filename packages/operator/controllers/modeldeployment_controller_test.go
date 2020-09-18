@@ -18,18 +18,24 @@ package controllers_test
 
 import (
 	"context"
+	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	. "github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/suite"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	"math/rand"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"strconv"
+	"sync"
 	"testing"
+	"time"
 )
 
 var (
@@ -41,13 +47,17 @@ var (
 	mdLivenessDelay         = int32(44)
 	mdNamespace             = "default"
 	mdImagePullConnectionID = ""
-)
-
-var (
-	deplExpectedRequest = reconcile.Request{
-		NamespacedName: types.NamespacedName{
-			Name:      mdName,
-			Namespace: mdNamespace,
+	validDeployment         = odahuflowv1alpha1.ModelDeployment{
+		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
+		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
+			Image:                      image,
+			MinReplicas:                &mdMinReplicas,
+			MaxReplicas:                &mdMaxReplicas,
+			ReadinessProbeInitialDelay: &mdReadinessDelay,
+			LivenessProbeInitialDelay:  &mdLivenessDelay,
+			Resources:                  mdResources,
+			ImagePullConnectionID:      &mdImagePullConnectionID,
+			NodeSelector:               nodeSelector,
 		},
 	}
 	reqMem      = "128Mi"
@@ -65,8 +75,55 @@ var (
 	}
 )
 
-func TestReconcile(t *testing.T) {
-	g := NewGomegaWithT(t)
+type ModelDeploymentControllerSuite struct {
+	suite.Suite
+	k8sClient  client.Client
+	k8sManager manager.Manager
+	requests   chan reconcile.Request
+	stopMgr    chan struct{}
+	mgrStopped *sync.WaitGroup
+}
+
+func TestModelDeploymentControllerSuite(t *testing.T) {
+	suite.Run(t, new(ModelDeploymentControllerSuite))
+}
+
+func (s *ModelDeploymentControllerSuite) SetupTest() {
+	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
+	s.Assertions.NoError(err)
+
+	s.k8sClient = mgr.GetClient()
+	s.k8sManager = mgr
+
+	s.requests = make(chan reconcile.Request)
+
+	s.stopMgr = make(chan struct{})
+	s.mgrStopped = &sync.WaitGroup{}
+	s.mgrStopped.Add(1)
+	go func() {
+		defer s.mgrStopped.Done()
+		s.Assertions.NoError(mgr.Start(s.stopMgr))
+	}()
+}
+
+func (s *ModelDeploymentControllerSuite) initReconciler(deploymentConfig config.ModelDeploymentConfig) {
+	cfg := config.NewDefaultConfig()
+	cfg.Deployment = deploymentConfig
+
+	reconciler := NewModelDeploymentReconciler(s.k8sManager, *cfg)
+	rw := NewReconcilerWrapper(reconciler, s.requests)
+	s.Assertions.NoError(rw.SetupWithManager(s.k8sManager))
+}
+
+func (s *ModelDeploymentControllerSuite) TearDownTest() {
+	close(s.stopMgr)
+	s.mgrStopped.Wait()
+}
+
+// TODO: break one super-test into separate tests
+func (s *ModelDeploymentControllerSuite) TestReconcile() {
+	s.initReconciler(config.NewDefaultModelDeploymentConfig())
+
 	md := &odahuflowv1alpha1.ModelDeployment{
 		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
@@ -80,75 +137,166 @@ func TestReconcile(t *testing.T) {
 		},
 	}
 
-	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
-	g.Expect(err).NotTo(HaveOccurred())
-	c := mgr.GetClient()
+	cleanF := s.createDeployment(md)
+	defer cleanF()
+	knativeConfiguration := s.getKnativeConfiguration(md)
 
-	requests := make(chan reconcile.Request)
+	configurationAnnotations := knativeConfiguration.Spec.Template.ObjectMeta.Annotations
+	s.Assertions.Len(configurationAnnotations, 5)
 
-	rw := NewReconcilerWrapper(NewModelDeploymentReconciler(
-		mgr, *config.NewDefaultConfig(),
-	), requests)
-	g.Expect(rw.SetupWithManager(mgr)).NotTo(HaveOccurred())
+	s.Assertions.Contains(configurationAnnotations, KnativeMinReplicasKey)
+	s.Assertions.Equal(configurationAnnotations[KnativeMinReplicasKey], strconv.Itoa(int(mdMinReplicas)))
 
-	stopMgr, mgrStopped := StartTestManager(mgr, g)
+	s.Assertions.Contains(configurationAnnotations, KnativeMaxReplicasKey)
+	s.Assertions.Equal(configurationAnnotations[KnativeMaxReplicasKey], strconv.Itoa(int(mdMaxReplicas)))
 
-	defer func() {
-		close(stopMgr)
-		mgrStopped.Wait()
-	}()
+	s.Assertions.Contains(configurationAnnotations, KnativeAutoscalingTargetKey)
+	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingTargetKey], KnativeAutoscalingTargetDefaultValue)
 
-	err = c.Create(context.TODO(), md)
+	s.Assertions.Contains(configurationAnnotations, KnativeAutoscalingClass)
+	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingClass], DefaultKnativeAutoscalingClass)
 
-	g.Expect(err).NotTo(HaveOccurred())
-	defer c.Delete(context.TODO(), md)
+	s.Assertions.Contains(configurationAnnotations, KnativeAutoscalingMetric)
+	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingMetric], DefaultKnativeAutoscalingMetric)
 
-	g.Eventually(requests, timeout).Should(Receive(Equal(deplExpectedRequest)))
-	g.Eventually(requests, timeout).Should(Receive(Equal(deplExpectedRequest)))
+	configurationLabels := knativeConfiguration.Spec.Template.ObjectMeta.Labels
+	s.Assertions.Len(configurationLabels, 3)
+	s.Assertions.Contains(configurationLabels, DodelNameAnnotationKey)
+	s.Assertions.Equal(md.Name, configurationLabels[DodelNameAnnotationKey])
 
-	configuration := &knservingv1.Configuration{}
-	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: mdNamespace}
-	g.Expect(c.Get(context.TODO(), configurationKey, configuration)).ToNot(HaveOccurred())
-
-	configurationAnnotations := configuration.Spec.Template.ObjectMeta.Annotations
-	g.Expect(configurationAnnotations).Should(HaveLen(5))
-	g.Expect(configurationAnnotations).Should(HaveKeyWithValue(
-		KnativeMinReplicasKey, strconv.Itoa(int(mdMinReplicas)),
-	))
-	g.Expect(configurationAnnotations).Should(HaveKeyWithValue(
-		KnativeMaxReplicasKey, strconv.Itoa(int(mdMaxReplicas)),
-	))
-	g.Expect(configurationAnnotations).Should(HaveKeyWithValue(
-		KnativeAutoscalingTargetKey, KnativeAutoscalingTargetDefaultValue,
-	))
-	g.Expect(configurationAnnotations).Should(HaveKeyWithValue(
-		KnativeAutoscalingClass, DefaultKnativeAutoscalingClass,
-	))
-	g.Expect(configurationAnnotations).Should(HaveKeyWithValue(
-		KnativeAutoscalingMetric, DefaultKnativeAutoscalingMetric,
-	))
-
-	configurationLabels := configuration.Spec.Template.ObjectMeta.Labels
-	g.Expect(configurationLabels).Should(HaveLen(3))
-	g.Expect(configurationLabels).Should(HaveKeyWithValue(DodelNameAnnotationKey, md.Name))
-
-	podSpec := configuration.Spec.Template.Spec
-	g.Expect(podSpec.Containers).To(HaveLen(1))
-	g.Expect(*podSpec.TimeoutSeconds).To(Equal(DefaultTerminationPeriod))
+	podSpec := knativeConfiguration.Spec.Template.Spec
+	s.Assertions.Len(podSpec.Containers, 1)
+	s.Assertions.Equal(DefaultTerminationPeriod, *podSpec.TimeoutSeconds)
 
 	containerSpec := podSpec.Containers[0]
-
 	mdResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources, config.NvidiaResourceName)
-	g.Expect(err).ShouldNot(HaveOccurred())
-	g.Expect(containerSpec.Resources).To(Equal(mdResources))
+	s.Assertions.NoError(err)
+	s.Assertions.Equal(mdResources, containerSpec.Resources)
 
-	g.Expect(containerSpec.Image).To(Equal(image))
-	g.Expect(containerSpec.Ports).To(HaveLen(1))
-	g.Expect(containerSpec.Ports).To(HaveLen(1))
-	g.Expect(containerSpec.Ports[0].Name).To(Equal(DefaultPortName))
-	g.Expect(containerSpec.Ports[0].ContainerPort).To(Equal(DefaultModelPort))
-	g.Expect(containerSpec.LivenessProbe).NotTo(BeNil())
-	g.Expect(containerSpec.LivenessProbe.InitialDelaySeconds).To(Equal(mdLivenessDelay))
-	g.Expect(containerSpec.ReadinessProbe).NotTo(BeNil())
-	g.Expect(containerSpec.ReadinessProbe.InitialDelaySeconds).To(Equal(mdReadinessDelay))
+	s.Assertions.Equal(image, containerSpec.Image)
+	s.Assertions.Len(containerSpec.Ports, 1)
+	s.Assertions.Equal(DefaultPortName, containerSpec.Ports[0].Name)
+	s.Assertions.Equal(DefaultModelPort, containerSpec.Ports[0].ContainerPort)
+	s.Assertions.NotNil(containerSpec.LivenessProbe)
+	s.Assertions.Equal(mdLivenessDelay, containerSpec.LivenessProbe.InitialDelaySeconds)
+	s.Assertions.NotNil(containerSpec.ReadinessProbe)
+	s.Assertions.Equal(mdReadinessDelay, containerSpec.ReadinessProbe.InitialDelaySeconds)
+}
+
+// Node pool provided in packaging request, use it for knative configuration
+func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolProvided() {
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	someNodeSelector := map[string]string{"mode": "deployment"}
+	deploymentConfig.NodePools = []config.NodePool{{NodeSelector: someNodeSelector}}
+	s.initReconciler(deploymentConfig)
+
+	md := newValidDeployment()
+	md.Spec.NodeSelector = someNodeSelector
+
+	cleanF := s.createDeployment(md)
+	defer cleanF()
+	knativeConfiguration := s.getKnativeConfiguration(md)
+
+	s.Assertions.Nil(knativeConfiguration.Spec.Template.Spec.Affinity)
+	s.Assertions.Equal(someNodeSelector, knativeConfiguration.Spec.Template.Spec.NodeSelector)
+}
+
+// Node pool not provided, build affinity for all deployment pools from config
+func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolNotProvided_UseAffinity() {
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	nodeSelector1 := map[string]string{"mode": "deployment"}
+	nodeSelector2 := map[string]string{"mode": "deployment2", "label": "value"}
+	deploymentConfig.NodePools = []config.NodePool{
+		{NodeSelector: nodeSelector1},
+		{NodeSelector: nodeSelector2},
+	}
+	s.initReconciler(deploymentConfig)
+
+	md := newValidDeployment()
+	md.Spec.NodeSelector = nil
+	cleanF := s.createDeployment(md)
+	defer cleanF()
+
+	knativeConfiguration := s.getKnativeConfiguration(md)
+
+	expectedNodeSelectorRequirement1 := []v1.NodeSelectorRequirement{{
+		Key:      "mode",
+		Operator: v1.NodeSelectorOpIn,
+		Values:   []string{"deployment"},
+	}}
+	expectedNodeSelectorRequirement2 := []v1.NodeSelectorRequirement{
+		{
+			Key:      "mode",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"deployment2"},
+		},
+		{
+			Key:      "label",
+			Operator: v1.NodeSelectorOpIn,
+			Values:   []string{"value"},
+		},
+	}
+
+	actualAffinity := knativeConfiguration.Spec.Template.Spec.Affinity
+	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
+	s.Assertions.Len(actualNodeSelectorTerms, 2)
+
+	for i, expectedNodeSelectorRequirement := range [][]v1.NodeSelectorRequirement{
+		expectedNodeSelectorRequirement1, expectedNodeSelectorRequirement2,
+	} {
+		s.Assertions.ElementsMatch(expectedNodeSelectorRequirement, actualNodeSelectorTerms[i].MatchExpressions)
+	}
+
+	s.Assertions.Nil(knativeConfiguration.Spec.Template.Spec.NodeSelector)
+}
+
+func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_Tolerations() {
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
+	tolerations := []v1.Toleration{{Key: "dedicated", Operator: v1.TolerationOpEqual, Value: "deploy"}}
+	deploymentConfig.Tolerations = tolerations
+	s.initReconciler(deploymentConfig)
+
+	md := newValidDeployment()
+
+	cleanF := s.createDeployment(md)
+	defer cleanF()
+	knativeConfiguration := s.getKnativeConfiguration(md)
+
+	s.Assertions.Equal(tolerations, knativeConfiguration.Spec.Template.Spec.Tolerations)
+}
+
+// Test utilities
+
+func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.ModelDeployment) (
+	cleanF func(),
+) {
+	err := s.k8sClient.Create(context.TODO(), md)
+	s.Assertions.NoError(err)
+
+	namespacedName := types.NamespacedName{Name: md.Name, Namespace: md.Namespace}
+	s.Assertions.Eventually(
+		func() bool { return s.k8sClient.Get(context.TODO(), namespacedName, md) == nil },
+		10*time.Second,
+		10*time.Millisecond)
+	return func() { s.k8sClient.Delete(context.TODO(), md) }
+}
+
+func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) (
+	*knservingv1.Configuration,
+) {
+	configuration := &knservingv1.Configuration{}
+	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
+	s.Assertions.Eventually(
+		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
+		10*time.Second,
+		10*time.Millisecond,
+		"Knative configuration not found!")
+	return configuration
+}
+
+// Returns validDeployment with random Name to avoid collisions when running in parallel
+func newValidDeployment() *odahuflowv1alpha1.ModelDeployment {
+	md := validDeployment.DeepCopy()
+	md.Name = fmt.Sprintf("deployment-%d", rand.Int()) //nolint
+	return md
 }

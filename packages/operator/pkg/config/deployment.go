@@ -64,8 +64,8 @@ type ModelDeploymentConfig struct {
 	// Default connection ID which will be used if a user doesn't specify it in a model deployment
 	DefaultDockerPullConnName string     `json:"defaultDockerPullConnName"`
 	Edge                      EdgeConfig `json:"edge"`
-	// Kubernetes node selector for model deployments
-	NodeSelector map[string]string `json:"nodeSelector"`
+	// Node pools to run deployments on
+	NodePools []NodePool `json:"nodePools"`
 	// Kubernetes tolerations for model deployments
 	Tolerations []corev1.Toleration        `json:"tolerations,omitempty"`
 	Istio       ModelDeploymentIstioConfig `json:"istio"`

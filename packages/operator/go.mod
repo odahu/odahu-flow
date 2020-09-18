@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/aspenmesh/istio-client-go v0.0.0-20190426173040-3e73c27b9ace
-	github.com/aws/aws-sdk-go v1.31.6
+	github.com/aws/aws-sdk-go v1.31.12
 	github.com/awslabs/amazon-ecr-credential-helper v0.3.1
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -17,7 +17,6 @@ require (
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang-migrate/migrate v3.5.4+incompatible
-	github.com/google/go-containerregistry v0.1.1 // indirect
 	github.com/hashicorp/go-memdb v1.0.4 // indirect
 	github.com/hashicorp/vault v1.4.2
 	github.com/hashicorp/vault/api v1.0.5-0.20200317185738-82f498082f02
@@ -40,22 +39,27 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.5.0
-	github.com/tektoncd/pipeline v0.13.0
+	github.com/tektoncd/pipeline v0.13.1-0.20200625065359-44f22a067b75
 	github.com/ugorji/go v1.1.7 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.uber.org/multierr v1.5.0
-	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
-	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
+	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
+	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0
-	istio.io/api v0.0.0-20191115173247-e1a1952e5b81
-	k8s.io/api v0.17.8
-	k8s.io/apimachinery v0.17.8
+	istio.io/api v0.0.0-20200512234804-e5412c253ffe
+	k8s.io/api v0.18.7-rc.0
+	k8s.io/apimachinery v0.18.7-rc.0
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
-	knative.dev/serving v0.15.0
-	sigs.k8s.io/controller-runtime v0.5.9
+	knative.dev/serving v0.17.0
+	sigs.k8s.io/controller-runtime v0.6.1
 )
 
-replace k8s.io/client-go => k8s.io/client-go v0.17.6
+replace (
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.6
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.6
+	k8s.io/client-go => k8s.io/client-go v0.17.6
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.9
+)

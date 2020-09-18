@@ -19,17 +19,26 @@ package deployment_test
 import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/multierr"
 	"testing"
 
 	. "github.com/onsi/gomega"
 )
 
 var (
-	mdRoleName = "test-tole"
+	mdRoleName        = "test-tole"
+	validNodeSelector = map[string]string{"mode": "valid"} // should be injected to config in SetupTest
+	validDeployment   = deployment.ModelDeployment{
+		ID: "valid-id",
+		Spec: v1alpha1.ModelDeploymentSpec{
+			Image:        "image",
+			NodeSelector: validNodeSelector,
+		},
+	}
 )
 
 type ModelDeploymentValidationSuite struct {
@@ -40,8 +49,10 @@ type ModelDeploymentValidationSuite struct {
 
 func (s *ModelDeploymentValidationSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+	deployConfig := config.NewDefaultModelDeploymentConfig()
+	deployConfig.NodePools = append(deployConfig.NodePools, config.NodePool{NodeSelector: validNodeSelector})
 	s.defaultModelValidator = md_routes.NewModelDeploymentValidator(
-		config.NewDefaultModelDeploymentConfig(),
+		deployConfig,
 		config.NvidiaResourceName,
 	)
 }
@@ -271,4 +282,29 @@ func (s *ModelDeploymentValidationSuite) TestValidateID() {
 	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(md)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
+
+// Tests that nil node selector is considered valid
+func (s *ModelDeploymentValidationSuite) TestValidateNodeSelector_nil() {
+	md := validDeployment
+	md.Spec.NodeSelector = nil
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&md)
+	s.Assertions.NoError(err)
+}
+
+// Deployment object has valid node selector that exists in config
+func (s *ModelDeploymentValidationSuite) TestValidateNodeSelector_Valid() {
+	md := validDeployment
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&md)
+	s.Assertions.NoError(err)
+}
+
+// Deployment object has invalid node selector that does not exist in config
+// Expect validator to return exactly one error
+func (s *ModelDeploymentValidationSuite) TestValidateNodeSelector_Invalid() {
+	mt := validDeployment
+	mt.Spec.NodeSelector = map[string]string{"mode": "invalid"}
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
 }
