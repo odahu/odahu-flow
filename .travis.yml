@@ -107,7 +107,6 @@ matrix:
         - go get github.com/t-yuki/gocover-cobertura
       script:
         - cd packages/feedback
-        - make build-all
         - make test
         - bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
         - make lint
