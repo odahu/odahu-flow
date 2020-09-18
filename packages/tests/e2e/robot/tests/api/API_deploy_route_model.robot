@@ -57,6 +57,7 @@ Create deployment
     Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${image}
     ${exp_result}               create List   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
+    Check model started  ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
 
 Update deployment
@@ -67,6 +68,7 @@ Update deployment
     should be equal             ${check_changes.spec.role_name}  test_updated
     ${exp_result}               create List   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
+    Check model started  ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
@@ -84,10 +86,6 @@ Check by id that route exists
     ${result}                   Call API  route get id  ${MODEL}
     ID should be equal          ${result}  ${MODEL}
 
-Check existance of model route by id
-    [Tags]                      route
-    ${result}                   Call API  route get id  ${MODEL}
-    ID should be equal          ${result}  ${MODEL}
 
 Get info about model
     [Tags]                      model
