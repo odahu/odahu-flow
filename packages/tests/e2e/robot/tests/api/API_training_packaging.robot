@@ -3,7 +3,7 @@ ${LOCAL_CONFIG}                     odahuflow/api_training_packaging
 ${RES_DIR}                          ${CURDIR}/resources/training_packaging
 ${TRAIN_MLFLOW_DEFAULT}             wine-mlflow-default
 ${PACKAGING}                        wine-api-testing
-${TRAINING_ARTIFACT_NAME}           wine-mlflow-not-default-1.0.zip
+${TRAINING_ARTIFACT_NAME}           wine-mlflow-default-updated-1.1.zip
 ${TRAIN_NOT_EXIST}                  train-api-not-exist
 ${PACKAGING_NOT_EXIST}              packaging-api-not-exist
 
@@ -78,7 +78,7 @@ Create packaging
 
 Update packaging
     [Tags]                      packaging
-    ${result}                   Call API  packaging put  ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
+    Call API  packaging put     ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
     ${result_pack}              Call API  packaging get id  ${PACKAGING}
     should be equal             ${result_pack.spec.integration_name}  docker-rest
     @{exp_result}               create list  succeeded  failed
