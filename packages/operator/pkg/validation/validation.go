@@ -59,3 +59,14 @@ func ValidateID(id string) error {
 
 	return ErrIDValidation
 }
+
+// K8s label must start/end with alphanumeric character, can consist of
+var k8sLabelRegex = regexp.MustCompile("^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$")
+var LabelValueValidationErrorTemplate = "%s must be valid Kubernetes label, i.e. match this pattern: %s"
+
+func ValidateK8sLabel(label string) error {
+	if k8sLabelRegex.MatchString(label) {
+		return nil
+	}
+	return errors.New(fmt.Sprintf(LabelValueValidationErrorTemplate, label, k8sLabelRegex))
+}

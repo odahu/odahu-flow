@@ -315,6 +315,15 @@ func (s *ModelTrainingValidationSuite) TestMtToolchainEmptyName() {
 	s.g.Expect(err.Error()).To(ContainSubstring(train_route.ToolchainEmptyErrorMessage))
 }
 
+func (s *ModelTrainingValidationSuite) TestMtToolchain_invalid() {
+	mt := validTraining
+	mt.Spec.Toolchain = "invalid label!"
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Error(err)
+	s.Assertions.Contains(err.Error(), mt.Spec.Toolchain)
+}
+
 func (s *ModelTrainingValidationSuite) TestMtEmptyModelName() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{},
@@ -325,6 +334,15 @@ func (s *ModelTrainingValidationSuite) TestMtEmptyModelName() {
 	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyModelNameErrorMessage))
 }
 
+func (s *ModelTrainingValidationSuite) TestMtName_invalid() {
+	mt := validTraining
+	mt.Spec.Model.Name = "invalid label!"
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Error(err)
+	s.Assertions.Contains(err.Error(), mt.Spec.Model.Name)
+}
+
 func (s *ModelTrainingValidationSuite) TestMtEmptyModelVersion() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{},
@@ -333,6 +351,15 @@ func (s *ModelTrainingValidationSuite) TestMtEmptyModelVersion() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyModelVersionErrorMessage))
+}
+
+func (s *ModelTrainingValidationSuite) TestMtVersion_invalid() {
+	mt := validTraining
+	mt.Spec.Model.Version = "invalid label!"
+
+	err := s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.Error(err)
+	s.Assertions.Contains(err.Error(), mt.Spec.Model.Version)
 }
 
 func (s *ModelTrainingValidationSuite) TestMtGenerationOutputArtifactName() {
