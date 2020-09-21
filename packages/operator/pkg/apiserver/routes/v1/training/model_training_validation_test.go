@@ -39,6 +39,7 @@ import (
 const (
 	gpuResourceName     = "nvidia"
 	mtvOutputConnection = "training-validation-output-connection"
+	invalidK8sLabel     = "invalid label!"
 )
 
 var (
@@ -317,7 +318,7 @@ func (s *ModelTrainingValidationSuite) TestMtToolchainEmptyName() {
 
 func (s *ModelTrainingValidationSuite) TestMtToolchain_invalid() {
 	mt := validTraining
-	mt.Spec.Toolchain = "invalid label!"
+	mt.Spec.Toolchain = invalidK8sLabel
 
 	err := s.validator.ValidatesAndSetDefaults(&mt)
 	s.Assertions.Error(err)
@@ -336,7 +337,7 @@ func (s *ModelTrainingValidationSuite) TestMtEmptyModelName() {
 
 func (s *ModelTrainingValidationSuite) TestMtName_invalid() {
 	mt := validTraining
-	mt.Spec.Model.Name = "invalid label!"
+	mt.Spec.Model.Name = invalidK8sLabel
 
 	err := s.validator.ValidatesAndSetDefaults(&mt)
 	s.Assertions.Error(err)
@@ -355,7 +356,7 @@ func (s *ModelTrainingValidationSuite) TestMtEmptyModelVersion() {
 
 func (s *ModelTrainingValidationSuite) TestMtVersion_invalid() {
 	mt := validTraining
-	mt.Spec.Model.Version = "invalid label!"
+	mt.Spec.Model.Version = invalidK8sLabel
 
 	err := s.validator.ValidatesAndSetDefaults(&mt)
 	s.Assertions.Error(err)

@@ -68,5 +68,5 @@ func ValidateK8sLabel(label string) error {
 	if k8sLabelRegex.MatchString(label) {
 		return nil
 	}
-	return errors.New(fmt.Sprintf(LabelValueValidationErrorTemplate, label, k8sLabelRegex))
+	return fmt.Errorf(LabelValueValidationErrorTemplate, label, k8sLabelRegex)
 }
