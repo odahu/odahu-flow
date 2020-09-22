@@ -63,9 +63,9 @@ func TestValidateID(t *testing.T) {
 			true,
 		},
 		{
-			"ID ends with number, invalid",
+			"ID ends with number, valid",
 			"abc-123",
-			true,
+			false,
 		},
 	}
 	for _, tt := range tests {

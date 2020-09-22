@@ -44,13 +44,13 @@ func ValidateExistsInRepository(name string, repository connection.Repository) e
 	return nil
 }
 
-var idRegex = regexp.MustCompile("^[a-z]([-a-z0-9]{0,61}[a-z])?$")
+var idRegex = regexp.MustCompile("^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$")
 var ErrIDValidation = errors.New("ID is not valid")
 
 // Id restrictions:
 //  * contain at most 63 characters
 //  * contain only lowercase alphanumeric characters or ‘-’
-//  * start with an alphanumeric character
+//  * start with an alpha character
 //  * end with an alphanumeric character
 func ValidateID(id string) error {
 	if idRegex.MatchString(id) {
