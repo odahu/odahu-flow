@@ -133,7 +133,7 @@ Delete Model Deployment and Check that Model Deployment does not exist
 #  DEPLOYMENT
 #############
 Try Create Deployment that already exists
-    [Tags]                      negative
+    [Tags]                      deployment  negative
     [Setup]                     Cleanup resource  deployment  ${DEPLOYMENT}
     [Teardown]                  Cleanup resource  deployment  ${DEPLOYMENT}
     Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  packaging_image
@@ -141,21 +141,21 @@ Try Create Deployment that already exists
     Call API and get Error      ${EntityAlreadyExists}  deployment post  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
 
 Try Update not existing and deleted Deployment
-    [Tags]                      negative
+    [Tags]                      deployment  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  packaging_image
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
     Call API and get Error      ${WrongHttpStatusCode}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
 
 Try Get id not existing and deleted Deployment
-    [Tags]                      negative
+    [Tags]                      deployment  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
     Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT}
 
 Try Delete not existing and deleted Deployment
-    [Tags]                      negative
+    [Tags]                      deployment  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  deployment delete  ${DEPLOYMENT_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
@@ -164,7 +164,7 @@ Try Delete not existing and deleted Deployment
 #  MODEL
 #############
 Try Get info not existing and deleted Model
-    [Tags]                      negative
+    [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${WrongStatusCodeReturned}  Format WrongStatusCodeReturned  ${model_url}/api/model/info
     Call API and get Error      ${WrongStatusCodeReturned}  model get  url=${model_url}
@@ -173,7 +173,7 @@ Try Get info not existing and deleted Model
     Call API and get Error      ${WrongStatusCodeReturned}  model get  url=${model_url}
 
 Try Invoke not existing and deleted Model
-    [Tags]                      negative
+    [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${WrongStatusCodeReturned}  Format WrongStatusCodeReturned  ${model_url}/api/model/invoke
     Call API and get Error      ${WrongStatusCodeReturned}  model post  url=${model_url}  json_input=${REQUEST}

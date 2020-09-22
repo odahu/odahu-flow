@@ -119,7 +119,7 @@ Delete Model Packaging and Check that Model Packaging does not exist
 #  TRAINING
 #############
 Try Create Training that already exists
-    [Tags]                      negative
+    [Tags]                      training  negative
     [Setup]                     Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     [Teardown]                  Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     Call API                    training post  ${RES_DIR}/valid/training.mlflow.default.yaml
@@ -127,21 +127,21 @@ Try Create Training that already exists
     Call API and get Error      ${EntityAlreadyExists}  training post  ${RES_DIR}/valid/training.mlflow.default.update.yaml
 
 Try Update not existing and deleted Training
-    [Tags]                      negative
+    [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  training put  ${RES_DIR}/invalid/training.update.not_exist.json
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${WrongHttpStatusCode}  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
 
 Try Get id not existing and deleted Training
-    [Tags]                      negative
+    [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  training get id  ${TRAIN_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${WrongHttpStatusCode}  training get id  ${TRAIN_MLFLOW_DEFAULT}
 
 Try Delete not existing and deleted Training
-    [Tags]                      negative
+    [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  training delete  ${TRAIN_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
@@ -150,7 +150,7 @@ Try Delete not existing and deleted Training
 #  PACKAGING
 #############
 Try Create Packaging that already exists
-    [Tags]                      negative
+    [Tags]                      packaging  negative
     [Setup]                     Cleanup resource  packaging  ${PACKAGING}
     [Teardown]                  Cleanup resource  packaging  ${PACKAGING}
     Call API                    packaging post  ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
@@ -158,21 +158,21 @@ Try Create Packaging that already exists
     Call API and get Error      ${EntityAlreadyExists}  packaging post  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
 
 Try Update not existing and deleted Packaging
-    [Tags]                      negative
+    [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packaging put  ${RES_DIR}/invalid/packaging.update.not_exist.yaml  ${TRAINING_ARTIFACT_NAME}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
     Call API and get Error      ${WrongHttpStatusCode}  packaging put  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
 
 Try Get id not existing and deleted Packaging
-    [Tags]                      negative
+    [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packaging get id  ${PACKAGING_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
     Call API and get Error      ${WrongHttpStatusCode}  packaging get id  ${PACKAGING}
 
 Try Delete not existing and deleted Packaging
-    [Tags]                      negative
+    [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packaging delete  ${PACKAGING_NOT_EXIST}
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
