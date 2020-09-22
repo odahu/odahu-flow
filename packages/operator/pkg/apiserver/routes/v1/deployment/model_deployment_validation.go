@@ -75,6 +75,8 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 			"Deployment name", md.ID, "role name", MdDefaultMinimumReplicas)
 		defaultRoleName := mdv.modelDeploymentConfig.Security.RoleName
 		md.Spec.RoleName = &defaultRoleName
+	} else {
+		err = multierr.Append(err, validation.ValidateK8sLabel(*md.Spec.RoleName))
 	}
 
 	if md.Spec.MinReplicas == nil {

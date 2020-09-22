@@ -34,8 +34,8 @@ import (
 
 const (
 	MtVcsNotExistsErrorMessage    = "cannot find VCS Connection"
-	EmptyModelNameErrorMessage    = "model name must be no empty"
-	EmptyModelVersionErrorMessage = "model version must be no empty"
+	EmptyModelNameErrorMessage    = "model name must be non-empty"
+	EmptyModelVersionErrorMessage = "model version must be non-empty"
 	EmptyVcsNameMessageError      = "VCS name is empty"
 	ValidationMtErrorMessage      = "Validation of model training is failed"
 	WrongVcsTypeErrorMessage      = "VCS connection must have the GIT type. You pass the connection of %s type"
@@ -100,14 +100,29 @@ func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err
 	return
 }
 
-func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err error) {
-	if len(mt.Spec.Model.Name) == 0 {
-		err = multierr.Append(err, errors.New(EmptyModelNameErrorMessage))
-	}
-
-	if len(mt.Spec.Model.Version) == 0 {
+func (mtv *MtValidator) validateTrainingVersion(version string) (err error) {
+	if len(version) == 0 {
 		err = multierr.Append(err, errors.New(EmptyModelVersionErrorMessage))
 	}
+	if labelErr := validation.ValidateK8sLabel(version); labelErr != nil {
+		err = multierr.Append(err, errors.New("invalid training version: "+labelErr.Error()))
+	}
+	return err
+}
+
+func (mtv *MtValidator) validateTrainingName(name string) (err error) {
+	if len(name) == 0 {
+		err = multierr.Append(err, errors.New(EmptyModelNameErrorMessage))
+	}
+	if labelErr := validation.ValidateK8sLabel(name); labelErr != nil {
+		err = multierr.Append(err, errors.New("invalid training name: "+labelErr.Error()))
+	}
+	return err
+}
+
+func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err error) {
+	err = multierr.Append(err, mtv.validateTrainingName(mt.Spec.Model.Name))
+	err = multierr.Append(err, mtv.validateTrainingVersion(mt.Spec.Model.Version))
 
 	if len(mt.ID) == 0 {
 		u4, uuidErr := uuid.NewV4()
@@ -144,6 +159,10 @@ func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error
 		err = multierr.Append(err, errors.New(ToolchainEmptyErrorMessage))
 
 		return
+	}
+
+	if labelErr := validation.ValidateK8sLabel(mt.Spec.Toolchain); labelErr != nil {
+		err = multierr.Append(err, errors.New("invalid training toolchain: "+labelErr.Error()))
 	}
 
 	toolchain, k8sErr := mtv.mtRepository.GetToolchainIntegration(mt.Spec.Toolchain)

@@ -308,3 +308,13 @@ func (s *ModelDeploymentValidationSuite) TestValidateNodeSelector_Invalid() {
 	s.Assertions.NotNil(err)
 	s.Assertions.Len(multierr.Errors(err), 1)
 }
+
+// Deployment has Role Name that is not valid K8s label; expect a validation error
+func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Invalid() {
+	mt := validDeployment
+	invalidLabel := "invalid label!"
+	mt.Spec.RoleName = &invalidLabel
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
+	s.Assertions.Error(err)
+	s.Assertions.Contains(err.Error(), invalidLabel)
+}
