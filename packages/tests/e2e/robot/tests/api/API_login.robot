@@ -19,6 +19,7 @@ Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Suite Setup         Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 Suite Teardown      Remove file  ${LOCAL_CONFIG}
 Force Tags          api  sdk  security  login
+Test Timeout        1 minute
 
 *** Keywords ***
 Format Error
