@@ -17,6 +17,7 @@
 package rclone
 
 import (
+	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	_ "github.com/rclone/rclone/backend/azureblob" // s3 specific handlers
@@ -45,23 +46,27 @@ func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*F
 		return nil, err
 	}
 
-	// If a URL does not contain a schema, then the Golang URL parser will fail.
-	// So we add the https schema if it missed. A schema is only required for the URL parsing.
-	// Later the schema will be ignored.
-	blobURI := conn.URI
-	if !strings.HasPrefix(httpsSchema, blobURI) && !strings.HasPrefix(wasbSchema, blobURI) {
-		blobURI = httpsSchema + blobURI
-	}
-
-	parsedURI, err := url.Parse(blobURI)
+	parsedURI, err := url.Parse(conn.URI)
 	if err != nil {
-		log.Error(err, "Parsing data binding URI", "connection uri", blobURI)
-
+		log.Error(err, "Parsing data binding URI", "connection uri", conn.URI)
 		return nil, err
 	}
 
+	uriPath := parsedURI.Path
+	if strings.HasPrefix(uriPath, "/") {
+		uriPath = uriPath[1:]
+	}
+
+	pathParts := strings.Split(uriPath, "/")
+	if len(pathParts) == 0 {
+		err = errors.New("azure URI must contain at least a bucket name")
+		log.Error(err, "azure URI is empty", "uri", conn.URI, "splitPath", pathParts)
+		return nil, err
+	}
+	bucketName := pathParts[0]
+	pathInsideBucket := "/" + strings.Join(pathParts[1:], "/")
 	return &FileDescription{
-		FsName: fmt.Sprintf("%s:%s", configName, parsedURI.Host),
-		Path:   parsedURI.Path,
+		FsName: fmt.Sprintf("%s:%s", configName, bucketName),
+		Path:   pathInsideBucket,
 	}, nil
 }
