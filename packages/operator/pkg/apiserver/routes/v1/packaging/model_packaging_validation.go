@@ -85,6 +85,8 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 
 	err = multierr.Append(err, mpv.validateNodeSelector(mp))
 
+	err = multierr.Append(err, validation.ValidateResources(mp.Spec.Resources, config.NvidiaResourceName))
+
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMpErrorMessage, err.Error())
 	}
