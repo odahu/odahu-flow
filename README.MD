@@ -2,7 +2,7 @@
 
 ## Documentation
 
-Latest version of [documentation](https://docs.odahu.org/about.html)
+Latest version of [documentation](https://docs.odahu.org/about.html) 
 
 ## Changelog
 Latest updates in [CHANGELOG](https://docs.odahu.org/ref_changelog.html)
