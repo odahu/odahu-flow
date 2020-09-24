@@ -59,7 +59,9 @@ func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*F
 
 	pathParts := strings.Split(uriPath, "/")
 	if len(pathParts) == 0 {
-		return nil, errors.New("azure URI must contain at least a bucket name")
+		err = errors.New("azure URI must contain at least a bucket name")
+		log.Error(err, "azure URI is empty", "uri", conn.URI, "splitPath", pathParts)
+		return nil, err
 	}
 	bucketName := pathParts[0]
 	pathInsideBucket := "/" + strings.Join(pathParts[1:], "/")
