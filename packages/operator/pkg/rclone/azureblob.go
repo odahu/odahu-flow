@@ -28,10 +28,6 @@ import (
 	"strings"
 )
 
-const (
-	httpsSchema = "https://"
-	wasbSchema  = "wasb://"
-)
 
 func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDescription, error) {
 	_, err := fs.Find("azureblob")
@@ -53,9 +49,7 @@ func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*F
 	}
 
 	uriPath := parsedURI.Path
-	if strings.HasPrefix(uriPath, "/") {
-		uriPath = uriPath[1:]
-	}
+	uriPath= strings.TrimPrefix(uriPath, "/")
 
 	pathParts := strings.Split(uriPath, "/")
 	if len(pathParts) == 0 {
