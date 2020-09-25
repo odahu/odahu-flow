@@ -97,7 +97,7 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
             mp = entity
 
     if not mp:
-        LOGGER.debug(
+        click.echo(
             f'The {pack_id} packaging not found in the manifest files.'
             f' Trying to retrieve it from API server'
         )
@@ -106,7 +106,7 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
     integration_name = mp.spec.integration_name
     packager = packagers.get(integration_name)
     if not packager:
-        LOGGER.debug(
+        click.echo(
             f'The {integration_name} packager not found in the manifest files.'
             f' Trying to retrieve it from API server'
         )
@@ -114,8 +114,7 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
 
     if artifact_name:
         mp.spec.artifact_name = artifact_name
-
-        LOGGER.debug('Override the artifact namesdsdsdsdsdsdsd')
+        LOGGER.debug('Override the artifact name')
 
     if is_target_disabled:
         mp.spec.targets = []
