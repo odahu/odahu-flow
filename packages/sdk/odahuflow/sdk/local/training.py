@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import pathlib
 import re
 import uuid
 from collections import namedtuple
