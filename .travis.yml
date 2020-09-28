@@ -6,8 +6,7 @@ services:
 install: skip
 branches:
   only:
-  - master
-  - develop
+  - /.*/
 
 matrix:
   include:
