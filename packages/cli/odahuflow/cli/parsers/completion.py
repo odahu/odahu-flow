@@ -25,13 +25,13 @@ def completion(shell):
     """
     Output odahuflowctl completion code to stdout.\n
     \b
-    Load zsh completion in the current shell:
+    Load the zsh completion in the current shell:
         source <(odahuflowctl completion zsh)
     \b
-    Load powershell completion in the current shell:
-        odahuflowctl completion > .\odahu_completion.ps1;
-        . .\odahu_completion.ps1;
-        Remove-Item .\odahu_completion.ps1
+    Load the powershell completion in the current shell:
+        odahuflowctl completion > $HOME\.odahuflow\odahu_completion.ps1;
+        . $HOME\.odahuflow\odahu_completion.ps1;
+        Remove-Item $HOME\.odahuflow\odahu_completion.ps1
     \f
     """
     click.echo(click_completion.core.get_code(shell))
