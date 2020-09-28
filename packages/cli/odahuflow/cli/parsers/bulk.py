@@ -21,6 +21,8 @@ import sys
 import typing
 
 import click
+
+from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import RemoteAPIClient
@@ -30,7 +32,7 @@ from odahuflow.sdk.clients.api_aggregated import parse_resources_file, Odahuflow
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(cls=click_utils.BetterHelpGroup)
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context

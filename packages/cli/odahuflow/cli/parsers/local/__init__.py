@@ -17,12 +17,13 @@
 Group of local commands
 """
 import click
+
 from odahuflow.cli.parsers.local.packaging import packaging_group
 from odahuflow.cli.parsers.local.training import training_group
-from odahuflow.cli.utils.abbr import AbbreviationGroup
+from odahuflow.cli.utils import click_utils
 
 
-@click.group(cls=AbbreviationGroup)
+@click.group(cls=click_utils.AbbreviationGroup)
 def local():
     """
     Train and package locally

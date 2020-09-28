@@ -17,11 +17,13 @@
 Template CLI commands
 """
 import click
+
+from odahuflow.cli.utils import click_utils
 from odahuflow.sdk.clients.templates import get_odahuflow_template_content
 from odahuflow.sdk.clients.templates import get_odahuflow_template_names
 
 
-@click.group()
+@click.group(cls=click_utils.BetterHelpGroup)
 def template():
     """
     Allow you to perform actions on odahuflow template files.\n

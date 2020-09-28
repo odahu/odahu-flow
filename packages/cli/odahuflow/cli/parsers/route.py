@@ -21,6 +21,8 @@ import time
 
 import click
 from click import pass_obj
+
+from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
 from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.sdk import config
@@ -32,7 +34,7 @@ DEFAULT_WAIT_TIMEOUT = 5
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(cls=click_utils.BetterHelpGroup)
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context
