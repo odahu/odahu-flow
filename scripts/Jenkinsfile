@@ -7,6 +7,11 @@ class Globals {
     static String dockerCacheArg = null
 }
 
+def DefCheckoutTimeout = 5
+def DefBuildTimeout = 35
+def DefUploadTimeout = 15
+def DefUpdateTimeout = 5
+
 pipeline {
     agent { label 'ec2builder'}
 
@@ -21,6 +26,10 @@ pipeline {
         sharedLibPath = "legion-cicd/pipelines/legionPipeline.groovy"
         //Git Branch to build package from
         param_git_branch = "${params.GitBranch}"
+        param_checkout_timeout = "${params.CheckoutTimeout ?: DefCheckoutTimeout}"
+        param_build_timeout = "${params.BuildTimeout ?: DefBuildTimeout}"
+        param_upload_timeout = "${params.UploadTimeout ?: DefUploadTimeout}"
+        param_update_timeout = "${params.UpdateTimeout ?: DefUpdateTimeout}"
 
         /*
         Release parameters
@@ -77,30 +86,32 @@ pipeline {
     stages {
         stage('Checkout and set build vars') {
             steps {
-                cleanWs()
-                checkout scm
-                script {
-                    // import CI/CD components
-                    sshagent(["${env.legionCicdGitlabKey}"]) {
-                        print ("Checkout CI/CD repo")
-                        sh"""#!/bin/bash -ex
-                        mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
-                        if [ ! -d "legion-cicd" ]; then
-                            git clone ${env.param_legion_cicd_repo} legion-cicd
-                        fi
-                        cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
-                        """
+                timeout(time: param_checkout_timeout, unit: 'MINUTES') {
+                    cleanWs()
+                    checkout scm
+                    script {
+                        // import CI/CD components
+                        sshagent(["${env.legionCicdGitlabKey}"]) {
+                            print ("Checkout CI/CD repo")
+                            sh"""#!/bin/bash -ex
+                            mkdir -p \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh && ssh-keyscan git.epam.com >> \$(getent passwd \$(whoami) | cut -d: -f6)/.ssh/known_hosts
+                            if [ ! -d "legion-cicd" ]; then
+                                git clone ${env.param_legion_cicd_repo} legion-cicd
+                            fi
+                            cd legion-cicd && git checkout ${env.param_legion_cicd_branch}
+                            """
 
-                        print ("Load ODAHU pipeline common library")
-                        cicdLibrary = load "${env.sharedLibPath}"
-                    }
+                            print ("Load ODAHU pipeline common library")
+                            cicdLibrary = load "${env.sharedLibPath}"
+                        }
 
-                    def verFiles = [
+                        def verFiles = [
                             'packages/cli/odahuflow/cli/version.py',
                             'packages/sdk/odahuflow/sdk/version.py',
                             'packages/robot/odahuflow/robot/version.py',
-                    ]
-                    cicdLibrary.setBuildMeta(verFiles)
+                        ]
+                        cicdLibrary.setBuildMeta(verFiles)
+                    }
                 }
             }
         }
@@ -109,38 +120,46 @@ pipeline {
             parallel {
                 stage('Build robot test Docker image') {
                     steps {
-                        script {
-                            cicdLibrary.buildDockerImage('odahu-flow-robot-tests', '.', 'containers/robot-tests/Dockerfile')
+                        timeout(time: param_build_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.buildDockerImage('odahu-flow-robot-tests', '.', 'containers/robot-tests/Dockerfile')
+                            }
                         }
                     }
                 }
                 stage("Build core images") {
                     steps {
-                        script {
-                            cicdLibrary.buildDockerImage('odahu-flow-operator-dependencies', ".", "containers/operator/Dockerfile", "--target builder")
-                            cicdLibrary.buildDockerImage('odahu-flow-operator', ".", "containers/operator/Dockerfile", "--target operator --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-api', ".", "containers/operator/Dockerfile", "--target api --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-service-catalog', ".", "containers/operator/Dockerfile", "--target service-catalog --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-migrate', ".", "containers/operator/Dockerfile", "--target odahu-migrate --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-controller', ".", "containers/operator/Dockerfile", "--target controller --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                        timeout(time: param_build_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.buildDockerImage('odahu-flow-operator-dependencies', ".", "containers/operator/Dockerfile", "--target builder")
+                                cicdLibrary.buildDockerImage('odahu-flow-operator', ".", "containers/operator/Dockerfile", "--target operator --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-api', ".", "containers/operator/Dockerfile", "--target api --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-service-catalog', ".", "containers/operator/Dockerfile", "--target service-catalog --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-migrate', ".", "containers/operator/Dockerfile", "--target odahu-migrate --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-controller', ".", "containers/operator/Dockerfile", "--target controller --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                            }
                         }
                     }
                 }
                 stage('Build odahuflowctl image') {
                     steps {
-                        script {
-                            cicdLibrary.buildDockerImage('odahu-flow-cli', '.', 'containers/odahu-flow-cli/Dockerfile')
+                        timeout(time: param_build_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.buildDockerImage('odahu-flow-cli', '.', 'containers/odahu-flow-cli/Dockerfile')
+                            }
                         }
                     }
                 }
                 stage("Build feedback images") {
                     steps {
-                        script {
-                            cicdLibrary.buildDockerImage('odahu-flow-feedback-dependencies', ".", "containers/feedback/Dockerfile", "--target builder")
-                            cicdLibrary.buildDockerImage('odahu-flow-feedback-collector', ".", "containers/feedback/Dockerfile", "--target collector --cache-from odahu/odahu-flow-feedback-dependencies:${Globals.buildVersion}")
-                            cicdLibrary.buildDockerImage('odahu-flow-feedback-rq-catcher', ".", "containers/feedback/Dockerfile", "--target rq-catcher --cache-from odahu/odahu-flow-feedback-dependencies:${Globals.buildVersion}")
+                        timeout(time: param_build_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.buildDockerImage('odahu-flow-feedback-dependencies', ".", "containers/feedback/Dockerfile", "--target builder")
+                                cicdLibrary.buildDockerImage('odahu-flow-feedback-collector', ".", "containers/feedback/Dockerfile", "--target collector --cache-from odahu/odahu-flow-feedback-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-feedback-rq-catcher', ".", "containers/feedback/Dockerfile", "--target rq-catcher --cache-from odahu/odahu-flow-feedback-dependencies:${Globals.buildVersion}")
+                            }
                         }
                     }
                 }
@@ -151,107 +170,137 @@ pipeline {
             parallel {
                 stage("Upload python packages") {
                     steps {
-                        script {
-                            cicdLibrary.publishPythonPackage("packages/cli", env.param_pypi_private_creds, env.param_pypi_private_url, env.param_pypi_publishing_enabled, env.param_pypi_public_creds, env.param_pypi_public_url)
-                            cicdLibrary.publishPythonPackage("packages/sdk", env.param_pypi_private_creds, env.param_pypi_private_url, env.param_pypi_publishing_enabled, env.param_pypi_public_creds, env.param_pypi_public_url)
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.publishPythonPackage("packages/cli", env.param_pypi_private_creds, env.param_pypi_private_url, env.param_pypi_publishing_enabled, env.param_pypi_public_creds, env.param_pypi_public_url)
+                                cicdLibrary.publishPythonPackage("packages/sdk", env.param_pypi_private_creds, env.param_pypi_private_url, env.param_pypi_publishing_enabled, env.param_pypi_public_creds, env.param_pypi_public_url)
+                            }
                         }
                     }
                 }
                 stage('Package and upload helm charts'){
                     steps {
-                        script {
-                            cicdLibrary.uploadHelmCharts(env.pathToCharts)
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadHelmCharts(env.pathToCharts)
+                            }
                         }
                     }
                 }
                 stage("Upload model trainer image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-model-trainer', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-model-trainer', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage("Upload odahuflowctl image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-cli', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-cli', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage("Upload model packager image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-model-packager', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-model-packager', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage("Upload model service catalog image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-service-catalog', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-service-catalog', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage("Upload operator image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-operator', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-operator', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage("Upload feedback collector image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-feedback-collector', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-feedback-collector', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage("Upload feedback rq-catcher image") {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-feedback-rq-catcher', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-feedback-rq-catcher', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage('Upload Api Docker image') {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-api', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-api', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage('Upload Controller Docker image') {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-controller', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-controller', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage('Upload Migrate Docker image') {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-migrate', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-migrate', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
                 stage('Upload Operator dependencies') {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-operator-dependencies', false)
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-operator-dependencies', false)
+                            }
                         }
                     }
                 }
                 stage('Upload Feedback dependencies') {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-feedback-dependencies', false)
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-feedback-dependencies', false)
+                            }
                         }
                     }
                 }
                 stage('Upload robot tests') {
                     steps {
-                        script {
-                            cicdLibrary.uploadDockerImage('odahu-flow-robot-tests', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-robot-tests', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
                         }
                     }
                 }
@@ -260,13 +309,15 @@ pipeline {
 
         stage("Update branch") {
             steps {
-                script {
-                    cicdLibrary.updateReleaseBranches(
-                        env.param_stable_release.toBoolean(),
-                        env.param_push_git_tag.toBoolean(),
-                        env.param_update_version_string.toBoolean(),
-                        env.param_update_master.toBoolean(),
-                        env.param_git_deploy_key)
+                timeout(time: param_update_timeout, unit: 'MINUTES') {
+                    script {
+                        cicdLibrary.updateReleaseBranches(
+                            env.param_stable_release.toBoolean(),
+                            env.param_push_git_tag.toBoolean(),
+                            env.param_update_version_string.toBoolean(),
+                            env.param_update_master.toBoolean(),
+                            env.param_git_deploy_key)
+                    }
                 }
             }
         }
