@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import pathlib
 import re
 import uuid
 from collections import namedtuple
@@ -158,8 +159,12 @@ def start_train(trainer: K8sTrainer, output_dir: str) -> None:
 def list_local_trainings() -> List[str]:
     if not os.path.exists(config.LOCAL_MODEL_OUTPUT_DIR):
         return []
-    return sorted(filter(lambda path: os.path.isdir(path) and PROJECT_FILE in os.listdir(path),
-                         listdir(config.LOCAL_MODEL_OUTPUT_DIR)))
+
+    def is_training_artifact(name: str) -> bool:
+        full_path = os.path.join(config.LOCAL_MODEL_OUTPUT_DIR, name)
+        return os.path.isdir(full_path) and PROJECT_FILE in os.listdir(full_path)
+
+    return sorted(filter(is_training_artifact, listdir(config.LOCAL_MODEL_OUTPUT_DIR)))
 
 
 def cleanup_local_artifacts():
