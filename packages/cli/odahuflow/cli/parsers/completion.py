@@ -28,4 +28,9 @@ def completion(shell):
         source <(odahuflowctl completion zsh)
     \f
     """
-    click.echo(click_completion.core.get_code(shell))
+    shell = shell or click_completion.lib.get_auto_shell()
+
+    if shell in click_completion.core.shells:
+        click.echo(click_completion.core.get_code(shell))
+    else:
+        raise click.ClickException(f'"{shell}" shell is not supported.')
