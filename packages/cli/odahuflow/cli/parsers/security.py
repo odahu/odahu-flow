@@ -24,7 +24,7 @@ from click import UsageError
 from odahuflow.sdk.clients import api
 from odahuflow.sdk.config import update_config_file
 
-LOG = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def _reset_credentials():
@@ -90,11 +90,11 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
         api_client.info()
         print('Success! Credentials have been saved.')
     except api.IncorrectAuthorizationToken as wrong_token:
-        LOG.error('Wrong authorization token\n%s', wrong_token)
+        LOGGER.error('Wrong authorization token\n%s', wrong_token)
         raise
     except api.APIConnectionException as connection_exc:
-        LOG.error(f'Failed to connect to API host!'
-                  f'Error: {connection_exc}')
+        LOGGER.error(f'Failed to connect to API host! '
+                     f'Error: {connection_exc}')
         raise
 
 

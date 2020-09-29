@@ -71,7 +71,11 @@ CONTEXT_SETTINGS = dict(max_content_width=100,
 @click.option('--verbose/--non-verbose', default=False)
 def base(verbose=False):
     """
-    Odahuflow CLI
+    odahuflowctl controls the ODAHU cluster
+
+    \b
+    Find more information at:
+        https://docs.odahu.org/
     """
     configure_logging(verbose)
 
