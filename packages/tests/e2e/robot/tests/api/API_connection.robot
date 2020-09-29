@@ -85,30 +85,38 @@ Try Create Connection that already exists
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_VALID}
     Call API and get Error      ${EntityAlreadyExists}  connection post  ${RES_DIR}/valid/docker_connection_create.json
 
-Try Update not existing and deleted Connection
+Try Update not existing Connection
     [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
+
+Try Update deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/valid/git_connection_update.yaml
 
-Try Get id not existing and deleted Connection
+Try Get id not existing Connection
     [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_NOT_EXIST}
+
+Try Get id deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_VALID}
 
-Try Get id decrypted not existing and deleted Connection
+Try Get id decrypted not existing Connection
     [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_NOT_EXIST}
+
+Try Get id decrypted deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_VALID}
 
-Try Delete not existing and deleted Connection
+Try Delete not existing Connection
     [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_NOT_EXIST}
+
+Try Delete deleted Connection
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
     Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_VALID}
