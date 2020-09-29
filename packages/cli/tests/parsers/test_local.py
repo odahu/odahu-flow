@@ -10,6 +10,7 @@ from docker.types import Mount
 from pytest_mock import MockFixture
 
 from odahuflow.cli.parsers.local import training
+from odahuflow.sdk.gppi.executor import PROJECT_FILE
 from odahuflow.sdk.local import training as training_sdk
 from odahuflow.sdk.local.training import MODEL_OUTPUT_CONTAINER_PATH
 from odahuflow.sdk.models import ModelTraining, ToolchainIntegration, ModelTrainingSpec
@@ -26,6 +27,7 @@ def test_list_local_trainings(tmpdir):
                'Awine-1@']
     for folder in folders:
         tmpdir.mkdir(folder)
+        pathlib.Path(tmpdir, folder, PROJECT_FILE).touch()
     with patch('odahuflow.sdk.local.training.config.LOCAL_MODEL_OUTPUT_DIR', tmpdir):
         assert training_sdk.list_local_trainings() == ['&wine-1-12',
                                           '2Wine-1@-12',

@@ -14,6 +14,7 @@ from docker.models.containers import Container
 from docker.types import Mount
 
 from odahuflow.sdk import config
+from odahuflow.sdk.gppi.executor import PROJECT_FILE
 from odahuflow.sdk.local.docker_utils import stream_container_logs, TRAINING_DOCKER_LABELS, WORKSPACE_PATH, \
     convert_labels_to_filter, cleanup_docker_containers, raise_error_if_container_failed
 from odahuflow.sdk.models import K8sTrainer
@@ -157,7 +158,12 @@ def start_train(trainer: K8sTrainer, output_dir: str) -> None:
 def list_local_trainings() -> List[str]:
     if not os.path.exists(config.LOCAL_MODEL_OUTPUT_DIR):
         return []
-    return sorted(listdir(config.LOCAL_MODEL_OUTPUT_DIR))
+
+    def is_training_artifact(name: str) -> bool:
+        full_path = os.path.join(config.LOCAL_MODEL_OUTPUT_DIR, name)
+        return os.path.isdir(full_path) and PROJECT_FILE in os.listdir(full_path)
+
+    return sorted(filter(is_training_artifact, listdir(config.LOCAL_MODEL_OUTPUT_DIR)))
 
 
 def cleanup_local_artifacts():
