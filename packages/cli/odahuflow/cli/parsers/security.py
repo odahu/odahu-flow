@@ -94,7 +94,7 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
         raise
     except api.APIConnectionException as connection_exc:
         LOGGER.error(f'Failed to connect to API host! '
-                  f'Error: {connection_exc}')
+                     f'Error: {connection_exc}')
         raise
 
 
