@@ -82,7 +82,7 @@ class ModelPackagingClient(RemoteAPIClient):
         :param name: Name of a Model Packaging
         :return Message from API server
         """
-        return self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')
+        return self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')['message']
 
     def log(self, name: str, follow: bool = False) -> Iterator[str]:
         """
@@ -147,7 +147,7 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Packaging
         :return Message from API server
         """
-        return await self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')
+        return await self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')['message']
 
     async def log(self, name: str, follow: bool = False) -> AsyncIterable:
         """
