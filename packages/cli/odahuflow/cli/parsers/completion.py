@@ -32,6 +32,5 @@ def completion(shell):
         odahuflowctl completion > $HOME\.odahuflow\odahu_completion.ps1;
         . $HOME\.odahuflow\odahu_completion.ps1;
         Remove-Item $HOME\.odahuflow\odahu_completion.ps1
-    \f
     """
     click.echo(click_completion.core.get_code(shell))
