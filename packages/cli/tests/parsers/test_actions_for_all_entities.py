@@ -23,13 +23,13 @@ import typing
 
 import pytest
 from click.testing import CliRunner
+from pytest_mock import MockFixture
+
 from odahuflow.cli.utils.error_handler import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
     ID_AND_FILE_GIVEN_ERROR_MESSAGE, ID_AND_FILE_MISSED_ERROR_MESSAGE
 from odahuflow.cli.utils.output import JSON_OUTPUT_FORMAT, \
     JSONPATH_OUTPUT_FORMAT
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
-from pytest_mock import MockFixture
-
 from .data import ENTITY_ID, EntityTestData, ROUTER, DEPLOYMENT, PACKAGING_INTEGRATION, PACKAGING, TOOLCHAIN, TRAINING, \
     CONNECTION, generate_entities_for_test
 
@@ -210,7 +210,7 @@ def test_delete_ignore_not_found_enabled(mocker: MockFixture, cli_runner: CliRun
 
     client_mock.assert_called_once_with(ENTITY_ID)
     assert result.exit_code == 0
-    assert IGNORE_NOT_FOUND_ERROR_MESSAGE.format(ENTITY_ID) in result.stdout
+    assert IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=entity_test_data.kind, id=ENTITY_ID) in result.stdout
 
 
 def test_delete_ignore_not_found_disabled(mocker: MockFixture, cli_runner: CliRunner,

@@ -57,11 +57,11 @@ def gppi(ctx, gppi_model_path: str, use_current_env: bool = False, env_name: str
 @click.pass_context
 def test(ctx):
     """
-    Initialize GPPI model and try to execute api
+    Initialize GPPI model and try to execute api.
 
     Next API are tested:
 
-    Executes .info() method
+    Executes .info() method;
 
     Executes .predict_on_matrix() method
     with data deserialized from head_input.pkl as a parameter
@@ -79,6 +79,8 @@ def test(ctx):
 @click.pass_context
 def predict(ctx, input_file: str, output_dir: str, output_file_name: str):
     """
+    Invokes a prediction on a trained model.
+    \f
 
     :param ctx:
     :param input_file: Input JSON file for predictions

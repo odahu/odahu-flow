@@ -169,4 +169,4 @@ def delete(client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not
         if e.status_code != http.HTTPStatus.NOT_FOUND or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(ti_id))
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ToolchainIntegration.__name__, id=ti_id))

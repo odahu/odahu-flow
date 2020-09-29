@@ -25,7 +25,8 @@ from requests import RequestException
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
+    IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.logs import print_logs
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
@@ -225,7 +226,7 @@ def delete(client: ModelPackagingClient, pack_id: str, file: str, ignore_not_fou
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(f'Model packaging {pack_id} was not found. Ignore')
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelPackaging.__name__, id=pack_id))
 
 
 @packaging.command()
