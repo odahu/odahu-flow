@@ -137,7 +137,7 @@ def _print_variable_information(name: str, show_secrets: bool = False):
     """
     description = config.ALL_VARIABLES[name]
     current_value = getattr(config, name)
-    is_secret = any(sub in name for sub in ('_PASSWORD', '_TOKEN'))
+    is_secret = any(sub in name for sub in ('_PASSWORD', '_TOKEN', '_SECRET'))
     click.echo('{} - {}\n  default: {!r}'.format(name, description.description, description.default))
     if current_value != description.default:
         if is_secret and not show_secrets:
