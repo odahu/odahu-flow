@@ -8,7 +8,7 @@ class Globals {
 }
 
 def DefCheckoutTimeout = 5
-def DefBuildTimeout = 35
+def DefBuildTimeout = 40
 def DefUploadTimeout = 15
 def DefUpdateTimeout = 5
 
