@@ -62,8 +62,10 @@ COMMAND_GROUPS = [
 # Initialize shell completion
 click_completion.init()
 
+CONTEXT_SETTINGS = dict(max_content_width=100,
+                        help_option_names=['-h', '--help'])
 
-@click.group(cls=AbbreviationGroup, context_settings={'max_content_width': 100})
+@click.group(cls=AbbreviationGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('--verbose/--non-verbose', default=False)
 def base(verbose=False):
     """
