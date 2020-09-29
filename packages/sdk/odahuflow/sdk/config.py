@@ -423,5 +423,5 @@ ODAHUFLOWCTL_NONINTERACTIVE = ConfigVariableDeclaration('ODAHUFLOWCTL_NONINTERAC
 # Local
 
 LOCAL_MODEL_OUTPUT_DIR = ConfigVariableDeclaration('LOCAL_MODEL_OUTPUT_DIR',
-                                                   Path.home().joinpath(".odahuflow", "training_output"),
+                                                   str(Path.home().joinpath(".odahuflow", "training_output")),
                                                    str, 'Directory where model artifacts will be saved', True)
