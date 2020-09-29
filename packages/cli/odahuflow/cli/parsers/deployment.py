@@ -20,15 +20,17 @@ import logging
 import time
 
 import click
+
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
+    IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.cli.utils.verifiers import positive_number
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.deployment import ModelDeployment, ModelDeploymentClient, READY_STATE, \
-    FAILED_STATE
 from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
+from odahuflow.sdk.clients.deployment import ModelDeployment, ModelDeploymentClient, READY_STATE, \
+    FAILED_STATE
 
 DEFAULT_WAIT_TIMEOUT = 5
 # 20 minutes
@@ -229,7 +231,7 @@ def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_foun
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(f'Model deployment {md_id} was not found. Ignore')
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelDeployment.__name__, id=md_id))
 
 
 def wait_delete_operation_finish(timeout: int, wait: bool, md_id: str, md_client: ModelDeploymentClient):
@@ -259,7 +261,6 @@ def wait_delete_operation_finish(timeout: int, wait: bool, md_id: str, md_client
             md_client.get(md_id)
         except WrongHttpStatusCode as e:
             if e.status_code == 404:
-                print(f'Model deployment {md_id} was deleted')
                 return
             LOGGER.info('Callback have not confirmed completion of the operation')
 
