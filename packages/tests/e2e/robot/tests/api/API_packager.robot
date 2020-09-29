@@ -94,6 +94,7 @@ Try Update not existing Packager
     Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
 
 Try Update deleted Packager
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
     Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/valid/docker_cli_update.json
 
@@ -103,6 +104,7 @@ Try Get id not existing Packager
     Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_NOT_EXIST}
 
 Try Get id deleted Packager
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_REST}
     Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_REST}
 
@@ -112,5 +114,6 @@ Try Delete not existing Packager
     Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_NOT_EXIST}
 
 Try Delete deleted Packager
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
     Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_CLI}

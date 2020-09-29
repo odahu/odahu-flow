@@ -94,6 +94,7 @@ Try Update not existing Toolchain
     Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/invalid/mlflow_gpu_update_not_exist.yaml
 
 Try Update deleted Toolchain
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/valid/mlflow-gpu_create.json
 
@@ -103,6 +104,7 @@ Try Get id not existing Toolchain
     Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW_NOT_EXIST}
 
 Try Get id deleted Toolchain
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW}
 
@@ -112,5 +114,6 @@ Try Delete not existing Toolchain
     Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_NOT_EXIST}
 
 Try Delete deleted Toolchain
+    [Tags]                      negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
     Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_GPU}
