@@ -1,7 +1,11 @@
 package validation_test
 
 import (
+	"fmt"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	. "github.com/odahu/odahu-flow/packages/operator/pkg/validation"
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
@@ -77,4 +81,70 @@ func TestValidateID(t *testing.T) {
 			}
 		})
 	}
+}
+
+
+func TestValidateResources(t *testing.T) {
+
+	const memTpl = "Invalid value: \"%s\": must be less than or equal to memory limit"
+	const cpuTpl = "Invalid value: \"%s\": must be less than or equal to cpu limit"
+
+	as := assert.New(t)
+
+	testData := []struct {
+		memoryRequests string
+		memoryLimits string
+		cpuRequests string
+		cpuLimits string
+
+		want []string
+	}{
+		{
+			memoryRequests: "128Mi", memoryLimits:   "120Mi",
+			cpuRequests:    "120m", cpuLimits:      "100m",
+			want: []string{
+				fmt.Sprintf(memTpl, "128Mi"),
+				fmt.Sprintf(cpuTpl, "120m"),
+			},
+		},
+		{
+			memoryRequests: "128Mi", memoryLimits:   "128Mi",
+			cpuRequests:    "128m", cpuLimits:      "128m",
+			want: []string{},
+		},
+		{
+			memoryRequests: "128Mi", memoryLimits:   "130Mi",
+			cpuRequests:    "120m", cpuLimits:      "130m",
+			want: []string{},
+		},
+	}
+
+	for _, test := range testData {
+
+		res := &odahuflowv1alpha1.ResourceRequirements{
+			Requests: &odahuflowv1alpha1.ResourceList{
+				CPU:    &test.cpuRequests,
+				Memory: &test.memoryRequests,
+			},
+			Limits: &odahuflowv1alpha1.ResourceList{
+				CPU:    &test.cpuLimits,
+				Memory: &test.memoryLimits,
+			},
+		}
+
+		err := ValidateResources(res, config.NvidiaResourceName)
+		if len(test.want) > 0 {
+			as.Error(err)
+			errStr := err.Error()
+
+			for _, expectedSubstr := range test.want {
+				as.Contains(errStr, expectedSubstr)
+			}
+
+		} else {
+			as.NoError(err)
+		}
+
+	}
+
 }

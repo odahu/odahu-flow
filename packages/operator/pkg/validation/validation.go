@@ -19,7 +19,12 @@ package validation
 import (
 	"errors"
 	"fmt"
+	odahuv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	connection "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"go.uber.org/multierr"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/kubernetes/pkg/apis/core/v1/validation"
 	"regexp"
 )
 
@@ -69,4 +74,18 @@ func ValidateK8sLabel(label string) error {
 		return nil
 	}
 	return fmt.Errorf(LabelValueValidationErrorTemplate, label, k8sLabelRegex)
+}
+
+
+func ValidateResources(resources *odahuv1alpha1.ResourceRequirements, gpuResName string) (err error) {
+
+	coreV1Resources, err := kubernetes.ConvertOdahuflowResourcesToK8s(resources, gpuResName)
+
+	fErrs := validation.ValidateResourceRequirements(&coreV1Resources, field.NewPath("resources"))
+
+	for _, fErr := range fErrs {
+		err = multierr.Append(err, fErr)
+	}
+
+	return
 }

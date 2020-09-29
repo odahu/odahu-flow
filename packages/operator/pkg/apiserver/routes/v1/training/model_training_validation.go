@@ -93,6 +93,8 @@ func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err
 
 	err = multierr.Append(err, mtv.validateNodeSelector(mt))
 
+	err = multierr.Append(err, validation.ValidateResources(mt.Spec.Resources, config.NvidiaResourceName))
+
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMtErrorMessage, err.Error())
 	}
