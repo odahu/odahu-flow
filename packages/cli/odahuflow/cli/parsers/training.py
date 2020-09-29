@@ -22,8 +22,10 @@ from http.client import HTTPException
 
 import click
 from requests import RequestException
+
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
+    IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.logs import print_logs
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, \
     validate_output_format
@@ -224,7 +226,7 @@ def delete(client: ModelTrainingClient, train_id: str, file: str,
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(f'Model training {train_id} was not found. Ignore')
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelTraining.__name__, id=train_id))
 
 
 @training.command()

@@ -21,7 +21,9 @@ import time
 
 import click
 from click import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
+    IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
@@ -179,7 +181,7 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(f'Model route {mr_id} was not found. Ignore')
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelRoute.__name__, id=mr_id))
 
 
 def wait_operation_finish(timeout: int, wait: bool, mr_id: str, mr_client: ModelRouteClient):
