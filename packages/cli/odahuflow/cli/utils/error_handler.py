@@ -13,18 +13,18 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
+import click
 import logging
 import sys
 from contextlib import contextmanager
 from typing import Optional
 
-import click
 from odahuflow.sdk.logger import is_verbose_enabled
 
 LOG = logging.getLogger(__name__)
 
 TIMEOUT_ERROR_MESSAGE = 'Time out: operation has not been confirmed'
-IGNORE_NOT_FOUND_ERROR_MESSAGE = '{} was not found. Ignore'
+IGNORE_NOT_FOUND_ERROR_MESSAGE = '{kind} {id} was not found. Ignore'
 ID_AND_FILE_GIVEN_ERROR_MESSAGE = 'You should provide an ID or ' \
                                    'file parameter, not both.'
 ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide an ID or ' \

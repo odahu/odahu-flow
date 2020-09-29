@@ -13,17 +13,17 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
+import click
 import http
 
-import click
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, \
     IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.connection import ConnectionClient
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
+from odahuflow.sdk.clients.connection import ConnectionClient
 from odahuflow.sdk.models import Connection
 
 
@@ -187,4 +187,4 @@ def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: 
         if e.status_code != http.HTTPStatus.NOT_FOUND or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(conn_id))
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=Connection.__name__, id=conn_id))

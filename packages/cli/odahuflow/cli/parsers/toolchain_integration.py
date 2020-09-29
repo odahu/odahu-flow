@@ -13,9 +13,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
+import click
 import http
 
-import click
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
     check_id_or_file_params_present
@@ -167,4 +167,4 @@ def delete(client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not
         if e.status_code != http.HTTPStatus.NOT_FOUND or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(ti_id))
+        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ToolchainIntegration.__name__, id=ti_id))
