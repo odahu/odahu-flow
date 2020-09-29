@@ -126,24 +126,33 @@ Try Create Training that already exists
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${EntityAlreadyExists}  training post  ${RES_DIR}/valid/training.mlflow.default.update.yaml
 
-Try Update not existing and deleted Training
+Try Update not existing Training
     [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  training put  ${RES_DIR}/invalid/training.update.not_exist.json
+
+Try Update deleted Training
+    [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${WrongHttpStatusCode}  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
 
-Try Get id not existing and deleted Training
+Try Get id not existing Training
     [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  training get id  ${TRAIN_NOT_EXIST}
+
+Try Get id deleted Training
+    [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${WrongHttpStatusCode}  training get id  ${TRAIN_MLFLOW_DEFAULT}
 
-Try Delete not existing and deleted Training
+Try Delete not existing Training
     [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  training delete  ${TRAIN_NOT_EXIST}
+
+Try Delete deleted Training
+    [Tags]                      training  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${WrongHttpStatusCode}  training delete  ${TRAIN_MLFLOW_DEFAULT}
 
@@ -157,17 +166,23 @@ Try Create Packaging that already exists
     ${EntityAlreadyExists}      Format EntityAlreadyExists  ${PACKAGING}
     Call API and get Error      ${EntityAlreadyExists}  packaging post  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
 
-Try Update not existing and deleted Packaging
+Try Update not existing and Packaging
     [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packaging put  ${RES_DIR}/invalid/packaging.update.not_exist.yaml  ${TRAINING_ARTIFACT_NAME}
+
+Try Update deleted Packaging
+    [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
     Call API and get Error      ${WrongHttpStatusCode}  packaging put  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
 
-Try Get id not existing and deleted Packaging
+Try Get id not existing Packaging
     [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packaging get id  ${PACKAGING_NOT_EXIST}
+
+Try Get id deleted Packaging
+    [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
     Call API and get Error      ${WrongHttpStatusCode}  packaging get id  ${PACKAGING}
 
@@ -175,5 +190,8 @@ Try Delete not existing and deleted Packaging
     [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
     Call API and get Error      ${WrongHttpStatusCode}  packaging delete  ${PACKAGING_NOT_EXIST}
+
+Try Delete deleted Packaging
+    [Tags]                      packaging  negative
     ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
     Call API and get Error      ${WrongHttpStatusCode}  packaging delete  ${PACKAGING}
