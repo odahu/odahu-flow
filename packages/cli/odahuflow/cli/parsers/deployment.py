@@ -16,9 +16,10 @@
 """
 API commands for odahuflow cli
 """
-import click
 import logging
 import time
+
+import click
 
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE

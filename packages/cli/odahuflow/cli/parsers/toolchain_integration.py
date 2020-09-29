@@ -13,8 +13,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 #
-import click
 import http
+
+import click
 
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
