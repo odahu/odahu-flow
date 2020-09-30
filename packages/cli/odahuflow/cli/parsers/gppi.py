@@ -18,6 +18,7 @@ import sys
 
 import click
 
+from odahuflow.cli.utils import click_utils
 from odahuflow.sdk.gppi.executor import GPPITrainedModelBinary
 
 ODAHUFLOW_GPPI_MODEL_PATH_ENV_NAME = 'ODAHUFLOW_GPPI_MODEL_PATH'
@@ -30,7 +31,7 @@ class GppiCommandContextObj:
         self.model_binary = model_binary
 
 
-@click.group()
+@click.group(cls=click_utils.BetterHelpGroup)
 @click.option('--gppi-model-path', '-m', type=click.Path(exists=True, file_okay=False),
               envvar=ODAHUFLOW_GPPI_MODEL_PATH_ENV_NAME)
 @click.option('--use-current-env/--not-use-current-env', 'use_current_env',

@@ -21,6 +21,8 @@ import logging
 from typing import List, Dict, Optional
 
 import click
+
+from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.output import PLAIN_TEXT_OUTPUT_FORMAT, JSON_OUTPUT_FORMAT
 from odahuflow.sdk import config
@@ -36,7 +38,7 @@ from odahuflow.sdk.models import ToolchainIntegration, K8sTrainer
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group(name='training')
+@click.group(name='training', cls=click_utils.BetterHelpGroup)
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context
