@@ -85,35 +85,35 @@ Try Create Packager that already exists
     [Setup]                     Cleanup resource  packaging-integration  ${DOCKER_CLI}
     [Teardown]                  Cleanup resource  packaging-integration  ${DOCKER_CLI}
     Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
-    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DOCKER_CLI}
+    ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${DOCKER_CLI}
     Call API and get Error      ${EntityAlreadyExists}  packager post  ${RES_DIR}/valid/docker_cli_create.yaml
 
 Try Update not existing Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
 
 Try Update deleted Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
-    Call API and get Error      ${WrongHttpStatusCode}  packager put  ${RES_DIR}/valid/docker_cli_update.json
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_CLI}
+    Call API and get Error      ${404NotFound}  packager put  ${RES_DIR}/valid/docker_cli_update.json
 
 Try Get id not existing Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packager get id  ${DOCKER_NOT_EXIST}
 
 Try Get id deleted Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_REST}
-    Call API and get Error      ${WrongHttpStatusCode}  packager get id  ${DOCKER_REST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_REST}
+    Call API and get Error      ${404NotFound}  packager get id  ${DOCKER_REST}
 
 Try Delete not existing Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packager delete  ${DOCKER_NOT_EXIST}
 
 Try Delete deleted Packager
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DOCKER_CLI}
-    Call API and get Error      ${WrongHttpStatusCode}  packager delete  ${DOCKER_CLI}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_CLI}
+    Call API and get Error      ${404NotFound}  packager delete  ${DOCKER_CLI}
