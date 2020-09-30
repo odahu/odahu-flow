@@ -85,35 +85,35 @@ Try Create Toolchain that already exists
     [Setup]                     Cleanup resource  toolchain-integration  ${MLFLOW}
     [Teardown]                  Cleanup resource  toolchain-integration  ${MLFLOW}
     Call API                    toolchain post  ${RES_DIR}/valid/mlflow_update.json
-    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${MLFLOW}
+    ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${MLFLOW}
     Call API and get Error      ${EntityAlreadyExists}  toolchain post  ${RES_DIR}/valid/mlflow_update.json
 
 Try Update not existing Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/invalid/mlflow_gpu_update_not_exist.yaml
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  toolchain put  ${RES_DIR}/invalid/mlflow_gpu_update_not_exist.yaml
 
 Try Update deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain put  ${RES_DIR}/valid/mlflow-gpu_create.json
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_GPU}
+    Call API and get Error      ${404NotFound}  toolchain put  ${RES_DIR}/valid/mlflow-gpu_create.json
 
 Try Get id not existing Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  toolchain get id  ${MLFLOW_NOT_EXIST}
 
 Try Get id deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain get id  ${MLFLOW}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW}
+    Call API and get Error      ${404NotFound}  toolchain get id  ${MLFLOW}
 
 Try Delete not existing Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  toolchain delete  ${MLFLOW_NOT_EXIST}
 
 Try Delete deleted Toolchain
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${MLFLOW_GPU}
-    Call API and get Error      ${WrongHttpStatusCode}  toolchain delete  ${MLFLOW_GPU}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_GPU}
+    Call API and get Error      ${404NotFound}  toolchain delete  ${MLFLOW_GPU}
