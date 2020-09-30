@@ -119,8 +119,8 @@ Delete Model Deployment and Check that Model Deployment does not exist
     Wait until delete finished  deployment  entity=${DEPLOYMENT}
     Command response list should not contain id  deployment  ${DEPLOYMENT}
     Command response list should not contain id  route  ${MODEL}
-    ${StatusCode}               Format WrongHttpStatusCode  ${DEPLOYMENT}
-    Call API and get Error      ${StatusCode}  deployment get id  ${DEPLOYMENT}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
+    Call API and get Error      ${404NotFound}  deployment get id  ${DEPLOYMENT}
 
 #############################
 #    NEGATIVE TEST CASES    #
