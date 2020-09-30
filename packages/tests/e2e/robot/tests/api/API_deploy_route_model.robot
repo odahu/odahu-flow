@@ -8,10 +8,6 @@ ${MODEL}                            ${DEPLOYMENT}
 ${REQUEST}                          SEPARATOR=
 ...                                 { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 ${REQUEST_RESPONSE}                 { "prediction": [ [ 42 ] ], "columns": [ "result" ] }
-${WrongHttpStatusCode}              SEPARATOR=
-...                                 WrongHttpStatusCode: Got error from server: entity "{entity name}" is not found (status: 404)
-${WrongStatusCodeReturned}          SEPARATOR=
-...                                 Wrong status code returned: 404. Data: . URL: {model url}
 
 ${DEPLOYMENT_NOT_EXIST}             deployment-api-not-exist
 ${MODEL_NOT_EXIST}                  ${DEPLOYMENT_NOT_EXIST}
@@ -47,12 +43,12 @@ Get model Url
 
 Format WrongHttpStatusCode
     [Arguments]       ${entity name}
-    ${error output}   format string  ${WrongHttpStatusCode}  entity name=${entity name}
+    ${error output}   format string  ${404NotFound}  entity name=${entity name}
     [return]          ${error output}
 
-Format WrongStatusCodeReturned
+        format string  ${404 Model NotFoundTemplate}
     [Arguments]       ${model url}
-    ${error output}   format string  ${WrongStatusCodeReturned}  model url=${model url}
+    ${error output}   format string  ${404ModelNotFound}  model url=${model url}
     [return]          ${error output}
 
 *** Test Cases ***
@@ -137,61 +133,61 @@ Try Create Deployment that already exists
     [Setup]                     Cleanup resource  deployment  ${DEPLOYMENT}
     [Teardown]                  Cleanup resource  deployment  ${DEPLOYMENT}
     Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  packaging_image
-    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${DEPLOYMENT}
+    ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${DEPLOYMENT}
     Call API and get Error      ${EntityAlreadyExists}  deployment post  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
 
 Try Update not existing Deployment
     [Tags]                      deployment  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  packaging_image
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  packaging_image
 
 Try Update deleted Deployment
     [Tags]                      deployment  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
+    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
 
 Try Get id not existing Deployment
     [Tags]                      deployment  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  deployment get id  ${DEPLOYMENT_NOT_EXIST}
 
 Try Get id deleted Deployment
     [Tags]                      deployment  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment get id  ${DEPLOYMENT}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
+    Call API and get Error      ${404NotFound}  deployment get id  ${DEPLOYMENT}
 
 Try Delete not existing Deployment
     [Tags]                      deployment  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment delete  ${DEPLOYMENT_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  deployment delete  ${DEPLOYMENT_NOT_EXIST}
 
 Try Delete deleted Deployment
     [Tags]                      deployment  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${DEPLOYMENT}
-    Call API and get Error      ${WrongHttpStatusCode}  deployment delete  ${DEPLOYMENT}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
+    Call API and get Error      ${404NotFound}  deployment delete  ${DEPLOYMENT}
 
 #  MODEL
 #############
 Try Get info not existing Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
-    ${WrongStatusCodeReturned}  Format WrongStatusCodeReturned  ${model_url}/api/model/info
-    Call API and get Error      ${WrongStatusCodeReturned}  model get  url=${model_url}
+    ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
+    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}
 
 Try Get info deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT}
-    ${WrongStatusCodeReturned}  Format WrongStatusCodeReturned  ${model_url}/api/model/info
-    Call API and get Error      ${WrongStatusCodeReturned}  model get  url=${model_url}
+    ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
+    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}
 
 Try Invoke not existing and deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
-    ${WrongStatusCodeReturned}  Format WrongStatusCodeReturned  ${model_url}/api/model/invoke
-    Call API and get Error      ${WrongStatusCodeReturned}  model post  url=${model_url}  json_input=${REQUEST}
+    ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke
+    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  json_input=${REQUEST}
 
 Try Invoke deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT}
-    ${WrongStatusCodeReturned}  Format WrongStatusCodeReturned  ${model_url}/api/model/invoke
-    Call API and get Error      ${WrongStatusCodeReturned}  model post  url=${model_url}  json_input=${REQUEST}
+    ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke
+    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  json_input=${REQUEST}

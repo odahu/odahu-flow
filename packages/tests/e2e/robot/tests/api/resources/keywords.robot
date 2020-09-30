@@ -3,8 +3,12 @@ Documentation       API keywords
 Library             Collections
 
 *** Variables ***
-${404NotFoundTemplate}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
-${EntityAlreadyExists}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
+${404 NotFound Template}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
+${404 Model NotFoundTemplate}      Wrong status code returned: 404. Data: . URL: {}
+${409 Conflict Template}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
+
+${APIConnectionException}          APIConnectionException: Can not reach {base url}
+${IncorrectToken}                  IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
 
 *** Keywords ***
 Call API
