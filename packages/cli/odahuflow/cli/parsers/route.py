@@ -23,7 +23,8 @@ import click
 from click import pass_obj
 
 from odahuflow.cli.utils import click_utils
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE
+from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
+    IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
