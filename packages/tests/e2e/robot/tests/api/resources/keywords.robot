@@ -3,6 +3,7 @@ Documentation       API keywords
 Library             Collections
 
 *** Variables ***
+# Error Templates
 ${404 NotFound Template}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
 ${404 Model NotFoundTemplate}      Wrong status code returned: 404. Data: . URL: {}
 ${409 Conflict Template}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
