@@ -2,6 +2,10 @@
 Documentation       API keywords
 Library             Collections
 
+*** Variables ***
+${404NotFoundTemplate}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
+${EntityAlreadyExists}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
+
 *** Keywords ***
 Call API
     [Arguments]                  ${keyword}  @{arguments}  &{named arguments}
@@ -158,13 +162,3 @@ Pick packaging image
     ${image}                      get variable value  ${result.status.results[0]}  ${EMPTY}
     ${image_value}                get variable value  ${image.value}  ${EMPTY}
     [Return]                      ${image_value}
-
-Format WrongHttpStatusCode
-    [Arguments]                     ${entity name}
-    ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)
-    [return]                        ${error output}
-
-Format EntityAlreadyExists
-    [Arguments]                     ${entity name}
-    ${error output}                 format string  EntityAlreadyExists: Got error from server: entity "${entity name}" already exists (status: 409)
-    [return]                        ${error output}

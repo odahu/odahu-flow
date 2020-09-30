@@ -87,40 +87,40 @@ Try Create Connection that already exists
 
 Try Update not existing Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  connection put  ${RES_DIR}/invalid/git_connection_update.not_exist.yaml
 
 Try Update deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection put  ${RES_DIR}/valid/git_connection_update.yaml
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_VALID}
+    Call API and get Error      ${404NotFound}  connection put  ${RES_DIR}/valid/git_connection_update.yaml
 
 Try Get id not existing Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_NOT_EXIST}
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  connection get id  ${GIT_NOT_EXIST}
 
 Try Get id deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection get id  ${GIT_VALID}
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_VALID}
+    Call API and get Error      ${404NotFound}  connection get id  ${GIT_VALID}
 
 Try Get id decrypted not existing Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_NOT_EXIST}
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  connection get id decrypted  ${GIT_NOT_EXIST}
 
 Try Get id decrypted deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection get id decrypted  ${GIT_VALID}
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_VALID}
+    Call API and get Error      ${404NotFound}  connection get id decrypted  ${GIT_VALID}
 
 Try Delete not existing Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_NOT_EXIST}
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  connection delete  ${GIT_NOT_EXIST}
 
 Try Delete deleted Connection
     [Tags]                      negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${GIT_VALID}
-    Call API and get Error      ${WrongHttpStatusCode}  connection delete  ${GIT_VALID}
+    ${404NotFound}              format string  ${404NotFoundTemplate}  ${GIT_VALID}
+    Call API and get Error      ${404NotFound}  connection delete  ${GIT_VALID}
