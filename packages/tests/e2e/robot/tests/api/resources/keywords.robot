@@ -28,21 +28,9 @@ Get Logs
     [Arguments]                  ${entity type}  ${entity id}
     Call API                     ${entity type} get log  ${entity id}
 
-Log id
-    [Arguments]                  ${input}
-    ${output}                    set variable  ${input.id}
-    Log                          ${output}
-    [Return]                     ${output}
-
 Log Status
     [Arguments]                  ${input}
     ${output}                    set variable  ${input.status}
-    Log  ${output}
-    [Return]                     ${output}
-
-Log State
-    [Arguments]                  ${input}
-    ${output}                    set variable  ${input.state}
     Log  ${output}
     [Return]                     ${output}
 
