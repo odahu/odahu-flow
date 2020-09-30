@@ -7,9 +7,6 @@ ${invalid_id}           12invalid-id
 ${invalid_secret}       234-invalid-client-secret
 ${invalid_issuer}       https://-invalid-issuer
 
-${APIConnectionException}   APIConnectionException: Can not reach {base url}
-${IncorrectToken}           IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
-
 *** Settings ***
 Documentation       API for login
 Resource            ../../resources/keywords.robot
@@ -22,11 +19,6 @@ Force Tags          api  sdk  security  login
 Test Timeout        1 minute
 
 *** Keywords ***
-Format Error
-    [Arguments]         ${error string}  &{placeholder values}
-    ${error output}     format string  ${error string}  &{placeholder values}
-    [return]            ${error output}
-
 Verify login
     [Arguments]             &{keyword arguments}
     Call API  config get    &{keyword arguments}
@@ -54,9 +46,9 @@ Try login with invalid credentials
     ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
 
 Try login with empty url and valid token
-    ${error}        Format Error  ${APIConnectionException}  base url=${EMPTY}
+    ${error}                    format string  ${APIConnectionException}  base url=${EMPTY}
     Call API and get Error      ${error}  config get  base_url=${EMPTY}  token=${AUTH_TOKEN}
 
 Try login with invalid url and valid token
-    ${error}        Format Error  ${APIConnectionException}  base url=${invalid_url}
+    ${error}                    format string  ${APIConnectionException}  base url=${invalid_url}
     Call API and get Error      ${error}  config get  base_url=${invalid_url}  token=${AUTH_TOKEN}
