@@ -23,6 +23,7 @@ from http.client import HTTPException
 import click
 from requests import RequestException
 
+from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
     IGNORE_NOT_FOUND_ERROR_MESSAGE
@@ -41,7 +42,7 @@ LOG_READ_TIMEOUT_SECONDS = 60
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group()
+@click.group(cls=click_utils.BetterHelpGroup)
 @click.option('--url', help='API server host', default=config.API_URL)
 @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
 @click.pass_context

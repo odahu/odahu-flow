@@ -19,10 +19,12 @@ Config commands for odahuflow cli
 import sys
 
 import click
+
+from odahuflow.cli.utils import click_utils
 from odahuflow.sdk import config
 
 
-@click.group(name='config')
+@click.group(name='config', cls=click_utils.BetterHelpGroup)
 def config_group():
     """
     Odahuflow CLI config manipulation.\n

@@ -19,6 +19,7 @@ CLI entrypoint
 
 import click
 import click_completion
+
 from odahuflow.cli.parsers.bulk import bulk
 from odahuflow.cli.parsers.completion import completion
 from odahuflow.cli.parsers.config import config_group
@@ -34,10 +35,10 @@ from odahuflow.cli.parsers.security import login, logout
 from odahuflow.cli.parsers.template import template
 from odahuflow.cli.parsers.toolchain_integration import toolchain_integration
 from odahuflow.cli.parsers.training import training
-from odahuflow.cli.utils.abbr import AbbreviationGroup
+from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.error_handler import cli_error_handler
-from odahuflow.sdk.logger import configure_logging
 from odahuflow.cli.version import version
+from odahuflow.sdk.logger import configure_logging
 
 COMMAND_GROUPS = [
     config_group,
@@ -65,7 +66,8 @@ click_completion.init()
 CONTEXT_SETTINGS = dict(max_content_width=100,
                         help_option_names=['-h', '--help'])
 
-@click.group(cls=AbbreviationGroup, context_settings=CONTEXT_SETTINGS)
+
+@click.group(cls=click_utils.AbbreviationGroup, context_settings=CONTEXT_SETTINGS)
 @click.option('--verbose/--non-verbose', default=False)
 def base(verbose=False):
     """

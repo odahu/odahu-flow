@@ -19,11 +19,13 @@ EDGE commands for odahuflow cli
 import json
 
 import click
+
+from odahuflow.cli.utils import click_utils
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.model import ModelClient, calculate_url
 
 
-@click.group()
+@click.group(cls=click_utils.BetterHelpGroup)
 def model():
     """
     Allow you to perform actions on deployed models
