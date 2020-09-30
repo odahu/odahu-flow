@@ -123,38 +123,38 @@ Try Create Training that already exists
     [Setup]                     Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     [Teardown]                  Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     Call API                    training post  ${RES_DIR}/valid/training.mlflow.default.yaml
-    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${TRAIN_MLFLOW_DEFAULT}
+    ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${TRAIN_MLFLOW_DEFAULT}
     Call API and get Error      ${EntityAlreadyExists}  training post  ${RES_DIR}/valid/training.mlflow.default.update.yaml
 
 Try Update not existing Training
     [Tags]                      training  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  training put  ${RES_DIR}/invalid/training.update.not_exist.json
+    ${404NotFound}              format string  ${404 NotFound Template}  ${TRAIN_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  training put  ${RES_DIR}/invalid/training.update.not_exist.json
 
 Try Update deleted Training
     [Tags]                      training  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
-    Call API and get Error      ${WrongHttpStatusCode}  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
+    ${404NotFound}              format string  ${404 NotFound Template}  ${TRAIN_MLFLOW_DEFAULT}
+    Call API and get Error      ${404NotFound}  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
 
 Try Get id not existing Training
     [Tags]                      training  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  training get id  ${TRAIN_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${TRAIN_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  training get id  ${TRAIN_NOT_EXIST}
 
 Try Get id deleted Training
     [Tags]                      training  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
-    Call API and get Error      ${WrongHttpStatusCode}  training get id  ${TRAIN_MLFLOW_DEFAULT}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${TRAIN_MLFLOW_DEFAULT}
+    Call API and get Error      ${404NotFound}  training get id  ${TRAIN_MLFLOW_DEFAULT}
 
 Try Delete not existing Training
     [Tags]                      training  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  training delete  ${TRAIN_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${TRAIN_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  training delete  ${TRAIN_NOT_EXIST}
 
 Try Delete deleted Training
     [Tags]                      training  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${TRAIN_MLFLOW_DEFAULT}
-    Call API and get Error      ${WrongHttpStatusCode}  training delete  ${TRAIN_MLFLOW_DEFAULT}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${TRAIN_MLFLOW_DEFAULT}
+    Call API and get Error      ${404NotFound}  training delete  ${TRAIN_MLFLOW_DEFAULT}
 
 #  PACKAGING
 #############
@@ -163,35 +163,35 @@ Try Create Packaging that already exists
     [Setup]                     Cleanup resource  packaging  ${PACKAGING}
     [Teardown]                  Cleanup resource  packaging  ${PACKAGING}
     Call API                    packaging post  ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
-    ${EntityAlreadyExists}      Format EntityAlreadyExists  ${PACKAGING}
+    ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${PACKAGING}
     Call API and get Error      ${EntityAlreadyExists}  packaging post  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
 
 Try Update not existing and Packaging
     [Tags]                      packaging  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  packaging put  ${RES_DIR}/invalid/packaging.update.not_exist.yaml  ${TRAINING_ARTIFACT_NAME}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${PACKAGING_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packaging put  ${RES_DIR}/invalid/packaging.update.not_exist.yaml  ${TRAINING_ARTIFACT_NAME}
 
 Try Update deleted Packaging
     [Tags]                      packaging  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
-    Call API and get Error      ${WrongHttpStatusCode}  packaging put  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${PACKAGING}
+    Call API and get Error      ${404NotFound}  packaging put  ${RES_DIR}/valid/packaging.create.yaml  ${TRAINING_ARTIFACT_NAME}
 
 Try Get id not existing Packaging
     [Tags]                      packaging  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  packaging get id  ${PACKAGING_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${PACKAGING_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packaging get id  ${PACKAGING_NOT_EXIST}
 
 Try Get id deleted Packaging
     [Tags]                      packaging  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
-    Call API and get Error      ${WrongHttpStatusCode}  packaging get id  ${PACKAGING}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${PACKAGING}
+    Call API and get Error      ${404NotFound}  packaging get id  ${PACKAGING}
 
 Try Delete not existing and deleted Packaging
     [Tags]                      packaging  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING_NOT_EXIST}
-    Call API and get Error      ${WrongHttpStatusCode}  packaging delete  ${PACKAGING_NOT_EXIST}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${PACKAGING_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packaging delete  ${PACKAGING_NOT_EXIST}
 
 Try Delete deleted Packaging
     [Tags]                      packaging  negative
-    ${WrongHttpStatusCode}      Format WrongHttpStatusCode  ${PACKAGING}
-    Call API and get Error      ${WrongHttpStatusCode}  packaging delete  ${PACKAGING}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${PACKAGING}
+    Call API and get Error      ${404NotFound}  packaging delete  ${PACKAGING}
