@@ -16,15 +16,15 @@ Library                odahuflow.robot.libraries.sdk_wrapper.Connection
 Suite Setup            Run Keywords
 ...                    Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                    Login to the api and edge  AND
-...                    Cleanup all Resources
+...                    Cleanup All Resources
 Suite Teardown         Run Keywords
-...                    Cleanup all Resources  AND
+...                    Cleanup All Resources  AND
 ...                    Remove File  ${LOCAL_CONFIG}
 Force Tags             api  sdk  connection
 Test Timeout           5 minutes
 
 *** Keywords ***
-Cleanup all Resources
+Cleanup All Resources
     Cleanup resource  connection  ${GIT_VALID}
     Cleanup resource  connection  ${DOCKER_VALID}
     Cleanup resource  connection  ${GIT_NOT_EXIST}

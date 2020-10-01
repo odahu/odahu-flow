@@ -13,28 +13,24 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelTraining
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
-...                 Cleanup Resources
+...                 Cleanup All Resources
 Suite Teardown      Run Keywords
-...                 Cleanup Resources  AND
+...                 Cleanup All Resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
-Force Tags          api  sdk
+Force Tags          api  sdk  training
 Test Timeout        60 minutes
 
 *** Keywords ***
-Cleanup Resources
-    [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW_NOT_DEFAULT} --ignore-not-found
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAIN_MLFLOW-GPU_NOT_DEFAULT} --ignore-not-found
+Cleanup All Resources
+    Cleanup resource  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
+    Cleanup resource  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
 *** Test Cases ***
 Check model trainings do not exist
-    [Tags]                      training
     [Documentation]             should not contain training that has not been run
     Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
 Create Model Training, mlflow toolchain, not default
-    [Tags]                      training
-    [Documentation]             create model training and check that one exists
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.not_default.yaml
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=@{exp_result}
@@ -42,7 +38,6 @@ Create Model Training, mlflow toolchain, not default
     Status State Should Be      ${result}  succeeded
 
 Create and Delete Model Training, mlflow-gpu toolchain, not default
-    [Tags]                      training
     [Documentation]             create model training with mlflow-gpu toolchain and not default values
     ...                         cluster with GPU node pools enabled
     Pass Execution If           not ${IS_GPU_ENABLED}  GPU node pools is not enabled on the cluster
@@ -58,13 +53,10 @@ Create and Delete Model Training, mlflow-gpu toolchain, not default
     Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
 Get Model Training by id
-    [Tags]                      training
     ${result}                   Call API  training get id  ${TRAIN_MLFLOW_NOT_DEFAULT}
     ID should be equal          ${result}  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
 Delete Model Trainings and Check that Model Training do not exist
-    [Tags]                      training
-    [Documentation]             delete model trainings
     Command response list should contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
     Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
     Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
