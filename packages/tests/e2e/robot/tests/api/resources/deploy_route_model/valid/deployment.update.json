@@ -7,16 +7,16 @@
       "limits": {
         "gpu": "",
         "cpu": "2",
-        "memory": "2Gi"
+        "memory": "3Gi"
       },
       "requests": {
         "gpu": "",
         "cpu": "1",
-        "memory": "1Gi"
+        "memory": "2Gi"
       }
     },
-    "minReplicas": 3,
-    "maxReplicas": 5,
+    "minReplicas": 1,
+    "maxReplicas": 1,
     "livenessProbeInitialDelay": 10,
     "readinessProbeInitialDelay": 10,
     "roleName": "test_updated",

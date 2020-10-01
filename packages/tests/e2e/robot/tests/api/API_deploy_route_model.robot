@@ -74,7 +74,7 @@ Update deployment
     Call API                    deployment put  ${RES_DIR}/valid/deployment.update.json  ${image}
     ${check_changes}            Call API  deployment get id  ${DEPLOYMENT}
     should be equal             ${check_changes.spec.role_name}  test_updated
-    ${exp_result}               create List   Ready
+    ${exp_result}               create list   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Status State Should Be      ${result}  Ready
     CreatedAt and UpdatedAt times should not be equal  ${result}
