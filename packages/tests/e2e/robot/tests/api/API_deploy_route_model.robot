@@ -8,7 +8,6 @@ ${MODEL}                            ${DEPLOYMENT}
 ${REQUEST}                          SEPARATOR=
 ...                                 { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 ${REQUEST_RESPONSE}                 { "prediction": [ [ 42 ] ], "columns": [ "result" ] }
-
 ${DEPLOYMENT_NOT_EXIST}             deployment-api-not-exist
 ${MODEL_NOT_EXIST}                  ${DEPLOYMENT_NOT_EXIST}
 
