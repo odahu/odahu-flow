@@ -1,22 +1,22 @@
 {
   "kind": "ModelDeployment",
-  "id": "wine-api-testing",
+  "id": "deployment-api-not-exist",
   "spec": {
     "image": null,
     "resources": {
       "limits": {
         "gpu": "",
         "cpu": "2",
-        "memory": "3Gi"
+        "memory": "2Gi"
       },
       "requests": {
         "gpu": "",
         "cpu": "1",
-        "memory": "2Gi"
+        "memory": "1Gi"
       }
     },
-    "minReplicas": 1,
-    "maxReplicas": 1,
+    "minReplicas": 3,
+    "maxReplicas": 5,
     "livenessProbeInitialDelay": 10,
     "readinessProbeInitialDelay": 10,
     "roleName": "test_updated",

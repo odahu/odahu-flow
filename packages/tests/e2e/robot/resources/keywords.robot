@@ -134,6 +134,10 @@ Cleanup example resources
     StrictShell  odahuflowctl --verbose pack delete --id ${example_id} --ignore-not-found
     StrictShell  odahuflowctl --verbose dep delete --id ${example_id} --ignore-not-found
 
+Cleanup resource
+    [Arguments]  ${entity type}  ${entity id}
+    StrictShell  odahuflowctl --verbose ${entity type} delete --id ${entity id} --ignore-not-found
+
 Run example model
     [Arguments]  ${example_id}  ${manifests_dir}
     StrictShell  odahuflowctl --verbose train create -f ${manifests_dir}/training.odahuflow.yaml --id ${example_id}
