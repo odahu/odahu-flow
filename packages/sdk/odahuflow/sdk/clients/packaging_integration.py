@@ -75,7 +75,7 @@ class PackagingIntegrationClient(RemoteAPIClient):
         :param name: Name of a Packaging Integration
         :return Message from API server
         """
-        return self.query(f'{PACKING_INTEGRATION_URL}/{name}', action='DELETE')
+        return self.query(f'{PACKING_INTEGRATION_URL}/{name}', action='DELETE')['message']
 
 
 class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
@@ -130,4 +130,4 @@ class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
         :param name: Name of a Packaging Integration
         :return Message from API server
         """
-        return await self.query(f'{PACKING_INTEGRATION_URL}/{name}', action='DELETE')
+        return await self.query(f'{PACKING_INTEGRATION_URL}/{name}', action='DELETE')['message']

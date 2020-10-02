@@ -81,7 +81,7 @@ class ModelRouteClient(RemoteAPIClient):
         :param name: Name of a Model Route
         :return Message from API server
         """
-        return self.query(f'{MODEL_ROUTE_URL}/{name}', action='DELETE')
+        return self.query(f'{MODEL_ROUTE_URL}/{name}', action='DELETE')['message']
 
 
 class AsyncModelRouteClient(AsyncRemoteAPIClient):
@@ -136,4 +136,4 @@ class AsyncModelRouteClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Route
         :return Message from API server
         """
-        return await self.query(f'{MODEL_ROUTE_URL}/{name}', action='DELETE')
+        return await self.query(f'{MODEL_ROUTE_URL}/{name}', action='DELETE')['message']
