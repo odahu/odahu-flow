@@ -6,6 +6,7 @@ spec:
     - connectionName: docker-ci
       name: docker-push
   arguments:
-    dockerfileAddCondaInstallation: "must be boolean"
+    timeout: "must be integer"
+    dockerfileBaseImage: True
   integrationName: docker-cli
 
