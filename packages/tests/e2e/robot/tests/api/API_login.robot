@@ -50,5 +50,6 @@ Try login with empty url and valid token
     Call API and get Error      ${error}  config get  base_url=${EMPTY}  token=${AUTH_TOKEN}
 
 Try login with invalid url and valid token
+    [Timeout]                   20 minutes
     ${error}                    format string  ${APIConnectionException}  base url=${invalid_url}
     Call API and get Error      ${error}  config get  base_url=${invalid_url}  token=${AUTH_TOKEN}
