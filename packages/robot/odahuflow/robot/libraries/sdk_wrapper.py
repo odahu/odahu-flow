@@ -13,9 +13,16 @@ from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
 
-from odahuflow.sdk.clients.api import RemoteAPIClient
 
-remote_api = RemoteAPIClient()
+class Login:
+
+    @staticmethod
+    def config_get(base_url: str = config.API_URL, token=None,
+                   client_id=None, client_secret=None, issuer_url=None):
+        return ConfigurationClient(
+            base_url=base_url, token=token,
+            client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
+        ).get()
 
 
 class Configuration:

@@ -1,0 +1,8 @@
+id: packaging-api-not-exist
+kind: ModelPackaging
+spec:
+  artifactName:  # Use artifact name from Train step
+  targets:
+    - connectionName: docker-ci  # Docker registry when output image will be stored
+      name: docker-push
+  integrationName: docker-rest

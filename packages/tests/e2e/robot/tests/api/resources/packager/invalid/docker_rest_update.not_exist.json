@@ -1,0 +1,65 @@
+{
+  "kind": "PackagingIntegration",
+  "id": "docker-rest-api-not-exist",
+  "spec": {
+    "entrypoint": "updated",
+    "defaultImage": "updated",
+    "privileged": true,
+    "schema": {
+      "targets": [
+        {
+          "name": "docker-push",
+          "connectionTypes": [
+            "docker",
+            "ecr"
+          ],
+          "default": "docker-ci",
+          "required": true
+        },
+        {
+          "name": "docker-pull",
+          "connectionTypes": [
+            "docker",
+            "ecr"
+          ],
+          "default": "odahuflow-docker-repository",
+          "required": false
+        }
+      ],
+      "arguments": {
+        "properties": [
+          {
+            "name": "dockerfileBaseImage",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Base image for Dockerfile."
+              },
+              {
+                "name": "type",
+                "value": "string"
+              }
+            ]
+          },
+          {
+            "name": "imageName",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "This option provides a way to specify the Docker image name. You can hardcode the full name or specify a template. Available template values:\n  - Name (Model Name)\n  - Version (Model Version)\n  - RandomUUID\nThe default value is '{{ Name }}/{{ Version }}:{{ RandomUUID }}'.\nImage name examples:\n  - myservice:123\n  - {{ Name }}:{{ Version }}\n"
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

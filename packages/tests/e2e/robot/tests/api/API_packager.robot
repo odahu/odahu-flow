@@ -1,31 +1,31 @@
 *** Variables ***
-${LOCAL_CONFIG}     odahuflow/api_packager
-${RES_DIR}          ${CURDIR}/resources/packager
-${DOCKER_CLI}       docker-cli-api-testing
-${DOCKER_REST}      docker-rest-api-testing
+${LOCAL_CONFIG}         odahuflow/api_packager
+${RES_DIR}              ${CURDIR}/resources/packager
+${DOCKER_CLI}           docker-cli-api-testing
+${DOCKER_REST}          docker-rest-api-testing
+${DOCKER_NOT_EXIST}     docker-rest-api-not-exist
 
 *** Settings ***
 Documentation       API of packagers
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library             odahuflow.robot.libraries.sdk_wrapper
 Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
-...                 Cleanup Resources
+...                 Cleanup All Resources
 Suite Teardown      Run Keywords
-...                 Cleanup Resources  AND
+...                 Cleanup All Resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  packager
 Test Timeout        5 minutes
 
 *** Keywords ***
-Cleanup Resources
-    [Documentation]  Deletes of created resources
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_CLI} --ignore-not-found
-    StrictShell  odahuflowctl --verbose packaging-integration delete --id ${DOCKER_REST} --ignore-not-found
+Cleanup All Resources
+    Cleanup resource  packaging-integration  ${DOCKER_CLI}
+    Cleanup resource  packaging-integration  ${DOCKER_REST}
+    Cleanup resource  packaging-integration  ${DOCKER_NOT_EXIST}
 
 *** Test Cases ***
 Get list of packagers
@@ -76,3 +76,44 @@ Delete Docker REST packager
 
 Check that packagers do not exist
     Command response list should not contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
+
+#############################
+#    NEGATIVE TEST CASES    #
+#############################
+Try Create Packager that already exists
+    [Tags]                      negative
+    [Setup]                     Cleanup resource  packaging-integration  ${DOCKER_CLI}
+    [Teardown]                  Cleanup resource  packaging-integration  ${DOCKER_CLI}
+    Call API                    packager post  ${RES_DIR}/valid/docker_cli_create.yaml
+    ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${DOCKER_CLI}
+    Call API and get Error      ${EntityAlreadyExists}  packager post  ${RES_DIR}/valid/docker_cli_create.yaml
+
+Try Update not existing Packager
+    [Tags]                      negative
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packager put  ${RES_DIR}/invalid/docker_rest_update.not_exist.json
+
+Try Update deleted Packager
+    [Tags]                      negative
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_CLI}
+    Call API and get Error      ${404NotFound}  packager put  ${RES_DIR}/valid/docker_cli_update.json
+
+Try Get id not existing Packager
+    [Tags]                      negative
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packager get id  ${DOCKER_NOT_EXIST}
+
+Try Get id deleted Packager
+    [Tags]                      negative
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_REST}
+    Call API and get Error      ${404NotFound}  packager get id  ${DOCKER_REST}
+
+Try Delete not existing Packager
+    [Tags]                      negative
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_NOT_EXIST}
+    Call API and get Error      ${404NotFound}  packager delete  ${DOCKER_NOT_EXIST}
+
+Try Delete deleted Packager
+    [Tags]                      negative
+    ${404NotFound}              format string  ${404 NotFound Template}  ${DOCKER_CLI}
+    Call API and get Error      ${404NotFound}  packager delete  ${DOCKER_CLI}

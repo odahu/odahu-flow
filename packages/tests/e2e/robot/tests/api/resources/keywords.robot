@@ -2,6 +2,15 @@
 Documentation       API keywords
 Library             Collections
 
+*** Variables ***
+# Error Templates
+${404 NotFound Template}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
+${404 Model NotFoundTemplate}      Wrong status code returned: 404. Data: . URL: {}
+${409 Conflict Template}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
+
+${APIConnectionException}          APIConnectionException: Can not reach {base url}
+${IncorrectToken}                  IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
+
 *** Keywords ***
 Call API
     [Arguments]                  ${keyword}  @{arguments}  &{named arguments}
@@ -19,21 +28,9 @@ Get Logs
     [Arguments]                  ${entity type}  ${entity id}
     Call API                     ${entity type} get log  ${entity id}
 
-Log id
-    [Arguments]                  ${input}
-    ${output}                    set variable  ${input.id}
-    Log                          ${output}
-    [Return]                     ${output}
-
 Log Status
     [Arguments]                  ${input}
     ${output}                    set variable  ${input.status}
-    Log  ${output}
-    [Return]                     ${output}
-
-Log State
-    [Arguments]                  ${input}
-    ${output}                    set variable  ${input.state}
     Log  ${output}
     [Return]                     ${output}
 
@@ -158,8 +155,3 @@ Pick packaging image
     ${image}                      get variable value  ${result.status.results[0]}  ${EMPTY}
     ${image_value}                get variable value  ${image.value}  ${EMPTY}
     [Return]                      ${image_value}
-
-Format WrongHttpStatusCode
-    [Arguments]                     ${entity name}
-    ${error output}                 format string  WrongHttpStatusCode: Got error from server: entity "${entity name}" is not found (status: 404)
-    [return]                        ${error output}
