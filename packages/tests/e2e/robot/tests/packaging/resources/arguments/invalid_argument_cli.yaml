@@ -8,5 +8,6 @@ spec:
   arguments:
     timeout: "must be integer"
     dockerfileBaseImage: True
+    dockerfileAddCondaInstallation: "must be boolean"
   integrationName: docker-cli
 
