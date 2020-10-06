@@ -359,7 +359,7 @@ MODEL_HOST = ConfigVariableDeclaration('MODEL_HOST', '', str, 'Default host of m
 
 MODEL_DEPLOYMENT_NAME = ConfigVariableDeclaration('MODEL_DEPLOYMENT_NAME', '', str, 'Model deployment name', True)
 
-MODEL_ROUTE_NAME = ConfigVariableDeclaration('MODEL_ROUTE_NAME', '', str, 'Model deployment name', True)
+MODEL_ROUTE_NAME = ConfigVariableDeclaration('MODEL_ROUTE_NAME', '', str, 'Model route name', True)
 
 # API endpoint
 API_URL = ConfigVariableDeclaration('API_URL', 'http://localhost:5000', str,
@@ -383,7 +383,7 @@ ODAHUFLOWCTL_OAUTH_CLIENT_ID = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLI
                                                          True)
 
 ODAHUFLOWCTL_OAUTH_CLIENT_SECRET = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLIENT_SECRET', '', str,
-                                                             'Set OAuth2 Client id',
+                                                             'Set OAuth2 Client secret',
                                                              True)
 
 ODAHUFLOWCTL_OAUTH_SCOPE = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_SCOPE',
@@ -409,7 +409,7 @@ ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_O
 ODAHUFLOWCTL_OAUTH_AUTH_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_AUTH_URL',
                                                         '',
                                                         str,
-                                                        'OAuth2 token issuing URL',
+                                                        'OAuth2 authorization URL',
                                                         True)
 
 JUPYTER_REDIRECT_URL = ConfigVariableDeclaration('JUPYTER_REDIRECT_URL',

@@ -142,11 +142,11 @@ Apply changes on a good profile, remove on teardown
     Check toolchain integration not exist    ${TI_2_ID}
     Check packaging integration              ${PI_1_ID}
     Apply bulk file and check counters     correct-v2.odahuflow.yaml  1  4  0
-    Check connection             ${CONN_1_ID}
-    Check connection             ${CONN_2_ID}
-    Check toolchain integration  ${TI_1_ID}
-    Check toolchain integration  ${TI_2_ID}
-    Check packaging integration  ${PI_1_ID}
+    Check connection                         ${CONN_1_ID}
+    Check connection                         ${CONN_2_ID}
+    Check toolchain integration              ${TI_1_ID}
+    Check toolchain integration              ${TI_2_ID}
+    Check packaging integration              ${PI_1_ID}
     Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  5
     Check connection not exist               ${CONN_1_ID}
     Check connection not exist               ${CONN_2_ID}
