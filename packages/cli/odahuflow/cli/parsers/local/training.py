@@ -101,7 +101,7 @@ def cleanup_containers():
     Delete all training docker containers.
     \b
     Usage example:
-        * odahuflowctl local train cleanup-artifacts
+        * odahuflowctl local train cleanup-containers
     \f
     """
     cleanup_training_docker_containers()
@@ -114,7 +114,7 @@ def cleanup_containers():
 @click.option('--manifest-dir', '-d', type=click.Path(), multiple=True,
               help='Path to a directory with ODAHU-flow manifest files')
 @click.option('--output-dir', '--output', type=click.Path(),
-              help='Directory where model artifact will be saved. Training artifact name would be the same as the dir.')
+              help='Directory where model artifact will be saved.')
 @pass_obj
 def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], manifest_dir: List[str],
         output_dir: str):

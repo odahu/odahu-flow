@@ -40,16 +40,6 @@ Get model Url
     ${model_url}      set variable  ${EDGE_URL}/model/${model_id}
     [return]          ${model_url}
 
-Format WrongHttpStatusCode
-    [Arguments]       ${entity name}
-    ${error output}   format string  ${404NotFound}  entity name=${entity name}
-    [return]          ${error output}
-
-        format string  ${404 Model NotFoundTemplate}
-    [Arguments]       ${model url}
-    ${error output}   format string  ${404ModelNotFound}  model url=${model url}
-    [return]          ${error output}
-
 *** Test Cases ***
 Check deployment doesn't exist
     [Tags]                      deployment

@@ -120,7 +120,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
         except Exception as err:
             raise Exception("Can\'t get dex authentication data: {}".format(err)) from err
 
-    # Increase retries and backoff for robot tests aganist defaults
+    # Increase retries and backoff for robot tests against defaults
     config.RETRY_ATTEMPTS = 10
     config.BACKOFF_FACTOR = 3
 

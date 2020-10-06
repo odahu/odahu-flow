@@ -54,7 +54,7 @@ def cleanup_containers():
     Delete all packaging docker containers.
     \b
     Usage example:
-        * odahuflowctl local pack cleanup-artifacts
+        * odahuflowctl local pack cleanup-containers
     \f
     """
     cleanup_packaging_docker_containers()
