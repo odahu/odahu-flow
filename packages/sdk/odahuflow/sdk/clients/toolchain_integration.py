@@ -75,7 +75,7 @@ class ToolchainIntegrationClient(RemoteAPIClient):
         :param name: Name of a Toolchain Integration
         :return Message from API server
         """
-        return self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}', action='DELETE')['message']
+        return self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}', action='DELETE')
 
 
 class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
@@ -129,4 +129,4 @@ class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
         :param name: Name of a Toolchain Integration
         :return Message from API server
         """
-        return await self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}', action='DELETE')['message']
+        return await self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}', action='DELETE')
