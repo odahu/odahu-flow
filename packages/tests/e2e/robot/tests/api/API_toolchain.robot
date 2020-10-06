@@ -68,11 +68,11 @@ Get mlflow and mlflow-gpu toolchains by id
 
 Delete mlflow toolchain
     ${result}                   Call API  toolchain delete  ${MLFLOW}
-    should be equal             ${result}  ToolchainIntegration ${MLFLOW} was deleted
+    should be equal             ${result.get('message')}  ToolchainIntegration ${MLFLOW} was deleted
 
 Delete mlflow-gpu toolchain
     ${result}                   Call API  toolchain delete  ${MLFLOW_GPU}
-    should be equal             ${result}  ToolchainIntegration ${MLFLOW_GPU} was deleted
+    should be equal             ${result.get('message')}  ToolchainIntegration ${MLFLOW_GPU} was deleted
 
 Check that toolchains do not exist
     Command response list should not contain id  toolchain  ${MLFLOW}  ${MLFLOW_GPU}

@@ -68,11 +68,11 @@ Get Docker CLI and REST packagers by id
 
 Delete Docker CLI packager
     ${result}                   Call API   packager delete  ${DOCKER_CLI}
-    should be equal             ${result}  Packaging integration ${DOCKER_CLI} was deleted
+    should be equal             ${result.get('message')}  Packaging integration ${DOCKER_CLI} was deleted
 
 Delete Docker REST packager
     ${result}                   Call API  packager delete  ${DOCKER_REST}
-    should be equal             ${result}  Packaging integration ${DOCKER_REST} was deleted
+    should be equal             ${result.get('message')}  Packaging integration ${DOCKER_REST} was deleted
 
 Check that packagers do not exist
     Command response list should not contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
