@@ -110,7 +110,7 @@ def cleanup_containers():
 @training_group.command()
 @click.option('--train-id', '--id', help='Model training ID', required=True)
 @click.option('--manifest-file', '-f', type=click.Path(), multiple=True,
-              help='Path to a ODAHU-flow manifest file')
+              help='Path to an ODAHU-flow manifest file')
 @click.option('--manifest-dir', '-d', type=click.Path(), multiple=True,
               help='Path to a directory with ODAHU-flow manifest files')
 @click.option('--output-dir', '--output', type=click.Path(),
