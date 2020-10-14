@@ -17,6 +17,7 @@
 package config
 
 type ServiceCatalog struct {
+	Auth AuthConfig `json:"auth"`
 	BaseURL string `json:"baseUrl"`
 }
 
