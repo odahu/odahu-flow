@@ -197,11 +197,11 @@ func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
 		case vcs.Spec.Type != connection.GITType:
 			err = multierr.Append(err, fmt.Errorf(WrongVcsTypeErrorMessage, vcs.Spec.Type))
 		case len(vcs.Spec.Reference) != 0:
-			logMT.Info("VCS reference parameter is nil. Set the default value",
+			logMT.Info("VCS reference parameter is nil. Take the value from connection specification",
 				"name", mt.ID, "reference", vcs.Spec.Reference)
 			mt.Spec.Reference = vcs.Spec.Reference
 		default:
-			logMT.Info("Neither VCS connection or Training has reference specified, using default")
+			logMT.Info("Neither VCS connection or Training has reference specified, using VCS default branch")
 		}
 	}
 
