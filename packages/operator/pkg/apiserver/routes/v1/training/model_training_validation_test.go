@@ -221,16 +221,11 @@ func (s *ModelTrainingValidationSuite) TestMtNotExplicitMTReference() {
 	s.g.Expect(err).Should(BeNil())
 	defer s.connRepository.DeleteConnection(conn.ID)
 
-	mt := &training.ModelTraining{
-		Spec: v1alpha1.ModelTrainingSpec{
-			VCSName:   conn.ID,
-			Reference: "",
-		},
-	}
+	mt := validTraining
+	mt.Spec.Reference = ""
 
-	err = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(err).ShouldNot(BeNil())
-	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(train_route.WrongVcsReferenceErrorMessage, conn.ID)))
+	err = s.validator.ValidatesAndSetDefaults(&mt)
+	s.Assertions.NoError(err)
 }
 
 func (s *ModelTrainingValidationSuite) TestMtEmptyVcsName() {

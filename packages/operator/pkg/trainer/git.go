@@ -81,27 +81,36 @@ func (mt *ModelTrainer) cloneUserRepo(
 		mt.log.Info("Fetching additional references failed")
 	}
 
+	var commitHash plumbing.Hash
 	referenceName := k8sTraining.ModelTraining.Spec.Reference
-	hash, err := mt.tryGetHash(repository, referenceName)
-	if err != nil {
-		mt.log.Error(err, "Determine full reference name")
+	if len(referenceName) > 0 {
+		commitHash, err = mt.tryGetHash(repository, referenceName)
+		if err != nil {
+			mt.log.Error(err, "Determine full reference name")
+			return "", err
+		}
 
-		return "", err
+		w, err := repository.Worktree()
+		if err != nil {
+			return "", err
+		}
+
+		err = w.Checkout(&git.CheckoutOptions{
+			Hash: commitHash,
+		})
+		if err != nil {
+			mt.log.Error(err, fmt.Sprintf("Checkout reference: %s", referenceName))
+		}
+	} else {
+		headReference, err := repository.Head()
+		if err != nil {
+			mt.log.Error(err, "failed to resolve HEAD")
+			return "", err
+		}
+		commitHash = headReference.Hash()
 	}
 
-	w, err := repository.Worktree()
-	if err != nil {
-		return "", err
-	}
-
-	err = w.Checkout(&git.CheckoutOptions{
-		Hash: hash,
-	})
-	if err != nil {
-		mt.log.Error(err, fmt.Sprintf("Checkout reference: %s", referenceName))
-	}
-
-	return hash.String(), err
+	return commitHash.String(), err
 }
 
 func getSSHKeyAuth(sshKey []byte, knownHostPath string) (transport.AuthMethod, error) {

@@ -33,14 +33,12 @@ import (
 )
 
 const (
-	MtVcsNotExistsErrorMessage    = "cannot find VCS Connection"
-	EmptyModelNameErrorMessage    = "model name must be non-empty"
-	EmptyModelVersionErrorMessage = "model version must be non-empty"
-	EmptyVcsNameMessageError      = "VCS name is empty"
-	ValidationMtErrorMessage      = "Validation of model training is failed"
-	WrongVcsTypeErrorMessage      = "VCS connection must have the GIT type. You pass the connection of %s type"
-	WrongVcsReferenceErrorMessage = "you should specify a VCS reference for model training explicitly." +
-		" Because %s does not have default reference"
+	MtVcsNotExistsErrorMessage       = "cannot find VCS Connection"
+	EmptyModelNameErrorMessage       = "model name must be non-empty"
+	EmptyModelVersionErrorMessage    = "model version must be non-empty"
+	EmptyVcsNameMessageError         = "VCS name is empty"
+	ValidationMtErrorMessage         = "Validation of model training is failed"
+	WrongVcsTypeErrorMessage         = "VCS connection must have the GIT type. You pass the connection of %s type"
 	EmptyDataBindingNameErrorMessage = "you should specify connection name for %d number of data binding"
 	EmptyDataBindingPathErrorMessage = "you should specify local path for %d number of data binding"
 	WrongDataBindingTypeErrorMessage = "%s data binding has wrong data type. Currently supported the following types" +
@@ -198,12 +196,12 @@ func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
 		switch {
 		case vcs.Spec.Type != connection.GITType:
 			err = multierr.Append(err, fmt.Errorf(WrongVcsTypeErrorMessage, vcs.Spec.Type))
-		case len(vcs.Spec.Reference) == 0:
-			err = multierr.Append(err, fmt.Errorf(WrongVcsReferenceErrorMessage, vcs.ID))
-		default:
-			logMT.Info("VCS reference parameter is nil. Set the default value",
+		case len(vcs.Spec.Reference) != 0:
+			logMT.Info("VCS reference parameter is nil. Take the value from connection specification",
 				"name", mt.ID, "reference", vcs.Spec.Reference)
 			mt.Spec.Reference = vcs.Spec.Reference
+		default:
+			logMT.Info("Neither VCS connection or Training has reference specified, using VCS default branch")
 		}
 	}
 
