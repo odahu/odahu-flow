@@ -18,6 +18,7 @@ spec:
       labels:
         {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 8 }}
         odahu-flow-authorization: enabled
+        opa-policy-config-map-name: {{ .Release.Name }}-opa-policies
     spec:
       {{- if .Values.rbac}}
       serviceAccountName: "{{ .Release.Name }}-api"

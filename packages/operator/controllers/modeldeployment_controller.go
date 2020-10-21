@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
@@ -73,18 +74,17 @@ const (
 	DodelNameAnnotationKey               = "modelName"
 	latestReadyRevisionKey               = "latestReadyRevision"
 
-	IstioRewriteHTTPProbesAnnotation 		 = "sidecar.istio.io/rewriteAppHTTPProbers"
-	OdahuAuthorizationLabel				     = "odahu-flow-authorization"
+	IstioRewriteHTTPProbesAnnotation     = "sidecar.istio.io/rewriteAppHTTPProbers"
+	OdahuAuthorizationLabel          	 = "odahu-flow-authorization"
 
+	deploymentIDLabel 					 = "odahu.org/deploymentID"
+	cmPolicySuffix    					 = "opa-policy"
+	podPolicyLabel   					 = "opa-policy-config-map-name"
 )
 
 var (
 	defaultWeight            = int32(100)
 	DefaultTerminationPeriod = int64(15)
-)
-
-const (
-	deploymentIDLabel = "odahu.org/deploymentID"
 )
 
 func NewModelDeploymentReconciler(
@@ -232,6 +232,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 						// https://github.com/knative/serving/blob/a333742324081d769d1b234622f3fc4cfd181ca4/pkg/apis/autoscaling/v1alpha1/pa_lifecycle.go#L85
 						serving.RouteLabelKey: modelDeploymentCR.Name,
 						OdahuAuthorizationLabel: "enabled",
+						podPolicyLabel: getCMPolicyName(modelDeploymentCR),
 					},
 					Annotations: map[string]string{
 						KnativeAutoscalingClass:     DefaultKnativeAutoscalingClass,
@@ -633,6 +634,48 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 	return nil
 }
 
+func getCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) string {
+	return modelDeploymentCR.Name + "-" + cmPolicySuffix
+}
+
+func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
+	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) error {
+
+	rn := modelDeploymentCR.Spec.RoleName
+	if rn == nil {
+		log.Info(".Spec.RoleName is nil. Skip creating custom policies for model")
+		return nil
+	}
+
+	policies, err := deployment.ReadDefaultPoliciesAndRender(*rn)
+	if err != nil {
+		return err
+	}
+
+	cm := deployment.BuildDefaultPolicyConfigMap(
+		getCMPolicyName(modelDeploymentCR), r.deploymentConfig.Namespace, policies,
+	)
+
+	if err := controllerutil.SetControllerReference(modelDeploymentCR, cm, r.scheme); err != nil {
+		return err
+	}
+
+	foundCM := &corev1.ConfigMap{}
+	err = r.Get(context.TODO(), types.NamespacedName{
+		Name: cm.Name, Namespace: cm.Namespace,
+	}, foundCM)
+
+	if err != nil && errors.IsNotFound(err) {
+		log.Info("Creating config map", "ID", cm.Name)
+		return r.Create(context.TODO(), cm)
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
@@ -689,6 +732,13 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	}
 
 	log.Info("Run reconciling of model deployment")
+
+
+
+	if err := r.reconcilePolicyCM(log, modelDeploymentCR); err != nil {
+		log.Error(err, "Reconcile policy config map")
+		return reconcile.Result{}, err
+	}
 
 	if err := r.reconcileDeploymentPullConnection(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile deployment pull connection")
@@ -780,6 +830,7 @@ func (r *ModelDeploymentReconciler) SetupBuilder(mgr ctrl.Manager) *ctrl.Builder
 		For(&odahuflowv1alpha1.ModelDeployment{}).
 		Owns(&knservingv1.Configuration{}).
 		Owns(&odahuflowv1alpha1.ModelRoute{}).
+		Owns(&corev1.ConfigMap{}).
 		Watches(&source.Kind{Type: &appsv1.Deployment{}}, &EnqueueRequestForImplicitOwner{}).
 		Watches(&source.Kind{Type: &knservingv1.Revision{}}, &EnqueueRequestForImplicitOwner{}).
 		Watches(&source.Kind{Type: &corev1.Endpoints{}}, &EnqueueRequestForImplicitOwner{}).
