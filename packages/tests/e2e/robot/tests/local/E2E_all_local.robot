@@ -64,13 +64,17 @@ Run E2E spec on cluster model
     ...             StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/e2e.training.yaml
     [Teardown]      Run Keywords
     ...             Remove Directory  ${CLUSTER_MODEL_OUTPUT_DIR}  recursive=True  AND
-    ...             StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
-    ...             Shell  docker stop -t 3 "${CLUSTER_DOCKER_CONTAINER}"
+    ...             Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
+    ...             StrictShell  docker stop -t 3 "${CLUSTER_DOCKER_CONTAINER}"
 
     ${result_train}             StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
     ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
     ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id e2e-pack-file-image -d "${ARTIFACT_DIR}/dir" --artifact-name my-training
-    ${image_name}               StrictShell  echo "${pack_result.stdout}" | tail -n 1 | awk '{ print $4 }'
+
+    Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
+    ${image_name}    Shell  (tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
+    Remove File  ${RES_DIR}/pack_result.txt
+
     Run   docker run --name "${CLUSTER_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
 
     Sleep  5 sec
