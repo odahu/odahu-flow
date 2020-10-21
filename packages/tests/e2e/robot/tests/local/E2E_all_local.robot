@@ -33,29 +33,29 @@ Run Packaging with api server spec
         StrictShell  odahuflowctl --verbose local pack ${auth data} run ${options}
 
 *** Test Cases ***
-# Run E2E local model
-#     [Setup]                     StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${LOCAL_MODEL_OUTPUT_DIR}
-#     [Teardown]                  Run Keywords
-#     ...                         Remove Directory  ${LOCAL_MODEL_OUTPUT_DIR}  recursive=True  AND
-#     ...                         Shell  docker stop -t 3 "${LOCAL_DOCKER_CONTAINER}"
-#     # training
-#     ${result_train}             StrictShell     odahuflowctl --verbose local train run --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
-#     # check that training artifact exists and take artifact name for packaging
-#     ${result_list}              StrictShell  odahuflowctl --verbose local train list
-#     ${artifact_name_cmd}        StrictShell  echo "${result_list.stdout}" | tail -n 1 | awk '{ print $2 }'
-#     ${artifact_name_dir}        list directory  ${LOCAL_MODEL_OUTPUT_DIR}
-#     Should Be Equal As Strings  ${artifact_name_cmd.stdout}  @{artifact_name_dir}
-#     # packaing
-#     ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
-#     ${image_name}               StrictShell  echo "${pack_result.stdout}" | tail -n 1 | awk '{ print $4 }'
-#     # deployment
-#     Run   docker run --name "${LOCAL_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
-#
-#     Sleep  5 sec
-#     Shell     docker container list -as -f name=${LOCAL_DOCKER_CONTAINER}
-#     # model invoke
-#     ${result_model}              StrictShell  odahuflowctl --verbose model invoke --url http://0:5000 --json-file ${RES_DIR}/request.json
-#     Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
+Run E2E local model
+    [Setup]                     StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${LOCAL_MODEL_OUTPUT_DIR}
+    [Teardown]                  Run Keywords
+    ...                         Remove Directory  ${LOCAL_MODEL_OUTPUT_DIR}  recursive=True  AND
+    ...                         Shell  docker stop -t 3 "${LOCAL_DOCKER_CONTAINER}"
+    # training
+    ${result_train}             StrictShell     odahuflowctl --verbose local train run --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
+    # check that training artifact exists and take artifact name for packaging
+    ${result_list}              StrictShell  odahuflowctl --verbose local train list
+    ${artifact_name_cmd}        StrictShell  echo "${result_list.stdout}" | tail -n 1 | awk '{ print $2 }'
+    ${artifact_name_dir}        list directory  ${LOCAL_MODEL_OUTPUT_DIR}
+    Should Be Equal As Strings  ${artifact_name_cmd.stdout}  @{artifact_name_dir}
+    # packaing
+    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
+    ${image_name}               StrictShell  echo "${pack_result.stdout}" | tail -n 1 | awk '{ print $4 }'
+    # deployment
+    Run   docker run --name "${LOCAL_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
+
+    Sleep  5 sec
+    Shell     docker container list -as -f name=${LOCAL_DOCKER_CONTAINER}
+    # model invoke
+    ${result_model}              StrictShell  odahuflowctl --verbose model invoke --url http://0:5000 --json-file ${RES_DIR}/request.json
+    Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
 
 Run E2E spec on cluster model
     [Setup]         Run Keywords
