@@ -1,0 +1,6 @@
+id: pack-dir
+kind: ModelPackaging
+spec:
+  artifactName: "my-training"
+  integrationName: docker-rest
+  imageName: "{{ .Name }}-{{ .Version }}"

@@ -1,0 +1,12 @@
+kind: ModelTraining
+id: wine-dir-artifact-template
+spec:
+  model:
+    name: wine-dir
+    version: 1.0
+    artifactNameTemplate: "{{ .Name }}-{{ .Version }}.zip"
+  toolchain: mlflow
+  entrypoint: main
+  workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"
+  hyperParameters:
+    alpha: "1.0"

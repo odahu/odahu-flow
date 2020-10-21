@@ -1,0 +1,36 @@
+[{
+  "kind": "ModelTraining",
+  "id": "wine-packaging",
+  "spec": {
+    "entrypoint": "main",
+    "hyperParameters": {
+      "alpha": "1.0"
+    },
+    "model": {
+      "artifactNameTemplate": "{{ .Name }}-{{ .Version }}.zip",
+      "name": "wine-name",
+      "version": 1
+    },
+    "toolchain": "mlflow",
+    "workDir": "packages/tests/e2e/robot/tests/local/resources/artifacts",
+    "vcsName": "odahu-flow-examples"
+  }
+},
+{
+  "kind": "ModelTraining",
+  "id": "pack-artifact-hardcoded",
+  "spec": {
+    "model": {
+      "name": "wine-artifact-hardcoded",
+      "version": 1,
+      "artifactNameTemplate": "my-training.zip"
+    },
+    "toolchain": "mlflow",
+    "entrypoint": "main",
+    "workDir": "packages/tests/e2e/robot/tests/local/resources/artifacts",
+    "hyperParameters": {
+      "alpha": "1.0"
+    },
+    "vcsName": "odahu-flow-examples"
+  }
+}]
