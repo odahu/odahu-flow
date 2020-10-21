@@ -18,7 +18,7 @@
 },
 {
   "kind": "ModelTraining",
-  "id": "pack-artifact-hardcoded",
+  "id": "train-artifact-hardcoded",
   "spec": {
     "model": {
       "name": "wine-artifact-hardcoded",

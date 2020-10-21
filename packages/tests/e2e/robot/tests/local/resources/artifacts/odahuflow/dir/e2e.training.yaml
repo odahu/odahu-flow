@@ -2,7 +2,7 @@ kind: ModelTraining
 id: e2e-artifact-hardcoded
 spec:
   model:
-    name: wine-artifact-hardcoded
+    name: e2e-artifact-hardcoded
     version: 1.0
     artifactNameTemplate: "my-training.zip"
   vcsName: odahu-flow-examples
