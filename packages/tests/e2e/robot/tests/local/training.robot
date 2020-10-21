@@ -46,16 +46,8 @@ Run Training with local spec
         Should be equal as Strings  ${response}  ${MODEL_RESULT}
 
 Run Packaging with api server spec
-    [Arguments]  ${auth data}  ${id}  ${file}  ${options}
-        Login to the api and edge
-        StrictShell  odahuflowctl --verbose pack create -f ${ARTIFACT_DIR}/file/training.yaml
-        StrictShell  odahuflowctl --verbose logout
-
-        StrictShell  odahuflowctl --verbose local pack ${auth data} run ${options}
-
-Run Packaging with local spec
-    [Arguments]  ${options}
-        StrictShell  odahuflowctl --verbose local packaging run ${options}
+    [Arguments]  ${command}
+        StrictShell  odahuflowctl --verbose ${command}
 
 *** Test Cases ***
 Run Valid Training with local spec
@@ -64,18 +56,28 @@ Run Valid Training with local spec
     --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_OUTPUT_DIR}
     --id wine-id-file --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --output ${RESULT_DIR}  ${RESULT_DIR}
-    --train-id wine-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_OUTPUT_DIR}
+    --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_OUTPUT_DIR}
 
 Run Valid Packaging with api server spec
-
+    [Setup]     Run Keywords
+    ...         Login to the api and edge  AND
+    ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
+    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --output ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0
+    local pack --url ${API_URL} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
 
 List trainings in default output dir
     ${list result}  StrictShell  odahuflowctl --verbose local train list
-    Should contain  ${list result}
+    Should contain  ${list result.stdout}  Training artifacts:
+    Should contain  ${list result.stdout}  wine-name-1
+    Should contain  ${list result.stdout}  my-training
+    ${list result}  convert to string  ${list result}
+    ${line number}  Get Line Count  ${list result}
+    Should be equal as integers     ${line number}  3
 
-Cleanup training artifacts
-    StrictShell  odahuflowctl --verbose local train cleanup-artifacts
-    ${list result}  StrictShell  odahuflowctl --verbose local train list
-    Should be Equal  ${list result}  Artifacts not found
+# Cleanup training artifacts from default output dir
+#     StrictShell  odahuflowctl --verbose local train cleanup-artifacts
+#     ${list result}  StrictShell  odahuflowctl --verbose local train list
+#     Should be Equal  ${list result.stdout}  Artifacts not found
