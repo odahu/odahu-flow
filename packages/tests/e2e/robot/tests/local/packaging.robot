@@ -44,7 +44,7 @@ Run Valid Training with api server spec
     [Template]  Run Training with api server spec
     # auth data     id      file/dir        output
     local training run -f ${ARTIFACT_DIR}/dir/packaging --id wine-packaging --output ${RESULT_DIR}
-    local training --url ${API_URL} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-artifact-hardcoded
+    local training --url ${API_URL} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
 
 Run Valid Packaging with local spec
     [Template]  Run Packaging with local spec
@@ -55,4 +55,4 @@ Run Valid Packaging with local spec
     --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
     --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets
     --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_OUTPUT_DIR}/my-training
-    --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a wine-name-1 --disable-package-targets
+    --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a my-training --disable-package-targets
