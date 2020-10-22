@@ -21,9 +21,9 @@ Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_OUTPUT_DIR}
 # Suite Teardown    Run Keywords
-...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
-...                 Remove Directory  ${DEFAULT_OUTPUT_DIR}  recursive=True  AND
-...                 Remove File  ${LOCAL_CONFIG}
+# ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
+# ...                 Remove Directory  ${DEFAULT_OUTPUT_DIR}  recursive=True  AND
+# ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
 # Test Timeout        90 minutes
 
@@ -66,7 +66,7 @@ Run Valid Packaging with api server spec
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
-    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --output ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0
+    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0
     local pack --url ${API_URL} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
 
 List trainings in default output dir
