@@ -72,6 +72,10 @@ const (
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	DodelNameAnnotationKey               = "modelName"
 	latestReadyRevisionKey               = "latestReadyRevision"
+
+	IstioRewriteHTTPProbesAnnotation 		 = "sidecar.istio.io/rewriteAppHTTPProbers"
+	OdahuAuthorizationLabel				     = "odahu-flow-authorization"
+
 )
 
 var (
@@ -227,6 +231,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 						// TODO in future: move from creating knservingv1.Configuration -> knservingv1.Service
 						// https://github.com/knative/serving/blob/a333742324081d769d1b234622f3fc4cfd181ca4/pkg/apis/autoscaling/v1alpha1/pa_lifecycle.go#L85
 						serving.RouteLabelKey: modelDeploymentCR.Name,
+						OdahuAuthorizationLabel: "enabled",
 					},
 					Annotations: map[string]string{
 						KnativeAutoscalingClass:     DefaultKnativeAutoscalingClass,
@@ -234,6 +239,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 						KnativeMinReplicasKey:       strconv.Itoa(int(*modelDeploymentCR.Spec.MinReplicas)),
 						KnativeMaxReplicasKey:       strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
 						KnativeAutoscalingTargetKey: KnativeAutoscalingTargetDefaultValue,
+						IstioRewriteHTTPProbesAnnotation: "true",
 					},
 				},
 				Spec: knservingv1.RevisionSpec{

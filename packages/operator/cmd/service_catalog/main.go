@@ -71,7 +71,9 @@ var mainCmd = &cobra.Command{
 		}
 
 		log.Info("Setting up controller")
-		r := servicecatalog.NewModelRouteReconciler(mgr, routeCatalog, odahuConfig.Deployment)
+		r := servicecatalog.NewModelRouteReconciler(
+			mgr, routeCatalog, odahuConfig.Deployment, odahuConfig.ServiceCatalog,
+		)
 		if err = r.SetupWithManager(mgr); err != nil {
 			log.Error(err, "unable to register controllers to the manager")
 			os.Exit(1)

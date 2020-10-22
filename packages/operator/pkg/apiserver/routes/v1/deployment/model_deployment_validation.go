@@ -73,7 +73,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.RoleName == nil || len(*md.Spec.RoleName) == 0 {
 		defaultRoleName := DefaultRolePrefix + md.ID
-		logMD.Info("Role name parameter is nil or empty. Set the model Role as the model ID with a prefix",
+		logMD.Info("Role name parameter is nil or empty. Set the model ID as model Role with prefix",
 			"Deployment name", md.ID, "role name", defaultRoleName)
 		md.Spec.RoleName = &defaultRoleName
 	} else {

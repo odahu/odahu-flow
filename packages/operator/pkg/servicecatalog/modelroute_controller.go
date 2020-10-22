@@ -21,6 +21,7 @@ import (
 	"fmt"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	http_util "github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"io/ioutil"
 	"net/http"
@@ -42,22 +43,20 @@ var (
 )
 
 const (
-	ServiceGatalogMaxConcurrentReconciles = 10
 	defaultUpdatePeriod                   = 20 * time.Second
-	defaultModelRequestTimeout            = 10 * time.Second
 )
 
 func NewModelRouteReconciler(
 	mgr manager.Manager,
 	mrc *catalog.ModelRouteCatalog,
-	deploymentConfig config.ModelDeploymentConfig,
-) *ModelRouteReconciler {
+	deploymentConfig config.ModelDeploymentConfig, scConfig config.ServiceCatalog, ) *ModelRouteReconciler {
 	rmr := ModelRouteReconciler{
 		Client:           mgr.GetClient(),
 		scheme:           mgr.GetScheme(),
 		mrc:              mrc,
 		ticker:           time.NewTicker(defaultUpdatePeriod),
 		deploymentConfig: deploymentConfig,
+		scConfig: scConfig,
 	}
 
 	go func() {
@@ -73,6 +72,7 @@ type ModelRouteReconciler struct {
 	mrc              *catalog.ModelRouteCatalog
 	ticker           *time.Ticker
 	deploymentConfig config.ModelDeploymentConfig
+	scConfig		 config.ServiceCatalog
 }
 
 func (r *ModelRouteReconciler) SetupBuilder(mgr ctrl.Manager) *ctrl.Builder {
@@ -156,9 +156,11 @@ func (r *ModelRouteReconciler) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{RequeueAfter: defaultRequeueDelay}, nil
 	}
 
-	httpClient := http.Client{
-		Timeout: defaultModelRequestTimeout,
-	}
+	httpClient := http_util.NewBaseAPIClient(
+		"", r.scConfig.Auth.APIToken, r.scConfig.Auth.ClientID, r.scConfig.Auth.ClientSecret,
+		r.scConfig.Auth.OAuthOIDCTokenEndpoint, "",
+	)
+
 	response, err := httpClient.Do(modelRequest)
 	if err != nil {
 		log.Error(
