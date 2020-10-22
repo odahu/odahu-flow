@@ -42,6 +42,7 @@ import (
 const (
 	knativeRevisionHeader    = "knative-serving-revision"
 	knativeNamespaceHeader   = "knative-serving-namespace"
+	odahuRequiredRoleHeader  = "x-odahu-required-role"
 	defaultRetryAttempts     = 30
 	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
 )
@@ -110,6 +111,16 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 			continue
 		}
 
+		requestHeaders := &v1alpha3_istio.Headers_HeaderOperations{
+			Add: map[string]string{
+				knativeRevisionHeader:  modelDeployment.Status.LastRevisionName,
+				knativeNamespaceHeader: r.deploymentConfig.Namespace,
+			},
+		}
+		if modelDeployment.Spec.RoleName != nil {
+			requestHeaders.Add[odahuRequiredRoleHeader] = *modelDeployment.Spec.RoleName
+		}
+
 		httpTargets = append(httpTargets,
 			&v1alpha3_istio.HTTPRouteDestination{
 				Destination: &v1alpha3_istio.Destination{
@@ -120,12 +131,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				},
 				Weight: *md.Weight,
 				Headers: &v1alpha3_istio.Headers{
-					Request: &v1alpha3_istio.Headers_HeaderOperations{
-						Add: map[string]string{
-							knativeRevisionHeader:  modelDeployment.Status.LastRevisionName,
-							knativeNamespaceHeader: r.deploymentConfig.Namespace,
-						},
-					},
+					Request: requestHeaders,
 				},
 			})
 	}

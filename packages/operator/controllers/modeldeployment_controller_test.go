@@ -142,7 +142,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	knativeConfiguration := s.getKnativeConfiguration(md)
 
 	configurationAnnotations := knativeConfiguration.Spec.Template.ObjectMeta.Annotations
-	s.Assertions.Len(configurationAnnotations, 5)
+	s.Assertions.Len(configurationAnnotations, 6)
 
 	s.Assertions.Contains(configurationAnnotations, KnativeMinReplicasKey)
 	s.Assertions.Equal(configurationAnnotations[KnativeMinReplicasKey], strconv.Itoa(int(mdMinReplicas)))
@@ -160,7 +160,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingMetric], DefaultKnativeAutoscalingMetric)
 
 	configurationLabels := knativeConfiguration.Spec.Template.ObjectMeta.Labels
-	s.Assertions.Len(configurationLabels, 3)
+	s.Assertions.Len(configurationLabels, 4)
 	s.Assertions.Contains(configurationLabels, DodelNameAnnotationKey)
 	s.Assertions.Equal(md.Name, configurationLabels[DodelNameAnnotationKey])
 

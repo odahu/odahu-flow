@@ -309,12 +309,22 @@ func (s *ModelDeploymentValidationSuite) TestValidateNodeSelector_Invalid() {
 	s.Assertions.Len(multierr.Errors(err), 1)
 }
 
-// Deployment has Role Name that is not valid K8s label; expect a validation error
-func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Invalid() {
+// Deployment has no Role Name; expect a model ID as suffix of default role
+func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Empty() {
 	mt := validDeployment
-	invalidLabel := "invalid label!"
-	mt.Spec.RoleName = &invalidLabel
+	role := ""
+	mt.Spec.RoleName = &role
 	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
-	s.Assertions.Error(err)
-	s.Assertions.Contains(err.Error(), invalidLabel)
+	s.Assertions.NoError(err)
+	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix + mt.ID)
+}
+
+// Deployment has no Role Name; expect a model ID as suffix of default role
+func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Nil() {
+	mt := validDeployment
+	var role *string = nil
+	mt.Spec.RoleName = role
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
+	s.Assertions.NoError(err)
+	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix + mt.ID)
 }
