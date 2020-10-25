@@ -23,7 +23,7 @@
     "model": {
       "name": "wine-artifact-hardcoded",
       "version": 1,
-      "artifactNameTemplate": "my-training.zip"
+      "artifactNameTemplate": "simple-model.zip"
     },
     "toolchain": "mlflow",
     "entrypoint": "main",

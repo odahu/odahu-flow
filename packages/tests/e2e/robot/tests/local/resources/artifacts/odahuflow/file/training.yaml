@@ -5,7 +5,7 @@ spec:
   entrypoint: /opt/conda/bin/odahu-flow-mlflow-runner
 ---
 kind: ModelTraining
-id: wine-id-file
+id: "wine id file"
 spec: 
   entrypoint: main
   hyperParameters: 
