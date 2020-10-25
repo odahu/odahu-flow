@@ -11,6 +11,13 @@ spec:
   workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"
   hyperParameters:
     alpha: "1.0"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
 ---
 id: e2e-pack-file-image
 kind: ModelPackaging
@@ -19,3 +26,10 @@ spec:
   integrationName: docker-rest
   arguments:
     imageName: "{{ Name }}-{{ Version }}"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi

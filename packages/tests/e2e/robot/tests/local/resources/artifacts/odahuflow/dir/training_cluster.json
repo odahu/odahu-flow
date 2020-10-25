@@ -11,6 +11,16 @@
       "name": "wine-name",
       "version": 1
     },
+    "resources": {
+      "limits": {
+        "cpu": "1224m",
+        "memory": "1224Mi"
+      },
+      "requests": {
+        "cpu": "1024m",
+        "memory": "1024Mi"
+      }
+    },
     "toolchain": "mlflow",
     "workDir": "packages/tests/e2e/robot/tests/local/resources/artifacts",
     "vcsName": "odahu-flow-examples"
@@ -24,6 +34,16 @@
       "name": "wine-artifact-hardcoded",
       "version": 1,
       "artifactNameTemplate": "simple-model.zip"
+    },
+    "resources": {
+      "limits": {
+        "cpu": "1224m",
+        "memory": "1224Mi"
+      },
+      "requests": {
+        "cpu": "1024m",
+        "memory": "1024Mi"
+      }
     },
     "toolchain": "mlflow",
     "entrypoint": "main",
