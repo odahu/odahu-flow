@@ -66,14 +66,14 @@ Run E2E spec on cluster model
     [Teardown]      Run Keywords
     ...             Remove Directory  ${CLUSTER_MODEL_OUTPUT_DIR}  recursive=True  AND
     ...             Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
-    ...             StrictShell  docker stop -t 3 "${CLUSTER_DOCKER_CONTAINER}"
+    ...             Shell  docker stop -t 3 "${CLUSTER_DOCKER_CONTAINER}"
 
     ${result_train}             StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
     ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
-    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id e2e-pack-file-image -d "${ARTIFACT_DIR}/dir" --artifact-name my-training
+    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id e2e-pack-file-image -d "${ARTIFACT_DIR}/dir" --artifact-name simple-model
 
     Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
-    ${image_name}    Shell  (tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
+    ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
     Remove File  ${RES_DIR}/pack_result.txt
 
     StrictShell  docker images --all

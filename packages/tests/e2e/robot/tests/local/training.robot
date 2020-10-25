@@ -29,7 +29,6 @@ Force Tags          cli  local  training
 
 *** Keywords ***
 Run Training with local spec
-    [Teardown]  Remove File  ${RES_DIR}/results.json
     [Arguments]  ${train options}  ${artifact path}
         ${result}  StrictShell  odahuflowctl --verbose local train run ${train options}
 
@@ -46,9 +45,20 @@ Run Training with local spec
         ${response}   Get File  ${result_path.stdout}
         Should be equal as Strings  ${response}  ${MODEL_RESULT}
 
+Try Run Training with local spec
+    [Arguments]  ${error}  ${train options}
+        ${result}  Run Process  odahuflowctl --verbose local train run ${train options}  stderr=STDOUT  timeout=30 mins
+        Run Keyword And Continue On Failure  log many  ${result}  ${reasult.stdout}  ${reasult.stderr}
+        should contain  ${result}  ${error}
+
 Run Packaging with api server spec
     [Arguments]  ${command}
         StrictShell  odahuflowctl --verbose ${command}
+
+Try Run Packaging with api server spec
+    [Arguments]  ${error}  ${command}
+        ${result}  FailedShell  odahuflowctl --verbose ${command}
+        should contain  ${result.stdout}  ${error}
 
 *** Test Cases ***
 Run Valid Training with local spec
@@ -56,23 +66,23 @@ Run Valid Training with local spec
     # id	file/dir	output
     --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_OUTPUT_DIR}
-    --id wine-id-file --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --output ${RESULT_DIR}  ${RESULT_DIR}
+    --id "wine id file" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --output ${RESULT_DIR}  ${RESULT_DIR}
     --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_OUTPUT_DIR}
 
 Run Valid Packaging with api server spec
     [Setup]     Run Keywords
     ...         Login to the api and edge  AND
     ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
     local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0
-    local pack --url ${API_URL} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    local pack --url ${API_URL} --token ${AUTH_TOKEN} run --id simple-model -a simple-model
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
     Should contain  ${list_result.stdout}  Training artifacts:
-    Should contain  ${list_result.stdout}  my-training
+    Should contain  ${list_result.stdout}  simple-model
     Should contain  ${list_result.stdout}  wine-name-1
     ${line number}  Split To Lines  ${list_result.stdout}
     ${line number}  Get length   ${line number}
@@ -82,3 +92,27 @@ Cleanup training artifacts from default output dir
     StrictShell  odahuflowctl --verbose local train cleanup-artifacts
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
     Should be Equal  ${list_result.stdout}  Artifacts not found
+
+# negative tests
+Try Run invalid Training with local spec
+    [Template]  Try Run Training with local spec
+    # missing required option
+    Error  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    # incompatible options
+    Error  -d "${ARTIFACT_DIR}/dir" --manifest-file "${ARTIFACT_DIR}/file/training.yaml"
+    Error  --train-id wine-e2e-default-template --id wine-e2e -f ${RESULT_DIR} --manifest-dir "${ARTIFACT_DIR}/file/training.yaml"
+    # not valid value for option
+    # for file & dir options
+    Error  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
+    Error  --id "wine_id_file" -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    Error  --id "wine id file" -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    # no training either locally or on the server
+    Error  --train-id not-existing-training
+
+Try Run invalid Packaging with api server spec
+    [Template]  Run Packaging with api server spec
+    # test on invalid credentials
+    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    local pack --url ${API_URL} --token ${EMPTY} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    local pack --url ${EMPTY} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
