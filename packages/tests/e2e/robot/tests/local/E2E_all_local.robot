@@ -47,11 +47,12 @@ Run E2E local model
     Should Be Equal As Strings  ${artifact_name_cmd.stdout}  @{artifact_name_dir}
     # packaing
     ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
-    ${image_name}               StrictShell  echo "${pack_result.stdout}" | tail -n 1 | awk '{ print $4 }'
+    Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
+    ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
+    Remove File  ${RES_DIR}/pack_result.txt
     # deployment
     StrictShell  docker images --all
     StrictShell  docker run --name "${LOCAL_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
-
     Sleep  5 sec
     Shell     docker container list -as -f name=${LOCAL_DOCKER_CONTAINER}
     # model invoke
