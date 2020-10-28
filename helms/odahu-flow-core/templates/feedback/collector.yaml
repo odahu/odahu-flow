@@ -19,6 +19,7 @@ spec:
       labels:
         {{- include "odahuflow.helm-labels" (dict "component" "feedback-collector" "root" .) | nindent 8 }}
         odahu-flow-authorization: enabled
+        opa-policy-config-map-name: {{ .Release.Name }}-feedback-opa-policies
     spec:
       volumes:
       - name: config

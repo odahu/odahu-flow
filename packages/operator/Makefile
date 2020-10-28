@@ -12,6 +12,8 @@ ODAHUFLOW_SECRET_CONFIG=odahu-flow-operator-config
 # Name of a sed binary
 SED_BIN=sed
 
+GO_BIN_DATA_EXTRA_ARGS=
+
 
 # Hardcoded vault token for local development
 TEST_VAULT_ROOT_TOKEN=test_root_token
@@ -123,8 +125,10 @@ generate-all: generate manifests swag
 
 ## generate-resources: Generate go-bindata
 generate-resources:
-	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go pkg/database/migrations/postgres/sources
+	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/database/migrations/postgres/sources
 	git add pkg/database/migrations/postgres/bindata.go
+	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/deployment/assets -o pkg/deployment/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/deployment/assets
+	git add pkg/deployment/bindata/bindata.go
 
 
 apply-crds:

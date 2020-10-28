@@ -160,7 +160,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingMetric], DefaultKnativeAutoscalingMetric)
 
 	configurationLabels := knativeConfiguration.Spec.Template.ObjectMeta.Labels
-	s.Assertions.Len(configurationLabels, 4)
+	s.Assertions.Len(configurationLabels, 5)
 	s.Assertions.Contains(configurationLabels, DodelNameAnnotationKey)
 	s.Assertions.Equal(md.Name, configurationLabels[DodelNameAnnotationKey])
 
