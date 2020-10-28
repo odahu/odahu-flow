@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+  {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 4 }}
+  name: {{ .Release.Name }}-opa-policies
+  namespace: {{ .Release.Namespace }}
+data:
+  {{- range $path, $content := .Files.Glob "policies/api/*.rego" }}
+  {{ base $path }}: |
+  {{ $content | toString | nindent 4 }}
+  {{ end }}

@@ -42,7 +42,6 @@ import (
 const (
 	knativeRevisionHeader    = "knative-serving-revision"
 	knativeNamespaceHeader   = "knative-serving-namespace"
-	odahuRequiredRoleHeader  = "x-odahu-required-role"
 	defaultRetryAttempts     = 30
 	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
 )
@@ -116,9 +115,6 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				knativeRevisionHeader:  modelDeployment.Status.LastRevisionName,
 				knativeNamespaceHeader: r.deploymentConfig.Namespace,
 			},
-		}
-		if modelDeployment.Spec.RoleName != nil {
-			requestHeaders.Add[odahuRequiredRoleHeader] = *modelDeployment.Spec.RoleName
 		}
 
 		httpTargets = append(httpTargets,
