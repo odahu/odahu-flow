@@ -46,10 +46,10 @@ Run Training with local spec
         Should be equal as Strings  ${response}  ${MODEL_RESULT}
 
 Try Run Training with local spec
-    [Arguments]  ${error}  ${train options}
+    [Arguments]  ${output}  ${error}  ${train options}
         ${result}  FailedShell  odahuflowctl --verbose local train run ${train options}
         Run Keyword And Continue On Failure  log many  ${result}  ${result.stdout}  ${result.stderr}
-        should contain  ${result.stdout}  ${error}
+        should contain  ${result.${output}}  ${error}
 
 Run Packaging with api server spec
     [Arguments]  ${command}
@@ -113,7 +113,7 @@ Try Run invalid Training with local spec
     Error  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
     Error  --id "wine id file" --output-dir ${RESULT_DIR}
     # incompatible options
-    Error  -d "${ARTIFACT_DIR}/dir" --manifest-file "${ARTIFACT_DIR}/file/training.yaml"
+    Error  --id "wine id file" -d "${ARTIFACT_DIR}/dir" --manifest-file "${ARTIFACT_DIR}/file/training.yaml"
     Error  --train-id wine-e2e-default-template --id wine-e2e -f ${RESULT_DIR} --manifest-dir "${ARTIFACT_DIR}/file/training.yaml"
     Error  --id "wine_id_file" -d "${ARTIFACT_DIR}/dir" --manifest-dir "${ARTIFACT_DIR}/file" --output ${RESULT_DIR}
     # not valid value for option

@@ -119,7 +119,5 @@ Try Run invalid Packaging with local spec
     # for file & dir options
     Error  --pack-id pack-dir --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
     Error  --id pack-file-image -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets
-    # added following slash
-    Error  --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir/ --artifact-path ${DEFAULT_RESULT_DIR}/simple-model
     # no training either locally or on the server
     Error  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
