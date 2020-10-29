@@ -4,7 +4,7 @@ ${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
 ${RESULT_DIR}               ${CURDIR}/training_train_results
 
 ${INPUT_FILE}               ${RES_DIR}/request.json
-${DEFAULT_OUTPUT_DIR}       ~/.odahuflow/local_training/training_output
+${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_training/training_output
 
 ${MODEL_RESULT}             {"prediction": [6.3881577909662886, 4.675934265196686], "columns": ["quality"]}
 ${LOCAL_CONFIG}             odahuflow/local_training
@@ -19,10 +19,10 @@ Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_OUTPUT_DIR}
+...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
 # Suite Teardown    Run Keywords
 # ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
-# ...                 Remove Directory  ${DEFAULT_OUTPUT_DIR}  recursive=True  AND
+# ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
 # ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
 # Test Timeout        90 minutes
@@ -47,13 +47,26 @@ Run Training with local spec
 
 Try Run Training with local spec
     [Arguments]  ${error}  ${train options}
-        ${result}  Run Process  odahuflowctl --verbose local train run ${train options}  stderr=STDOUT  timeout=30 mins
+        ${result}  FailedShell  odahuflowctl --verbose local train run ${train options}
         Run Keyword And Continue On Failure  log many  ${result}  ${reasult.stdout}  ${reasult.stderr}
-        should contain  ${result}  ${error}
+        should contain  ${reasult.stdout}  ${error}
 
 Run Packaging with api server spec
     [Arguments]  ${command}
-        StrictShell  odahuflowctl --verbose ${command}
+        ${pack_result}  StrictShell  odahuflowctl --verbose ${command}
+
+        Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
+        ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
+        Remove File  ${RES_DIR}/pack_result.txt
+
+        StrictShell  docker images --all
+        ${container_id}  StrictShell  docker run -d --rm -p 5001:5000 ${image_name.stdout}
+
+        Sleep  5 sec
+        Shell  docker container list -as -f id=${container_id.stdout}
+
+        ${result_model}             StrictShell  odahuflowctl --verbose model invoke --url http://0:5001 --json-file ${RES_DIR}/request.json
+        Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
 
 Try Run Packaging with api server spec
     [Arguments]  ${error}  ${command}
@@ -65,9 +78,9 @@ Run Valid Training with local spec
     [Template]  Run Training with local spec
     # id	file/dir	output
     --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
-    --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_OUTPUT_DIR}
+    --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
     --id "wine id file" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --output ${RESULT_DIR}  ${RESULT_DIR}
-    --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_OUTPUT_DIR}
+    --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with api server spec
     [Setup]     Run Keywords
@@ -110,9 +123,11 @@ Try Run invalid Training with local spec
     Error  --train-id not-existing-training
 
 Try Run invalid Packaging with api server spec
-    [Template]  Run Packaging with api server spec
-    # test on invalid credentials
-    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    local pack --url ${API_URL} --token ${EMPTY} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    local pack --url ${EMPTY} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    [Setup]  Shell  odahuflowctl logout
+    [Teardown]  Login to the api and edge
+    [Template]  Try Run Packaging with api server spec
+    # invalid credentials
+    Error  local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    Error  local pack --url ${API_URL} --token ${EMPTY} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    Error  local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    Error  local pack --url ${EMPTY} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
