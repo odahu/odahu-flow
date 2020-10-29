@@ -48,8 +48,8 @@ Run Training with local spec
 Try Run Training with local spec
     [Arguments]  ${error}  ${train options}
         ${result}  FailedShell  odahuflowctl --verbose local train run ${train options}
-        Run Keyword And Continue On Failure  log many  ${result}  ${reasult.stdout}  ${reasult.stderr}
-        should contain  ${reasult.stdout}  ${error}
+        Run Keyword And Continue On Failure  log many  ${result}  ${result.stdout}  ${result.stderr}
+        should contain  ${result.stdout}  ${error}
 
 Run Packaging with api server spec
     [Arguments]  ${command}
@@ -111,14 +111,15 @@ Try Run invalid Training with local spec
     [Template]  Try Run Training with local spec
     # missing required option
     Error  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    Error  --id "wine id file" --output-dir ${RESULT_DIR}
     # incompatible options
     Error  -d "${ARTIFACT_DIR}/dir" --manifest-file "${ARTIFACT_DIR}/file/training.yaml"
     Error  --train-id wine-e2e-default-template --id wine-e2e -f ${RESULT_DIR} --manifest-dir "${ARTIFACT_DIR}/file/training.yaml"
+    Error  --id "wine_id_file" -d "${ARTIFACT_DIR}/dir" --manifest-dir "${ARTIFACT_DIR}/file" --output ${RESULT_DIR}
     # not valid value for option
     # for file & dir options
     Error  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
-    Error  --id "wine_id_file" -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
-    Error  --id "wine id file" -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    Error  --id "wine id file" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
     # no training either locally or on the server
     Error  --train-id not-existing-training
 
