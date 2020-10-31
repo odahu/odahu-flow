@@ -18,7 +18,7 @@ Local packaging commands for odahuflow cli
 """
 import base64
 import logging
-from typing import List, Dict, NoReturn, Optional, Tuple
+from typing import List, Dict, Optional
 
 import click
 

@@ -93,7 +93,7 @@ class Case:
 
 
 test_cases: List[Case] = [
-    Case(  # all manifests are locally stored, default run withot options
+    Case(  # all manifests are locally stored, default run without options
         input=I(
             cmd=["--pack-id", "pack1"],
             local=[conn1, conn2, pi, pack1], remote=[]),
