@@ -208,7 +208,7 @@ def _deprecation_warning(is_target_disabled: bool):
               help='Disable target in packaging')
 @pass_obj
 def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], manifest_dir: List[str],
-        artifact_path: str, artifact_name: str, is_target_disabled:bool, disable_target: List[str]):
+        artifact_path: str, artifact_name: str, is_target_disabled: bool, disable_target: List[str]):
     """
     \b
     Start a packaging process locally.
