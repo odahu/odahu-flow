@@ -147,7 +147,7 @@ def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], ma
         click.echo(f'{train_id} training not found. Trying to retrieve it from API server')
         mt = client.get(train_id)
 
-    toolchain = toolchains.get(mt.spec.toolchain) or ""
+    toolchain = toolchains.get(mt.spec.toolchain)
     if not toolchain:
         click.echo(f'{toolchain} toolchain not found. Trying to retrieve it from API server')
         toolchain = ToolchainIntegrationClient.construct_from_other(client).get(mt.spec.toolchain)
