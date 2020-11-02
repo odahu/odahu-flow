@@ -20,10 +20,10 @@ Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
-# Suite Teardown    Run Keywords
-# ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
-# ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
-# ...                 Remove File  ${LOCAL_CONFIG}
+Suite Teardown      Run Keywords
+...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
+...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
+...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
 # Test Timeout        90 minutes
 
