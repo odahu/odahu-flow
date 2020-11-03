@@ -62,7 +62,7 @@ def cleanup_containers():
     cleanup_packaging_docker_containers()
 
 
-def fetch_local_entities(manifest_file, manifest_dir):
+def fetch_local_entities(manifest_file: List[str], manifest_dir: List[str]) -> List[OdahuflowCloudResourceUpdatePair]:
     """
     Collect entities from manifest files in local FS and return a result
     Manifests can be collected from file or files inside a directory
