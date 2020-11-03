@@ -82,7 +82,7 @@ Run Valid Training with api server spec
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
     [Template]  Run Training with api server spec
     # auth data     id      file/dir        output
-    local training run -f ${ARTIFACT_DIR}/dir/packaging --id wine-packaging --output ${RESULT_DIR}  ${RESULT_DIR}
+    local train run -f ${ARTIFACT_DIR}/dir/packaging --id wine-packaging --output ${RESULT_DIR}  ${RESULT_DIR}
     local training --url ${API_URL} --token "${AUTH_TOKEN}" run --id train-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with local spec

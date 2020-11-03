@@ -90,7 +90,7 @@ Run Valid Packaging with api server spec
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
     local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0
-    local pack --url ${API_URL} --token ${AUTH_TOKEN} run --id simple-model -a simple-model
+    local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id simple-model -a simple-model
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
