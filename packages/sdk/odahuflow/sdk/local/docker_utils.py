@@ -47,7 +47,7 @@ def stream_container_logs(container: Container) -> None:
     logs = container.logs(stream=True, follow=True)
     for log in logs:
         for line in log.splitlines():
-            print(line.decode())
+            print(f'[Container {container.id[:5]}] {line.decode()}')
 
 
 def convert_labels_to_filter(labels: Dict[str, str]) -> List[str]:
