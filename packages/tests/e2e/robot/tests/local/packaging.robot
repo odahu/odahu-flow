@@ -108,13 +108,6 @@ Try Run invalid Training with api server spec
 
 Try Run invalid Packaging with local spec
     [Template]  Try Run Packaging with local spec
-    # missing required option
-    Error  -d ${ARTIFACT_DIR}/dir
-    Error  --pack-id pack-file-image --artifact-path ${RESULT_DIR}/wine-name-1 --artifact-name wine-name-1
-    # incompatible options
-    Error  --id pack-dir -f ${ARTIFACT_DIR}/file/packaging.yaml --manifest-dir ${ARTIFACT_DIR}/dir
-    Error  --id pack-dir -d ${ARTIFACT_DIR}/file --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets --no-disable-package-targets
-    Error  --id pack-dir -d ${ARTIFACT_DIR}/dir --disable-package-targets --no-disable-package-targets
     # not valid value for option
     # for file & dir options
     Error  --pack-id pack-dir --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
