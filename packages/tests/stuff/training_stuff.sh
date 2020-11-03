@@ -211,11 +211,6 @@ function local_setup() {
 #  echo "username" ${DOCKER_USERNAME}
 #  echo "password" ${DOCKER_PASSWORD}
 #  docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
-
-  # gcloud login  https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
-  gcloud auth configure-docker
-  sudo gcloud auth configure-docker
-#  exec $SHELL
 }
 
 # Main entrypoint for setup command.
