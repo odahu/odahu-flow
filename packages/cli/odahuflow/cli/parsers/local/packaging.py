@@ -67,9 +67,6 @@ def fetch_local_entities(manifest_file, manifest_dir):
     Collect entities from manifest files in local FS and return a result
     Manifests can be collected from file or files inside a directory
     Manifests from different sources are combined together
-    :param manifest_file: manifest file
-    :param manifest_dir: directory with manifest files
-    :return:
     """
 
     entities: List[OdahuflowCloudResourceUpdatePair] = []
