@@ -46,10 +46,10 @@ Run Training with local spec
         Should be equal as Strings  ${response}  ${MODEL_RESULT}
 
 Try Run Training with local spec
-    [Arguments]  ${output}  ${error}  ${train options}
+    [Arguments]  ${error}  ${train options}
         ${result}  FailedShell  odahuflowctl --verbose local train run ${train options}
-        Run Keyword And Continue On Failure  log many  ${result}  ${result.stdout}  ${result.stderr}
-        should contain  ${result.${output}}  ${error}
+        ${result}  Catenate  ${result.stdout}  ${result.stderr}
+        should contain  ${result}  ${error}
 
 Run Packaging with api server spec
     [Arguments]  ${command}
@@ -77,9 +77,9 @@ Try Run Packaging with api server spec
 Run Valid Training with local spec
     [Template]  Run Training with local spec
     # id	file/dir	output
-    --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
-    --id "wine id file" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --output ${RESULT_DIR}  ${RESULT_DIR}
+    --id "wine id file" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/file/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
     --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with api server spec
@@ -108,27 +108,30 @@ Cleanup training artifacts from default output dir
 
 # negative tests
 Try Run invalid Training with local spec
+    [Setup]  Login to the api and edge
+    [Teardown]  Shell  odahuflowctl logout
     [Template]  Try Run Training with local spec
     # missing required option
-    Error  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
-    Error  --id "wine id file" --output-dir ${RESULT_DIR}
-    # incompatible options
-    Error  --id "wine id file" -d "${ARTIFACT_DIR}/dir" --manifest-file "${ARTIFACT_DIR}/file/training.yaml"
-    Error  --train-id wine-e2e-default-template --id wine-e2e -f ${RESULT_DIR} --manifest-dir "${ARTIFACT_DIR}/file/training.yaml"
-    Error  --id "wine_id_file" -d "${ARTIFACT_DIR}/dir" --manifest-dir "${ARTIFACT_DIR}/file" --output ${RESULT_DIR}
+    Error: Missing option '--train-id' / '--id'.
+    ...  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
     # not valid value for option
     # for file & dir options
-    Error  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
-    Error  --id "wine id file" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
+    Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
+    ...  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
+    Error: ${ARTIFACT_DIR}/file/training.yaml is not a directory
+    ...  --id "wine id file" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
+    Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
+    ...  --id "wine id file" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
     # no training either locally or on the server
-    Error  --train-id not-existing-training
+    Error: Got error from server: entity "not-existing-training" is not found (status: 404)
+    ...  --train-id not-existing-training
 
 Try Run invalid Packaging with api server spec
     [Setup]  Shell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     [Template]  Try Run Packaging with api server spec
     # invalid credentials
-    Error  local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    Error  local pack --url ${API_URL} --token ${EMPTY} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    Error  local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    Error  local pack --url ${EMPTY} --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${INVALID_URL_ERROR}            local pack --url "${EMPTY}" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
