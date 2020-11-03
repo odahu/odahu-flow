@@ -10,6 +10,7 @@ from docker.types import Mount
 from odahuflow.sdk import config
 from odahuflow.sdk.local.docker_utils import stream_container_logs, \
     convert_labels_to_filter, cleanup_docker_containers, PACKAGING_DOCKER_LABELS, raise_error_if_container_failed
+from odahuflow.sdk.logger import is_verbose_enabled
 from odahuflow.sdk.models import K8sPackager
 
 PACKAGER_CONF_FILE_PATH = 'mp.json'
@@ -52,7 +53,7 @@ def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
             ARTIFACT_PATH,
             # specified path for Docker Linux Container ignoring OS
             str(PurePosixPath(ARTIFACT_PATH, PACKAGER_CONF_FILE_PATH)),
-        ],
+        ] + [v for v in ("--verbose",) if is_verbose_enabled()],
         mounts=[
             Mount(ARTIFACT_PATH, artifact_path, type="bind"),
             Mount("/var/run/docker.sock", "/var/run/docker.sock", type="bind")
