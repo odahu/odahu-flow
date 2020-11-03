@@ -153,10 +153,9 @@ def get_packager_targets(
     """
     Build targets for calling packager. Fetch and base64 decode connections by names using local manifest and
     ODAHU connections API
-    :param targets:
-    :param connections:
-    :param remote_api:
-    :return:
+    :param targets: Targets from packaging manifest
+    :param connections: Connections found in local manifest files
+    :param remote_api: ConnectionClient to fetch missing Connections
     """
 
     packager_targets: List[PackagerTarget] = []
