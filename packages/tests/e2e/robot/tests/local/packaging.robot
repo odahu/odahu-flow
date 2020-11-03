@@ -71,7 +71,8 @@ Try Run Training with api server spec
 Try Run Packaging with local spec
     [Arguments]  ${error}  ${options}
         ${result}  FailedShell  odahuflowctl --verbose local packaging run ${options}
-        should contain  ${result.stdout}  ${error}
+        ${result}  Catenate  ${result.stdout}  ${result.stderr}
+        should contain  ${result}  ${error}
 
 *** Test Cases ***
 Run Valid Training with api server spec
@@ -101,16 +102,26 @@ Try Run invalid Training with api server spec
     [Teardown]  Login to the api and edge
     [Template]  Try Run Training with api server spec
     # invalid credentials
-    Error  local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
-    Error  local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
-    Error  local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
-    Error  local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
+    ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
+    ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
+    ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
+    ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
 
 Try Run invalid Packaging with local spec
     [Template]  Try Run Packaging with local spec
+    # missing required option
+    Error: Missing option '--pack-id' / '--id'.
+    ...  --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
     # not valid value for option
     # for file & dir options
-    Error  --pack-id pack-dir --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
-    Error  --id pack-file-image -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets
+    Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
+    ...  --pack-id pack-dir --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
+    Error: ${ARTIFACT_DIR}/file/packaging.yaml is not a directory
+    ...  --id pack-file-image -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
+    Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
+    ...  --id pack-file-image -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-name-1
+    Error: [Errno 2] No such file or directory: '${RESULT_DIR}/not-existing/mp.json'
+    ...  --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/not-existing
     # no training either locally or on the server
-    Error  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
+    Error: Got error from server: entity "not-existing-packaging" is not found (status: 404)
+    ...  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model
