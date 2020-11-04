@@ -19,9 +19,9 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Set Environment Variable    ODAHUFLOW_CONFIG    ${LOCAL_CONFIG}
-# Suite Teardown      Remove File     ${LOCAL_CONFIG}
+Suite Teardown      Remove File     ${LOCAL_CONFIG}
 Force Tags          cli  local  e2e
-# Test Timeout        30 minutes
+Test Timeout        60 minutes
 
 *** Keywords ***
 Run Training with local spec
@@ -71,7 +71,7 @@ Run E2E spec on cluster model
 
     ${result_train}             StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
     ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
-    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id e2e-pack-file-image -d "${ARTIFACT_DIR}" --artifact-name simple-model
+    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --id e2e-pack-file-image -a simple-model --no-disable-package-targets
 
     Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
     ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
