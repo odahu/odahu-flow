@@ -16,6 +16,7 @@
 """
 Local packaging commands for odahuflow cli
 """
+import os
 import logging
 from typing import List, Dict, Optional
 
@@ -126,6 +127,8 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
         packaging_integration=packager,
         targets=[],
     )
+    
+    artifact_path = os.path.join(artifact_path, artifact_name)
 
     result = start_package(k8s_packager, artifact_path)
 
