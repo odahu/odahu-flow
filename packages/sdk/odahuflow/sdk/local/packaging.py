@@ -34,10 +34,12 @@ def read_mp_result_file(config_dir: str) -> Dict[str, Any]:
 
 def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
     if not artifact_path:
-        artifact_path = join(
-            config.LOCAL_MODEL_OUTPUT_DIR,
-            packager.model_packaging.spec.artifact_name
-        )
+        artifact_path = config.LOCAL_MODEL_OUTPUT_DIR
+
+    artifact_path = join(
+        artifact_path,
+        packager.model_packaging.spec.artifact_name
+    )
 
     create_mp_config_file(artifact_path, packager)
 
