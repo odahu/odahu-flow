@@ -207,10 +207,8 @@ function local_setup() {
   # from setup() function
   cp "${TEST_DATA}/wine-quality.csv"  "${LOCAL_TEST_DATA}/wine-quality.csv"
 
-#  # docker login
-#  echo "username" ${DOCKER_USERNAME}
-#  echo "password" ${DOCKER_PASSWORD}
-#  docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
+  # make gcloud auth if needed
+  gcloud auth configure-docker
 }
 
 # Main entrypoint for setup command.
