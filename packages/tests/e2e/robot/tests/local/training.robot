@@ -20,10 +20,10 @@ Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
-Suite Teardown      Run Keywords
-...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
-...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
-...                 Remove File  ${LOCAL_CONFIG}
+# Suite Teardown      Run Keywords
+# ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
+# ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
+# ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
 # Test Timeout        90 minutes
 
@@ -52,6 +52,7 @@ Try Run Training with local spec
         should contain  ${result}  ${error}
 
 Run Packaging with api server spec
+    [Teardown]  Shell  docker stop -t 3 ${container_id.stdout}
     [Arguments]  ${command}
         ${pack_result}  StrictShell  odahuflowctl --verbose ${command}
 
@@ -60,7 +61,7 @@ Run Packaging with api server spec
         Remove File  ${RES_DIR}/pack_result.txt
 
         StrictShell  docker images --all
-        ${container_id}  StrictShell  docker run -d --rm -p 5001:5000 ${image_name.stdout}
+        ${container_id}  StrictShell  docker run -d --rm -p 5002:5000 ${image_name.stdout}
 
         Sleep  5 sec
         Shell  docker container list -as -f id=${container_id.stdout}
@@ -89,25 +90,25 @@ Run Valid Packaging with api server spec
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
-    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0
-    local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id simple-model -a simple-model
+    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0 --no-disable-package-targets --disable-target docker-push
+    local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id simple-model --no-disable-package-targets --disable-target docker-push
 
-List trainings in default output dir
-    ${list_result}  StrictShell  odahuflowctl --verbose local train list
-    Should contain  ${list_result.stdout}  Training artifacts:
-    Should contain  ${list_result.stdout}  simple-model
-    Should contain  ${list_result.stdout}  wine-name-1
-    ${line number}  Split To Lines  ${list_result.stdout}
-    ${line number}  Get length   ${line number}
-    Should be equal as integers  ${line number}  3
-
-Cleanup training artifacts from default output dir
-    StrictShell  odahuflowctl --verbose local train cleanup-artifacts
-    ${list_result}  StrictShell  odahuflowctl --verbose local train list
-    Should be Equal  ${list_result.stdout}  Artifacts not found
+# List trainings in default output dir
+#     ${list_result}  StrictShell  odahuflowctl --verbose local train list
+#     Should contain  ${list_result.stdout}  Training artifacts:
+#     Should contain  ${list_result.stdout}  simple-model
+#     Should contain  ${list_result.stdout}  wine-name-1
+#     ${line number}  Split To Lines  ${list_result.stdout}
+#     ${line number}  Get length   ${line number}
+#     Should be equal as integers  ${line number}  3
+#
+# Cleanup training artifacts from default output dir
+#     StrictShell  odahuflowctl --verbose local train cleanup-artifacts
+#     ${list_result}  StrictShell  odahuflowctl --verbose local train list
+#     Should be Equal  ${list_result.stdout}  Artifacts not found
 
 # negative tests
-Try Run invalid Training with local spec
+Try Run invalid Training
     [Setup]  Login to the api and edge
     [Teardown]  Shell  odahuflowctl logout
     [Template]  Try Run Training with local spec
@@ -126,11 +127,10 @@ Try Run invalid Training with local spec
     Error: Got error from server: entity "not-existing-training" is not found (status: 404)
     ...  --train-id not-existing-training
 
-Try Run invalid Packaging with api server spec
-    [Setup]  Shell  odahuflowctl logout
+Try Run Packaging with invalid credentials
+    [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     [Template]  Try Run Packaging with api server spec
-    # invalid credentials
     ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
     ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
     ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image

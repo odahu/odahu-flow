@@ -19,11 +19,13 @@ Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
+...                 Login to the api and edge  AND
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
 Suite Teardown      Run Keywords
 ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
 ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
-...                 Remove File  ${LOCAL_CONFIG}
+...                 Remove File  ${LOCAL_CONFIG}  AND
+...                 StrictShell  odahuflowctl logout
 Force Tags          cli  local  packaging
 # Test Timeout        90 minutes
 
@@ -76,9 +78,7 @@ Try Run Packaging with local spec
 
 *** Test Cases ***
 Run Valid Training with api server spec
-    [Setup]     Run Keywords
-    ...         Login to the api and edge  AND
-    ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
     [Template]  Run Training with api server spec
     # auth data     id      file/dir        output
@@ -86,6 +86,8 @@ Run Valid Training with api server spec
     local training --url ${API_URL} --token "${AUTH_TOKEN}" run --id train-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with local spec
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
     --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
@@ -95,19 +97,23 @@ Run Valid Packaging with local spec
     --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets
     --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}/simple-model
     --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
+    # manifest on cluster but disabled targets
+    --id pack-dir -a wine-dir-1.0 --artifact-path ${RESULT_DIR}/wine-dir-1.0 --disable-package-targets
+    --id pack-dir -a wine-dir-1.0 --artifact-path ${RESULT_DIR}/wine-dir-1.0
+    --id pack-file-image --no-disable-package-targets --disable-target docker-pull
+    --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
 
 # negative tests
-Try Run invalid Training with api server spec
-    [Setup]  Shell  odahuflowctl logout
+Try Run Training with invalid credentials
+    [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     [Template]  Try Run Training with api server spec
-    # invalid credentials
     ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
     ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
     ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
     ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
 
-Try Run invalid Packaging with local spec
+Try Run invalid Packaging
     [Template]  Try Run Packaging with local spec
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
