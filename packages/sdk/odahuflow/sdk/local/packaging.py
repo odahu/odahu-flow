@@ -36,6 +36,11 @@ def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
     if not artifact_path:
         artifact_path = config.LOCAL_MODEL_OUTPUT_DIR
 
+    # Removing .zip extension if there's one
+    artifact_name = packager.model_packaging.spec.artifact_name.strip()
+    if artifact_name.endswith('.zip'):
+        packager.model_packaging.spec.artifact_name = artifact_name[:-4]
+
     artifact_path = join(
         artifact_path,
         packager.model_packaging.spec.artifact_name
