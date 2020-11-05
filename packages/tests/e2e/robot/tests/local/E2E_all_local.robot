@@ -68,7 +68,7 @@ Run E2E spec on cluster model
     ...           Remove Directory  ${CLUSTER_MODEL_OUTPUT_DIR}  recursive=True  AND
     ...           Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
     ...           Shell  docker stop -t 3 "${CLUSTER_DOCKER_CONTAINER}"
-
+    # training & packaging
     ${result_train}             StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
     ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
     ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --id e2e-pack-file-image -a simple-model --no-disable-package-targets
@@ -76,12 +76,12 @@ Run E2E spec on cluster model
     Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
     ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
     Remove File  ${RES_DIR}/pack_result.txt
-
+    # deployment
     StrictShell  docker images --all
     StrictShell  docker run --name "${CLUSTER_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
 
     Sleep  5 sec
     Shell  docker container list -as -f name=${CLUSTER_DOCKER_CONTAINER}
-
+    # model invoke
     ${result_model}              StrictShell  odahuflowctl --verbose model invoke --url http://0:5000 --json-file ${RES_DIR}/request.json
     Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
