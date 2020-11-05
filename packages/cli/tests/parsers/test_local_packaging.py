@@ -12,8 +12,8 @@ from odahuflow.sdk.local import packaging as packaging_sdk
 from odahuflow.sdk.models import ConnectionSpec, K8sPackager, ModelPackaging, ModelPackagingSpec, ModelPackagingStatus, \
     PackagingIntegration, \
     PackagerTarget, \
-    Target, \
-    Connection
+    PackagingIntegrationSpec, Schema, Target, \
+    Connection, TargetSchema
 from pytest_mock import MockFixture
 
 PLAIN_VALUE = 'Value'
@@ -25,6 +25,7 @@ conn1 = Connection(
         key_secret=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
         public_key=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
         password=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
+        type='gcr'
     )
 )
 conn2 = Connection(
@@ -34,6 +35,7 @@ conn2 = Connection(
         key_secret=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
         public_key=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
         password=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
+        type='gcr'
     )
 )
 conn_d1 = Connection(
@@ -43,6 +45,7 @@ conn_d1 = Connection(
         key_secret=PLAIN_VALUE,
         public_key=PLAIN_VALUE,
         password=PLAIN_VALUE,
+        type='gcr'
     )
 )
 conn_d2 = Connection(
@@ -52,6 +55,7 @@ conn_d2 = Connection(
         key_secret=PLAIN_VALUE,
         public_key=PLAIN_VALUE,
         password=PLAIN_VALUE,
+        type='gcr'
     )
 )
 target_pull = Target("conn1", "docker-pull")
@@ -69,7 +73,18 @@ pack1 = ModelPackaging(
     status=ModelPackagingStatus()
 )
 
-pi = PackagingIntegration(id="pi")
+pi = PackagingIntegration(id="pi", spec=PackagingIntegrationSpec(
+    schema=Schema(
+        targets=[
+            TargetSchema(
+                connection_types=['gcr', 'ecr', 'docker'], name='docker-push', required=True
+            ),
+            TargetSchema(
+                connection_types=['gcr', 'ecr', 'docker'], name='docker-pull', required=False
+            )
+        ]
+    )
+))
 
 
 @dataclass
@@ -83,7 +98,8 @@ class I:
 class E:
     targets: List[PackagerTarget]
     exit_code: int = 0
-    exc: Exception = None
+    exc: BaseException = None
+    output_subs: str = ""
 
 
 @dataclass
@@ -136,7 +152,8 @@ test_cases: List[Case] = [
         input=I(
             cmd=["--pack-id", "pack1", "--no-disable-package-targets"],
             local=[conn1, pi, pack1], remote=[]),
-        expected=E(targets=[], exit_code=1, exc=WrongHttpStatusCode(404, {"message": f"Not found {conn2.id}"}))
+        expected=E(targets=[], exit_code=1, exc=SystemExit(1,),
+                   output_subs="connection conn2 of target docker-push is not found")
     ),
 ]
 
@@ -185,7 +202,7 @@ def test_run_targets(cli_runner: CliRunner, test_case: Case, mocker: MockFixture
         result = cli_runner.invoke(run, command_args, obj=api_client)
 
         # Assert expectations
-        if expected.exc is None:
+        if expected.exit_code == 0:
             assert result.exit_code == 0
             assert result.exception is None
 
@@ -198,3 +215,6 @@ def test_run_targets(cli_runner: CliRunner, test_case: Case, mocker: MockFixture
             assert result.exit_code == 1
             assert isinstance(result.exception, type(expected.exc))
             assert str(expected.exc) == str(result.exception)
+
+        if expected.output_subs:
+            assert expected.output_subs in result.output
