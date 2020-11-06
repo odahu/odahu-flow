@@ -242,7 +242,7 @@ def validate_targets(
     for t in targets:
         t_schema: TargetSchema = schema.get(t.name)
         if t_schema is None:
-            errors.append(f'cannot find {t.name} target in packaging integration {pi.id}')
+            errors.append(f'cannot find "{t.name}" target in "{pi.id}" packaging integration')
             continue
 
         try:
