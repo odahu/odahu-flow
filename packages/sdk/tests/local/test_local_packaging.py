@@ -13,8 +13,6 @@
 #  limitations under the License.
 import os
 import json
-from unittest.mock import patch
-
 import docker
 
 import pytest
