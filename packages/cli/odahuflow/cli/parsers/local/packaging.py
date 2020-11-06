@@ -249,7 +249,7 @@ def validate_targets(
             pt = get_packager_target(t, connections, remote_api)
         except WrongHttpStatusCode as e:
             if e.status_code == 404:
-                errors.append(f'connection {t.connection_name} of target {t.name} is not found')
+                errors.append(f'"{t.connection_name}" connection of "{t.name}" target is not found')
                 continue
             raise e
 
