@@ -139,7 +139,7 @@ def get_packager(
     packager = local.get(name)
     if not packager:
         click.echo(
-            f'The {name} packager not found in the manifest files. '
+            f'The "{name}" packager is not found in the manifest files. '
             f'Trying to retrieve it from API server'
         )
         packager = remote_api.get(name)
