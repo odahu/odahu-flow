@@ -54,7 +54,6 @@ def test_start_package__artifact_name_artifact_path(artifact_name, artifact_path
         # mocking packaging_integration default_image
         packaging_integration=PackagingIntegration(spec=PackagingIntegrationSpec(default_image='default_image')))
 
-    # os_path_join_mock = mocker.patch.object(os.path, 'join')
     create_mp_config_file_mock = mocker.patch.object(packaging, 'create_mp_config_file')
     config_mock = mocker.patch.object(packaging, 'config')
 
@@ -76,6 +75,5 @@ def test_start_package__artifact_name_artifact_path(artifact_name, artifact_path
 
     expected_full_artifact_path = os.path.join(expected_artifact_path, expected_artifact_name)
 
-    # os_path_join_mock.assert_called_with(expected_artifact_path, expected_artifact_name)
     create_mp_config_file_mock.assert_called_with(expected_full_artifact_path, expected_packager)
     read_mp_result_file_mock.assert_called_with(expected_full_artifact_path)
