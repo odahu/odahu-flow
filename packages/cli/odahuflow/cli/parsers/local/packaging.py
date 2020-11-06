@@ -252,7 +252,7 @@ def validate_targets(
 
         if pt.connection.spec.type not in t_schema.connection_types:
             errors.append(f'"{pt.name}" target has invalid connection type, "{pt.connection.spec.type}", '
-                          f'for "{pi.id}" packaging integration the following are expected: {t_schema.connection_types}')
+                          f'for "{pi.id}" packaging integration the expected are {t_schema.connection_types}')
             continue
 
         result.append(pt)
