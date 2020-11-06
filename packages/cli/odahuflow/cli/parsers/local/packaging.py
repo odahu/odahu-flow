@@ -163,7 +163,7 @@ def get_packager_targets(
         conn = connections.get(t.connection_name)
         if not conn:
             click.echo(
-                f'The {t.connection_name} connection of target {t.name} not found in the manifest files. '
+                f'The "{t.connection_name}" connection of "{t.name}" target is not found in the manifest files. '
                 f'Trying to retrieve it from API server'
             )
             conn = remote_api.get_decrypted(t.connection_name)
