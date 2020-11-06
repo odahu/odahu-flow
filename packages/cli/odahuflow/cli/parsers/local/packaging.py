@@ -183,7 +183,7 @@ def get_packager_target(
     """
     Build targets for calling packager. Fetch and base64 decode connections by names using local manifest and
     ODAHU connections API
-    :param targets: Targets from packaging manifest
+    :param target: Targets from packaging manifest
     :param connections: Connections found in local manifest files
     :param remote_api: ConnectionClient to fetch missing Connections
     """
@@ -215,8 +215,7 @@ def _deprecation_warning(is_target_disabled: bool):
 
 
 def validate_targets(
-        targets: List[Target], pi: PackagingIntegration,
-        all_targets_disabled: bool, disabled_targets: List[str],
+        targets: List[Target], pi: PackagingIntegration, disabled_targets: List[str],
         connections: Dict[str, Connection], remote_api: ConnectionClient
 ) -> List[PackagerTarget]:
 
@@ -229,8 +228,6 @@ def validate_targets(
     # Set defaults
     for ts in pi.spec.schema.targets:
         if ts.name in targets_in_spec:  # already in spec
-            continue
-        if all_targets_disabled:  # all targets are disabled
             continue
         if ts.name in disabled_targets:  # disabled
             continue
@@ -322,12 +319,16 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
 
     mp_spec_targets = mp.spec.targets if mp.spec.targets is not None else []
 
-    # Disable targets
-    mp_spec_targets = [t for t in mp_spec_targets if t.name not in disable_target and not is_target_disabled]
+    # check for deprecated option
+    if is_target_disabled:
+        targets = []
+    else:
+        # Disable targets
+        mp_spec_targets = [t for t in mp_spec_targets if t.name not in disable_target]
 
-    # Validate targets
-    targets = validate_targets(mp_spec_targets, packager, is_target_disabled, disable_target,
-                               connections, ConnectionClient.construct_from_other(client))
+        # Validate targets
+        targets = validate_targets(mp_spec_targets, packager, disable_target,
+                                   connections, ConnectionClient.construct_from_other(client))
 
     k8s_packager = K8sPackager(
         model_packaging=mp,
