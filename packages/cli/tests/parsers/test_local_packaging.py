@@ -153,7 +153,7 @@ test_cases: List[Case] = [
             cmd=["--pack-id", "pack1", "--no-disable-package-targets"],
             local=[conn1, pi, pack1], remote=[]),
         expected=E(targets=[], exit_code=1, exc=SystemExit(1,),
-                   output_subs="connection conn2 of target docker-push is not found")
+                   output_subs="\"conn2\" connection of \"docker-push\" target is not found")
     ),
 ]
 
