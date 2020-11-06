@@ -304,7 +304,7 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
 
     if not mp:
         click.echo(
-            f'The {pack_id} packaging not found in the manifest files. '
+            f'The "{pack_id}" packaging is not found in the manifest files. '
             f'Trying to retrieve it from API server'
         )
         mp = client.get(pack_id)
