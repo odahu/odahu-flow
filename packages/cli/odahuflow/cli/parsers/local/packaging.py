@@ -236,7 +236,7 @@ def validate_targets(
             continue
         targets_in_spec.add(ts.name)
         targets.append(Target(ts.name, ts.default))
-        LOGGER.info(f'{ts.name} target default value is set ({ts.default})')
+        LOGGER.info(f'{ts.name} target default value is set to ({ts.default})')
 
     # validate targets
     for t in targets:
