@@ -232,7 +232,7 @@ def validate_targets(
         if ts.name in disabled_targets:  # disabled
             continue
         targets_in_spec.add(ts.name)
-        targets.append(Target(ts.name, ts.default))
+        targets.append(Target(ts.default, ts.name, ))
         LOGGER.info(f'{ts.name} target default value is set to ({ts.default})')
 
     # validate targets
