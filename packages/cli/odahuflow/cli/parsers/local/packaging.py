@@ -21,10 +21,12 @@ import logging
 from typing import List, Dict, Optional
 
 import click
+from click import ClickException
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.sdk import config
+from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import \
     parse_resources_file, \
     parse_resources_dir, OdahuflowCloudResourceUpdatePair
@@ -32,7 +34,8 @@ from odahuflow.sdk.clients.connection import ConnectionClient
 from odahuflow.sdk.clients.packaging import ModelPackagingClient
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient
 from odahuflow.sdk.local.packaging import start_package, cleanup_packaging_docker_containers
-from odahuflow.sdk.models import Connection, K8sPackager, ModelPackaging, PackagerTarget, PackagingIntegration, Target
+from odahuflow.sdk.models import Connection, K8sPackager, ModelPackaging, PackagerTarget, \
+    PackagingIntegration, Target, TargetSchema
 
 LOGGER = logging.getLogger(__name__)
 
@@ -99,7 +102,6 @@ def parse_entities(
 
 
 def _decode_connection(connection: Connection) -> None:
-
     encoding = 'utf-8'
     decode_fields = ['password', 'key_secret', 'key_id', 'public_key']
 
@@ -137,8 +139,8 @@ def get_packager(
     packager = local.get(name)
     if not packager:
         click.echo(
-            f'The {name} packager not found in the manifest files.'
-            f' Trying to retrieve it from API server'
+            f'The "{name}" packager is not found in the manifest files. '
+            f'Trying to retrieve it from API server'
         )
         packager = remote_api.get(name)
     return packager
@@ -161,8 +163,8 @@ def get_packager_targets(
         conn = connections.get(t.connection_name)
         if not conn:
             click.echo(
-                f'The {t.connection_name} connection of target {t.name} not found in the manifest files.'
-                f' Trying to retrieve it from API server'
+                f'The "{t.connection_name}" connection of "{t.name}" target is not found in the manifest files. '
+                f'Trying to retrieve it from API server'
             )
             conn = remote_api.get_decrypted(t.connection_name)
 
@@ -173,6 +175,30 @@ def get_packager_targets(
         )
 
     return packager_targets
+
+
+def get_packager_target(
+        target: Target, connections: Dict[str, Connection], remote_api: ConnectionClient
+) -> PackagerTarget:
+    """
+    Build targets for calling packager. Fetch and base64 decode connections by names using local manifest and
+    ODAHU connections API
+    :param target: Targets from packaging manifest
+    :param connections: Connections found in local manifest files
+    :param remote_api: ConnectionClient to fetch missing Connections
+    """
+
+    conn = connections.get(target.connection_name)
+    if not conn:
+        click.echo(
+            f'The "{target.connection_name}" connection of "{target.name}" target is not found in the manifest files. '
+            f'Trying to retrieve it from API server'
+        )
+        conn = remote_api.get_decrypted(target.connection_name)
+
+    _decode_connection(conn)
+
+    return PackagerTarget(conn, target.name)
 
 
 def _deprecation_warning(is_target_disabled: bool):
@@ -186,6 +212,56 @@ def _deprecation_warning(is_target_disabled: bool):
                    'are deprecated and will be removed in future releases. '
                    'By default all targets will be enabled. '
                    'Consider using --disable-target option to disable specific targets by name')
+
+
+def validate_targets(
+        targets: List[Target], pi: PackagingIntegration, disabled_targets: List[str],
+        connections: Dict[str, Connection], remote_api: ConnectionClient
+) -> List[PackagerTarget]:
+
+    result: List[PackagerTarget] = []
+    errors = []
+
+    targets_in_spec = {t.name for t in targets}
+    schema = {t.name: t for t in pi.spec.schema.targets}
+
+    # Set defaults
+    for ts in pi.spec.schema.targets:
+        if ts.name in targets_in_spec:  # already in spec
+            continue
+        if ts.name in disabled_targets:  # disabled
+            continue
+        targets_in_spec.add(ts.name)
+        targets.append(Target(ts.default, ts.name, ))
+        LOGGER.info(f'{ts.name} target default value is set to ({ts.default})')
+
+    # validate targets
+    for t in targets:
+        t_schema: TargetSchema = schema.get(t.name)
+        if t_schema is None:
+            errors.append(f'cannot find "{t.name}" target in "{pi.id}" packaging integration')
+            continue
+
+        try:
+            pt = get_packager_target(t, connections, remote_api)
+        except WrongHttpStatusCode as e:
+            if e.status_code == 404:
+                errors.append(f'"{t.connection_name}" connection of "{t.name}" target is not found')
+                continue
+            raise e
+
+        if pt.connection.spec.type not in t_schema.connection_types:
+            errors.append(f'"{pt.name}" target has invalid connection type, "{pt.connection.spec.type}", '
+                          f'for "{pi.id}" packaging integration the expected are {t_schema.connection_types}')
+            continue
+
+        result.append(pt)
+
+    if errors:
+        raise ClickException('Next errors were found during .spec.targets validation:\n'
+                             + '\n'.join(errors))
+
+    return result
 
 
 @packaging_group.command()
@@ -225,8 +301,8 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
 
     if not mp:
         click.echo(
-            f'The {pack_id} packaging not found in the manifest files.'
-            f' Trying to retrieve it from API server'
+            f'The "{pack_id}" packaging is not found in the manifest files. '
+            f'Trying to retrieve it from API server'
         )
         mp = client.get(pack_id)
 
@@ -240,10 +316,19 @@ def run(client: ModelPackagingClient, pack_id: str, manifest_file: List[str], ma
 
     if disable_target:
         LOGGER.debug(f'Next targets are disabled: {", ".join(disable_target)}')
-    targets = get_packager_targets(
-        [t for t in mp.spec.targets if t.name not in disable_target and not is_target_disabled],
-        connections, ConnectionClient.construct_from_other(client)
-    )
+
+    mp_spec_targets = mp.spec.targets if mp.spec.targets is not None else []
+
+    # check for deprecated option
+    if is_target_disabled:
+        targets = []
+    else:
+        # Disable targets
+        mp_spec_targets = [t for t in mp_spec_targets if t.name not in disable_target]
+
+        # Validate targets
+        targets = validate_targets(mp_spec_targets, packager, disable_target,
+                                   connections, ConnectionClient.construct_from_other(client))
 
     k8s_packager = K8sPackager(
         model_packaging=mp,
