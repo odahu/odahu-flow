@@ -7,7 +7,7 @@
       "alpha": "1.0"
     },
     "model": {
-      "artifactNameTemplate": "{{ .Name }}-{{ .Version }}.zip",
+      "artifactNameTemplate": "{{ .Name }}-{{ .Version }}",
       "name": "wine-name",
       "version": 1
     },
@@ -33,7 +33,7 @@
     "model": {
       "name": "wine-artifact-hardcoded",
       "version": 1,
-      "artifactNameTemplate": "simple-model.zip"
+      "artifactNameTemplate": "simple-model"
     },
     "resources": {
       "limits": {

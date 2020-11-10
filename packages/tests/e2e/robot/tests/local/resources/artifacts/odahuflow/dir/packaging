@@ -6,7 +6,7 @@ spec:
       connectionName: docker-ci
     - name: docker-pull
       connectionName: odahuflow-docker-repository
-  artifactName: "simple-model.zip"
+  artifactName: "simple-model"
   integrationName: docker-rest
   imageName: "{{ .Name }}-{{ .Version }}"
   resources:
