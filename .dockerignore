@@ -2,6 +2,7 @@
 !Makefile
 !containers/**
 !packages/cli/**
+!packages/cli-image/**
 !packages/operator/main.go
 !packages/operator/cmd/**
 !packages/operator/pkg/**

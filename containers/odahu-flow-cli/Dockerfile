@@ -36,18 +36,13 @@ RUN wget --quiet ${MINICONDA_URL}  -O ~/miniconda.sh && \
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
     echo "conda activate base" >> ~/.bashrc
 
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip pipenv==2018.10.13
 
 ARG WORKSPACE=/opt/workspace
+WORKDIR ${WORKSPACE}
 
-COPY packages/ ${WORKSPACE}/
+COPY packages/ ./
 
-# Install python dependecies
-RUN  cd ${WORKSPACE}/sdk/ && pip install -r requirements.txt
-RUN  cd ${WORKSPACE}/cli/ && pip install -r requirements.txt
-
-# Install packages
-RUN cd ${WORKSPACE}/sdk/ && pip install --no-deps -e .
-RUN cd ${WORKSPACE}/cli/ && pip install --no-deps -e .
+RUN cd cli-image && pipenv sync && echo "export PATH=$(pipenv --venv):\$PATH" >> ~/.bashrc
 
 CMD [ "/bin/bash" ]
