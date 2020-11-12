@@ -37,6 +37,7 @@ const (
 	ReadinessProbeErrorMessage = "readiness probe must be positive number"
 	LivenessProbeErrorMessage  = "liveness probe parameter must be positive number"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
+	DefaultRolePrefix		   = "role-"
 )
 
 var (
@@ -71,9 +72,9 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	}
 
 	if md.Spec.RoleName == nil || len(*md.Spec.RoleName) == 0 {
-		logMD.Info("Role name parameter is nil or empty. Set the default value",
-			"Deployment name", md.ID, "role name", MdDefaultMinimumReplicas)
-		defaultRoleName := mdv.modelDeploymentConfig.Security.RoleName
+		defaultRoleName := DefaultRolePrefix + md.ID
+		logMD.Info("Role name parameter is nil or empty. Set the model Role as the model ID with a prefix",
+			"Deployment name", md.ID, "role name", defaultRoleName)
 		md.Spec.RoleName = &defaultRoleName
 	} else {
 		err = multierr.Append(err, validation.ValidateK8sLabel(*md.Spec.RoleName))
