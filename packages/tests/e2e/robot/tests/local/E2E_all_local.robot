@@ -21,7 +21,7 @@ Library             Collections
 Suite Setup         Set Environment Variable    ODAHUFLOW_CONFIG    ${LOCAL_CONFIG}
 Suite Teardown      Remove File     ${LOCAL_CONFIG}
 Force Tags          cli  local  e2e
-Test Timeout        60 minutes
+Test Timeout        90 minutes
 
 *** Keywords ***
 Run Training with local spec
