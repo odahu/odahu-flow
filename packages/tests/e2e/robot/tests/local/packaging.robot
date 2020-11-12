@@ -1,7 +1,7 @@
 *** Variables ***
 ${RES_DIR}                  ${CURDIR}/resources
-${RESULT_DIR}               ${CURDIR}/packaging_train_results
 ${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
+${RESULT_DIR}               ${CURDIR}/packaging_train_results
 
 ${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
@@ -27,7 +27,7 @@ Suite Teardown      Run Keywords
 ...                 Remove File  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl logout
 Force Tags          cli  local  packaging
-# Test Timeout        90 minutes
+Test Timeout        150 minutes
 
 *** Keywords ***
 Run Training with api server spec
@@ -57,7 +57,7 @@ Run Packaging with local spec
         Remove File  ${RES_DIR}/pack_result.txt
 
         StrictShell  docker images --all
-        ${container_id}  StrictShell  docker run -d --rm -p 5002:5000 ${image_name.stdout}
+        ${container_id}  Shell  docker run -d --rm -p 5002:5000 ${image_name.stdout}
 
         Sleep  5 sec
         Shell  docker container list -as -f id=${container_id.stdout}
@@ -98,8 +98,8 @@ Run Valid Packaging with local spec
     --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}/simple-model
     --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
     # manifest on cluster but disabled targets
-    --id pack-dir -a wine-dir-1.0 --artifact-path ${RESULT_DIR}/wine-dir-1.0 --disable-package-targets
-    --id pack-dir -a wine-dir-1.0 --artifact-path ${RESULT_DIR}/wine-dir-1.0
+    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
+    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}/wine-name-1
     --id pack-file-image --no-disable-package-targets --disable-target docker-pull
     --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
 
