@@ -97,8 +97,6 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
               help='no wait until scale will be finished')
 @click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
               help='timeout in seconds. for wait (if no-wait is off)')
-@click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
-              help='timeout in seconds. for wait (if no-wait is off)')
 @click.option('--ignore-if-exists', is_flag=True,
               help='Ignore if entity is already exists on API server. Return success status code')
 @pass_obj
