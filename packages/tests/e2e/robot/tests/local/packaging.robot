@@ -91,15 +91,15 @@ Run Valid Packaging with local spec
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
     --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR}/wine-name-1 --artifact-name wine-name-1
+    --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
     --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
-    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
-    --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets
-    --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}/simple-model
+    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} --disable-package-targets
+    --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
+    --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
     --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
     # manifest on cluster but disabled targets
-    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}/wine-name-1 --disable-package-targets
-    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}/wine-name-1
+    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
+    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}
     --id pack-file-image --no-disable-package-targets --disable-target docker-pull
     --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
 
