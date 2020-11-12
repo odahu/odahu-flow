@@ -15,7 +15,7 @@ spec:
 id: pack-file-image
 kind: ModelPackaging
 spec:
-  artifactName: "simple-model"
+  artifactName: "simple-model.zip"
   integrationName: docker-rest
   arguments:
     imageName: "{{ Name }}-{{ Version }}"

@@ -11,7 +11,7 @@ spec:
   hyperParameters: 
     alpha: "1.0"
   model: 
-    artifactNameTemplate: "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}"
+    artifactNameTemplate: "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
     name: wine-name
     version: 1.0
   toolchain: mlflow

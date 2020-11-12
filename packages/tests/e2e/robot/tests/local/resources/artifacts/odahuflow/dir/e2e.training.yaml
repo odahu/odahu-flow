@@ -4,7 +4,7 @@ spec:
   model:
     name: e2e-artifact-hardcoded
     version: 1.0
-    artifactNameTemplate: "simple-model"
+    artifactNameTemplate: "simple-model.zip"
   vcsName: odahu-flow-examples
   toolchain: mlflow
   entrypoint: main
