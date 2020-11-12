@@ -20,12 +20,12 @@ Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
-# Suite Teardown      Run Keywords
-# ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
-# ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
-# ...                 Remove File  ${LOCAL_CONFIG}
+Suite Teardown      Run Keywords
+...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
+...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
+...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
-# Test Timeout        90 minutes
+Test Timeout        150 minutes
 
 *** Keywords ***
 Run Training with local spec
@@ -61,7 +61,7 @@ Run Packaging with api server spec
         Remove File  ${RES_DIR}/pack_result.txt
 
         StrictShell  docker images --all
-        ${container_id}  StrictShell  docker run -d --rm -p 5002:5000 ${image_name.stdout}
+        ${container_id}  Shell  docker run -d --rm -p 5001:5000 ${image_name.stdout}
 
         Sleep  5 sec
         Shell  docker container list -as -f id=${container_id.stdout}
@@ -91,21 +91,21 @@ Run Valid Packaging with api server spec
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
     local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR}/wine-dir-1.0 --artifact-name wine-dir-1.0 --no-disable-package-targets --disable-target docker-push
-    local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id simple-model --no-disable-package-targets --disable-target docker-push
+    local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id pack-dir --artifact-name simple-model --no-disable-package-targets --disable-target docker-push  # change id on --id simple-model delete --artifact-path
 
-# List trainings in default output dir
-#     ${list_result}  StrictShell  odahuflowctl --verbose local train list
-#     Should contain  ${list_result.stdout}  Training artifacts:
-#     Should contain  ${list_result.stdout}  simple-model
-#     Should contain  ${list_result.stdout}  wine-name-1
-#     ${line number}  Split To Lines  ${list_result.stdout}
-#     ${line number}  Get length   ${line number}
-#     Should be equal as integers  ${line number}  3
-#
-# Cleanup training artifacts from default output dir
-#     StrictShell  odahuflowctl --verbose local train cleanup-artifacts
-#     ${list_result}  StrictShell  odahuflowctl --verbose local train list
-#     Should be Equal  ${list_result.stdout}  Artifacts not found
+List trainings in default output dir
+    ${list_result}  StrictShell  odahuflowctl --verbose local train list
+    Should contain  ${list_result.stdout}  Training artifacts:
+    Should contain  ${list_result.stdout}  simple-model
+    Should contain  ${list_result.stdout}  wine-name-1
+    ${line number}  Split To Lines  ${list_result.stdout}
+    ${line number}  Get length   ${line number}
+    Should be equal as integers  ${line number}  3
+
+Cleanup training artifacts from default output dir
+    StrictShell  odahuflowctl --verbose local train cleanup-artifacts
+    ${list_result}  StrictShell  odahuflowctl --verbose local train list
+    Should be Equal  ${list_result.stdout}  Artifacts not found
 
 # negative tests
 Try Run invalid Training
