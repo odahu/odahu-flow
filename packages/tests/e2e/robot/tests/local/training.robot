@@ -25,7 +25,7 @@ Suite Teardown      Run Keywords
 ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
-Test Timeout        150 minutes
+Test Timeout        180 minutes
 
 *** Keywords ***
 Run Training with local spec
