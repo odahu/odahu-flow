@@ -1,4 +1,3 @@
-# for class Model
 import json
 from odahuflow.sdk import config
 
@@ -246,9 +245,9 @@ class Toolchain:
 class Model:
 
     @staticmethod
-    def model_get(url=None, token=config.API_TOKEN, **kwargs):
+    def model_get(url=None, token=None, **kwargs):
         return ModelClient(url, token, **kwargs).info()
 
     @staticmethod
-    def model_post(url=None, token=config.API_TOKEN, json_input=None, **kwargs):
+    def model_post(url=None, token=None, json_input=None, **kwargs):
         return ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
