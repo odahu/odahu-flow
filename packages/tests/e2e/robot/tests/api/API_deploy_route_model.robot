@@ -88,13 +88,13 @@ Check by id that route exists
 Get info about model
     [Tags]                      model
     ${model_url}                Get model Url  ${MODEL}
-    ${result}                   Call API  model get  url=${model_url}
+    ${result}                   Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
     should be equal             ${result['info']['description']}  This is a EDI server.
 
 Invoke model
     [Tags]                        model
     ${model_url}                  Get model Url  ${MODEL}
-    ${result}                     Call API  model post  url=${model_url}  json_input=${REQUEST}
+    ${result}                     Call API  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
     ${expected response}          evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result}  ${expected response}
 
@@ -159,22 +159,22 @@ Try Get info not existing Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
-    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}
+    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}  token=${AUTH_TOKEN}
 
 Try Get info deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
-    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}
+    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}  token=${AUTH_TOKEN}
 
 Try Invoke not existing and deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke
-    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  json_input=${REQUEST}
+    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
 
 Try Invoke deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke
-    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  json_input=${REQUEST}
+    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
