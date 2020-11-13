@@ -85,26 +85,8 @@ Run Valid Training with api server spec
     local train run -f ${ARTIFACT_DIR}/dir/packaging --id wine-packaging --output ${RESULT_DIR}  ${RESULT_DIR}
     local training --url ${API_URL} --token "${AUTH_TOKEN}" run --id train-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
-Run Valid Packaging with local spec
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Template]  Run Packaging with local spec
-    # id	file/dir	artifact path	artifact name	package-targets
-    --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
-    --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
-    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
-    --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
-    --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
-    # manifest on cluster but disabled targets
-    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
-    --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}
-    --id pack-file-image --no-disable-package-targets --disable-target docker-pull
-    --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
-
-# negative tests
-Try Run Training with invalid credentials
+Try Run and Fail Training with invalid credentials
+    [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     [Template]  Try Run Training with api server spec
@@ -113,7 +95,8 @@ Try Run Training with invalid credentials
     ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
     ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
 
-Try Run invalid Packaging
+Try Run and Fail invalid Packaging
+    [Tags]  negative
     [Template]  Try Run Packaging with local spec
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
@@ -131,3 +114,24 @@ Try Run invalid Packaging
     # no training either locally or on the server
     Error: Got error from server: entity "not-existing-packaging" is not found (status: 404)
     ...  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model
+    # manifest on cluster but disabled target docker-pull (image not pulled locally)
+    Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
+    ...  --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
+    Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
+    ...  --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}
+    Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
+    ...  --id pack-file-image --no-disable-package-targets --disable-target docker-pull
+
+Run Valid Packaging with local spec
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Template]  Run Packaging with local spec
+    # id	file/dir	artifact path	artifact name	package-targets
+    --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
+    --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
+    --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
+    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
+    --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
+    --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
+    --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
+    --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing

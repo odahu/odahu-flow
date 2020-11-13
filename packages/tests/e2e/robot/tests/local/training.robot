@@ -75,6 +75,36 @@ Try Run Packaging with api server spec
         should contain  ${result.stdout}  ${error}
 
 *** Test Cases ***
+Try Run and Fail Packaging with invalid credentials
+    [Tags]   negative
+    [Setup]  StrictShell  odahuflowctl logout
+    [Teardown]  Login to the api and edge
+    [Template]  Try Run Packaging with api server spec
+    ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+    ${INVALID_URL_ERROR}            local pack --url "${EMPTY}" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
+
+Try Run and Fail invalid Training
+    [Tags]   negative
+    [Setup]  Login to the api and edge
+    [Teardown]  Shell  odahuflowctl logout
+    [Template]  Try Run Training with local spec
+    # missing required option
+    Error: Missing option '--train-id' / '--id'.
+    ...  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    # not valid value for option
+    # for file & dir options
+    Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
+    ...  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
+    Error: ${ARTIFACT_DIR}/file/training.yaml is not a directory
+    ...  --id "wine id file" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
+    Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
+    ...  --id "wine id file" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
+    # no training either locally or on the server
+    Error: Got error from server: entity "not-existing-training" is not found (status: 404)
+    ...  --train-id not-existing-training
+
 Run Valid Training with local spec
     [Template]  Run Training with local spec
     # id	file/dir	output
@@ -106,32 +136,3 @@ Cleanup training artifacts from default output dir
     StrictShell  odahuflowctl --verbose local train cleanup-artifacts
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
     Should be Equal  ${list_result.stdout}  Artifacts not found
-
-# negative tests
-Try Run invalid Training
-    [Setup]  Login to the api and edge
-    [Teardown]  Shell  odahuflowctl logout
-    [Template]  Try Run Training with local spec
-    # missing required option
-    Error: Missing option '--train-id' / '--id'.
-    ...  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
-    # not valid value for option
-    # for file & dir options
-    Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
-    Error: ${ARTIFACT_DIR}/file/training.yaml is not a directory
-    ...  --id "wine id file" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
-    Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
-    ...  --id "wine id file" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
-    # no training either locally or on the server
-    Error: Got error from server: entity "not-existing-training" is not found (status: 404)
-    ...  --train-id not-existing-training
-
-Try Run Packaging with invalid credentials
-    [Setup]  StrictShell  odahuflowctl logout
-    [Teardown]  Login to the api and edge
-    [Template]  Try Run Packaging with api server spec
-    ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
-    ${INVALID_URL_ERROR}            local pack --url "${EMPTY}" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/training.yaml --id pack-file-image
