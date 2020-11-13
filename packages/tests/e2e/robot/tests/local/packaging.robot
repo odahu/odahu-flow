@@ -27,7 +27,7 @@ Suite Teardown      Run Keywords
 ...                 Remove File  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl logout
 Force Tags          cli  local  packaging
-Test Timeout        150 minutes
+Test Timeout        180 minutes
 
 *** Keywords ***
 Run Training with api server spec
@@ -93,7 +93,7 @@ Run Valid Packaging with local spec
     --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
     --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
     --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
-    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} --disable-package-targets
+    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
     --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
     --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
     --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
