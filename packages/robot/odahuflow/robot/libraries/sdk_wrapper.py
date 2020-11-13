@@ -16,62 +16,58 @@ from odahuflow.sdk.clients.training import ModelTrainingClient
 class Login:
 
     @staticmethod
-    def config_get(base_url: str = config.API_URL, token=None,
-                   client_id=None, client_secret=None, issuer_url=None):
-        return ConfigurationClient(
-            base_url=base_url, token=token,
-            client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
-        ).get()
+    def config_get(base_url: str = config.API_URL, **kwargs):
+        return ConfigurationClient(base_url=base_url, **kwargs).get()
 
 
 class Configuration:
 
     @staticmethod
-    def config_get():
-        return ConfigurationClient().get()
+    def config_get(**kwargs):
+        return ConfigurationClient(**kwargs).get()
 
 
 class Connection:
 
     @staticmethod
-    def connection_get():
-        return ConnectionClient().get_all()
+    def connection_get(**kwargs):
+        return ConnectionClient(**kwargs).get_all()
 
     @staticmethod
-    def connection_get_id(conn_id: str):
-        return ConnectionClient().get(conn_id)
+    def connection_get_id(conn_id: str, **kwargs):
+        return ConnectionClient(**kwargs).get(conn_id)
 
     @staticmethod
-    def connection_get_id_decrypted(conn_id: str):
-        return ConnectionClient().get_decrypted(conn_id)
+    def connection_get_id_decrypted(conn_id: str, **kwargs):
+        return ConnectionClient(**kwargs).get_decrypted(conn_id)
 
     @staticmethod
-    def connection_put(payload_file):
+    def connection_put(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ConnectionClient().edit(api_object)
+        return ConnectionClient(**kwargs).edit(api_object)
 
     @staticmethod
-    def connection_post(payload_file):
+    def connection_post(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ConnectionClient().create(api_object)
+        return ConnectionClient(**kwargs).create(api_object)
 
     @staticmethod
-    def connection_delete(conn_id: str):
-        return ConnectionClient().delete(conn_id)
+    def connection_delete(conn_id: str, **kwargs):
+        return ConnectionClient(**kwargs).delete(conn_id)
 
 
 class ModelDeployment:
 
     @staticmethod
-    def deployment_get():
-        return ModelDeploymentClient().get_all()
+    def deployment_get(**kwargs):
+        return ModelDeploymentClient(**kwargs).get_all()
 
     @staticmethod
-    def deployment_get_id(dep_id: str):
-        return ModelDeploymentClient().get(dep_id)
+    def deployment_get_id(dep_id: str, **kwargs):
+        return ModelDeploymentClient(**kwargs).get(dep_id)
 
     @staticmethod
-    def deployment_put(payload_file, image=None):
+    def deployment_put(payload_file, image=None, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
 
         if image:
@@ -80,7 +76,7 @@ class ModelDeployment:
         return ModelDeploymentClient().edit(api_object)
 
     @staticmethod
-    def deployment_post(payload_file, image=None):
+    def deployment_post(payload_file, image=None, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
 
         if image:
@@ -89,45 +85,45 @@ class ModelDeployment:
         return ModelDeploymentClient().create(api_object)
 
     @staticmethod
-    def deployment_delete(dep_id: str):
-        return ModelDeploymentClient().delete(dep_id)
+    def deployment_delete(dep_id: str, **kwargs):
+        return ModelDeploymentClient(**kwargs).delete(dep_id)
 
 
 class ModelPackaging:
 
     @staticmethod
-    def packaging_get():
-        return ModelPackagingClient().get_all()
+    def packaging_get(**kwargs):
+        return ModelPackagingClient(**kwargs).get_all()
 
     @staticmethod
-    def packaging_get_id(pack_id: str):
-        return ModelPackagingClient().get(pack_id)
+    def packaging_get_id(pack_id: str, **kwargs):
+        return ModelPackagingClient(**kwargs).get(pack_id)
 
     @staticmethod
-    def packaging_put(payload_file, artifact_name=None):
+    def packaging_put(payload_file, artifact_name=None, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
 
         if artifact_name:
             api_object.spec.artifact_name = artifact_name
 
-        return ModelPackagingClient().edit(api_object)
+        return ModelPackagingClient(**kwargs).edit(api_object)
 
     @staticmethod
-    def packaging_post(payload_file, artifact_name=None):
+    def packaging_post(payload_file, artifact_name=None, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
 
         if artifact_name:
             api_object.spec.artifact_name = artifact_name
 
-        return ModelPackagingClient().create(api_object)
+        return ModelPackagingClient(**kwargs).create(api_object)
 
     @staticmethod
-    def packaging_delete(pack_id: str):
-        return ModelPackagingClient().delete(pack_id)
+    def packaging_delete(pack_id: str, **kwargs):
+        return ModelPackagingClient(**kwargs).delete(pack_id)
 
     @staticmethod
-    def packaging_get_log(pack_id):
-        log_generator = ModelPackagingClient().log(pack_id, follow=False)
+    def packaging_get_log(pack_id, **kwargs):
+        log_generator = ModelPackagingClient(**kwargs).log(pack_id, follow=False)
         # logs_list will be list of log lines
         logs_list = list(log_generator)
         text = "\n".join(logs_list)
@@ -137,30 +133,30 @@ class ModelPackaging:
 class ModelTraining:
 
     @staticmethod
-    def training_get():
-        return ModelTrainingClient().get_all()
+    def training_get(**kwargs):
+        return ModelTrainingClient(**kwargs).get_all()
 
     @staticmethod
-    def training_get_id(train_id: str):
-        return ModelTrainingClient().get(train_id)
+    def training_get_id(train_id: str, **kwargs):
+        return ModelTrainingClient(**kwargs).get(train_id)
 
     @staticmethod
-    def training_put(payload_file):
+    def training_put(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ModelTrainingClient().edit(api_object)
+        return ModelTrainingClient(**kwargs).edit(api_object)
 
     @staticmethod
-    def training_post(payload_file):
+    def training_post(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ModelTrainingClient().create(api_object)
+        return ModelTrainingClient(**kwargs).create(api_object)
 
     @staticmethod
-    def training_delete(train_id: str):
-        return ModelTrainingClient().delete(train_id)
+    def training_delete(train_id: str, **kwargs):
+        return ModelTrainingClient(**kwargs).delete(train_id)
 
     @staticmethod
-    def training_get_log(train_id):
-        log_generator = ModelTrainingClient().log(train_id, follow=False)
+    def training_get_log(train_id, **kwargs):
+        log_generator = ModelTrainingClient(**kwargs).log(train_id, follow=False)
         # logs_list will be list of log lines
         logs_list = list(log_generator)
         text = "\n".join(logs_list)
@@ -170,84 +166,84 @@ class ModelTraining:
 class ModelRoute:
 
     @staticmethod
-    def route_get():
-        return ModelRouteClient().get_all()
+    def route_get(**kwargs):
+        return ModelRouteClient(**kwargs).get_all()
 
     @staticmethod
-    def route_get_id(route_id: str):
-        return ModelRouteClient().get(route_id)
+    def route_get_id(route_id: str, **kwargs):
+        return ModelRouteClient(**kwargs).get(route_id)
 
     @staticmethod
-    def route_put(payload_file):
+    def route_put(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ModelRouteClient().edit(api_object)
+        return ModelRouteClient(**kwargs).edit(api_object)
 
     @staticmethod
-    def route_post(payload_file):
+    def route_post(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ModelRouteClient().create(api_object)
+        return ModelRouteClient(**kwargs).create(api_object)
 
     @staticmethod
-    def route_delete(route_id: str):
-        return ModelRouteClient().delete(route_id)
+    def route_delete(route_id: str, **kwargs):
+        return ModelRouteClient(**kwargs).delete(route_id)
 
 
 class Packager:
 
     @staticmethod
-    def packager_get():
-        return PackagingIntegrationClient().get_all()
+    def packager_get(**kwargs):
+        return PackagingIntegrationClient(**kwargs).get_all()
 
     @staticmethod
-    def packager_get_id(pi_id: str):
-        return PackagingIntegrationClient().get(pi_id)
+    def packager_get_id(pi_id: str, **kwargs):
+        return PackagingIntegrationClient(**kwargs).get(pi_id)
 
     @staticmethod
-    def packager_put(payload_file):
+    def packager_put(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return PackagingIntegrationClient().edit(api_object)
+        return PackagingIntegrationClient(**kwargs).edit(api_object)
 
     @staticmethod
-    def packager_post(payload_file):
+    def packager_post(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return PackagingIntegrationClient().create(api_object)
+        return PackagingIntegrationClient(**kwargs).create(api_object)
 
     @staticmethod
-    def packager_delete(pi_id: str):
-        return PackagingIntegrationClient().delete(pi_id)
+    def packager_delete(pi_id: str, **kwargs):
+        return PackagingIntegrationClient(**kwargs).delete(pi_id)
 
 
 class Toolchain:
 
     @staticmethod
-    def toolchain_get():
-        return ToolchainIntegrationClient().get_all()
+    def toolchain_get(**kwargs):
+        return ToolchainIntegrationClient(**kwargs).get_all()
 
     @staticmethod
-    def toolchain_get_id(ti_id: str):
-        return ToolchainIntegrationClient().get(ti_id)
+    def toolchain_get_id(ti_id: str, **kwargs):
+        return ToolchainIntegrationClient(**kwargs).get(ti_id)
 
     @staticmethod
-    def toolchain_put(payload_file):
+    def toolchain_put(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ToolchainIntegrationClient().edit(api_object)
+        return ToolchainIntegrationClient(**kwargs).edit(api_object)
 
     @staticmethod
-    def toolchain_post(payload_file):
+    def toolchain_post(payload_file, **kwargs):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ToolchainIntegrationClient().create(api_object)
+        return ToolchainIntegrationClient(**kwargs).create(api_object)
 
     @staticmethod
-    def toolchain_delete(ti_id: str):
-        return ToolchainIntegrationClient().delete(ti_id)
+    def toolchain_delete(ti_id: str, **kwargs):
+        return ToolchainIntegrationClient(**kwargs).delete(ti_id)
 
 
 class Model:
 
     @staticmethod
-    def model_get(url=None, token=None, **kwargs):
-        return ModelClient(url, token, **kwargs).info()
+    def model_get(**kwargs):
+        return ModelClient(**kwargs).info()
 
     @staticmethod
-    def model_post(url=None, token=None, json_input=None, **kwargs):
-        return ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
+    def model_post(json_input=None, **kwargs):
+        return ModelClient(**kwargs).invoke(**json.loads(json_input))
