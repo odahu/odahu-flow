@@ -1,0 +1,25 @@
+kind: ToolchainIntegration
+id: mlflow
+spec:
+  defaultImage: "odahu/odahu-flow-mlflow-toolchain:latest"
+  entrypoint: /opt/conda/bin/odahu-flow-mlflow-runner
+---
+kind: ModelTraining
+id: "wine id file"
+spec: 
+  entrypoint: main
+  hyperParameters: 
+    alpha: "1.0"
+  model: 
+    artifactNameTemplate: "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
+    name: wine-name
+    version: 1.0
+  toolchain: mlflow
+  workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi

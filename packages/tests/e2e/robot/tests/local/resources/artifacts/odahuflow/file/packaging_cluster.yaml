@@ -1,0 +1,28 @@
+id: pack-dir
+kind: ModelPackaging
+spec:
+  artifactName: "<fill-in>"
+  integrationName: docker-rest
+  imageName: "{{ .Name }}-{{ .Version }}"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+---
+id: pack-file-image
+kind: ModelPackaging
+spec:
+  artifactName: "simple-model.zip"
+  integrationName: docker-rest
+  arguments:
+    imageName: "{{ Name }}-{{ Version }}"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
