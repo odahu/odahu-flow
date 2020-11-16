@@ -8,7 +8,9 @@ MODEL_NAMES=(simple-model fail counter feedback)
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TRAINED_ARTIFACTS_DIR="${DIR}/trained_artifacts"
 ODAHUFLOW_RESOURCES="${DIR}/odahuflow_resources"
+GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
 TEST_DATA="${DIR}/data"
+LOCAL_TEST_DATA="${DIR}/../e2e/robot/tests/local/resources/artifacts"
 COMMAND=setup
 
 # Test connection points to the valid gppi archive
@@ -197,8 +199,20 @@ function upload_test_dags() {
     rm -rf "${tmp_odahu_example_dir}"
 }
 
+# Upload files for local training and packaging
+function local_setup() {
+  wget -O "${LOCAL_TEST_DATA}/MLproject" "${GIT_REPO_DATA}/mlflow/sklearn/wine/MLproject"
+  wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
+  wget -O "${LOCAL_TEST_DATA}/conda.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.yaml"
+  # from setup() function
+  cp "${TEST_DATA}/wine-quality.csv"  "${LOCAL_TEST_DATA}/wine-quality.csv"
+
+  # make gcloud auth if needed
+  gcloud auth configure-docker
+}
+
 # Main entrypoint for setup command.
-# The function creates the model packaings and the toolchain integrations.
+# The function creates the model packagings and the toolchain integrations.
 function setup() {
   for mp_id in "${MODEL_NAMES[@]}"; do
     pack_model "${mp_id}" &
@@ -211,7 +225,8 @@ function setup() {
   rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
 
   # Download training data for the wine model
-  wget -O "${TEST_DATA}/wine-quality.csv" "https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}/mlflow/sklearn/wine/data/wine-quality.csv"
+  GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
+  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # Pushes a test data to the bucket and create a file with the connection
   copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
@@ -227,6 +242,8 @@ function setup() {
   upload_test_dags
 
   wait_all_background_task
+
+  local_setup
 }
 
 # Main entrypoint for cleanup command.
