@@ -1,0 +1,18 @@
+id: pack-dir
+kind: ModelPackaging
+spec:
+  targets:
+    - name: docker-push
+      connectionName: docker-ci
+    - name: docker-pull
+      connectionName: odahuflow-docker-repository
+  artifactName: "simple-model.zip"
+  integrationName: docker-rest
+  imageName: "{{ .Name }}-{{ .Version }}"
+  resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 1
+    memory: 1Gi

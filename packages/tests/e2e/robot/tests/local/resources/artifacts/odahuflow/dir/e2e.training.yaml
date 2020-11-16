@@ -1,0 +1,35 @@
+kind: ModelTraining
+id: e2e-artifact-hardcoded
+spec:
+  model:
+    name: e2e-artifact-hardcoded
+    version: 1.0
+    artifactNameTemplate: "simple-model.zip"
+  vcsName: odahu-flow-examples
+  toolchain: mlflow
+  entrypoint: main
+  workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"
+  hyperParameters:
+    alpha: "1.0"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+---
+id: e2e-pack-file-image
+kind: ModelPackaging
+spec:
+  artifactName: "<fill-in>"
+  integrationName: docker-rest
+  arguments:
+    imageName: "{{ Name }}-{{ Version }}"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
