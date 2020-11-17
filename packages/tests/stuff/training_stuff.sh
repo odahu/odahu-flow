@@ -207,7 +207,7 @@ function local_setup() {
   # from setup() function
   cp "${TEST_DATA}/wine-quality.csv"  "${LOCAL_TEST_DATA}/wine-quality.csv"
 
-  # make gcloud auth if needed
+  # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
 }
 
