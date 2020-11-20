@@ -1,0 +1,11 @@
+kind: PackagingIntegration
+id: "docker-rest-packager-example"
+spec:
+    integrationName: docker-rest
+    artifactName: wine-model-123456789.zip
+    targets:
+        - connectionName: test-docker-registry
+          name: docker-push
+    arguments:
+        imageName: "wine-test:prefix-{{ RandomUUID }}"
+        workers: 4

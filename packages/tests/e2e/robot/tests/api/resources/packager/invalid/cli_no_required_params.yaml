@@ -1,0 +1,8 @@
+kind: PackagingIntegration
+id: "docker-cli-packager-example"
+spec:
+    integrationName: docker-cli
+    artifactName: wine-model-123456789.zip
+    targets:
+        - connectionName: test-docker-registry
+          name: docker-push
