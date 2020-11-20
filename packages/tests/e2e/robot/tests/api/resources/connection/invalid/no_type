@@ -1,0 +1,11 @@
+{
+  "kind": "Connection",
+  "id": "git-no-required-parameters",
+  "spec": {
+    "description": "Git repository with the Odahu-Flow examples",
+    "webUILink": "https://github.com/odahu/odahu-examples",
+    "username": "admin",
+    "password": "e3Bhc3N3b3JkfQ==",
+    "uri": "docs.odahu.org/"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_comment": "no uri and keySecret",
+  "kind": "Connection",
+  "id": "azureblob-no-required-parameters",
+  "spec": {
+    "type": "azureblob",
+    "description": "Git repository with the Odahu-Flow examples",
+    "username": "admin",
+    "password": "e3Bhc3N3b3JkfQ=="
+  }
+}

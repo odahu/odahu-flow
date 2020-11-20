@@ -1,0 +1,9 @@
+# no uri
+kind: Connection
+id: docker-ci
+spec:
+  type: docker
+  username: username
+  password: AKIAIOSFODNN7EXAMPLE
+  description: Default GCR docker repository for model packaging
+  webUILink: https://gcr.io/gke-dev04

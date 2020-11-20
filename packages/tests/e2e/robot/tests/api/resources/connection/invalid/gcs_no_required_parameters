@@ -1,0 +1,6 @@
+# no uri & keySecret
+kind: Connection
+id: "gcs-no-required-parameters"
+spec:
+    type: gcs
+    region: eu-central-1
