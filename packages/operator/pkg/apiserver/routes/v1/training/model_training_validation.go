@@ -33,8 +33,8 @@ import (
 
 const (
 	MtVcsNotExistsErrorMessage       = "cannot find VCS Connection"
-	EmptyModelNameErrorMessage       = "model name must be non-empty"
-	EmptyModelVersionErrorMessage    = "model version must be non-empty"
+	EmptyModelNameErrorMessage       = "model name must be nonempty"
+	EmptyModelVersionErrorMessage    = "model version must be nonempty"
 	EmptyVcsNameMessageError         = "VCS name is empty"
 	ValidationMtErrorMessage         = "Validation of model training is failed"
 	WrongVcsTypeErrorMessage         = "VCS connection must have the GIT type. You pass the connection of %s type"
