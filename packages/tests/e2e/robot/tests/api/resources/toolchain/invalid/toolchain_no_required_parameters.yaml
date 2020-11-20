@@ -1,0 +1,7 @@
+kind: ToolchainIntegration
+id: toolchain-yaml
+spec:
+  defaultImage: >-
+    gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:latest
+  additionalEnvironments:
+    MLFLOW_TRACKING_URI: 'http://mlflow.odahu-flow.svc.cluster.local'
