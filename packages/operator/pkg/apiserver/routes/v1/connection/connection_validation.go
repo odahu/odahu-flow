@@ -45,7 +45,7 @@ const (
 	GcsTypeRoleNotSupportedErrorMessage = "gcs type does not support role parameter yet" +
 		" must be non-empty"
 	AzureBlobTypeKeySecretEmptyErrorMessage = "azureblob type requires that keySecret parameter contains" +
-		"HTTP endpoint with SAS Token"
+		" HTTP endpoint with SAS Token"
 	S3TypeRegionErrorMessage         = "s3 type requires that region must be non-empty"
 	S3TypeKeySecretEmptyErrorMessage = "s3 type requires that keyID and keySecret parameters" +
 		" must be non-empty"
