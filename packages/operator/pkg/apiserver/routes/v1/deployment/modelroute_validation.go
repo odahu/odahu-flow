@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	URLPrefixEmptyErrorMessage = "URL Prefix must not be empty"
+	URLPrefixEmptyErrorMessage = "URL Prefix must be non-empty"
 	EmptyTargetErrorMessage    = "model deployment targets must contain at least one element"
 	OneTargetErrorMessage      = "it must have 100 weight or nil value if there is only one target"
 	MissedWeightErrorMessage   = "weights must be present if there are more than one model deployment targets"
