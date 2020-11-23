@@ -27,6 +27,11 @@ Try Call API
     [Arguments]  ${error}  ${command}  @{options}
     Call API and get Error  ${error}  ${command}  @{options}
 
+Try Call API and continue on Failure
+    [Arguments]     ${error}  ${command}  @{options}
+    ${result}       Call API and continue on Failure  ${command}  @{options}
+    should contain  ${result}  ${error}
+
 *** Test Cases ***
 Status Code 400 - Bad Request
     [Template]  Try Call API
@@ -71,15 +76,15 @@ Status Code 400 - Bad Request
     ...  packager post  ${RES_DIR}/packager/invalid/rest_no_required_params.json
     WrongHttpStatusCode: Got error from server: Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty (status: 400)
     ...  packager put  ${RES_DIR}/packager/invalid/rest_no_required_params.json
-    # model training
-    Error  training post
-    Error  training put
-    # model packaging
-    Error  packaging post
-    Error  packaging put
-    # model deployment
-    Error  deployment post
-    Error  deployment put
+#     # model training
+#     Error  training post
+#     Error  training put
+#     # model packaging
+#     Error  packaging post
+#     Error  packaging put
+#     # model deployment
+#     Error  deployment post
+#     Error  deployment put
 
 ## also create 401, 403 for different user types (data-scientist, viewer, admin)
 #
