@@ -103,7 +103,7 @@ func newFsFile(remote string) (fs.Fs, string, error) {
 // TODO: extract common part from the functions below
 
 // Downloads files from connection specific storage to the local filesystem.
-// Nonempty "remotePath" overrides the connection URI path.
+// Non-empty "remotePath" overrides the connection URI path.
 // For example, we have the following bucket structure:
 //    - /data/text.txt
 // A connection has "gs://bucket-name/data" URI structure.
@@ -165,7 +165,7 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 }
 
 // Uploads files to connection specific storage from the local filesystem.
-// Nonempty "remotePath" overrides the connection URI path.
+// Non-empty "remotePath" overrides the connection URI path.
 // For example, we have the following local filesystem structure:
 //    - /data/text.txt
 // A connection has "gs://bucket-name/sync_dir/" URI structure.

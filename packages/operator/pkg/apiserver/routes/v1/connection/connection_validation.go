@@ -38,20 +38,20 @@ const (
 	DockerTypePasswordErrorMessage         = "docker type requires the password parameter" //nolint
 	DockerTypeUsernameErrorMessage         = "docker type requires the username parameter"
 	GitTypePublicKeyExtractionErrorMessage = "can not extract the public SSH host key from URI: %s"
-	GcsTypeRegionErrorMessage              = "gcs type requires that region must be nonempty"
+	GcsTypeRegionErrorMessage              = "gcs type requires that region must be non-empty"
 	GcsTypeKeySecretEmptyErrorMessage      = "gcs type requires that keySecret parameter" +
-		" must be nonempty"
+		" must be non-empty"
 	GcsTypeRoleNotSupportedErrorMessage = "gcs type does not support role parameter yet" +
-		" must be nonempty"
+		" must be non-empty"
 	AzureBlobTypeKeySecretEmptyErrorMessage = "azureblob type requires that keySecret parameter contains" +
 		" HTTP endpoint with SAS Token"
-	S3TypeRegionErrorMessage         = "s3 type requires that region must be nonempty"
+	S3TypeRegionErrorMessage         = "s3 type requires that region must be non-empty"
 	S3TypeKeySecretEmptyErrorMessage = "s3 type requires that keyID and keySecret parameters" +
-		" must be nonempty"
+		" must be non-empty"
 	defaultIDTemplate                  = "%s-%s"
 	S3TypeRoleNotSupportedErrorMessage = "s3 type does not support role parameter yet"
 	ECRTypeKeySecretEmptyErrorMessage  = "ecr type requires that keyID and keySecret parameters" +
-		" must be nonempty"
+		" must be non-empty"
 	ECRTypeNotValidURI = "not valid uri for ecr type: %s"
 )
 
