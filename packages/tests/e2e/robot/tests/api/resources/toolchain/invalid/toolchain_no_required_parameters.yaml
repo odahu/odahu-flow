@@ -1,5 +1,5 @@
 kind: ToolchainIntegration
-id: toolchain-yaml
+id: toolchain-yaml-no-required-params
 spec:
   defaultImage: >-
     gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:latest

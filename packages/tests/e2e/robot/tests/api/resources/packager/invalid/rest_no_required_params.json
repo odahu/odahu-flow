@@ -1,6 +1,6 @@
 {
   "kind": "PackagingIntegration",
-  "id": "docker-rest-packager-example",
+  "id": "docker-rest-no-required-params",
   "spec": {
     "integrationName": "docker-rest",
     "artifactName": "wine-model-123456789.zip",

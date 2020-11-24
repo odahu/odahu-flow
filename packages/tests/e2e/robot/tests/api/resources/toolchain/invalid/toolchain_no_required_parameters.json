@@ -1,6 +1,6 @@
 {
   "kind": "ToolchainIntegration",
-  "id": "toolchain-json",
+  "id": "toolchain-json-no-required-params",
   "spec": {
     "additionalEnvironments": {
       "MLFLOW_TRACKING_URI": "http://mlflow.odahu-flow.svc.cluster.local"

@@ -1,5 +1,5 @@
 kind: PackagingIntegration
-id: "docker-cli-packager-example"
+id: "docker-cli-no-required-params"
 spec:
     integrationName: docker-cli
     artifactName: wine-model-123456789.zip
