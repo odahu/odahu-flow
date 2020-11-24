@@ -24,11 +24,13 @@ Test Timeout        1 minute
 
 *** Keywords ***
 Try Call API
-    [Arguments]  ${error}  ${command}  @{options}
+    [Arguments]  ${format_string}  ${error}  ${command}  @{options}
+    ${error}        format string   ${format_string}  ${error}
     Call API and get Error  ${error}  ${command}  @{options}
 
 Try Call API and continue on Failure
-    [Arguments]     ${error}  ${command}  @{options}
+    [Arguments]     ${format_string}  ${error}  ${command}  @{options}
+    ${error}        format string   ${format_string}  ${error}
     ${result}       Call API and continue on Failure  ${command}  @{options}
     should contain  ${result}  ${error}
 
@@ -36,58 +38,68 @@ Try Call API and continue on Failure
 Status Code 400 - Bad Request
     [Template]  Try Call API
     # connection
-#    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; unknown type: . Supported types: [s3 gcs azureblob git docker ecr] (status: 400)
+#    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; unknown type: . Supported types: [s3 gcs azureblob git docker ecr]
 #    ...  connection post  ${RES_DIR}/connection/invalid/no_type
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: ID is not valid (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${invalid_id}
     ...  connection put   ${RES_DIR}/connection/invalid/conn_invalid_id.yaml
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: s3 type requires that keyID and keySecret parameters must be non-empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${s3_empty_keyID_keySecret}
     ...  connection post  ${RES_DIR}/connection/invalid/s3_no_required_parameters.yaml
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: s3 type requires that keyID and keySecret parameters must be non-empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${s3_empty_keyID_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/s3_no_required_parameters.yaml
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; gcs type requires that keySecret parameter must be non-empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${gcs_empty_keySecret}
     ...  connection post  ${RES_DIR}/connection/invalid/gcs_no_required_parameters
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; gcs type requires that keySecret parameter must be non-empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${gcs_empty_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/gcs_no_required_parameters
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; azureblob type requires that keySecret parameter containsHTTP endpoint with SAS Token (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${azureblob_req_keySecret}
     ...  connection post  ${RES_DIR}/connection/invalid/azureblob_no_required_parameters.json
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; azureblob type requires that keySecret parameter containsHTTP endpoint with SAS Token (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${azureblob_req_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/azureblob_no_required_parameters.json
-#    Error  connection post  ${RES_DIR}/connection/invalid/git_no_required_parameters.json
-#    Error  connection put   ${RES_DIR}/connection/invalid/git_no_required_parameters.json
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty (status: 400)
+#    ${400 BadRequest Template}  Error
+#     ...  connection post  ${RES_DIR}/connection/invalid/git_no_required_parameters.json
+#    ${400 BadRequest Template}  Error
+#     ...  connection put   ${RES_DIR}/connection/invalid/git_no_required_parameters.json
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}
     ...  connection post  ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}
     ...  connection put   ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.; ecr type requires that keyID and keySecret parameters must be non-empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.; ecr type requires that keyID and keySecret parameters must be non-empty
     ...  connection post  ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
-    WrongHttpStatusCode: Got error from server: Validation of connection is failed: the uri parameter is empty; not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.; ecr type requires that keyID and keySecret parameters must be non-empty (status: 400)
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.; ecr type requires that keyID and keySecret parameters must be non-empty
     ...  connection put   ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
     # toolchains
-    WrongHttpStatusCode: Got error from server: Validation of toolchain integration is failed: entrypoint must be no empty; defaultImage must be no empty (status: 400)
+    ${400 BadRequest Template}  Validation of toolchain integration is failed: entrypoint must be no empty; defaultImage must be no empty
     ...  toolchain post  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.json
-    WrongHttpStatusCode: Got error from server: Validation of toolchain integration is failed: entrypoint must be no empty (status: 400)
+    ${400 BadRequest Template}  Validation of toolchain integration is failed: entrypoint must be no empty
     ...  toolchain put  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.yaml
     # packagers
-    WrongHttpStatusCode: Got error from server: Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty (status: 400)
+    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
     ...  packager post  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
-    WrongHttpStatusCode: Got error from server: Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty (status: 400)
+    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
     ...  packager put  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
-    WrongHttpStatusCode: Got error from server: Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty (status: 400)
+    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
     ...  packager post  ${RES_DIR}/packager/invalid/rest_no_required_params.json
-    WrongHttpStatusCode: Got error from server: Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty (status: 400)
+    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
     ...  packager put  ${RES_DIR}/packager/invalid/rest_no_required_params.json
-#     # model training
-#     Error  training post
-#     Error  training put
-#     # model packaging
-#     Error  packaging post
-#     Error  packaging put
-#     # model deployment
-#     Error  deployment post
-#     Error  deployment put
+    # model training
+    ${400 BadRequest Template}  Validation of model training is failed: model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
+    ...  training post  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
+    ${400 BadRequest Template}  Validation of model training is failed: model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
+    ...  training put  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
+    # model packaging
+    ${400 BadRequest Template}  Validation of model packaging is failed: entity "" is not found; you should specify artifactName; integration name must be nonempty
+    ...  packaging post  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
+    ${400 BadRequest Template}  Validation of model packaging is failed: entity "" is not found; you should specify artifactName; integration name must be nonempty
+    ...  packaging put  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
+    # model deployment
+    ${400 BadRequest Template}  maximum number of replicas parameter must not be less than minimum number of replicas parameter; the image parameter is empty
+    ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_no_required_params.json
+    ${400 BadRequest Template}  maximum number of replicas parameter must not be less than minimum number of replicas parameter; the image parameter is empty
+    ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_no_required_params.json
+    ${400 BadRequest Template}  liveness probe parameter must be positive number; readiness probe must be positive number; maximum number of replicas parameter must not be less than minimum number of replicas parameter; maximum number of replicas parameter must not be less than 1; minimum number of replicas parameter must not be less than 0
+    ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.yaml
+    ${400 BadRequest Template}  liveness probe parameter must be positive number; readiness probe must be positive number; maximum number of replicas parameter must not be less than minimum number of replicas parameter; maximum number of replicas parameter must not be less than 1; minimum number of replicas parameter must not be less than 0
+    ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.yaml
 
-## also create 401, 403 for different user types (data-scientist, viewer, admin)
-#
 #Status Code 401 - Unathorized
 #    [Template]  Template Error Keyword
 #    # config
@@ -140,6 +152,9 @@ Status Code 400 - Bad Request
 #    # model
 #    model get
 #    model post
+#
+#
+## also create 403 for different user types (data-scientist, viewer, admin)
 #
 #Status Code 403 - Forbidden
 #    [Template]  Template Error Keyword

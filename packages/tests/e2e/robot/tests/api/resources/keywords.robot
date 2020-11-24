@@ -4,12 +4,25 @@ Library             Collections
 
 *** Variables ***
 # Error Templates
+${400 BadRequest Template}         WrongHttpStatusCode: Got error from server: {} (status: 400)
+${401 Unathorized Template}
+${403 Forbidden Template}
 ${404 NotFound Template}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
 ${404 Model NotFoundTemplate}      Wrong status code returned: 404. Data: . URL: {}
 ${409 Conflict Template}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
 
 ${APIConnectionException}          APIConnectionException: Can not reach {base url}
 ${IncorrectToken}                  IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
+
+# Validation checks
+${FailedConn}   Validation of connection is failed:
+
+${invalid_id}   ID is not valid
+# connections
+${empty_uri}   the uri parameter is empty
+${s3_empty_keyID_keySecret}  s3 type requires that keyID and keySecret parameters must be non-empty
+${gcs_empty_keySecret}       gcs type requires that keySecret parameter must be non-empty
+${azureblob_req_keySecret}   azureblob type requires that keySecret parameter containsHTTP endpoint with SAS Token
 
 *** Keywords ***
 Call API
