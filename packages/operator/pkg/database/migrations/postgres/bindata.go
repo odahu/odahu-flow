@@ -11,6 +11,8 @@
 // pkg/database/migrations/postgres/sources/000004_deletionmark.up.sql
 // pkg/database/migrations/postgres/sources/000005_created_updated.down.sql
 // pkg/database/migrations/postgres/sources/000005_created_updated.up.sql
+// pkg/database/migrations/postgres/sources/000006_created_updated_delmark_for_route.down.sql
+// pkg/database/migrations/postgres/sources/000006_created_updated_delmark_for_route.up.sql
 package postgres
 
 import (
@@ -287,6 +289,46 @@ func _000005_created_updatedUpSql() (*asset, error) {
 	return a, nil
 }
 
+var __000006_created_updated_delmark_for_routeDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xa4\xcc\x31\x0a\x83\x50\x0c\x06\xe0\xdd\x53\xe4\x04\x5e\xe0\x6d\x2d\xa5\x38\xd8\x2e\xdd\x25\xbe\xfc\x50\x69\x34\x21\x24\xf7\x2f\x78\x05\xc7\x6f\xf9\x6e\x8f\xe7\xf4\x6a\x03\x6b\x22\x28\x79\x55\x90\x09\x7f\x6b\xf4\x5a\x75\xeb\xe3\x89\xc5\x1c\xc1\x69\xb1\x84\x55\x82\x24\xcc\xa9\x9b\xd6\x7e\x50\x0f\x70\x42\xae\x14\xe5\x72\xb5\x10\x28\x72\xb3\x63\xe7\xf8\xb5\xe1\xfe\x9e\xe7\xe9\xd3\xfe\x01\x00\x00\xff\xff\xb1\x16\xe1\x13\xdc\x00\x00\x00")
+
+func _000006_created_updated_delmark_for_routeDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000006_created_updated_delmark_for_routeDownSql,
+		"000006_created_updated_delmark_for_route.down.sql",
+	)
+}
+
+func _000006_created_updated_delmark_for_routeDownSql() (*asset, error) {
+	bytes, err := _000006_created_updated_delmark_for_routeDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000006_created_updated_delmark_for_route.down.sql", size: 220, mode: os.FileMode(420), modTime: time.Unix(1606218309, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000006_created_updated_delmark_for_routeUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\xac\xcc\x31\xaa\xc2\x40\x10\x06\xe0\x3e\xa7\xf8\xc9\x01\x72\x81\x54\xef\x49\x94\x80\xd1\x42\xfb\x30\xc9\x8c\x18\x9c\xdd\x59\xd6\x99\xc6\xd3\x0b\x1e\x41\x2c\xbf\xe6\xfb\x1f\x0e\xe3\xa9\x6f\x48\x5d\x2a\x9c\x16\x15\x18\xd3\x3d\xba\x12\x8b\x6e\x6b\xf7\xc1\x6c\x45\x2a\xb9\xd5\xb9\x5a\xb8\x34\x00\x40\xcc\x58\xab\x90\x0b\xc3\xb7\x24\x4f\xa7\x54\xfc\xf5\x6d\x15\x85\x7f\x55\xb5\x2c\x2a\xbe\x59\x4e\x54\x1f\x2d\x16\x33\x15\xca\x60\xb9\x51\xa8\x63\xff\x77\xbc\x0c\xc8\xe6\xc8\xa1\xda\x37\xbb\xf3\x34\x8d\xd7\xfe\x1d\x00\x00\xff\xff\x70\x35\xa5\x50\x09\x01\x00\x00")
+
+func _000006_created_updated_delmark_for_routeUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000006_created_updated_delmark_for_routeUpSql,
+		"000006_created_updated_delmark_for_route.up.sql",
+	)
+}
+
+func _000006_created_updated_delmark_for_routeUpSql() (*asset, error) {
+	bytes, err := _000006_created_updated_delmark_for_routeUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000006_created_updated_delmark_for_route.up.sql", size: 265, mode: os.FileMode(420), modTime: time.Unix(1606218309, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -339,16 +381,18 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"000001_zero.down.sql":            _000001_zeroDownSql,
-	"000001_zero.up.sql":              _000001_zeroUpSql,
-	"000002_init.down.sql":            _000002_initDownSql,
-	"000002_init.up.sql":              _000002_initUpSql,
-	"000003_route.down.sql":           _000003_routeDownSql,
-	"000003_route.up.sql":             _000003_routeUpSql,
-	"000004_deletionmark.down.sql":    _000004_deletionmarkDownSql,
-	"000004_deletionmark.up.sql":      _000004_deletionmarkUpSql,
-	"000005_created_updated.down.sql": _000005_created_updatedDownSql,
-	"000005_created_updated.up.sql":   _000005_created_updatedUpSql,
+	"000001_zero.down.sql":                              _000001_zeroDownSql,
+	"000001_zero.up.sql":                                _000001_zeroUpSql,
+	"000002_init.down.sql":                              _000002_initDownSql,
+	"000002_init.up.sql":                                _000002_initUpSql,
+	"000003_route.down.sql":                             _000003_routeDownSql,
+	"000003_route.up.sql":                               _000003_routeUpSql,
+	"000004_deletionmark.down.sql":                      _000004_deletionmarkDownSql,
+	"000004_deletionmark.up.sql":                        _000004_deletionmarkUpSql,
+	"000005_created_updated.down.sql":                   _000005_created_updatedDownSql,
+	"000005_created_updated.up.sql":                     _000005_created_updatedUpSql,
+	"000006_created_updated_delmark_for_route.down.sql": _000006_created_updated_delmark_for_routeDownSql,
+	"000006_created_updated_delmark_for_route.up.sql":   _000006_created_updated_delmark_for_routeUpSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -392,16 +436,18 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"000001_zero.down.sql":            &bintree{_000001_zeroDownSql, map[string]*bintree{}},
-	"000001_zero.up.sql":              &bintree{_000001_zeroUpSql, map[string]*bintree{}},
-	"000002_init.down.sql":            &bintree{_000002_initDownSql, map[string]*bintree{}},
-	"000002_init.up.sql":              &bintree{_000002_initUpSql, map[string]*bintree{}},
-	"000003_route.down.sql":           &bintree{_000003_routeDownSql, map[string]*bintree{}},
-	"000003_route.up.sql":             &bintree{_000003_routeUpSql, map[string]*bintree{}},
-	"000004_deletionmark.down.sql":    &bintree{_000004_deletionmarkDownSql, map[string]*bintree{}},
-	"000004_deletionmark.up.sql":      &bintree{_000004_deletionmarkUpSql, map[string]*bintree{}},
-	"000005_created_updated.down.sql": &bintree{_000005_created_updatedDownSql, map[string]*bintree{}},
-	"000005_created_updated.up.sql":   &bintree{_000005_created_updatedUpSql, map[string]*bintree{}},
+	"000001_zero.down.sql":                              &bintree{_000001_zeroDownSql, map[string]*bintree{}},
+	"000001_zero.up.sql":                                &bintree{_000001_zeroUpSql, map[string]*bintree{}},
+	"000002_init.down.sql":                              &bintree{_000002_initDownSql, map[string]*bintree{}},
+	"000002_init.up.sql":                                &bintree{_000002_initUpSql, map[string]*bintree{}},
+	"000003_route.down.sql":                             &bintree{_000003_routeDownSql, map[string]*bintree{}},
+	"000003_route.up.sql":                               &bintree{_000003_routeUpSql, map[string]*bintree{}},
+	"000004_deletionmark.down.sql":                      &bintree{_000004_deletionmarkDownSql, map[string]*bintree{}},
+	"000004_deletionmark.up.sql":                        &bintree{_000004_deletionmarkUpSql, map[string]*bintree{}},
+	"000005_created_updated.down.sql":                   &bintree{_000005_created_updatedDownSql, map[string]*bintree{}},
+	"000005_created_updated.up.sql":                     &bintree{_000005_created_updatedUpSql, map[string]*bintree{}},
+	"000006_created_updated_delmark_for_route.down.sql": &bintree{_000006_created_updated_delmark_for_routeDownSql, map[string]*bintree{}},
+	"000006_created_updated_delmark_for_route.up.sql":   &bintree{_000006_created_updated_delmark_for_routeUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory
