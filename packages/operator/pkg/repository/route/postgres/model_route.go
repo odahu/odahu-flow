@@ -285,3 +285,8 @@ func (repo RouteRepo) CreateModelRoute(
 	return nil
 
 }
+
+
+func (repo RouteRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
+	return repo.DB.BeginTx(ctx, txOptions)
+}
