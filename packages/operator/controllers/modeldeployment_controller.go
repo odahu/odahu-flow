@@ -72,7 +72,6 @@ const (
 	DefaultKnativeAutoscalingMetric      = "concurrency"
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	DodelNameAnnotationKey               = "modelName"
-	latestReadyRevisionKey               = "latestReadyRevision"
 
 	IstioRewriteHTTPProbesAnnotation     = "sidecar.istio.io/rewriteAppHTTPProbers"
 	OdahuAuthorizationLabel          	 = "odahu-flow-authorization"
@@ -132,16 +131,11 @@ func modelRouteName(md *odahuflowv1alpha1.ModelDeployment) string {
 func (r *ModelDeploymentReconciler) ReconcileModelRoute(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-	latestReadyRevision string,
 ) error {
 	modelRoute := &odahuflowv1alpha1.ModelRoute{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      modelRouteName(modelDeploymentCR),
 			Namespace: modelDeploymentCR.Namespace,
-			Annotations: map[string]string{
-				odahuflowv1alpha1.SkipURLValidationKey: odahuflowv1alpha1.SkipURLValidationValue,
-				latestReadyRevisionKey:                 latestReadyRevision,
-			},
 		},
 		Spec: odahuflowv1alpha1.ModelRouteSpec{
 			URLPrefix: fmt.Sprintf("/model/%s", modelDeploymentCR.Name),
@@ -767,7 +761,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	log.Info("Reconcile default Model Route")
 
-	if err := r.ReconcileModelRoute(log, modelDeploymentCR, latestReadyRevision); err != nil {
+	if err := r.ReconcileModelRoute(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile the default Model Route")
 		return reconcile.Result{}, err
 	}
