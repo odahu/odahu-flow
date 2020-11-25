@@ -19,16 +19,18 @@ package route
 import (
 	"context"
 	"database/sql"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
 type Repository interface {
-	GetModelRoute(name string) (*deployment.ModelRoute, error)
-	GetModelRouteList(options ...filter.ListOption) ([]deployment.ModelRoute, error)
-	DeleteModelRoute(name string) error
-	UpdateModelRoute(md *deployment.ModelRoute) error
-	CreateModelRoute(md *deployment.ModelRoute) error
+	GetModelRoute(ctx context.Context, tx *sql.Tx, name string) (*deployment.ModelRoute, error)
+	GetModelRouteList(ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]deployment.ModelRoute, error)
+	DeleteModelRoute(ctx context.Context, tx *sql.Tx, name string) error
+	UpdateModelRoute(ctx context.Context, tx *sql.Tx, md *deployment.ModelRoute) error
+	CreateModelRoute(ctx context.Context, tx *sql.Tx, md *deployment.ModelRoute) error
+	UpdateModelRouteStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelRouteStatus) error
 	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }
