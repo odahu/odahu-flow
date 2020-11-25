@@ -98,6 +98,8 @@ Try Run and Fail Training with invalid credentials
 Try Run and Fail invalid Packaging
     [Tags]  negative
     [Template]  Try Run Packaging with local spec
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
     ...  --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
