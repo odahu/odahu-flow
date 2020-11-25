@@ -38,8 +38,8 @@ Try Call API and continue on Failure
 Status Code 400 - Bad Request
     [Template]  Try Call API
     # connection
-#    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; unknown type: . Supported types: [s3 gcs azureblob git docker ecr]
-#    ...  connection post  ${RES_DIR}/connection/invalid/no_type
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${unknown type}
+    ...  connection post  ${RES_DIR}/connection/invalid/no_type
     ${400 BadRequest Template}  ${FailedConn} ${invalid_id}
     ...  connection put   ${RES_DIR}/connection/invalid/conn_invalid_id.yaml
     ${400 BadRequest Template}  ${FailedConn} ${s3_empty_keyID_keySecret}
@@ -62,33 +62,33 @@ Status Code 400 - Bad Request
     ...  connection post  ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}
     ...  connection put   ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
-    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.; ecr type requires that keyID and keySecret parameters must be non-empty
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_invalid_uri}; ${ecr_empty_keyID_keySecret}
     ...  connection post  ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
-    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.; ecr type requires that keyID and keySecret parameters must be non-empty
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_invalid_uri}; ${ecr_empty_keyID_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
     # toolchains
-    ${400 BadRequest Template}  Validation of toolchain integration is failed: entrypoint must be no empty; defaultImage must be no empty
+    ${400 BadRequest Template}  ${FailedTI} entrypoint must be no empty; defaultImage must be no empty
     ...  toolchain post  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.json
-    ${400 BadRequest Template}  Validation of toolchain integration is failed: entrypoint must be no empty
+    ${400 BadRequest Template}  ${FailedTI} entrypoint must be no empty
     ...  toolchain put  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.yaml
     # packagers
-    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
     ...  packager post  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
-    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
     ...  packager put  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
-    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
     ...  packager post  ${RES_DIR}/packager/invalid/rest_no_required_params.json
-    ${400 BadRequest Template}  Validation of packaging integration is failed: entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
     ...  packager put  ${RES_DIR}/packager/invalid/rest_no_required_params.json
     # model training
-    ${400 BadRequest Template}  Validation of model training is failed: model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
+    ${400 BadRequest Template}  ${FailedTrain} model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
     ...  training post  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
-    ${400 BadRequest Template}  Validation of model training is failed: model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
+    ${400 BadRequest Template}  ${FailedTrain} model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
     ...  training put  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
     # model packaging
-    ${400 BadRequest Template}  Validation of model packaging is failed: entity "" is not found; you should specify artifactName; integration name must be nonempty
+    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; you should specify artifactName; integration name must be nonempty
     ...  packaging post  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
-    ${400 BadRequest Template}  Validation of model packaging is failed: entity "" is not found; you should specify artifactName; integration name must be nonempty
+    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; you should specify artifactName; integration name must be nonempty
     ...  packaging put  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
     # model deployment
     ${400 BadRequest Template}  maximum number of replicas parameter must not be less than minimum number of replicas parameter; the image parameter is empty

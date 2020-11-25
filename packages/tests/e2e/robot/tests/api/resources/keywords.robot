@@ -16,13 +16,22 @@ ${IncorrectToken}                  IncorrectAuthorizationToken: Refresh token is
 
 # Validation checks
 ${FailedConn}   Validation of connection is failed:
+${FailedTI}     Validation of toolchain integration is failed:
+${FailedPI}     Validation of packaging integration is failed:
+${FailedTrain}  Validation of model training is failed:
+${FailedPack}   Validation of model packaging is failed:
+
 
 ${invalid_id}   ID is not valid
 # connections
-${empty_uri}   the uri parameter is empty
+@{connection types}          s3  gcs  azureblob  git  docker  ecr
+${unknown type}              unknown type: . Supported types: [s3 gcs azureblob git docker ecr]
+${empty_uri}                 the uri parameter is empty
+${ecr_invalid_uri}           not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.
 ${s3_empty_keyID_keySecret}  s3 type requires that keyID and keySecret parameters must be non-empty
 ${gcs_empty_keySecret}       gcs type requires that keySecret parameter must be non-empty
 ${azureblob_req_keySecret}   azureblob type requires that keySecret parameter containsHTTP endpoint with SAS Token
+${ecr_empty_keyID_keySecret}  ecr type requires that keyID and keySecret parameters must be non-empty
 
 *** Keywords ***
 Call API
