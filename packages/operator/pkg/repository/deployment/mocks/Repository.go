@@ -58,20 +58,6 @@ func (_m *Repository) CreateModelDeployment(ctx context.Context, tx *sql.Tx, md 
 	return r0
 }
 
-// CreateModelRoute provides a mock function with given fields: md
-func (_m *Repository) CreateModelRoute(md *apisdeployment.ModelRoute) error {
-	ret := _m.Called(md)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*apisdeployment.ModelRoute) error); ok {
-		r0 = rf(md)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // DeleteModelDeployment provides a mock function with given fields: ctx, tx, id
 func (_m *Repository) DeleteModelDeployment(ctx context.Context, tx *sql.Tx, id string) error {
 	ret := _m.Called(ctx, tx, id)
@@ -79,20 +65,6 @@ func (_m *Repository) DeleteModelDeployment(ctx context.Context, tx *sql.Tx, id 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string) error); ok {
 		r0 = rf(ctx, tx, id)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// DeleteModelRoute provides a mock function with given fields: name
-func (_m *Repository) DeleteModelRoute(name string) error {
-	ret := _m.Called(name)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(name)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -153,58 +125,6 @@ func (_m *Repository) GetModelDeploymentList(ctx context.Context, tx *sql.Tx, op
 	return r0, r1
 }
 
-// GetModelRoute provides a mock function with given fields: name
-func (_m *Repository) GetModelRoute(name string) (*apisdeployment.ModelRoute, error) {
-	ret := _m.Called(name)
-
-	var r0 *apisdeployment.ModelRoute
-	if rf, ok := ret.Get(0).(func(string) *apisdeployment.ModelRoute); ok {
-		r0 = rf(name)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*apisdeployment.ModelRoute)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(name)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// GetModelRouteList provides a mock function with given fields: options
-func (_m *Repository) GetModelRouteList(options ...filter.ListOption) ([]apisdeployment.ModelRoute, error) {
-	_va := make([]interface{}, len(options))
-	for _i := range options {
-		_va[_i] = options[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 []apisdeployment.ModelRoute
-	if rf, ok := ret.Get(0).(func(...filter.ListOption) []apisdeployment.ModelRoute); ok {
-		r0 = rf(options...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]apisdeployment.ModelRoute)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(...filter.ListOption) error); ok {
-		r1 = rf(options...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // SetDeletionMark provides a mock function with given fields: ctx, tx, id, value
 func (_m *Repository) SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error {
 	ret := _m.Called(ctx, tx, id, value)
@@ -240,20 +160,6 @@ func (_m *Repository) UpdateModelDeploymentStatus(ctx context.Context, tx *sql.T
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, string, v1alpha1.ModelDeploymentStatus) error); ok {
 		r0 = rf(ctx, tx, id, s)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// UpdateModelRoute provides a mock function with given fields: md
-func (_m *Repository) UpdateModelRoute(md *apisdeployment.ModelRoute) error {
-	ret := _m.Called(md)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(*apisdeployment.ModelRoute) error); ok {
-		r0 = rf(md)
 	} else {
 		r0 = ret.Error(0)
 	}
