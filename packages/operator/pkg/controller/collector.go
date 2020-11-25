@@ -7,11 +7,14 @@ import (
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	dep_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	route_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
@@ -64,6 +67,16 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 			deployment.NewAdapter(depService, deployKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&deployWorker)
+
+
+		routeService := route_service.NewService(route_repo.RouteRepo{DB: db})
+
+		routeWorker := NewGenericWorker(
+			"route", cfg.Common.LaunchPeriod,
+			route.NewAdapter(routeService, deployKubeClient, kubeMgr),
+		)
+		runMgr.AddRunnable(&routeWorker)
+
 	}
 
 }
