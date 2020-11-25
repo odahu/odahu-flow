@@ -27,12 +27,12 @@ import (
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	dep_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	route_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -51,16 +51,13 @@ type ModelRouteSuite struct {
 	g            *GomegaWithT
 	server       *gin.Engine
 	mdService    md_service.Service
-	mdKubeClient kube_client.Client
+	mrService    mr_service.Service
 }
 
 func (s *ModelRouteSuite) SetupSuite() {
 
-	s.mdKubeClient = kube_client.NewClientWithOptions(
-		testNamespace, kubeClient, metav1.DeletePropagationBackground,
-	)
-
 	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db})
+	s.mrService = mr_service.NewService(route_repository_db.RouteRepo{DB: db})
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
@@ -114,12 +111,12 @@ func (s *ModelRouteSuite) SetupTest() {
 func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelRouteSuite) TearDownTest() {
 	for _, mdID := range []string{mrID, mrID1, mrID2} {
-		if err := s.mdKubeClient.DeleteModelRoute(mdID); err != nil && !errors.IsNotFoundError(err) {
+		if err := s.mrService.DeleteModelRoute(context.Background(), mdID); err != nil && !errors.IsNotFoundError(err) {
 			panic(err)
 		}
 	}
@@ -146,7 +143,7 @@ func TestModelRouteSuite(t *testing.T) {
 
 func (s *ModelRouteSuite) TestGetMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -185,7 +182,7 @@ func (s *ModelRouteSuite) TestGetMRNotFound() {
 
 func (s *ModelRouteSuite) TestGetAllModelRoutes() {
 	conn := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(conn)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), conn)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -227,11 +224,11 @@ func (s *ModelRouteSuite) TestGetAllEmptyModelRoutes() {
 func (s *ModelRouteSuite) TestGetAllModelRoutesPaging() {
 	mr1 := newStubMr()
 	mr1.ID = mrID1
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr1)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr1)).NotTo(HaveOccurred())
 
 	mr2 := newStubMr()
 	mr2.ID = mrID2
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr2)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr2)).NotTo(HaveOccurred())
 
 	connNames := map[string]interface{}{mrID1: nil, mrID2: nil}
 
@@ -316,7 +313,7 @@ func (s *ModelRouteSuite) TestCreateMR() {
 	s.g.Expect(mrResponse.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mrResponse.Spec).To(Equal(mrEntity.Spec))
 
-	mr, err := s.mdKubeClient.GetModelRoute(mrID)
+	mr, err := s.mrService.GetModelRoute(context.Background(), mrID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(mr.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
@@ -324,7 +321,7 @@ func (s *ModelRouteSuite) TestCreateMR() {
 
 func (s *ModelRouteSuite) TestCreateDuplicateMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	mrEntityBody, err := json.Marshal(mr)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -364,7 +361,7 @@ func (s *ModelRouteSuite) TestValidateCreateMR() {
 
 func (s *ModelRouteSuite) TestUpdateMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	newURL := "/new/url"
 	mrEntity := newStubMr()
@@ -386,7 +383,7 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 	s.g.Expect(mrResponse.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mrResponse.Spec).To(Equal(mrEntity.Spec))
 
-	mr, err = s.mdKubeClient.GetModelRoute(mrID)
+	mr, err = s.mrService.GetModelRoute(context.Background(), mrID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mr.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
@@ -413,7 +410,7 @@ func (s *ModelRouteSuite) TestUpdateMRNotFound() {
 
 func (s *ModelRouteSuite) TestValidateUpdateMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	mr.Spec.URLPrefix = ""
 	connEntityBody, err := json.Marshal(mr)
@@ -434,7 +431,7 @@ func (s *ModelRouteSuite) TestValidateUpdateMR() {
 
 func (s *ModelRouteSuite) TestDeleteMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -452,7 +449,7 @@ func (s *ModelRouteSuite) TestDeleteMR() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
 
-	mrList, err := s.mdKubeClient.GetModelRouteList()
+	mrList, err := s.mrService.GetModelRouteList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mrList).To(HaveLen(0))
 }
@@ -481,7 +478,7 @@ func (s *ModelRouteSuite) TestDisabledAPIGetMR() {
 	s.registerHTTPHandlers(deploymentConfig)
 
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
