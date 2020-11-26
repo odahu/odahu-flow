@@ -16,6 +16,15 @@ import (
 const (
 	ModelRouteTable = "odahu_operator_route"
 	uniqueViolationPostgresCode = pq.ErrorCode("23505") // unique_violation
+
+	ClID = "id"
+	ClSpec = "spec"
+	ClStatus = "status"
+	ClDelMark = "deletionmark"
+	ClCreated = "created"
+	ClUpdated = "updated"
+	ClIsDefault = "is_default"
+	ClFirstMDName = "spec->'modelDeployments'->0->>'mdName'"
 )
 
 var (
@@ -44,9 +53,9 @@ func (repo RouteRepo) GetModelRoute(
 	mt := new(route.ModelRoute)
 
 	q, args, err := sq.
-		Select("id", "spec", "status", "deletionmark", "created", "updated, is_default").
+		Select(ClID, ClSpec, ClStatus, ClDelMark, ClCreated, ClUpdated, ClIsDefault).
 		From(ModelRouteTable).
-		Where(sq.Eq{"id": id}).
+		Where(sq.Eq{ClID: id}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
@@ -89,9 +98,9 @@ func (repo RouteRepo) GetModelRouteList(
 	offset := *listOptions.Size * (*listOptions.Page)
 
 	sb := sq.
-		Select("id, spec, status, deletionmark, created, updated, is_default").
-		From("odahu_operator_route").
-		OrderBy("id").
+		Select(ClID, ClSpec, ClStatus, ClDelMark, ClCreated, ClUpdated, ClIsDefault).
+		From(ModelRouteTable).
+		OrderBy(ClID).
 		Offset(uint64(offset)).
 		Limit(uint64(*listOptions.Size)).PlaceholderFormat(sq.Dollar)
 
@@ -140,7 +149,7 @@ func (repo RouteRepo) DeleteModelRoute(ctx context.Context, tx *sql.Tx, id strin
 		qrr = tx
 	}
 
-	stmt, args, err := sq.Delete(ModelRouteTable).Where(sq.Eq{"id": id}).PlaceholderFormat(sq.Dollar).ToSql()
+	stmt, args, err := sq.Delete(ModelRouteTable).Where(sq.Eq{ClID: id}).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return err
 	}
@@ -186,11 +195,11 @@ func (repo RouteRepo) UpdateModelRoute(
 	md.Status.State = ""
 
 	stmt, args, err := sq.Update(ModelRouteTable).
-		Set("spec", md.Spec).
-		Set("status", md.Status).
-		Set("updated", md.UpdatedAt).
-		Set("is_default", md.Default).
-		Where(sq.Eq{"id": md.ID}).
+		Set(ClSpec, md.Spec).
+		Set(ClStatus, md.Status).
+		Set(ClUpdated, md.UpdatedAt).
+		Set(ClIsDefault, md.Default).
+		Where(sq.Eq{ClID: md.ID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -225,8 +234,8 @@ func (repo RouteRepo) UpdateModelRouteStatus(
 	}
 
 	stmt, args, err := sq.Update(ModelRouteTable).
-		Set("status", s).
-		Where(sq.Eq{"id": id}).
+		Set(ClStatus, s).
+		Where(sq.Eq{ClID: id}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -262,7 +271,7 @@ func (repo RouteRepo) CreateModelRoute(
 
 	stmt, args, err := sq.
 		Insert(ModelRouteTable).
-		Columns("id", "spec", "status", "created", "updated", "is_default").
+		Columns(ClID, ClSpec, ClStatus, ClCreated, ClUpdated, ClIsDefault).
 		Values(md.ID, md.Spec, md.Status, md.CreatedAt, md.UpdatedAt, md.Default).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -290,4 +299,58 @@ func (repo RouteRepo) CreateModelRoute(
 
 func (repo RouteRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 	return repo.DB.BeginTx(ctx, txOptions)
+}
+
+// Check whether the default ModelRoute for ModelDeployment with id=mdID is existed
+func (repo RouteRepo) DefaultExists(ctx context.Context, mdID string, tx *sql.Tx) (bool, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
+
+	stmt, args, err := sq.
+		Select("count(id)").
+		From(ModelRouteTable).
+		Where(sq.Eq{ClIsDefault: true, ClFirstMDName: mdID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return false, err
+	}
+
+	row := qrr.QueryRowContext(ctx, stmt, args...)
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return false, err
+	}
+	return count >= 1, nil
+}
+
+// Check whether the the route is default route
+func (repo RouteRepo) IsDefault(ctx context.Context, id string, tx *sql.Tx) (bool, error) {
+
+	var qrr utils.Querier
+	qrr = repo.DB
+	if tx != nil {
+		qrr = tx
+	}
+
+	stmt, args, err := sq.
+		Select(ClIsDefault).
+		From(ModelRouteTable).
+		Where(sq.Eq{ClID: id}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return false, err
+	}
+
+	row := qrr.QueryRowContext(ctx, stmt, args...)
+	var isDefault bool
+	if err := row.Scan(&isDefault); err != nil {
+		return false, err
+	}
+	return isDefault, nil
 }

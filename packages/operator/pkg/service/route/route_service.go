@@ -18,10 +18,13 @@ package route
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	route "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
+	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -59,19 +62,54 @@ func (s serviceImpl) GetModelRouteList(
 	return s.repo.GetModelRouteList(ctx, nil, options...)
 }
 
-func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) error {
-	return s.repo.DeleteModelRoute(ctx, nil, id)
+func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) (err error) {
+	var tx *sql.Tx
+	tx, err = s.repo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		db_utils.FinishTx(tx, err, log)
+	}()
+
+	isDef, err := s.repo.IsDefault(ctx, id, tx)
+	if err != nil {
+		return err
+	}
+	if isDef {
+		return fmt.Errorf("unable to delete default route with ID \"%v\"", id)
+	}
+
+	return s.repo.DeleteModelRoute(ctx, tx, id)
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
 	return s.repo.SetDeletionMark(ctx, nil, id, value)
 }
 
-func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute) error {
+func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute) (err error) {
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelRouteStatus{
 	}
+
+	var tx *sql.Tx
+	tx, err = s.repo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		db_utils.FinishTx(tx, err, log)
+	}()
+
+	isDef, err := s.repo.IsDefault(ctx, md.ID, tx)
+	if err != nil {
+		return err
+	}
+	if isDef {
+		return fmt.Errorf("unable to update default route with ID \"%v\"", md.ID)
+	}
+
 	return s.repo.UpdateModelRoute(ctx, nil, md)
 }
 
@@ -127,6 +165,9 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
+	if md.Default {
+		return fmt.Errorf("unable to create default route")
+	}
 	md.Status = v1alpha1.ModelRouteStatus{}
 	return s.repo.CreateModelRoute(ctx, nil, md)
 }

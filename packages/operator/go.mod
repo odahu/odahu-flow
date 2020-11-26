@@ -17,6 +17,7 @@ require (
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang-migrate/migrate v3.5.4+incompatible
+	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-memdb v1.0.4 // indirect
 	github.com/hashicorp/vault v1.4.2
 	github.com/hashicorp/vault/api v1.0.5-0.20200317185738-82f498082f02

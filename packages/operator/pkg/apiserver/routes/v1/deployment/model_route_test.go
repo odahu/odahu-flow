@@ -56,7 +56,7 @@ type ModelRouteSuite struct {
 
 func (s *ModelRouteSuite) SetupSuite() {
 
-	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db})
+	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db}, route_repository_db.RouteRepo{DB: db})
 	s.mrService = mr_service.NewService(route_repository_db.RouteRepo{DB: db})
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
