@@ -13,6 +13,8 @@
 // pkg/database/migrations/postgres/sources/000005_created_updated.up.sql
 // pkg/database/migrations/postgres/sources/000006_created_updated_delmark_for_route.down.sql
 // pkg/database/migrations/postgres/sources/000006_created_updated_delmark_for_route.up.sql
+// pkg/database/migrations/postgres/sources/000007_default_route.down.sql
+// pkg/database/migrations/postgres/sources/000007_default_route.up.sql
 package postgres
 
 import (
@@ -329,6 +331,46 @@ func _000006_created_updated_delmark_for_routeUpSql() (*asset, error) {
 	return a, nil
 }
 
+var __000007_default_routeDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x04\xc0\x31\x0e\x80\x30\x08\x00\xc0\xbd\xaf\xe0\x1f\xdd\x34\xc6\x74\xa8\x2e\xee\x0d\x0a\x46\x13\x94\x06\xe1\xff\xde\x30\xcd\x65\xc9\x09\xc5\xd9\xc0\x71\x17\x06\x25\xbc\xa2\x69\x67\x43\x57\x6b\xa6\xe1\x0c\x64\xda\xe1\x50\x89\xe7\x85\xfb\x6b\xc4\x27\x86\x78\x4e\xe3\x5a\x6b\xd9\xf2\x1f\x00\x00\xff\xff\xc4\x58\xde\x6c\x47\x00\x00\x00")
+
+func _000007_default_routeDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000007_default_routeDownSql,
+		"000007_default_route.down.sql",
+	)
+}
+
+func _000007_default_routeDownSql() (*asset, error) {
+	bytes, err := _000007_default_routeDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000007_default_route.down.sql", size: 71, mode: os.FileMode(420), modTime: time.Unix(1606386936, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000007_default_routeUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x34\xc7\x31\x0a\x42\x31\x0c\x06\xe0\xbd\xa7\xf8\xef\xd1\x49\xe5\x29\x05\xab\x83\xee\x25\x25\x11\x85\xd0\x48\x4c\xee\xef\xf4\xc6\xef\xb8\x5d\xda\xad\x16\xd2\x10\x47\xd0\x54\x81\x31\xbd\x73\xd8\x57\x9c\xc2\x7c\xb8\x65\x48\x01\x00\x62\xc6\xe7\x37\x58\x5e\x94\x1a\x98\x66\x2a\xb4\xb0\xfb\x7c\xb8\x3e\x36\x2c\x0b\xac\x54\xad\xe5\x74\xef\xbd\x3d\xeb\x3f\x00\x00\xff\xff\x15\x93\xd4\x27\x62\x00\x00\x00")
+
+func _000007_default_routeUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000007_default_routeUpSql,
+		"000007_default_route.up.sql",
+	)
+}
+
+func _000007_default_routeUpSql() (*asset, error) {
+	bytes, err := _000007_default_routeUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000007_default_route.up.sql", size: 98, mode: os.FileMode(420), modTime: time.Unix(1606386936, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -393,6 +435,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000005_created_updated.up.sql":                     _000005_created_updatedUpSql,
 	"000006_created_updated_delmark_for_route.down.sql": _000006_created_updated_delmark_for_routeDownSql,
 	"000006_created_updated_delmark_for_route.up.sql":   _000006_created_updated_delmark_for_routeUpSql,
+	"000007_default_route.down.sql":                     _000007_default_routeDownSql,
+	"000007_default_route.up.sql":                       _000007_default_routeUpSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -448,6 +492,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000005_created_updated.up.sql":                     &bintree{_000005_created_updatedUpSql, map[string]*bintree{}},
 	"000006_created_updated_delmark_for_route.down.sql": &bintree{_000006_created_updated_delmark_for_routeDownSql, map[string]*bintree{}},
 	"000006_created_updated_delmark_for_route.up.sql":   &bintree{_000006_created_updated_delmark_for_routeUpSql, map[string]*bintree{}},
+	"000007_default_route.down.sql":                     &bintree{_000007_default_routeDownSql, map[string]*bintree{}},
+	"000007_default_route.up.sql":                       &bintree{_000007_default_routeUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory

@@ -44,7 +44,7 @@ func (repo RouteRepo) GetModelRoute(
 	mt := new(route.ModelRoute)
 
 	q, args, err := sq.
-		Select("id", "spec", "status", "deletionmark", "created", "updated").
+		Select("id", "spec", "status", "deletionmark", "created", "updated, is_default").
 		From(ModelRouteTable).
 		Where(sq.Eq{"id": id}).
 		PlaceholderFormat(sq.Dollar).
@@ -54,7 +54,7 @@ func (repo RouteRepo) GetModelRoute(
 	}
 
 	err = qrr.QueryRowContext(ctx, q, args...).
-		Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
+		Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt, &mt.Default)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -89,7 +89,7 @@ func (repo RouteRepo) GetModelRouteList(
 	offset := *listOptions.Size * (*listOptions.Page)
 
 	sb := sq.
-		Select("id, spec, status, deletionmark, created, updated").
+		Select("id, spec, status, deletionmark, created, updated, is_default").
 		From("odahu_operator_route").
 		OrderBy("id").
 		Offset(uint64(offset)).
@@ -119,7 +119,7 @@ func (repo RouteRepo) GetModelRouteList(
 
 	for rows.Next() {
 		mt := new(route.ModelRoute)
-		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
+		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt, &mt.Default)
 		if err != nil {
 			return nil, err
 		}
@@ -189,6 +189,7 @@ func (repo RouteRepo) UpdateModelRoute(
 		Set("spec", md.Spec).
 		Set("status", md.Status).
 		Set("updated", md.UpdatedAt).
+		Set("is_default", md.Default).
 		Where(sq.Eq{"id": md.ID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
@@ -261,8 +262,8 @@ func (repo RouteRepo) CreateModelRoute(
 
 	stmt, args, err := sq.
 		Insert(ModelRouteTable).
-		Columns("id", "spec", "status", "created", "updated").
-		Values(md.ID, md.Spec, md.Status, md.CreatedAt, md.UpdatedAt).
+		Columns("id", "spec", "status", "created", "updated", "is_default").
+		Values(md.ID, md.Spec, md.Status, md.CreatedAt, md.UpdatedAt, md.Default).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
