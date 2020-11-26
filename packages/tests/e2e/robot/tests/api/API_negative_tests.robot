@@ -6,6 +6,7 @@ ${RES_DIR}              ${CURDIR}/resources
 *** Settings ***
 Documentation       tests for API status codes 400, 401, 403
 Resource            ../../resources/keywords.robot
+Resource            ../../resources/variables.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
@@ -38,8 +39,8 @@ Try Call API and continue on Failure
 Status Code 400 - Bad Request
     [Template]  Try Call API
     # connection
-    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${unknown type}
-    ...  connection post  ${RES_DIR}/connection/invalid/no_type
+#    ${400 BadRequest Template}  ${FailedConn} ${unknown type}
+#    ...  connection post  ${RES_DIR}/connection/invalid/no_type
     ${400 BadRequest Template}  ${FailedConn} ${invalid_id}
     ...  connection put   ${RES_DIR}/connection/invalid/conn_invalid_id.yaml
     ${400 BadRequest Template}  ${FailedConn} ${s3_empty_keyID_keySecret}
@@ -67,37 +68,37 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_invalid_uri}; ${ecr_empty_keyID_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
     # toolchains
-    ${400 BadRequest Template}  ${FailedTI} entrypoint must be no empty; defaultImage must be no empty
+    ${400 BadRequest Template}  ${FailedTI} ${TI_empty_entrypoint}; ${TI_empty_defaultImage}
     ...  toolchain post  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.json
-    ${400 BadRequest Template}  ${FailedTI} entrypoint must be no empty
+    ${400 BadRequest Template}  ${FailedTI} ${TI_empty_entrypoint}
     ...  toolchain put  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.yaml
     # packagers
-    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager post  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
-    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager put  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
-    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager post  ${RES_DIR}/packager/invalid/rest_no_required_params.json
-    ${400 BadRequest Template}  ${FailedPI} entrypoint must be nonempty; default image must be nonempty
+    ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager put  ${RES_DIR}/packager/invalid/rest_no_required_params.json
     # model training
-    ${400 BadRequest Template}  ${FailedTrain} model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
+    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS}; ${empty_toolchain}
     ...  training post  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
-    ${400 BadRequest Template}  ${FailedTrain} model name must be non-empty; model version must be non-empty; VCS name is empty; toolchain parameter is empty
+    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS}; ${empty_toolchain}
     ...  training put  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
     # model packaging
-    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; you should specify artifactName; integration name must be nonempty
+    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; ${empty_artifactName}; ${empty_integrationName}
     ...  packaging post  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
-    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; you should specify artifactName; integration name must be nonempty
+    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; ${empty_artifactName}; ${empty_integrationName}
     ...  packaging put  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
     # model deployment
-    ${400 BadRequest Template}  maximum number of replicas parameter must not be less than minimum number of replicas parameter; the image parameter is empty
+    ${400 BadRequest Template}  ${max_smaller_min_replicas}; ${empty_image}
     ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_no_required_params.json
-    ${400 BadRequest Template}  maximum number of replicas parameter must not be less than minimum number of replicas parameter; the image parameter is empty
+    ${400 BadRequest Template}  ${max_smaller_min_replicas}; ${empty_image}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_no_required_params.json
-    ${400 BadRequest Template}  liveness probe parameter must be positive number; readiness probe must be positive number; maximum number of replicas parameter must not be less than minimum number of replicas parameter; maximum number of replicas parameter must not be less than 1; minimum number of replicas parameter must not be less than 0
+    ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.yaml
-    ${400 BadRequest Template}  liveness probe parameter must be positive number; readiness probe must be positive number; maximum number of replicas parameter must not be less than minimum number of replicas parameter; maximum number of replicas parameter must not be less than 1; minimum number of replicas parameter must not be less than 0
+    ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.yaml
 
 #Status Code 401 - Unathorized
