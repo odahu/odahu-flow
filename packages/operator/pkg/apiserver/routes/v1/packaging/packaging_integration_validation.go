@@ -29,9 +29,9 @@ import (
 
 const (
 	ValidationPiErrorMessage               = "Validation of packaging integration is failed"
-	EmptyIDErrorMessage                    = "id must be nonempty"
-	EmptyEntrypointErrorMessage            = "entrypoint must be nonempty"
-	EmptyDefaultImageErrorMessage          = "default image must be nonempty"
+	EmptyIDErrorMessage                    = "id must be non-empty"
+	EmptyEntrypointErrorMessage            = "entrypoint must be non-empty"
+	EmptyDefaultImageErrorMessage          = "defaultImage must be non-empty"
 	TargetEmptyConnectionTypesErrorMessage = "%s target must have at least one connection type"
 	TargetEmptyNameErrorMessage            = "one of target has empty name"
 	TargetUnknownConnTypeErrorMessage      = "%s target have unknown connection type: %s"
