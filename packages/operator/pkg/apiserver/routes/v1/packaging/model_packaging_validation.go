@@ -35,9 +35,9 @@ import (
 
 const (
 	ValidationMpErrorMessage             = "Validation of model packaging is failed"
-	TrainingIDOrArtifactNameErrorMessage = "you should specify artifactName"
+	TrainingIDOrArtifactNameErrorMessage = "artifactName is empty"
 	ArgumentValidationErrorMessage       = "argument validation is failed: %s"
-	EmptyIntegrationNameErrorMessage     = "integration name must be nonempty"
+	EmptyIntegrationNameErrorMessage     = "integrationName is empty"
 	TargetNotFoundErrorMessage           = "cannot find %s target in packaging integration %s"
 	NotValidConnTypeErrorMessage         = "%s target has not valid connection type %s for packaging integration %s"
 	defaultIDTemplate                    = "%s-%s-%s"
