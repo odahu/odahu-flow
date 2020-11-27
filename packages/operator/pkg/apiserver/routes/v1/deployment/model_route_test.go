@@ -430,7 +430,7 @@ func (s *ModelRouteSuite) TestUpdateDefaultRoute() {
 	var result routes.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
-	errMsg := fmt.Sprintf("unable to update default route with ID \"%v\"", r)
+	errMsg := fmt.Sprintf("access forbidden: unable to update default route with ID \"%v\"", r)
 	s.g.Expect(result.Message).Should(Equal(errMsg))
 
 }
@@ -522,7 +522,7 @@ func (s *ModelRouteSuite) TestDeleteDefaultRoute() {
 	var result routes.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
-	errMsg := fmt.Sprintf("unable to delete default route with ID \"%v\"", r)
+	errMsg := fmt.Sprintf("access forbidden: unable to delete default route with ID \"%v\"", r)
 	s.g.Expect(result.Message).Should(Equal(errMsg))
 
 }

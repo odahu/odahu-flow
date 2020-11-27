@@ -78,7 +78,9 @@ func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) (err error
 		return err
 	}
 	if isDef {
-		return fmt.Errorf("unable to delete default route with ID \"%v\"", id)
+		return odahu_errors.ExtendedForbiddenError{
+			Message: fmt.Sprintf("unable to delete default route with ID \"%v\"", id),
+		}
 	}
 
 	return s.repo.DeleteModelRoute(ctx, tx, id)
@@ -108,7 +110,9 @@ func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute)
 		return err
 	}
 	if isDef {
-		return fmt.Errorf("unable to update default route with ID \"%v\"", md.ID)
+		return odahu_errors.ExtendedForbiddenError{
+			Message: fmt.Sprintf("unable to update default route with ID \"%v\"", md.ID),
+		}
 	}
 
 	return s.repo.UpdateModelRoute(ctx, tx, md)
