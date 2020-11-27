@@ -584,6 +584,50 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/model/deployment/{id}/default-route": {
+            "get": {
+                "description": "Get a Model deployment default route",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Get a Model deployment default route",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model deployment id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelRoute"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/model/packaging": {
             "get": {
                 "description": "Get list of Model Packagings",
@@ -2148,7 +2192,7 @@ var doc = `{
                     "type": "string"
                 },
                 "nodePools": {
-                    "description": "Node pools to run training tasks on",
+                    "description": "Node pools to run deployments on",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/NodePool"
@@ -2356,6 +2400,10 @@ var doc = `{
         "ServiceCatalog": {
             "type": "object",
             "properties": {
+                "auth": {
+                    "type": "object",
+                    "$ref": "#/definitions/AuthConfig"
+                },
                 "baseUrl": {
                     "type": "string"
                 }
@@ -2469,6 +2517,14 @@ var doc = `{
         "ModelRoute": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
+                "default": {
+                    "description": "Default routes cannot be deleted by  They are managed by system\nOne ModelDeployment as exactly one default route that give 100% traffic to the model",
+                    "type": "boolean"
+                },
                 "id": {
                     "description": "Model route id",
                     "type": "string"
@@ -2482,6 +2538,10 @@ var doc = `{
                     "description": "Model route status",
                     "type": "object",
                     "$ref": "#/definitions/ModelRouteStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },

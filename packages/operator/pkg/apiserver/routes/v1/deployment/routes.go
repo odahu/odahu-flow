@@ -38,6 +38,7 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, 
 	routeGroup.POST(CreateModelDeploymentURL, mdController.createMD)
 	routeGroup.PUT(UpdateModelDeploymentURL, mdController.updateMD)
 	routeGroup.DELETE(DeleteModelDeploymentURL, mdController.deleteMD)
+	routeGroup.GET(GetModelDeploymentDefaultRouteURL, mdController.getDefaultRoute)
 
 	mrController := ModelRouteController{
 		service: mrService,

@@ -48,6 +48,7 @@ type Service interface {
 	UpdateModelDeploymentStatus(
 		ctx context.Context, id string, status v1alpha1.ModelDeploymentStatus, spec v1alpha1.ModelDeploymentSpec) error
 	CreateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error
+	GetDefaultModelRoute(ctx context.Context, mdID string) (*deployment.ModelRoute, error)
 }
 
 type serviceImpl struct {
@@ -83,6 +84,21 @@ func GetDefaultModelRoute(ctx context.Context, tx *sql.Tx, mdID string, reposito
 		return "", nil
 	}
 	return mrs[0].ID, nil
+}
+
+func (s serviceImpl) GetDefaultModelRoute(ctx context.Context, mdID string) (*deployment.ModelRoute, error) {
+	tx, err := s.mrRepo.BeginTransaction(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		db_utils.FinishTx(tx, err, log)
+	}()
+	id, err := GetDefaultModelRoute(ctx, tx, mdID, s.mrRepo)
+	if err != nil {
+		return nil, err
+	}
+	return s.mrRepo.GetModelRoute(ctx, tx, id)
 }
 
 func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err error) {

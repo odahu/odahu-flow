@@ -658,3 +658,23 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIDeleteMD() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
 }
+
+func (s *ModelDeploymentRouteSuite) TestGetDefaultRoute() {
+	s.newMultipleMds()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		strings.Replace(dep_route.GetModelDeploymentDefaultRouteURL, ":id", mdID1, -1),
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var result deployment.ModelRoute
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(result.Default).Should(BeTrue())
+}
