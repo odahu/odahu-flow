@@ -27,6 +27,7 @@ import (
 	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
@@ -168,7 +169,18 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 	if md.Default {
 		return fmt.Errorf("unable to create default route")
 	}
-	md.Status = v1alpha1.ModelRouteStatus{}
+	md.Status = v1alpha1.ModelRouteStatus{
+		EdgeURL: "",
+		State:   "",
+		Modifiable: v1alpha1.Modifiable{
+			CreatedAt: &metav1.Time{
+				Time: time.Time{},
+			},
+			UpdatedAt: &metav1.Time{
+				Time: time.Time{},
+			},
+		},
+	}
 	return s.repo.CreateModelRoute(ctx, nil, md)
 }
 

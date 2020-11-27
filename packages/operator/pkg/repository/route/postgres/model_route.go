@@ -347,10 +347,25 @@ func (repo RouteRepo) IsDefault(ctx context.Context, id string, tx *sql.Tx) (boo
 		return false, err
 	}
 
-	row := qrr.QueryRowContext(ctx, stmt, args...)
-	var isDefault bool
-	if err := row.Scan(&isDefault); err != nil {
+	rows, err := qrr.QueryContext(ctx, stmt, args...)
+	if err != nil {
 		return false, err
 	}
-	return isDefault, nil
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Error(err, "error during rows.Close()")
+		}
+		if err := rows.Err(); err != nil {
+			log.Error(err, "error during rows iterating")
+		}
+	}()
+	var isDefault bool
+	for rows.Next() {
+		if err := rows.Scan(&isDefault); err != nil {
+			return false, err
+		}
+		return isDefault, nil  //nolint
+	}
+
+	return false, odahuErrors.NotFoundError{Entity: id}
 }

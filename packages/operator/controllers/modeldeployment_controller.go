@@ -82,7 +82,6 @@ const (
 )
 
 var (
-	defaultWeight            = int32(100)
 	DefaultTerminationPeriod = int64(600)
 )
 
@@ -122,70 +121,6 @@ func KnativeConfigurationName(md *odahuflowv1alpha1.ModelDeployment) string {
 
 func knativeDeploymentName(revisionName string) string {
 	return fmt.Sprintf("%s-deployment", revisionName)
-}
-
-func modelRouteName(md *odahuflowv1alpha1.ModelDeployment) string {
-	return md.Name
-}
-
-func (r *ModelDeploymentReconciler) ReconcileModelRoute(
-	log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-) error {
-	modelRoute := &odahuflowv1alpha1.ModelRoute{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      modelRouteName(modelDeploymentCR),
-			Namespace: modelDeploymentCR.Namespace,
-		},
-		Spec: odahuflowv1alpha1.ModelRouteSpec{
-			URLPrefix: fmt.Sprintf("/model/%s", modelDeploymentCR.Name),
-			ModelDeploymentTargets: []odahuflowv1alpha1.ModelDeploymentTarget{
-				{
-					Name:   modelDeploymentCR.Name,
-					Weight: &defaultWeight,
-				},
-			},
-		},
-	}
-
-	if err := controllerutil.SetControllerReference(modelDeploymentCR, modelRoute, r.scheme); err != nil {
-		return err
-	}
-
-	if err := odahuflow.StoreHash(modelRoute); err != nil {
-		log.Error(err, "Cannot apply obj hash")
-		return err
-	}
-
-	found := &odahuflowv1alpha1.ModelRoute{}
-	err := r.Get(context.TODO(), types.NamespacedName{
-		Name: modelRoute.Name, Namespace: modelRoute.Namespace,
-	}, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s model route", modelRoute.ObjectMeta.Name))
-		err = r.Create(context.TODO(), modelRoute)
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if !odahuflow.ObjsEqualByHash(modelRoute, found) {
-		log.Info(fmt.Sprintf("Model Route hashes aren't equal. Update the %s Model route", modelRoute.Name))
-
-		found.Spec = modelRoute.Spec
-		found.ObjectMeta.Annotations = modelRoute.ObjectMeta.Annotations
-		found.ObjectMeta.Labels = modelRoute.ObjectMeta.Labels
-
-		log.Info(fmt.Sprintf("Updating %s k8s model route", modelRoute.ObjectMeta.Name))
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Info(fmt.Sprintf("Model Route hashes equal. Skip updating of the %s model route", modelRoute.Name))
-	}
-
-	return nil
 }
 
 func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
@@ -760,11 +695,6 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	}
 
 	log.Info("Reconcile default Model Route")
-
-	if err := r.ReconcileModelRoute(log, modelDeploymentCR); err != nil {
-		log.Error(err, "Reconcile the default Model Route")
-		return reconcile.Result{}, err
-	}
 
 	if err := r.reconcileService(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile the k8s service")

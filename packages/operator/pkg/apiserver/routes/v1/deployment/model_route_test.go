@@ -198,9 +198,17 @@ func (s *ModelRouteSuite) TestGetAllModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(1))
-	s.g.Expect(result[0].ID).Should(Equal(conn.ID))
-	s.g.Expect(result[0].Spec).Should(Equal(conn.Spec))
+	s.g.Expect(result).Should(HaveLen(3))  // two defaults and one that we created
+
+	ids := make([]string, len(result))
+	specs := make([]odahuflowv1alpha1.ModelRouteSpec, len(result))
+	for i, v := range result {
+		ids[i] = v.ID
+		specs[i] = v.Spec
+	}
+
+	s.g.Expect(ids).Should(ContainElement(conn.ID))
+	s.g.Expect(specs).Should(ContainElement(conn.Spec))
 }
 
 func (s *ModelRouteSuite) TestGetAllEmptyModelRoutes() {
@@ -218,7 +226,7 @@ func (s *ModelRouteSuite) TestGetAllEmptyModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(0))
+	s.g.Expect(result).Should(HaveLen(2)) // only suite deployments default routes
 }
 
 func (s *ModelRouteSuite) TestGetAllModelRoutesPaging() {
@@ -280,7 +288,7 @@ func (s *ModelRouteSuite) TestGetAllModelRoutesPaging() {
 
 	query = req.URL.Query()
 	query.Set("size", "1")
-	query.Set("page", "2")
+	query.Set("page", "4")
 	req.URL.RawQuery = query.Encode()
 
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -451,7 +459,7 @@ func (s *ModelRouteSuite) TestDeleteMR() {
 
 	mrList, err := s.mrService.GetModelRouteList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
-	s.g.Expect(mrList).To(HaveLen(0))
+	s.g.Expect(mrList).To(HaveLen(2))  // only suite default routes
 }
 
 func (s *ModelRouteSuite) TestDeleteMRNotFound() {
@@ -516,7 +524,7 @@ func (s *ModelRouteSuite) TestDisabledAPIGetAllModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(0))
+	s.g.Expect(result).Should(HaveLen(2))  // only suite deployments default routes
 }
 
 func (s *ModelRouteSuite) TestDisabledAPICreateMR() {
