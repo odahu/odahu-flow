@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.auth_config import AuthConfig  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -15,20 +16,25 @@ class ServiceCatalog(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, base_url: str=None):  # noqa: E501
+    def __init__(self, auth: AuthConfig=None, base_url: str=None):  # noqa: E501
         """ServiceCatalog - a model defined in Swagger
 
+        :param auth: The auth of this ServiceCatalog.  # noqa: E501
+        :type auth: AuthConfig
         :param base_url: The base_url of this ServiceCatalog.  # noqa: E501
         :type base_url: str
         """
         self.swagger_types = {
+            'auth': AuthConfig,
             'base_url': str
         }
 
         self.attribute_map = {
+            'auth': 'auth',
             'base_url': 'baseUrl'
         }
 
+        self._auth = auth
         self._base_url = base_url
 
     @classmethod
@@ -41,6 +47,27 @@ class ServiceCatalog(Model):
         :rtype: ServiceCatalog
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def auth(self) -> AuthConfig:
+        """Gets the auth of this ServiceCatalog.
+
+
+        :return: The auth of this ServiceCatalog.
+        :rtype: AuthConfig
+        """
+        return self._auth
+
+    @auth.setter
+    def auth(self, auth: AuthConfig):
+        """Sets the auth of this ServiceCatalog.
+
+
+        :param auth: The auth of this ServiceCatalog.
+        :type auth: AuthConfig
+        """
+
+        self._auth = auth
 
     @property
     def base_url(self) -> str:

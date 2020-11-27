@@ -17,31 +17,46 @@ class ModelRoute(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, spec: ModelRouteSpec=None, status: ModelRouteStatus=None):  # noqa: E501
+    def __init__(self, created_at: str=None, default: bool=None, id: str=None, spec: ModelRouteSpec=None, status: ModelRouteStatus=None, updated_at: str=None):  # noqa: E501
         """ModelRoute - a model defined in Swagger
 
+        :param created_at: The created_at of this ModelRoute.  # noqa: E501
+        :type created_at: str
+        :param default: The default of this ModelRoute.  # noqa: E501
+        :type default: bool
         :param id: The id of this ModelRoute.  # noqa: E501
         :type id: str
         :param spec: The spec of this ModelRoute.  # noqa: E501
         :type spec: ModelRouteSpec
         :param status: The status of this ModelRoute.  # noqa: E501
         :type status: ModelRouteStatus
+        :param updated_at: The updated_at of this ModelRoute.  # noqa: E501
+        :type updated_at: str
         """
         self.swagger_types = {
+            'created_at': str,
+            'default': bool,
             'id': str,
             'spec': ModelRouteSpec,
-            'status': ModelRouteStatus
+            'status': ModelRouteStatus,
+            'updated_at': str
         }
 
         self.attribute_map = {
+            'created_at': 'createdAt',
+            'default': 'default',
             'id': 'id',
             'spec': 'spec',
-            'status': 'status'
+            'status': 'status',
+            'updated_at': 'updatedAt'
         }
 
+        self._created_at = created_at
+        self._default = default
         self._id = id
         self._spec = spec
         self._status = status
+        self._updated_at = updated_at
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelRoute':
@@ -53,6 +68,52 @@ class ModelRoute(Model):
         :rtype: ModelRoute
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def created_at(self) -> str:
+        """Gets the created_at of this ModelRoute.
+
+        CreatedAt  # noqa: E501
+
+        :return: The created_at of this ModelRoute.
+        :rtype: str
+        """
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, created_at: str):
+        """Sets the created_at of this ModelRoute.
+
+        CreatedAt  # noqa: E501
+
+        :param created_at: The created_at of this ModelRoute.
+        :type created_at: str
+        """
+
+        self._created_at = created_at
+
+    @property
+    def default(self) -> bool:
+        """Gets the default of this ModelRoute.
+
+        Default routes cannot be deleted by  They are managed by system One ModelDeployment as exactly one default route that give 100% traffic to the model  # noqa: E501
+
+        :return: The default of this ModelRoute.
+        :rtype: bool
+        """
+        return self._default
+
+    @default.setter
+    def default(self, default: bool):
+        """Sets the default of this ModelRoute.
+
+        Default routes cannot be deleted by  They are managed by system One ModelDeployment as exactly one default route that give 100% traffic to the model  # noqa: E501
+
+        :param default: The default of this ModelRoute.
+        :type default: bool
+        """
+
+        self._default = default
 
     @property
     def id(self) -> str:
@@ -122,3 +183,26 @@ class ModelRoute(Model):
         """
 
         self._status = status
+
+    @property
+    def updated_at(self) -> str:
+        """Gets the updated_at of this ModelRoute.
+
+        UpdatedAt  # noqa: E501
+
+        :return: The updated_at of this ModelRoute.
+        :rtype: str
+        """
+        return self._updated_at
+
+    @updated_at.setter
+    def updated_at(self, updated_at: str):
+        """Sets the updated_at of this ModelRoute.
+
+        UpdatedAt  # noqa: E501
+
+        :param updated_at: The updated_at of this ModelRoute.
+        :type updated_at: str
+        """
+
+        self._updated_at = updated_at
