@@ -18,12 +18,13 @@ Model HTTP API client and utils
 """
 import json
 import logging
-from urllib3.exceptions import HTTPError
 
 import requests
 
+from odahuflow.sdk.clients.deployment import ModelDeploymentClient
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.utils import ensure_function_succeed
+from urllib3.exceptions import HTTPError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,8 +37,9 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
     :param host: edge host
     :param url: full url to model api
     :param model_route: model route name
-    :param model_deployment: model deployment name
+    :param model_deployment: model deployment name. Default route URL will be returned
     :param url_prefix: model prefix
+    :param mr_client: ModelRoute client to use
     :return: model url
     """
     if url:
@@ -48,6 +50,7 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
         return f'{host}{url_prefix}'
 
     model_route = model_route or model_deployment
+
     if model_route:
         if mr_client is None:
             mr_client = ModelRouteClient()
@@ -55,6 +58,12 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
         model_route = mr_client.get(model_route)
 
         LOGGER.debug('Found model route: %s', model_route)
+        return model_route.status.edge_url
+
+    if model_deployment:
+        md_client = ModelDeploymentClient()
+        model_route = md_client.get_default_route(model_deployment)
+        LOGGER.debug('Found default model route: %s', model_route)
         return model_route.status.edge_url
 
     raise NotImplementedError("Cannot create a model url")
