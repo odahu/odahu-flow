@@ -119,7 +119,17 @@ func (s *TestSuite) TestDeleteModelRoute() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
-	s.mockRepo.On("DeleteModelRoute", ctx, s.nilTx, enID).Return(nil)
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
+	s.mockRepo.On("DeleteModelRoute", ctx, mockTx, enID).Return(nil)
 
 	as.NoError(s.service.DeleteModelRoute(ctx, enID))
 	s.mockRepo.AssertExpectations(s.T())
@@ -140,7 +150,18 @@ func (s *TestSuite) TestUpdateModelRoute() {
 
 	ctx := context.Background()
 	en := newStubMT()
-	s.mockRepo.On("UpdateModelRoute", ctx, s.nilTx, en).Return(nil)
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
+	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
 
 	as.NoError(s.service.UpdateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -151,7 +172,18 @@ func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
 
 	ctx := context.Background()
 	en := newStubMT()
-	s.mockRepo.On("UpdateModelRoute", ctx, s.nilTx, en).Return(nil)
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
+	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.UpdateModelRoute(ctx, en))

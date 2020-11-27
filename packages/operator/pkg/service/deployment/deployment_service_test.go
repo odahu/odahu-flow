@@ -25,6 +25,7 @@ import (
 	apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/mocks"
+	route_mocks "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/mocks"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/stretchr/testify/assert"
@@ -45,6 +46,7 @@ func TestSuiteRun(t *testing.T) {
 type TestSuite struct {
 	suite.Suite
 	mockRepo *mocks.Repository
+	rMockRepo *route_mocks.Repository
 	service service.Service
 	db *sql.DB
 	dbMock sqlmock.Sqlmock
@@ -62,11 +64,13 @@ func (s *TestSuite) SetupTest() {
 		s.T().Fatal("Unable initialize sql mock")
 	}
 	mockRepo := &mocks.Repository{}
+	rMockRepo := &route_mocks.Repository{}
 
 	s.mockRepo = mockRepo
+	s.rMockRepo = rMockRepo
 	s.db = db
 	s.dbMock = dbMock
-	s.service = service.NewService(mockRepo, nil)
+	s.service = service.NewService(mockRepo, rMockRepo)
 }
 
 func (s *TestSuite) TestGetModelDeployment() {
@@ -119,7 +123,26 @@ func (s *TestSuite) TestDeleteModelDeployment() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
-	s.mockRepo.On("DeleteModelDeployment", ctx, s.nilTx, enID).Return(nil)
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+
+	defaultRouteID := "defaultRoute"
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.rMockRepo.On("GetModelRouteList", ctx, mockTx, mock.Anything).Return([]apis.ModelRoute{
+		{
+			ID:           defaultRouteID,
+			Default:      true,
+		},
+	}, nil)
+	s.rMockRepo.On("DeleteModelRoute", ctx, mockTx, defaultRouteID).Return(nil)
+	s.mockRepo.On("DeleteModelDeployment", ctx, mockTx, enID).Return(nil)
 
 	as.NoError(s.service.DeleteModelDeployment(ctx, enID))
 	s.mockRepo.AssertExpectations(s.T())
@@ -236,7 +259,20 @@ func (s *TestSuite) TestCreateModelDeployment() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(nil)
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("CreateModelDeployment", ctx, mockTx, en).Return(nil)
+	s.rMockRepo.On("DefaultExists", ctx, enID, mockTx).Return(false, nil)
+	s.rMockRepo.On("CreateModelRoute", ctx, mockTx, mock.Anything).
+		Return(nil)
 
 	as.NoError(s.service.CreateModelDeployment(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -247,7 +283,20 @@ func (s *TestSuite) TestCreateModelDeployment_CreatedAt() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(nil)
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("CreateModelDeployment", ctx, mockTx, en).Return(nil)
+	s.rMockRepo.On("DefaultExists", ctx, enID, mockTx).Return(false, nil)
+	s.rMockRepo.On("CreateModelRoute", ctx, mockTx, mock.Anything).
+		Return(nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.CreateModelDeployment(ctx, en))
@@ -261,12 +310,26 @@ func (s *TestSuite) TestCreateModelDeployment_Error() {
 	as := assert.New(s.T())
 
 	en := newStubMT()
+
 	ctx := context.Background()
-	anyError := errors.New("any error")
-	s.mockRepo.On("CreateModelDeployment", ctx, s.nilTx, en).Return(anyError)
+	anyError  := errors.New("any error")
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectRollback()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("CreateModelDeployment", ctx, mockTx, en).Return(anyError)
 
 	as.Error(s.service.CreateModelDeployment(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
+	s.rMockRepo.AssertNotCalled(s.T(), "DefaultExists")
+	s.rMockRepo.AssertNotCalled(s.T(), "CreateModelRoute")
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 // Helpers

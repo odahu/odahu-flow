@@ -110,7 +110,7 @@ func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute)
 		return fmt.Errorf("unable to update default route with ID \"%v\"", md.ID)
 	}
 
-	return s.repo.UpdateModelRoute(ctx, nil, md)
+	return s.repo.UpdateModelRoute(ctx, tx, md)
 }
 
 func (s serviceImpl) UpdateModelRouteStatus(
