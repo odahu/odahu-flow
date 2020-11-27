@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
@@ -52,12 +53,14 @@ type ModelRouteSuite struct {
 	server       *gin.Engine
 	mdService    md_service.Service
 	mrService    mr_service.Service
+	mrRepo 	     route_repository_db.RouteRepo
 }
 
 func (s *ModelRouteSuite) SetupSuite() {
 
+	s.mrRepo = route_repository_db.RouteRepo{DB: db}
 	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db}, route_repository_db.RouteRepo{DB: db})
-	s.mrService = mr_service.NewService(route_repository_db.RouteRepo{DB: db})
+	s.mrService = mr_service.NewService(s.mrRepo)
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
@@ -397,6 +400,41 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
 }
 
+func (s *ModelRouteSuite) TestUpdateDefaultRoute() {
+
+	ctx := context.Background()
+
+	r, err := md_service.GetDefaultModelRoute(ctx, nil, mdID1, s.mrRepo)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	// API request
+
+	newURL := "/new/url"
+	mrEntity := newStubMr()
+	mrEntity.Spec.URLPrefix = newURL
+	mrEntity.ID = r
+	mrEntityBody, err := json.Marshal(mrEntity)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodPut,
+		dep_route.UpdateModelRouteURL,
+		bytes.NewReader(mrEntityBody),
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	s.g.Expect(w.Code).Should(Equal(403))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	errMsg := fmt.Sprintf("unable to update default route with ID \"%v\"", r)
+	s.g.Expect(result.Message).Should(Equal(errMsg))
+
+}
+
 func (s *ModelRouteSuite) TestUpdateMRNotFound() {
 	mrEntity := newStubMr()
 
@@ -460,6 +498,33 @@ func (s *ModelRouteSuite) TestDeleteMR() {
 	mrList, err := s.mrService.GetModelRouteList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mrList).To(HaveLen(2))  // only suite default routes
+}
+
+func (s *ModelRouteSuite) TestDeleteDefaultRoute() {
+
+	ctx := context.Background()
+
+	r, err := md_service.GetDefaultModelRoute(ctx, nil, mdID1, s.mrRepo)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	// API request
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodDelete,
+		strings.Replace(dep_route.DeleteModelRouteURL, ":id", r, -1),
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	s.g.Expect(w.Code).Should(Equal(403))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	errMsg := fmt.Sprintf("unable to delete default route with ID \"%v\"", r)
+	s.g.Expect(result.Message).Should(Equal(errMsg))
+
 }
 
 func (s *ModelRouteSuite) TestDeleteMRNotFound() {
