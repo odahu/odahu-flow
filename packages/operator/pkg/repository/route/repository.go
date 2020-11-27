@@ -40,6 +40,6 @@ type Repository interface {
 
 
 type Filter struct {
-	Default	     bool `name:"is_default" postgres:"is_default"`
+	Default	     []bool `name:"is_default" postgres:"is_default"`
 	MdID	     []string `name:"mdId" postgres:"spec->'modelDeployments'->0->>'mdName'"`
 }

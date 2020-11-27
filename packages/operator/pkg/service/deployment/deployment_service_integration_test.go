@@ -23,6 +23,7 @@ import (
 	repo_route "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	route_interface "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	route_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/testenvs"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +45,7 @@ type IntegrationTestSuite struct {
 	service service.Service
 	repo repo_dep.DeploymentRepo
 	routeRepo repo_route.RouteRepo
+	routeService route_service.Service
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
@@ -56,6 +58,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.repo = repo_dep.DeploymentRepo{DB: s.DB}
 	s.routeRepo = repo_route.RouteRepo{DB: s.DB}
 	s.service = service.NewService(s.repo, s.routeRepo)
+	s.routeService = route_service.NewService(s.routeRepo)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -80,6 +83,21 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	routes, err := s.routeRepo.GetModelRouteList(ctx, nil)
 	as.NoError(err)
 	as.Len(routes, 1)
+	r := routes[0]
+
+	route, err := s.routeRepo.GetModelRoute(ctx, nil, r.ID)
+	as.NoError(err)
+	as.Equal(route.Spec.ModelDeploymentTargets[0].Name, en.ID)
+	as.Equal(route.Default, true)
+
+	// It is impossible to delete default route via route Service (only via deployment service by deletion
+	// corresponding ModelDeployment)
+	err = s.routeService.DeleteModelRoute(ctx, route.ID)
+	as.Errorf(err, "unable to delete default route with ID \"%v\"", route.ID)
+
+	// It is impossible to update default route via route Service
+	err = s.routeService.UpdateModelRoute(ctx, route)
+	as.Errorf(err, "unable to update default route with ID \"%v\"", route.ID)
 
 	// Add yet another deployment
 	as.NoError(s.service.CreateModelDeployment(ctx, en2))
@@ -94,15 +112,17 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	as.NoError(err)
 	as.Len(routes, 2)
 
-	// Check that all created routes are default
-	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{Default: false}))
+	// Check that there are no NOT default routes
+	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{Default: []bool{
+		false,
+	}}))
 	as.NoError(err)
 	as.Len(routes, 0)
 
 	// Try to select route of first deployment
 	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{
 		MdID: []string{en.ID},
-		Default: true,
+		Default: []bool{true, false},
 	}))
 	as.NoError(err)
 	as.Len(routes, 1)
@@ -112,8 +132,10 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	// There are not routes of first deployment
 	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{
 		MdID: []string{en.ID},
+		Default: []bool{true},
 	}))
 	as.NoError(err)
 	as.Len(routes, 0)
+
 }
 

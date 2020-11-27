@@ -70,7 +70,7 @@ func (s serviceImpl) GetModelDeploymentList(
 func GetDefaultModelRoute(ctx context.Context, tx *sql.Tx, mdID string, repository mrRepo.Repository) (string, error) {
 
 	mrs, err := repository.GetModelRouteList(ctx, tx, filter.ListFilter(&mrRepo.Filter{
-		Default: true,
+		Default: []bool{true},
 		MdID: []string{mdID},
 	}))
 	if err != nil {

@@ -42,7 +42,7 @@ func TransformFilter(sqlBuilder sq.SelectBuilder, filter interface{}) sq.SelectB
 
 	elem = reflect.ValueOf(filter).Elem()
 	for i := 0; i < elem.NumField(); i++ {
-		value, ok := elem.Field(i).Interface().(bool)
+		value, ok := elem.Field(i).Interface().([]bool)
 		if !ok {
 			continue
 		}
