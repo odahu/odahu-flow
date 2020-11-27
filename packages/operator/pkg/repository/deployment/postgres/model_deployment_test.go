@@ -32,7 +32,9 @@ func TestModelDeploymentRepository(t *testing.T) {
 
 	as.NoError(repo.CreateModelDeployment(context.Background(), nil, created))
 
-	as.Exactly(repo.CreateModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{Entity: mdID})
+	as.Exactly(repo.CreateModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{
+		Entity: mdID,
+	})
 
 	fetched, err := repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)

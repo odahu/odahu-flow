@@ -43,18 +43,39 @@ func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 	return r0, r1
 }
 
-// CreateModelRoute provides a mock function with given fields: ctx, tx, md
-func (_m *Repository) CreateModelRoute(ctx context.Context, tx *sql.Tx, md *deployment.ModelRoute) error {
-	ret := _m.Called(ctx, tx, md)
+// CreateModelRoute provides a mock function with given fields: ctx, tx, r
+func (_m *Repository) CreateModelRoute(ctx context.Context, tx *sql.Tx, r *deployment.ModelRoute) error {
+	ret := _m.Called(ctx, tx, r)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, *deployment.ModelRoute) error); ok {
-		r0 = rf(ctx, tx, md)
+		r0 = rf(ctx, tx, r)
 	} else {
 		r0 = ret.Error(0)
 	}
 
 	return r0
+}
+
+// DefaultExists provides a mock function with given fields: ctx, mdID, qrr
+func (_m *Repository) DefaultExists(ctx context.Context, mdID string, qrr *sql.Tx) (bool, error) {
+	ret := _m.Called(ctx, mdID, qrr)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string, *sql.Tx) bool); ok {
+		r0 = rf(ctx, mdID, qrr)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, *sql.Tx) error); ok {
+		r1 = rf(ctx, mdID, qrr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // DeleteModelRoute provides a mock function with given fields: ctx, tx, name
@@ -117,6 +138,27 @@ func (_m *Repository) GetModelRouteList(ctx context.Context, tx *sql.Tx, options
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, *sql.Tx, ...filter.ListOption) error); ok {
 		r1 = rf(ctx, tx, options...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// IsDefault provides a mock function with given fields: ctx, id, tx
+func (_m *Repository) IsDefault(ctx context.Context, id string, tx *sql.Tx) (bool, error) {
+	ret := _m.Called(ctx, id, tx)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string, *sql.Tx) bool); ok {
+		r0 = rf(ctx, id, tx)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, *sql.Tx) error); ok {
+		r1 = rf(ctx, id, tx)
 	} else {
 		r1 = ret.Error(1)
 	}

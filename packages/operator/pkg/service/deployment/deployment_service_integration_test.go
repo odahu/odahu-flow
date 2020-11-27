@@ -85,10 +85,21 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	as.Len(routes, 1)
 	r := routes[0]
 
+	// Check default route
 	route, err := s.routeRepo.GetModelRoute(ctx, nil, r.ID)
 	as.NoError(err)
 	as.Equal(route.Spec.ModelDeploymentTargets[0].Name, en.ID)
 	as.Equal(route.Default, true)
+
+	// Check default route via API of route repository
+	isDef, err := s.routeRepo.IsDefault(ctx, route.ID, nil)
+	as.NoError(err)
+	as.True(isDef)
+
+	defExists, err := s.routeRepo.DefaultExists(ctx, en.ID, nil)
+	as.NoError(err)
+	as.True(defExists)
+
 
 	// It is impossible to delete default route via route Service (only via deployment service by deletion
 	// corresponding ModelDeployment)
@@ -129,13 +140,18 @@ func (s *IntegrationTestSuite) TestFullCase() {
 
 	// Delete first deployment
 	as.NoError(s.service.DeleteModelDeployment(ctx, en.ID))
-	// There are not routes of first deployment
+	// There are not default routes of first deployment
 	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{
 		MdID: []string{en.ID},
 		Default: []bool{true},
 	}))
 	as.NoError(err)
 	as.Len(routes, 0)
+
+	// Check the same via api of route repo
+	defExists, err = s.routeRepo.DefaultExists(ctx, en.ID, nil)
+	as.NoError(err)
+	as.False(defExists)
 
 }
 
