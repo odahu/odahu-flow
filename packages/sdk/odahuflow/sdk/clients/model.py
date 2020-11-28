@@ -49,8 +49,6 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
         LOGGER.debug('')
         return f'{host}{url_prefix}'
 
-    model_route = model_route or model_deployment
-
     if model_route:
         if mr_client is None:
             mr_client = ModelRouteClient()
