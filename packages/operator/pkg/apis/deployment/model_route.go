@@ -25,7 +25,7 @@ type ModelRoute struct {
 	// Model route id
 	ID string `json:"id"`
 	// Default routes cannot be deleted by user. They are managed by system
-	// One ModelDeployment as exactly one default route that give 100% traffic to the model
+	// One ModelDeployment has exactly one default Route that gives 100% traffic to the model
 	Default bool `json:"default,omitempty"`
 	// Deletion mark
 	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
