@@ -152,8 +152,8 @@ Run example model
     StrictShell  odahuflowctl --verbose dep create -f ${manifests_dir}/deployment.odahuflow.yaml --image ${res.stdout} --id ${example_id}
     report model deployment pods  ${example_id}
 
-    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --mr ${example_id}
-    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --mr ${example_id} --json-file ${manifests_dir}/request.json
+    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --md ${example_id}
+    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json
 
-    ${res}=  Shell  odahuflowctl model invoke --mr ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
+    ${res}=  Shell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
     should not be equal  ${res.rc}  0
