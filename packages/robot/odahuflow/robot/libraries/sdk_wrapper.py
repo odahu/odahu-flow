@@ -93,6 +93,10 @@ class ModelDeployment:
     def deployment_delete(dep_id: str):
         return ModelDeploymentClient().delete(dep_id)
 
+    @staticmethod
+    def deployment_get_default_route(dep_id: str):
+        return ModelDeploymentClient().get_default_route(dep_id)
+
 
 class ModelPackaging:
 

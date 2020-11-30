@@ -45,10 +45,6 @@ Check deployment doesn't exist
     [Tags]                      deployment
     Command response list should not contain id  deployment  ${DEPLOYMENT}
 
-Check route doesn't exist before deployment
-    [Tags]                      route
-    Command response list should not contain id  route  ${MODEL}
-
 Create deployment
     [Tags]                      deployment
     ${image}                    Pick packaging_image  ${PACKAGING}
@@ -77,12 +73,14 @@ Check by id that deployment exists
 
 Check that list of routes contains
     [Tags]                      route
-    Command response list should contain id  route  ${MODEL}
+    ${result}                   Call API  deployment get default route  ${MODEL}
+    Command response list should contain id  route  ${result.id}
 
 Check by id that route exists
     [Tags]                      route
-    ${result}                   Call API  route get id  ${MODEL}
-    ID should be equal          ${result}  ${MODEL}
+    ${default_route}            Call API  deployment get default route  ${MODEL}
+    ${result}                   Call API  route get id  ${default_route.id}
+    ID should be equal          ${result}  ${default_route.id}
 
 
 Get info about model
