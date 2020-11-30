@@ -430,8 +430,8 @@ definitions:
         type: string
       default:
         description: |-
-          Default routes cannot be deleted by  They are managed by system
-          One ModelDeployment as exactly one default route that give 100% traffic to the model
+          Default routes cannot be deleted by user. They are managed by system
+          One ModelDeployment has exactly one default Route that gives 100% traffic to the model
         type: boolean
       id:
         description: Model route id
