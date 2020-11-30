@@ -69,10 +69,10 @@ Invoke two models
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --mr ${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
-    ${res}=  Shell  odahuflowctl --verbose model invoke --mr ${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
 
