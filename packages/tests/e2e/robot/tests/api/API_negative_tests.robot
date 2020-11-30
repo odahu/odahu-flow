@@ -1,6 +1,7 @@
 *** Variables ***
 ${LOCAL_CONFIG}         odahuflow/api_status_codes_400-401-403
 ${RES_DIR}              ${CURDIR}/resources
+${invalid_token}        not-valid-token
 
 
 *** Settings ***
@@ -18,26 +19,27 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelPackaging
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
-Suite Setup         Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
-Suite Teardown      Remove file  ${LOCAL_CONFIG}
+Suite Setup         Run Keywords
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
+...                 Login to the api and edge
+# Suite Teardown      Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  negative  test
 Test Timeout        1 minute
 
 *** Keywords ***
-Try Call API
+Try Call API - Bad Request
     [Arguments]  ${format_string}  ${error}  ${command}  @{options}
     ${error}        format string   ${format_string}  ${error}
     Call API and get Error  ${error}  ${command}  @{options}
 
-Try Call API and continue on Failure
-    [Arguments]     ${format_string}  ${error}  ${command}  @{options}
-    ${error}        format string   ${format_string}  ${error}
-    ${result}       Call API and continue on Failure  ${command}  @{options}
-    should contain  ${result}  ${error}
+Try Call API - Unathorized
+    [Arguments]  ${command}  @{options}
+    Call API   ${command}  @{options}  token=${EMPTY}
+    Call API   ${command}  @{options}  token=${invalid_token}
 
 *** Test Cases ***
 Status Code 400 - Bad Request
-    [Template]  Try Call API
+    [Template]  Try Call API - Bad Request
     # connection
 #    ${400 BadRequest Template}  ${FailedConn} ${unknown type}
 #    ...  connection post  ${RES_DIR}/connection/invalid/no_type
@@ -101,60 +103,63 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
 
-#Status Code 401 - Unathorized
-#    [Template]  Template Error Keyword
-#    # config
-#    config get
-#    # connection
-#    connection get
-#    connection get id
-#    connection get id decrypted
-#    connection post
-#    connection put
-#    connection delete
-#    # toolchains
-#    toolchain get
-#    toolchain get id
-#    toolchain post
-#    toolchain put
-#    toolchain delete
-#    # packagers
-#    packager get
-#    packager get id
-#    packager post
-#    packager put
-#    packager delete
-#    # training
-#    training get
-#    training get id
-#    training get log
-#    training post
-#    training put
-#    training delete
-#    # packaging
-#    packaging get
-#    packaging get id
-#    packaging get log
-#    packaging post
-#    packaging put
-#    packaging delete
-#    # deployment
-#    deployment get
-#    deployment get id
-#    deployment post
-#    deployment put
-#    deployment delete
-#    # route
-#    route get
-#    route get id
-#    route post
-#    route put
-#    route delete
-#    # model
-#    model get
-#    model post
-#
-#
+Status Code 401 - Unathorized
+    [Template]  Try Call API - Unathorized
+    [Setup]     Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Run Keywords
+    ...         Login to the api and edge  AND
+    ...         Remove File  ${LOCAL_CONFIG}
+    # config
+    config get
+    # connection
+    connection get
+    connection get id  odahu-flow-examples
+    connection get id decrypted  odahu-flow-examples
+    connection post
+    connection put
+    connection delete
+    # toolchains
+    toolchain get
+    toolchain get id
+    toolchain post
+    toolchain put
+    toolchain delete
+    # packagers
+    packager get
+    packager get id
+    packager post
+    packager put
+    packager delete
+    # training
+    training get
+    training get id
+    training get log
+    training post
+    training put
+    training delete
+    # packaging
+    packaging get
+    packaging get id
+    packaging get log
+    packaging post
+    packaging put
+    packaging delete
+    # deployment
+    deployment get
+    deployment get id
+    deployment post
+    deployment put
+    deployment delete
+    # route
+    route get
+    route get id
+    route post
+    route put
+    route delete
+    # model
+    model get
+    model post
+
 ## also create 403 for different user types (data-scientist, viewer, admin)
 #
 #Status Code 403 - Forbidden
