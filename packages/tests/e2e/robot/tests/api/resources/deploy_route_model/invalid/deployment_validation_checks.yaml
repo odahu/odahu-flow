@@ -1,5 +1,5 @@
 kind: ModelDeployment
-id: deployment-no-required-params
+id: deployment-validation-checks
 spec:
   image: gcr.io/or2-msq-epmd-legn-t1iylu/
   minReplicas: -1

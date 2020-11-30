@@ -1,7 +1,7 @@
 {
   "_comment": "empty image",
   "kind": "ModelDeployment",
-  "id": "deployment-no-required-params",
+  "id": "deployment-empty-image",
   "spec": {
     "image": "",
     "minReplicas": 5,
