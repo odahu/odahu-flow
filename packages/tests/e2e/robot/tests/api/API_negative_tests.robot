@@ -93,13 +93,13 @@ Status Code 400 - Bad Request
     ...  packaging put  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
     # model deployment
     ${400 BadRequest Template}  ${max_smaller_min_replicas}; ${empty_image}
-    ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_no_required_params.json
+    ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.json
     ${400 BadRequest Template}  ${max_smaller_min_replicas}; ${empty_image}
-    ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_no_required_params.json
+    ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.json
     ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
-    ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.yaml
+    ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
     ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
-    ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.yaml
+    ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
 
 #Status Code 401 - Unathorized
 #    [Template]  Template Error Keyword
