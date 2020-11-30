@@ -96,8 +96,7 @@ class ModelRoute(Model):
     def default(self) -> bool:
         """Gets the default of this ModelRoute.
 
-        Default routes cannot be deleted by user. They are managed by system
-        One ModelDeployment has exactly one default Route that gives 100% traffic to the model
+        Default routes cannot be deleted by  They are managed by system One ModelDeployment has exactly one default Route that gives 100% traffic to the model  # noqa: E501
 
         :return: The default of this ModelRoute.
         :rtype: bool
@@ -108,7 +107,7 @@ class ModelRoute(Model):
     def default(self, default: bool):
         """Sets the default of this ModelRoute.
 
-        Default routes cannot be deleted by  They are managed by system One ModelDeployment as exactly one default route that give 100% traffic to the model  # noqa: E501
+        Default routes cannot be deleted by  They are managed by system One ModelDeployment has exactly one default Route that gives 100% traffic to the model  # noqa: E501
 
         :param default: The default of this ModelRoute.
         :type default: bool

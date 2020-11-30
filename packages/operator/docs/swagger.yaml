@@ -187,7 +187,7 @@ definitions:
         description: Kubernetes namespace, where model deployments will be deployed
         type: string
       nodePools:
-        description: Node pools to run deployments on
+        description: Node pools to run deployments
         items:
           $ref: '#/definitions/NodePool'
         type: array
@@ -430,7 +430,7 @@ definitions:
         type: string
       default:
         description: |-
-          Default routes cannot be deleted by user. They are managed by system
+          Default routes cannot be deleted by  They are managed by system
           One ModelDeployment has exactly one default Route that gives 100% traffic to the model
         type: boolean
       id:

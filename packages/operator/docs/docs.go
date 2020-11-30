@@ -2192,7 +2192,7 @@ var doc = `{
                     "type": "string"
                 },
                 "nodePools": {
-                    "description": "Node pools to run deployments on",
+                    "description": "Node pools to run deployments",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/NodePool"
@@ -2522,7 +2522,7 @@ var doc = `{
                     "type": "string"
                 },
                 "default": {
-                    "description": "Default routes cannot be deleted by  They are managed by system\nOne ModelDeployment as exactly one default route that give 100% traffic to the model",
+                    "description": "Default routes cannot be deleted by  They are managed by system\nOne ModelDeployment has exactly one default Route that gives 100% traffic to the model",
                     "type": "boolean"
                 },
                 "id": {
