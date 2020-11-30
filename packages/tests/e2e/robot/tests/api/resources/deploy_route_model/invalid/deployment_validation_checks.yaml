@@ -1,0 +1,8 @@
+kind: ModelDeployment
+id: deployment-no-required-params
+spec:
+  image: gcr.io/or2-msq-epmd-legn-t1iylu/
+  minReplicas: -1
+  maxReplicas: -2
+  livenessProbeInitialDelay: 0
+  readinessProbeInitialDelay: 0
