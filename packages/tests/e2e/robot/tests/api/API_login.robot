@@ -21,29 +21,29 @@ Test Timeout        1 minute
 *** Keywords ***
 Verify login
     [Arguments]             &{keyword arguments}
-    Call API  config get    &{keyword arguments}
+    Call API  config get    base_url=${API_URL}  &{keyword arguments}
 
 Try login
     [Arguments]             ${error}  &{keyword arguments}
-    Call API and get Error  ${error}  config get  &{keyword arguments}
+    Call API and get Error  ${error}  config get  base_url=${API_URL}   &{keyword arguments}
 
 *** Test Cases ***
 Verify login with valid credentials
     [Template]  Verify login
-    base_url=${API_URL}  token=${AUTH_TOKEN}
-    base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    token=${AUTH_TOKEN}
+    client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
 
 Try login with invalid credentials
     [Template]  Try login
-    ${IncorrectToken}  base_url=${API_URL}  token=${EMPTY}
-    ${IncorrectToken}  base_url=${API_URL}  token=${invalid_token}
+    ${IncorrectToken}  token=${EMPTY}
+    ${IncorrectToken}  token=${invalid_token}
 
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
-    ${IncorrectToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
+    ${IncorrectToken}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectToken}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
+    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
+    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
+    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
 
 Try login with empty url and valid token
     ${error}                    format string  ${APIConnectionException}  base url=${EMPTY}
