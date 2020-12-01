@@ -34,8 +34,8 @@ Try Call API - Bad Request
 
 Try Call API - Unathorized
     [Arguments]  ${command}  @{options}
-    Call API   ${command}  @{options}  token=${EMPTY}
-    Call API   ${command}  @{options}  token=${invalid_token}
+    Call API and get Error  ${IncorrectToken}  ${command}  @{options}  token=${EMPTY}
+    Call API and get Error  ${IncorrectToken}  ${command}  @{options}  token=${invalid_token}
 
 *** Test Cases ***
 Status Code 400 - Bad Request
@@ -105,31 +105,32 @@ Status Code 400 - Bad Request
 
 Status Code 401 - Unathorized
     [Template]  Try Call API - Unathorized
-    [Setup]     Remove File  ${LOCAL_CONFIG}
-    [Teardown]  Run Keywords
-    ...         Login to the api and edge  AND
-    ...         Remove File  ${LOCAL_CONFIG}
+    [Setup]     Run keywords
+    ...         Remove File  ${LOCAL_CONFIG}  AND
+    ...         Set Environment Variable  ODAHUFLOW_CONFIG  odahuflow/api_status_code_401  AND
+    ...         Shell  odahuflowctl config set API_URL ${API_URL}
+    [Teardown]  Login to the api and edge
     # config
     config get
     # connection
     connection get
-    connection get id  odahu-flow-examples
-    connection get id decrypted  odahu-flow-examples
-    connection post
-    connection put
-    connection delete
+    connection get id  ${VCS_CONNECTION}
+    connection get id decrypted  ${VCS_CONNECTION}
+    connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
+    connection put  ${RES_DIR}/connection/valid/git_connection_update.yaml
+    connection delete  not-exist
     # toolchains
     toolchain get
-    toolchain get id
-    toolchain post
-    toolchain put
-    toolchain delete
+    toolchain get id  ${TOOLCHAIN_INTEGRATION}
+    toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
+    toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
+    toolchain delete  not-exist
     # packagers
     packager get
-    packager get id
-    packager post
-    packager put
-    packager delete
+    packager get id  ${PI_REST}
+    packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
+    packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
+    packager delete  not-exist
     # training
     training get
     training get id
