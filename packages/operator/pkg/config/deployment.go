@@ -64,7 +64,7 @@ type ModelDeploymentConfig struct {
 	// Default connection ID which will be used if a user doesn't specify it in a model deployment
 	DefaultDockerPullConnName string     `json:"defaultDockerPullConnName"`
 	Edge                      EdgeConfig `json:"edge"`
-	// Node pools to run deployments on
+	// Node pools to run deployments
 	NodePools []NodePool `json:"nodePools"`
 	// Kubernetes tolerations for model deployments
 	Tolerations []corev1.Toleration        `json:"tolerations,omitempty"`

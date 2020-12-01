@@ -40,6 +40,16 @@ func TransformFilter(sqlBuilder sq.SelectBuilder, filter interface{}) sq.SelectB
 		conditions = append(conditions, sq.Eq{field: value})
 	}
 
+	elem = reflect.ValueOf(filter).Elem()
+	for i := 0; i < elem.NumField(); i++ {
+		value, ok := elem.Field(i).Interface().([]bool)
+		if !ok {
+			continue
+		}
+		field := elem.Type().Field(i).Tag.Get(tagKey)
+		conditions = append(conditions, sq.Eq{field: value})
+	}
+
 	if len(conditions) > 0 {
 		newSQLBuilder := sqlBuilder.Where(conditions)
 		return newSQLBuilder

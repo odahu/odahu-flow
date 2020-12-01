@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package deployment_test
+package route_test
 
 import (
 	"context"
@@ -24,9 +24,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/mocks"
-	route_mocks "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/mocks"
-	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/mocks"
+	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -46,7 +45,6 @@ func TestSuiteRun(t *testing.T) {
 type TestSuite struct {
 	suite.Suite
 	mockRepo *mocks.Repository
-	rMockRepo *route_mocks.Repository
 	service service.Service
 	db *sql.DB
 	dbMock sqlmock.Sqlmock
@@ -64,66 +62,63 @@ func (s *TestSuite) SetupTest() {
 		s.T().Fatal("Unable initialize sql mock")
 	}
 	mockRepo := &mocks.Repository{}
-	rMockRepo := &route_mocks.Repository{}
 
 	s.mockRepo = mockRepo
-	s.rMockRepo = rMockRepo
 	s.db = db
 	s.dbMock = dbMock
-	s.service = service.NewService(mockRepo, rMockRepo)
+	s.service = service.NewService(mockRepo)
 }
 
-func (s *TestSuite) TestGetModelDeployment() {
+func (s *TestSuite) TestGetModelRoute() {
 	as := assert.New(s.T())
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("GetModelDeployment", ctx, s.nilTx, enID).Return(en, nil)
+	s.mockRepo.On("GetModelRoute", ctx, s.nilTx, enID).Return(en, nil)
 
-	actEn, err := s.service.GetModelDeployment(ctx, enID)
+	actEn, err := s.service.GetModelRoute(ctx, enID)
 	as.NoError(err)
 	as.Equal(en, actEn)
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestGetModelDeploymentList() {
+func (s *TestSuite) TestGetModelRouteList() {
 	as := assert.New(s.T())
 
-	ens := []apis.ModelDeployment{*newStubMT()}
+	ens := []apis.ModelRoute{*newStubMT()}
 	ctx := context.Background()
 	stubFilter := newStubFilter()
 	s.mockRepo.
-		On("GetModelDeploymentList", ctx, s.nilTx, mock.AnythingOfType("filter.ListOption")).
+		On("GetModelRouteList", ctx, s.nilTx, mock.AnythingOfType("filter.ListOption")).
 		Return(ens, nil)
 
-	actualEns, err := s.service.GetModelDeploymentList(ctx, stubFilter)
+	actualEns, err := s.service.GetModelRouteList(ctx, stubFilter)
 	as.NoError(err)
 	as.Equal(ens, actualEns)
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestGetModelDeploymentList_Error() {
+func (s *TestSuite) TestGetModelRouteList_Error() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
 	stubFilter := newStubFilter()
 	anyError := errors.New("any error")
 	s.mockRepo.
-		On("GetModelDeploymentList", ctx, s.nilTx, mock.AnythingOfType("filter.ListOption")).
+		On("GetModelRouteList", ctx, s.nilTx, mock.AnythingOfType("filter.ListOption")).
 		Return(nil, anyError)
 
-	actualEns, err := s.service.GetModelDeploymentList(ctx, stubFilter)
+	actualEns, err := s.service.GetModelRouteList(ctx, stubFilter)
 	as.Error(err)
 	as.Equal(anyError, err)
 	as.Nil(actualEns)
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestDeleteModelDeployment() {
+func (s *TestSuite) TestDeleteModelRoute() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
-
 
 	// Assume transaction commit
 	s.dbMock.ExpectBegin()
@@ -132,19 +127,11 @@ func (s *TestSuite) TestDeleteModelDeployment() {
 	if err != nil {
 		s.T().Fatal(err)
 	}
-
-	defaultRouteID := "defaultRoute"
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.rMockRepo.On("GetModelRouteList", ctx, mockTx, mock.Anything).Return([]apis.ModelRoute{
-		{
-			ID:           defaultRouteID,
-			Default:      true,
-		},
-	}, nil)
-	s.rMockRepo.On("DeleteModelRoute", ctx, mockTx, defaultRouteID).Return(nil)
-	s.mockRepo.On("DeleteModelDeployment", ctx, mockTx, enID).Return(nil)
+	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
+	s.mockRepo.On("DeleteModelRoute", ctx, mockTx, enID).Return(nil)
 
-	as.NoError(s.service.DeleteModelDeployment(ctx, enID))
+	as.NoError(s.service.DeleteModelRoute(ctx, enID))
 	s.mockRepo.AssertExpectations(s.T())
 }
 
@@ -158,26 +145,48 @@ func (s *TestSuite) TestSetDeletionMark() {
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestUpdateModelDeployment() {
+func (s *TestSuite) TestUpdateModelRoute() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
 	en := newStubMT()
-	s.mockRepo.On("UpdateModelDeployment", ctx, s.nilTx, en).Return(nil)
 
-	as.NoError(s.service.UpdateModelDeployment(ctx, en))
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
+	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
+
+	as.NoError(s.service.UpdateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestUpdateModelDeployment_UpdatedAt() {
+func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
 	as := assert.New(s.T())
 
 	ctx := context.Background()
 	en := newStubMT()
-	s.mockRepo.On("UpdateModelDeployment", ctx, s.nilTx, en).Return(nil)
+
+
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	if err != nil {
+		s.T().Fatal(err)
+	}
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
+	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
 
 	timeBeforeCall := time.Now()
-	as.NoError(s.service.UpdateModelDeployment(ctx, en))
+	as.NoError(s.service.UpdateModelRoute(ctx, en))
 	// UpdatedAt field must be updated on now during the invocation
 	as.True(timeBeforeCall.Before(en.UpdatedAt))
 	// UpdatedAt field must be not updated on now during the invocation
@@ -185,7 +194,7 @@ func (s *TestSuite) TestUpdateModelDeployment_UpdatedAt() {
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestUpdateModelDeploymentStatus() {
+func (s *TestSuite) TestUpdateModelRouteStatus() {
 	as := assert.New(s.T())
 
 	// Assume transaction commit
@@ -199,24 +208,24 @@ func (s *TestSuite) TestUpdateModelDeploymentStatus() {
 		s.T().Fatal(err)
 	}
 	repoEn := newStubMT()
-	s.mockRepo.On("GetModelDeployment", ctx, mockTx, enID).Return(repoEn, nil)
+	s.mockRepo.On("GetModelRoute", ctx, mockTx, enID).Return(repoEn, nil)
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
-	newStatus.Replicas = 3
+	newStatus.EdgeURL = "old"
 	s.mockRepo.
-		On("UpdateModelDeploymentStatus", ctx, mockTx, enID, newStatus).
+		On("UpdateModelRouteStatus", ctx, mockTx, enID, newStatus).
 		Return(nil)
 
 	// Call service with the same spec snapshot as in repository and new status
 	specSnapshot := repoEn.Spec
-	as.NoError(s.service.UpdateModelDeploymentStatus(ctx, enID, newStatus, specSnapshot))
+	as.NoError(s.service.UpdateModelRouteStatus(ctx, enID, newStatus, specSnapshot))
 	as.NoError(s.dbMock.ExpectationsWereMet())
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestUpdateModelDeploymentStatusSpecTouched() {
+func (s *TestSuite) TestUpdateModelRouteStatusSpecTouched() {
 	as := assert.New(s.T())
 
 	// Assume transaction rollback
@@ -230,18 +239,18 @@ func (s *TestSuite) TestUpdateModelDeploymentStatusSpecTouched() {
 		s.T().Fatal(err)
 	}
 	repoEn := newStubMT()
-	s.mockRepo.On("GetModelDeployment", ctx, mockTx, enID).Return(repoEn, nil)
+	s.mockRepo.On("GetModelRoute", ctx, mockTx, enID).Return(repoEn, nil)
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 
 
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
-	newStatus.Replicas = 3
+	newStatus.EdgeURL = "old"
 
 	// Call service with the same spec snapshot as in repository and new status
 	specSnapshot := repoEn.Spec
-	specSnapshot.Image = "image in spec was changed"
-	err = s.service.UpdateModelDeploymentStatus(ctx, enID, newStatus, specSnapshot)
+	specSnapshot.URLPrefix = "prefix was changed"
+	err = s.service.UpdateModelRouteStatus(ctx, enID, newStatus, specSnapshot)
 	as.Error(err)
 
 	// Error about spec was touched must be raised
@@ -251,85 +260,45 @@ func (s *TestSuite) TestUpdateModelDeploymentStatusSpecTouched() {
 	as.NoError(s.dbMock.ExpectationsWereMet())
 	s.mockRepo.AssertExpectations(s.T())
 	// Update in repo should not be called
-	s.mockRepo.AssertNotCalled(s.T(), "UpdateModelDeploymentStatus")
+	s.mockRepo.AssertNotCalled(s.T(), "UpdateModelRouteStatus")
 }
 
-func (s *TestSuite) TestCreateModelDeployment() {
+func (s *TestSuite) TestCreateModelRoute() {
 	as := assert.New(s.T())
 
 	en := newStubMT()
 	ctx := context.Background()
+	s.mockRepo.On("CreateModelRoute", ctx, s.nilTx, en).Return(nil)
 
-
-	// Assume transaction commit
-	s.dbMock.ExpectBegin()
-	s.dbMock.ExpectCommit()
-	mockTx, err := s.db.Begin()
-	if err != nil {
-		s.T().Fatal(err)
-	}
-	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.mockRepo.On("CreateModelDeployment", ctx, mockTx, en).Return(nil)
-	s.rMockRepo.On("DefaultExists", ctx, enID, mockTx).Return(false, nil)
-	s.rMockRepo.On("CreateModelRoute", ctx, mockTx, mock.Anything).
-		Return(nil)
-
-	as.NoError(s.service.CreateModelDeployment(ctx, en))
+	as.NoError(s.service.CreateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestCreateModelDeployment_CreatedAt() {
+func (s *TestSuite) TestCreateModelRoute_CreatedAt() {
 	as := assert.New(s.T())
 
 	en := newStubMT()
 	ctx := context.Background()
-
-
-	// Assume transaction commit
-	s.dbMock.ExpectBegin()
-	s.dbMock.ExpectCommit()
-	mockTx, err := s.db.Begin()
-	if err != nil {
-		s.T().Fatal(err)
-	}
-	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.mockRepo.On("CreateModelDeployment", ctx, mockTx, en).Return(nil)
-	s.rMockRepo.On("DefaultExists", ctx, enID, mockTx).Return(false, nil)
-	s.rMockRepo.On("CreateModelRoute", ctx, mockTx, mock.Anything).
-		Return(nil)
+	s.mockRepo.On("CreateModelRoute", ctx, s.nilTx, en).Return(nil)
 
 	timeBeforeCall := time.Now()
-	as.NoError(s.service.CreateModelDeployment(ctx, en))
+	as.NoError(s.service.CreateModelRoute(ctx, en))
 	// CreatedAt, UpdatedAt fields must be updated on now during the invocation
 	as.True(timeBeforeCall.Before(en.CreatedAt))
 	as.True(timeBeforeCall.Before(en.UpdatedAt))
 	s.mockRepo.AssertExpectations(s.T())
 }
 
-func (s *TestSuite) TestCreateModelDeployment_Error() {
+func (s *TestSuite) TestCreateModelRoute_Error() {
 	as := assert.New(s.T())
 
 	en := newStubMT()
-
 	ctx := context.Background()
-	anyError  := errors.New("any error")
+	anyError := errors.New("any error")
+	s.mockRepo.On("CreateModelRoute", ctx, s.nilTx, en).Return(anyError)
 
-
-	// Assume transaction commit
-	s.dbMock.ExpectBegin()
-	s.dbMock.ExpectRollback()
-	mockTx, err := s.db.Begin()
-	if err != nil {
-		s.T().Fatal(err)
-	}
-	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.mockRepo.On("CreateModelDeployment", ctx, mockTx, en).Return(anyError)
-
-	as.Error(s.service.CreateModelDeployment(ctx, en))
+	as.Error(s.service.CreateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
-	s.rMockRepo.AssertNotCalled(s.T(), "DefaultExists")
-	s.rMockRepo.AssertNotCalled(s.T(), "CreateModelRoute")
-	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 // Helpers
@@ -339,11 +308,11 @@ func newStubFilter() filter.ListOption {
 	}
 }
 
-func newStubMT() *apis.ModelDeployment {
-	return &apis.ModelDeployment{
+func newStubMT() *apis.ModelRoute {
+	return &apis.ModelRoute{
 		ID:           enID,
 		DeletionMark: false,
-		Spec:         v1alpha1.ModelDeploymentSpec{},
-		Status:       v1alpha1.ModelDeploymentStatus{},
+		Spec:         v1alpha1.ModelRouteSpec{},
+		Status:       v1alpha1.ModelRouteStatus{},
 	}
 }

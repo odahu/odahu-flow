@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -44,7 +44,7 @@ var (
 )
 
 type ModelRouteController struct {
-	deployKubeClient deploymentclient.Client
+	service 		 service.Service
 	validator        *MrValidator
 }
 
@@ -62,7 +62,7 @@ type ModelRouteController struct {
 func (mrc *ModelRouteController) getMR(c *gin.Context) {
 	mrID := c.Param(IDMrURLParam)
 
-	mr, err := mrc.deployKubeClient.GetModelRoute(mrID)
+	mr, err := mrc.service.GetModelRoute(c.Request.Context(), mrID)
 	if err != nil {
 		logMR.Error(err, fmt.Sprintf("Retrieving %s model route", mrID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -92,7 +92,8 @@ func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 		return
 	}
 
-	mrList, err := mrc.deployKubeClient.GetModelRouteList(
+	mrList, err := mrc.service.GetModelRouteList(
+		c.Request.Context(),
 		filter.Size(size),
 		filter.Page(page),
 	)
@@ -132,7 +133,7 @@ func (mrc *ModelRouteController) createMR(c *gin.Context) {
 		return
 	}
 
-	if err := mrc.deployKubeClient.CreateModelRoute(&mr); err != nil {
+	if err := mrc.service.CreateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Creation of the model route: %+v", mr))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -169,7 +170,7 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 		return
 	}
 
-	if err := mrc.deployKubeClient.UpdateModelRoute(&mr); err != nil {
+	if err := mrc.service.UpdateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Update of the model route: %+v", mr))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -193,7 +194,7 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 	mrID := c.Param(IDMrURLParam)
 
-	if err := mrc.deployKubeClient.DeleteModelRoute(mrID); err != nil {
+	if err := mrc.service.DeleteModelRoute(c.Request.Context(), mrID); err != nil {
 		logMR.Error(err, fmt.Sprintf("Deletion of %s model route is failed", mrID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 

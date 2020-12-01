@@ -1,5 +1,5 @@
 //
-//    Copyright 2019 EPAM Systems
+//    Copyright 2020 EPAM Systems
 //
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 //    limitations under the License.
 //
 
-package deployment
+package route
 
 import (
 	"context"
@@ -24,22 +24,22 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 )
 
-const (
-	TagKey = "name"
-)
-
 type Repository interface {
-	GetModelDeployment(ctx context.Context, tx *sql.Tx, id string) (*deployment.ModelDeployment, error)
-	GetModelDeploymentList(
-		ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]deployment.ModelDeployment, error)
-	DeleteModelDeployment(ctx context.Context, tx *sql.Tx, id string) error
-	UpdateModelDeployment(ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error
-	UpdateModelDeploymentStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelDeploymentStatus) error
-	CreateModelDeployment(ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error
+	GetModelRoute(ctx context.Context, tx *sql.Tx, name string) (*deployment.ModelRoute, error)
+	GetModelRouteList(ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]deployment.ModelRoute, error)
+	DeleteModelRoute(ctx context.Context, tx *sql.Tx, name string) error
+	UpdateModelRoute(ctx context.Context, tx *sql.Tx, md *deployment.ModelRoute) error
+	CreateModelRoute(ctx context.Context, tx *sql.Tx, r *deployment.ModelRoute) error
+	UpdateModelRouteStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelRouteStatus) error
 	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
+
+	DefaultExists(ctx context.Context, mdID string, qrr *sql.Tx) (bool, error)
+	IsDefault(ctx context.Context, id string, tx *sql.Tx) (bool, error)
 }
 
-type MdFilter struct {
-	RoleName []string `name:"roleName" postgres:"spec->>'roleName'"`
+
+type Filter struct {
+	Default	     []bool `name:"is_default" postgres:"is_default"`
+	MdID	     []string `name:"mdId" postgres:"spec->'modelDeployments'->0->>'mdName'"`
 }

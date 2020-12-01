@@ -32,12 +32,13 @@ import (
 var logMD = logf.Log.WithName("md-controller")
 
 const (
-	GetModelDeploymentURL    = "/model/deployment/:id"
-	GetAllModelDeploymentURL = "/model/deployment"
-	CreateModelDeploymentURL = "/model/deployment"
-	UpdateModelDeploymentURL = "/model/deployment"
-	DeleteModelDeploymentURL = "/model/deployment/:id"
-	IDMdURLParam             = "id"
+	GetModelDeploymentURL             = "/model/deployment/:id"
+	GetModelDeploymentDefaultRouteURL = "/model/deployment/:id/default-route"
+	GetAllModelDeploymentURL          = "/model/deployment"
+	CreateModelDeploymentURL          = "/model/deployment"
+	UpdateModelDeploymentURL          = "/model/deployment"
+	DeleteModelDeploymentURL          = "/model/deployment/:id"
+	IDMdURLParam                      = "id"
 )
 
 var (
@@ -214,4 +215,29 @@ func (mdc *ModelDeploymentController) deleteMD(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model deployment %s was deleted", mdID)})
+}
+
+// @Summary Get a Model deployment default route
+// @Description Get a Model deployment default route
+// @Tags Deployment
+// @Name id
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Model deployment id"
+// @Success 200 {object} deployment.ModelRoute
+// @Failure 404 {object} routes.HTTPResult
+// @Failure 400 {object} routes.HTTPResult
+// @Router /api/v1/model/deployment/{id}/default-route [get]
+func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
+	mdID := c.Param(IDMdURLParam)
+
+	mr, err := mdc.mdService.GetDefaultModelRoute(c.Request.Context(),  mdID)
+	if err != nil {
+		logMD.Error(err, fmt.Sprintf("Retrieving %s model deployment default route", mdID))
+		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, mr)
 }

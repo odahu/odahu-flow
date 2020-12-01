@@ -20,12 +20,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	md_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup,
-	mdService md_service.Service, deployKubeClient md_kube_client.Client,
+func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, mrService mr_service.Service,
 	deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
 
 	mdController := ModelDeploymentController{
@@ -39,9 +38,10 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup,
 	routeGroup.POST(CreateModelDeploymentURL, mdController.createMD)
 	routeGroup.PUT(UpdateModelDeploymentURL, mdController.updateMD)
 	routeGroup.DELETE(DeleteModelDeploymentURL, mdController.deleteMD)
+	routeGroup.GET(GetModelDeploymentDefaultRouteURL, mdController.getDefaultRoute)
 
 	mrController := ModelRouteController{
-		deployKubeClient: deployKubeClient,
+		service: mrService,
 		validator:        NewMrValidator(mdService),
 	}
 	routeGroup.GET(GetModelRouteURL, mrController.getMR)
