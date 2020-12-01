@@ -17,10 +17,14 @@ ${TEST_VCS}                           odahuflow
 ${ODAHUFLOW_ENTITIES_DIR}             ${CURDIR}/entities
 ${NODE_TAINT_KEY}                     dedicated
 ${NODE_TAINT_VALUE}                   jenkins-slave
+${VCS_CONNECTION}                     odahu-flow-examples
 ${MP_SIMPLE_MODEL}                    simple-model
 ${MP_FAIL_MODEL}                      fail
 ${MP_COUNTER_MODEL}                   counter
 ${MP_FEEDBACK_MODEL}                  feedback
+${TOOLCHAIN_INTEGRATION}              mlflow
+${PI_REST}                            docker-rest
+${PI_CLI}                             docker-cli
 ${CONN_SECRET_MASK}                   *****
 
 # ---------------------------------  Error Templates  ---------------------------------
