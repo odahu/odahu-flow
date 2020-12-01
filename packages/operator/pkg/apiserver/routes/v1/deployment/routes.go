@@ -25,7 +25,7 @@ import (
 )
 
 func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, mrService mr_service.Service,
-	deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
+	mrEventsReader RoutesEventReader, deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
 
 	mdController := ModelDeploymentController{
 		mdService:   mdService,
@@ -43,10 +43,12 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, 
 	mrController := ModelRouteController{
 		service: mrService,
 		validator:        NewMrValidator(mdService),
+		eventsReader: mrEventsReader,
 	}
 	routeGroup.GET(GetModelRouteURL, mrController.getMR)
 	routeGroup.GET(GetAllModelRouteURL, mrController.getAllMRs)
 	routeGroup.POST(CreateModelRouteURL, mrController.createMR)
 	routeGroup.PUT(UpdateModelRouteURL, mrController.updateMR)
 	routeGroup.DELETE(DeleteModelRouteURL, mrController.deleteMR)
+	routeGroup.GET(EventsModelRouteURL, mrController.getRouteEvents)
 }

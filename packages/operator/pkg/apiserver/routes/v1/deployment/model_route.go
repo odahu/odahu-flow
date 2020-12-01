@@ -23,6 +23,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	route_outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox/model_route"
+	"strconv"
 
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -36,6 +38,7 @@ const (
 	CreateModelRouteURL = "/model/route"
 	UpdateModelRouteURL = "/model/route"
 	DeleteModelRouteURL = "/model/route/:id"
+	EventsModelRouteURL = "/model/route-events"
 	IDMrURLParam        = "id"
 )
 
@@ -43,9 +46,14 @@ var (
 	emptyCache = map[string]int{}
 )
 
+type RoutesEventReader interface {
+	Get(cursor int) ([]route_outbox.RouteEvent, int, error)
+}
+
 type ModelRouteController struct {
-	service 		 service.Service
-	validator        *MrValidator
+	service      service.Service
+	validator    *MrValidator
+	eventsReader RoutesEventReader
 }
 
 // @Summary Get a Model route
@@ -202,4 +210,50 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model route %s was deleted", mrID)})
+}
+
+type RouteEventsResponse struct {
+	Events []route_outbox.RouteEvent `json:"events"`
+	Cursor int                       `json:"cursor"`
+}
+// @Summary Get Last Changes for ModelRoute entities
+// @Description Get Last Changes for ModelRoute entity
+// @Tags Route
+// @Accept  json
+// @Produce  json
+// @Param cursor query int false "Cursor can be passed to get only new changes"
+// @Success 200 {object} RouteEventsResponse
+// @Failure 400 {object} routes.HTTPResult
+// @Router /api/v1/model/route-events [get]
+func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
+	var cursor int
+	var err error
+	cursorParam := c.Query("cursor")
+	if cursorParam != "" {
+		cursor, err = strconv.Atoi(cursorParam)
+		numErr, isNumErr := err.(*strconv.NumError)
+		if err != nil && isNumErr {
+			text := "Incorrect \"cursor\" query parameter value: %v. Integer expected. Details: %v"
+			c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{
+				Message: fmt.Sprintf(text, cursorParam, numErr),
+			})
+			return
+		} else if err != nil && !isNumErr {
+			c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+			return
+		}
+	}
+
+	events, newCursor, err := mrc.eventsReader.Get(cursor)
+	if err != nil {
+		logMR.Error(err, "Retrieving list of model route events")
+		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+	}
+
+	response := RouteEventsResponse{
+		Events: events,
+		Cursor: newCursor,
+	}
+	c.JSON(http.StatusOK, response)
+
 }

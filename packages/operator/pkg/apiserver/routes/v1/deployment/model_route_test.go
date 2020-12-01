@@ -26,9 +26,12 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	dep_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	route_outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox/model_route"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
@@ -38,6 +41,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -54,6 +58,7 @@ type ModelRouteSuite struct {
 	mdService    md_service.Service
 	mrService    mr_service.Service
 	mrRepo 	     route_repository_db.RouteRepo
+	mrEventsReader *mocks.RoutesEventReader
 }
 
 func (s *ModelRouteSuite) SetupSuite() {
@@ -61,6 +66,7 @@ func (s *ModelRouteSuite) SetupSuite() {
 	s.mrRepo = route_repository_db.RouteRepo{DB: db}
 	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db}, route_repository_db.RouteRepo{DB: db})
 	s.mrService = mr_service.NewService(s.mrRepo)
+	s.mrEventsReader = &mocks.RoutesEventReader{}
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
@@ -114,7 +120,8 @@ func (s *ModelRouteSuite) SetupTest() {
 func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, s.mrEventsReader,
+		deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelRouteSuite) TearDownTest() {
@@ -657,4 +664,93 @@ func (s *ModelRouteSuite) TestDisabledAPIDeleteMR() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
+}
+
+func (s *ModelRouteSuite) TestGetRouteEventsIncorrectCursor() {
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelRouteURL + "?cursor=not-number",
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(400))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.g.Expect(result.Message).Should(ContainSubstring("Incorrect \"cursor\" query parameter"))
+}
+
+func (s *ModelRouteSuite) TestGetRouteEvents() {
+
+	events := []route_outbox.RouteEvent{
+		{
+			Payload:   deployment.ModelRoute{ID: "route-1"},
+			EventType: outbox.ModelRouteCreatedEventType,
+			Datetime:  time.Time{},
+		},
+		{
+			PayloadID: "route-2",
+			EventType: outbox.ModelRouteDeletedEventType,
+			Datetime:  time.Time{},
+		},
+	}
+
+	s.mrEventsReader.On("Get", 0).Return(events, 5, nil)
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelRouteURL,
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(200))
+
+	var result dep_route.RouteEventsResponse
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(result.Cursor).Should(Equal(5))
+	s.g.Expect(result.Events).Should(Equal(events))
+	s.g.Expect(err).NotTo(HaveOccurred())
+}
+
+func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
+
+	events := []route_outbox.RouteEvent{
+		{
+			Payload:   deployment.ModelRoute{ID: "route-1"},
+			EventType: outbox.ModelRouteCreatedEventType,
+			Datetime:  time.Time{},
+		},
+		{
+			PayloadID: "route-2",
+			EventType: outbox.ModelRouteDeletedEventType,
+			Datetime:  time.Time{},
+		},
+	}
+
+	s.mrEventsReader.On("Get", 6).Return(events, 9, nil)
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelRouteURL + "?cursor=6",
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(200))
+
+	var result dep_route.RouteEventsResponse
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(result.Cursor).Should(Equal(9))
+	s.g.Expect(result.Events).Should(Equal(events))
+	s.g.Expect(err).NotTo(HaveOccurred())
 }

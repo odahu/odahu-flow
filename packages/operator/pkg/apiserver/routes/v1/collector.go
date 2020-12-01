@@ -99,7 +99,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 
-	deployment.ConfigureRoutes(routeGroup, depService, mrService, cfg.Deployment, cfg.Common.ResourceGPUName)
+	deployment.ConfigureRoutes(routeGroup, depService, mrService, nil, cfg.Deployment, cfg.Common.ResourceGPUName)
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))
 	packaging.ConfigureRoutes(
 		packagingRouteGroup, packKubeClient, packService,
