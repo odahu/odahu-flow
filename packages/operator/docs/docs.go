@@ -1070,6 +1070,43 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/model/route-events": {
+            "get": {
+                "description": "Get Last Changes for ModelRoute entity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Get Last Changes for ModelRoute entities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cursor can be passed to get only new changes",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RouteEventsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/model/route/{id}": {
             "get": {
                 "description": "Get a Model route by id",
@@ -2545,11 +2582,47 @@ var doc = `{
                 }
             }
         },
+        "RouteEventsResponse": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "integer"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model_route.RouteEvent"
+                    }
+                }
+            }
+        },
         "feedback.ModelFeedbackRequest": {
             "type": "object"
         },
         "feedback.ModelFeedbackResponse": {
             "type": "object"
+        },
+        "model_route.RouteEvent": {
+            "type": "object",
+            "properties": {
+                "datetime": {
+                    "description": "When event is raised",
+                    "type": "string"
+                },
+                "entityID": {
+                    "description": "EntityID contains ID of ModelRoute for ModelRouteDeleted event type\nDoes not make sense in case of ModelRouteUpdate and ModelRouteCreate events",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "EntityID contains ModelRoute for ModelRouteUpdate and ModelRouteCreate events\nDoes not make sense in case of ModelRouteDelete event",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelRoute"
+                },
+                "type": {
+                    "description": "Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted",
+                    "type": "string"
+                }
+            }
         },
         "JsonSchema": {
             "type": "object",

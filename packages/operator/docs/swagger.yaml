@@ -448,9 +448,38 @@ definitions:
         description: UpdatedAt
         type: string
     type: object
+  RouteEventsResponse:
+    properties:
+      cursor:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/model_route.RouteEvent'
+        type: array
+    type: object
   feedback.ModelFeedbackRequest:
     type: object
   feedback.ModelFeedbackResponse:
+    type: object
+  model_route.RouteEvent:
+    properties:
+      datetime:
+        description: When event is raised
+        type: string
+      entityID:
+        description: |-
+          EntityID contains ID of ModelRoute for ModelRouteDeleted event type
+          Does not make sense in case of ModelRouteUpdate and ModelRouteCreate events
+        type: string
+      payload:
+        $ref: '#/definitions/ModelRoute'
+        description: |-
+          EntityID contains ModelRoute for ModelRouteUpdate and ModelRouteCreate events
+          Does not make sense in case of ModelRouteDelete event
+        type: object
+      type:
+        description: 'Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted'
+        type: string
     type: object
   JsonSchema:
     properties:
@@ -1810,6 +1839,30 @@ paths:
           schema:
             $ref: '#/definitions/HTTPResult'
       summary: Update a Model route
+      tags:
+      - Route
+  /api/v1/model/route-events:
+    get:
+      consumes:
+      - application/json
+      description: Get Last Changes for ModelRoute entity
+      parameters:
+      - description: Cursor can be passed to get only new changes
+        in: query
+        name: cursor
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RouteEventsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get Last Changes for ModelRoute entities
       tags:
       - Route
   /api/v1/model/route/{id}:

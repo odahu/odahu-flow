@@ -26,7 +26,13 @@ var txOptions = &sql.TxOptions{
 	ReadOnly:  false,
 }
 
-
+const (
+	EntityIDCol = "entity_id"
+	EventTypeCol = "event_type"
+	EventGroupCol = "event_group"
+	DatetimeCol = "datetime"
+	PayloadCol = "payload"
+)
 type Event struct {
 	EntityID string
 	EventType string
@@ -39,6 +45,9 @@ type EventRepository struct {
 	DB *sql.DB
 }
 
+const (
+	IDCol = "id"
+)
 type EventRecord struct {
 	id int
 	event Event
@@ -46,7 +55,7 @@ type EventRecord struct {
 
 func (repo EventRepository) RaiseEvent(ctx context.Context, tx *sql.Tx, event Event) (err error) {
 
-	if tx != nil {
+	if tx == nil {
 		tx, err = repo.DB.BeginTx(ctx, txOptions)
 		if err != nil {
 			return
@@ -57,7 +66,7 @@ func (repo EventRepository) RaiseEvent(ctx context.Context, tx *sql.Tx, event Ev
 	// Only last event with EntityID
 	stmt, args, err := sq.
 		Delete(Table).
-		Where(sq.Eq{"id": event.EntityID, "event_group": event.EventGroup}).
+		Where(sq.Eq{EntityIDCol: event.EntityID, EventGroupCol: event.EventGroup}).
 		PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
 		return
@@ -74,7 +83,7 @@ func (repo EventRepository) RaiseEvent(ctx context.Context, tx *sql.Tx, event Ev
 
 	stmt, args, err = sq.
 		Insert(Table).
-		Columns("entity_id", "event_type", "event_group", "datetime", "payload").
+		Columns(EntityIDCol, EventTypeCol, EventGroupCol, DatetimeCol, PayloadCol).
 		Values(event.EntityID, event.EventType, event.EventGroup, event.Datetime, event.Payload).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

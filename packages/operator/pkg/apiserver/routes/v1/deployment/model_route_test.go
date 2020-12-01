@@ -694,7 +694,7 @@ func (s *ModelRouteSuite) TestGetRouteEvents() {
 			Datetime:  time.Time{},
 		},
 		{
-			PayloadID: "route-2",
+			EntityID:  "route-2",
 			EventType: outbox.ModelRouteDeletedEventType,
 			Datetime:  time.Time{},
 		},
@@ -729,7 +729,7 @@ func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
 			Datetime:  time.Time{},
 		},
 		{
-			PayloadID: "route-2",
+			EntityID:  "route-2",
 			EventType: outbox.ModelRouteDeletedEventType,
 			Datetime:  time.Time{},
 		},

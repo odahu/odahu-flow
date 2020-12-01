@@ -11,10 +11,10 @@ type RouteEventReader struct {
 }
 
 type RouteEvent struct {
-	// PayloadID contains ID of ModelRoute for ModelRouteDeleted event type
+	// EntityID contains ID of ModelRoute for ModelRouteDeleted event type
 	// Does not make sense in case of ModelRouteUpdate and ModelRouteCreate events
-	PayloadID string				`json:"payloadID"`
-	// PayloadID contains ModelRoute for ModelRouteUpdate and ModelRouteCreate events
+	EntityID string `json:"entityID"`
+	// EntityID contains ModelRoute for ModelRouteUpdate and ModelRouteCreate events
 	// Does not make sense in case of ModelRouteDelete event
 	Payload deployment.ModelRoute  `json:"payload"`
 	// Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted
