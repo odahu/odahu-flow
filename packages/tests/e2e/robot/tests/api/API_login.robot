@@ -35,15 +35,15 @@ Verify login with valid credentials
 
 Try login with invalid credentials
     [Template]  Try login
-    ${IncorrectToken}  token=${EMPTY}
-    ${IncorrectToken}  token=${invalid_token}
+    ${IncorrectRefreshToken}  token=${EMPTY}
+    ${IncorrectRefreshToken}  token=${invalid_token}
 
-    ${IncorrectToken}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectToken}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
-    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
-    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
-    ${IncorrectToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
+    ${IncorrectRefreshToken}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
+    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
 
 Try login with empty url and valid token
     ${error}                    format string  ${APIConnectionException}  base url=${EMPTY}
