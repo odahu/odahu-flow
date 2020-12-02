@@ -25,8 +25,6 @@ import (
 	outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	"strconv"
-
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -229,20 +227,9 @@ type RouteEventsResponse struct {
 func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 	var cursor int
 	var err error
-	cursorParam := c.Query("cursor")
-	if cursorParam != "" {
-		cursor, err = strconv.Atoi(cursorParam)
-		numErr, isNumErr := err.(*strconv.NumError)
-		if err != nil && isNumErr {
-			text := "Incorrect \"cursor\" query parameter value: %v. Integer expected. Details: %v"
-			c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{
-				Message: fmt.Sprintf(text, cursorParam, numErr),
-			})
-			return
-		} else if err != nil && !isNumErr {
-			c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
-			return
-		}
+
+	if !ValidateAndParseCursor(c, &cursor) {
+		return
 	}
 
 	events, newCursor, err := mrc.eventsReader.Get(c.Request.Context(), cursor)

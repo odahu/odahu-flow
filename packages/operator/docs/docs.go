@@ -498,6 +498,43 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/model/deployment-events": {
+            "get": {
+                "description": "Get Last Changes for ModelDeployment entity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Get Last Changes for ModelDeployment entities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cursor can be passed to get only new changes",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelDeploymentEventsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/model/deployment/{id}": {
             "get": {
                 "description": "Get a Model deployment by id",
@@ -2551,6 +2588,20 @@ var doc = `{
                 }
             }
         },
+        "ModelDeploymentEventsResponse": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "integer"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/outbox.DeploymentEvent"
+                    }
+                }
+            }
+        },
         "ModelRoute": {
             "type": "object",
             "properties": {
@@ -2591,7 +2642,7 @@ var doc = `{
                 "events": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model_route.RouteEvent"
+                        "$ref": "#/definitions/outbox.RouteEvent"
                     }
                 }
             }
@@ -2602,7 +2653,29 @@ var doc = `{
         "feedback.ModelFeedbackResponse": {
             "type": "object"
         },
-        "model_route.RouteEvent": {
+        "outbox.DeploymentEvent": {
+            "type": "object",
+            "properties": {
+                "datetime": {
+                    "description": "When event is raised",
+                    "type": "string"
+                },
+                "entityID": {
+                    "description": "EntityID contains ID of ModelDeployment for ModelDeploymentDeleted event type\nDoes not make sense in case of ModelDeploymentUpdate and ModelDeploymentCreate events",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "EntityID contains ModelDeployment for ModelDeploymentUpdate and ModelDeploymentCreate events\nDoes not make sense in case of ModelDeploymentDelete event",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeployment"
+                },
+                "type": {
+                    "description": "Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted",
+                    "type": "string"
+                }
+            }
+        },
+        "outbox.RouteEvent": {
             "type": "object",
             "properties": {
                 "datetime": {

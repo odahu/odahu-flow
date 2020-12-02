@@ -57,10 +57,6 @@ type EventPublisher struct {
 const (
 	IDCol = "id"
 )
-type EventRecord struct {
-	id int64
-	event Event
-}
 
 func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event Event) (err error) {
 
@@ -111,6 +107,6 @@ func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event E
 		return
 	}
 
-	return
+	return err
 }
 

@@ -120,7 +120,7 @@ func (s *ModelRouteSuite) SetupTest() {
 func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, s.mrEventsGetter,
+	dep_route.ConfigureRoutes(v1Group, s.mdService, nil, s.mrService, s.mrEventsGetter,
 		deploymentConfig, config.NvidiaResourceName)
 }
 

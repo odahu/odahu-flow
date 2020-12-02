@@ -104,7 +104,6 @@ func TestRaiseEvent(t *testing.T) {
 
 	rows, err := db.Query(stmt)
 	assert.NoError(t, err)
-	defer func() {_ = rows.Close()}()
 
 	assert.True(t, rows.Next())
 	e := outbox.Event{}
@@ -121,6 +120,9 @@ func TestRaiseEvent(t *testing.T) {
 	assert.Equal(t, event1Delete, e)
 
 	assert.False(t, rows.Next())
+
+	_ = rows.Close()
+	_ = rows.Err()
 
 	stmt, _, _ = sq.Delete(outbox.Table).ToSql()
 	_, _ = db.Exec(stmt)

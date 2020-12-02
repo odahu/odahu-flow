@@ -45,6 +45,7 @@ import (
 	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
 func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql.DB, cfg config.Config) (err error) {
@@ -99,7 +100,11 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 
-	deployment.ConfigureRoutes(routeGroup, depService, mrService, nil, cfg.Deployment, cfg.Common.ResourceGPUName)
+	mdEventGetter := outbox.DeploymentEventGetter{DB: db}
+	mrEventGetter := outbox.RouteEventGetter{DB: db}
+
+	deployment.ConfigureRoutes(routeGroup, depService, mdEventGetter, mrService, mrEventGetter,
+		cfg.Deployment, cfg.Common.ResourceGPUName)
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))
 	packaging.ConfigureRoutes(
 		packagingRouteGroup, packKubeClient, packService,

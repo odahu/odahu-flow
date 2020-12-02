@@ -24,12 +24,15 @@ import (
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, mrService mr_service.Service,
+func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service,
+	mdEventsReader ModelDeploymentEventGetter,
+	mrService mr_service.Service,
 	mrEventsReader RoutesEventGetter, deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
 
 	mdController := ModelDeploymentController{
 		mdService:   mdService,
 		mdValidator: NewModelDeploymentValidator(deploymentConfig, gpuResourceName),
+		eventsReader: mdEventsReader,
 	}
 	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(deploymentConfig.Enabled))
 
@@ -39,6 +42,7 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, 
 	routeGroup.PUT(UpdateModelDeploymentURL, mdController.updateMD)
 	routeGroup.DELETE(DeleteModelDeploymentURL, mdController.deleteMD)
 	routeGroup.GET(GetModelDeploymentDefaultRouteURL, mdController.getDefaultRoute)
+	routeGroup.GET(EventsModelDeploymentURL, mdController.getDeploymentEvents)
 
 	mrController := ModelRouteController{
 		service: mrService,

@@ -46,17 +46,12 @@ func (rer RouteEventGetter) Get(ctx context.Context, cursor int) (routes []Route
 	if err != nil {
 		return
 	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Error(err, "Unable to close rows (release connection)")
-		}
-	}()
 
 	for rows.Next() {
 		var e RouteEvent
 		if err = rows.Scan(&newCursor, &e.EntityID, &e.EventType, &e.Payload, &e.Datetime); err != nil {
 			log.Error(err, "Unable to scan route")
-			return
+			return routes, newCursor, err
 		}
 		if e.EventType != ModelRouteCreatedEventType && e.EventType != ModelRouteUpdatedEventType &&
 			e.EventType != ModelRouteDeletedEventType {
@@ -66,7 +61,12 @@ func (rer RouteEventGetter) Get(ctx context.Context, cursor int) (routes []Route
 
 		routes = append(routes, e)
 	}
-	return
+
+	if err = rows.Err(); err != nil {
+		err = fmt.Errorf("error during rows iteration: %v", err)
+	}
+
+	return routes, newCursor, err
 }
 
 type DeploymentEventGetter struct {
@@ -86,7 +86,9 @@ type DeploymentEvent struct {
 	Datetime time.Time  `json:"datetime"`
 }
 
-func (rer DeploymentEventGetter) Get(ctx context.Context, cursor int) (routes []DeploymentEvent, newCursor int, err error)  {
+func (rer DeploymentEventGetter) Get(ctx context.Context, cursor int) (routes []DeploymentEvent,
+	newCursor int, err error)  {
+
 	stmt, args, err := sq.
 		Select(IDCol, EntityIDCol, EventTypeCol, PayloadCol, DatetimeCol).
 		From(Table).
@@ -106,11 +108,6 @@ func (rer DeploymentEventGetter) Get(ctx context.Context, cursor int) (routes []
 	if err != nil {
 		return
 	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Error(err, "Unable to close rows (release connection)")
-		}
-	}()
 
 	for rows.Next() {
 		var e DeploymentEvent
@@ -125,5 +122,8 @@ func (rer DeploymentEventGetter) Get(ctx context.Context, cursor int) (routes []
 
 		routes = append(routes, e)
 	}
-	return
+	if err = rows.Err(); err != nil {
+		err = fmt.Errorf("error during rows iteration: %v", err)
+	}
+	return routes, newCursor, err
 }

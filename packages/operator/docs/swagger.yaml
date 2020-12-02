@@ -423,6 +423,15 @@ definitions:
         description: UpdatedAt
         type: string
     type: object
+  ModelDeploymentEventsResponse:
+    properties:
+      cursor:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/outbox.DeploymentEvent'
+        type: array
+    type: object
   ModelRoute:
     properties:
       createdAt:
@@ -454,14 +463,34 @@ definitions:
         type: integer
       events:
         items:
-          $ref: '#/definitions/model_route.RouteEvent'
+          $ref: '#/definitions/outbox.RouteEvent'
         type: array
     type: object
   feedback.ModelFeedbackRequest:
     type: object
   feedback.ModelFeedbackResponse:
     type: object
-  model_route.RouteEvent:
+  outbox.DeploymentEvent:
+    properties:
+      datetime:
+        description: When event is raised
+        type: string
+      entityID:
+        description: |-
+          EntityID contains ID of ModelDeployment for ModelDeploymentDeleted event type
+          Does not make sense in case of ModelDeploymentUpdate and ModelDeploymentCreate events
+        type: string
+      payload:
+        $ref: '#/definitions/ModelDeployment'
+        description: |-
+          EntityID contains ModelDeployment for ModelDeploymentUpdate and ModelDeploymentCreate events
+          Does not make sense in case of ModelDeploymentDelete event
+        type: object
+      type:
+        description: 'Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted'
+        type: string
+    type: object
+  outbox.RouteEvent:
     properties:
       datetime:
         description: When event is raised
@@ -1464,6 +1493,30 @@ paths:
       summary: Update a Model deployment
       tags:
       - Deployment
+  /api/v1/model/deployment-events:
+    get:
+      consumes:
+      - application/json
+      description: Get Last Changes for ModelDeployment entity
+      parameters:
+      - description: Cursor can be passed to get only new changes
+        in: query
+        name: cursor
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ModelDeploymentEventsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get Last Changes for ModelDeployment entities
+      tags:
+      - Route
   /api/v1/model/deployment/{id}:
     delete:
       consumes:

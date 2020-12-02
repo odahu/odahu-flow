@@ -53,7 +53,7 @@ func TestModelRouteGet(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Fetch next route updates
-	routes, newC, err = routeEventGetter.Get(context.TODO(), newC)
+	routes, _, err = routeEventGetter.Get(context.TODO(), newC)
 	assert.NoError(t, err)
 	assert.Len(t, routes, 2)
 	r = routes[0]
@@ -114,7 +114,7 @@ func TestModelDeploymentGet(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Fetch next route updates
-	routes, newC, err = deploymentEventGetter.Get(context.TODO(), newC)
+	routes, _, err = deploymentEventGetter.Get(context.TODO(), newC)
 	assert.NoError(t, err)
 	assert.Len(t, routes, 2)
 	r = routes[0]
