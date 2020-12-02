@@ -1,12 +1,14 @@
-package model_route
+package outbox
 
 import (
+	"context"
 	"database/sql"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"time"
+	sq "github.com/Masterminds/squirrel"
 )
 
-type RouteEventReader struct {
+type RouteEventGetter struct {
 	DB *sql.DB
 }
 
@@ -18,11 +20,24 @@ type RouteEvent struct {
 	// Does not make sense in case of ModelRouteDelete event
 	Payload deployment.ModelRoute  `json:"payload"`
 	// Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted
-	EventType string `json:"type"`
+	EventType EventType `json:"type"`
 	// When event is raised
 	Datetime time.Time  `json:"datetime"`
 }
 
-func (rer RouteEventReader) Get(cursor int) ([]RouteEvent, int, error)  {
+func (rer RouteEventGetter) Get(ctx context.Context, cursor int) (routes []RouteEvent, newCursor int, err error)  {
+	stmt, args, err := sq.
+		Select(EntityIDCol, EventTypeCol, PayloadCol, DatetimeCol).
+		From(Table).
+		Where(sq.Eq{EventGroupCol: ModelRouteEventGroup}, sq.Gt{IDCol: cursor}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return routes, newCursor, err
+	}
+
+	rer.DB.QueryContext(ctx, stmt, args...)
+
 	return nil, 0, nil
 }

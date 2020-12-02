@@ -62,7 +62,7 @@ func (c CustomPayload) Value() (driver.Value, error) {
 }
 
 func TestRaiseEvent(t *testing.T) {
-	eventRepo := &outbox.EventRepository{DB: db}
+	eventPublisher := &outbox.EventPublisher{DB: db}
 	event1 := outbox.Event{
 		EntityID:   "CustomID",
 		EventType:  "Create",
@@ -70,7 +70,7 @@ func TestRaiseEvent(t *testing.T) {
 		Datetime:   time.Now().UTC(),
 		Payload:    CustomPayload{Name: "test"},
 	}
-	err := eventRepo.RaiseEvent(context.Background(), nil, event1)
+	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
 	assert.NoError(t, err)
 	event2 := outbox.Event{
 		EntityID:   "CustomID-2",
@@ -79,7 +79,7 @@ func TestRaiseEvent(t *testing.T) {
 		Datetime:   time.Now().UTC(),
 		Payload:    CustomPayload{Name: "test"},
 	}
-	err = eventRepo.RaiseEvent(context.Background(), nil, event2)
+	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
 	assert.NoError(t, err)
 	event1Delete := outbox.Event{
 		EntityID:   "CustomID",
@@ -88,7 +88,7 @@ func TestRaiseEvent(t *testing.T) {
 		Datetime:   time.Now().UTC(),
 		Payload:    CustomPayload{Name: "test"},
 	}
-	err = eventRepo.RaiseEvent(context.Background(), nil, event1Delete)
+	err = eventPublisher.PublishEvent(context.Background(), nil, event1Delete)
 	assert.NoError(t, err)
 
 	stmt, _, err := sq.

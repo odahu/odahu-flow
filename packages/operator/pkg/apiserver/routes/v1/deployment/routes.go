@@ -25,7 +25,7 @@ import (
 )
 
 func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service, mrService mr_service.Service,
-	mrEventsReader RoutesEventReader, deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
+	mrEventsReader RoutesEventGetter, deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
 
 	mdController := ModelDeploymentController{
 		mdService:   mdService,

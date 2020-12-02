@@ -30,11 +30,11 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	dep_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
-	route_outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox/model_route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	"github.com/stretchr/testify/mock"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -53,12 +53,12 @@ const (
 
 type ModelRouteSuite struct {
 	suite.Suite
-	g            *GomegaWithT
-	server       *gin.Engine
-	mdService    md_service.Service
-	mrService    mr_service.Service
-	mrRepo 	     route_repository_db.RouteRepo
-	mrEventsReader *mocks.RoutesEventReader
+	g              *GomegaWithT
+	server         *gin.Engine
+	mdService      md_service.Service
+	mrService      mr_service.Service
+	mrRepo         route_repository_db.RouteRepo
+	mrEventsGetter *mocks.RoutesEventGetter
 }
 
 func (s *ModelRouteSuite) SetupSuite() {
@@ -66,7 +66,7 @@ func (s *ModelRouteSuite) SetupSuite() {
 	s.mrRepo = route_repository_db.RouteRepo{DB: db}
 	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db}, route_repository_db.RouteRepo{DB: db})
 	s.mrService = mr_service.NewService(s.mrRepo)
-	s.mrEventsReader = &mocks.RoutesEventReader{}
+	s.mrEventsGetter = &mocks.RoutesEventGetter{}
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
@@ -120,7 +120,7 @@ func (s *ModelRouteSuite) SetupTest() {
 func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, s.mrEventsReader,
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, s.mrEventsGetter,
 		deploymentConfig, config.NvidiaResourceName)
 }
 
@@ -687,7 +687,7 @@ func (s *ModelRouteSuite) TestGetRouteEventsIncorrectCursor() {
 
 func (s *ModelRouteSuite) TestGetRouteEvents() {
 
-	events := []route_outbox.RouteEvent{
+	events := []outbox.RouteEvent{
 		{
 			Payload:   deployment.ModelRoute{ID: "route-1"},
 			EventType: outbox.ModelRouteCreatedEventType,
@@ -700,7 +700,7 @@ func (s *ModelRouteSuite) TestGetRouteEvents() {
 		},
 	}
 
-	s.mrEventsReader.On("Get", 0).Return(events, 5, nil)
+	s.mrEventsGetter.On("Get", mock.Anything, 0).Return(events, 5, nil)
 
 
 	w := httptest.NewRecorder()
@@ -722,7 +722,7 @@ func (s *ModelRouteSuite) TestGetRouteEvents() {
 
 func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
 
-	events := []route_outbox.RouteEvent{
+	events := []outbox.RouteEvent{
 		{
 			Payload:   deployment.ModelRoute{ID: "route-1"},
 			EventType: outbox.ModelRouteCreatedEventType,
@@ -735,7 +735,7 @@ func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
 		},
 	}
 
-	s.mrEventsReader.On("Get", 6).Return(events, 9, nil)
+	s.mrEventsGetter.On("Get", mock.Anything, 6).Return(events, 9, nil)
 
 
 	w := httptest.NewRecorder()

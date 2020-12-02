@@ -17,13 +17,14 @@
 package deployment
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	route_outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox/model_route"
 	"strconv"
 
 	"net/http"
@@ -46,14 +47,14 @@ var (
 	emptyCache = map[string]int{}
 )
 
-type RoutesEventReader interface {
-	Get(cursor int) ([]route_outbox.RouteEvent, int, error)
+type RoutesEventGetter interface {
+	Get(ctx context.Context, cursor int) ([]outbox.RouteEvent, int, error)
 }
 
 type ModelRouteController struct {
 	service      service.Service
 	validator    *MrValidator
-	eventsReader RoutesEventReader
+	eventsReader RoutesEventGetter
 }
 
 // @Summary Get a Model route
@@ -213,8 +214,8 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 }
 
 type RouteEventsResponse struct {
-	Events []route_outbox.RouteEvent `json:"events"`
-	Cursor int                       `json:"cursor"`
+	Events []outbox.RouteEvent `json:"events"`
+	Cursor int                 `json:"cursor"`
 }
 // @Summary Get Last Changes for ModelRoute entities
 // @Description Get Last Changes for ModelRoute entity
@@ -244,7 +245,7 @@ func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 		}
 	}
 
-	events, newCursor, err := mrc.eventsReader.Get(cursor)
+	events, newCursor, err := mrc.eventsReader.Get(c.Request.Context(), cursor)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model route events")
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})

@@ -3,7 +3,6 @@ package outbox
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	sq "github.com/Masterminds/squirrel"
 	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -43,11 +42,6 @@ const (
 	PayloadCol = "payload"
 )
 
-type ValuerScanner interface {
-	sql.Scanner
-	driver.Valuer
-}
-
 type Event struct {
 	EntityID string
 	EventType EventType
@@ -56,7 +50,7 @@ type Event struct {
 	Payload  interface{}
 }
 
-type EventRepository struct {
+type EventPublisher struct {
 	DB *sql.DB
 }
 
@@ -68,7 +62,7 @@ type EventRecord struct {
 	event Event
 }
 
-func (repo EventRepository) RaiseEvent(ctx context.Context, tx *sql.Tx, event Event) (err error) {
+func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event Event) (err error) {
 
 	if tx == nil {
 		tx, err = repo.DB.BeginTx(ctx, txOptions)
