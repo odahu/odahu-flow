@@ -47,7 +47,7 @@ def invoke(json_input, model_route: str, model_deployment: str, url: str, url_pr
            host: str, jwt: str, json_file: str):
     """
     Invoke model endpoint.
-
+    \f
     :param json_input:
     :param client:
     :return: None
@@ -75,7 +75,7 @@ def info(model_route: str, model_deployment: str, url: str, url_prefix: str,
          host: str, jwt: str):
     """
     Get model information.
-
+    \f
     :param client: Model HTTP Client
     """
     client = ModelClient(calculate_url(host, url, model_route, model_deployment, url_prefix), jwt)
