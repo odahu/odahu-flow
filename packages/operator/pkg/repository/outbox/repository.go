@@ -3,28 +3,37 @@ package outbox
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
 	sq "github.com/Masterminds/squirrel"
+	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
+
+
+type EventType string
+type EventGroup string
 
 const (
 	Table = "odahu_outbox"
 
-	ModelRouteCreatedEventType = "ModelRouteCreated"
-	ModelRouteDeletedEventType = "ModelRouteDeleted"
-	ModelRouteUpdatedEventType = "ModelRouteUpdate"
-	ModelRouteEventGroup       = "ModelRoute"
+	ModelRouteCreatedEventType EventType  = "ModelRouteCreated"
+	ModelRouteDeletedEventType EventType  = "ModelRouteDeleted"
+	ModelRouteUpdatedEventType EventType  = "ModelRouteUpdate"
+	ModelRouteEventGroup       EventGroup = "ModelRoute"
 
-	ModelDeploymentCreatedEventType = "ModelDeploymentCreated"
-	ModelDeploymentDeletedEventType = "ModelDeploymentDeleted"
-	ModelDeploymentUpdatedEventType = "ModelDeploymentUpdated"
-	ModelDeploymentEventGroup       = "ModelDeployment"
+	ModelDeploymentCreatedEventType EventType  = "ModelDeploymentCreated"
+	ModelDeploymentDeletedEventType EventType  = "ModelDeploymentDeleted"
+	ModelDeploymentUpdatedEventType EventType  = "ModelDeploymentUpdated"
+	ModelDeploymentEventGroup       EventGroup = "ModelDeployment"
 )
 
 var txOptions = &sql.TxOptions{
 	Isolation: sql.LevelRepeatableRead,
 	ReadOnly:  false,
 }
+
+var log = logf.Log.WithName("event-repository")
 
 const (
 	EntityIDCol = "entity_id"
@@ -33,10 +42,16 @@ const (
 	DatetimeCol = "datetime"
 	PayloadCol = "payload"
 )
+
+type ValuerScanner interface {
+	sql.Scanner
+	driver.Valuer
+}
+
 type Event struct {
 	EntityID string
-	EventType string
-	EventGroup string
+	EventType EventType
+	EventGroup EventGroup
 	Datetime time.Time
 	Payload  interface{}
 }
@@ -49,7 +64,7 @@ const (
 	IDCol = "id"
 )
 type EventRecord struct {
-	id int
+	id int64
 	event Event
 }
 
@@ -61,6 +76,7 @@ func (repo EventRepository) RaiseEvent(ctx context.Context, tx *sql.Tx, event Ev
 			return
 		}
 	}
+	defer db_utils.FinishTx(tx, err, log)
 
 	// First, delete previous event with the same ID, because outbox table currently stores
 	// Only last event with EntityID

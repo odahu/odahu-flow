@@ -3,14 +3,17 @@ package outbox_test
 import (
 	"context"
 	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/testenvs"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"os"
 	"testing"
 	"time"
-	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -42,7 +45,20 @@ func TestMain(m *testing.M) {
 }
 
 type CustomPayload struct {
-	name string
+	Name string `json:"name"`
+}
+
+func (c *CustomPayload) Scan(src interface{}) error {
+	b, ok := src.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &c)
+	return res
+}
+
+func (c CustomPayload) Value() (driver.Value, error) {
+	return json.Marshal(c)
 }
 
 func TestRaiseEvent(t *testing.T) {
@@ -51,8 +67,8 @@ func TestRaiseEvent(t *testing.T) {
 		EntityID:   "CustomID",
 		EventType:  "Create",
 		EventGroup: "CustomEventGroup",
-		Datetime:   time.Time{},
-		Payload:    CustomPayload{name: "test"},
+		Datetime:   time.Now().UTC(),
+		Payload:    CustomPayload{Name: "test"},
 	}
 	err := eventRepo.RaiseEvent(context.Background(), nil, event1)
 	assert.NoError(t, err)
@@ -60,8 +76,8 @@ func TestRaiseEvent(t *testing.T) {
 		EntityID:   "CustomID-2",
 		EventType:  "Create",
 		EventGroup: "CustomEventGroup",
-		Datetime:   time.Time{},
-		Payload:    CustomPayload{name: "test"},
+		Datetime:   time.Now().UTC(),
+		Payload:    CustomPayload{Name: "test"},
 	}
 	err = eventRepo.RaiseEvent(context.Background(), nil, event2)
 	assert.NoError(t, err)
@@ -69,8 +85,8 @@ func TestRaiseEvent(t *testing.T) {
 		EntityID:   "CustomID",
 		EventType:  "Delete",
 		EventGroup: "CustomEventGroup",
-		Datetime:   time.Time{},
-		Payload:    CustomPayload{name: "test"},
+		Datetime:   time.Now().UTC(),
+		Payload:    CustomPayload{Name: "test"},
 	}
 	err = eventRepo.RaiseEvent(context.Background(), nil, event1Delete)
 	assert.NoError(t, err)
@@ -92,13 +108,19 @@ func TestRaiseEvent(t *testing.T) {
 
 	assert.True(t, rows.Next())
 	e := outbox.Event{}
-	assert.NoError(t, rows.Scan(&e.EntityID, &e.EventType, &e.EventGroup, &e.Datetime, &e.Payload))
+	p := CustomPayload{}
+	assert.NoError(t, rows.Scan(&e.EntityID, &e.EventType, &e.EventGroup, &e.Datetime, &p))
+	e.Datetime = e.Datetime.UTC()
+	e.Payload = p
 	assert.Equal(t, event2, e)
 
-	assert.False(t, rows.Next())
-	e = outbox.Event{}
-	assert.NoError(t, rows.Scan(&e.EntityID, &e.EventType, &e.EventGroup, &e.Datetime, &e.Payload))
+	assert.True(t, rows.Next())
+	assert.NoError(t, rows.Scan(&e.EntityID, &e.EventType, &e.EventGroup, &e.Datetime, &p))
+	e.Datetime = e.Datetime.UTC()
+	e.Payload = p
 	assert.Equal(t, event1Delete, e)
+
+	assert.False(t, rows.Next())
 
 }
 
