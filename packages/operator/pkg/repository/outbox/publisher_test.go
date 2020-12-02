@@ -122,5 +122,8 @@ func TestRaiseEvent(t *testing.T) {
 
 	assert.False(t, rows.Next())
 
+	stmt, _, _ = sq.Delete(outbox.Table).ToSql()
+	_, _ = db.Exec(stmt)
+
 }
 
