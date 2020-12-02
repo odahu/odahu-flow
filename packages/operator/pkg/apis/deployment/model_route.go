@@ -17,6 +17,9 @@
 package deployment
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"time"
 )
@@ -37,4 +40,17 @@ type ModelRoute struct {
 	Spec v1alpha1.ModelRouteSpec `json:"spec,omitempty"`
 	// Model route status
 	Status v1alpha1.ModelRouteStatus `json:"status,omitempty"`
+}
+
+func (in ModelRoute) Value() (driver.Value, error) {
+	return json.Marshal(in)
+}
+
+func (in *ModelRoute) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	res := json.Unmarshal(b, &in)
+	return res
 }
