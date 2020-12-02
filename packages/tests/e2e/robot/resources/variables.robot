@@ -36,7 +36,9 @@ ${404 Model NotFoundTemplate}      Wrong status code returned: 404. Data: . URL:
 ${409 Conflict Template}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
 
 ${APIConnectionException}          APIConnectionException: Can not reach {base url}
-${IncorrectToken}                  IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
+${IncorrectRefreshToken}           IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
+${IncorrectCredentials}            IncorrectAuthorizationToken: Credentials are not correct.\nPlease provide correct temporary token or disable non interactive mode
+${IncorrectTemporaryToken}         IncorrectAuthorizationToken: Credentials are missed.\nPlease provide correct temporary token or disable non interactive mode
 
 # ---------------------------------  Validation checks  ---------------------------------
 ${FailedConn}   Validation of connection is failed:
