@@ -73,7 +73,7 @@ class ModelDeployment:
         if image:
             api_object.spec.image = image
 
-        return ModelDeploymentClient().edit(api_object)
+        return ModelDeploymentClient(**kwargs).edit(api_object)
 
     @staticmethod
     def deployment_post(payload_file, image=None, **kwargs):
@@ -82,7 +82,7 @@ class ModelDeployment:
         if image:
             api_object.spec.image = image
 
-        return ModelDeploymentClient().create(api_object)
+        return ModelDeploymentClient(**kwargs).create(api_object)
 
     @staticmethod
     def deployment_delete(dep_id: str, **kwargs):
