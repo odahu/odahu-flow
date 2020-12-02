@@ -30,20 +30,20 @@ Try login
 *** Test Cases ***
 Verify login with valid credentials
     [Template]  Verify login
-    token=${AUTH_TOKEN}
-    client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    base_url=${API_URL}  token=${AUTH_TOKEN}
+    base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
 
 Try login with invalid credentials
     [Template]  Try login
-    ${IncorrectRefreshToken}  token=${EMPTY}
-    ${IncorrectRefreshToken}  token=${invalid_token}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  token=${EMPTY}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  token=${invalid_token}
 
-    ${IncorrectRefreshToken}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectRefreshToken}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
-    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
-    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
-    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
-    ${IncorrectRefreshToken}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  client_id=${EMPTY}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  client_id=${invalid_id}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${EMPTY}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${invalid_secret}  issuer_url=${ISSUER}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${EMPTY}
+    ${IncorrectRefreshToken}  base_url=${API_URL}  client_id=${SA_CLIENT_ID}  client_secret=${SA_CLIENT_SECRET}  issuer_url=${invalid_issuer}
 
 Try login with empty url and valid token
     ${error}                    format string  ${APIConnectionException}  base url=${EMPTY}
