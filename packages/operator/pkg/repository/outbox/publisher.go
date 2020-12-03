@@ -78,7 +78,7 @@ func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event E
 		if err != nil {
 			return
 		}
-		defer db_utils.FinishTx(tx, err, log)
+		defer func(){db_utils.FinishTx(tx, err, log)}()
 	}
 
 	// First, delete previous event with the same ID, because outbox table currently stores

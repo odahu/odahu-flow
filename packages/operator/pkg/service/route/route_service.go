@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
 var (
@@ -48,9 +49,15 @@ type Service interface {
 	CreateModelRoute(ctx context.Context, mt *route.ModelRoute) error
 }
 
+type EventPublisher interface {
+	PublishEvent(ctx context.Context, tx *sql.Tx, event outbox.Event) (err error)
+}
+
 type serviceImpl struct {
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
+	eventPub EventPublisher
+
 }
 
 func (s serviceImpl) GetModelRoute(ctx context.Context, id string) (*route.ModelRoute, error) {
@@ -188,7 +195,7 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 	return s.repo.CreateModelRoute(ctx, nil, md)
 }
 
-func NewService(repo repo.Repository) Service {
-	return &serviceImpl{repo: repo}
+func NewService(repo repo.Repository, eventPub EventPublisher) Service {
+	return &serviceImpl{repo: repo, eventPub: eventPub}
 }
 

@@ -112,7 +112,7 @@ func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err 
 	if err != nil {
 		return err
 	}
-	defer db_utils.FinishTx(tx, err, log)
+	defer func(){db_utils.FinishTx(tx, err, log)}()
 
 	mrDefaultID, err := GetDefaultModelRoute(ctx, tx, id, s.mrRepo)
 	if err != nil {
@@ -145,7 +145,7 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	if err != nil {
 		return err
 	}
-	defer db_utils.FinishTx(tx, err, log)
+	defer func(){db_utils.FinishTx(tx, err, log)}()
 
 	event := outbox.Event{
 		EntityID:   id,
@@ -165,7 +165,7 @@ func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.M
 	if err != nil {
 		return err
 	}
-	defer db_utils.FinishTx(tx, err, log)
+	defer func(){db_utils.FinishTx(tx, err, log)}()
 
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
@@ -187,12 +187,13 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 	ctx context.Context, id string, status v1alpha1.ModelDeploymentStatus, spec v1alpha1.ModelDeploymentSpec,
 ) (err error) {
 
-	tx, err := s.repo.BeginTransaction(ctx)
+	var tx *sql.Tx
+	tx, err = s.repo.BeginTransaction(ctx)
 	if err != nil {
 		return err
 	}
 
-	defer db_utils.FinishTx(tx, err, log)
+	defer func(){db_utils.FinishTx(tx, err, log)}()
 
 	oldMt, err := s.repo.GetModelDeployment(ctx, tx, id)
 	if err != nil {
@@ -210,7 +211,8 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 	}
 
 	if oldHash != specHash {
-		return odahu_errors.SpecWasTouched{Entity: id}
+		err = odahu_errors.SpecWasTouched{Entity: id}
+		return err
 	}
 
 	if err = s.repo.UpdateModelDeploymentStatus(ctx, tx, id, status); err != nil {
@@ -261,7 +263,7 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 	if err != nil {
 		return err
 	}
-	defer db_utils.FinishTx(tx, err, log)
+	defer func(){db_utils.FinishTx(tx, err, log)}()
 
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = time.Now()

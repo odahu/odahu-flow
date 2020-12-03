@@ -66,7 +66,7 @@ func (s *TestSuite) SetupTest() {
 	s.mockRepo = mockRepo
 	s.db = db
 	s.dbMock = dbMock
-	s.service = service.NewService(mockRepo)
+	s.service = service.NewService(mockRepo, nil)
 }
 
 func (s *TestSuite) TestGetModelRoute() {
