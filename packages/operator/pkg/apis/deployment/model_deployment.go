@@ -45,10 +45,12 @@ func (in ModelDeployment) Value() (driver.Value, error) {
 
 
 func (in *ModelDeployment) Scan(value interface{}) error {
-	b, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
+	switch b := value.(type) {
+	case nil:
+		return nil
+	case []byte:
+		return json.Unmarshal(b, &in)
+	default:
+		return errors.New("type assertion to []byte or nil is failed")
 	}
-	res := json.Unmarshal(b, &in)
-	return res
 }
