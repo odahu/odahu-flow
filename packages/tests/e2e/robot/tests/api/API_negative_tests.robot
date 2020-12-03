@@ -23,7 +23,7 @@ Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge
 # Suite Teardown      Remove File  ${LOCAL_CONFIG}
-Force Tags          api  sdk  negative  test
+Force Tags          api  sdk  negative
 Test Timeout        1 minute
 
 *** Keywords ***
