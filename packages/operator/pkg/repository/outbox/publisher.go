@@ -16,10 +16,12 @@ type EventGroup string
 const (
 	Table = "odahu_outbox"
 
-	ModelRouteCreatedEventType EventType  = "ModelRouteCreated"
-	ModelRouteDeletedEventType EventType  = "ModelRouteDeleted"
-	ModelRouteUpdatedEventType EventType  = "ModelRouteUpdate"
-	ModelRouteEventGroup       EventGroup = "ModelRoute"
+	ModelRouteCreatedEventType           EventType  = "ModelRouteCreated"
+	ModelRouteDeletedEventType           EventType  = "ModelRouteDeleted"
+	ModelRouteUpdatedEventType           EventType  = "ModelRouteUpdate"
+	ModelRouteStatusUpdatedEventType     EventType  = "ModelRouteStatusUpdated"
+	ModelRouteDeletionMarkIsSetEventType EventType  = "ModelRouteDeletionMarkIsSet"
+	ModelRouteEventGroup                 EventGroup = "ModelRoute"
 
 	ModelDeploymentCreatedEventType           EventType  = "ModelDeploymentCreated"
 	ModelDeploymentDeletedEventType           EventType  = "ModelDeploymentDeleted"

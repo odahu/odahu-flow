@@ -86,8 +86,8 @@ type ModelDeploymentRouteSuite struct {
 func (s *ModelDeploymentRouteSuite) SetupSuite() {
 	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db}, route_post_repository.RouteRepo{
 		DB: db,
-	})
-	s.mrService = mr_service.NewService(route_post_repository.RouteRepo{DB: db})
+	}, outbox.EventPublisher{DB: db})
+	s.mrService = mr_service.NewService(route_post_repository.RouteRepo{DB: db}, outbox.EventPublisher{DB: db})
 	s.mdEventsGetter = &mocks.ModelDeploymentEventGetter{}
 }
 

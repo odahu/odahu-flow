@@ -2661,16 +2661,16 @@ var doc = `{
                     "type": "string"
                 },
                 "entityID": {
-                    "description": "EntityID contains ID of ModelDeployment for ModelDeploymentDeleted event type\nDoes not make sense in case of ModelDeploymentUpdate and ModelDeploymentCreate events",
+                    "description": "EntityID contains ID of ModelDeployment for ModelDeploymentDeleted and ModelDeploymentDeletionMarkIsSet\nevent types\nDoes not make sense in case of ModelDeploymentUpdate, ModelDeploymentCreate, ModelDeploymentStatusUpdated events",
                     "type": "string"
                 },
                 "payload": {
-                    "description": "EntityID contains ModelDeployment for ModelDeploymentUpdate and ModelDeploymentCreate events\nDoes not make sense in case of ModelDeploymentDelete event",
+                    "description": "Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,\nModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of\nModelDeploymentStatusUpdated update\nDoes not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events",
                     "type": "object",
                     "$ref": "#/definitions/ModelDeployment"
                 },
                 "type": {
-                    "description": "Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted",
+                    "description": "Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted,\nModelDeploymentDeletionMarkIsSet, ModelDeploymentStatusUpdated",
                     "type": "string"
                 }
             }
@@ -2683,16 +2683,16 @@ var doc = `{
                     "type": "string"
                 },
                 "entityID": {
-                    "description": "EntityID contains ID of ModelRoute for ModelRouteDeleted event type\nDoes not make sense in case of ModelRouteUpdate and ModelRouteCreate events",
+                    "description": "EntityID contains ID of ModelRoute for ModelRouteDeleted and ModelRouteDeletionMarkIsSet\nevent types\nDoes not make sense in case of ModelRouteUpdate, ModelRouteCreate, ModelRouteStatusUpdated events",
                     "type": "string"
                 },
                 "payload": {
-                    "description": "EntityID contains ModelRoute for ModelRouteUpdate and ModelRouteCreate events\nDoes not make sense in case of ModelRouteDelete event",
+                    "description": "Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,\nModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of\nModelRouteStatusUpdated update\nDoes not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events",
                     "type": "object",
                     "$ref": "#/definitions/ModelRoute"
                 },
                 "type": {
-                    "description": "Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted",
+                    "description": "Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,\nModelRouteDeletionMarkIsSet, ModelRouteStatusUpdated",
                     "type": "string"
                 }
             }

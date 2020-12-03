@@ -14,13 +14,17 @@ type RouteEventGetter struct {
 }
 
 type RouteEvent struct {
-	// EntityID contains ID of ModelRoute for ModelRouteDeleted event type
-	// Does not make sense in case of ModelRouteUpdate and ModelRouteCreate events
+	// EntityID contains ID of ModelRoute for ModelRouteDeleted and ModelRouteDeletionMarkIsSet
+	// event types
+	// Does not make sense in case of ModelRouteUpdate, ModelRouteCreate, ModelRouteStatusUpdated events
 	EntityID string `json:"entityID"`
-	// EntityID contains ModelRoute for ModelRouteUpdate and ModelRouteCreate events
-	// Does not make sense in case of ModelRouteDelete event
+	// Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,
+	// ModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of
+	// ModelRouteStatusUpdated update
+	// Does not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events
 	Payload deployment.ModelRoute  `json:"payload"`
-	// Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted
+	// Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,
+	// ModelRouteDeletionMarkIsSet, ModelRouteStatusUpdated
 	EventType EventType `json:"type"`
 	// When event is raised
 	Datetime time.Time  `json:"datetime"`
@@ -55,6 +59,7 @@ func (rer RouteEventGetter) Get(ctx context.Context, cursor int) (routes []Route
 		}
 		availableTypes := []EventType{
 			ModelRouteCreatedEventType, ModelRouteUpdatedEventType, ModelRouteDeletedEventType,
+			ModelRouteDeletionMarkIsSetEventType, ModelRouteStatusUpdatedEventType,
 		}
 		if !EventTypeOK(availableTypes, e.EventType) {
 			log.Error(fmt.Errorf("unknown event for ModelRouteEventGroup: %v", e.EventType), "")

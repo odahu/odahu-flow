@@ -94,8 +94,8 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	connService := conn_service.NewService(connRepository)
 	trainService := mt_service.NewService(trainRepo)
 	packService := mp_service.NewService(packRepo)
-	depService := md_service.NewService(deployRepo, routeRepo)
-	mrService := mr_service.NewService(routeRepo)
+	depService := md_service.NewService(deployRepo, routeRepo, outbox.EventPublisher{DB: db})
+	mrService := mr_service.NewService(routeRepo, outbox.EventPublisher{DB: db})
 
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)

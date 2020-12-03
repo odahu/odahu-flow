@@ -25,6 +25,7 @@ import (
 	apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/mocks"
+	event_pub_mocks "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment/mocks"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"github.com/stretchr/testify/assert"
@@ -50,6 +51,7 @@ type TestSuite struct {
 	dbMock sqlmock.Sqlmock
 	as *assert.Assertions
 	nilTx *sql.Tx
+	eMockPub *event_pub_mocks.EventPublisher
 }
 
 func (s *TestSuite) SetupSuite() {
@@ -62,11 +64,13 @@ func (s *TestSuite) SetupTest() {
 		s.T().Fatal("Unable initialize sql mock")
 	}
 	mockRepo := &mocks.Repository{}
+	eMockPub := &event_pub_mocks.EventPublisher{}
 
 	s.mockRepo = mockRepo
 	s.db = db
 	s.dbMock = dbMock
-	s.service = service.NewService(mockRepo, nil)
+	s.eMockPub = eMockPub
+	s.service = service.NewService(mockRepo, eMockPub)
 }
 
 func (s *TestSuite) TestGetModelRoute() {
@@ -130,19 +134,30 @@ func (s *TestSuite) TestDeleteModelRoute() {
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
 	s.mockRepo.On("DeleteModelRoute", ctx, mockTx, enID).Return(nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.NoError(s.service.DeleteModelRoute(ctx, enID))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 func (s *TestSuite) TestSetDeletionMark() {
 	as := assert.New(s.T())
 
+	// Assume transaction commit
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	as.NoError(err)
+
 	ctx := context.Background()
-	s.mockRepo.On("SetDeletionMark", ctx, s.nilTx, enID, true).Return(nil)
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("SetDeletionMark", ctx, mockTx, enID, true).Return(nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.NoError(s.service.SetDeletionMark(ctx, enID, true))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 func (s *TestSuite) TestUpdateModelRoute() {
@@ -162,9 +177,11 @@ func (s *TestSuite) TestUpdateModelRoute() {
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
 	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.NoError(s.service.UpdateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
@@ -184,6 +201,7 @@ func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
 	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.UpdateModelRoute(ctx, en))
@@ -192,6 +210,7 @@ func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
 	// UpdatedAt field must be not updated on now during the invocation
 	as.True(timeBeforeCall.After(en.CreatedAt))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 func (s *TestSuite) TestUpdateModelRouteStatus() {
@@ -210,6 +229,7 @@ func (s *TestSuite) TestUpdateModelRouteStatus() {
 	repoEn := newStubMT()
 	s.mockRepo.On("GetModelRoute", ctx, mockTx, enID).Return(repoEn, nil)
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
@@ -241,6 +261,7 @@ func (s *TestSuite) TestUpdateModelRouteStatusSpecTouched() {
 	repoEn := newStubMT()
 	s.mockRepo.On("GetModelRoute", ctx, mockTx, enID).Return(repoEn, nil)
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 
 	// Assume that repository return no error while set new status with not touched spec snapshot
@@ -266,20 +287,36 @@ func (s *TestSuite) TestUpdateModelRouteStatusSpecTouched() {
 func (s *TestSuite) TestCreateModelRoute() {
 	as := assert.New(s.T())
 
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	as.NoError(err)
+
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelRoute", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("CreateModelRoute", ctx, mockTx, en).Return(nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.NoError(s.service.CreateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 func (s *TestSuite) TestCreateModelRoute_CreatedAt() {
 	as := assert.New(s.T())
 
 	en := newStubMT()
+
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectCommit()
+	mockTx, err := s.db.Begin()
+	as.NoError(err)
+
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelRoute", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("CreateModelRoute", ctx, mockTx, en).Return(nil)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.CreateModelRoute(ctx, en))
@@ -287,18 +324,27 @@ func (s *TestSuite) TestCreateModelRoute_CreatedAt() {
 	as.True(timeBeforeCall.Before(en.CreatedAt))
 	as.True(timeBeforeCall.Before(en.UpdatedAt))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 func (s *TestSuite) TestCreateModelRoute_Error() {
 	as := assert.New(s.T())
 
+	s.dbMock.ExpectBegin()
+	s.dbMock.ExpectRollback()
+	mockTx, err := s.db.Begin()
+	as.NoError(err)
+
 	en := newStubMT()
 	ctx := context.Background()
 	anyError := errors.New("any error")
-	s.mockRepo.On("CreateModelRoute", ctx, s.nilTx, en).Return(anyError)
+	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
+	s.mockRepo.On("CreateModelRoute", ctx, mockTx, en).Return(anyError)
+	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.Error(s.service.CreateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
+	as.NoError(s.dbMock.ExpectationsWereMet())
 }
 
 // Helpers

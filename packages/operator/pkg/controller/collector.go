@@ -7,6 +7,7 @@ import (
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
@@ -59,7 +60,8 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 	}
 
 	if cfg.Deployment.Enabled {
-		depService := dep_service.NewService(deploy_repo.DeploymentRepo{DB: db}, route_repo.RouteRepo{DB: db})
+		depService := dep_service.NewService(deploy_repo.DeploymentRepo{DB: db}, route_repo.RouteRepo{DB: db},
+		outbox.EventPublisher{DB: db})
 		deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, kClient)
 
 		deployWorker := NewGenericWorker(
@@ -69,7 +71,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 		runMgr.AddRunnable(&deployWorker)
 
 
-		routeService := route_service.NewService(route_repo.RouteRepo{DB: db})
+		routeService := route_service.NewService(route_repo.RouteRepo{DB: db}, outbox.EventPublisher{DB: db})
 
 		routeWorker := NewGenericWorker(
 			"route", cfg.Common.LaunchPeriod,
