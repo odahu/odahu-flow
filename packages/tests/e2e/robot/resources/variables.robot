@@ -30,7 +30,7 @@ ${CONN_SECRET_MASK}                   *****
 # ---------------------------------  Error Templates  ---------------------------------
 ${400 BadRequest Template}         WrongHttpStatusCode: Got error from server: {} (status: 400)
 ${401 Unathorized Template}
-${403 Forbidden Template}
+${403 Forbidden Template}          WrongHttpStatusCode: Got error from server: {} (status: 403)
 ${404 NotFound Template}           WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
 ${404 Model NotFoundTemplate}      Wrong status code returned: 404. Data: . URL: {}
 ${409 Conflict Template}           EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
