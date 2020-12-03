@@ -21,11 +21,24 @@ const (
 	ModelRouteUpdatedEventType EventType  = "ModelRouteUpdate"
 	ModelRouteEventGroup       EventGroup = "ModelRoute"
 
-	ModelDeploymentCreatedEventType EventType  = "ModelDeploymentCreated"
-	ModelDeploymentDeletedEventType EventType  = "ModelDeploymentDeleted"
-	ModelDeploymentUpdatedEventType EventType  = "ModelDeploymentUpdated"
-	ModelDeploymentEventGroup       EventGroup = "ModelDeployment"
+	ModelDeploymentCreatedEventType           EventType  = "ModelDeploymentCreated"
+	ModelDeploymentDeletedEventType           EventType  = "ModelDeploymentDeleted"
+	ModelDeploymentUpdatedEventType           EventType  = "ModelDeploymentUpdated"
+	ModelDeploymentStatusUpdatedEventType     EventType  = "ModelDeploymentStatusUpdated"
+	ModelDeploymentDeletionMarkIsSetEventType EventType  = "ModelDeploymentDeletionMarkIsSet"
+	ModelDeploymentEventGroup                 EventGroup = "ModelDeployment"
 )
+
+
+func EventTypeOK(available []EventType, actual EventType) bool {
+	for _, e := range available {
+		if e == actual {
+			return true
+		}
+	}
+	return false
+}
+
 
 var txOptions = &sql.TxOptions{
 	Isolation: sql.LevelRepeatableRead,
@@ -65,8 +78,8 @@ func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event E
 		if err != nil {
 			return
 		}
+		defer db_utils.FinishTx(tx, err, log)
 	}
-	defer db_utils.FinishTx(tx, err, log)
 
 	// First, delete previous event with the same ID, because outbox table currently stores
 	// Only last event with EntityID

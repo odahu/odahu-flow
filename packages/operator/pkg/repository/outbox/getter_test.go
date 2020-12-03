@@ -1,14 +1,15 @@
 package outbox_test
 
 import (
+
 	"context"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
-	sq "github.com/Masterminds/squirrel"
 )
 
 func TestModelRouteGet(t *testing.T) {
@@ -104,11 +105,10 @@ func TestModelDeploymentGet(t *testing.T) {
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
 	assert.NoError(t, err)
 
-	payload3 := deployment.ModelDeployment{Spec: v1alpha1.ModelDeploymentSpec{Image: "Image"}}
 	event3 := outbox.Event{
-		EntityID:   "event3", EventType: outbox.ModelDeploymentCreatedEventType,
+		EntityID:   "event3", EventType: outbox.ModelDeploymentDeletedEventType,
 		EventGroup: outbox.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
-		Payload:    payload3,
+		Payload:    nil,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event3)
 	assert.NoError(t, err)
@@ -125,7 +125,6 @@ func TestModelDeploymentGet(t *testing.T) {
 	r = routes[1]
 	assert.Equal(t, event3.EntityID, r.EntityID)
 	assert.Equal(t, event3.EventType, r.EventType)
-	assert.Equal(t, payload3, r.Payload)
 	assert.Equal(t, event3.Datetime, r.Datetime.UTC())
 
 	stmt, _, _ := sq.Delete(outbox.Table).ToSql()

@@ -53,8 +53,10 @@ func (rer RouteEventGetter) Get(ctx context.Context, cursor int) (routes []Route
 			log.Error(err, "Unable to scan route")
 			return routes, newCursor, err
 		}
-		if e.EventType != ModelRouteCreatedEventType && e.EventType != ModelRouteUpdatedEventType &&
-			e.EventType != ModelRouteDeletedEventType {
+		availableTypes := []EventType{
+			ModelRouteCreatedEventType, ModelRouteUpdatedEventType, ModelRouteDeletedEventType,
+		}
+		if !EventTypeOK(availableTypes, e.EventType) {
 			log.Error(fmt.Errorf("unknown event for ModelRouteEventGroup: %v", e.EventType), "")
 			continue
 		}
@@ -74,13 +76,17 @@ type DeploymentEventGetter struct {
 }
 
 type DeploymentEvent struct {
-	// EntityID contains ID of ModelDeployment for ModelDeploymentDeleted event type
-	// Does not make sense in case of ModelDeploymentUpdate and ModelDeploymentCreate events
+	// EntityID contains ID of ModelDeployment for ModelDeploymentDeleted and ModelDeploymentDeletionMarkIsSet
+	// event types
+	// Does not make sense in case of ModelDeploymentUpdate, ModelDeploymentCreate, ModelDeploymentStatusUpdated events
 	EntityID string `json:"entityID"`
-	// EntityID contains ModelDeployment for ModelDeploymentUpdate and ModelDeploymentCreate events
-	// Does not make sense in case of ModelDeploymentDelete event
+	// Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,
+	// ModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of
+	// ModelDeploymentStatusUpdated update
+	// Does not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events
 	Payload deployment.ModelDeployment  `json:"payload"`
-	// Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted
+	// Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted,
+	// ModelDeploymentDeletionMarkIsSet, ModelDeploymentStatusUpdated
 	EventType EventType `json:"type"`
 	// When event is raised
 	Datetime time.Time  `json:"datetime"`
@@ -115,11 +121,15 @@ func (rer DeploymentEventGetter) Get(ctx context.Context, cursor int) (routes []
 			log.Error(err, "Unable to scan route")
 			return
 		}
-		if e.EventType != ModelDeploymentCreatedEventType && e.EventType != ModelDeploymentUpdatedEventType &&
-			e.EventType != ModelDeploymentDeletedEventType {
-			log.Error(fmt.Errorf("unknown event for ModelDeploymentEventGroup: %v", e.EventType), "")
-		}
 
+		availableTypes := []EventType{
+			ModelDeploymentCreatedEventType, ModelDeploymentUpdatedEventType, ModelDeploymentDeletedEventType,
+			ModelDeploymentStatusUpdatedEventType, ModelDeploymentDeletionMarkIsSetEventType,
+		}
+		if !EventTypeOK(availableTypes, e.EventType) {
+			log.Error(fmt.Errorf("unknown event for ModelDeploymentEventGroup: %v", e.EventType), "")
+			continue
+		}
 		routes = append(routes, e)
 	}
 	if err = rows.Err(); err != nil {
