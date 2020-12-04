@@ -367,7 +367,7 @@ class Utils:
 
     @staticmethod
     def get_local_model_host():
-        docker_host = os.getenv('DOCKER_HOST_ENV')
+        docker_host = os.getenv(DOCKER_HOST_ENV)
         if docker_host:
             return f"http://{urllib.parse.urlparse(docker_host).netloc.split(':')[0]}"
         else:
