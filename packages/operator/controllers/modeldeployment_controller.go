@@ -84,7 +84,7 @@ const (
 
 var (
 	defaultWeight            = int32(100)
-	DefaultTerminationPeriod = int64(15)
+	DefaultTerminationPeriod = int64(600)
 )
 
 func NewModelDeploymentReconciler(
