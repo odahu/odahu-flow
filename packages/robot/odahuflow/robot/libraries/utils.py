@@ -21,8 +21,8 @@ import datetime
 import socket
 import time
 import json
-import requests
 import urllib.parse
+import requests
 
 from odahuflow.robot.libraries.auth_client import get_authorization_headers
 
