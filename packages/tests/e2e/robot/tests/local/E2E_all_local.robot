@@ -19,7 +19,7 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Set Environment Variable    ODAHUFLOW_CONFIG    ${LOCAL_CONFIG}
-Suite Teardown      Remove File     ${LOCAL_CONFIG}
+Suite Teardown      Remove File   ${LOCAL_CONFIG}
 Force Tags          cli  local  e2e
 Test Timeout        90 minutes
 
@@ -56,7 +56,8 @@ Run E2E local model
     Sleep  5 sec
     Shell     docker container list -as -f name=${LOCAL_DOCKER_CONTAINER}
     # model invoke
-    ${result_model}              StrictShell  odahuflowctl --verbose model invoke --url http://0:5000 --json-file ${RES_DIR}/request.json
+    ${MODEL_HOST}    Get local model host
+    ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
     Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
 
 Run E2E spec on cluster model
@@ -83,5 +84,6 @@ Run E2E spec on cluster model
     Sleep  5 sec
     Shell  docker container list -as -f name=${CLUSTER_DOCKER_CONTAINER}
     # model invoke
-    ${result_model}              StrictShell  odahuflowctl --verbose model invoke --url http://0:5000 --json-file ${RES_DIR}/request.json
+    ${MODEL_HOST}    Get local model host
+    ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
     Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}

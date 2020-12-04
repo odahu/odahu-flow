@@ -66,7 +66,8 @@ Run Packaging with api server spec
         Sleep  5 sec
         Shell  docker container list -as -f id=${container_id.stdout}
 
-        ${result_model}             StrictShell  odahuflowctl --verbose model invoke --url http://0:5001 --json-file ${RES_DIR}/request.json
+        ${MODEL_HOST}    Get local model host
+        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5001 --json-file ${RES_DIR}/request.json
         Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
 
 Try Run Packaging with api server spec
