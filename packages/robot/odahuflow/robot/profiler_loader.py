@@ -33,6 +33,7 @@ CLUSTER_PROFILE = 'CLUSTER_PROFILE'
 # Key in cluster_profile.json that contain creds for
 TEST_SA_ADMIN = 'test'
 TEST_SA_DS = 'test_data_scientist'
+TEST_SA_VIEWER = 'odahu_viewer_role'
 TEST_SA_CUSTOM_ROLE = 'odahu_custom_role'
 
 
@@ -81,6 +82,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
 
             test_sa_admin = ServiceAccount(data, TEST_SA_ADMIN)
             test_sa_ds = ServiceAccount(data, TEST_SA_DS)
+            test_sa_viewer = ServiceAccount(data,TEST_SA_VIEWER)
             test_sa_custom_role = ServiceAccount(data, TEST_SA_CUSTOM_ROLE)
 
             host_base_domain = data['dns']['domain']
@@ -104,6 +106,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'SA_CLIENT_SECRET': test_sa_admin.client_secret,
                 'SA_ADMIN': test_sa_admin,
                 'SA_DATA_SCIENTIST': test_sa_ds,
+                'SA_VIEWER': test_sa_viewer,
                 'SA_CUSTOM_USER': test_sa_custom_role,
                 'SA_CUSTOM_ROLE': test_sa_custom_role.roles,
 
