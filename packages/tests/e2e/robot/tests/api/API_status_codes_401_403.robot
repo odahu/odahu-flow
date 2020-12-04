@@ -15,6 +15,7 @@ Resource            ../../resources/variables.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             String
+Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
 Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
@@ -102,8 +103,9 @@ Try Call API - Forbidden
 
 Status Code 403 - Forbidden - Data Scientist
     [Template]  Try Call API - Forbidden
-    [Setup]  Login to the api and edge  ${SA_DATA_SCIENTIST}
+    [Setup]     Login to the api and edge  ${SA_DATA_SCIENTIST}
     # [Teardown]  Remove File  ${LOCAL_CONFIG}
+    reload config
     connection get
     connection get id  ${VCS_CONNECTION}
     connection get id decrypted  ${VCS_CONNECTION}
