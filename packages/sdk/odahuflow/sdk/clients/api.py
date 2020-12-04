@@ -346,14 +346,14 @@ class RemoteAPIClient:
     """
 
     def __init__(self,
-                 base_url: str = odahuflow.sdk.config.API_URL,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+                 base_url: str = '',
+                 token: Optional[str] = '',
                  client_id: Optional[str] = '',
                  client_secret: Optional[str] = '',
-                 retries: Optional[int] = odahuflow.sdk.config.RETRY_ATTEMPTS,
+                 retries: Optional[int] = None,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
                  non_interactive: Optional[bool] = True,
-                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
+                 issuer_url: Optional[str] = ''):
         """
         Build client
 
@@ -365,6 +365,17 @@ class RemoteAPIClient:
         :param timeout: timeout for connection in seconds. 0 for disabling
         :param non_interactive: disable any interaction
         """
+
+        # set defaults
+        if not base_url:
+            base_url = odahuflow.sdk.config.API_URL
+        if not token:
+            token = odahuflow.sdk.config.API_TOKEN
+        if retries is None:
+            retries = odahuflow.sdk.config.RETRY_ATTEMPTS
+        if not issuer_url:
+            issuer_url = odahuflow.sdk.config.ISSUER_URL
+
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)

@@ -24,6 +24,11 @@ class Login:
             client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
         ).get()
 
+    @staticmethod
+    def reload_config():
+        config._INI_FILE_TRIED_TO_BE_LOADED = False
+        config.reinitialize_variables()
+
 
 class Configuration:
 
