@@ -19,6 +19,11 @@ class Login:
     def config_get(base_url: str = config.API_URL, **kwargs):
         return ConfigurationClient(base_url=base_url, **kwargs).get()
 
+    @staticmethod
+    def reload_config():
+        config._INI_FILE_TRIED_TO_BE_LOADED = False
+        config.reinitialize_variables()
+
 
 class Configuration:
 
