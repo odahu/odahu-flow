@@ -109,6 +109,9 @@ Delete Model Deployment and Check that Model Deployment does not exist
     ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
     Call API and get Error      ${404NotFound}  deployment get id  ${DEPLOYMENT}
 
+Check Custom Model Role
+
+
 #############################
 #    NEGATIVE TEST CASES    #
 #############################

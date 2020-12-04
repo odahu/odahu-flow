@@ -103,11 +103,11 @@ Try Call API - Forbidden
 
 Status Code 403 - Forbidden - Data Scientist
     [Template]  Try Call API - Forbidden
-    [Setup]     Login to the api and edge  ${SA_DATA_SCIENTIST}
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_DATA_SCIENTIST}  AND
+    ...         reload config
     # [Teardown]  Remove File  ${LOCAL_CONFIG}
-    reload config
-    connection get
-    connection get id  ${VCS_CONNECTION}
+    # connection
     connection get id decrypted  ${VCS_CONNECTION}
     # toolchains
     toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
@@ -122,11 +122,45 @@ Status Code 403 - Forbidden - Data Scientist
     route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route delete  ${NOT_EXIST_ENTITY}
 
-# Status Code 403 - Forbidden - Viewer
-#     [Template]  Template Error Keyword
-#     [Setup]  Login to the api and edge  ${SA_DATA_SCIENTIST}
-#     [Teardown]  Remove File  ${LOCAL_CONFIG}
-#
+Status Code 403 - Forbidden - Viewer
+    [Template]  Try Call API - Forbidden
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_VIEWER}  AND
+    ...         reload config
+    # [Teardown]  Remove File  ${LOCAL_CONFIG}
+    # connection
+    connection get id decrypted  ${VCS_CONNECTION}
+    connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
+    connection put  ${RES_DIR}/connection/valid/git_connection_update.yaml
+    connection delete  ${NOT_EXIST_ENTITY}
+    # toolchains
+    toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
+    toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
+    toolchain delete  ${NOT_EXIST_ENTITY}
+    # packagers
+    packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
+    packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
+    packager delete  ${NOT_EXIST_ENTITY}
+    # training
+    training post  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
+    training put  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
+    training delete  ${NOT_EXIST_ENTITY}
+    # packaging
+    packaging post  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
+    packaging put  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
+    packaging delete  ${NOT_EXIST_ENTITY}
+    # deployment
+    deployment post  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
+    deployment put  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
+    deployment delete  ${NOT_EXIST_ENTITY}
+    # route
+    route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
+    route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
+    route delete  ${NOT_EXIST_ENTITY}
+    # model
+    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
+    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
+
 # Status Code 403 - Forbidden - Custom Role
 #     [Template]  Template Error Keyword
 #     [Setup]  Login to the api and edge  ${SA_DATA_SCIENTIST}
