@@ -18,11 +18,21 @@ package deployment
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"time"
 )
 
 type ModelRoute struct {
 	// Model route id
 	ID string `json:"id"`
+	// Default routes cannot be deleted by user. They are managed by system
+	// One ModelDeployment has exactly one default Route that gives 100% traffic to the model
+	Default bool `json:"default,omitempty"`
+	// Deletion mark
+	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
+	// CreatedAt
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Model route specification
 	Spec v1alpha1.ModelRouteSpec `json:"spec,omitempty"`
 	// Model route status

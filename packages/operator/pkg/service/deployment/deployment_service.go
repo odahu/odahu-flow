@@ -18,10 +18,15 @@ package deployment
 
 import (
 	"context"
+	"database/sql"
+	"fmt"
+	"github.com/google/uuid"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
+	mrRepo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
+	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -30,6 +35,7 @@ import (
 
 var (
 	log = logf.Log.WithName("model-deployment--service")
+	defaultWeight            = int32(100)
 )
 
 type Service interface {
@@ -42,11 +48,13 @@ type Service interface {
 	UpdateModelDeploymentStatus(
 		ctx context.Context, id string, status v1alpha1.ModelDeploymentStatus, spec v1alpha1.ModelDeploymentSpec) error
 	CreateModelDeployment(ctx context.Context, mt *deployment.ModelDeployment) error
+	GetDefaultModelRoute(ctx context.Context, mdID string) (*deployment.ModelRoute, error)
 }
 
 type serviceImpl struct {
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
+	mrRepo mrRepo.Repository
 }
 
 func (s serviceImpl) GetModelDeployment(ctx context.Context, id string) (*deployment.ModelDeployment, error) {
@@ -59,8 +67,63 @@ func (s serviceImpl) GetModelDeploymentList(
 	return s.repo.GetModelDeploymentList(ctx, nil, options...)
 }
 
-func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) error {
-	return s.repo.DeleteModelDeployment(ctx, nil, id)
+
+func GetDefaultModelRoute(ctx context.Context, tx *sql.Tx, mdID string, repository mrRepo.Repository) (string, error) {
+
+	mrs, err := repository.GetModelRouteList(ctx, tx, filter.ListFilter(&mrRepo.Filter{
+		Default: []bool{true},
+		MdID: []string{mdID},
+	}))
+	if err != nil {
+		return "", err
+	}
+	if len(mrs) > 1 {
+		return "", fmt.Errorf("model deployment must have one default route, but have %v", len(mrs))
+	}
+	if len(mrs) == 0 {
+		return "", nil
+	}
+	return mrs[0].ID, nil
+}
+
+func (s serviceImpl) GetDefaultModelRoute(ctx context.Context, mdID string) (*deployment.ModelRoute, error) {
+	tx, err := s.mrRepo.BeginTransaction(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		db_utils.FinishTx(tx, err, log)
+	}()
+	id, err := GetDefaultModelRoute(ctx, tx, mdID, s.mrRepo)
+	if err != nil {
+		return nil, err
+	}
+	return s.mrRepo.GetModelRoute(ctx, tx, id)
+}
+
+func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err error) {
+	tx, err := s.repo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		db_utils.FinishTx(tx, err, log)
+	}()
+
+	mrDefaultID, err := GetDefaultModelRoute(ctx, tx, id, s.mrRepo)
+	if err != nil {
+		return err
+	}
+
+	if mrDefaultID != "" {
+		err = s.mrRepo.DeleteModelRoute(ctx, tx, mrDefaultID)
+		if err != nil {
+			return
+		}
+	}
+
+	err = s.repo.DeleteModelDeployment(ctx, tx, id)
+	return
 }
 
 func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
@@ -70,8 +133,7 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.ModelDeployment) error {
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
-	md.Status = v1alpha1.ModelDeploymentStatus{
-	}
+	md.Status = v1alpha1.ModelDeploymentStatus{}
 	return s.repo.UpdateModelDeployment(ctx, nil, md)
 }
 
@@ -123,15 +185,64 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 	return err
 }
 
-func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.ModelDeployment) error {
+
+func constructDefaultRoute(mdID string) deployment.ModelRoute {
+	return deployment.ModelRoute{
+		ID:           mdID + "-" + uuid.New().String()[:5],
+		Default:      true,
+		DeletionMark: false,
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		Spec:         v1alpha1.ModelRouteSpec{
+			URLPrefix:              fmt.Sprintf("/model/%s", mdID),
+			ModelDeploymentTargets: []v1alpha1.ModelDeploymentTarget{
+				{
+					Name:   mdID,
+					Weight: &defaultWeight,
+				},
+			},
+		},
+	}
+}
+
+func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.ModelDeployment) (err error) {
+
+	var tx *sql.Tx
+
+	tx, err = s.repo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		db_utils.FinishTx(tx, err, log)
+	}()
+
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelDeploymentStatus{}
-	return s.repo.CreateModelDeployment(ctx, nil, md)
+	err = s.repo.CreateModelDeployment(ctx, tx, md)
+	if err != nil {
+		return
+	}
+
+
+	exists, err := s.mrRepo.DefaultExists(ctx, md.ID, tx)
+	if err != nil || exists {
+		return err
+	}
+	// Every Model deployment must have a default HTTP route that sends 100% of traffic to the model
+	defRoute := constructDefaultRoute(md.ID)
+	err = s.mrRepo.CreateModelRoute(ctx, tx, &defRoute)
+	if err != nil {
+		return fmt.Errorf("unable to create default ModelRoute: %v", err)
+	}
+
+
+	return err
 }
 
-func NewService(repo repo.Repository) Service {
-	return &serviceImpl{repo: repo}
+func NewService(repo repo.Repository, mrRepo mrRepo.Repository) Service {
+	return &serviceImpl{repo: repo, mrRepo: mrRepo}
 }
 

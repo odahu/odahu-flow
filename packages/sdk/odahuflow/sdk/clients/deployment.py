@@ -21,8 +21,8 @@ import typing
 from urllib import parse
 
 from odahuflow.sdk.clients.api import RemoteAPIClient, AsyncRemoteAPIClient
-from odahuflow.sdk.definitions import MODEL_DEPLOYMENT_URL
-from odahuflow.sdk.models import ModelDeployment
+from odahuflow.sdk.definitions import MODEL_DEPLOYMENT_DEFAULT_ROUTE_URL, MODEL_DEPLOYMENT_URL
+from odahuflow.sdk.models import ModelDeployment, ModelRoute
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,6 +44,14 @@ class ModelDeploymentClient(RemoteAPIClient):
         :return: Model Deployment
         """
         return ModelDeployment.from_dict(self.query(f'{MODEL_DEPLOYMENT_URL}/{name}'))
+
+    def get_default_route(self, name: str) -> ModelRoute:
+        """
+        Get default Model Route for deployment with `name`
+        :param name: name of deployment
+        :return: default ModelRoute that accepts 100% traffic of the model
+        """
+        return ModelRoute.from_dict(self.query(MODEL_DEPLOYMENT_DEFAULT_ROUTE_URL.format(id=name, version='{version}')))
 
     def get_all(self, labels: typing.Dict[str, str] = None) -> typing.List[ModelDeployment]:
         """

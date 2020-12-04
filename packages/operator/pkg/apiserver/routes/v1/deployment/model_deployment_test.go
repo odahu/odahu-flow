@@ -27,12 +27,12 @@ import (
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	dep_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	route_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -75,20 +75,20 @@ type ModelDeploymentRouteSuite struct {
 	g            *GomegaWithT
 	server       *gin.Engine
 	mdService    md_service.Service
-	mdKubeClient kube_client.Client
+	mrService    mr_service.Service
 }
 
 func (s *ModelDeploymentRouteSuite) SetupSuite() {
-	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db})
-	s.mdKubeClient = kube_client.NewClientWithOptions(
-		testNamespace, kubeClient, metav1.DeletePropagationBackground,
-	)
+	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db}, route_post_repository.RouteRepo{
+		DB: db,
+	})
+	s.mrService = mr_service.NewService(route_post_repository.RouteRepo{DB: db})
 }
 
 func (s *ModelDeploymentRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mrService, deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelDeploymentRouteSuite) SetupTest() {
@@ -657,4 +657,24 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIDeleteMD() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
+}
+
+func (s *ModelDeploymentRouteSuite) TestGetDefaultRoute() {
+	s.newMultipleMds()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		strings.Replace(dep_route.GetModelDeploymentDefaultRouteURL, ":id", mdID1, -1),
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var result deployment.ModelRoute
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(result.Default).Should(BeTrue())
 }

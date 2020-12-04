@@ -47,8 +47,6 @@ type ModelRouteState string
 const (
 	ModelRouteStateReady      = ModelRouteState("Ready")
 	ModelRouteStateProcessing = ModelRouteState("Processing")
-	SkipURLValidationKey      = "internal.odahuflow.org.skip_url_validation"
-	SkipURLValidationValue    = "true"
 )
 
 // ModelRouteStatus defines the observed state of ModelRoute

@@ -1,4 +1,4 @@
-package deployment_test
+package postgres_test
 
 import (
 	"database/sql"
@@ -12,8 +12,7 @@ var (
 	db *sql.DB
 )
 
-func testMainWrapper(m *testing.M) int {
-
+func Wrapper(m *testing.M) int {
 	// Setup Test DB
 
 	var closeDB func() error
@@ -28,11 +27,11 @@ func testMainWrapper(m *testing.M) int {
 		return -1
 	}
 
-
 	return m.Run()
-
 }
 
 func TestMain(m *testing.M) {
-	os.Exit(testMainWrapper(m))
+
+	os.Exit(Wrapper(m))
+
 }

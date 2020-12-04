@@ -76,6 +76,11 @@ spec:
                 parameter equals 0.
               format: int32
               type: integer
+            nodeSelector:
+              additionalProperties:
+                type: string
+              description: Node selector for specifying a node pool
+              type: object
             readinessProbeInitialDelay:
               description: Initial delay for readiness probe of model pod
               format: int32
