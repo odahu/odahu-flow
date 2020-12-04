@@ -16,5 +16,5 @@ spec:
   maxReplicas: 1
   livenessProbeInitialDelay: 10
   readinessProbeInitialDelay: 10
-  roleName: test
+  roleName: odahu_custom_role
   imagePullConnID: docker-ci
