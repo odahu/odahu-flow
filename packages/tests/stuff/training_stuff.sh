@@ -8,7 +8,6 @@ MODEL_NAMES=(simple-model fail counter feedback)
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TRAINED_ARTIFACTS_DIR="${DIR}/trained_artifacts"
 ODAHUFLOW_RESOURCES="${DIR}/odahuflow_resources"
-GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
 TEST_DATA="${DIR}/data"
 LOCAL_TEST_DATA="${DIR}/../e2e/robot/tests/local/resources/artifacts"
 COMMAND=setup
