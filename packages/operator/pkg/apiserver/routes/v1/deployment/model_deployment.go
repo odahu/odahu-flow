@@ -17,13 +17,15 @@
 package deployment
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"net/http"
 	"reflect"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -38,6 +40,7 @@ const (
 	CreateModelDeploymentURL          = "/model/deployment"
 	UpdateModelDeploymentURL          = "/model/deployment"
 	DeleteModelDeploymentURL          = "/model/deployment/:id"
+	EventsModelDeploymentURL 		  = "/model/deployment-events"
 	IDMdURLParam                      = "id"
 )
 
@@ -54,9 +57,14 @@ func init() {
 	}
 }
 
+type ModelDeploymentEventGetter interface {
+	Get(ctx context.Context, cursor int) ([]event.DeploymentEvent, int, error)
+}
+
 type ModelDeploymentController struct {
 	mdService   md_service.Service
 	mdValidator *ModelDeploymentValidator
+	eventsReader ModelDeploymentEventGetter
 }
 
 // @Summary Get a Model deployment
@@ -240,4 +248,34 @@ func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, mr)
+}
+
+// @Summary Get Last Changes for ModelDeployment entities
+// @Description Get Last Changes for ModelDeployment entity
+// @Tags Route
+// @Accept  json
+// @Produce  json
+// @Param cursor query int false "Cursor can be passed to get only new changes"
+// @Success 200 {object} event.LatestDeploymentEvents
+// @Failure 400 {object} routes.HTTPResult
+// @Router /api/v1/model/deployment-events [get]
+func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
+	var cursor int
+	var err error
+	if err = ValidateAndParseCursor(c, &cursor); err != nil {
+		return
+	}
+
+	events, newCursor, err := mdc.eventsReader.Get(c.Request.Context(), cursor)
+	if err != nil {
+		logMR.Error(err, "Retrieving list of model deployment events")
+		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+	}
+
+	response := event.LatestDeploymentEvents{
+		Events: events,
+		Cursor: newCursor,
+	}
+	c.JSON(http.StatusOK, response)
+
 }

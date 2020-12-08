@@ -19,9 +19,11 @@ package deployment_test
 import (
 	"context"
 	"database/sql"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	repo_dep "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
-	repo_route "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_interface "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
+	repo_route "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	route_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/testenvs"
@@ -46,6 +48,9 @@ type IntegrationTestSuite struct {
 	repo repo_dep.DeploymentRepo
 	routeRepo repo_route.RouteRepo
 	routeService route_service.Service
+	eventPub *outbox.EventPublisher
+	routeEventGetter *outbox.RouteEventGetter
+	depEventGetter *outbox.DeploymentEventGetter
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
@@ -57,14 +62,36 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	}
 	s.repo = repo_dep.DeploymentRepo{DB: s.DB}
 	s.routeRepo = repo_route.RouteRepo{DB: s.DB}
-	s.service = service.NewService(s.repo, s.routeRepo)
-	s.routeService = route_service.NewService(s.routeRepo)
+	s.eventPub = &outbox.EventPublisher{DB: s.DB}
+	s.service = service.NewService(s.repo, s.routeRepo, s.eventPub)
+	s.routeService = route_service.NewService(s.routeRepo, s.eventPub)
+
+	s.routeEventGetter = &outbox.RouteEventGetter{DB: s.DB}
+	s.depEventGetter = &outbox.DeploymentEventGetter{DB: s.DB}
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
 	if err := s.closeDB(); err != nil {
 		s.T().Fatal("Error during release test DB resources")
 	}
+}
+
+func (s *IntegrationTestSuite) assertLastDepEvent(eventType event.Type, entityID string) {
+	as := assert.New(s.T())
+	events, _, err := s.depEventGetter.Get(context.TODO(), 0)
+	as.NoError(err)
+	lastEvent := events[len(events) - 1]
+	as.Equal(eventType, lastEvent.EventType)
+	as.Equal(entityID, lastEvent.EntityID)
+}
+
+func (s *IntegrationTestSuite) assertLastRouteEvent(eventType event.Type, entityID string) {
+	as := assert.New(s.T())
+	events, _, err := s.routeEventGetter.Get(context.TODO(), 0)
+	as.NoError(err)
+	lastEvent := events[len(events) - 1]
+	as.Equal(eventType, lastEvent.EventType)
+	as.Equal(entityID, lastEvent.EntityID)
 }
 
 
@@ -113,6 +140,12 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	// Add yet another deployment
 	as.NoError(s.service.CreateModelDeployment(ctx, en2))
 
+	// Check events
+	s.assertLastDepEvent(event.ModelDeploymentCreatedEventType, en2.ID)
+	defRoute, err := s.service.GetDefaultModelRoute(ctx, en2.ID)
+	as.NoError(err)
+	s.assertLastRouteEvent(event.ModelRouteCreatedEventType, defRoute.ID)
+
 	// Check count of deployments
 	deps, err = s.repo.GetModelDeploymentList(ctx, nil)
 	as.NoError(err)
@@ -139,7 +172,14 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	as.Len(routes, 1)
 
 	// Delete first deployment
+	defRoute, err = s.service.GetDefaultModelRoute(ctx, en.ID)
 	as.NoError(s.service.DeleteModelDeployment(ctx, en.ID))
+
+	// Check events
+	s.assertLastDepEvent(event.ModelDeploymentDeletedEventType, en.ID)
+	as.NoError(err)
+	s.assertLastRouteEvent(event.ModelRouteDeletedEventType, defRoute.ID)
+
 	// There are not default routes of first deployment
 	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{
 		MdID: []string{en.ID},
