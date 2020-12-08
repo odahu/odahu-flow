@@ -228,7 +228,7 @@ func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 	var cursor int
 	var err error
 
-	if !ValidateAndParseCursor(c, &cursor) {
+	if err = ValidateAndParseCursor(c, &cursor); err != nil {
 		return
 	}
 

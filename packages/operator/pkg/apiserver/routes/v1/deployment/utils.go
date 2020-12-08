@@ -8,8 +8,7 @@ import (
 	"strconv"
 )
 
-func ValidateAndParseCursor(c *gin.Context, cursor *int) (ok bool) {
-	var err error
+func ValidateAndParseCursor(c *gin.Context, cursor *int) (err error) {
 	cursorParam := c.Query("cursor")
 	if cursorParam != "" {
 		*cursor, err = strconv.Atoi(cursorParam)
@@ -19,11 +18,9 @@ func ValidateAndParseCursor(c *gin.Context, cursor *int) (ok bool) {
 			c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{
 				Message: fmt.Sprintf(text, cursorParam, numErr),
 			})
-			return false
 		} else if err != nil && !isNumErr {
 			c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
-			return false
 		}
 	}
-	return true
+	return
 }

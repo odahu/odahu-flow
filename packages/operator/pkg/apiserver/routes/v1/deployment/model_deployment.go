@@ -266,7 +266,7 @@ type ModelDeploymentEventsResponse struct {
 func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
 	var cursor int
 	var err error
-	if !ValidateAndParseCursor(c, &cursor) {
+	if err = ValidateAndParseCursor(c, &cursor); err != nil {
 		return
 	}
 
