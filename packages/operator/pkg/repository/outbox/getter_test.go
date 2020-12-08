@@ -33,7 +33,7 @@ func TestModelRouteGet(t *testing.T) {
 	assert.Equal(t, event1.EntityID, r.EntityID)
 	assert.Equal(t, event1.EventType, r.EventType)
 	assert.Equal(t, payload1, r.Payload)
-	assert.Equal(t, event1.Datetime, r.Datetime.UTC())
+	assert.True(t, event1.Datetime.Equal(r.Datetime))
 
 	payload2 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
 	event2 := outbox.Event{
@@ -61,12 +61,12 @@ func TestModelRouteGet(t *testing.T) {
 	assert.Equal(t, event2.EntityID, r.EntityID)
 	assert.Equal(t, event2.EventType, r.EventType)
 	assert.Equal(t, payload2, r.Payload)
-	assert.Equal(t, event2.Datetime, r.Datetime.UTC())
+	assert.True(t, event2.Datetime.Equal(r.Datetime))
 	r = routes[1]
 	assert.Equal(t, event3.EntityID, r.EntityID)
 	assert.Equal(t, event3.EventType, r.EventType)
 	assert.Equal(t, payload3, r.Payload)
-	assert.Equal(t, event3.Datetime, r.Datetime.UTC())
+	assert.True(t, event3.Datetime.Equal(r.Datetime))
 
 	stmt, _, _ := sq.Delete(outbox.Table).ToSql()
 	_, _ = db.Exec(stmt)
@@ -121,11 +121,11 @@ func TestModelDeploymentGet(t *testing.T) {
 	assert.Equal(t, event2.EntityID, r.EntityID)
 	assert.Equal(t, event2.EventType, r.EventType)
 	assert.Equal(t, payload2, r.Payload)
-	assert.Equal(t, event2.Datetime, r.Datetime.UTC())
+	assert.True(t, event2.Datetime.Equal(r.Datetime.UTC()))
 	r = routes[1]
 	assert.Equal(t, event3.EntityID, r.EntityID)
 	assert.Equal(t, event3.EventType, r.EventType)
-	assert.Equal(t, event3.Datetime, r.Datetime.UTC())
+	assert.True(t, event3.Datetime.Equal(r.Datetime.UTC()))
 
 	stmt, _, _ := sq.Delete(outbox.Table).ToSql()
 	_, _ = db.Exec(stmt)
