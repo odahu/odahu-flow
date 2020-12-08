@@ -17,13 +17,14 @@
 package deployment
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
-
+	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -36,6 +37,7 @@ const (
 	CreateModelRouteURL = "/model/route"
 	UpdateModelRouteURL = "/model/route"
 	DeleteModelRouteURL = "/model/route/:id"
+	EventsModelRouteURL = "/model/route-events"
 	IDMrURLParam        = "id"
 )
 
@@ -43,9 +45,14 @@ var (
 	emptyCache = map[string]int{}
 )
 
+type RoutesEventGetter interface {
+	Get(ctx context.Context, cursor int) ([]event.RouteEvent, int, error)
+}
+
 type ModelRouteController struct {
-	deployKubeClient deploymentclient.Client
-	validator        *MrValidator
+	service      service.Service
+	validator    *MrValidator
+	eventsReader RoutesEventGetter
 }
 
 // @Summary Get a Model route
@@ -62,7 +69,7 @@ type ModelRouteController struct {
 func (mrc *ModelRouteController) getMR(c *gin.Context) {
 	mrID := c.Param(IDMrURLParam)
 
-	mr, err := mrc.deployKubeClient.GetModelRoute(mrID)
+	mr, err := mrc.service.GetModelRoute(c.Request.Context(), mrID)
 	if err != nil {
 		logMR.Error(err, fmt.Sprintf("Retrieving %s model route", mrID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
@@ -92,7 +99,8 @@ func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 		return
 	}
 
-	mrList, err := mrc.deployKubeClient.GetModelRouteList(
+	mrList, err := mrc.service.GetModelRouteList(
+		c.Request.Context(),
 		filter.Size(size),
 		filter.Page(page),
 	)
@@ -132,7 +140,7 @@ func (mrc *ModelRouteController) createMR(c *gin.Context) {
 		return
 	}
 
-	if err := mrc.deployKubeClient.CreateModelRoute(&mr); err != nil {
+	if err := mrc.service.CreateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Creation of the model route: %+v", mr))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -169,7 +177,7 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 		return
 	}
 
-	if err := mrc.deployKubeClient.UpdateModelRoute(&mr); err != nil {
+	if err := mrc.service.UpdateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Update of the model route: %+v", mr))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -193,7 +201,7 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 	mrID := c.Param(IDMrURLParam)
 
-	if err := mrc.deployKubeClient.DeleteModelRoute(mrID); err != nil {
+	if err := mrc.service.DeleteModelRoute(c.Request.Context(), mrID); err != nil {
 		logMR.Error(err, fmt.Sprintf("Deletion of %s model route is failed", mrID))
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
@@ -201,4 +209,35 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model route %s was deleted", mrID)})
+}
+
+// @Summary Get Last Changes for ModelRoute entities
+// @Description Get Last Changes for ModelRoute entity
+// @Tags Route
+// @Accept  json
+// @Produce  json
+// @Param cursor query int false "Cursor can be passed to get only new changes"
+// @Success 200 {object} event.LatestRouteEvents
+// @Failure 400 {object} routes.HTTPResult
+// @Router /api/v1/model/route-events [get]
+func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
+	var cursor int
+	var err error
+
+	if err = ValidateAndParseCursor(c, &cursor); err != nil {
+		return
+	}
+
+	events, newCursor, err := mrc.eventsReader.Get(c.Request.Context(), cursor)
+	if err != nil {
+		logMR.Error(err, "Retrieving list of model route events")
+		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+	}
+
+	response := event.LatestRouteEvents{
+		Events: events,
+		Cursor: newCursor,
+	}
+	c.JSON(http.StatusOK, response)
+
 }

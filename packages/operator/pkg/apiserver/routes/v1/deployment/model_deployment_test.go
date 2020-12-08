@@ -23,20 +23,25 @@ import (
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	dep_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
+	route_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 var (
@@ -75,20 +80,23 @@ type ModelDeploymentRouteSuite struct {
 	g            *GomegaWithT
 	server       *gin.Engine
 	mdService    md_service.Service
-	mdKubeClient kube_client.Client
+	mrService    mr_service.Service
+	mdEventsGetter *mocks.ModelDeploymentEventGetter
 }
 
 func (s *ModelDeploymentRouteSuite) SetupSuite() {
-	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db})
-	s.mdKubeClient = kube_client.NewClientWithOptions(
-		testNamespace, kubeClient, metav1.DeletePropagationBackground,
-	)
+	s.mdService = md_service.NewService(dep_post_repository.DeploymentRepo{DB: db}, route_post_repository.RouteRepo{
+		DB: db,
+	}, outbox.EventPublisher{DB: db})
+	s.mrService = mr_service.NewService(route_post_repository.RouteRepo{DB: db}, outbox.EventPublisher{DB: db})
+	s.mdEventsGetter = &mocks.ModelDeploymentEventGetter{}
 }
 
 func (s *ModelDeploymentRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdEventsGetter, s.mrService, nil,
+		deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelDeploymentRouteSuite) SetupTest() {
@@ -657,4 +665,113 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIDeleteMD() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
+}
+
+func (s *ModelDeploymentRouteSuite) TestGetDefaultRoute() {
+	s.newMultipleMds()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		strings.Replace(dep_route.GetModelDeploymentDefaultRouteURL, ":id", mdID1, -1),
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	var result deployment.ModelRoute
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
+	s.g.Expect(result.Default).Should(BeTrue())
+}
+
+func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsIncorrectCursor() {
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelDeploymentURL + "?cursor=not-number",
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(400))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.g.Expect(result.Message).Should(ContainSubstring("Incorrect \"cursor\" query parameter"))
+}
+
+func (s *ModelDeploymentRouteSuite) TestGetDeploymentEvents() {
+
+	events := []event.DeploymentEvent{
+		{
+			Payload:   deployment.ModelDeployment{ID: "deployment-1"},
+			EventType: event.ModelDeploymentCreatedEventType,
+			Datetime:  time.Time{},
+		},
+		{
+			EntityID:  "deployment-2",
+			EventType: event.ModelDeploymentDeletedEventType,
+			Datetime:  time.Time{},
+		},
+	}
+
+	s.mdEventsGetter.On("Get", mock.Anything, 0).Return(events, 5, nil)
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelDeploymentURL,
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(200))
+
+	var result event.LatestDeploymentEvents
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(result.Cursor).Should(Equal(5))
+	s.g.Expect(result.Events).Should(Equal(events))
+	s.g.Expect(err).NotTo(HaveOccurred())
+}
+
+func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsWithCursor() {
+
+	events := []event.DeploymentEvent{
+		{
+			Payload:   deployment.ModelDeployment{ID: "deployment-1"},
+			EventType: event.ModelRouteCreatedEventType,
+			Datetime:  time.Time{},
+		},
+		{
+			EntityID:  "deployment-2",
+			EventType: event.ModelRouteDeletedEventType,
+			Datetime:  time.Time{},
+		},
+	}
+
+	s.mdEventsGetter.On("Get", mock.Anything, 6).Return(events, 9, nil)
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelDeploymentURL + "?cursor=6",
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(200))
+
+	var result event.LatestDeploymentEvents
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(result.Cursor).Should(Equal(9))
+	s.g.Expect(result.Events).Should(Equal(events))
+	s.g.Expect(err).NotTo(HaveOccurred())
 }
