@@ -94,7 +94,7 @@ func TestModelDeploymentGet(t *testing.T) {
 	assert.Equal(t, event1.EntityID, r.EntityID)
 	assert.Equal(t, event1.EventType, r.EventType)
 	assert.Equal(t, payload1, r.Payload)
-	assert.Equal(t, event1.Datetime, r.Datetime.UTC())
+	assert.True(t, event1.Datetime.Equal(r.Datetime))
 
 	payload2 := deployment.ModelDeployment{Spec: v1alpha1.ModelDeploymentSpec{Image: "Image"}}
 	event2 := outbox.Event{
