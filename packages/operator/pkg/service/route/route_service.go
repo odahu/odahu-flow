@@ -30,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
 var (
@@ -48,9 +49,15 @@ type Service interface {
 	CreateModelRoute(ctx context.Context, mt *route.ModelRoute) error
 }
 
+type EventPublisher interface {
+	PublishEvent(ctx context.Context, tx *sql.Tx, event outbox.Event) (err error)
+}
+
 type serviceImpl struct {
 	// Repository that has "database/sql" underlying storage
 	repo repo.Repository
+	eventPub EventPublisher
+
 }
 
 func (s serviceImpl) GetModelRoute(ctx context.Context, id string) (*route.ModelRoute, error) {
@@ -83,11 +90,33 @@ func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) (err error
 		}
 	}
 
+	event := outbox.Event{EntityID:   id, EventType:  outbox.ModelRouteDeletedEventType,
+		EventGroup: outbox.ModelRouteEventGroup, Payload:    nil}
+	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+		return
+	}
+
 	return s.repo.DeleteModelRoute(ctx, tx, id)
 }
 
-func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) error {
-	return s.repo.SetDeletionMark(ctx, nil, id, value)
+func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool) (err error) {
+
+	tx, err := s.repo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer func(){db_utils.FinishTx(tx, err, log)}()
+
+	event := outbox.Event{
+		EntityID:   id,
+		EventType:  outbox.ModelRouteDeletionMarkIsSetEventType,
+		EventGroup: outbox.ModelRouteEventGroup,
+	}
+	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+		return err
+	}
+
+	return s.repo.SetDeletionMark(ctx, tx, id, value)
 }
 
 func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute) (err error) {
@@ -115,6 +144,15 @@ func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute)
 		}
 	}
 
+	event := outbox.Event{
+		EntityID:   md.ID,
+		EventType:  outbox.ModelRouteUpdatedEventType,
+		EventGroup: outbox.ModelRouteEventGroup,
+		Payload: *md,
+	}
+	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+		return err
+	}
 	return s.repo.UpdateModelRoute(ctx, tx, md)
 }
 
@@ -128,15 +166,7 @@ func (s serviceImpl) UpdateModelRouteStatus(
 	}
 
 	defer func() {
-		if err == nil {
-			if err := tx.Commit(); err != nil {
-				log.Error(err, "Error while commit transaction")
-			}
-		} else {
-			if err := tx.Rollback(); err != nil {
-				log.Error(err, "Error while rollback transaction")
-			}
-		}
+		db_utils.FinishTx(tx, err, log)
 	}()
 
 	oldMt, err := s.repo.GetModelRoute(ctx, tx, id)
@@ -163,10 +193,31 @@ func (s serviceImpl) UpdateModelRouteStatus(
 		return err
 	}
 
+	event := outbox.Event{
+		EntityID:   id,
+		EventType:  outbox.ModelRouteStatusUpdatedEventType,
+		EventGroup: outbox.ModelRouteEventGroup,
+		Payload: route.ModelRoute{
+			Status: status,
+		},
+	}
+	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+		return err
+	}
+
 	return err
 }
 
-func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute) error {
+func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute) (err error) {
+
+	var tx *sql.Tx
+
+	tx, err = s.repo.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	defer func(){db_utils.FinishTx(tx, err, log)}()
+
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
@@ -185,10 +236,21 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 			},
 		},
 	}
-	return s.repo.CreateModelRoute(ctx, nil, md)
+
+	event := outbox.Event{
+		EntityID:   md.ID,
+		EventType:  outbox.ModelRouteCreatedEventType,
+		EventGroup: outbox.ModelRouteEventGroup,
+		Payload: *md,
+	}
+	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+		return err
+	}
+
+	return s.repo.CreateModelRoute(ctx, tx, md)
 }
 
-func NewService(repo repo.Repository) Service {
-	return &serviceImpl{repo: repo}
+func NewService(repo repo.Repository, eventPub EventPublisher) Service {
+	return &serviceImpl{repo: repo, eventPub: eventPub}
 }
 

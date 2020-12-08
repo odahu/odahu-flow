@@ -46,6 +46,10 @@ func SetupTestDB() (db *sql.DB, connString string, close func() error, err error
 			return db, connString, close, err
 		}
 
+		// Sometimes dockertest does not stop container (if test process is killed for example)
+		// We configure auto kill container after 5 minutes.
+		_  = resource.Expire(5 * 60)
+
 		close = func() error {
 			return pool.Purge(resource)
 		}
