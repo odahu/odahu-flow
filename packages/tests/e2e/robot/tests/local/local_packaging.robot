@@ -9,6 +9,7 @@ ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 ${MODEL_RESULT}             {"prediction": [6.3881577909662886, 4.675934265196686], "columns": ["quality"]}
 
 ${LOCAL_CONFIG}             odahuflow/local_packaging
+${DOCKER_PULL_IMAGE}        gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers
 
 *** Settings ***
 Documentation       trainings with spec on cluster & local packagings
@@ -99,7 +100,9 @@ Try Run and Fail Training with invalid credentials
 Try Run and Fail invalid Packaging
     [Tags]  negative
     [Template]  Try Run Packaging with local spec
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Setup]     run keywords
+    ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml  AND
+    ...         StrictShell  docker rmi -f $(docker images -a -q ${DOCKER_PULL_IMAGE})
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
@@ -125,16 +128,16 @@ Try Run and Fail invalid Packaging
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
     ...  --id pack-file-image --no-disable-package-targets --disable-target docker-pull
 
-Run Valid Packaging with local spec
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Template]  Run Packaging with local spec
-    # id	file/dir	artifact path	artifact name	package-targets
-    --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
-    --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
-    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
-    --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
-    --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
-    --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
+# Run Valid Packaging with local spec
+#     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+#     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+#     [Template]  Run Packaging with local spec
+#     # id	file/dir	artifact path	artifact name	package-targets
+#     --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
+#     --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
+#     --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
+#     --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
+#     --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
+#     --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
+#     --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
+#     --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
