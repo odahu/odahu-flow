@@ -24,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
@@ -34,8 +35,8 @@ import (
 	route_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
-	"github.com/stretchr/testify/mock"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
@@ -690,15 +691,15 @@ func (s *ModelRouteSuite) TestGetRouteEventsIncorrectCursor() {
 
 func (s *ModelRouteSuite) TestGetRouteEvents() {
 
-	events := []outbox.RouteEvent{
+	events := []event.RouteEvent{
 		{
 			Payload:   deployment.ModelRoute{ID: "route-1"},
-			EventType: outbox.ModelRouteCreatedEventType,
+			EventType: event.ModelRouteCreatedEventType,
 			Datetime:  time.Time{},
 		},
 		{
 			EntityID:  "route-2",
-			EventType: outbox.ModelRouteDeletedEventType,
+			EventType: event.ModelRouteDeletedEventType,
 			Datetime:  time.Time{},
 		},
 	}
@@ -716,7 +717,7 @@ func (s *ModelRouteSuite) TestGetRouteEvents() {
 	s.server.ServeHTTP(w, req)
 	s.g.Expect(w.Code).Should(Equal(200))
 
-	var result dep_route.RouteEventsResponse
+	var result event.LatestRouteEvents
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(result.Cursor).Should(Equal(5))
 	s.g.Expect(result.Events).Should(Equal(events))
@@ -725,15 +726,15 @@ func (s *ModelRouteSuite) TestGetRouteEvents() {
 
 func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
 
-	events := []outbox.RouteEvent{
+	events := []event.RouteEvent{
 		{
 			Payload:   deployment.ModelRoute{ID: "route-1"},
-			EventType: outbox.ModelRouteCreatedEventType,
+			EventType: event.ModelRouteCreatedEventType,
 			Datetime:  time.Time{},
 		},
 		{
 			EntityID:  "route-2",
-			EventType: outbox.ModelRouteDeletedEventType,
+			EventType: event.ModelRouteDeletedEventType,
 			Datetime:  time.Time{},
 		},
 	}
@@ -751,7 +752,7 @@ func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
 	s.server.ServeHTTP(w, req)
 	s.g.Expect(w.Code).Should(Equal(200))
 
-	var result dep_route.RouteEventsResponse
+	var result event.LatestRouteEvents
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(result.Cursor).Should(Equal(9))
 	s.g.Expect(result.Events).Should(Equal(events))

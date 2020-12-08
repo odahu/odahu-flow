@@ -23,9 +23,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	mrRepo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
 	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -53,7 +53,7 @@ type Service interface {
 }
 
 type EventPublisher interface {
-	PublishEvent(ctx context.Context, tx *sql.Tx, event outbox.Event) (err error)
+	PublishEvent(ctx context.Context, tx *sql.Tx, event event.Event) (err error)
 }
 
 type serviceImpl struct {
@@ -123,16 +123,16 @@ func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err 
 		if err = s.mrRepo.DeleteModelRoute(ctx, tx, mrDefaultID); err != nil {
 			return
 		}
-		event := outbox.Event{EntityID:   mrDefaultID, EventType:  outbox.ModelRouteDeletedEventType,
-			EventGroup: outbox.ModelRouteEventGroup, Payload:    nil}
+		event := event.Event{EntityID: mrDefaultID, EventType: event.ModelRouteDeletedEventType,
+			EventGroup: event.ModelRouteEventGroup, Payload:    nil}
 		if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 			return
 		}
 	}
 
 	err = s.repo.DeleteModelDeployment(ctx, tx, id)
-	event := outbox.Event{EntityID:   id, EventType:  outbox.ModelDeploymentDeletedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup, Payload:    nil}
+	event := event.Event{EntityID: id, EventType: event.ModelDeploymentDeletedEventType,
+		EventGroup: event.ModelDeploymentEventGroup, Payload:    nil}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return
 	}
@@ -147,10 +147,10 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	}
 	defer func(){db_utils.FinishTx(tx, err, log)}()
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   id,
-		EventType:  outbox.ModelDeploymentDeletionMarkIsSetEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup,
+		EventType:  event.ModelDeploymentDeletionMarkIsSetEventType,
+		EventGroup: event.ModelDeploymentEventGroup,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return err
@@ -171,11 +171,11 @@ func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.M
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelDeploymentStatus{}
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   md.ID,
-		EventType:  outbox.ModelDeploymentUpdatedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup,
-		Payload: *md,
+		EventType:  event.ModelDeploymentUpdatedEventType,
+		EventGroup: event.ModelDeploymentEventGroup,
+		Payload:    *md,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return err
@@ -219,10 +219,10 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 		return err
 	}
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   id,
-		EventType:  outbox.ModelDeploymentStatusUpdatedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup,
+		EventType:  event.ModelDeploymentStatusUpdatedEventType,
+		EventGroup: event.ModelDeploymentEventGroup,
 		Payload: deployment.ModelDeployment{
 			Status: status,
 		},
@@ -286,23 +286,23 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 		return fmt.Errorf("unable to create default ModelRoute: %v", err)
 	}
 
-	event := outbox.Event{
+	e := event.Event{
 		EntityID:   md.ID,
-		EventType:  outbox.ModelDeploymentCreatedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup,
-		Payload: *md,
+		EventType:  event.ModelDeploymentCreatedEventType,
+		EventGroup: event.ModelDeploymentEventGroup,
+		Payload:    *md,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 
-	event = outbox.Event{
+	e = event.Event{
 		EntityID:   defRoute.ID,
-		EventType:  outbox.ModelRouteCreatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup,
-		Payload: defRoute,
+		EventType:  event.ModelRouteCreatedEventType,
+		EventGroup: event.ModelRouteEventGroup,
+		Payload:    defRoute,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 

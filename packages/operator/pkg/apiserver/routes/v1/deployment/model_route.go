@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
-	outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"net/http"
@@ -46,7 +46,7 @@ var (
 )
 
 type RoutesEventGetter interface {
-	Get(ctx context.Context, cursor int) ([]outbox.RouteEvent, int, error)
+	Get(ctx context.Context, cursor int) ([]event.RouteEvent, int, error)
 }
 
 type ModelRouteController struct {
@@ -211,17 +211,13 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model route %s was deleted", mrID)})
 }
 
-type RouteEventsResponse struct {
-	Events []outbox.RouteEvent `json:"events"`
-	Cursor int                 `json:"cursor"`
-}
 // @Summary Get Last Changes for ModelRoute entities
 // @Description Get Last Changes for ModelRoute entity
 // @Tags Route
 // @Accept  json
 // @Produce  json
 // @Param cursor query int false "Cursor can be passed to get only new changes"
-// @Success 200 {object} RouteEventsResponse
+// @Success 200 {object} event.LatestRouteEvents
 // @Failure 400 {object} routes.HTTPResult
 // @Router /api/v1/model/route-events [get]
 func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
@@ -238,7 +234,7 @@ func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 	}
 
-	response := RouteEventsResponse{
+	response := event.LatestRouteEvents{
 		Events: events,
 		Cursor: newCursor,
 	}

@@ -6,6 +6,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -18,9 +19,9 @@ func TestModelRouteGet(t *testing.T) {
 
 
 	payload1 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
-	event1 := outbox.Event{
-		EntityID:   "event1", EventType: outbox.ModelRouteCreatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
+	event1 := event.Event{
+		EntityID:   "event1", EventType: event.ModelRouteCreatedEventType,
+		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
 		Payload:    payload1,
 	}
 	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
@@ -36,18 +37,18 @@ func TestModelRouteGet(t *testing.T) {
 	assert.True(t, event1.Datetime.Equal(r.Datetime))
 
 	payload2 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
-	event2 := outbox.Event{
-		EntityID:   "event2", EventType: outbox.ModelRouteCreatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
+	event2 := event.Event{
+		EntityID:   "event2", EventType: event.ModelRouteCreatedEventType,
+		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
 		Payload:    payload2,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
 	assert.NoError(t, err)
 
 	payload3 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
-	event3 := outbox.Event{
-		EntityID:   "event3", EventType: outbox.ModelRouteCreatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
+	event3 := event.Event{
+		EntityID:   "event3", EventType: event.ModelRouteCreatedEventType,
+		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
 		Payload:    payload3,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event3)
@@ -79,9 +80,9 @@ func TestModelDeploymentGet(t *testing.T) {
 
 
 	payload1 := deployment.ModelDeployment{Spec: v1alpha1.ModelDeploymentSpec{Image: "Image"}}
-	event1 := outbox.Event{
-		EntityID:   "event1", EventType: outbox.ModelDeploymentCreatedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
+	event1 := event.Event{
+		EntityID:   "event1", EventType: event.ModelDeploymentCreatedEventType,
+		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
 		Payload:    payload1,
 	}
 	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
@@ -97,17 +98,17 @@ func TestModelDeploymentGet(t *testing.T) {
 	assert.True(t, event1.Datetime.Equal(r.Datetime))
 
 	payload2 := deployment.ModelDeployment{Spec: v1alpha1.ModelDeploymentSpec{Image: "Image"}}
-	event2 := outbox.Event{
-		EntityID:   "event2", EventType: outbox.ModelDeploymentCreatedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
+	event2 := event.Event{
+		EntityID:   "event2", EventType: event.ModelDeploymentCreatedEventType,
+		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
 		Payload:    payload2,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
 	assert.NoError(t, err)
 
-	event3 := outbox.Event{
-		EntityID:   "event3", EventType: outbox.ModelDeploymentDeletedEventType,
-		EventGroup: outbox.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
+	event3 := event.Event{
+		EntityID:   "event3", EventType: event.ModelDeploymentDeletedEventType,
+		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
 		Payload:    nil,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event3)

@@ -19,9 +19,11 @@ package deployment_test
 import (
 	"context"
 	"database/sql"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	repo_dep "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
-	repo_route "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_interface "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
+	repo_route "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	route_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/testenvs"
@@ -29,7 +31,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
 
@@ -75,7 +76,7 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 	}
 }
 
-func (s *IntegrationTestSuite) assertLastDepEvent(eventType outbox.EventType, entityID string) {
+func (s *IntegrationTestSuite) assertLastDepEvent(eventType event.Type, entityID string) {
 	as := assert.New(s.T())
 	events, _, err := s.depEventGetter.Get(context.TODO(), 0)
 	as.NoError(err)
@@ -84,7 +85,7 @@ func (s *IntegrationTestSuite) assertLastDepEvent(eventType outbox.EventType, en
 	as.Equal(entityID, lastEvent.EntityID)
 }
 
-func (s *IntegrationTestSuite) assertLastRouteEvent(eventType outbox.EventType, entityID string) {
+func (s *IntegrationTestSuite) assertLastRouteEvent(eventType event.Type, entityID string) {
 	as := assert.New(s.T())
 	events, _, err := s.routeEventGetter.Get(context.TODO(), 0)
 	as.NoError(err)
@@ -140,10 +141,10 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	as.NoError(s.service.CreateModelDeployment(ctx, en2))
 
 	// Check events
-	s.assertLastDepEvent(outbox.ModelDeploymentCreatedEventType, en2.ID)
+	s.assertLastDepEvent(event.ModelDeploymentCreatedEventType, en2.ID)
 	defRoute, err := s.service.GetDefaultModelRoute(ctx, en2.ID)
 	as.NoError(err)
-	s.assertLastRouteEvent(outbox.ModelRouteCreatedEventType, defRoute.ID)
+	s.assertLastRouteEvent(event.ModelRouteCreatedEventType, defRoute.ID)
 
 	// Check count of deployments
 	deps, err = s.repo.GetModelDeploymentList(ctx, nil)
@@ -175,9 +176,9 @@ func (s *IntegrationTestSuite) TestFullCase() {
 	as.NoError(s.service.DeleteModelDeployment(ctx, en.ID))
 
 	// Check events
-	s.assertLastDepEvent(outbox.ModelDeploymentDeletedEventType, en.ID)
+	s.assertLastDepEvent(event.ModelDeploymentDeletedEventType, en.ID)
 	as.NoError(err)
-	s.assertLastRouteEvent(outbox.ModelRouteDeletedEventType, defRoute.ID)
+	s.assertLastRouteEvent(event.ModelRouteDeletedEventType, defRoute.ID)
 
 	// There are not default routes of first deployment
 	routes, err = s.routeRepo.GetModelRouteList(ctx, nil, filter.ListFilter(&route_interface.Filter{

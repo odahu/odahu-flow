@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"net/http"
@@ -58,7 +58,7 @@ func init() {
 }
 
 type ModelDeploymentEventGetter interface {
-	Get(ctx context.Context, cursor int) ([]outbox.DeploymentEvent, int, error)
+	Get(ctx context.Context, cursor int) ([]event.DeploymentEvent, int, error)
 }
 
 type ModelDeploymentController struct {
@@ -250,17 +250,13 @@ func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
 	c.JSON(http.StatusOK, mr)
 }
 
-type ModelDeploymentEventsResponse struct {
-	Events []outbox.DeploymentEvent `json:"events"`
-	Cursor int                 `json:"cursor"`
-}
 // @Summary Get Last Changes for ModelDeployment entities
 // @Description Get Last Changes for ModelDeployment entity
 // @Tags Route
 // @Accept  json
 // @Produce  json
 // @Param cursor query int false "Cursor can be passed to get only new changes"
-// @Success 200 {object} ModelDeploymentEventsResponse
+// @Success 200 {object} event.LatestDeploymentEvents
 // @Failure 400 {object} routes.HTTPResult
 // @Router /api/v1/model/deployment-events [get]
 func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
@@ -276,7 +272,7 @@ func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
 		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 	}
 
-	response := ModelDeploymentEventsResponse{
+	response := event.LatestDeploymentEvents{
 		Events: events,
 		Cursor: newCursor,
 	}
