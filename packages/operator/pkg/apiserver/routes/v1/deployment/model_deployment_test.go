@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
@@ -707,15 +708,15 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsIncorrectCursor() {
 
 func (s *ModelDeploymentRouteSuite) TestGetDeploymentEvents() {
 
-	events := []outbox.DeploymentEvent{
+	events := []event.DeploymentEvent{
 		{
 			Payload:   deployment.ModelDeployment{ID: "deployment-1"},
-			EventType: outbox.ModelDeploymentCreatedEventType,
+			EventType: event.ModelDeploymentCreatedEventType,
 			Datetime:  time.Time{},
 		},
 		{
 			EntityID:  "deployment-2",
-			EventType: outbox.ModelDeploymentDeletedEventType,
+			EventType: event.ModelDeploymentDeletedEventType,
 			Datetime:  time.Time{},
 		},
 	}
@@ -733,7 +734,7 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEvents() {
 	s.server.ServeHTTP(w, req)
 	s.g.Expect(w.Code).Should(Equal(200))
 
-	var result dep_route.ModelDeploymentEventsResponse
+	var result event.LatestDeploymentEvents
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(result.Cursor).Should(Equal(5))
 	s.g.Expect(result.Events).Should(Equal(events))
@@ -742,15 +743,15 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEvents() {
 
 func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsWithCursor() {
 
-	events := []outbox.DeploymentEvent{
+	events := []event.DeploymentEvent{
 		{
 			Payload:   deployment.ModelDeployment{ID: "deployment-1"},
-			EventType: outbox.ModelRouteCreatedEventType,
+			EventType: event.ModelRouteCreatedEventType,
 			Datetime:  time.Time{},
 		},
 		{
 			EntityID:  "deployment-2",
-			EventType: outbox.ModelRouteDeletedEventType,
+			EventType: event.ModelRouteDeletedEventType,
 			Datetime:  time.Time{},
 		},
 	}
@@ -768,7 +769,7 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsWithCursor() {
 	s.server.ServeHTTP(w, req)
 	s.g.Expect(w.Code).Should(Equal(200))
 
-	var result dep_route.ModelDeploymentEventsResponse
+	var result event.LatestDeploymentEvents
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(result.Cursor).Should(Equal(9))
 	s.g.Expect(result.Events).Should(Equal(events))

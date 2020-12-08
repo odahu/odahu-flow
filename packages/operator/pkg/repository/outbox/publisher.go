@@ -4,35 +4,18 @@ import (
 	"context"
 	"database/sql"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
 
-
-type EventType string
-type EventGroup string
-
 const (
 	Table = "odahu_outbox"
-
-	ModelRouteCreatedEventType           EventType  = "ModelRouteCreated"
-	ModelRouteDeletedEventType           EventType  = "ModelRouteDeleted"
-	ModelRouteUpdatedEventType           EventType  = "ModelRouteUpdate"
-	ModelRouteStatusUpdatedEventType     EventType  = "ModelRouteStatusUpdated"
-	ModelRouteDeletionMarkIsSetEventType EventType  = "ModelRouteDeletionMarkIsSet"
-	ModelRouteEventGroup                 EventGroup = "ModelRoute"
-
-	ModelDeploymentCreatedEventType           EventType  = "ModelDeploymentCreated"
-	ModelDeploymentDeletedEventType           EventType  = "ModelDeploymentDeleted"
-	ModelDeploymentUpdatedEventType           EventType  = "ModelDeploymentUpdated"
-	ModelDeploymentStatusUpdatedEventType     EventType  = "ModelDeploymentStatusUpdated"
-	ModelDeploymentDeletionMarkIsSetEventType EventType  = "ModelDeploymentDeletionMarkIsSet"
-	ModelDeploymentEventGroup                 EventGroup = "ModelDeployment"
 )
 
 
-func EventTypeOK(available []EventType, actual EventType) bool {
+func EventTypeOK(available []event.Type, actual event.Type) bool {
 	for _, e := range available {
 		if e == actual {
 			return true
@@ -57,14 +40,6 @@ const (
 	PayloadCol = "payload"
 )
 
-type Event struct {
-	EntityID string
-	EventType EventType
-	EventGroup EventGroup
-	Datetime time.Time
-	Payload  interface{}
-}
-
 type EventPublisher struct {
 	DB *sql.DB
 }
@@ -73,7 +48,7 @@ const (
 	IDCol = "id"
 )
 
-func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event Event) (err error) {
+func (repo EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event event.Event) (err error) {
 
 	if tx == nil {
 		tx, err = repo.DB.BeginTx(ctx, txOptions)

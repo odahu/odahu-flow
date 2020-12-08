@@ -5,9 +5,9 @@ package mocks
 import (
 	context "context"
 
-	mock "github.com/stretchr/testify/mock"
+	event "github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 
-	outbox "github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
+	mock "github.com/stretchr/testify/mock"
 
 	sql "database/sql"
 )
@@ -17,13 +17,13 @@ type EventPublisher struct {
 	mock.Mock
 }
 
-// PublishEvent provides a mock function with given fields: ctx, tx, event
-func (_m *EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, event outbox.Event) error {
-	ret := _m.Called(ctx, tx, event)
+// PublishEvent provides a mock function with given fields: ctx, tx, _a2
+func (_m *EventPublisher) PublishEvent(ctx context.Context, tx *sql.Tx, _a2 event.Event) error {
+	ret := _m.Called(ctx, tx, _a2)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, outbox.Event) error); ok {
-		r0 = rf(ctx, tx, event)
+	if rf, ok := ret.Get(0).(func(context.Context, *sql.Tx, event.Event) error); ok {
+		r0 = rf(ctx, tx, _a2)
 	} else {
 		r0 = ret.Error(0)
 	}

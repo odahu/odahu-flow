@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	route "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route"
 	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
@@ -30,7 +31,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
 var (
@@ -50,7 +50,7 @@ type Service interface {
 }
 
 type EventPublisher interface {
-	PublishEvent(ctx context.Context, tx *sql.Tx, event outbox.Event) (err error)
+	PublishEvent(ctx context.Context, tx *sql.Tx, event event.Event) (err error)
 }
 
 type serviceImpl struct {
@@ -90,8 +90,8 @@ func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) (err error
 		}
 	}
 
-	event := outbox.Event{EntityID:   id, EventType:  outbox.ModelRouteDeletedEventType,
-		EventGroup: outbox.ModelRouteEventGroup, Payload:    nil}
+	event := event.Event{EntityID: id, EventType: event.ModelRouteDeletedEventType,
+		EventGroup: event.ModelRouteEventGroup, Payload:    nil}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return
 	}
@@ -107,10 +107,10 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	}
 	defer func(){db_utils.FinishTx(tx, err, log)}()
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   id,
-		EventType:  outbox.ModelRouteDeletionMarkIsSetEventType,
-		EventGroup: outbox.ModelRouteEventGroup,
+		EventType:  event.ModelRouteDeletionMarkIsSetEventType,
+		EventGroup: event.ModelRouteEventGroup,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return err
@@ -144,11 +144,11 @@ func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute)
 		}
 	}
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   md.ID,
-		EventType:  outbox.ModelRouteUpdatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup,
-		Payload: *md,
+		EventType:  event.ModelRouteUpdatedEventType,
+		EventGroup: event.ModelRouteEventGroup,
+		Payload:    *md,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return err
@@ -193,10 +193,10 @@ func (s serviceImpl) UpdateModelRouteStatus(
 		return err
 	}
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   id,
-		EventType:  outbox.ModelRouteStatusUpdatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup,
+		EventType:  event.ModelRouteStatusUpdatedEventType,
+		EventGroup: event.ModelRouteEventGroup,
 		Payload: route.ModelRoute{
 			Status: status,
 		},
@@ -237,11 +237,11 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 		},
 	}
 
-	event := outbox.Event{
+	event := event.Event{
 		EntityID:   md.ID,
-		EventType:  outbox.ModelRouteCreatedEventType,
-		EventGroup: outbox.ModelRouteEventGroup,
-		Payload: *md,
+		EventType:  event.ModelRouteCreatedEventType,
+		EventGroup: event.ModelRouteEventGroup,
+		Payload:    *md,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
 		return err

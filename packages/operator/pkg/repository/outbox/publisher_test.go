@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	sq "github.com/Masterminds/squirrel"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/testhelpers/testenvs"
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,7 @@ func (c CustomPayload) Value() (driver.Value, error) {
 
 func TestRaiseEvent(t *testing.T) {
 	eventPublisher := &outbox.EventPublisher{DB: db}
-	event1 := outbox.Event{
+	event1 := event.Event{
 		EntityID:   "CustomID",
 		EventType:  "Create",
 		EventGroup: "CustomEventGroup",
@@ -72,7 +73,7 @@ func TestRaiseEvent(t *testing.T) {
 	}
 	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
 	assert.NoError(t, err)
-	event2 := outbox.Event{
+	event2 := event.Event{
 		EntityID:   "CustomID-2",
 		EventType:  "Create",
 		EventGroup: "CustomEventGroup",
@@ -81,7 +82,7 @@ func TestRaiseEvent(t *testing.T) {
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
 	assert.NoError(t, err)
-	event1Delete := outbox.Event{
+	event1Delete := event.Event{
 		EntityID:   "CustomID",
 		EventType:  "Delete",
 		EventGroup: "CustomEventGroup",
@@ -106,7 +107,7 @@ func TestRaiseEvent(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.True(t, rows.Next())
-	e := outbox.Event{}
+	e := event.Event{}
 	p := CustomPayload{}
 	assert.NoError(t, rows.Scan(&e.EntityID, &e.EventType, &e.EventGroup, &e.Datetime, &p))
 	e.Datetime = e.Datetime.UTC()
