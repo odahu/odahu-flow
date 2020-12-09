@@ -32,23 +32,27 @@ def _reset_credentials():
     Clean credentials from config file
     :return:
     """
-    update_config_file(API_URL=None,
-                       API_TOKEN=None,
-                       API_REFRESH_TOKEN=None,
-                       API_ACCESS_TOKEN=None,
-                       API_ISSUING_URL=None,
-                       ODAHUFLOWCTL_OAUTH_CLIENT_ID=None,
-                       ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=None,
-                       ISSUER_URL=None,
-                       MODEL_HOST=None)
+    update_config_file(
+        API_URL=None,
+        API_TOKEN=None,
+        API_REFRESH_TOKEN=None,
+        API_ACCESS_TOKEN=None,
+        API_ISSUING_URL=None,
+        ODAHUFLOWCTL_OAUTH_CLIENT_ID=None,
+        ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=None,
+        ISSUER_URL=None,
+        MODEL_HOST=None,
+    )
 
 
 @click.command()
-@click.option('--url', 'api_host', help='API server host', required=True)
-@click.option('--token', help='API server jwt token')
-@click.option('--client_id', help='client_id for OAuth2 Client Credentials flow')
-@click.option('--client_secret', help='client_secret for OAuth2 Client Credentials flow')
-@click.option('--issuer', help='OIDC Issuer URL')
+@click.option("--url", "api_host", help="API server host", required=True)
+@click.option("--token", help="API server jwt token")
+@click.option("--client_id", help="client_id for OAuth2 Client Credentials flow")
+@click.option(
+    "--client_secret", help="client_secret for OAuth2 Client Credentials flow"
+)
+@click.option("--issuer", help="OIDC Issuer URL")
 def login(api_host: str, token: str, client_id: str, client_secret: str, issuer: str):
     """
     Authorize on API endpoint.
@@ -64,7 +68,7 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
         API_TOKEN=token,
         ODAHUFLOWCTL_OAUTH_CLIENT_ID=client_id,
         ODAHUFLOWCTL_OAUTH_CLIENT_SECRET=client_secret,
-        ISSUER_URL=issuer
+        ISSUER_URL=issuer,
     )
 
     # set predicates
@@ -74,27 +78,37 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
 
     # validate
     if is_token_login and is_client_cred_login:
-        raise UsageError('You should use either --token or --client_id/--client_secret to login. '
-                         'Otherwise skipp all options to launch interactive login mode')
+        raise UsageError(
+            "You should use either --token or --client_id/--client_secret to login. "
+            "Otherwise skipp all options to launch interactive login mode"
+        )
     if is_client_cred_login and (not client_id or not client_secret):
-        raise UsageError('You must pass both client_id and client_secret to client_credentials login')
+        raise UsageError(
+            "You must pass both client_id and client_secret to client_credentials login"
+        )
     if is_client_cred_login and not issuer:
-        raise UsageError('You must provide --issuer parameter to do client_credentials login. '
-                         'Or set ISSUER_URL option in config file')
+        raise UsageError(
+            "You must provide --issuer parameter to do client_credentials login. "
+            "Or set ISSUER_URL option in config file"
+        )
 
     # login
-    api_client = api.RemoteAPIClient(api_host, token, client_id, client_secret,
-                                     non_interactive=not is_interactive_login,
-                                     issuer_url=issuer)
+    api_client = api.RemoteAPIClient(
+        api_host,
+        token,
+        client_id,
+        client_secret,
+        non_interactive=not is_interactive_login,
+        issuer_url=issuer,
+    )
     try:
         api_client.info()
-        print('Success! Credentials have been saved.')
+        print("Success! Credentials have been saved.")
     except api.IncorrectAuthorizationToken as wrong_token:
-        LOGGER.error('Wrong authorization token\n%s', wrong_token)
+        LOGGER.error("Wrong authorization token\n%s", wrong_token)
         raise
     except api.APIConnectionException as connection_exc:
-        LOGGER.error(f'Failed to connect to API host! '
-                     f'Error: {connection_exc}')
+        LOGGER.error(f"Failed to connect to API host! " f"Error: {connection_exc}")
         raise
 
 
@@ -104,4 +118,4 @@ def logout():
     Remove all authorization data from the configuration file
     """
     _reset_credentials()
-    click.echo('All authorization credentials have been removed')
+    click.echo("All authorization credentials have been removed")

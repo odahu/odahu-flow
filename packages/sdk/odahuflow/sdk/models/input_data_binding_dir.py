@@ -16,7 +16,12 @@ class InputDataBindingDir(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, data_binding: ConnectionSpec=None, local_path: str=None, remote_path: str=None):  # noqa: E501
+    def __init__(
+        self,
+        data_binding: ConnectionSpec = None,
+        local_path: str = None,
+        remote_path: str = None,
+    ):  # noqa: E501
         """InputDataBindingDir - a model defined in Swagger
 
         :param data_binding: The data_binding of this InputDataBindingDir.  # noqa: E501
@@ -27,15 +32,15 @@ class InputDataBindingDir(Model):
         :type remote_path: str
         """
         self.swagger_types = {
-            'data_binding': ConnectionSpec,
-            'local_path': str,
-            'remote_path': str
+            "data_binding": ConnectionSpec,
+            "local_path": str,
+            "remote_path": str,
         }
 
         self.attribute_map = {
-            'data_binding': 'dataBinding',
-            'local_path': 'localPath',
-            'remote_path': 'remotePath'
+            "data_binding": "dataBinding",
+            "local_path": "localPath",
+            "remote_path": "remotePath",
         }
 
         self._data_binding = data_binding
@@ -43,7 +48,7 @@ class InputDataBindingDir(Model):
         self._remote_path = remote_path
 
     @classmethod
-    def from_dict(cls, dikt) -> 'InputDataBindingDir':
+    def from_dict(cls, dikt) -> "InputDataBindingDir":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -172,6 +172,21 @@ install-python-linter:
 python-lint:
 	scripts/lint.sh
 
+## install-python-formatter: Install python formatter
+install-python-formatter:
+	pip install black==20.8b1
+
+## python-format: Format python packages
+python-format:
+	black packages/sdk
+	black packages/cli
+	black packages/robot
+
+## configure-git: Configure repo git config
+configure-git:
+	git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+
 ## generate-python-client: Generate python models
 generate-python-client:
 	mkdir -p ${MOCKS_DIR}
@@ -193,6 +208,11 @@ generate-python-client:
 	mkdir -p ${PYTHON_MODEL_DIR}
 	cp -r ${MOCKS_DIR}/python/odahuflow/sdk/models/* ${PYTHON_MODEL_DIR}
 	git add ${PYTHON_MODEL_DIR}
+
+
+## Install dev requirements
+install-dev-requirements:
+	pip install -r pip-dev-requirements.txt
 
 ## install-python-tests: Install python test dependencies
 install-python-tests:

@@ -7,7 +7,9 @@ from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.node_pool import NodePool  # noqa: F401,E501
-from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import (
+    ResourceRequirements,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -17,7 +19,23 @@ class ModelTrainingConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, gpu_node_pools: List[NodePool]=None, gpu_tolerations: str=None, metric_url: str=None, model_trainer_image: str=None, namespace: str=None, node_pools: List[NodePool]=None, output_connection_id: str=None, service_account: str=None, timeout: str=None, tolerations: str=None, toolchain_integration_namespace: str=None, toolchain_integration_repository_type: str=None):  # noqa: E501
+    def __init__(
+        self,
+        default_resources: ResourceRequirements = None,
+        enabled: bool = None,
+        gpu_node_pools: List[NodePool] = None,
+        gpu_tolerations: str = None,
+        metric_url: str = None,
+        model_trainer_image: str = None,
+        namespace: str = None,
+        node_pools: List[NodePool] = None,
+        output_connection_id: str = None,
+        service_account: str = None,
+        timeout: str = None,
+        tolerations: str = None,
+        toolchain_integration_namespace: str = None,
+        toolchain_integration_repository_type: str = None,
+    ):  # noqa: E501
         """ModelTrainingConfig - a model defined in Swagger
 
         :param default_resources: The default_resources of this ModelTrainingConfig.  # noqa: E501
@@ -50,37 +68,37 @@ class ModelTrainingConfig(Model):
         :type toolchain_integration_repository_type: str
         """
         self.swagger_types = {
-            'default_resources': ResourceRequirements,
-            'enabled': bool,
-            'gpu_node_pools': List[NodePool],
-            'gpu_tolerations': str,
-            'metric_url': str,
-            'model_trainer_image': str,
-            'namespace': str,
-            'node_pools': List[NodePool],
-            'output_connection_id': str,
-            'service_account': str,
-            'timeout': str,
-            'tolerations': str,
-            'toolchain_integration_namespace': str,
-            'toolchain_integration_repository_type': str
+            "default_resources": ResourceRequirements,
+            "enabled": bool,
+            "gpu_node_pools": List[NodePool],
+            "gpu_tolerations": str,
+            "metric_url": str,
+            "model_trainer_image": str,
+            "namespace": str,
+            "node_pools": List[NodePool],
+            "output_connection_id": str,
+            "service_account": str,
+            "timeout": str,
+            "tolerations": str,
+            "toolchain_integration_namespace": str,
+            "toolchain_integration_repository_type": str,
         }
 
         self.attribute_map = {
-            'default_resources': 'defaultResources',
-            'enabled': 'enabled',
-            'gpu_node_pools': 'gpuNodePools',
-            'gpu_tolerations': 'gpuTolerations',
-            'metric_url': 'metricUrl',
-            'model_trainer_image': 'modelTrainerImage',
-            'namespace': 'namespace',
-            'node_pools': 'nodePools',
-            'output_connection_id': 'outputConnectionID',
-            'service_account': 'serviceAccount',
-            'timeout': 'timeout',
-            'tolerations': 'tolerations',
-            'toolchain_integration_namespace': 'toolchainIntegrationNamespace',
-            'toolchain_integration_repository_type': 'toolchainIntegrationRepositoryType'
+            "default_resources": "defaultResources",
+            "enabled": "enabled",
+            "gpu_node_pools": "gpuNodePools",
+            "gpu_tolerations": "gpuTolerations",
+            "metric_url": "metricUrl",
+            "model_trainer_image": "modelTrainerImage",
+            "namespace": "namespace",
+            "node_pools": "nodePools",
+            "output_connection_id": "outputConnectionID",
+            "service_account": "serviceAccount",
+            "timeout": "timeout",
+            "tolerations": "tolerations",
+            "toolchain_integration_namespace": "toolchainIntegrationNamespace",
+            "toolchain_integration_repository_type": "toolchainIntegrationRepositoryType",
         }
 
         self._default_resources = default_resources
@@ -96,10 +114,12 @@ class ModelTrainingConfig(Model):
         self._timeout = timeout
         self._tolerations = tolerations
         self._toolchain_integration_namespace = toolchain_integration_namespace
-        self._toolchain_integration_repository_type = toolchain_integration_repository_type
+        self._toolchain_integration_repository_type = (
+            toolchain_integration_repository_type
+        )
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelTrainingConfig':
+    def from_dict(cls, dikt) -> "ModelTrainingConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -410,7 +430,9 @@ class ModelTrainingConfig(Model):
         return self._toolchain_integration_repository_type
 
     @toolchain_integration_repository_type.setter
-    def toolchain_integration_repository_type(self, toolchain_integration_repository_type: str):
+    def toolchain_integration_repository_type(
+        self, toolchain_integration_repository_type: str
+    ):
         """Sets the toolchain_integration_repository_type of this ModelTrainingConfig.
 
         Storage backend for toolchain integrations. Available options:   * kubernetes   * postgres  # noqa: E501
@@ -419,4 +441,6 @@ class ModelTrainingConfig(Model):
         :type toolchain_integration_repository_type: str
         """
 
-        self._toolchain_integration_repository_type = toolchain_integration_repository_type
+        self._toolchain_integration_repository_type = (
+            toolchain_integration_repository_type
+        )

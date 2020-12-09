@@ -43,7 +43,7 @@ class ModelPackagingClient(RemoteAPIClient):
         :type name: str
         :return: Model Packaging
         """
-        return ModelPackaging.from_dict(self.query(f'{MODEL_PACKING_URL}/{name}'))
+        return ModelPackaging.from_dict(self.query(f"{MODEL_PACKING_URL}/{name}"))
 
     def get_all(self) -> List[ModelPackaging]:
         """
@@ -61,7 +61,7 @@ class ModelPackagingClient(RemoteAPIClient):
         :return Message from API server
         """
         return ModelPackaging.from_dict(
-            self.query(MODEL_PACKING_URL, action='POST', payload=mr.to_dict())
+            self.query(MODEL_PACKING_URL, action="POST", payload=mr.to_dict())
         )
 
     def edit(self, mr: ModelPackaging) -> ModelPackaging:
@@ -72,7 +72,7 @@ class ModelPackagingClient(RemoteAPIClient):
         :return Message from API server
         """
         return ModelPackaging.from_dict(
-            self.query(MODEL_PACKING_URL, action='PUT', payload=mr.to_dict())
+            self.query(MODEL_PACKING_URL, action="PUT", payload=mr.to_dict())
         )
 
     def delete(self, name: str) -> str:
@@ -82,7 +82,7 @@ class ModelPackagingClient(RemoteAPIClient):
         :param name: Name of a Model Packaging
         :return Message from API server
         """
-        return self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')['message']
+        return self.query(f"{MODEL_PACKING_URL}/{name}", action="DELETE")["message"]
 
     def log(self, name: str, follow: bool = False) -> Iterator[str]:
         """
@@ -92,7 +92,9 @@ class ModelPackagingClient(RemoteAPIClient):
         :param name: Name of a Model Packaging
         :return Message from API server
         """
-        return self.stream(f'{MODEL_PACKING_URL}/{name}/log', 'GET', params={'follow': follow})
+        return self.stream(
+            f"{MODEL_PACKING_URL}/{name}/log", "GET", params={"follow": follow}
+        )
 
 
 class AsyncModelPackagingClient(AsyncRemoteAPIClient):
@@ -108,7 +110,7 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
         :type name: str
         :return: Model Packaging
         """
-        return ModelPackaging.from_dict(await self.query(f'{MODEL_PACKING_URL}/{name}'))
+        return ModelPackaging.from_dict(await self.query(f"{MODEL_PACKING_URL}/{name}"))
 
     async def get_all(self) -> List[ModelPackaging]:
         """
@@ -116,7 +118,9 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
 
         :return: all Model Packagings
         """
-        return [ModelPackaging.from_dict(mr) for mr in await self.query(MODEL_PACKING_URL)]
+        return [
+            ModelPackaging.from_dict(mr) for mr in await self.query(MODEL_PACKING_URL)
+        ]
 
     async def create(self, mr: ModelPackaging) -> ModelPackaging:
         """
@@ -126,7 +130,7 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ModelPackaging.from_dict(
-            await self.query(MODEL_PACKING_URL, action='POST', payload=mr.to_dict())
+            await self.query(MODEL_PACKING_URL, action="POST", payload=mr.to_dict())
         )
 
     async def edit(self, mr: ModelPackaging) -> ModelPackaging:
@@ -137,7 +141,7 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ModelPackaging.from_dict(
-            await self.query(MODEL_PACKING_URL, action='PUT', payload=mr.to_dict())
+            await self.query(MODEL_PACKING_URL, action="PUT", payload=mr.to_dict())
         )
 
     async def delete(self, name: str) -> str:
@@ -147,16 +151,20 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Packaging
         :return Message from API server
         """
-        return await self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')['message']
+        return await self.query(f"{MODEL_PACKING_URL}/{name}", action="DELETE")[
+            "message"
+        ]
 
     async def log(self, name: str, follow: bool = False) -> AsyncIterable:
         """
-            Stream logs from packaging
+        Stream logs from packaging
 
-            :param follow: follow stream
-            :param name: Name of a Model Packaging
-            :return Message from API server
-            """
-        params = {'follow': 'true' if follow else 'false'}
-        async for chunk in self.stream(f'{MODEL_PACKING_URL}/{name}/log', 'GET', params=params):
+        :param follow: follow stream
+        :param name: Name of a Model Packaging
+        :return Message from API server
+        """
+        params = {"follow": "true" if follow else "false"}
+        async for chunk in self.stream(
+            f"{MODEL_PACKING_URL}/{name}/log", "GET", params=params
+        ):
             yield chunk

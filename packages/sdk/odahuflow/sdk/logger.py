@@ -36,9 +36,11 @@ def configure_logging(verbose: bool):
     else:
         log_level = DISABLED_VERBOSE_LOG_LEVEL
 
-    logging.basicConfig(level=log_level,
-                        format='%(asctime)s - %(levelname)s - %(message)s',
-                        stream=sys.stderr)
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        stream=sys.stderr,
+    )
 
 
 def is_verbose_enabled() -> bool:

@@ -19,7 +19,7 @@ Color output
 import colorama
 from termcolor import colored
 
-TRAIN_LOGS_COLOR = 'cyan'
+TRAIN_LOGS_COLOR = "cyan"
 colorama.init()
 
 

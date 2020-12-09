@@ -17,7 +17,9 @@ class Schema(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, arguments: JsonSchema=None, targets: List[TargetSchema]=None):  # noqa: E501
+    def __init__(
+        self, arguments: JsonSchema = None, targets: List[TargetSchema] = None
+    ):  # noqa: E501
         """Schema - a model defined in Swagger
 
         :param arguments: The arguments of this Schema.  # noqa: E501
@@ -25,21 +27,15 @@ class Schema(Model):
         :param targets: The targets of this Schema.  # noqa: E501
         :type targets: List[TargetSchema]
         """
-        self.swagger_types = {
-            'arguments': JsonSchema,
-            'targets': List[TargetSchema]
-        }
+        self.swagger_types = {"arguments": JsonSchema, "targets": List[TargetSchema]}
 
-        self.attribute_map = {
-            'arguments': 'arguments',
-            'targets': 'targets'
-        }
+        self.attribute_map = {"arguments": "arguments", "targets": "targets"}
 
         self._arguments = arguments
         self._targets = targets
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Schema':
+    def from_dict(cls, dikt) -> "Schema":
         """Returns the dict as a model
 
         :param dikt: A dict.

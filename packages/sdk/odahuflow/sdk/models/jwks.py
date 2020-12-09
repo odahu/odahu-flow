@@ -15,7 +15,9 @@ class JWKS(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, enabled: bool=None, issuer: str=None, url: str=None):  # noqa: E501
+    def __init__(
+        self, enabled: bool = None, issuer: str = None, url: str = None
+    ):  # noqa: E501
         """JWKS - a model defined in Swagger
 
         :param enabled: The enabled of this JWKS.  # noqa: E501
@@ -25,24 +27,16 @@ class JWKS(Model):
         :param url: The url of this JWKS.  # noqa: E501
         :type url: str
         """
-        self.swagger_types = {
-            'enabled': bool,
-            'issuer': str,
-            'url': str
-        }
+        self.swagger_types = {"enabled": bool, "issuer": str, "url": str}
 
-        self.attribute_map = {
-            'enabled': 'enabled',
-            'issuer': 'issuer',
-            'url': 'url'
-        }
+        self.attribute_map = {"enabled": "enabled", "issuer": "issuer", "url": "url"}
 
         self._enabled = enabled
         self._issuer = issuer
         self._url = url
 
     @classmethod
-    def from_dict(cls, dikt) -> 'JWKS':
+    def from_dict(cls, dikt) -> "JWKS":
         """Returns the dict as a model
 
         :param dikt: A dict.

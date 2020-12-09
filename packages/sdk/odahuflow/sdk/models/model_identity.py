@@ -15,7 +15,9 @@ class ModelIdentity(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, artifact_name_template: str=None, name: str=None, version: str=None):  # noqa: E501
+    def __init__(
+        self, artifact_name_template: str = None, name: str = None, version: str = None
+    ):  # noqa: E501
         """ModelIdentity - a model defined in Swagger
 
         :param artifact_name_template: The artifact_name_template of this ModelIdentity.  # noqa: E501
@@ -26,15 +28,15 @@ class ModelIdentity(Model):
         :type version: str
         """
         self.swagger_types = {
-            'artifact_name_template': str,
-            'name': str,
-            'version': str
+            "artifact_name_template": str,
+            "name": str,
+            "version": str,
         }
 
         self.attribute_map = {
-            'artifact_name_template': 'artifactNameTemplate',
-            'name': 'name',
-            'version': 'version'
+            "artifact_name_template": "artifactNameTemplate",
+            "name": "name",
+            "version": "version",
         }
 
         self._artifact_name_template = artifact_name_template
@@ -42,7 +44,7 @@ class ModelIdentity(Model):
         self._version = version
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelIdentity':
+    def from_dict(cls, dikt) -> "ModelIdentity":
         """Returns the dict as a model
 
         :param dikt: A dict.

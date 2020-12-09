@@ -8,24 +8,31 @@ import docker
 from docker.models.containers import Container
 from docker.types import Mount
 from odahuflow.sdk import config
-from odahuflow.sdk.local.docker_utils import stream_container_logs, \
-    convert_labels_to_filter, cleanup_docker_containers, PACKAGING_DOCKER_LABELS, raise_error_if_container_failed
+from odahuflow.sdk.local.docker_utils import (
+    stream_container_logs,
+    convert_labels_to_filter,
+    cleanup_docker_containers,
+    PACKAGING_DOCKER_LABELS,
+    raise_error_if_container_failed,
+)
 from odahuflow.sdk.logger import is_verbose_enabled
 from odahuflow.sdk.models import K8sPackager
 
-PACKAGER_CONF_FILE_PATH = 'mp.json'
-PACKAGER_RESULT_FILE_PATH = 'result.json'
-ARTIFACT_PATH = '/trained_artifact'
+PACKAGER_CONF_FILE_PATH = "mp.json"
+PACKAGER_RESULT_FILE_PATH = "result.json"
+ARTIFACT_PATH = "/trained_artifact"
 
 LOGGER = logging.getLogger(__name__)
 
 
 def create_mp_config_file(config_dir: str, packager: K8sPackager) -> None:
-    with open(join(config_dir, PACKAGER_CONF_FILE_PATH), 'w') as f:
+    with open(join(config_dir, PACKAGER_CONF_FILE_PATH), "w") as f:
         packager_dict = packager.to_dict()
         json.dump(packager_dict, f)
 
-        LOGGER.debug(f"Saved the packaging configuration:\n{json.dumps(packager_dict, indent=2)}")
+        LOGGER.debug(
+            f"Saved the packaging configuration:\n{json.dumps(packager_dict, indent=2)}"
+        )
 
 
 def read_mp_result_file(config_dir: str) -> Dict[str, Any]:
@@ -39,20 +46,18 @@ def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
 
     # removing .zip extension if there's one
     artifact_name = packager.model_packaging.spec.artifact_name.strip()
-    if artifact_name.endswith('.zip'):
+    if artifact_name.endswith(".zip"):
         packager.model_packaging.spec.artifact_name = artifact_name[:-4]
 
     # make full artifact path with artifact name
-    artifact_path = join(
-        artifact_path,
-        packager.model_packaging.spec.artifact_name
-    )
+    artifact_path = join(artifact_path, packager.model_packaging.spec.artifact_name)
 
     create_mp_config_file(artifact_path, packager)
 
     client = docker.from_env()
     container: Container = client.containers.run(
-        packager.model_packaging.spec.image or packager.packaging_integration.spec.default_image,
+        packager.model_packaging.spec.image
+        or packager.packaging_integration.spec.default_image,
         stderr=True,
         stdout=True,
         working_dir=ARTIFACT_PATH,
@@ -61,19 +66,20 @@ def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
             ARTIFACT_PATH,
             # specified path for Docker Linux Container ignoring OS
             str(PurePosixPath(ARTIFACT_PATH, PACKAGER_CONF_FILE_PATH)),
-        ] + [v for v in ("--verbose",) if is_verbose_enabled()],
+        ]
+        + [v for v in ("--verbose",) if is_verbose_enabled()],
         mounts=[
             Mount(ARTIFACT_PATH, artifact_path, type="bind"),
-            Mount("/var/run/docker.sock", "/var/run/docker.sock", type="bind")
+            Mount("/var/run/docker.sock", "/var/run/docker.sock", type="bind"),
         ],
         detach=True,
         labels=PACKAGING_DOCKER_LABELS,
     )
 
     container_info = client.api.inspect_container(container.id)
-    LOGGER.debug(f'Container info:\n{json.dumps(container_info, indent=2)}')
+    LOGGER.debug(f"Container info:\n{json.dumps(container_info, indent=2)}")
 
-    print(f'Packaging docker image {container.id} has started. Stream logs:')
+    print(f"Packaging docker image {container.id} has started. Stream logs:")
     stream_container_logs(container)
 
     raise_error_if_container_failed(container.id)

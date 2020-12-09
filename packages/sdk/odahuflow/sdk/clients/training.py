@@ -42,7 +42,7 @@ class ModelTrainingClient(RemoteAPIClient):
         :type name: str
         :return: Model Training
         """
-        return ModelTraining.from_dict(self.query(f'{MODEL_TRAINING_URL}/{name}'))
+        return ModelTraining.from_dict(self.query(f"{MODEL_TRAINING_URL}/{name}"))
 
     def get_all(self) -> List[ModelTraining]:
         """
@@ -60,7 +60,7 @@ class ModelTrainingClient(RemoteAPIClient):
         :return Message from API server
         """
         return ModelTraining.from_dict(
-            self.query(MODEL_TRAINING_URL, action='POST', payload=mt.to_dict())
+            self.query(MODEL_TRAINING_URL, action="POST", payload=mt.to_dict())
         )
 
     def edit(self, mt: ModelTraining) -> ModelTraining:
@@ -71,7 +71,7 @@ class ModelTrainingClient(RemoteAPIClient):
         :return Message from API server
         """
         return ModelTraining.from_dict(
-            self.query(MODEL_TRAINING_URL, action='PUT', payload=mt.to_dict())
+            self.query(MODEL_TRAINING_URL, action="PUT", payload=mt.to_dict())
         )
 
     def delete(self, name: str) -> str:
@@ -81,7 +81,7 @@ class ModelTrainingClient(RemoteAPIClient):
         :param name: Name of a Model Training
         :return Message from API server
         """
-        return self.query(f'{MODEL_TRAINING_URL}/{name}', action='DELETE')['message']
+        return self.query(f"{MODEL_TRAINING_URL}/{name}", action="DELETE")["message"]
 
     def log(self, name: str, follow: bool = False) -> Iterator[str]:
         """
@@ -91,7 +91,9 @@ class ModelTrainingClient(RemoteAPIClient):
         :param name: Name of a Model Training
         :return Message from API server
         """
-        return self.stream(f'{MODEL_TRAINING_URL}/{name}/log', 'GET', params={'follow': follow})
+        return self.stream(
+            f"{MODEL_TRAINING_URL}/{name}/log", "GET", params={"follow": follow}
+        )
 
 
 class AsyncModelTrainingClient(AsyncRemoteAPIClient):
@@ -107,7 +109,7 @@ class AsyncModelTrainingClient(AsyncRemoteAPIClient):
         :type name: str
         :return: Model Training
         """
-        return ModelTraining.from_dict(await self.query(f'{MODEL_TRAINING_URL}/{name}'))
+        return ModelTraining.from_dict(await self.query(f"{MODEL_TRAINING_URL}/{name}"))
 
     async def get_all(self) -> List[ModelTraining]:
         """
@@ -115,7 +117,9 @@ class AsyncModelTrainingClient(AsyncRemoteAPIClient):
 
         :return: all Model Trainings
         """
-        return [ModelTraining.from_dict(mt) for mt in await self.query(MODEL_TRAINING_URL)]
+        return [
+            ModelTraining.from_dict(mt) for mt in await self.query(MODEL_TRAINING_URL)
+        ]
 
     async def create(self, mt: ModelTraining) -> ModelTraining:
         """
@@ -125,7 +129,7 @@ class AsyncModelTrainingClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ModelTraining.from_dict(
-            await self.query(MODEL_TRAINING_URL, action='POST', payload=mt.to_dict())
+            await self.query(MODEL_TRAINING_URL, action="POST", payload=mt.to_dict())
         )
 
     async def edit(self, mt: ModelTraining) -> ModelTraining:
@@ -136,7 +140,7 @@ class AsyncModelTrainingClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ModelTraining.from_dict(
-            await self.query(MODEL_TRAINING_URL, action='PUT', payload=mt.to_dict())
+            await self.query(MODEL_TRAINING_URL, action="PUT", payload=mt.to_dict())
         )
 
     async def delete(self, name: str) -> str:
@@ -146,7 +150,9 @@ class AsyncModelTrainingClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Training
         :return Message from API server
         """
-        return (await self.query(f'{MODEL_TRAINING_URL}/{name}', action='DELETE'))['message']
+        return (await self.query(f"{MODEL_TRAINING_URL}/{name}", action="DELETE"))[
+            "message"
+        ]
 
     async def log(self, name: str, follow: bool = False) -> AsyncIterable:
         """
@@ -156,6 +162,8 @@ class AsyncModelTrainingClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Training
         :return Message from API server
         """
-        params = {'follow': 'true' if follow else 'false'}
-        async for chunk in self.stream(f'{MODEL_TRAINING_URL}/{name}/log', 'GET', params=params):
+        params = {"follow": "true" if follow else "false"}
+        async for chunk in self.stream(
+            f"{MODEL_TRAINING_URL}/{name}/log", "GET", params=params
+        ):
             yield chunk

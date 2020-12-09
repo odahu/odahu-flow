@@ -18,15 +18,9 @@ from typing import Dict, List
 import docker
 from docker.models.containers import Container
 
-WORKSPACE_PATH = '/workspace'
-TRAINING_DOCKER_LABELS: Dict[str, str] = {
-    "component": "odahu",
-    "api": "training"
-}
-PACKAGING_DOCKER_LABELS: Dict[str, str] = {
-    "component": "odahu",
-    "api": "packaging"
-}
+WORKSPACE_PATH = "/workspace"
+TRAINING_DOCKER_LABELS: Dict[str, str] = {"component": "odahu", "api": "training"}
+PACKAGING_DOCKER_LABELS: Dict[str, str] = {"component": "odahu", "api": "packaging"}
 
 
 def raise_error_if_container_failed(container_id: str) -> None:
@@ -36,7 +30,7 @@ def raise_error_if_container_failed(container_id: str) -> None:
 
     container_exit_code = container_info.get("State", {}).get("ExitCode", 0)
     if container_exit_code != 0:
-        raise Exception(f'Container finished with {container_exit_code} error code')
+        raise Exception(f"Container finished with {container_exit_code} error code")
 
 
 def stream_container_logs(container: Container) -> None:
@@ -47,7 +41,7 @@ def stream_container_logs(container: Container) -> None:
     logs = container.logs(stream=True, follow=True)
     for log in logs:
         for line in log.splitlines():
-            print(f'[Container {container.id[:5]}] {line.decode()}')
+            print(f"[Container {container.id[:5]}] {line.decode()}")
 
 
 def convert_labels_to_filter(labels: Dict[str, str]) -> List[str]:
@@ -56,20 +50,22 @@ def convert_labels_to_filter(labels: Dict[str, str]) -> List[str]:
     :param labels: container labels
     :return: filters
     """
-    return list(map(lambda item: f'{item[0]}={item[1]}', labels.items()))
+    return list(map(lambda item: f"{item[0]}={item[1]}", labels.items()))
 
 
 def cleanup_docker_containers(labels: List[str]):
     client = docker.from_env()
-    containers = client.containers.list(filters={
-        "status": "exited",
-        "label": labels,
-    })
+    containers = client.containers.list(
+        filters={
+            "status": "exited",
+            "label": labels,
+        }
+    )
 
     if not containers:
-        print('There are no containers')
+        print("There are no containers")
         return
 
     for container in containers:
-        print(f'{container.id} container has been deleted')
+        print(f"{container.id} container has been deleted")
         container.remove()

@@ -18,7 +18,7 @@ from odahuflow.cli.parsers import template
 
 
 def test_get_all_template_names(cli_runner: CliRunner):
-    result = cli_runner.invoke(template.template, ['all'])
+    result = cli_runner.invoke(template.template, ["all"])
 
     assert result.exit_code == 0
     assert result.output
@@ -28,7 +28,7 @@ def test_get_all_template_names(cli_runner: CliRunner):
 
 
 def test_generate_template_by_name(cli_runner: CliRunner):
-    result = cli_runner.invoke(template.template, ['generate', '--name', 'deployment'])
+    result = cli_runner.invoke(template.template, ["generate", "--name", "deployment"])
 
     assert result.exit_code == 0
     assert result.output
@@ -37,7 +37,7 @@ def test_generate_template_by_name(cli_runner: CliRunner):
 
 
 def test_generate_not_present_template(cli_runner: CliRunner):
-    result = cli_runner.invoke(template.template, ['generate', '--name', 'not_present'])
+    result = cli_runner.invoke(template.template, ["generate", "--name", "not_present"])
 
     assert result.exit_code != 0
     assert result.exception

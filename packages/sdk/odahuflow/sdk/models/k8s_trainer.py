@@ -7,9 +7,13 @@ from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.connection import Connection  # noqa: F401,E501
-from odahuflow.sdk.models.input_data_binding_dir import InputDataBindingDir  # noqa: F401,E501
+from odahuflow.sdk.models.input_data_binding_dir import (
+    InputDataBindingDir,
+)  # noqa: F401,E501
 from odahuflow.sdk.models.model_training import ModelTraining  # noqa: F401,E501
-from odahuflow.sdk.models.toolchain_integration import ToolchainIntegration  # noqa: F401,E501
+from odahuflow.sdk.models.toolchain_integration import (
+    ToolchainIntegration,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -19,7 +23,14 @@ class K8sTrainer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, toolchain_integration: ToolchainIntegration=None, vcs: Connection=None):  # noqa: E501
+    def __init__(
+        self,
+        input_data: List[InputDataBindingDir] = None,
+        model_training: ModelTraining = None,
+        output_conn: Connection = None,
+        toolchain_integration: ToolchainIntegration = None,
+        vcs: Connection = None,
+    ):  # noqa: E501
         """K8sTrainer - a model defined in Swagger
 
         :param input_data: The input_data of this K8sTrainer.  # noqa: E501
@@ -34,19 +45,19 @@ class K8sTrainer(Model):
         :type vcs: Connection
         """
         self.swagger_types = {
-            'input_data': List[InputDataBindingDir],
-            'model_training': ModelTraining,
-            'output_conn': Connection,
-            'toolchain_integration': ToolchainIntegration,
-            'vcs': Connection
+            "input_data": List[InputDataBindingDir],
+            "model_training": ModelTraining,
+            "output_conn": Connection,
+            "toolchain_integration": ToolchainIntegration,
+            "vcs": Connection,
         }
 
         self.attribute_map = {
-            'input_data': 'inputData',
-            'model_training': 'modelTraining',
-            'output_conn': 'outputConn',
-            'toolchain_integration': 'toolchainIntegration',
-            'vcs': 'vcs'
+            "input_data": "inputData",
+            "model_training": "modelTraining",
+            "output_conn": "outputConn",
+            "toolchain_integration": "toolchainIntegration",
+            "vcs": "vcs",
         }
 
         self._input_data = input_data
@@ -56,7 +67,7 @@ class K8sTrainer(Model):
         self._vcs = vcs
 
     @classmethod
-    def from_dict(cls, dikt) -> 'K8sTrainer':
+    def from_dict(cls, dikt) -> "K8sTrainer":
         """Returns the dict as a model
 
         :param dikt: A dict.

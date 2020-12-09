@@ -16,7 +16,13 @@ class TrainerConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, auth: AuthConfig=None, model_training_id: str=None, mt_file: str=None, output_dir: str=None):  # noqa: E501
+    def __init__(
+        self,
+        auth: AuthConfig = None,
+        model_training_id: str = None,
+        mt_file: str = None,
+        output_dir: str = None,
+    ):  # noqa: E501
         """TrainerConfig - a model defined in Swagger
 
         :param auth: The auth of this TrainerConfig.  # noqa: E501
@@ -29,17 +35,17 @@ class TrainerConfig(Model):
         :type output_dir: str
         """
         self.swagger_types = {
-            'auth': AuthConfig,
-            'model_training_id': str,
-            'mt_file': str,
-            'output_dir': str
+            "auth": AuthConfig,
+            "model_training_id": str,
+            "mt_file": str,
+            "output_dir": str,
         }
 
         self.attribute_map = {
-            'auth': 'auth',
-            'model_training_id': 'modelTrainingId',
-            'mt_file': 'mtFile',
-            'output_dir': 'outputDir'
+            "auth": "auth",
+            "model_training_id": "modelTrainingId",
+            "mt_file": "mtFile",
+            "output_dir": "outputDir",
         }
 
         self._auth = auth
@@ -48,7 +54,7 @@ class TrainerConfig(Model):
         self._output_dir = output_dir
 
     @classmethod
-    def from_dict(cls, dikt) -> 'TrainerConfig':
+    def from_dict(cls, dikt) -> "TrainerConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

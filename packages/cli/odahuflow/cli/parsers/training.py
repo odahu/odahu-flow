@@ -25,19 +25,30 @@ from requests import RequestException
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
-    IGNORE_NOT_FOUND_ERROR_MESSAGE
+from odahuflow.cli.utils.error_handler import (
+    check_id_or_file_params_present,
+    TIMEOUT_ERROR_MESSAGE,
+    IGNORE_NOT_FOUND_ERROR_MESSAGE,
+)
 from odahuflow.cli.utils.logs import print_logs
-from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, \
-    validate_output_format
+from odahuflow.cli.utils.output import (
+    format_output,
+    DEFAULT_OUTPUT_FORMAT,
+    validate_output_format,
+)
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, \
-    APIConnectionException
-from odahuflow.sdk.clients.api_aggregated import \
-    parse_resources_file_with_one_item
-from odahuflow.sdk.clients.training import ModelTraining, ModelTrainingClient, \
-    TRAINING_SUCCESS_STATE, \
-    TRAINING_FAILED_STATE
+from odahuflow.sdk.clients.api import (
+    EntityAlreadyExists,
+    WrongHttpStatusCode,
+    APIConnectionException,
+)
+from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
+from odahuflow.sdk.clients.training import (
+    ModelTraining,
+    ModelTrainingClient,
+    TRAINING_SUCCESS_STATE,
+    TRAINING_FAILED_STATE,
+)
 
 DEFAULT_WAIT_TIMEOUT = 3
 # 1 hour
@@ -48,8 +59,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def training(ctx: click.core.Context, url: str, token: str):
     """
@@ -60,9 +71,15 @@ def training(ctx: click.core.Context, url: str, token: str):
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--train-id", "--id", help="Model training ID")
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def get(client: ModelTrainingClient, train_id: str, output_format: str):
     """
@@ -90,18 +107,37 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(), required=True,
-              help='Path to the file with training')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
-              help='timeout in seconds. for wait (if no-wait is off)')
-@click.option('--ignore-if-exists', is_flag=True,
-              help='Ignore if entity is already exists on API server. Return success status code')
+@click.option("--train-id", "--id", help="Model training ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with training",
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=DEFAULT_TRAINING_TIMEOUT,
+    type=int,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
+@click.option(
+    "--ignore-if-exists",
+    is_flag=True,
+    help="Ignore if entity is already exists on API server. Return success status code",
+)
 @pass_obj
-def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
-           timeout: int, ignore_if_exists: bool):
+def create(
+    client: ModelTrainingClient,
+    train_id: str,
+    file: str,
+    wait: bool,
+    timeout: int,
+    ignore_if_exists: bool,
+):
     """
     \b
     Create a training.
@@ -122,7 +158,7 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
     """
     train = parse_resources_file_with_one_item(file).resource
     if not isinstance(train, ModelTraining):
-        raise ValueError(f'ModelTraining expected, but {type(train)} provided')
+        raise ValueError(f"ModelTraining expected, but {type(train)} provided")
 
     if train_id:
         train.id = train_id
@@ -131,8 +167,8 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
         train = client.create(train)
     except EntityAlreadyExists as e:
         if ignore_if_exists:
-            LOGGER.debug(f'--ignore-if-exists was passed: {e} will be suppressed')
-            click.echo('Training already exists')
+            LOGGER.debug(f"--ignore-if-exists was passed: {e} will be suppressed")
+            click.echo("Training already exists")
             return
         raise
 
@@ -141,16 +177,27 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(), required=True,
-              help='Path to the file with training')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=DEFAULT_TRAINING_TIMEOUT, type=int,
-              help='timeout in seconds. for wait (if no-wait is off)')
+@click.option("--train-id", "--id", help="Model training ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with training",
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=DEFAULT_TRAINING_TIMEOUT,
+    type=int,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
 @pass_obj
-def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
-         timeout: int):
+def edit(
+    client: ModelTrainingClient, train_id: str, file: str, wait: bool, timeout: int
+):
     """
     \b
     Rerun a training.
@@ -170,7 +217,7 @@ def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
     """
     train = parse_resources_file_with_one_item(file).resource
     if not isinstance(train, ModelTraining):
-        raise ValueError(f'Model training expected, but {type(train)} provided')
+        raise ValueError(f"Model training expected, but {type(train)} provided")
 
     if train_id:
         train.id = train_id
@@ -182,14 +229,17 @@ def edit(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(),
-              help='Path to the file with training')
-@click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if Model Training is not found')
+@click.option("--train-id", "--id", help="Model training ID")
+@click.option("--file", "-f", type=click.Path(), help="Path to the file with training")
+@click.option(
+    "--ignore-not-found/--not-ignore-not-found",
+    default=False,
+    help="ignore if Model Training is not found",
+)
 @pass_obj
-def delete(client: ModelTrainingClient, train_id: str, file: str,
-           ignore_not_found: bool):
+def delete(
+    client: ModelTrainingClient, train_id: str, file: str, ignore_not_found: bool
+):
     """
     \b
     Delete a training.
@@ -213,8 +263,7 @@ def delete(client: ModelTrainingClient, train_id: str, file: str,
     if file:
         train = parse_resources_file_with_one_item(file).resource
         if not isinstance(train, ModelTraining):
-            raise ValueError(
-                f'Model training expected, but {type(train)} provided')
+            raise ValueError(f"Model training expected, but {type(train)} provided")
 
         train_id = train.id
 
@@ -225,15 +274,17 @@ def delete(client: ModelTrainingClient, train_id: str, file: str,
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelTraining.__name__, id=train_id))
+        click.echo(
+            IGNORE_NOT_FOUND_ERROR_MESSAGE.format(
+                kind=ModelTraining.__name__, id=train_id
+            )
+        )
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
-@click.option('--file', '-f', type=click.Path(),
-              help='Path to the file with training')
-@click.option('--follow/--not-follow', default=True,
-              help='Follow logs stream')
+@click.option("--train-id", "--id", help="Model training ID")
+@click.option("--file", "-f", type=click.Path(), help="Path to the file with training")
+@click.option("--follow/--not-follow", default=True, help="Follow logs stream")
 @pass_obj
 def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
     """
@@ -256,8 +307,7 @@ def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
     if file:
         train = parse_resources_file_with_one_item(file).resource
         if not isinstance(train, ModelTraining):
-            raise ValueError(
-                f'Model training expected, but {type(train)} provided')
+            raise ValueError(f"Model training expected, but {type(train)} provided")
 
         train_id = train.id
 
@@ -265,8 +315,9 @@ def logs(client: ModelTrainingClient, train_id: str, file: str, follow: bool):
         print_logs(msg)
 
 
-def wait_training_finish(timeout: int, wait: bool, mt_id: str,
-                         mt_client: ModelTrainingClient):
+def wait_training_finish(
+    timeout: int, wait: bool, mt_id: str, mt_client: ModelTrainingClient
+):
     """
     Wait for training to finish according to command line arguments
 
@@ -280,8 +331,7 @@ def wait_training_finish(timeout: int, wait: bool, mt_id: str,
 
     start = time.time()
     if timeout <= 0:
-        raise Exception(
-            'Invalid --timeout argument: should be positive integer')
+        raise Exception("Invalid --timeout argument: should be positive integer")
 
     # We create a separate client for logs because it has the different timeout settings
     log_mt_client = ModelTrainingClient.construct_from_other(mt_client)
@@ -298,21 +348,27 @@ def wait_training_finish(timeout: int, wait: bool, mt_id: str,
             mt = mt_client.get(mt_id)
             if mt.status.state == TRAINING_SUCCESS_STATE:
                 click.echo(
-                    f'Model {mt_id} was trained. Training took {round(time.time() - start)} seconds')
+                    f"Model {mt_id} was trained. Training took {round(time.time() - start)} seconds"
+                )
                 return
             elif mt.status.state == TRAINING_FAILED_STATE:
-                raise Exception(f'Model training {mt_id} was failed.')
+                raise Exception(f"Model training {mt_id} was failed.")
             elif mt.status.state == "":
                 click.echo(f"Can't determine the state of {mt.id}. Sleeping...")
             else:
                 for msg in log_mt_client.log(mt.id, follow=True):
                     print_logs(msg)
 
-        except (WrongHttpStatusCode, HTTPException, RequestException,
-                APIConnectionException) as e:
+        except (
+            WrongHttpStatusCode,
+            HTTPException,
+            RequestException,
+            APIConnectionException,
+        ) as e:
             LOGGER.info(
-                'Callback have not confirmed completion of the operation. Exception: %s',
-                str(e))
+                "Callback have not confirmed completion of the operation. Exception: %s",
+                str(e),
+            )
 
-        LOGGER.debug('Sleep before next request')
+        LOGGER.debug("Sleep before next request")
         time.sleep(DEFAULT_WAIT_TIMEOUT)

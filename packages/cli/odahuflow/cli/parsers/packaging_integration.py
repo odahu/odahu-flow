@@ -19,20 +19,29 @@ import click
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, IGNORE_NOT_FOUND_ERROR_MESSAGE
-from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
+from odahuflow.cli.utils.error_handler import (
+    check_id_or_file_params_present,
+    IGNORE_NOT_FOUND_ERROR_MESSAGE,
+)
+from odahuflow.cli.utils.output import (
+    format_output,
+    DEFAULT_OUTPUT_FORMAT,
+    validate_output_format,
+)
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient
 from odahuflow.sdk.models import PackagingIntegration
 
-ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide a packaging integration ID or file parameter, not both.'
+ID_AND_FILE_MISSED_ERROR_MESSAGE = (
+    "You should provide a packaging integration ID or file parameter, not both."
+)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def packaging_integration(ctx: click.core.Context, url: str, token: str):
     """
@@ -43,9 +52,15 @@ def packaging_integration(ctx: click.core.Context, url: str, token: str):
 
 
 @packaging_integration.command()
-@click.option('--pi-id', '--id', help='Packaging integration ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--pi-id", "--id", help="Packaging integration ID")
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def get(client: PackagingIntegrationClient, pi_id: str, output_format: str):
     """
@@ -69,12 +84,26 @@ def get(client: PackagingIntegrationClient, pi_id: str, output_format: str):
 
 
 @packaging_integration.command()
-@click.option('--pi-id', '--id', help='Packaging integration ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--pi-id", "--id", help="Packaging integration ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with packaging integration",
+)
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
-def create(client: PackagingIntegrationClient, pi_id: str, file: str, output_format: str):
+def create(
+    client: PackagingIntegrationClient, pi_id: str, file: str, output_format: str
+):
     """
     Create a packaging integration.\n
     You should specify a path to file with a packaging integration.
@@ -92,7 +121,7 @@ def create(client: PackagingIntegrationClient, pi_id: str, file: str, output_for
     """
     pi = parse_resources_file_with_one_item(file).resource
     if not isinstance(pi, PackagingIntegration):
-        raise ValueError(f'Packaging integration expected, but {type(pi)} provided')
+        raise ValueError(f"Packaging integration expected, but {type(pi)} provided")
 
     if pi_id:
         pi.id = pi_id
@@ -101,10 +130,22 @@ def create(client: PackagingIntegrationClient, pi_id: str, file: str, output_for
 
 
 @packaging_integration.command()
-@click.option('--pi-id', '--id', help='Packaging integration ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--pi-id", "--id", help="Packaging integration ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with packaging integration",
+)
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def edit(client: PackagingIntegrationClient, pi_id: str, file: str, output_format: str):
     """
@@ -124,7 +165,7 @@ def edit(client: PackagingIntegrationClient, pi_id: str, file: str, output_forma
     """
     pi = parse_resources_file_with_one_item(file).resource
     if not isinstance(pi, PackagingIntegration):
-        raise ValueError(f'Packaging integration expected, but {type(pi)} provided')
+        raise ValueError(f"Packaging integration expected, but {type(pi)} provided")
 
     if pi_id:
         pi.id = pi_id
@@ -133,12 +174,22 @@ def edit(client: PackagingIntegrationClient, pi_id: str, file: str, output_forma
 
 
 @packaging_integration.command()
-@click.option('--pi-id', '--id', help='Packaging integration ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with packaging integration')
-@click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if toolchain integration is not found')
+@click.option("--pi-id", "--id", help="Packaging integration ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    help="Path to the file with packaging integration",
+)
+@click.option(
+    "--ignore-not-found/--not-ignore-not-found",
+    default=False,
+    help="ignore if toolchain integration is not found",
+)
 @pass_obj
-def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not_found: bool):
+def delete(
+    client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not_found: bool
+):
     """
     Delete a packaging integration.\n
     For this command, you must provide a packaging integration ID or path to file with one packaging integration.
@@ -160,7 +211,7 @@ def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not
     if file:
         pi = parse_resources_file_with_one_item(file).resource
         if not isinstance(pi, PackagingIntegration):
-            raise ValueError(f'Packaging Integration expected, but {type(pi)} provided')
+            raise ValueError(f"Packaging Integration expected, but {type(pi)} provided")
 
         pi_id = pi.id
 
@@ -170,4 +221,8 @@ def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not
         if e.status_code != http.HTTPStatus.NOT_FOUND or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=PackagingIntegration.__name__, id=pi_id))
+        click.echo(
+            IGNORE_NOT_FOUND_ERROR_MESSAGE.format(
+                kind=PackagingIntegration.__name__, id=pi_id
+            )
+        )

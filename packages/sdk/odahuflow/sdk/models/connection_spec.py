@@ -15,7 +15,21 @@ class ConnectionSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, description: str=None, key_id: str=None, key_secret: str=None, password: str=None, public_key: str=None, reference: str=None, region: str=None, role: str=None, type: str=None, uri: str=None, username: str=None, web_ui_link: str=None):  # noqa: E501
+    def __init__(
+        self,
+        description: str = None,
+        key_id: str = None,
+        key_secret: str = None,
+        password: str = None,
+        public_key: str = None,
+        reference: str = None,
+        region: str = None,
+        role: str = None,
+        type: str = None,
+        uri: str = None,
+        username: str = None,
+        web_ui_link: str = None,
+    ):  # noqa: E501
         """ConnectionSpec - a model defined in Swagger
 
         :param description: The description of this ConnectionSpec.  # noqa: E501
@@ -44,33 +58,33 @@ class ConnectionSpec(Model):
         :type web_ui_link: str
         """
         self.swagger_types = {
-            'description': str,
-            'key_id': str,
-            'key_secret': str,
-            'password': str,
-            'public_key': str,
-            'reference': str,
-            'region': str,
-            'role': str,
-            'type': str,
-            'uri': str,
-            'username': str,
-            'web_ui_link': str
+            "description": str,
+            "key_id": str,
+            "key_secret": str,
+            "password": str,
+            "public_key": str,
+            "reference": str,
+            "region": str,
+            "role": str,
+            "type": str,
+            "uri": str,
+            "username": str,
+            "web_ui_link": str,
         }
 
         self.attribute_map = {
-            'description': 'description',
-            'key_id': 'keyID',
-            'key_secret': 'keySecret',
-            'password': 'password',
-            'public_key': 'publicKey',
-            'reference': 'reference',
-            'region': 'region',
-            'role': 'role',
-            'type': 'type',
-            'uri': 'uri',
-            'username': 'username',
-            'web_ui_link': 'webUILink'
+            "description": "description",
+            "key_id": "keyID",
+            "key_secret": "keySecret",
+            "password": "password",
+            "public_key": "publicKey",
+            "reference": "reference",
+            "region": "region",
+            "role": "role",
+            "type": "type",
+            "uri": "uri",
+            "username": "username",
+            "web_ui_link": "webUILink",
         }
 
         self._description = description
@@ -87,7 +101,7 @@ class ConnectionSpec(Model):
         self._web_ui_link = web_ui_link
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionSpec':
+    def from_dict(cls, dikt) -> "ConnectionSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

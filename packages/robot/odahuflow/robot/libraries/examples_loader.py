@@ -20,7 +20,6 @@ import requests
 
 
 class ExamplesLoader:
-
     def __init__(self, examples_http_url: str, examples_version: str) -> None:
         self._examples_http_url = examples_http_url
         self._examples_version = examples_version
@@ -33,11 +32,13 @@ class ExamplesLoader:
         :param result_file_path: Save a content of remote file by this path
         """
         # TODO: replace by urljoin
-        file_http_url = '/'.join([
-            self._examples_http_url,
-            self._examples_version,
-            remote_file_path,
-        ])
+        file_http_url = "/".join(
+            [
+                self._examples_http_url,
+                self._examples_version,
+                remote_file_path,
+            ]
+        )
 
         # TODO: replace with stream downloading
         resp = requests.get(file_http_url)
@@ -46,5 +47,5 @@ class ExamplesLoader:
         # Create all intermediate-level directories
         makedirs(Path(result_file_path).parent, exist_ok=True)
 
-        with open(result_file_path, 'w') as f:
+        with open(result_file_path, "w") as f:
             f.write(resp.text)

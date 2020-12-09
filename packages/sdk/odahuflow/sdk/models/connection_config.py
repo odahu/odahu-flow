@@ -16,7 +16,13 @@ class ConnectionConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, enabled: bool=None, namespace: str=None, repository_type: str=None, vault: Vault=None):  # noqa: E501
+    def __init__(
+        self,
+        enabled: bool = None,
+        namespace: str = None,
+        repository_type: str = None,
+        vault: Vault = None,
+    ):  # noqa: E501
         """ConnectionConfig - a model defined in Swagger
 
         :param enabled: The enabled of this ConnectionConfig.  # noqa: E501
@@ -29,17 +35,17 @@ class ConnectionConfig(Model):
         :type vault: Vault
         """
         self.swagger_types = {
-            'enabled': bool,
-            'namespace': str,
-            'repository_type': str,
-            'vault': Vault
+            "enabled": bool,
+            "namespace": str,
+            "repository_type": str,
+            "vault": Vault,
         }
 
         self.attribute_map = {
-            'enabled': 'enabled',
-            'namespace': 'namespace',
-            'repository_type': 'repositoryType',
-            'vault': 'vault'
+            "enabled": "enabled",
+            "namespace": "namespace",
+            "repository_type": "repositoryType",
+            "vault": "vault",
         }
 
         self._enabled = enabled
@@ -48,7 +54,7 @@ class ConnectionConfig(Model):
         self._vault = vault
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionConfig':
+    def from_dict(cls, dikt) -> "ConnectionConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

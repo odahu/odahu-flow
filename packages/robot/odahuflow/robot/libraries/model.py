@@ -46,23 +46,24 @@ class Model:
         """
         headers = {"Authorization": "Bearer {}".format(token)}
         if model_version:
-            url = '{}/api/model/{}/{}/info'.format(edge, model_name, model_version)
+            url = "{}/api/model/{}/{}/info".format(edge, model_name, model_version)
         else:
-            url = '{}/api/model/{}/info'.format(edge, model_name)
+            url = "{}/api/model/{}/info".format(edge, model_name)
 
-        print('Requesting {} in GET mode'.format(url))
+        print("Requesting {} in GET mode".format(url))
 
-        response = requests.get(
-            url,
-            headers=headers
-        )
+        response = requests.get(url, headers=headers)
 
         if response.status_code != 200:
-            raise Exception('Returned wrong status code: {}'.format(response.status_code))
+            raise Exception(
+                "Returned wrong status code: {}".format(response.status_code)
+            )
 
         return response.json()
 
-    def invoke_model_feedback(self, md_name, model_name, model_version, edge, token, request_id, **payload):
+    def invoke_model_feedback(
+        self, md_name, model_name, model_version, edge, token, request_id, **payload
+    ):
         """
         Invoke model through API
 
@@ -75,24 +76,22 @@ class Model:
         :return: dict -- response
         """
         headers = {
-            'Authorization': 'Bearer {}'.format(token),
+            "Authorization": "Bearer {}".format(token),
             odahuflow_headers.MODEL_REQUEST_ID: request_id,
             odahuflow_headers.MODEL_NAME: model_name,
             odahuflow_headers.MODEL_VERSION: model_version,
         }
 
-        url = f'{edge}/api/v1/feedback/model/{md_name}/api/model'
+        url = f"{edge}/api/v1/feedback/model/{md_name}/api/model"
 
-        print('Requesting {} with data = {} in POST mode'.format(url, payload))
+        print("Requesting {} with data = {} in POST mode".format(url, payload))
 
-        response = requests.post(
-            url,
-            json=payload,
-            headers=headers
-        )
+        response = requests.post(url, json=payload, headers=headers)
 
         if not response.ok:
-            raise Exception(f'Returned wrong status code: {response.status_code}, body: {response.text}')
+            raise Exception(
+                f"Returned wrong status code: {response.status_code}, body: {response.text}"
+            )
 
         return response.json()
 
@@ -107,30 +106,30 @@ class Model:
         :param payload: payload dict
         :return: dict -- response
         """
-        headers = {'Authorization': 'Bearer {}'.format(token)}
+        headers = {"Authorization": "Bearer {}".format(token)}
         if request_id:
             headers[odahuflow_headers.MODEL_REQUEST_ID] = request_id
 
-        url = f'{edge}/model/{md_name}/api/model/invoke'
+        url = f"{edge}/model/{md_name}/api/model/invoke"
 
-        print('Requesting {} with data = {} in POST mode'.format(url, payload))
+        print("Requesting {} with data = {} in POST mode".format(url, payload))
 
         payload = {
-            'data': [list(payload.values())],
-            'columns': list(payload.keys()),
+            "data": [list(payload.values())],
+            "columns": list(payload.keys()),
         }
 
-        response = requests.post(
-            url,
-            json=payload,
-            headers=headers
-        )
+        response = requests.post(url, json=payload, headers=headers)
 
         if not response.ok:
-            raise Exception(f'Returned wrong status code: {response.status_code}, body: {response.text},'
-                            f' payload: {payload}')
+            raise Exception(
+                f"Returned wrong status code: {response.status_code}, body: {response.text},"
+                f" payload: {payload}"
+            )
 
-        self._last_response_id = response.headers.get(odahuflow_headers.MODEL_REQUEST_ID)
+        self._last_response_id = response.headers.get(
+            odahuflow_headers.MODEL_REQUEST_ID
+        )
         self._last_response = response.json()
         return self._last_response
 

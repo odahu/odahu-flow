@@ -6,7 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.model_deployment_target import ModelDeploymentTarget  # noqa: F401,E501
+from odahuflow.sdk.models.model_deployment_target import (
+    ModelDeploymentTarget,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -16,7 +18,12 @@ class ModelRouteSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, mirror: str=None, model_deployments: List[ModelDeploymentTarget]=None, url_prefix: str=None):  # noqa: E501
+    def __init__(
+        self,
+        mirror: str = None,
+        model_deployments: List[ModelDeploymentTarget] = None,
+        url_prefix: str = None,
+    ):  # noqa: E501
         """ModelRouteSpec - a model defined in Swagger
 
         :param mirror: The mirror of this ModelRouteSpec.  # noqa: E501
@@ -27,15 +34,15 @@ class ModelRouteSpec(Model):
         :type url_prefix: str
         """
         self.swagger_types = {
-            'mirror': str,
-            'model_deployments': List[ModelDeploymentTarget],
-            'url_prefix': str
+            "mirror": str,
+            "model_deployments": List[ModelDeploymentTarget],
+            "url_prefix": str,
         }
 
         self.attribute_map = {
-            'mirror': 'mirror',
-            'model_deployments': 'modelDeployments',
-            'url_prefix': 'urlPrefix'
+            "mirror": "mirror",
+            "model_deployments": "modelDeployments",
+            "url_prefix": "urlPrefix",
         }
 
         self._mirror = mirror
@@ -43,7 +50,7 @@ class ModelRouteSpec(Model):
         self._url_prefix = url_prefix
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelRouteSpec':
+    def from_dict(cls, dikt) -> "ModelRouteSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

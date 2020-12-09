@@ -15,7 +15,13 @@ class ModelRouteStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, edge_url: str=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        edge_url: str = None,
+        state: str = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelRouteStatus - a model defined in Swagger
 
         :param created_at: The created_at of this ModelRouteStatus.  # noqa: E501
@@ -28,17 +34,17 @@ class ModelRouteStatus(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'edge_url': str,
-            'state': str,
-            'updated_at': str
+            "created_at": str,
+            "edge_url": str,
+            "state": str,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'edge_url': 'edgeUrl',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "edge_url": "edgeUrl",
+            "state": "state",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -47,7 +53,7 @@ class ModelRouteStatus(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelRouteStatus':
+    def from_dict(cls, dikt) -> "ModelRouteStatus":
         """Returns the dict as a model
 
         :param dikt: A dict.

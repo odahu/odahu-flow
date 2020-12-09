@@ -33,8 +33,12 @@ import requests
 import requests.exceptions
 
 import odahuflow.sdk.config
-from odahuflow.sdk.clients.oauth_handler import OAuthLoginResult, do_client_cred_authentication, do_refresh_token, \
-    start_oauth2_callback_handler
+from odahuflow.sdk.clients.oauth_handler import (
+    OAuthLoginResult,
+    do_client_cred_authentication,
+    do_refresh_token,
+    start_oauth2_callback_handler,
+)
 from odahuflow.sdk.clients.oidc import fetch_openid_configuration
 from odahuflow.sdk.config import update_config_file
 from odahuflow.sdk.definitions import API_VERSION
@@ -56,7 +60,9 @@ class WrongHttpStatusCode(Exception):
         """
         if http_result is None:
             http_result = {}
-        super().__init__(f'Got error from server: {http_result.get("message")} (status: {status_code})')
+        super().__init__(
+            f'Got error from server: {http_result.get("message")} (status: {status_code})'
+        )
 
         self.status_code = status_code
 
@@ -65,6 +71,7 @@ class EntityAlreadyExists(WrongHttpStatusCode):
     """
     Exception for 409 conflict: entity already exists
     """
+
     pass
 
 
@@ -110,22 +117,23 @@ def get_authorization_redirect(web_redirect: str, after_login: Callable) -> str:
     """
     loc = urlparse(web_redirect)
 
-    state = ''.join(random.choice(string.ascii_letters) for _ in range(10))
-    local_check_address = start_oauth2_callback_handler(after_login, state, web_redirect)
+    state = "".join(random.choice(string.ascii_letters) for _ in range(10))
+    local_check_address = start_oauth2_callback_handler(
+        after_login, state, web_redirect
+    )
 
     get_parameters = {
-        'client_id': odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_CLIENT_ID,
-        'response_type': 'code',
-        'state': state,
-        'redirect_uri': local_check_address,
-        'scope': odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_SCOPE
+        "client_id": odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_CLIENT_ID,
+        "response_type": "code",
+        "state": state,
+        "redirect_uri": local_check_address,
+        "scope": odahuflow.sdk.config.ODAHUFLOWCTL_OAUTH_SCOPE,
     }
-    web_redirect = f'{loc.scheme}://{loc.netloc}{loc.path}?{urlencode(get_parameters)}'
+    web_redirect = f"{loc.scheme}://{loc.netloc}{loc.path}?{urlencode(get_parameters)}"
     return web_redirect
 
 
 class URLBuilder:
-
     def __init__(self, base_url: str = odahuflow.sdk.config.API_URL):
         self._base_url = base_url
         self._version = API_VERSION
@@ -136,38 +144,43 @@ class URLBuilder:
 
     def build_url(self, url_template):
         sub_url = url_template.format(version=self._version)
-        target_url = self._base_url.strip('/') + sub_url
+        target_url = self._base_url.strip("/") + sub_url
         return target_url
 
-    def build_request_kwargs(self,
-                             url_template: str,
-                             payload: Mapping[Any, Any] = None,
-                             action: str = 'GET',
-                             stream: bool = False,
-                             token: Optional[str] = None
-                             ) -> Dict[str, Any]:
+    def build_request_kwargs(
+        self,
+        url_template: str,
+        payload: Mapping[Any, Any] = None,
+        action: str = "GET",
+        stream: bool = False,
+        token: Optional[str] = None,
+    ) -> Dict[str, Any]:
         target_url = self.build_url(url_template)
         headers = {}
         if token:
-            headers['Authorization'] = f'Bearer {token}'
+            headers["Authorization"] = f"Bearer {token}"
         if stream:
-            headers['Content-type'] = 'text/event-stream'
+            headers["Content-type"] = "text/event-stream"
 
         request_kwargs = {
-            'method': action,
-            'url': target_url,
-            'params' if action.lower() == 'get' else 'json': payload,
-            'headers': headers
+            "method": action,
+            "url": target_url,
+            "params" if action.lower() == "get" else "json": payload,
+            "headers": headers,
         }
         return request_kwargs
 
 
 class Authenticator:
-
-    def __init__(self,
-                 client_id: str, client_secret: str, non_interactive: bool, base_url: str,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
-                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
+    def __init__(
+        self,
+        client_id: str,
+        client_secret: str,
+        non_interactive: bool,
+        base_url: str,
+        token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+        issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL,
+    ):
 
         self._client_id = client_id
         self._client_secret = client_secret
@@ -192,9 +205,9 @@ class Authenticator:
         # We assume if there were redirects then credentials are out of date and we can refresh or build auth url
 
         def not_authorized_resp_code():
-            if hasattr(response, 'status_code'):
+            if hasattr(response, "status_code"):
                 return response.status_code == 401
-            elif hasattr(response, 'status'):
+            elif hasattr(response, "status"):
                 return response.status == 401
             return False
 
@@ -211,26 +224,33 @@ class Authenticator:
         # If it is an error after refreshed token - fail
         if limit_stack:
             raise IncorrectAuthorizationToken(
-                f'{self._credentials_error_status} even after refreshing. \n'
-                'Please try to log in again'
+                f"{self._credentials_error_status} even after refreshing. \n"
+                "Please try to log in again"
             )
 
         # use default value if self._issuer_url is empty
         self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
 
-        LOGGER.debug('Redirect has been detected. Trying to refresh a token')
+        LOGGER.debug("Redirect has been detected. Trying to refresh a token")
         if self._refresh_token_exists:
-            LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
+            LOGGER.debug(
+                "Refresh token for %s has been found, trying to use it",
+                odahuflow.sdk.config.API_ISSUING_URL,
+            )
             self._login_with_refresh_token()
-        elif self._client_id and self._client_secret and fetch_openid_configuration(self._issuer_url):
+        elif (
+            self._client_id
+            and self._client_secret
+            and fetch_openid_configuration(self._issuer_url)
+        ):
             self._login_with_client_credentials()
         elif self._interactive_mode_enabled:
             # Start interactive flow
             self._login_interactive_mode(url)
         else:
             raise IncorrectAuthorizationToken(
-                f'{self._credentials_error_status}.\n'
-                'Please provide correct temporary token or disable non interactive mode'
+                f"{self._credentials_error_status}.\n"
+                "Please provide correct temporary token or disable non interactive mode"
             )
 
     @property
@@ -238,11 +258,12 @@ class Authenticator:
         return self._token
 
     def _login_with_refresh_token(self):
-        login_result = do_refresh_token(odahuflow.sdk.config.API_REFRESH_TOKEN, odahuflow.sdk.config.API_ISSUING_URL)
+        login_result = do_refresh_token(
+            odahuflow.sdk.config.API_REFRESH_TOKEN, odahuflow.sdk.config.API_ISSUING_URL
+        )
         if not login_result:
             raise IncorrectAuthorizationToken(
-                'Refresh token is not correct.\n'
-                'Please login again'
+                "Refresh token is not correct.\n" "Please login again"
             )
         else:
             self._update_config_with_new_oauth_config(login_result)
@@ -253,13 +274,13 @@ class Authenticator:
         self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
 
         login_result = do_client_cred_authentication(
-            issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
-            client_secret=self._client_secret
+            issue_token_url=fetch_openid_configuration(self._issuer_url),
+            client_id=self._client_id,
+            client_secret=self._client_secret,
         )
         if not login_result:
             raise IncorrectClientCredentials(
-                'Client credentials are not correct.\n'
-                'Please login again'
+                "Client credentials are not correct.\n" "Please login again"
             )
         else:
             self._update_config_with_new_oauth_config(login_result)
@@ -267,12 +288,15 @@ class Authenticator:
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()
         target_url = get_authorization_redirect(url, self._after_login)
-        print('%s. \nPlease open %s' % (self._credentials_error_status, target_url))
+        print("%s. \nPlease open %s" % (self._credentials_error_status, target_url))
         self._interactive_login_finished.wait()
 
     @property
     def _refresh_token_exists(self):
-        return odahuflow.sdk.config.API_REFRESH_TOKEN and odahuflow.sdk.config.API_ISSUING_URL
+        return (
+            odahuflow.sdk.config.API_REFRESH_TOKEN
+            and odahuflow.sdk.config.API_ISSUING_URL
+        )
 
     @property
     def _interactive_mode_enabled(self):
@@ -281,12 +305,14 @@ class Authenticator:
     @property
     def _credentials_error_status(self):
         if self._token:
-            credentials_error_status = 'Credentials are not correct'
+            credentials_error_status = "Credentials are not correct"
         else:
-            credentials_error_status = 'Credentials are missed'
+            credentials_error_status = "Credentials are missed"
         return credentials_error_status
 
-    def _update_config_with_new_oauth_config(self, login_result: OAuthLoginResult) -> None:
+    def _update_config_with_new_oauth_config(
+        self, login_result: OAuthLoginResult
+    ) -> None:
         """
         Update config with new oauth credentials
 
@@ -294,12 +320,14 @@ class Authenticator:
         :return: None
         """
         self._token = login_result.id_token
-        update_config_file(API_URL=self._base_url,
-                           API_TOKEN=login_result.id_token,
-                           API_REFRESH_TOKEN=login_result.refresh_token,
-                           API_ACCESS_TOKEN=login_result.access_token,
-                           ISSUER_URL=self._issuer_url,
-                           API_ISSUING_URL=login_result.issuing_url)
+        update_config_file(
+            API_URL=self._base_url,
+            API_TOKEN=login_result.id_token,
+            API_REFRESH_TOKEN=login_result.refresh_token,
+            API_ACCESS_TOKEN=login_result.access_token,
+            ISSUER_URL=self._issuer_url,
+            API_ISSUING_URL=login_result.issuing_url,
+        )
 
     def _after_login(self, login_result: OAuthLoginResult) -> None:
         """
@@ -310,16 +338,23 @@ class Authenticator:
         """
         self._interactive_login_finished.set()
         self._update_config_with_new_oauth_config(login_result)
-        print('You have been authorized on endpoint %s as %s / %s' %
-              (self._base_url, login_result.user_name, login_result.user_email))
+        print(
+            "You have been authorized on endpoint %s as %s / %s"
+            % (self._base_url, login_result.user_name, login_result.user_email)
+        )
         sys.exit(0)
 
 
-def _handle_query_response(text: str, payload: Mapping[Any, Any], status_code: int) -> Dict:
+def _handle_query_response(
+    text: str, payload: Mapping[Any, Any], status_code: int
+) -> Dict:
     try:
         answer = json.loads(text)
-        LOGGER.debug('Got answer: {!r} with code {} for URL {!r}'
-                     .format(answer, status_code, payload))
+        LOGGER.debug(
+            "Got answer: {!r} with code {} for URL {!r}".format(
+                answer, status_code, payload
+            )
+        )
     except ValueError:
         answer = {}
 
@@ -328,7 +363,7 @@ def _handle_query_response(text: str, payload: Mapping[Any, Any], status_code: i
     if 400 <= status_code < 600:
         raise WrongHttpStatusCode(status_code, answer)
 
-    LOGGER.debug('Query has been completed, parsed and validated')
+    LOGGER.debug("Query has been completed, parsed and validated")
     return answer
 
 
@@ -337,15 +372,17 @@ class RemoteAPIClient:
     Base API client
     """
 
-    def __init__(self,
-                 base_url: str = odahuflow.sdk.config.API_URL,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
-                 client_id: Optional[str] = '',
-                 client_secret: Optional[str] = '',
-                 retries: Optional[int] = odahuflow.sdk.config.RETRY_ATTEMPTS,
-                 timeout: Optional[Union[int, Tuple[int, int]]] = 10,
-                 non_interactive: Optional[bool] = True,
-                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
+    def __init__(
+        self,
+        base_url: str = odahuflow.sdk.config.API_URL,
+        token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+        client_id: Optional[str] = "",
+        client_secret: Optional[str] = "",
+        retries: Optional[int] = odahuflow.sdk.config.RETRY_ATTEMPTS,
+        timeout: Optional[Union[int, Tuple[int, int]]] = 10,
+        non_interactive: Optional[bool] = True,
+        issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL,
+    ):
         """
         Build client
 
@@ -359,14 +396,16 @@ class RemoteAPIClient:
         """
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
-        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)
+        self.authenticator = Authenticator(
+            client_id, client_secret, non_interactive, base_url, token, issuer_url
+        )
         self.timeout = timeout
         self.retries = retries
 
         retry_strategy = Retry(
             total=retries,
             status_forcelist=[429, 500, 502, 503, 504],
-            backoff_factor=odahuflow.sdk.config.BACKOFF_FACTOR
+            backoff_factor=odahuflow.sdk.config.BACKOFF_FACTOR,
         )
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.default_client = requests.Session()
@@ -390,18 +429,22 @@ class RemoteAPIClient:
         :return: self -- new client
         """
         return cls(
-            other.url_builder.base_url, other.authenticator.token,
-            retries=other.retries, timeout=other.timeout
+            other.url_builder.base_url,
+            other.authenticator.token,
+            retries=other.retries,
+            timeout=other.timeout,
         )
 
-    def _request(self,
-                 url_template: str,
-                 payload: Mapping[Any, Any] = None,
-                 action: str = 'GET',
-                 stream: bool = False,
-                 timeout: Optional[int] = None,
-                 limit_stack: bool = False,
-                 client: requests.Session = None):
+    def _request(
+        self,
+        url_template: str,
+        payload: Mapping[Any, Any] = None,
+        action: str = "GET",
+        stream: bool = False,
+        timeout: Optional[int] = None,
+        limit_stack: bool = False,
+        client: requests.Session = None,
+    ):
         """
         Make HTTP request
 
@@ -414,17 +457,24 @@ class RemoteAPIClient:
         :return: :py:class:`requests.Response` -- response
         """
 
-        request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream,
-                                                               token=self.authenticator.token)
+        request_kwargs = self.url_builder.build_request_kwargs(
+            url_template, payload, action, stream, token=self.authenticator.token
+        )
         connection_timeout = self.timeout
 
         try:
             if client:
-                response = client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
+                response = client.request(
+                    timeout=connection_timeout, stream=stream, **request_kwargs
+                )
             else:
-                response = self.default_client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
+                response = self.default_client.request(
+                    timeout=connection_timeout, stream=stream, **request_kwargs
+                )
         except Exception as raised_exception:
-            raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
+            raise APIConnectionException(
+                "Can not reach {}".format(self._base_url)
+            ) from raised_exception
 
         if self.authenticator.login_required(response):
             try:
@@ -437,12 +487,14 @@ class RemoteAPIClient:
                 action=action,
                 stream=stream,
                 timeout=timeout,
-                limit_stack=True
+                limit_stack=True,
             )
         else:
             return response
 
-    def query(self, url_template: str, payload: Mapping[Any, Any] = None, action: str = 'GET'):
+    def query(
+        self, url_template: str, payload: Mapping[Any, Any] = None, action: str = "GET"
+    ):
         """
         Perform query to API server
 
@@ -454,7 +506,9 @@ class RemoteAPIClient:
         response = self._request(url_template, payload, action)
         return _handle_query_response(response.text, payload, response.status_code)
 
-    def stream(self, url_template: str, action: str = 'GET', params: Mapping[str, Any] = None) -> Iterator[str]:
+    def stream(
+        self, url_template: str, action: str = "GET", params: Mapping[str, Any] = None
+    ) -> Iterator[str]:
         """
         Perform query to API server
 
@@ -463,7 +517,9 @@ class RemoteAPIClient:
         :param action: HTTP method (GET, POST, PUT, DELETE)
         :return: response content
         """
-        response = self._request(url_template, payload=params, action=action, stream=True)
+        response = self._request(
+            url_template, payload=params, action=action, stream=True
+        )
 
         with response:
             if not response.ok:
@@ -485,16 +541,17 @@ class RemoteAPIClient:
 
 
 class AsyncRemoteAPIClient:
-
-    def __init__(self,
-                 base_url: str = odahuflow.sdk.config.API_URL,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
-                 client_id: Optional[str] = '',
-                 client_secret: Optional[str] = '',
-                 retries: Optional[int] = 3,
-                 timeout: Optional[Union[int, Tuple[int, int]]] = 10,
-                 non_interactive: Optional[bool] = True,
-                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
+    def __init__(
+        self,
+        base_url: str = odahuflow.sdk.config.API_URL,
+        token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+        client_id: Optional[str] = "",
+        client_secret: Optional[str] = "",
+        retries: Optional[int] = 3,
+        timeout: Optional[Union[int, Tuple[int, int]]] = 10,
+        non_interactive: Optional[bool] = True,
+        issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL,
+    ):
         """
         Build client
 
@@ -508,16 +565,19 @@ class AsyncRemoteAPIClient:
         """
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
-        self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)
+        self.authenticator = Authenticator(
+            client_id, client_secret, non_interactive, base_url, token, issuer_url
+        )
         self.timeout = timeout
         self.retries = retries
 
     async def _request(
-            self, url_template: str,
-            payload: Mapping[Any, Any] = None,
-            action: str = 'GET',
-            stream=False,
-            session: aiohttp.ClientSession = None
+        self,
+        url_template: str,
+        payload: Mapping[Any, Any] = None,
+        action: str = "GET",
+        stream=False,
+        session: aiohttp.ClientSession = None,
     ) -> AsyncIterable:
         """
         Perform async request to API server
@@ -531,8 +591,9 @@ class AsyncRemoteAPIClient:
         """
         assert session is not None
 
-        request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream=False,
-                                                               token=self.authenticator.token)
+        request_kwargs = self.url_builder.build_request_kwargs(
+            url_template, payload, action, stream=False, token=self.authenticator.token
+        )
         left_retries = self.retries
         raised_exception = None
         while left_retries > 0:
@@ -543,24 +604,40 @@ class AsyncRemoteAPIClient:
                         raise LoginRequired()
 
                     if stream:
-                        LOGGER.debug('Status code: "{}", Response: "<stream>"'.format(resp.status))
+                        LOGGER.debug(
+                            'Status code: "{}", Response: "<stream>"'.format(
+                                resp.status
+                            )
+                        )
                         async for line in self._handle_stream_response(resp):
                             yield line
                     else:
                         resp_text = await resp.text()
-                        LOGGER.debug('Status code: "{}", Response: "{}"'.format(resp.status, resp_text))
+                        LOGGER.debug(
+                            'Status code: "{}", Response: "{}"'.format(
+                                resp.status, resp_text
+                            )
+                        )
                         data = _handle_query_response(resp_text, payload, resp.status)
                         yield data
                     break
             except aiohttp.ClientConnectionError as exception:
-                LOGGER.error('Failed to connect to {}: {}. Retrying'.format(self._base_url, exception))
+                LOGGER.error(
+                    "Failed to connect to {}: {}. Retrying".format(
+                        self._base_url, exception
+                    )
+                )
                 raised_exception = exception
                 left_retries -= 1
         else:
-            raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
+            raise APIConnectionException(
+                "Can not reach {}".format(self._base_url)
+            ) from raised_exception
 
     @staticmethod
-    async def _handle_stream_response(response: aiohttp.ClientResponse, chunk_size=500) -> AsyncIterable:
+    async def _handle_stream_response(
+        response: aiohttp.ClientResponse, chunk_size=500
+    ) -> AsyncIterable:
         """
         Helper method that do next things:
         1) Async iterating over response content by chunks
@@ -597,7 +674,11 @@ class AsyncRemoteAPIClient:
             yield pending
 
     async def _request_with_login(
-            self, url_template: str, payload: Mapping[Any, Any] = None, action: str = 'GET', stream=False
+        self,
+        url_template: str,
+        payload: Mapping[Any, Any] = None,
+        action: str = "GET",
+        stream=False,
     ):
         """
         Perform async request to API server.
@@ -610,18 +691,24 @@ class AsyncRemoteAPIClient:
         :param stream: use stream mode or not
         :return: AsyncIterable of data. If stream = False, only one line will be returned
         """
-        async with aiohttp.ClientSession(conn_timeout=self.timeout, trust_env=True) as session:
+        async with aiohttp.ClientSession(
+            conn_timeout=self.timeout, trust_env=True
+        ) as session:
             try:
-                async for data in self._request(url_template, payload, action, stream, session):
+                async for data in self._request(
+                    url_template, payload, action, stream, session
+                ):
                     yield data
             except LoginRequired:
-                self.authenticator.login(
-                    self.url_builder.build_url(url_template)
-                )
-                async for data in self._request(url_template, payload, action, stream, session):
+                self.authenticator.login(self.url_builder.build_url(url_template))
+                async for data in self._request(
+                    url_template, payload, action, stream, session
+                ):
                     yield data
 
-    async def query(self, url_template: str, payload: Mapping[Any, Any] = None, action: str = 'GET') -> Any:
+    async def query(
+        self, url_template: str, payload: Mapping[Any, Any] = None, action: str = "GET"
+    ) -> Any:
         """
         Perform query to API server.
 
@@ -631,11 +718,15 @@ class AsyncRemoteAPIClient:
         :return: dict[str, any] -- response content
         """
         resp = None
-        async for res in self._request_with_login(url_template, payload, action, stream=False):
+        async for res in self._request_with_login(
+            url_template, payload, action, stream=False
+        ):
             resp = res
         return resp
 
-    async def stream(self, url_template: str, action: str = 'GET', params: Mapping[str, Any] = None) -> AsyncIterable:
+    async def stream(
+        self, url_template: str, action: str = "GET", params: Mapping[str, Any] = None
+    ) -> AsyncIterable:
         """
         Perform query to API server in stream mode
 
@@ -644,7 +735,9 @@ class AsyncRemoteAPIClient:
         :param params: payload (will be converted to JSON) or None
         :return: async iterable that return response content line by line
         """
-        async for line in self._request_with_login(url_template, action=action, stream=True, payload=params):
+        async for line in self._request_with_login(
+            url_template, action=action, stream=True, payload=params
+        ):
             yield line
 
     async def info(self):
@@ -674,6 +767,8 @@ class AsyncRemoteAPIClient:
         :return: self -- new client
         """
         return cls(
-            other.url_builder.base_url, other.authenticator.token,
-            retries=other.retries, timeout=other.timeout
+            other.url_builder.base_url,
+            other.authenticator.token,
+            retries=other.retries,
+            timeout=other.timeout,
         )

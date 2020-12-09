@@ -2,23 +2,25 @@ import logging
 import os
 
 import pytest
-from odahuflow.sdk.gppi.executor import GPPITrainedModelBinary, VALIDATION_FAILED_EXCEPTION_MESSAGE
+from odahuflow.sdk.gppi.executor import (
+    GPPITrainedModelBinary,
+    VALIDATION_FAILED_EXCEPTION_MESSAGE,
+)
 
-GPPI_MODEL_RESOURCES = os.path.join(os.path.dirname(__file__), 'resources')
+GPPI_MODEL_RESOURCES = os.path.join(os.path.dirname(__file__), "resources")
 
 logging.basicConfig(level=logging.INFO)
 
 
 class TestGPPITrainedModelBinary:
-
     def test_validate_ok(self):
-        model_path = os.path.join(GPPI_MODEL_RESOURCES, 'mlflow_gppi_correct')
+        model_path = os.path.join(GPPI_MODEL_RESOURCES, "mlflow_gppi_correct")
         gppi_model = GPPITrainedModelBinary(model_path)
         gppi_model.self_check()
 
     def test_validate_lib_missed(self):
 
-        model_path = os.path.join(GPPI_MODEL_RESOURCES, 'mlflow_gppi_lib_missed')
+        model_path = os.path.join(GPPI_MODEL_RESOURCES, "mlflow_gppi_lib_missed")
         print(model_path)
         gppi_model = GPPITrainedModelBinary(model_path)
         with pytest.raises(Exception) as exc_info:

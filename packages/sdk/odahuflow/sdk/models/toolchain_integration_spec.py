@@ -15,7 +15,12 @@ class ToolchainIntegrationSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, additional_environments: Dict[str, str]=None, default_image: str=None, entrypoint: str=None):  # noqa: E501
+    def __init__(
+        self,
+        additional_environments: Dict[str, str] = None,
+        default_image: str = None,
+        entrypoint: str = None,
+    ):  # noqa: E501
         """ToolchainIntegrationSpec - a model defined in Swagger
 
         :param additional_environments: The additional_environments of this ToolchainIntegrationSpec.  # noqa: E501
@@ -26,15 +31,15 @@ class ToolchainIntegrationSpec(Model):
         :type entrypoint: str
         """
         self.swagger_types = {
-            'additional_environments': Dict[str, str],
-            'default_image': str,
-            'entrypoint': str
+            "additional_environments": Dict[str, str],
+            "default_image": str,
+            "entrypoint": str,
         }
 
         self.attribute_map = {
-            'additional_environments': 'additionalEnvironments',
-            'default_image': 'defaultImage',
-            'entrypoint': 'entrypoint'
+            "additional_environments": "additionalEnvironments",
+            "default_image": "defaultImage",
+            "entrypoint": "entrypoint",
         }
 
         self._additional_environments = additional_environments
@@ -42,7 +47,7 @@ class ToolchainIntegrationSpec(Model):
         self._entrypoint = entrypoint
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ToolchainIntegrationSpec':
+    def from_dict(cls, dikt) -> "ToolchainIntegrationSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

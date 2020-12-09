@@ -16,17 +16,13 @@ class FeedbackModelFeedbackResponse(Model):
     """
 
     def __init__(self):  # noqa: E501
-        """FeedbackModelFeedbackResponse - a model defined in Swagger
+        """FeedbackModelFeedbackResponse - a model defined in Swagger"""
+        self.swagger_types = {}
 
-        """
-        self.swagger_types = {
-        }
-
-        self.attribute_map = {
-        }
+        self.attribute_map = {}
 
     @classmethod
-    def from_dict(cls, dikt) -> 'FeedbackModelFeedbackResponse':
+    def from_dict(cls, dikt) -> "FeedbackModelFeedbackResponse":
         """Returns the dict as a model
 
         :param dikt: A dict.

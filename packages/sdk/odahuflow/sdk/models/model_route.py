@@ -17,7 +17,15 @@ class ModelRoute(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, default: bool=None, id: str=None, spec: ModelRouteSpec=None, status: ModelRouteStatus=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        default: bool = None,
+        id: str = None,
+        spec: ModelRouteSpec = None,
+        status: ModelRouteStatus = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelRoute - a model defined in Swagger
 
         :param created_at: The created_at of this ModelRoute.  # noqa: E501
@@ -34,21 +42,21 @@ class ModelRoute(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'default': bool,
-            'id': str,
-            'spec': ModelRouteSpec,
-            'status': ModelRouteStatus,
-            'updated_at': str
+            "created_at": str,
+            "default": bool,
+            "id": str,
+            "spec": ModelRouteSpec,
+            "status": ModelRouteStatus,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'default': 'default',
-            'id': 'id',
-            'spec': 'spec',
-            'status': 'status',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "default": "default",
+            "id": "id",
+            "spec": "spec",
+            "status": "status",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -59,7 +67,7 @@ class ModelRoute(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelRoute':
+    def from_dict(cls, dikt) -> "ModelRoute":
         """Returns the dict as a model
 
         :param dikt: A dict.

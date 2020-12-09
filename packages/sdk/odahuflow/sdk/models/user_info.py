@@ -15,7 +15,7 @@ class UserInfo(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, email: str=None, username: str=None):  # noqa: E501
+    def __init__(self, email: str = None, username: str = None):  # noqa: E501
         """UserInfo - a model defined in Swagger
 
         :param email: The email of this UserInfo.  # noqa: E501
@@ -23,21 +23,15 @@ class UserInfo(Model):
         :param username: The username of this UserInfo.  # noqa: E501
         :type username: str
         """
-        self.swagger_types = {
-            'email': str,
-            'username': str
-        }
+        self.swagger_types = {"email": str, "username": str}
 
-        self.attribute_map = {
-            'email': 'email',
-            'username': 'username'
-        }
+        self.attribute_map = {"email": "email", "username": "username"}
 
         self._email = email
         self._username = username
 
     @classmethod
-    def from_dict(cls, dikt) -> 'UserInfo':
+    def from_dict(cls, dikt) -> "UserInfo":
         """Returns the dict as a model
 
         :param dikt: A dict.

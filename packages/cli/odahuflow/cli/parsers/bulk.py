@@ -27,14 +27,17 @@ from odahuflow.cli.utils.client import pass_obj
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import apply as api_aggregated_apply
-from odahuflow.sdk.clients.api_aggregated import parse_resources_file, OdahuflowCloudResourceUpdatePair
+from odahuflow.sdk.clients.api_aggregated import (
+    parse_resources_file,
+    OdahuflowCloudResourceUpdatePair,
+)
 
 LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def bulk(ctx: click.core.Context, url: str, token: str):
     """
@@ -44,7 +47,7 @@ def bulk(ctx: click.core.Context, url: str, token: str):
 
 
 @bulk.command()
-@click.argument('file', required=True, type=click.Path())
+@click.argument("file", required=True, type=click.Path())
 @pass_obj
 def apply(client: RemoteAPIClient, file: str):
     """
@@ -61,7 +64,7 @@ def apply(client: RemoteAPIClient, file: str):
 
 
 @bulk.command()
-@click.argument('file', required=True, type=click.Path())
+@click.argument("file", required=True, type=click.Path())
 @pass_obj
 def delete(client: RemoteAPIClient, file: str):
     """
@@ -77,21 +80,27 @@ def delete(client: RemoteAPIClient, file: str):
     process_bulk_operation(client, file, True)
 
 
-def _print_resources_info_counter(objects: typing.Tuple[OdahuflowCloudResourceUpdatePair]) -> str:
+def _print_resources_info_counter(
+    objects: typing.Tuple[OdahuflowCloudResourceUpdatePair],
+) -> str:
     """
     Output count of resources with their's types
 
     :param objects: resources to print
     :return: str
     """
-    names = ', '.join(f'{type(obj.resource).__name__} {obj.resource_id}' for obj in objects)
+    names = ", ".join(
+        f"{type(obj.resource).__name__} {obj.resource_id}" for obj in objects
+    )
     if objects:
-        return f'{len(objects)} ({names})'
+        return f"{len(objects)} ({names})"
     else:
         return str(len(objects))
 
 
-def process_bulk_operation(api_client: RemoteAPIClient, filename: str, is_removal: bool):
+def process_bulk_operation(
+    api_client: RemoteAPIClient, filename: str, is_removal: bool
+):
     """
     Apply bulk operation helper
 
@@ -101,17 +110,23 @@ def process_bulk_operation(api_client: RemoteAPIClient, filename: str, is_remova
     """
     odahuflow_resources = parse_resources_file(filename)
     result = api_aggregated_apply(odahuflow_resources, api_client, is_removal)
-    output = ['Operation completed']
+    output = ["Operation completed"]
     if result.created:
-        output.append(f'created resources: {_print_resources_info_counter(result.created)}')
+        output.append(
+            f"created resources: {_print_resources_info_counter(result.created)}"
+        )
     if result.changed:
-        output.append(f'changed resources: {_print_resources_info_counter(result.changed)}')
+        output.append(
+            f"changed resources: {_print_resources_info_counter(result.changed)}"
+        )
     if result.removed:
-        output.append(f'removed resources: {_print_resources_info_counter(result.removed)}')
-    click.echo(', '.join(output))
+        output.append(
+            f"removed resources: {_print_resources_info_counter(result.removed)}"
+        )
+    click.echo(", ".join(output))
 
     if result.errors:
-        click.echo('Some errors detected:')
+        click.echo("Some errors detected:")
         for error in result.errors:
-            click.echo(f'\t{error}')
+            click.echo(f"\t{error}")
         sys.exit(1)

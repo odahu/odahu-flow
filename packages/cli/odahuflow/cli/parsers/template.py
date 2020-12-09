@@ -32,7 +32,7 @@ def template():
     pass
 
 
-@template.command(name='all')
+@template.command(name="all")
 def template_all():
     """
     Get all template names.\n
@@ -40,11 +40,11 @@ def template_all():
         * odahuflowctl template all\n
     """
     nl = "\n * "
-    click.echo(f'Templates:{nl}{nl.join(get_odahuflow_template_names())}')
+    click.echo(f"Templates:{nl}{nl.join(get_odahuflow_template_names())}")
 
 
 @template.command()
-@click.option('--name', help='Template name', required=True)
+@click.option("--name", help="Template name", required=True)
 def generate(name: str):
     """
     Generate a template by name.

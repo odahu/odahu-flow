@@ -36,7 +36,9 @@ class ToolchainIntegrationClient(RemoteAPIClient):
         :type name: str
         :return: Toolchain Integration
         """
-        return ToolchainIntegration.from_dict(self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}'))
+        return ToolchainIntegration.from_dict(
+            self.query(f"{TOOLCHAIN_INTEGRATION_URL}/{name}")
+        )
 
     def get_all(self) -> typing.List[ToolchainIntegration]:
         """
@@ -44,7 +46,10 @@ class ToolchainIntegrationClient(RemoteAPIClient):
 
         :return: all Toolchain Integrations
         """
-        return [ToolchainIntegration.from_dict(ti) for ti in self.query(TOOLCHAIN_INTEGRATION_URL)]
+        return [
+            ToolchainIntegration.from_dict(ti)
+            for ti in self.query(TOOLCHAIN_INTEGRATION_URL)
+        ]
 
     def create(self, ti: ToolchainIntegration) -> ToolchainIntegration:
         """
@@ -54,7 +59,7 @@ class ToolchainIntegrationClient(RemoteAPIClient):
         :return Message from API server
         """
         return ToolchainIntegration.from_dict(
-            self.query(TOOLCHAIN_INTEGRATION_URL, action='POST', payload=ti.to_dict())
+            self.query(TOOLCHAIN_INTEGRATION_URL, action="POST", payload=ti.to_dict())
         )
 
     def edit(self, ti: ToolchainIntegration) -> ToolchainIntegration:
@@ -65,7 +70,7 @@ class ToolchainIntegrationClient(RemoteAPIClient):
         :return Message from API server
         """
         return ToolchainIntegration.from_dict(
-            self.query(TOOLCHAIN_INTEGRATION_URL, action='PUT', payload=ti.to_dict())
+            self.query(TOOLCHAIN_INTEGRATION_URL, action="PUT", payload=ti.to_dict())
         )
 
     def delete(self, name: str) -> str:
@@ -75,13 +80,14 @@ class ToolchainIntegrationClient(RemoteAPIClient):
         :param name: Name of a Toolchain Integration
         :return Message from API server
         """
-        return self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}', action='DELETE')
+        return self.query(f"{TOOLCHAIN_INTEGRATION_URL}/{name}", action="DELETE")
 
 
 class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
     """
     HTTP toolchain integration async client
     """
+
     async def get(self, name: str) -> ToolchainIntegration:
         """
         Get Toolchain Integration from API server
@@ -90,7 +96,9 @@ class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
         :type name: str
         :return: Toolchain Integration
         """
-        return ToolchainIntegration.from_dict(await self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}'))
+        return ToolchainIntegration.from_dict(
+            await self.query(f"{TOOLCHAIN_INTEGRATION_URL}/{name}")
+        )
 
     async def get_all(self) -> typing.List[ToolchainIntegration]:
         """
@@ -98,7 +106,10 @@ class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
 
         :return: all Toolchain Integrations
         """
-        return [ToolchainIntegration.from_dict(ti) for ti in await self.query(TOOLCHAIN_INTEGRATION_URL)]
+        return [
+            ToolchainIntegration.from_dict(ti)
+            for ti in await self.query(TOOLCHAIN_INTEGRATION_URL)
+        ]
 
     async def create(self, ti: ToolchainIntegration) -> ToolchainIntegration:
         """
@@ -108,7 +119,9 @@ class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ToolchainIntegration.from_dict(
-            await self.query(TOOLCHAIN_INTEGRATION_URL, action='POST', payload=ti.to_dict())
+            await self.query(
+                TOOLCHAIN_INTEGRATION_URL, action="POST", payload=ti.to_dict()
+            )
         )
 
     async def edit(self, ti: ToolchainIntegration) -> ToolchainIntegration:
@@ -119,7 +132,9 @@ class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ToolchainIntegration.from_dict(
-            await self.query(TOOLCHAIN_INTEGRATION_URL, action='PUT', payload=ti.to_dict())
+            await self.query(
+                TOOLCHAIN_INTEGRATION_URL, action="PUT", payload=ti.to_dict()
+            )
         )
 
     async def delete(self, name: str) -> str:
@@ -129,4 +144,4 @@ class AsyncToolchainIntegrationClient(AsyncRemoteAPIClient):
         :param name: Name of a Toolchain Integration
         :return Message from API server
         """
-        return await self.query(f'{TOOLCHAIN_INTEGRATION_URL}/{name}', action='DELETE')
+        return await self.query(f"{TOOLCHAIN_INTEGRATION_URL}/{name}", action="DELETE")

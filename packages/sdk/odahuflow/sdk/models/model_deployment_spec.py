@@ -6,7 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import (
+    ResourceRequirements,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -16,7 +18,19 @@ class ModelDeploymentSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, annotations: Dict[str, str]=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, node_selector: Dict[str, str]=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
+    def __init__(
+        self,
+        annotations: Dict[str, str] = None,
+        image: str = None,
+        image_pull_conn_id: str = None,
+        liveness_probe_initial_delay: int = None,
+        max_replicas: int = None,
+        min_replicas: int = None,
+        node_selector: Dict[str, str] = None,
+        readiness_probe_initial_delay: int = None,
+        resources: ResourceRequirements = None,
+        role_name: str = None,
+    ):  # noqa: E501
         """ModelDeploymentSpec - a model defined in Swagger
 
         :param annotations: The annotations of this ModelDeploymentSpec.  # noqa: E501
@@ -41,29 +55,29 @@ class ModelDeploymentSpec(Model):
         :type role_name: str
         """
         self.swagger_types = {
-            'annotations': Dict[str, str],
-            'image': str,
-            'image_pull_conn_id': str,
-            'liveness_probe_initial_delay': int,
-            'max_replicas': int,
-            'min_replicas': int,
-            'node_selector': Dict[str, str],
-            'readiness_probe_initial_delay': int,
-            'resources': ResourceRequirements,
-            'role_name': str
+            "annotations": Dict[str, str],
+            "image": str,
+            "image_pull_conn_id": str,
+            "liveness_probe_initial_delay": int,
+            "max_replicas": int,
+            "min_replicas": int,
+            "node_selector": Dict[str, str],
+            "readiness_probe_initial_delay": int,
+            "resources": ResourceRequirements,
+            "role_name": str,
         }
 
         self.attribute_map = {
-            'annotations': 'annotations',
-            'image': 'image',
-            'image_pull_conn_id': 'imagePullConnID',
-            'liveness_probe_initial_delay': 'livenessProbeInitialDelay',
-            'max_replicas': 'maxReplicas',
-            'min_replicas': 'minReplicas',
-            'node_selector': 'nodeSelector',
-            'readiness_probe_initial_delay': 'readinessProbeInitialDelay',
-            'resources': 'resources',
-            'role_name': 'roleName'
+            "annotations": "annotations",
+            "image": "image",
+            "image_pull_conn_id": "imagePullConnID",
+            "liveness_probe_initial_delay": "livenessProbeInitialDelay",
+            "max_replicas": "maxReplicas",
+            "min_replicas": "minReplicas",
+            "node_selector": "nodeSelector",
+            "readiness_probe_initial_delay": "readinessProbeInitialDelay",
+            "resources": "resources",
+            "role_name": "roleName",
         }
 
         self._annotations = annotations
@@ -78,7 +92,7 @@ class ModelDeploymentSpec(Model):
         self._role_name = role_name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentSpec':
+    def from_dict(cls, dikt) -> "ModelDeploymentSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

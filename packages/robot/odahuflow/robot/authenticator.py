@@ -18,12 +18,16 @@ Test user authentication
 """
 
 import click
-from odahuflow.robot.profiler_loader import get_variables, AUTH_TOKEN_PARAM_NAME, API_URL_PARAM_NAME
+from odahuflow.robot.profiler_loader import (
+    get_variables,
+    AUTH_TOKEN_PARAM_NAME,
+    API_URL_PARAM_NAME,
+)
 from odahuflow.sdk.config import update_config_file
 
 
 @click.command()
-@click.argument('profile', type=click.Path(exists=True, dir_okay=True, readable=True))
+@click.argument("profile", type=click.Path(exists=True, dir_okay=True, readable=True))
 def main(profile: str) -> None:
     """
     Authenticate the test user from odahuflow profile file and save its credentials
@@ -32,7 +36,10 @@ def main(profile: str) -> None:
     :param profile: file with odahuflow secrets
     """
     test_variables = get_variables(profile)
-    api_token, api_url = test_variables[AUTH_TOKEN_PARAM_NAME], test_variables[API_URL_PARAM_NAME]
+    api_token, api_url = (
+        test_variables[AUTH_TOKEN_PARAM_NAME],
+        test_variables[API_URL_PARAM_NAME],
+    )
 
     update_config_file(API_URL=api_url, API_TOKEN=api_token)
     click.echo("Config was updated!")

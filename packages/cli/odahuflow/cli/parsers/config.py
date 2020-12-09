@@ -24,7 +24,7 @@ from odahuflow.cli.utils import click_utils
 from odahuflow.sdk import config
 
 
-@click.group(name='config', cls=click_utils.BetterHelpGroup)
+@click.group(name="config", cls=click_utils.BetterHelpGroup)
 def config_group():
     """
     Odahuflow CLI config manipulation.\n
@@ -34,8 +34,8 @@ def config_group():
 
 
 @config_group.command(name="set")
-@click.argument('key', type=str, required=True)
-@click.argument('value', type=str, required=True)
+@click.argument("key", type=str, required=True)
+@click.argument("value", type=str, required=True)
 def config_set(key: str, value: str):
     """
     \b
@@ -50,7 +50,9 @@ def config_set(key: str, value: str):
     _check_variable_exists_or_exit(variable_name)
 
     if not config.ALL_VARIABLES[variable_name].configurable_manually:
-        raise Exception('Variable {} is not configurable manually'.format(variable_name))
+        raise Exception(
+            "Variable {} is not configurable manually".format(variable_name)
+        )
 
     config.update_config_file(**{variable_name: value})
 
@@ -58,8 +60,10 @@ def config_set(key: str, value: str):
 
 
 @config_group.command(name="get")
-@click.argument('key', type=str, required=True)
-@click.option('--show-secrets/--no-show-secrets', default=False, help='Show tokens and passwords')
+@click.argument("key", type=str, required=True)
+@click.option(
+    "--show-secrets/--no-show-secrets", default=False, help="Show tokens and passwords"
+)
 def config_get(key: str, show_secrets: bool):
     """
     \b
@@ -77,8 +81,12 @@ def config_get(key: str, show_secrets: bool):
 
 
 @config_group.command(name="all")
-@click.option('--show-secrets/--no-show-secrets', default=False, help='Show tokens and passwords')
-@click.option('--with-system/--no-with-system', default=False, help='Show with system variables')
+@click.option(
+    "--show-secrets/--no-show-secrets", default=False, help="Show tokens and passwords"
+)
+@click.option(
+    "--with-system/--no-with-system", default=False, help="Show with system variables"
+)
 def config_get_all(show_secrets: bool, with_system: bool):
     """
     \b
@@ -89,17 +97,21 @@ def config_get_all(show_secrets: bool, with_system: bool):
     :param with_system: Show with system variables
     :param show_secrets: Show tokens and passwords
     """
-    configurable_values = filter(lambda i: i[1].configurable_manually, config.ALL_VARIABLES.items())
-    non_configurable_values = filter(lambda i: not i[1].configurable_manually, config.ALL_VARIABLES.items())
+    configurable_values = filter(
+        lambda i: i[1].configurable_manually, config.ALL_VARIABLES.items()
+    )
+    non_configurable_values = filter(
+        lambda i: not i[1].configurable_manually, config.ALL_VARIABLES.items()
+    )
 
-    click.echo('Configurable manually variables:\n===========================')
+    click.echo("Configurable manually variables:\n===========================")
     for name, _ in configurable_values:
         _print_variable_information(name, show_secrets)
 
     if with_system:
-        click.echo('\n\n')
+        click.echo("\n\n")
 
-        click.echo('System variables:\n===========================')
+        click.echo("System variables:\n===========================")
         for name, _ in non_configurable_values:
             _print_variable_information(name, show_secrets)
 
@@ -123,7 +135,7 @@ def _check_variable_exists_or_exit(name: str):
     :param name: name of variable, case-sensitive
     """
     if name not in config.ALL_VARIABLES:
-        click.echo('Variable {!r} is unknown'.format(name))
+        click.echo("Variable {!r} is unknown".format(name))
         sys.exit(1)
 
 
@@ -137,9 +149,13 @@ def _print_variable_information(name: str, show_secrets: bool = False):
     """
     description = config.ALL_VARIABLES[name]
     current_value = getattr(config, name)
-    is_secret = any(sub in name for sub in ('_PASSWORD', '_TOKEN', '_SECRET'))
-    click.echo('{} - {}\n  default: {!r}'.format(name, description.description, description.default))
+    is_secret = any(sub in name for sub in ("_PASSWORD", "_TOKEN", "_SECRET"))
+    click.echo(
+        "{} - {}\n  default: {!r}".format(
+            name, description.description, description.default
+        )
+    )
     if current_value != description.default:
         if is_secret and not show_secrets:
-            current_value = '****'
-        click.echo('  current: {!r}'.format(current_value))
+            current_value = "****"
+        click.echo("  current: {!r}".format(current_value))

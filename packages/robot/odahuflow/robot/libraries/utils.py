@@ -68,7 +68,7 @@ class Utils:
             return socket.gethostbyname(domain)
         except socket.gaierror as exception:
             if exception.errno == -2:
-                raise Exception('Unknown domain name: {}'.format(domain)) from exception
+                raise Exception("Unknown domain name: {}".format(domain)) from exception
             else:
                 raise
 
@@ -90,12 +90,11 @@ class Utils:
         if login and password:
             credentials = login, password
 
-        response = requests.get(url,
-                                stream=True,
-                                verify=False,
-                                auth=credentials)
+        response = requests.get(url, stream=True, verify=False, auth=credentials)
         if response.status_code >= 400 or response.status_code < 200:
-            raise Exception('Returned wrong status code: {}'.format(response.status_code))
+            raise Exception(
+                "Returned wrong status code: {}".format(response.status_code)
+            )
 
         response.close()
 
@@ -143,7 +142,9 @@ class Utils:
         if len(lines) < 2:
             return []
 
-        return [[item.strip() for item in line.split('|') if item] for line in lines[1:]]
+        return [
+            [item.strip() for item in line.split("|") if item] for line in lines[1:]
+        ]
 
     @staticmethod
     def find_model_information_in_api(parsed_api_output, model_name):
@@ -158,10 +159,9 @@ class Utils:
         """
         founded = [info for info in parsed_api_output if info[0] == model_name]
         if not founded:
-            raise Exception(f'Info about model {model_name} not found')
+            raise Exception(f"Info about model {model_name} not found")
 
         return founded[0]
-
 
     @staticmethod
     def check_valid_http_response(url, token=None):
@@ -187,9 +187,15 @@ class Utils:
                 if response.status_code == 200:
                     return response.text
                 elif i >= 5:
-                    raise Exception('Returned wrong status code: {}'.format(response.status_code))
+                    raise Exception(
+                        "Returned wrong status code: {}".format(response.status_code)
+                    )
                 elif response.status_code >= 400 or response.status_code < 200:
-                    print('Response code = {}, sleep and try again'.format(response.status_code))
+                    print(
+                        "Response code = {}, sleep and try again".format(
+                            response.status_code
+                        )
+                    )
                     time.sleep(3)
             except requests.exceptions.Timeout as e:
                 error = e
@@ -197,7 +203,7 @@ class Utils:
         if error:
             raise error
         else:
-            raise Exception('Unexpected case happen!')
+            raise Exception("Unexpected case happen!")
 
     @staticmethod
     def execute_post_request_as_authorized_user(url, data=None, json_data=None):
@@ -212,7 +218,9 @@ class Utils:
         :type json_data: dict
         :return:  str -- response text
         """
-        response = requests.post(url, json=json_data, data=data, headers=get_authorization_headers())
+        response = requests.post(
+            url, json=json_data, data=data, headers=get_authorization_headers()
+        )
 
         return {"text": response.text, "code": response.status_code}
 
@@ -268,8 +276,9 @@ class Utils:
         :type time_template: str
         :return: str -- time from template
         """
-        return (datetime.datetime.utcnow() +
-                datetime.timedelta(seconds=offset)).strftime(time_template)
+        return (
+            datetime.datetime.utcnow() + datetime.timedelta(seconds=offset)
+        ).strftime(time_template)
 
     @staticmethod
     def reformat_time(time_str, initial_format, target_format):
@@ -318,7 +327,7 @@ class Utils:
             sleep_time = target_second - current_second
 
         if sleep_time:
-            print('Waiting {} second(s)'.format(sleep_time))
+            print("Waiting {} second(s)".format(sleep_time))
             time.sleep(sleep_time)
 
         if time_template:
@@ -348,7 +357,7 @@ class Utils:
         :type field_key: str
         :return: str -- concatinated string
         """
-        return ''.join([item[field_key] for item in list_of_dicts])
+        return "".join([item[field_key] for item in list_of_dicts])
 
     @staticmethod
     def repeat_string_n_times(string, count):

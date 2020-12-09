@@ -6,8 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.toolchain_integration_spec import ToolchainIntegrationSpec  # noqa: F401,E501
-from odahuflow.sdk.models.toolchain_integration_status import ToolchainIntegrationStatus  # noqa: F401,E501
+from odahuflow.sdk.models.toolchain_integration_spec import (
+    ToolchainIntegrationSpec,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.toolchain_integration_status import (
+    ToolchainIntegrationStatus,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -17,7 +21,12 @@ class ToolchainIntegration(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, spec: ToolchainIntegrationSpec=None, status: ToolchainIntegrationStatus=None):  # noqa: E501
+    def __init__(
+        self,
+        id: str = None,
+        spec: ToolchainIntegrationSpec = None,
+        status: ToolchainIntegrationStatus = None,
+    ):  # noqa: E501
         """ToolchainIntegration - a model defined in Swagger
 
         :param id: The id of this ToolchainIntegration.  # noqa: E501
@@ -28,23 +37,19 @@ class ToolchainIntegration(Model):
         :type status: ToolchainIntegrationStatus
         """
         self.swagger_types = {
-            'id': str,
-            'spec': ToolchainIntegrationSpec,
-            'status': ToolchainIntegrationStatus
+            "id": str,
+            "spec": ToolchainIntegrationSpec,
+            "status": ToolchainIntegrationStatus,
         }
 
-        self.attribute_map = {
-            'id': 'id',
-            'spec': 'spec',
-            'status': 'status'
-        }
+        self.attribute_map = {"id": "id", "spec": "spec", "status": "status"}
 
         self._id = id
         self._spec = spec
         self._status = status
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ToolchainIntegration':
+    def from_dict(cls, dikt) -> "ToolchainIntegration":
         """Returns the dict as a model
 
         :param dikt: A dict.

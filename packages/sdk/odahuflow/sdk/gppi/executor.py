@@ -26,16 +26,21 @@ import uuid
 import pydantic
 import yaml
 from odahuflow.sdk.gppi import entrypoint_invoke
-from odahuflow.sdk.gppi.models import OdahuflowProjectManifest, OdahuflowProjectManifestBinaries
+from odahuflow.sdk.gppi.models import (
+    OdahuflowProjectManifest,
+    OdahuflowProjectManifestBinaries,
+)
 from odahuflow.sdk.io_proc_utils import run
 
 _logger = logging.getLogger(__name__)
 
-PROJECT_FILE = 'odahuflow.project.yaml'
+PROJECT_FILE = "odahuflow.project.yaml"
 
-VALIDATION_FAILED_EXCEPTION_MESSAGE = 'Exception raised while invoke model entrypoint. ' \
-                                      'GPPI self-check failed. ' \
-                                      'Fix your model and try again.'
+VALIDATION_FAILED_EXCEPTION_MESSAGE = (
+    "Exception raised while invoke model entrypoint. "
+    "GPPI self-check failed. "
+    "Fix your model and try again."
+)
 
 
 def _get_conda_bin_executable(executable_name):
@@ -54,10 +59,11 @@ def _get_conda_bin_executable(executable_name):
 
 def _get_activate_conda_command(conda_env_name):
     #  Checking for newer conda versions
-    if 'CONDA_EXE' in os.environ:
+    if "CONDA_EXE" in os.environ:
         conda_path = _get_conda_bin_executable("conda")
-        activate_conda_env = ['source ' + os.path.dirname(conda_path) +
-                              '/../etc/profile.d/conda.sh']
+        activate_conda_env = [
+            "source " + os.path.dirname(conda_path) + "/../etc/profile.d/conda.sh"
+        ]
         activate_conda_env += ["conda activate {0} 1>&2".format(conda_env_name)]
     else:
         activate_path = _get_conda_bin_executable("activate")
@@ -67,7 +73,7 @@ def _get_activate_conda_command(conda_env_name):
             activate_conda_env = ["source %s %s 1>&2" % (activate_path, conda_env_name)]
         else:
             activate_conda_env = ["conda %s %s 1>&2" % (activate_path, conda_env_name)]
-    return ' && '.join(activate_conda_env)
+    return " && ".join(activate_conda_env)
 
 
 def _check_conda():
@@ -75,9 +81,11 @@ def _check_conda():
     try:
         run(conda_path, "--help", stream_output=False)
     except Exception as exc_info:
-        raise Exception("Could not find Conda executable at {0}. "
-                        "Ensure Conda is installed as per the instructions "
-                        "at https://docs.conda.io/projects/conda/en/latest/user-guide/install/") from exc_info
+        raise Exception(
+            "Could not find Conda executable at {0}. "
+            "Ensure Conda is installed as per the instructions "
+            "at https://docs.conda.io/projects/conda/en/latest/user-guide/install/"
+        ) from exc_info
 
 
 def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
@@ -90,9 +98,9 @@ def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
     """
     manifest_file = os.path.join(manifest_path, PROJECT_FILE)
     if not manifest_file:
-        raise Exception(f'Can not find manifest file {manifest_file}')
+        raise Exception(f"Can not find manifest file {manifest_file}")
 
-    with open(manifest_file, 'r') as manifest_stream:
+    with open(manifest_file, "r") as manifest_stream:
         data = manifest_stream.read()
 
         try:
@@ -101,17 +109,26 @@ def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
             try:
                 data = yaml.safe_load(data)
             except yaml.YAMLError as decode_error:
-                raise ValueError(f'Cannot decode ModelPacking resource file: {decode_error}') from decode_error
+                raise ValueError(
+                    f"Cannot decode ModelPacking resource file: {decode_error}"
+                ) from decode_error
 
         try:
             return OdahuflowProjectManifest(**data)
         except pydantic.ValidationError as valid_error:
-            raise Exception(f'Legion manifest file is in incorrect format: {valid_error}') from valid_error
+            raise Exception(
+                f"Legion manifest file is in incorrect format: {valid_error}"
+            ) from valid_error
 
 
 class ExecutionEnvironment:
-
-    def __init__(self, name: str, binaries: OdahuflowProjectManifestBinaries, manifest_path: str, skip_deps=False):
+    def __init__(
+        self,
+        name: str,
+        binaries: OdahuflowProjectManifestBinaries,
+        manifest_path: str,
+        skip_deps=False,
+    ):
 
         self.check_environment_executables()
 
@@ -128,11 +145,11 @@ class ExecutionEnvironment:
 
             _logger.warning('Flag "skip_deps"=True. Installing deps is skipped')
         else:
-            _logger.info(f'Start to install dependencies for {self.__class__}')
+            _logger.info(f"Start to install dependencies for {self.__class__}")
             self.install_dependencies()
 
     def __str__(self):
-        return f'{self.__class__}: name: {self._name}'
+        return f"{self.__class__}: name: {self._name}"
 
     @property
     def binaries(self):
@@ -152,41 +169,53 @@ class ExecutionEnvironment:
 
 
 class CondaExecutionEnvironment(ExecutionEnvironment):
-
     def check_environment_executables(self):
         _check_conda()
-        _logger.info('Conda environment executables are detected')
+        _logger.info("Conda environment executables are detected")
 
     def env_created(self):
-        conda_exec = _get_conda_bin_executable('conda')
-        _1, stdout, _2 = run(conda_exec, 'env', 'list', '--json', stream_output=False)
-        env_names = [os.path.basename(env) for env in json.loads(stdout)['envs']]
+        conda_exec = _get_conda_bin_executable("conda")
+        _1, stdout, _2 = run(conda_exec, "env", "list", "--json", stream_output=False)
+        env_names = [os.path.basename(env) for env in json.loads(stdout)["envs"]]
         return self._name in env_names
 
     def create_env(self):
         env_id = self._name
-        conda_exec = _get_conda_bin_executable('conda')
+        conda_exec = _get_conda_bin_executable("conda")
 
         if self.env_created():
-            _logger.info(f'Conda env with name {env_id!r} already exists. Creating step is skipped')
+            _logger.info(
+                f"Conda env with name {env_id!r} already exists. Creating step is skipped"
+            )
         else:
-            _logger.info(f'Creating conda env with name {env_id!r}')
-            run(conda_exec, 'create', '--yes', '--name', env_id, stream_output=False)
+            _logger.info(f"Creating conda env with name {env_id!r}")
+            run(conda_exec, "create", "--yes", "--name", env_id, stream_output=False)
 
     def install_dependencies(self):
 
         env_id = self._name
-        conda_exec = _get_conda_bin_executable('conda')
+        conda_exec = _get_conda_bin_executable("conda")
 
         # Install requirements from dep. list
         conda_dep_list = os.path.join(self._manifest_path, self.binaries.conda_path)
-        _logger.info(f'Installing mandatory requirements from {conda_dep_list} to {env_id!r}')
-        run(conda_exec, 'env', 'update', f'--name={env_id}', f'--file={conda_dep_list}', stream_output=False)
+        _logger.info(
+            f"Installing mandatory requirements from {conda_dep_list} to {env_id!r}"
+        )
+        run(
+            conda_exec,
+            "env",
+            "update",
+            f"--name={env_id}",
+            f"--file={conda_dep_list}",
+            stream_output=False,
+        )
 
     def execute(self, command: str, cwd: str = None, stream_output: bool = True):
         activate_cmd = _get_activate_conda_command(self._name)
-        _logger.info(f'cwd: {cwd}')
-        return run('bash', '-c', f'{activate_cmd} && {command}', cwd=cwd, stream_output=False)
+        _logger.info(f"cwd: {cwd}")
+        return run(
+            "bash", "-c", f"{activate_cmd} && {command}", cwd=cwd, stream_output=False
+        )
 
 
 class GPPITrainedModelBinary:
@@ -200,7 +229,13 @@ class GPPITrainedModelBinary:
         * https://docs.odahu.org/gen_glossary.html#term-general-python-prediction-interface
     """
 
-    def __init__(self, manifest_path: str, use_current_env: bool = False, env_name: str = '', skip_deps=False):
+    def __init__(
+        self,
+        manifest_path: str,
+        use_current_env: bool = False,
+        env_name: str = "",
+        skip_deps=False,
+    ):
         """
 
         :param manifest_path: path to dir where odahuflow.project.yaml
@@ -208,7 +243,9 @@ class GPPITrainedModelBinary:
         """
         self.manifest_path: str = manifest_path
         try:
-            self.manifest: OdahuflowProjectManifest = load_odahuflow_project_manifest(manifest_path)
+            self.manifest: OdahuflowProjectManifest = load_odahuflow_project_manifest(
+                manifest_path
+            )
         except Exception as e:
             raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
         self.use_current_env = use_current_env
@@ -216,7 +253,7 @@ class GPPITrainedModelBinary:
 
         self.exec_env = None
         if not use_current_env:
-            _logger.info('Start initializing environment')
+            _logger.info("Start initializing environment")
             self.exec_env: ExecutionEnvironment = self._init_exec_env(env_name)
 
     @property
@@ -225,14 +262,24 @@ class GPPITrainedModelBinary:
 
     def execute(self, command: str, cwd: str = None, stream_output: bool = True):
         if self.use_current_env:
-            _logger.info('use_current_env flag = True. Start to execute command without changing environment')
-            exit_code, output, err_ = run('bash', '-c', command, cwd=cwd, stream_output=stream_output)
+            _logger.info(
+                "use_current_env flag = True. Start to execute command without changing environment"
+            )
+            exit_code, output, err_ = run(
+                "bash", "-c", command, cwd=cwd, stream_output=stream_output
+            )
         else:
-            _logger.info(f'use_current_env flag = False. Start to execute command in {self.exec_env}')
-            exit_code, output, err_ = self.exec_env.execute(command, cwd=cwd, stream_output=stream_output)
+            _logger.info(
+                f"use_current_env flag = False. Start to execute command in {self.exec_env}"
+            )
+            exit_code, output, err_ = self.exec_env.execute(
+                command, cwd=cwd, stream_output=stream_output
+            )
 
-        _logger.info('Subprocess result: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======' %
-                     (exit_code, output, err_))
+        _logger.info(
+            "Subprocess result: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======"
+            % (exit_code, output, err_)
+        )
 
         return output
 
@@ -245,17 +292,17 @@ class GPPITrainedModelBinary:
         :return:
         """
 
-        _logger.info('Start procedure of self-checking for GPPI')
+        _logger.info("Start procedure of self-checking for GPPI")
         try:
             self.execute(
-                f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
-                f'--entrypoint {self.manifest.model.entrypoint} self_check',
-                stream_output=False
+                f"python  {entrypoint_invoke.__file__} -v --model {self.model_dir} "
+                f"--entrypoint {self.manifest.model.entrypoint} self_check",
+                stream_output=False,
             )
         except Exception as e:
             raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
 
-        _logger.info('Self-check is successful. GPPI model is packed as expected.')
+        _logger.info("Self-check is successful. GPPI model is packed as expected.")
 
     def predict(self, input_file: str, output_dir: str, output_file_name):
         """
@@ -266,15 +313,15 @@ class GPPITrainedModelBinary:
         """
         try:
             self.execute(
-                f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
-                f'--entrypoint {self.manifest.model.entrypoint} predict {input_file} {output_dir} '
+                f"python  {entrypoint_invoke.__file__} -v --model {self.model_dir} "
+                f"--entrypoint {self.manifest.model.entrypoint} predict {input_file} {output_dir} "
                 f'{"--output_file_name "+output_file_name if output_file_name else ""}',
-                stream_output=False
+                stream_output=False,
             )
         except Exception as e:
             raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
 
-        _logger.info('Prediction successfully completed')
+        _logger.info("Prediction successfully completed")
 
     def info(self) -> str:
         """
@@ -283,9 +330,9 @@ class GPPITrainedModelBinary:
         """
         try:
             out = self.execute(
-                f'python  {entrypoint_invoke.__file__} -v --model {self.model_dir} '
-                f'--entrypoint {self.manifest.model.entrypoint} info',
-                stream_output=False
+                f"python  {entrypoint_invoke.__file__} -v --model {self.model_dir} "
+                f"--entrypoint {self.manifest.model.entrypoint} info",
+                stream_output=False,
             )
         except Exception as e:
             raise Exception(VALIDATION_FAILED_EXCEPTION_MESSAGE) from e
@@ -293,9 +340,13 @@ class GPPITrainedModelBinary:
         return out
 
     def _init_exec_env(self, env_name: str) -> ExecutionEnvironment:
-        if self.manifest.binaries.dependencies == 'conda':
-            env = CondaExecutionEnvironment(env_name, self.manifest.binaries, self.manifest_path, self.skip_deps)
+        if self.manifest.binaries.dependencies == "conda":
+            env = CondaExecutionEnvironment(
+                env_name, self.manifest.binaries, self.manifest_path, self.skip_deps
+            )
         else:
-            raise RuntimeError(f'{self.manifest.binaries.dependencies} dependency manager is not recognized')
+            raise RuntimeError(
+                f"{self.manifest.binaries.dependencies} dependency manager is not recognized"
+            )
 
         return env

@@ -16,7 +16,7 @@ class ServiceCatalog(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, auth: AuthConfig=None, base_url: str=None):  # noqa: E501
+    def __init__(self, auth: AuthConfig = None, base_url: str = None):  # noqa: E501
         """ServiceCatalog - a model defined in Swagger
 
         :param auth: The auth of this ServiceCatalog.  # noqa: E501
@@ -24,21 +24,15 @@ class ServiceCatalog(Model):
         :param base_url: The base_url of this ServiceCatalog.  # noqa: E501
         :type base_url: str
         """
-        self.swagger_types = {
-            'auth': AuthConfig,
-            'base_url': str
-        }
+        self.swagger_types = {"auth": AuthConfig, "base_url": str}
 
-        self.attribute_map = {
-            'auth': 'auth',
-            'base_url': 'baseUrl'
-        }
+        self.attribute_map = {"auth": "auth", "base_url": "baseUrl"}
 
         self._auth = auth
         self._base_url = base_url
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ServiceCatalog':
+    def from_dict(cls, dikt) -> "ServiceCatalog":
         """Returns the dict as a model
 
         :param dikt: A dict.

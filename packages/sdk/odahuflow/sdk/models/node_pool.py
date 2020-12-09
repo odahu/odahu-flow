@@ -15,7 +15,9 @@ class NodePool(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, node_selector: Dict[str, str]=None, tags: List[str]=None):  # noqa: E501
+    def __init__(
+        self, node_selector: Dict[str, str] = None, tags: List[str] = None
+    ):  # noqa: E501
         """NodePool - a model defined in Swagger
 
         :param node_selector: The node_selector of this NodePool.  # noqa: E501
@@ -23,21 +25,15 @@ class NodePool(Model):
         :param tags: The tags of this NodePool.  # noqa: E501
         :type tags: List[str]
         """
-        self.swagger_types = {
-            'node_selector': Dict[str, str],
-            'tags': List[str]
-        }
+        self.swagger_types = {"node_selector": Dict[str, str], "tags": List[str]}
 
-        self.attribute_map = {
-            'node_selector': 'nodeSelector',
-            'tags': 'tags'
-        }
+        self.attribute_map = {"node_selector": "nodeSelector", "tags": "tags"}
 
         self._node_selector = node_selector
         self._tags = tags
 
     @classmethod
-    def from_dict(cls, dikt) -> 'NodePool':
+    def from_dict(cls, dikt) -> "NodePool":
         """Returns the dict as a model
 
         :param dikt: A dict.

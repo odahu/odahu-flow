@@ -16,7 +16,9 @@ class ResourceRequirements(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, limits: ResourceList=None, requests: ResourceList=None):  # noqa: E501
+    def __init__(
+        self, limits: ResourceList = None, requests: ResourceList = None
+    ):  # noqa: E501
         """ResourceRequirements - a model defined in Swagger
 
         :param limits: The limits of this ResourceRequirements.  # noqa: E501
@@ -24,21 +26,15 @@ class ResourceRequirements(Model):
         :param requests: The requests of this ResourceRequirements.  # noqa: E501
         :type requests: ResourceList
         """
-        self.swagger_types = {
-            'limits': ResourceList,
-            'requests': ResourceList
-        }
+        self.swagger_types = {"limits": ResourceList, "requests": ResourceList}
 
-        self.attribute_map = {
-            'limits': 'limits',
-            'requests': 'requests'
-        }
+        self.attribute_map = {"limits": "limits", "requests": "requests"}
 
         self._limits = limits
         self._requests = requests
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ResourceRequirements':
+    def from_dict(cls, dikt) -> "ResourceRequirements":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -15,7 +15,13 @@ class ConnectionStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, secret_name: str=None, service_account: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        secret_name: str = None,
+        service_account: str = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ConnectionStatus - a model defined in Swagger
 
         :param created_at: The created_at of this ConnectionStatus.  # noqa: E501
@@ -28,17 +34,17 @@ class ConnectionStatus(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'secret_name': str,
-            'service_account': str,
-            'updated_at': str
+            "created_at": str,
+            "secret_name": str,
+            "service_account": str,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'secret_name': 'secretName',
-            'service_account': 'serviceAccount',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "secret_name": "secretName",
+            "service_account": "serviceAccount",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -47,7 +53,7 @@ class ConnectionStatus(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ConnectionStatus':
+    def from_dict(cls, dikt) -> "ConnectionStatus":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -6,8 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.model_deployment_spec import ModelDeploymentSpec  # noqa: F401,E501
-from odahuflow.sdk.models.model_deployment_status import ModelDeploymentStatus  # noqa: F401,E501
+from odahuflow.sdk.models.model_deployment_spec import (
+    ModelDeploymentSpec,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.model_deployment_status import (
+    ModelDeploymentStatus,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -17,7 +21,14 @@ class ModelDeployment(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, id: str=None, spec: ModelDeploymentSpec=None, status: ModelDeploymentStatus=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        id: str = None,
+        spec: ModelDeploymentSpec = None,
+        status: ModelDeploymentStatus = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelDeployment - a model defined in Swagger
 
         :param created_at: The created_at of this ModelDeployment.  # noqa: E501
@@ -32,19 +43,19 @@ class ModelDeployment(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'id': str,
-            'spec': ModelDeploymentSpec,
-            'status': ModelDeploymentStatus,
-            'updated_at': str
+            "created_at": str,
+            "id": str,
+            "spec": ModelDeploymentSpec,
+            "status": ModelDeploymentStatus,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'id': 'id',
-            'spec': 'spec',
-            'status': 'status',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "id": "id",
+            "spec": "spec",
+            "status": "status",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -54,7 +65,7 @@ class ModelDeployment(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeployment':
+    def from_dict(cls, dikt) -> "ModelDeployment":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -2,6 +2,7 @@
 
 # flake8: noqa
 from __future__ import absolute_import
+
 # import models into model package
 from odahuflow.sdk.models.api_backend_config import APIBackendConfig
 from odahuflow.sdk.models.api_config import APIConfig
@@ -18,8 +19,12 @@ from odahuflow.sdk.models.data_binding_dir import DataBindingDir
 from odahuflow.sdk.models.edge_config import EdgeConfig
 from odahuflow.sdk.models.environment_variable import EnvironmentVariable
 from odahuflow.sdk.models.external_url import ExternalUrl
-from odahuflow.sdk.models.feedback_model_feedback_request import FeedbackModelFeedbackRequest
-from odahuflow.sdk.models.feedback_model_feedback_response import FeedbackModelFeedbackResponse
+from odahuflow.sdk.models.feedback_model_feedback_request import (
+    FeedbackModelFeedbackRequest,
+)
+from odahuflow.sdk.models.feedback_model_feedback_response import (
+    FeedbackModelFeedbackResponse,
+)
 from odahuflow.sdk.models.http_result import HTTPResult
 from odahuflow.sdk.models.input_data_binding_dir import InputDataBindingDir
 from odahuflow.sdk.models.jwks import JWKS
@@ -28,9 +33,15 @@ from odahuflow.sdk.models.k8s_packager import K8sPackager
 from odahuflow.sdk.models.k8s_trainer import K8sTrainer
 from odahuflow.sdk.models.model_deployment import ModelDeployment
 from odahuflow.sdk.models.model_deployment_config import ModelDeploymentConfig
-from odahuflow.sdk.models.model_deployment_events_response import ModelDeploymentEventsResponse
-from odahuflow.sdk.models.model_deployment_istio_config import ModelDeploymentIstioConfig
-from odahuflow.sdk.models.model_deployment_security_config import ModelDeploymentSecurityConfig
+from odahuflow.sdk.models.model_deployment_events_response import (
+    ModelDeploymentEventsResponse,
+)
+from odahuflow.sdk.models.model_deployment_istio_config import (
+    ModelDeploymentIstioConfig,
+)
+from odahuflow.sdk.models.model_deployment_security_config import (
+    ModelDeploymentSecurityConfig,
+)
 from odahuflow.sdk.models.model_deployment_spec import ModelDeploymentSpec
 from odahuflow.sdk.models.model_deployment_status import ModelDeploymentStatus
 from odahuflow.sdk.models.model_deployment_target import ModelDeploymentTarget

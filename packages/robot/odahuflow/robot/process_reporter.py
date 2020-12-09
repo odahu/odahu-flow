@@ -28,12 +28,12 @@ ROBOT_LISTENER_API_VERSION = 3
 KILL_SIGNAL = signal.SIGKILL
 
 
-LOGGER = logging.getLogger('listener.process_reporter')
+LOGGER = logging.getLogger("listener.process_reporter")
 LOGGER.setLevel(logging.DEBUG)
 
 handler = logging.StreamHandler(sys.__stdout__)
 handler.setLevel(logging.DEBUG)
-handler.setFormatter(logging.Formatter('\n%(asctime)s - %(levelname)s - %(message)s'))
+handler.setFormatter(logging.Formatter("\n%(asctime)s - %(levelname)s - %(message)s"))
 LOGGER.addHandler(handler)
 
 
@@ -47,6 +47,7 @@ def with_execution_time_limit(limit):
     Send alarm after limit
     :param limit: limit alarm
     """
+
     def sig_handler(_1, _2):
         raise ExecutionTimeoutException()
 
@@ -72,11 +73,13 @@ def report_process_output(process_name, stream_name, stream):
     :return: None
     """
     if not stream:
-        LOGGER.info('Process {!r} has no {}'.format(process_name, stream_name))
+        LOGGER.info("Process {!r} has no {}".format(process_name, stream_name))
     else:
         if isinstance(stream, bytes):
-            stream = stream.decode('utf-8')
-        LOGGER.info('Process {!r} has {} output:\n{}'.format(process_name, stream_name, stream))
+            stream = stream.decode("utf-8")
+        LOGGER.info(
+            "Process {!r} has {} output:\n{}".format(process_name, stream_name, stream)
+        )
 
 
 def kill_and_report_process(popen_object):
@@ -88,18 +91,26 @@ def kill_and_report_process(popen_object):
     :return: None
     """
     try:
-        LOGGER.debug('Killing process #{}'.format(popen_object.pid))
+        LOGGER.debug("Killing process #{}".format(popen_object.pid))
         popen_object.kill()
 
         try:
-            report_process_output(popen_object.args, 'stdout', popen_object.stdout.read())
-            report_process_output(popen_object.args, 'stderr', popen_object.stderr.read())
+            report_process_output(
+                popen_object.args, "stdout", popen_object.stdout.read()
+            )
+            report_process_output(
+                popen_object.args, "stderr", popen_object.stderr.read()
+            )
         except Exception as gather_exception:
-            LOGGER.error('Cannot gather process #{} logs: {!r}'.format(popen_object.pid, gather_exception))
+            LOGGER.error(
+                "Cannot gather process #{} logs: {!r}".format(
+                    popen_object.pid, gather_exception
+                )
+            )
     except ProcessLookupError:
-        LOGGER.error('Cannot find process by id #{}'.format(popen_object.pid))
+        LOGGER.error("Cannot find process by id #{}".format(popen_object.pid))
     except Exception as kill_exception:
-        LOGGER.error('Cannot kill process: {!r}'.format(kill_exception))
+        LOGGER.error("Cannot kill process: {!r}".format(kill_exception))
 
 
 def end_test(test, result):  # pylint: disable=W0613
@@ -111,27 +122,32 @@ def end_test(test, result):  # pylint: disable=W0613
     :return: None
     """
     if not result.passed:
-        process_lib = get_imported_library_instance('Process')
+        process_lib = get_imported_library_instance("Process")
         if process_lib:
             all_processes = process_lib._processes._connections
             all_results = process_lib._results
 
-            active_processes = [process for process in all_processes
-                                if process in all_results and all_results[process].rc is None]
+            active_processes = [
+                process
+                for process in all_processes
+                if process in all_results and all_results[process].rc is None
+            ]
 
             if active_processes:
-                LOGGER.info('Some hanging processes have been detected for failed test {!r}'.format(
-                    result.name
-                ))
+                LOGGER.info(
+                    "Some hanging processes have been detected for failed test {!r}".format(
+                        result.name
+                    )
+                )
 
                 for process in active_processes:
-                    LOGGER.info('Killing active process {!r} for test {!r} because of {!r}'.format(
-                        process.args,
-                        result.name,
-                        result.message
-                    ))
+                    LOGGER.info(
+                        "Killing active process {!r} for test {!r} because of {!r}".format(
+                            process.args, result.name, result.message
+                        )
+                    )
                     try:
                         with with_execution_time_limit(10):
                             kill_and_report_process(process)
                     except ExecutionTimeoutException:
-                        LOGGER.error('Operation timed out')
+                        LOGGER.error("Operation timed out")

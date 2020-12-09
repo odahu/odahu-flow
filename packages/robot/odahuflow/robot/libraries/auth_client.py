@@ -26,7 +26,14 @@ _auth_jwt = None
 LOGGER = logging.getLogger(__name__)
 
 
-def init_token(login: str, password: str, auth_url: str, client_id: str, client_secret: str, scope: str) -> None:
+def init_token(
+    login: str,
+    password: str,
+    auth_url: str,
+    client_id: str,
+    client_secret: str,
+    scope: str,
+) -> None:
     """
     Authorize test user and get access token.
 
@@ -52,23 +59,27 @@ def init_token(login: str, password: str, auth_url: str, client_id: str, client_
         response = requests.post(
             auth_url,
             data={
-                'grant_type': 'password',
-                'client_id': client_id,
-                'client_secret': client_secret,
-                'username': login,
-                'password': password,
-                'scope': scope
-            }
+                "grant_type": "password",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "username": login,
+                "password": password,
+                "scope": scope,
+            },
         )
         response_data = response.json()
         # Parse fields and return
-        id_token = response_data.get('id_token')
-        token_type = response_data.get('token_type')
-        expires_in = response_data.get('expires_in')
-        LOGGER.info('Received %s token with expiration in %d seconds', token_type, expires_in)
+        id_token = response_data.get("id_token")
+        token_type = response_data.get("token_type")
+        expires_in = response_data.get("expires_in")
+        LOGGER.info(
+            "Received %s token with expiration in %d seconds", token_type, expires_in
+        )
         _auth_jwt = id_token
     except requests.HTTPError as http_error:
-        raise Exception(f'Can not authorize test user {login!r} on {auth_url!r}: {http_error}') from http_error
+        raise Exception(
+            f"Can not authorize test user {login!r} on {auth_url!r}: {http_error}"
+        ) from http_error
 
     return _auth_jwt
 
@@ -79,9 +90,9 @@ def get_authorization_headers(token=None):
 
     :return: headers dict or empty dict if Session ID wasn't found
     """
-    return {
-        'Authorization': f'Bearer {token or _auth_jwt}'
-    } if token or _auth_jwt else {}
+    return (
+        {"Authorization": f"Bearer {token or _auth_jwt}"} if token or _auth_jwt else {}
+    )
 
 
 def get_token():

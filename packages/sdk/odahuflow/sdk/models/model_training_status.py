@@ -16,7 +16,17 @@ class ModelTrainingStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, artifacts: List[TrainingResult]=None, created_at: str=None, exit_code: int=None, message: str=None, pod_name: str=None, reason: str=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        artifacts: List[TrainingResult] = None,
+        created_at: str = None,
+        exit_code: int = None,
+        message: str = None,
+        pod_name: str = None,
+        reason: str = None,
+        state: str = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelTrainingStatus - a model defined in Swagger
 
         :param artifacts: The artifacts of this ModelTrainingStatus.  # noqa: E501
@@ -37,25 +47,25 @@ class ModelTrainingStatus(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'artifacts': List[TrainingResult],
-            'created_at': str,
-            'exit_code': int,
-            'message': str,
-            'pod_name': str,
-            'reason': str,
-            'state': str,
-            'updated_at': str
+            "artifacts": List[TrainingResult],
+            "created_at": str,
+            "exit_code": int,
+            "message": str,
+            "pod_name": str,
+            "reason": str,
+            "state": str,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'artifacts': 'artifacts',
-            'created_at': 'createdAt',
-            'exit_code': 'exitCode',
-            'message': 'message',
-            'pod_name': 'podName',
-            'reason': 'reason',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            "artifacts": "artifacts",
+            "created_at": "createdAt",
+            "exit_code": "exitCode",
+            "message": "message",
+            "pod_name": "podName",
+            "reason": "reason",
+            "state": "state",
+            "updated_at": "updatedAt",
         }
 
         self._artifacts = artifacts
@@ -68,7 +78,7 @@ class ModelTrainingStatus(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelTrainingStatus':
+    def from_dict(cls, dikt) -> "ModelTrainingStatus":
         """Returns the dict as a model
 
         :param dikt: A dict.

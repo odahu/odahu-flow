@@ -16,7 +16,9 @@ class OperatorConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, auth: AuthConfig=None, monitoring_port: int=None):  # noqa: E501
+    def __init__(
+        self, auth: AuthConfig = None, monitoring_port: int = None
+    ):  # noqa: E501
         """OperatorConfig - a model defined in Swagger
 
         :param auth: The auth of this OperatorConfig.  # noqa: E501
@@ -24,21 +26,15 @@ class OperatorConfig(Model):
         :param monitoring_port: The monitoring_port of this OperatorConfig.  # noqa: E501
         :type monitoring_port: int
         """
-        self.swagger_types = {
-            'auth': AuthConfig,
-            'monitoring_port': int
-        }
+        self.swagger_types = {"auth": AuthConfig, "monitoring_port": int}
 
-        self.attribute_map = {
-            'auth': 'auth',
-            'monitoring_port': 'monitoringPort'
-        }
+        self.attribute_map = {"auth": "auth", "monitoring_port": "monitoringPort"}
 
         self._auth = auth
         self._monitoring_port = monitoring_port
 
     @classmethod
-    def from_dict(cls, dikt) -> 'OperatorConfig':
+    def from_dict(cls, dikt) -> "OperatorConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

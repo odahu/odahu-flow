@@ -17,7 +17,12 @@ class Connection(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, spec: ConnectionSpec=None, status: ConnectionStatus=None):  # noqa: E501
+    def __init__(
+        self,
+        id: str = None,
+        spec: ConnectionSpec = None,
+        status: ConnectionStatus = None,
+    ):  # noqa: E501
         """Connection - a model defined in Swagger
 
         :param id: The id of this Connection.  # noqa: E501
@@ -28,23 +33,19 @@ class Connection(Model):
         :type status: ConnectionStatus
         """
         self.swagger_types = {
-            'id': str,
-            'spec': ConnectionSpec,
-            'status': ConnectionStatus
+            "id": str,
+            "spec": ConnectionSpec,
+            "status": ConnectionStatus,
         }
 
-        self.attribute_map = {
-            'id': 'id',
-            'spec': 'spec',
-            'status': 'status'
-        }
+        self.attribute_map = {"id": "id", "spec": "spec", "status": "status"}
 
         self._id = id
         self._spec = spec
         self._status = status
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Connection':
+    def from_dict(cls, dikt) -> "Connection":
         """Returns the dict as a model
 
         :param dikt: A dict.

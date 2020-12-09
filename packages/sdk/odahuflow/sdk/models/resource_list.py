@@ -15,7 +15,9 @@ class ResourceList(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, cpu: str=None, gpu: str=None, memory: str=None):  # noqa: E501
+    def __init__(
+        self, cpu: str = None, gpu: str = None, memory: str = None
+    ):  # noqa: E501
         """ResourceList - a model defined in Swagger
 
         :param cpu: The cpu of this ResourceList.  # noqa: E501
@@ -25,24 +27,16 @@ class ResourceList(Model):
         :param memory: The memory of this ResourceList.  # noqa: E501
         :type memory: str
         """
-        self.swagger_types = {
-            'cpu': str,
-            'gpu': str,
-            'memory': str
-        }
+        self.swagger_types = {"cpu": str, "gpu": str, "memory": str}
 
-        self.attribute_map = {
-            'cpu': 'cpu',
-            'gpu': 'gpu',
-            'memory': 'memory'
-        }
+        self.attribute_map = {"cpu": "cpu", "gpu": "gpu", "memory": "memory"}
 
         self._cpu = cpu
         self._gpu = gpu
         self._memory = memory
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ResourceList':
+    def from_dict(cls, dikt) -> "ResourceList":
         """Returns the dict as a model
 
         :param dikt: A dict.

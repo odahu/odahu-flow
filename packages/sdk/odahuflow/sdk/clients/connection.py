@@ -38,7 +38,7 @@ class ConnectionClient(RemoteAPIClient):
         :param conn_id: Connection ID
         :return: Connection
         """
-        return Connection.from_dict(self.query(f'{CONNECTION_URL}/{conn_id}'))
+        return Connection.from_dict(self.query(f"{CONNECTION_URL}/{conn_id}"))
 
     def get_decrypted(self, conn_id: str) -> Connection:
         """
@@ -47,9 +47,7 @@ class ConnectionClient(RemoteAPIClient):
         :param conn_id: Connection ID
         :return: Connection
         """
-        return Connection.from_dict(self.query(
-            f'{CONNECTION_URL}/{conn_id}/decrypted'
-        ))
+        return Connection.from_dict(self.query(f"{CONNECTION_URL}/{conn_id}/decrypted"))
 
     def get_all(self) -> typing.List[Connection]:
         """
@@ -66,7 +64,9 @@ class ConnectionClient(RemoteAPIClient):
         :param conn: Connection
         :return Message from API server
         """
-        return Connection.from_dict(self.query(CONNECTION_URL, action='POST', payload=conn.to_dict()))
+        return Connection.from_dict(
+            self.query(CONNECTION_URL, action="POST", payload=conn.to_dict())
+        )
 
     def edit(self, conn: Connection) -> Connection:
         """
@@ -75,7 +75,9 @@ class ConnectionClient(RemoteAPIClient):
         :param conn: Connection
         :return Message from API server
         """
-        return Connection.from_dict(self.query(CONNECTION_URL, action='PUT', payload=conn.to_dict()))
+        return Connection.from_dict(
+            self.query(CONNECTION_URL, action="PUT", payload=conn.to_dict())
+        )
 
     def delete(self, name: str) -> str:
         """
@@ -84,7 +86,7 @@ class ConnectionClient(RemoteAPIClient):
         :param name: Name of a Connection
         :return Message from API server
         """
-        return self.query(f'{CONNECTION_URL}/{name}', action='DELETE')['message']
+        return self.query(f"{CONNECTION_URL}/{name}", action="DELETE")["message"]
 
 
 class AsyncConnectionClient(AsyncRemoteAPIClient):
@@ -99,7 +101,7 @@ class AsyncConnectionClient(AsyncRemoteAPIClient):
         :param conn_id: Connection ID
         :return: Connection
         """
-        return Connection.from_dict(await self.query(f'{CONNECTION_URL}/{conn_id}'))
+        return Connection.from_dict(await self.query(f"{CONNECTION_URL}/{conn_id}"))
 
     async def get_decrypted(self, conn_id: str) -> Connection:
         """
@@ -108,9 +110,9 @@ class AsyncConnectionClient(AsyncRemoteAPIClient):
         :param conn_id: Connection ID
         :return: Connection
         """
-        return Connection.from_dict(await self.query(
-            f'{CONNECTION_URL}/{conn_id}/decrypted'
-        ))
+        return Connection.from_dict(
+            await self.query(f"{CONNECTION_URL}/{conn_id}/decrypted")
+        )
 
     async def get_all(self) -> typing.List[Connection]:
         """
@@ -127,7 +129,9 @@ class AsyncConnectionClient(AsyncRemoteAPIClient):
         :param conn: Connection
         :return Message from API server
         """
-        return Connection.from_dict(await self.query(CONNECTION_URL, action='POST', payload=conn.to_dict()))
+        return Connection.from_dict(
+            await self.query(CONNECTION_URL, action="POST", payload=conn.to_dict())
+        )
 
     async def edit(self, conn: Connection) -> Connection:
         """
@@ -136,7 +140,9 @@ class AsyncConnectionClient(AsyncRemoteAPIClient):
         :param conn: Connection
         :return Message from API server
         """
-        return Connection.from_dict(await self.query(CONNECTION_URL, action='PUT', payload=conn.to_dict()))
+        return Connection.from_dict(
+            await self.query(CONNECTION_URL, action="PUT", payload=conn.to_dict())
+        )
 
     async def delete(self, name: str) -> str:
         """
@@ -145,4 +151,6 @@ class AsyncConnectionClient(AsyncRemoteAPIClient):
         :param name: Name of a Connection
         :return Message from API server
         """
-        return (await self.query(f'{CONNECTION_URL}/{name}', action='DELETE'))['message']
+        return (await self.query(f"{CONNECTION_URL}/{name}", action="DELETE"))[
+            "message"
+        ]

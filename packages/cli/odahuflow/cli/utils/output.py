@@ -44,7 +44,7 @@ ALL_OUTPUT_FORMATS = [
     JSON_OUTPUT_FORMAT,
     TABLE_OUTPUT_FORMAT,
     YAML_OUTPUT_FORMAT,
-    JSONPATH_OUTPUT_FORMAT
+    JSONPATH_OUTPUT_FORMAT,
 ]
 
 
@@ -61,7 +61,9 @@ def validate_output_format(ctx, param, value):
     """
     splited_output_format = value.split(SPLIT_SIGN, maxsplit=1)
     if splited_output_format[0] not in ALL_OUTPUT_FORMATS:
-        raise click.BadParameter(f'invalid choice: {value}. (choose from {", ".join(ALL_OUTPUT_FORMATS)})')
+        raise click.BadParameter(
+            f'invalid choice: {value}. (choose from {", ".join(ALL_OUTPUT_FORMATS)})'
+        )
 
     return value
 
@@ -76,7 +78,7 @@ def flatten_dict(d: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any
 
     def expand(key, value):
         if isinstance(value, dict):
-            return [(key + '.' + k, v) for k, v in flatten_dict(value).items()]
+            return [(key + "." + k, v) for k, v in flatten_dict(value).items()]
         else:
             return [(key, value)]
 
@@ -106,7 +108,7 @@ def _convert_model_values(model: Model) -> typing.List[str]:
     return list(
         map(
             lambda x: _restrict_table_value_length(str(x)),
-            flatten_dict(model.to_dict()).values()
+            flatten_dict(model.to_dict()).values(),
         )
     )
 
@@ -135,7 +137,9 @@ def extract_jsonpath(models: typing.List[Model], expr: str):
     """
     jsonpath_expr = parse(expr)
 
-    result = [match.value for match in jsonpath_expr.find([md.to_dict() for md in models])]
+    result = [
+        match.value for match in jsonpath_expr.find([md.to_dict() for md in models])
+    ]
 
     click.echo(result[0] if len(result) == 1 else json.dumps(result))
 
@@ -160,4 +164,4 @@ def format_output(models: typing.List[Model], output_format: str):
     elif output_format == JSONPATH_OUTPUT_FORMAT:
         extract_jsonpath(models, expression)
     else:
-        raise ValueError(f'Not expected {output_format} output format')
+        raise ValueError(f"Not expected {output_format} output format")

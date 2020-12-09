@@ -15,25 +15,30 @@ from odahuflow.sdk.clients.training import ModelTrainingClient
 
 
 class Login:
-
     @staticmethod
-    def config_get(base_url: str = config.API_URL, token=None,
-                   client_id=None, client_secret=None, issuer_url=None):
+    def config_get(
+        base_url: str = config.API_URL,
+        token=None,
+        client_id=None,
+        client_secret=None,
+        issuer_url=None,
+    ):
         return ConfigurationClient(
-            base_url=base_url, token=token,
-            client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
+            base_url=base_url,
+            token=token,
+            client_id=client_id,
+            client_secret=client_secret,
+            issuer_url=issuer_url,
         ).get()
 
 
 class Configuration:
-
     @staticmethod
     def config_get():
         return ConfigurationClient().get()
 
 
 class Connection:
-
     @staticmethod
     def connection_get():
         return ConnectionClient().get_all()
@@ -62,7 +67,6 @@ class Connection:
 
 
 class ModelDeployment:
-
     @staticmethod
     def deployment_get():
         return ModelDeploymentClient().get_all()
@@ -99,7 +103,6 @@ class ModelDeployment:
 
 
 class ModelPackaging:
-
     @staticmethod
     def packaging_get():
         return ModelPackagingClient().get_all()
@@ -140,7 +143,6 @@ class ModelPackaging:
 
 
 class ModelTraining:
-
     @staticmethod
     def training_get():
         return ModelTrainingClient().get_all()
@@ -173,7 +175,6 @@ class ModelTraining:
 
 
 class ModelRoute:
-
     @staticmethod
     def route_get():
         return ModelRouteClient().get_all()
@@ -198,7 +199,6 @@ class ModelRoute:
 
 
 class Packager:
-
     @staticmethod
     def packager_get():
         return PackagingIntegrationClient().get_all()
@@ -223,7 +223,6 @@ class Packager:
 
 
 class Toolchain:
-
     @staticmethod
     def toolchain_get():
         return ToolchainIntegrationClient().get_all()
@@ -248,7 +247,6 @@ class Toolchain:
 
 
 class Model:
-
     @staticmethod
     def model_get(url=None, token=config.API_TOKEN, **kwargs):
         return ModelClient(url, token, **kwargs).info()

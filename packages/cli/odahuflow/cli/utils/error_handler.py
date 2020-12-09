@@ -24,16 +24,16 @@ from odahuflow.sdk.logger import is_verbose_enabled
 
 LOG = logging.getLogger(__name__)
 
-TIMEOUT_ERROR_MESSAGE = 'Time out: operation has not been confirmed'
-IGNORE_NOT_FOUND_ERROR_MESSAGE = '{kind} {id} was not found. Ignore'
-ID_AND_FILE_GIVEN_ERROR_MESSAGE = 'You should provide an ID or ' \
-                                   'file parameter, not both.'
-ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide an ID or ' \
-                                   'file parameter.'
+TIMEOUT_ERROR_MESSAGE = "Time out: operation has not been confirmed"
+IGNORE_NOT_FOUND_ERROR_MESSAGE = "{kind} {id} was not found. Ignore"
+ID_AND_FILE_GIVEN_ERROR_MESSAGE = (
+    "You should provide an ID or file parameter, not both."
+)
+ID_AND_FILE_MISSED_ERROR_MESSAGE = "You should provide an ID or file parameter."
 
 
 def check_id_or_file_params_present(
-        entity_id: Optional[str], file: Optional[str]
+    entity_id: Optional[str], file: Optional[str]
 ) -> None:
     """
     Verify that only one parameter is present
@@ -54,13 +54,13 @@ def cli_error_handler():
         yield
     except Exception as e:
         # If the verbose flag is enabled than the stacktrace will be logged.
-        LOG.exception('Exception occurs during CLI invocation')
+        LOG.exception("Exception occurs during CLI invocation")
         # This message always appears in stdout.
         # The verbose flag does not affect this.
-        click.echo(f'Error: {str(e)}')
+        click.echo(f"Error: {str(e)}")
 
         if not is_verbose_enabled():
-            click.echo('For more information rerun command with --verbose flag')
+            click.echo("For more information rerun command with --verbose flag")
 
         # We can't reraise, for example, click.ClickException.
         # Because this function doesn't executes in click context,

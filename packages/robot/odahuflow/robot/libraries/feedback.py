@@ -30,7 +30,7 @@ def join_bucket_paths(*items):
     :param items: list[str] -- path items
     :return: str -- path
     """
-    return '/'.join(item.strip('/ ') for item in items)
+    return "/".join(item.strip("/ ") for item in items)
 
 
 class Feedback:
@@ -38,7 +38,7 @@ class Feedback:
     AWS S3 client for robot tests
     """
 
-    ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
+    ROBOT_LIBRARY_SCOPE = "TEST SUITE"
     S3_LISTING_REQUEST_LIMIT = 1000
     WAIT_FILE_TIME = 5
     WAIT_FILE_ITERATIONS = 36
@@ -60,21 +60,23 @@ class Feedback:
         :type lag: str
         :return: List[str] -- list of s3 patterns
         """
-        lag = kwargs.get('lag', '01:00')
-        lag_as_date = datetime.datetime.strptime(lag, '%H:%M')
-        lag_as_delta = datetime.timedelta(hours=lag_as_date.hour, minutes=lag_as_date.minute,
-                                          seconds=lag_as_date.second)
-        times = [
-            datetime.datetime.utcnow(),
-            datetime.datetime.utcnow() - lag_as_delta
-        ]
+        lag = kwargs.get("lag", "01:00")
+        lag_as_date = datetime.datetime.strptime(lag, "%H:%M")
+        lag_as_delta = datetime.timedelta(
+            hours=lag_as_date.hour,
+            minutes=lag_as_date.minute,
+            seconds=lag_as_date.second,
+        )
+        times = [datetime.datetime.utcnow(), datetime.datetime.utcnow() - lag_as_delta]
         result = [
             particular_time.strftime(join_bucket_paths(*paths))
             for particular_time in times
         ]
         return result
 
-    def find_log_lines_with_content(self, prefixes, needle_substring, required_count, return_first_line):
+    def find_log_lines_with_content(
+        self, prefixes, needle_substring, required_count, return_first_line
+    ):
         """
         Find line with content
 
@@ -95,11 +97,12 @@ class Feedback:
         def check_function():
             all_data = []
             for prefix in prefixes:
-                print('Analyzing prefix {}'.format(prefix))
-                all_files = self._client.list_files(prefix=prefix,
-                                                    limit=self.S3_LISTING_REQUEST_LIMIT)
+                print("Analyzing prefix {}".format(prefix))
+                all_files = self._client.list_files(
+                    prefix=prefix, limit=self.S3_LISTING_REQUEST_LIMIT
+                )
                 for file in all_files:
-                    print('Analyzing file {}'.format(file))
+                    print("Analyzing file {}".format(file))
                     content = self._client.read_file(file)
                     for line in content.splitlines():
                         if needle_substring in line:
@@ -111,9 +114,15 @@ class Feedback:
             if all_data and required_count == 0:
                 return all_data
 
-        result = wait_until(check_function, self.WAIT_FILE_TIME, self.WAIT_FILE_ITERATIONS)
+        result = wait_until(
+            check_function, self.WAIT_FILE_TIME, self.WAIT_FILE_ITERATIONS
+        )
         if not result:
-            raise Exception('{} log line(s) with {!r} has not been found'.format(required_count, needle_substring))
+            raise Exception(
+                "{} log line(s) with {!r} has not been found".format(
+                    required_count, needle_substring
+                )
+            )
         if return_first_line:
             return result[0]
         else:

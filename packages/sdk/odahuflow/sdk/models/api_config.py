@@ -16,7 +16,9 @@ class APIConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, backend: APIBackendConfig=None, port: int=None):  # noqa: E501
+    def __init__(
+        self, backend: APIBackendConfig = None, port: int = None
+    ):  # noqa: E501
         """APIConfig - a model defined in Swagger
 
         :param backend: The backend of this APIConfig.  # noqa: E501
@@ -24,21 +26,15 @@ class APIConfig(Model):
         :param port: The port of this APIConfig.  # noqa: E501
         :type port: int
         """
-        self.swagger_types = {
-            'backend': APIBackendConfig,
-            'port': int
-        }
+        self.swagger_types = {"backend": APIBackendConfig, "port": int}
 
-        self.attribute_map = {
-            'backend': 'backend',
-            'port': 'port'
-        }
+        self.attribute_map = {"backend": "backend", "port": "port"}
 
         self._backend = backend
         self._port = port
 
     @classmethod
-    def from_dict(cls, dikt) -> 'APIConfig':
+    def from_dict(cls, dikt) -> "APIConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

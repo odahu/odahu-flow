@@ -15,7 +15,7 @@ class Claims(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, email: str=None, name: str=None):  # noqa: E501
+    def __init__(self, email: str = None, name: str = None):  # noqa: E501
         """Claims - a model defined in Swagger
 
         :param email: The email of this Claims.  # noqa: E501
@@ -23,21 +23,15 @@ class Claims(Model):
         :param name: The name of this Claims.  # noqa: E501
         :type name: str
         """
-        self.swagger_types = {
-            'email': str,
-            'name': str
-        }
+        self.swagger_types = {"email": str, "name": str}
 
-        self.attribute_map = {
-            'email': 'email',
-            'name': 'name'
-        }
+        self.attribute_map = {"email": "email", "name": "name"}
 
         self._email = email
         self._name = name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Claims':
+    def from_dict(cls, dikt) -> "Claims":
         """Returns the dict as a model
 
         :param dikt: A dict.

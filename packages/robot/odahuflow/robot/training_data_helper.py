@@ -39,9 +39,9 @@ def parse_model_training_entity(source_file: str) -> K8sTrainer:
     """
     # Validate resource file exist
     if not os.path.exists(source_file) or not os.path.isfile(source_file):
-        raise ValueError(f'File {source_file} is not readable')
+        raise ValueError(f"File {source_file} is not readable")
 
-    with open(source_file, 'r') as mt_file:
+    with open(source_file, "r") as mt_file:
         mt = mt_file.read()
 
         try:
@@ -50,17 +50,28 @@ def parse_model_training_entity(source_file: str) -> K8sTrainer:
             try:
                 mt = yaml.safe_load(mt)
             except json.JSONDecodeError as decode_error:
-                raise ValueError(f'Cannot decode ModelTraining resource file: {decode_error}') from decode_error
+                raise ValueError(
+                    f"Cannot decode ModelTraining resource file: {decode_error}"
+                ) from decode_error
 
     return K8sTrainer.from_dict(mt)
 
 
 @click.command()
 @click.option("--verbose/--no-verbose", default=True, help="more extensive logging")
-@click.option("--mt-file", '--mt', type=str, required=True,
-              help="json/yaml file with a mode training resource")
-@click.option("--target", type=str, default='mlflow_output',
-              help="directory where result model will be saved")
+@click.option(
+    "--mt-file",
+    "--mt",
+    type=str,
+    required=True,
+    help="json/yaml file with a mode training resource",
+)
+@click.option(
+    "--target",
+    type=str,
+    default="mlflow_output",
+    help="directory where result model will be saved",
+)
 def main(verbose: str, mt_file: str, target: str) -> None:  # pylint: disable=W0613
     """
     Move training data to zip model artifact
@@ -76,7 +87,12 @@ def main(verbose: str, mt_file: str, target: str) -> None:  # pylint: disable=W0
     if not os.path.exists(target):
         os.makedirs(target)
 
-    copyfile(parameters[INPUT_FILE_LOCATION], join(target, parameters[TARGET_FILE_LOCATION]))
-    copytree(parameters[INPUT_MODEL_LOCATION], join(target, parameters[TARGET_MODEL_LOCATION]))
+    copyfile(
+        parameters[INPUT_FILE_LOCATION], join(target, parameters[TARGET_FILE_LOCATION])
+    )
+    copytree(
+        parameters[INPUT_MODEL_LOCATION],
+        join(target, parameters[TARGET_MODEL_LOCATION]),
+    )
 
     click.echo("Files were copied!")

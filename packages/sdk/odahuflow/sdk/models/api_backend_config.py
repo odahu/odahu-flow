@@ -6,7 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.api_local_backend_config import APILocalBackendConfig  # noqa: F401,E501
+from odahuflow.sdk.models.api_local_backend_config import (
+    APILocalBackendConfig,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -16,7 +18,9 @@ class APIBackendConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, local: APILocalBackendConfig=None, type: str=None):  # noqa: E501
+    def __init__(
+        self, local: APILocalBackendConfig = None, type: str = None
+    ):  # noqa: E501
         """APIBackendConfig - a model defined in Swagger
 
         :param local: The local of this APIBackendConfig.  # noqa: E501
@@ -24,21 +28,15 @@ class APIBackendConfig(Model):
         :param type: The type of this APIBackendConfig.  # noqa: E501
         :type type: str
         """
-        self.swagger_types = {
-            'local': APILocalBackendConfig,
-            'type': str
-        }
+        self.swagger_types = {"local": APILocalBackendConfig, "type": str}
 
-        self.attribute_map = {
-            'local': 'local',
-            'type': 'type'
-        }
+        self.attribute_map = {"local": "local", "type": "type"}
 
         self._local = local
         self._type = type
 
     @classmethod
-    def from_dict(cls, dikt) -> 'APIBackendConfig':
+    def from_dict(cls, dikt) -> "APIBackendConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

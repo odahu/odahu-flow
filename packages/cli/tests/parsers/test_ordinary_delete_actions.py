@@ -21,8 +21,17 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from .data import ENTITY_ID, EntityTestData, ROUTER, PACKAGING_INTEGRATION, PACKAGING, TOOLCHAIN, TRAINING, \
-    CONNECTION, generate_entities_for_test
+from .data import (
+    ENTITY_ID,
+    EntityTestData,
+    ROUTER,
+    PACKAGING_INTEGRATION,
+    PACKAGING,
+    TOOLCHAIN,
+    TRAINING,
+    CONNECTION,
+    generate_entities_for_test,
+)
 
 ENTITY_TEST_DATA: typing.Dict[str, EntityTestData] = {
     "connection": CONNECTION,
@@ -43,36 +52,47 @@ def entity_test_data(request) -> EntityTestData:
     return ENTITY_TEST_DATA[request.param]
 
 
-def test_delete_by_file(tmp_path: pathlib.Path, mocker: MockFixture, cli_runner: CliRunner,
-                        entity_test_data: EntityTestData):
+def test_delete_by_file(
+    tmp_path: pathlib.Path,
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    entity_test_data: EntityTestData,
+):
     message = "was deleted"
     entity_file = tmp_path / "entity.yaml"
     entity_file.write_text(
         json.dumps(
-            {**entity_test_data.entity.to_dict(), **{'kind': entity_test_data.kind}}))
-    client_mock = mocker.patch.object(entity_test_data.entity_client.__class__,
-                                      'delete',
-                                      return_value=message)
+            {**entity_test_data.entity.to_dict(), **{"kind": entity_test_data.kind}}
+        )
+    )
+    client_mock = mocker.patch.object(
+        entity_test_data.entity_client.__class__, "delete", return_value=message
+    )
 
-    result = cli_runner.invoke(entity_test_data.click_group,
-                               ['delete', '-f', entity_file],
-                               obj=entity_test_data.entity_client)
+    result = cli_runner.invoke(
+        entity_test_data.click_group,
+        ["delete", "-f", entity_file],
+        obj=entity_test_data.entity_client,
+    )
 
     client_mock.assert_called_once_with(entity_test_data.entity.id)
     assert result.exit_code == 0
     assert message in result.stdout
 
 
-def test_delete_by_id(mocker: MockFixture, cli_runner: CliRunner,
-                      entity_test_data: EntityTestData):
+def test_delete_by_id(
+    mocker: MockFixture, cli_runner: CliRunner, entity_test_data: EntityTestData
+):
     message = "was deleted"
-    client_mock = mocker.patch.object(entity_test_data.entity_client.__class__,
-                                      'delete',
-                                      return_value=message)
+    client_mock = mocker.patch.object(
+        entity_test_data.entity_client.__class__, "delete", return_value=message
+    )
 
-    result = cli_runner.invoke(entity_test_data.click_group,
-                               ['delete', '--id', ENTITY_ID],
-                               obj=entity_test_data.entity_client)
+    result = cli_runner.invoke(
+        entity_test_data.click_group,
+        ["delete", "--id", ENTITY_ID],
+        obj=entity_test_data.entity_client,
+    )
 
     client_mock.assert_called_once_with(ENTITY_ID)
     assert result.exit_code == 0
