@@ -166,7 +166,9 @@ Status Code 403 - Forbidden - Viewer
 
 Status Code 403 - Forbidden - Custom Role
     [Template]  Try Call API - Forbidden
-    [Setup]  Login to the api and edge  ${SA_DATA_SCIENTIST}
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
+    ...         reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # config
     config get
