@@ -39,6 +39,10 @@ func createS3config(configName string, conn *v1alpha1.ConnectionSpec) (*FileDesc
 		"bucket_acl":        "private",
 		"access_key_id":     conn.KeyID,
 		"secret_access_key": conn.KeySecret,
+		// https://github.com/rclone/rclone/issues/1824
+		// Workaround can be replaced after rclone v1.54 release
+		// with option server_side_encryption: aws:kms
+		"upload_cutoff": 0,
 	}, true, false); err != nil {
 		return nil, err
 	}
