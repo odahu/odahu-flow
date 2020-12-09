@@ -15,6 +15,8 @@
 // pkg/database/migrations/postgres/sources/000006_created_updated_delmark_for_route.up.sql
 // pkg/database/migrations/postgres/sources/000007_default_route.down.sql
 // pkg/database/migrations/postgres/sources/000007_default_route.up.sql
+// pkg/database/migrations/postgres/sources/000008_outbox.down.sql
+// pkg/database/migrations/postgres/sources/000008_outbox.up.sql
 package postgres
 
 import (
@@ -306,7 +308,7 @@ func _000006_created_updated_delmark_for_routeDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000006_created_updated_delmark_for_route.down.sql", size: 181, mode: os.FileMode(420), modTime: time.Unix(1606220863, 0)}
+	info := bindataFileInfo{name: "000006_created_updated_delmark_for_route.down.sql", size: 181, mode: os.FileMode(420), modTime: time.Unix(1606805564, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -326,7 +328,7 @@ func _000006_created_updated_delmark_for_routeUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000006_created_updated_delmark_for_route.up.sql", size: 226, mode: os.FileMode(420), modTime: time.Unix(1606220869, 0)}
+	info := bindataFileInfo{name: "000006_created_updated_delmark_for_route.up.sql", size: 226, mode: os.FileMode(420), modTime: time.Unix(1606805579, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -346,7 +348,7 @@ func _000007_default_routeDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_default_route.down.sql", size: 71, mode: os.FileMode(420), modTime: time.Unix(1606386936, 0)}
+	info := bindataFileInfo{name: "000007_default_route.down.sql", size: 71, mode: os.FileMode(420), modTime: time.Unix(1606805602, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -366,7 +368,47 @@ func _000007_default_routeUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_default_route.up.sql", size: 98, mode: os.FileMode(420), modTime: time.Unix(1606386936, 0)}
+	info := bindataFileInfo{name: "000007_default_route.up.sql", size: 98, mode: os.FileMode(420), modTime: time.Unix(1606805602, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000008_outboxDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x72\x72\x75\xf7\xf4\xb3\xe6\x72\x09\xf2\x0f\x50\x08\x71\x74\xf2\x71\x55\xf0\x74\x53\x70\x8d\xf0\x0c\x0e\x09\x56\xc8\x4f\x49\xcc\x28\x8d\xcf\x2f\x2d\x49\xca\xaf\xb0\xe6\x72\xf6\xf7\xf5\xf5\x0c\xb1\x06\x04\x00\x00\xff\xff\x5e\x08\x04\x5c\x31\x00\x00\x00")
+
+func _000008_outboxDownSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000008_outboxDownSql,
+		"000008_outbox.down.sql",
+	)
+}
+
+func _000008_outboxDownSql() (*asset, error) {
+	bytes, err := _000008_outboxDownSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000008_outbox.down.sql", size: 49, mode: os.FileMode(420), modTime: time.Unix(1606844666, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var __000008_outboxUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x6c\xcf\xcd\x8a\xc2\x30\x14\x40\xe1\x7d\x9e\xe2\x2e\x5b\x98\xcd\x0c\xc3\x30\xd0\x55\x52\x62\x8d\x34\xad\x24\x17\x11\x37\x25\x92\xa0\x01\x6d\x8a\xdc\x8a\x7d\x7b\xf1\x07\x41\x70\x7b\xbe\xd5\x11\xb2\x52\x4d\xc1\x58\x69\x24\x47\x09\xc8\x45\x2d\x41\xcd\xa0\x69\x11\xe4\x5a\x59\xb4\x90\xbc\xdb\x8f\x5d\x1a\x69\x9b\x2e\x2c\x63\x00\x00\xd1\x03\x08\x55\x59\x69\x14\xaf\xbf\xee\x29\xf4\x14\x69\xea\xa2\x87\x15\x37\xe5\x9c\x9b\xec\xef\x37\x7f\xd2\x39\xf4\xd4\xd1\x34\x84\x97\x7d\xff\xfc\xbf\xe1\xee\x94\xc6\xe1\x83\x7a\x47\x81\xe2\x31\x00\x2a\x2d\x2d\x72\xbd\xc4\xcd\x43\x06\x37\x1d\x92\xf3\xb0\xb0\x6d\x23\x58\x7e\x5b\x68\xb5\x56\x58\x5c\x03\x00\x00\xff\xff\xf0\xc0\x2d\x0c\xd2\x00\x00\x00")
+
+func _000008_outboxUpSqlBytes() ([]byte, error) {
+	return bindataRead(
+		__000008_outboxUpSql,
+		"000008_outbox.up.sql",
+	)
+}
+
+func _000008_outboxUpSql() (*asset, error) {
+	bytes, err := _000008_outboxUpSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "000008_outbox.up.sql", size: 210, mode: os.FileMode(420), modTime: time.Unix(1606900079, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -437,6 +479,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000006_created_updated_delmark_for_route.up.sql":   _000006_created_updated_delmark_for_routeUpSql,
 	"000007_default_route.down.sql":                     _000007_default_routeDownSql,
 	"000007_default_route.up.sql":                       _000007_default_routeUpSql,
+	"000008_outbox.down.sql":                            _000008_outboxDownSql,
+	"000008_outbox.up.sql":                              _000008_outboxUpSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -494,6 +538,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000006_created_updated_delmark_for_route.up.sql":   &bintree{_000006_created_updated_delmark_for_routeUpSql, map[string]*bintree{}},
 	"000007_default_route.down.sql":                     &bintree{_000007_default_routeDownSql, map[string]*bintree{}},
 	"000007_default_route.up.sql":                       &bintree{_000007_default_routeUpSql, map[string]*bintree{}},
+	"000008_outbox.down.sql":                            &bintree{_000008_outboxDownSql, map[string]*bintree{}},
+	"000008_outbox.up.sql":                              &bintree{_000008_outboxUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory

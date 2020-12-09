@@ -20,11 +20,12 @@ import json
 import logging
 
 import requests
+from urllib3.exceptions import HTTPError
 
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.utils import ensure_function_succeed
-from urllib3.exceptions import HTTPError
+
 
 LOGGER = logging.getLogger(__name__)
 
