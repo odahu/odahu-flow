@@ -46,6 +46,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.uber.org/multierr v1.5.0
+	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	gopkg.in/src-d/go-git.v4 v4.13.1

@@ -18,18 +18,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"github.com/spf13/cobra"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"os"
 	"os/signal"
-	k8s_config "sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
 	"syscall"
 )
 
@@ -40,44 +35,10 @@ var mainCmd = &cobra.Command{
 	Short: "Odahu-flow service catalog server",
 	Run: func(cmd *cobra.Command, args []string) {
 		odahuConfig := config.MustLoadConfig()
-		routeCatalog := catalog.NewModelRouteCatalog()
+		routeCatalog := servicecatalog.NewModelRouteCatalog()
 
-		log.Info("setting up client for manager")
-		cfg, err := k8s_config.GetConfig()
-		if err != nil {
-			log.Error(err, "unable to set up client config")
-			os.Exit(1)
-		}
-
-		log.Info("setting up manager")
-		mgr, err := manager.New(
-			cfg,
-			manager.Options{
-				//MetricsBindAddress: fmt.Sprintf(":%d", viper.GetInt(legion.PrometheusMetricsPort)),
-			},
-		)
-
-		if err != nil {
-			log.Error(err, "unable to set up overall controller manager")
-			os.Exit(1)
-		}
 
 		log.Info("Registering Components.")
-
-		log.Info("Setting up odahu-flow scheme")
-		if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-			log.Error(err, "unable add odahu-flow APIs to scheme")
-			os.Exit(1)
-		}
-
-		log.Info("Setting up controller")
-		r := servicecatalog.NewModelRouteReconciler(
-			mgr, routeCatalog, odahuConfig.Deployment, odahuConfig.ServiceCatalog,
-		)
-		if err = r.SetupWithManager(mgr); err != nil {
-			log.Error(err, "unable to register controllers to the manager")
-			os.Exit(1)
-		}
 
 		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
 
@@ -89,12 +50,7 @@ var mainCmd = &cobra.Command{
 		exitCh := make(chan int, 1)
 
 		go func() {
-			log.Info("Starting the operator.")
-			if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-				exitCh <- 1
-			} else {
-				exitCh <- 0
-			}
+			log.Info("Starting the reflector.")
 		}()
 
 		go func() {

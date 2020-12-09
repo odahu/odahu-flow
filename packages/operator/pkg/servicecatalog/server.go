@@ -19,12 +19,11 @@ package servicecatalog
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"github.com/rakyll/statik/fs"
 )
 
 func SetUPMainServer(
-	mrc *catalog.ModelRouteCatalog,
+	mrc *ModelRouteCatalog,
 	config config.ServiceCatalog,
 ) (*gin.Engine, error) {
 	staticFS, err := fs.New()

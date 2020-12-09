@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package catalog
+package servicecatalog
 
 import (
 	"bytes"
