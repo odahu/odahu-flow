@@ -18,7 +18,7 @@ type eventHandler interface {
 	Handle(event interface{}) (err error)
 }
 
-// Reflector subscribe on changes in external system and handle this events to reflect them
+// Reflector subscribe on changes in external system and handle these events to reflect them
 // in Local state (eg. App storage)
 type Reflector struct {
 	Log            *zap.SugaredLogger
@@ -53,7 +53,7 @@ func (u Reflector) Run(ctx context.Context) error {
 		defer cancel()
 
 		var cursor int
-		t := time.NewTicker(u.FetchTimeout * time.Second)
+		t := time.NewTicker(u.FetchTimeout)
 
 		for {
 
@@ -70,7 +70,7 @@ func (u Reflector) Run(ctx context.Context) error {
 						return
 					}
 
-					u.Log.Warnw("Transient error during event fetching. Will try fetch later", zap.Error(err))
+					u.Log.Warnw("Temporary error during event fetching. Will try fetch later", zap.Error(err))
 					continue
 				}
 				cursor = lastEvents.Cursor
@@ -90,7 +90,7 @@ func (u Reflector) Run(ctx context.Context) error {
 		defer wg.Done()
 		defer cancel()
 
-		t := time.NewTicker(u.HandleTimeout * time.Second)
+		t := time.NewTicker(u.HandleTimeout)
 		for {
 			select {
 			case <-ctx.Done():

@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 )
 
 type httpClient interface {
@@ -14,8 +15,8 @@ type httpClient interface {
 }
 
 type OdahuMLServerDiscoverer struct {
-	Host       string
-	HostHeader string
+	EdgeHost   string
+	EdgeURL    url.URL
 	HTTPClient httpClient
 }
 
@@ -82,15 +83,17 @@ func (o OdahuMLServerDiscoverer) GetMLServerName() model_types.MLServerName {
 
 
 func (o OdahuMLServerDiscoverer) generateModelRequest(prefix string) *http.Request {
-	modelURL := &url.URL{
-		Scheme: "http",
-		Host: o.Host,
-		Path: prefix,
+
+	MlServerURL := url.URL{
+		Scheme: o.EdgeURL.Scheme,
+		Host: o.EdgeURL.Host,
+		Path: path.Join(o.EdgeURL.Path, prefix),
+
 	}
 
 	return &http.Request{
 		Method: http.MethodGet,
-		URL:    modelURL,
-		Host:   o.HostHeader,
+		URL:    &MlServerURL,
+		Host:   o.EdgeHost,
 	}
 }

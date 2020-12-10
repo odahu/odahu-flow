@@ -16,11 +16,22 @@
 
 package config
 
+import "time"
+
 type ServiceCatalog struct {
 	Auth AuthConfig `json:"auth"`
 	BaseURL string `json:"baseUrl"`
+	FetchTimeout time.Duration `json:"fetchTimeout"`
+	HandleTimeout time.Duration `json:"handleTimeout"`
+	// ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
+	EdgeURL string `json:"edgeURL"`
+	// ServiceCatalog set EdgeHost as Host header in requests to ML servers
+	EdgeHost string `json:"edgeHost"`
 }
 
 func NewDefaultServiceCatalogConfig() ServiceCatalog {
-	return ServiceCatalog{}
+	return ServiceCatalog{
+		FetchTimeout: 2 * time.Second,
+		HandleTimeout: 2 * time.Second,
+	}
 }
