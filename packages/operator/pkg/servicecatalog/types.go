@@ -2,6 +2,16 @@ package servicecatalog
 
 import model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
 
+type temporaryError interface {
+	Temporary() bool
+}
+
+func IsTemporary(err error) bool {
+	tErr, ok := err.(temporaryError)
+	return ok && tErr.Temporary()
+}
+
+
 type temporaryErr struct {
 	error
 }
@@ -18,7 +28,7 @@ type route struct {
 	model model_types.DeployedModel
 }
 
-type latestGenericEvents struct {
+type LatestGenericEvents struct {
 	Cursor int
 	Events []interface{}
 }

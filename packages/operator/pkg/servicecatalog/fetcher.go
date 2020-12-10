@@ -12,8 +12,8 @@ type DeploymentEventFetcher struct {
 	APIClient deploymentEventsAPIClient
 }
 
-func (d DeploymentEventFetcher) GetLastEvents(cursor int) (latestGenericEvents, error) {
-	var generic latestGenericEvents
+func (d DeploymentEventFetcher) GetLastEvents(cursor int) (LatestGenericEvents, error) {
+	var generic LatestGenericEvents
 
 	deploymentEvents, err := d.APIClient.GetLastEvents(cursor)
 	if err != nil {
@@ -37,8 +37,8 @@ type RouteEventFetcher struct {
 	APIClient routeEventsAPIClient
 }
 
-func (d RouteEventFetcher) GetLastEvents(cursor int) (latestGenericEvents, error) {
-	var generic latestGenericEvents
+func (d RouteEventFetcher) GetLastEvents(cursor int) (LatestGenericEvents, error) {
+	var generic LatestGenericEvents
 
 	routeEvents, err := d.APIClient.GetLastEvents(cursor)
 	if err != nil {

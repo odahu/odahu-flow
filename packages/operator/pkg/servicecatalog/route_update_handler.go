@@ -7,6 +7,7 @@ import (
 	deployment_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	event_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 )
 
@@ -49,6 +50,7 @@ func (r UpdateHandler) discoverModel(
 	prefix string, log *zap.SugaredLogger) (model model_types.ServedModel, err error) {
 
 	found := false
+	var tempErrors error
 	for _, d := range r.Discoverers {
 
 		mlServer := d.GetMLServerName()
@@ -57,6 +59,10 @@ func (r UpdateHandler) discoverModel(
 		if err != nil {
 			log.Infow("Discovery is failed",
 				zap.Error(err), "MLServer", d.GetMLServerName())
+			if !IsTemporary(err) {
+				return model, err  // stop immediately
+			}
+			tempErrors = multierr.Append(tempErrors, err)
 			continue
 		}
 
@@ -67,8 +73,9 @@ func (r UpdateHandler) discoverModel(
 	}
 
 	if !found {
-		err = errors.New("unable to identify MLServer that serves the model")
-		log.Error(zap.Error(err))
+		err = temporaryErr{
+			error: multierr.Combine(errors.New("unable to identify ML server"), tempErrors),
+		}
 	}
 
 	return model, err

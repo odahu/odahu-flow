@@ -11,7 +11,7 @@ import (
 
 
 type eventFetcher interface {
-	GetLastEvents(cursor int) (latestGenericEvents, error)
+	GetLastEvents(cursor int) (LatestGenericEvents, error)
 }
 
 type eventHandler interface {
@@ -28,15 +28,6 @@ type Reflector struct {
 	FetchTimeout  time.Duration
 	HandleTimeout time.Duration
 
-}
-
-type temporaryError interface {
-	Temporary() bool
-}
-
-func IsTemporary(err error) bool {
-	tErr, ok := err.(temporaryError)
-	return ok && tErr.Temporary()
 }
 
 func (u Reflector) Run(ctx context.Context) error {
