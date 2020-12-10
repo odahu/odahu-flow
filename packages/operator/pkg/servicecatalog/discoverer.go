@@ -16,7 +16,7 @@ type httpClient interface {
 type OdahuMLServerDiscoverer struct {
 	Host       string
 	HostHeader string
-	HttpClient httpClient
+	HTTPClient httpClient
 }
 
 // ODAHU ML Server has not hardcoded swagger spec. But claims that "GET /" request
@@ -26,7 +26,7 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 	modelRequest := o.generateModelRequest(prefix)
 
 	var response *http.Response
-	response, err = o.HttpClient.Do(modelRequest)
+	response, err = o.HTTPClient.Do(modelRequest)
 	if err != nil {
 		log.Error(
 			err, "Can not get swagger response for prefix",

@@ -1,7 +1,6 @@
 package model
 
 type Metadata struct {
-	other map[string]interface{}
 }
 
 type Swagger2 struct {

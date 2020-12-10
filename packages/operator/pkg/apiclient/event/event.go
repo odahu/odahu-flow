@@ -16,8 +16,8 @@ type httpClient interface {
 }
 
 type ModelRouteEventClient struct {
-	HttpClient httpClient
-	Log *zap.SugaredLogger
+	HTTPClient httpClient
+	Log        *zap.SugaredLogger
 }
 
 type temporaryErr struct {
@@ -60,7 +60,7 @@ func (m ModelRouteEventClient) GetLastEvents(cursor int) (events event.LatestRou
 	q.Set("cursor", strconv.Itoa(cursor))
 	u.RawQuery = q.Encode()
 
-	response, err = m.HttpClient.Do(&http.Request{
+	response, err = m.HTTPClient.Do(&http.Request{
 		Method:           http.MethodGet,
 		URL:             &u,
 	})
@@ -89,14 +89,12 @@ func (m ModelRouteEventClient) GetLastEvents(cursor int) (events event.LatestRou
 					response.StatusCode, bytes,
 				),
 			}
-		} else {
-			return events, fmt.Errorf(
-				"not correct status code: %d. Response body: %s",
-				response.StatusCode, bytes,
-			)
 		}
+		return events, fmt.Errorf(
+			"not correct status code: %d. Response body: %s",
+			response.StatusCode, bytes,
+		)
 	}
-
 
 
 
