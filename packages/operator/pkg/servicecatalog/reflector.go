@@ -1,7 +1,6 @@
 package servicecatalog
 
 import (
-	"container/list"
 	"context"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -50,8 +49,7 @@ func (u Reflector) Run(ctx context.Context) error {
 	// Second goroutine retrieves events and pass them to handlers.
 	// If handler return error for some event then second goroutine push this event back to queue to try handle it later
 
-	queue := list.New()
-	mu := &sync.Mutex{}
+	queue := NewQueue()
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
@@ -89,11 +87,9 @@ func (u Reflector) Run(ctx context.Context) error {
 				}
 				cursor = lastEvents.Cursor
 
-				mu.Lock()
 				for _, event := range lastEvents.Events {
-					queue.PushBack(event)
+					queue.Push(ctx, &Item{Value: event})
 				}
-				mu.Unlock()
 			}
 
 		}
@@ -113,26 +109,22 @@ func (u Reflector) Run(ctx context.Context) error {
 				return
 			case <-t.C:
 				for {
-					mu.Lock()
-					el := queue.Front()
-					mu.Unlock()
-					if el == nil {
+					item := queue.Pop()
+					if item == nil {
+						// Queue is empty. Sleep again
 						break
 					}
 
-					event := el.Value
+					event := item.Value
 					if err := u.H.Handle(event); err != nil {
 
 						if !IsTemporary(err){
 							handleEventPermanentErr = err
 							return
 						}
-
 						u.Log.Warnw("Transient error during event handling. Push event back to queue",
 							"event", event, zap.Error(err))
-						mu.Lock()
-						queue.PushBack(event)
-						mu.Unlock()
+						queue.Push(ctx, item)
 					}
 
 
