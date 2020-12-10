@@ -2,6 +2,8 @@ package servicecatalog
 
 import (
 	"container/list"
+	"context"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -20,7 +22,9 @@ type EventHandler interface {
 	Handle(event interface{}) (err error)
 }
 
-type Updater struct {
+// Reflector subscribe on changes in external system and handle this events to reflect them
+// in Local state (eg. App storage)
+type Reflector struct {
 	Log            *zap.SugaredLogger
 
 	H             EventHandler
@@ -30,7 +34,16 @@ type Updater struct {
 
 }
 
-func (u Updater) Run(stopCh <-chan struct{}) {
+type TemporaryError interface {
+	Temporary() bool
+}
+
+func IsTemporary(err error) bool {
+	tErr, ok := err.(TemporaryError)
+	return ok && tErr.Temporary()
+}
+
+func (u Reflector) Run(ctx context.Context) error {
 
 	// We need two goroutines that communicate with each other through queue.
 	// First goroutine fill queue by events,
@@ -42,42 +55,61 @@ func (u Updater) Run(stopCh <-chan struct{}) {
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	var fetchEventsPermanentErr error
+	var handleEventPermanentErr error
+
 	// Fill queue from API Server
 	go func() {
+
 		defer wg.Done()
+		defer cancel()
 
 		var cursor int
 		t := time.NewTicker(u.FetchTimeout * time.Second)
+
 		for {
+
 			select {
-			case  <-stopCh:
+			case  <-ctx.Done():
 				return
 			case  <-t.C:
 				lastEvents, err := u.C.GetLastEvents(cursor)
 				if err != nil {
 					u.Log.Errorw("Unable to get last events", zap.Error(err))
+
+					if !IsTemporary(err) {
+						fetchEventsPermanentErr = err
+						return
+					}
+
+					u.Log.Warnw("Transient error during event fetching. Will try fetch later", zap.Error(err))
 					continue
 				}
 				cursor = lastEvents.Cursor
 
 				mu.Lock()
 				for _, event := range lastEvents.Events {
-					// Write error handling
 					queue.PushBack(event)
 				}
 				mu.Unlock()
 			}
+
 		}
 
 	}()
 
 	// Process queue
 	go func() {
+
 		defer wg.Done()
+		defer cancel()
+
 		t := time.NewTicker(u.HandleTimeout * time.Second)
 		for {
 			select {
-			case <-stopCh:
+			case <-ctx.Done():
 				return
 			case <-t.C:
 				for {
@@ -90,8 +122,14 @@ func (u Updater) Run(stopCh <-chan struct{}) {
 
 					event := el.Value
 					if err := u.H.Handle(event); err != nil {
-						u.Log.Warnw("Error during event handling. Push event back to queue",
-							"event", event)
+
+						if !IsTemporary(err){
+							handleEventPermanentErr = err
+							return
+						}
+
+						u.Log.Warnw("Transient error during event handling. Push event back to queue",
+							"event", event, zap.Error(err))
 						mu.Lock()
 						queue.PushBack(event)
 						mu.Unlock()
@@ -100,9 +138,17 @@ func (u Updater) Run(stopCh <-chan struct{}) {
 
 				}
 			}
+
 		}
 	}()
 
 	wg.Wait()
-	u.Log.Info("Stop signal was received")
+	var err error
+	if fetchEventsPermanentErr != nil {
+		err = multierr.Append(err, fetchEventsPermanentErr)
+	}
+	if handleEventPermanentErr != nil {
+		err = multierr.Append(err, fetchEventsPermanentErr)
+	}
+	return err
 }
