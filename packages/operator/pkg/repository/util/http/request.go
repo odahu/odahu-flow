@@ -294,5 +294,6 @@ func (bec *BaseAPIClient) DoRequestGetBody(httpMethod, path string, body interfa
 	if err != nil {
 		return buf, err
 	}
+	defer response.Body.Close()
 	return ioutil.ReadAll(response.Body)
 }
