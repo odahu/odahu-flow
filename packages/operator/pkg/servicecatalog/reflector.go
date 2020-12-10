@@ -8,16 +8,13 @@ import (
 	"time"
 )
 
-type LatestGenericEvents struct {
-	Cursor int
-	Events []interface{}
+
+
+type eventFetcher interface {
+	GetLastEvents(cursor int) (latestGenericEvents, error)
 }
 
-type EventFetcher interface {
-	GetLastEvents(cursor int) (LatestGenericEvents, error)
-}
-
-type EventHandler interface {
+type eventHandler interface {
 	Handle(event interface{}) (err error)
 }
 
@@ -26,19 +23,19 @@ type EventHandler interface {
 type Reflector struct {
 	Log            *zap.SugaredLogger
 
-	H             EventHandler
-	C             EventFetcher
+	H             eventHandler
+	C             eventFetcher
 	FetchTimeout  time.Duration
 	HandleTimeout time.Duration
 
 }
 
-type TemporaryError interface {
+type temporaryError interface {
 	Temporary() bool
 }
 
 func IsTemporary(err error) bool {
-	tErr, ok := err.(TemporaryError)
+	tErr, ok := err.(temporaryError)
 	return ok && tErr.Temporary()
 }
 

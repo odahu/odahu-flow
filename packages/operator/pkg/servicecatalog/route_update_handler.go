@@ -3,6 +3,7 @@ package servicecatalog
 import (
 	"errors"
 	"fmt"
+	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	deployment_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	event_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
@@ -18,9 +19,9 @@ type ModelServerDiscoverer interface {
 	// and return model Metadata and Swagger if it is possible
 	// return error if Web API behind prefix is not compatible with
 	// MLServer
-	Discover(prefix string) (model_types.DeployedModel, error)
+	Discover(prefix string, log *zap.SugaredLogger) (model_types.ServedModel, error)
 	// Returns ML Server name for this discoverer
-	GetMLServerName() string
+	GetMLServerName() model_types.MLServerName
 }
 
 type Catalog interface {
@@ -31,27 +32,28 @@ type Catalog interface {
 type UpdateHandler struct {
 	Log             *zap.SugaredLogger
 	Discoverers     []ModelServerDiscoverer
-	Storage         Catalog
+	Catalog         Catalog
 	GetDefaultRoute func(ModelDeploymentID string) (deployment_types.ModelRoute, error)
 }
 
-type route struct {
-	id string
-	prefix string
 
-	isDefault bool
-	// Only for default route
-	model model_types.DeployedModel
+func extractModelDeploymentID(modelRoute deployment_types.ModelRoute) string {
+	if modelRoute.Default && len(modelRoute.Spec.ModelDeploymentTargets) > 0 {
+		target := modelRoute.Spec.ModelDeploymentTargets[0]
+		return target.Name
+	}
+	return ""
 }
 
 func (r UpdateHandler) discoverModel(
-	prefix string, log *zap.SugaredLogger) (model model_types.DeployedModel, err error) {
+	prefix string, log *zap.SugaredLogger) (model model_types.ServedModel, err error) {
 
+	found := false
 	for _, d := range r.Discoverers {
 
 		mlServer := d.GetMLServerName()
 		log.Infof("Check whether the model is served by %s", mlServer)
-		model, err = d.Discover(prefix)
+		model, err = d.Discover(prefix, log)
 		if err != nil {
 			log.Infow("Discovery is failed",
 				zap.Error(err), "MLServer", d.GetMLServerName())
@@ -60,10 +62,11 @@ func (r UpdateHandler) discoverModel(
 
 		log.Info("MLServer behind the prefix is identified. Model metadata is fetched",
 			"MLServer", d.GetMLServerName())
+		found = true
 		break
 	}
 
-	if (model == model_types.DeployedModel{}) {
+	if !found {
 		err = errors.New("unable to identify MLServer that serves the model")
 		log.Error(zap.Error(err))
 	}
@@ -83,9 +86,15 @@ func (r UpdateHandler) Handle(object interface{}) (err error) {
 		"EventDatetime", event.Datetime.String())
 
 	if event.EventType == event_types.ModelRouteDeletedEventType {
-		r.Storage.Delete(event.EntityID)
+		r.Catalog.Delete(event.EntityID)
 		log.Info("Route was deleted")
 		return nil
+	}
+
+	if event.Payload.Status.State != odahuflowv1alpha1.ModelRouteStateReady {
+		return temporaryErr{
+			error:    fmt.Errorf("ModelRoute %s has not a Ready state", event.EntityID),
+		}
 	}
 
 	route := route{
@@ -94,13 +103,19 @@ func (r UpdateHandler) Handle(object interface{}) (err error) {
 		isDefault: event.Payload.Default,
 	}
 
-	route.model, err = r.discoverModel(route.prefix, log)
-
+	var servedModel model_types.ServedModel
+	servedModel, err = r.discoverModel(route.prefix, log)
 	if err != nil {
 		return err
 	}
+	deployedModel := model_types.DeployedModel{
+		DeploymentID: extractModelDeploymentID(event.Payload),
+		ServedModel:  servedModel,
+	}
 
-	if err != r.Storage.CreateOrUpdate(route) {
+	route.model = deployedModel
+
+	if err != r.Catalog.CreateOrUpdate(route) {
 		return err
 	}
 
