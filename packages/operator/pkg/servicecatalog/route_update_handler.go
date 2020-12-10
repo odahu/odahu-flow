@@ -34,7 +34,6 @@ type UpdateHandler struct {
 	Log             *zap.SugaredLogger
 	Discoverers     []ModelServerDiscoverer
 	Catalog         Catalog
-	GetDefaultRoute func(ModelDeploymentID string) (deployment_types.ModelRoute, error)
 }
 
 

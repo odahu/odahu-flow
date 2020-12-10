@@ -4,12 +4,12 @@ import (
 	event_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 )
 
-type deploymentEventsAPIClient interface {
+type DeploymentEventsAPIClient interface {
 	GetLastEvents(cursor int) (event_types.LatestDeploymentEvents, error)
 }
 
 type DeploymentEventFetcher struct {
-	APIClient deploymentEventsAPIClient
+	APIClient DeploymentEventsAPIClient
 }
 
 func (d DeploymentEventFetcher) GetLastEvents(cursor int) (LatestGenericEvents, error) {
@@ -29,12 +29,12 @@ func (d DeploymentEventFetcher) GetLastEvents(cursor int) (LatestGenericEvents, 
 
 
 
-type routeEventsAPIClient interface {
+type RouteEventsAPIClient interface {
 	GetLastEvents(cursor int) (event_types.LatestRouteEvents, error)
 }
 
 type RouteEventFetcher struct {
-	APIClient routeEventsAPIClient
+	APIClient RouteEventsAPIClient
 }
 
 func (d RouteEventFetcher) GetLastEvents(cursor int) (LatestGenericEvents, error) {
