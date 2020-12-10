@@ -102,7 +102,7 @@ Try Run and Fail invalid Packaging
     [Template]  Try Run Packaging with local spec
     [Setup]     run keywords
     ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml  AND
-    ...         StrictShell  docker image ls
+    ...         StrictShell  docker image ls  AND
     ...         StrictShell  docker images -a -q ${DOCKER_PULL_IMAGE}  AND
     ...         StrictShell  docker rmi -f $(docker images -a -q ${DOCKER_PULL_IMAGE})
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
