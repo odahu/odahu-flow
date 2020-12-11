@@ -9,7 +9,6 @@ ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 ${MODEL_RESULT}             {"prediction": [6.3881577909662886, 4.675934265196686], "columns": ["quality"]}
 
 ${LOCAL_CONFIG}             odahuflow/local_packaging
-${DOCKER_PULL_IMAGE}        gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers
 
 *** Settings ***
 Documentation       trainings with spec on cluster & local packagings
@@ -101,10 +100,7 @@ Try Run and Fail invalid Packaging
     [Tags]  negative
     [Template]  Try Run Packaging with local spec
     [Setup]     run keywords
-    ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml  AND
-    ...         StrictShell  docker image ls  AND
-    ...         StrictShell  docker images -a -q ${DOCKER_PULL_IMAGE}  AND
-    ...         StrictShell  docker rmi -f $(docker images -a -q ${DOCKER_PULL_IMAGE})
+    ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
