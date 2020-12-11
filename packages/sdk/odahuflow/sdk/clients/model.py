@@ -22,6 +22,7 @@ import logging
 import requests
 from urllib3.exceptions import HTTPError
 
+from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.utils import ensure_function_succeed
@@ -136,8 +137,7 @@ class ModelClient:
 
         if not 200 <= response.status_code < 400:
             url = response.url if hasattr(response, 'url') else None
-            raise Exception('Wrong status code returned: {}. Data: {}. URL: {}'
-                            .format(response.status_code, data, url))
+            raise WrongHttpStatusCode(response.status_code)
 
         return data
 
