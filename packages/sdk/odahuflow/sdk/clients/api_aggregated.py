@@ -267,7 +267,7 @@ def parse_resources_file_with_one_item(path: str) -> OdahuflowCloudResourceUpdat
     """
     resources = parse_resources_file(path)
     if len(resources.changes) != 1:
-        raise Exception('{!r} should contain 1 item, but {!r} founded'.format(path, len(resources)))
+        raise Exception('{!r} should contain 1 item, but {!r} found'.format(path, len(resources)))
     return resources.changes[0]
 
 

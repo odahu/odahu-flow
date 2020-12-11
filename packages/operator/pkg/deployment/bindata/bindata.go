@@ -95,7 +95,7 @@ func coreRego() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "core.rego", size: 634, mode: os.FileMode(420), modTime: time.Unix(1603388691, 0)}
+	info := bindataFileInfo{name: "core.rego", size: 634, mode: os.FileMode(420), modTime: time.Unix(1604043088, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -115,7 +115,7 @@ func mapperRego() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "mapper.rego", size: 567, mode: os.FileMode(420), modTime: time.Unix(1603383824, 0)}
+	info := bindataFileInfo{name: "mapper.rego", size: 567, mode: os.FileMode(420), modTime: time.Unix(1604043088, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -135,7 +135,7 @@ func rolesRego() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "roles.rego", size: 91, mode: os.FileMode(420), modTime: time.Unix(1603383824, 0)}
+	info := bindataFileInfo{name: "roles.rego", size: 91, mode: os.FileMode(420), modTime: time.Unix(1604043088, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

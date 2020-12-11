@@ -46,10 +46,6 @@ build-webserver:
 build-controller:
 	go build -o controller ./cmd/controller
 
-## build-migrate: Build odahu-migrate executable binary
-build-odahu-migrate:
-	go build -o odahu-migrate ./cmd/migrator
-
 ## build-model-trainer: Build model trainer executable binary
 build-model-trainer:
 	go build -o trainer ./cmd/trainer
@@ -63,7 +59,7 @@ build-service-catalog:
 	go build -o service-catalog ./cmd/service_catalog
 
 ## build-all: Build all executable binyries
-build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog build-odahu-migrate
+build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog
 
 ## run-operator: Start operator
 run-operator:

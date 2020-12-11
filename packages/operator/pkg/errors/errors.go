@@ -64,9 +64,18 @@ func (aee ForbiddenError) Error() string {
 	return "access forbidden"
 }
 
+type ExtendedForbiddenError struct{
+	Message string
+}
+
+func (aee ExtendedForbiddenError) Error() string {
+	return fmt.Sprintf("access forbidden: %v", aee.Message)
+}
+
 func IsForbiddenError(err error) bool {
 	_, ok := err.(ForbiddenError)
-	return ok
+	_, eok := err.(ExtendedForbiddenError)
+	return ok || eok
 }
 
 type InvalidEntityError struct {

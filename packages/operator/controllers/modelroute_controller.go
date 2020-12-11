@@ -26,10 +26,17 @@ import (
 	v1alpha3_istio "istio.io/api/networking/v1alpha3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+	"sort"
+	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -40,10 +47,11 @@ import (
 )
 
 const (
-	knativeRevisionHeader    = "knative-serving-revision"
-	knativeNamespaceHeader   = "knative-serving-namespace"
-	defaultRetryAttempts     = 30
-	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
+	knativeRevisionHeader                   = "knative-serving-revision"
+	knativeNamespaceHeader                  = "knative-serving-namespace"
+	defaultRetryAttempts                    = 30
+	defaultListOfRetryCauses                = "5xx,connect-failure,refused-stream"
+	routeForLabelPrefix						= "odahu-route-for-"
 )
 
 var (
@@ -295,6 +303,10 @@ func (r *ModelRouteReconciler) Reconcile(request ctrl.Request) (ctrl.Result, err
 		return reconcile.Result{}, err
 	}
 
+	if err = r.reconcileRouteForLabels(modelRouteCR); err != nil {
+		return reconcile.Result{}, err
+	}
+
 	if reconcileAgain, err := r.reconcileVirtualService(modelRouteCR); err != nil {
 		log.Error(err, "Reconcile Istio Virtual Service")
 		return reconcile.Result{}, err
@@ -313,10 +325,92 @@ func (r *ModelRouteReconciler) Reconcile(request ctrl.Request) (ctrl.Result, err
 	return reconcile.Result{}, nil
 }
 
+func routeForLabelKey(mdName string) string {
+	return routeForLabelPrefix + mdName
+}
+
+func (r *ModelRouteReconciler) reconcileRouteForLabels(route *odahuflowv1alpha1.ModelRoute) error {
+
+	var oldRouteForLabels []string
+	for key := range route.GetLabels() {
+		if strings.HasPrefix(key, routeForLabelPrefix) {
+			oldRouteForLabels = append(oldRouteForLabels, key)
+		}
+	}
+
+	var newRouteForLabels []string  //nolint
+	for _, md := range route.Spec.ModelDeploymentTargets {
+		newRouteForLabels = append(newRouteForLabels, routeForLabelKey(md.Name))
+	}
+	sort.Strings(oldRouteForLabels)
+	sort.Strings(newRouteForLabels)
+	if reflect.DeepEqual(oldRouteForLabels, newRouteForLabels) {
+		log.Info("ModelRoute routeFor labels are already reconciled properly")
+		return nil
+	}
+
+	// Otherwise let's update routeFor labels
+
+	newLabels := map[string]string{}
+	for key, el := range route.GetLabels() {
+		if !strings.HasPrefix(key, routeForLabelPrefix) {
+			newLabels[key] = el
+		}
+	}
+	for _, key := range newRouteForLabels {
+		newLabels[key] = "enabled"
+	}
+
+	route.SetLabels(newLabels)
+	if err := r.Update(context.TODO(), route); err != nil {
+		return err
+	}
+	log.Info("ModelRoute routeFor labels were changed")
+	return nil
+}
+
 func (r *ModelRouteReconciler) SetupBuilder(mgr ctrl.Manager) *ctrl.Builder {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&odahuflowv1alpha1.ModelRoute{}).
-		Owns(&v1alpha3_istio_api.VirtualService{})
+		Owns(&v1alpha3_istio_api.VirtualService{}).
+		// Route should reacts on changes in any ModelDeployment from its targets
+		Watches(&source.Kind{Type: &odahuflowv1alpha1.ModelDeployment{}}, &handler.EnqueueRequestsFromMapFunc{
+		ToRequests: handler.ToRequestsFunc(func(object handler.MapObject) []reconcile.Request {
+
+			mdName := object.Meta.GetName()
+
+			var result []reconcile.Request
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
+			defer cancel()
+
+			selector := labels.NewSelector()
+			req, err := labels.NewRequirement(routeForLabelKey(mdName), selection.Exists, nil)
+			if err != nil {
+				log.Error(err, "Unable to create label requirement")
+				return result
+			}
+			selector.Add(*req)
+
+			modelRoutes := &odahuflowv1alpha1.ModelRouteList{}
+			if err := r.List(ctx, modelRoutes, &client.ListOptions{
+				LabelSelector: selector,
+			}); err != nil {
+				log.Error(err, "Unable to fetch ModelRouteList for ModelDeployment")
+				return result
+			}
+
+			for _, mr := range modelRoutes.Items {
+				result = append(result, reconcile.Request{
+					NamespacedName: types.NamespacedName{
+						Namespace: mr.Namespace,
+						Name: mr.Name,
+					},
+				})
+			}
+
+			return result
+		}),
+	})
 }
 
 func (r *ModelRouteReconciler) SetupWithManager(mgr ctrl.Manager) error {

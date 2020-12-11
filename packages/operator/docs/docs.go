@@ -498,6 +498,43 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/model/deployment-events": {
+            "get": {
+                "description": "Get Last Changes for ModelDeployment entity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Get Last Changes for ModelDeployment entities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cursor can be passed to get only new changes",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelDeploymentEventsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/model/deployment/{id}": {
             "get": {
                 "description": "Get a Model deployment by id",
@@ -567,6 +604,50 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/deployment/{id}/default-route": {
+            "get": {
+                "description": "Get a Model deployment default route",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Deployment"
+                ],
+                "summary": "Get a Model deployment default route",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Model deployment id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ModelRoute"
                         }
                     },
                     "400": {
@@ -1015,6 +1096,43 @@ var doc = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/ModelRoute"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/model/route-events": {
+            "get": {
+                "description": "Get Last Changes for ModelRoute entity",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Route"
+                ],
+                "summary": "Get Last Changes for ModelRoute entities",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Cursor can be passed to get only new changes",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RouteEventsResponse"
                         }
                     },
                     "400": {
@@ -2148,7 +2266,7 @@ var doc = `{
                     "type": "string"
                 },
                 "nodePools": {
-                    "description": "Node pools to run training tasks on",
+                    "description": "Node pools to run deployments",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/NodePool"
@@ -2356,6 +2474,10 @@ var doc = `{
         "ServiceCatalog": {
             "type": "object",
             "properties": {
+                "auth": {
+                    "type": "object",
+                    "$ref": "#/definitions/AuthConfig"
+                },
                 "baseUrl": {
                     "type": "string"
                 }
@@ -2466,9 +2588,31 @@ var doc = `{
                 }
             }
         },
+        "ModelDeploymentEventsResponse": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "integer"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/outbox.DeploymentEvent"
+                    }
+                }
+            }
+        },
         "ModelRoute": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
+                "default": {
+                    "description": "Default routes cannot be deleted by  They are managed by system\nOne ModelDeployment has exactly one default Route that gives 100% traffic to the model",
+                    "type": "boolean"
+                },
                 "id": {
                     "description": "Model route id",
                     "type": "string"
@@ -2482,6 +2626,24 @@ var doc = `{
                     "description": "Model route status",
                     "type": "object",
                     "$ref": "#/definitions/ModelRouteStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
+                }
+            }
+        },
+        "RouteEventsResponse": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "integer"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/outbox.RouteEvent"
+                    }
                 }
             }
         },
@@ -2490,6 +2652,50 @@ var doc = `{
         },
         "feedback.ModelFeedbackResponse": {
             "type": "object"
+        },
+        "outbox.DeploymentEvent": {
+            "type": "object",
+            "properties": {
+                "datetime": {
+                    "description": "When event is raised",
+                    "type": "string"
+                },
+                "entityID": {
+                    "description": "EntityID contains ID of ModelDeployment for ModelDeploymentDeleted and ModelDeploymentDeletionMarkIsSet\nevent types\nDoes not make sense in case of ModelDeploymentUpdate, ModelDeploymentCreate, ModelDeploymentStatusUpdated events",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,\nModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of\nModelDeploymentStatusUpdated update\nDoes not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelDeployment"
+                },
+                "type": {
+                    "description": "Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted,\nModelDeploymentDeletionMarkIsSet, ModelDeploymentStatusUpdated",
+                    "type": "string"
+                }
+            }
+        },
+        "outbox.RouteEvent": {
+            "type": "object",
+            "properties": {
+                "datetime": {
+                    "description": "When event is raised",
+                    "type": "string"
+                },
+                "entityID": {
+                    "description": "EntityID contains ID of ModelRoute for ModelRouteDeleted and ModelRouteDeletionMarkIsSet\nevent types\nDoes not make sense in case of ModelRouteUpdate, ModelRouteCreate, ModelRouteStatusUpdated events",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,\nModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of\nModelRouteStatusUpdated update\nDoes not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events",
+                    "type": "object",
+                    "$ref": "#/definitions/ModelRoute"
+                },
+                "type": {
+                    "description": "Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,\nModelRouteDeletionMarkIsSet, ModelRouteStatusUpdated",
+                    "type": "string"
+                }
+            }
         },
         "JsonSchema": {
             "type": "object",

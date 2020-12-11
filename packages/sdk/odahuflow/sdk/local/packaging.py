@@ -35,10 +35,18 @@ def read_mp_result_file(config_dir: str) -> Dict[str, Any]:
 
 def start_package(packager: K8sPackager, artifact_path: str) -> Dict[str, Any]:
     if not artifact_path:
-        artifact_path = join(
-            config.LOCAL_MODEL_OUTPUT_DIR,
-            packager.model_packaging.spec.artifact_name
-        )
+        artifact_path = config.LOCAL_MODEL_OUTPUT_DIR
+
+    # removing .zip extension if there's one
+    artifact_name = packager.model_packaging.spec.artifact_name.strip()
+    if artifact_name.endswith('.zip'):
+        packager.model_packaging.spec.artifact_name = artifact_name[:-4]
+
+    # make full artifact path with artifact name
+    artifact_path = join(
+        artifact_path,
+        packager.model_packaging.spec.artifact_name
+    )
 
     create_mp_config_file(artifact_path, packager)
 
