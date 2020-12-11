@@ -28,7 +28,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup All Resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
-Force Tags          api  sdk  test
+Force Tags          api  sdk
 Test Timeout        60 minutes
 
 *** Keywords ***
