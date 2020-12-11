@@ -47,6 +47,15 @@ Try Call API - Forbidden
 
 
 *** Test Cases ***
+Status Code 403 - Forbidden - Admin
+    [Template]  Call API
+    [Setup]     run keywords
+    ...         Login to the api and edge  AND
+    ...         reload config
+    # model
+    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
+    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
+
 Status Code 403 - Forbidden - Data Scientist
     [Template]  Try Call API - Forbidden
     [Setup]     run keywords
@@ -67,9 +76,6 @@ Status Code 403 - Forbidden - Data Scientist
     route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route delete  ${NOT_EXIST_ENTITY}
-    # model
-    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
-    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
 
 Status Code 403 - Forbidden - Viewer
     [Template]  Try Call API - Forbidden
