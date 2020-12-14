@@ -57,6 +57,7 @@ func (q Queue) Push(ctx context.Context, item *Item) {
 	if item.backoff == 0 {
 		item.backoff = 2
 		q.push(item)
+		return
 	}
 
 	t := time.NewTimer(time.Duration(item.backoff) * time.Second)

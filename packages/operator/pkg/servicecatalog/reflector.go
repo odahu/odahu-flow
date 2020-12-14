@@ -128,7 +128,7 @@ func (u Reflector) Run(ctx context.Context) error {
 		err = multierr.Append(err, fetchEventsPermanentErr)
 	}
 	if handleEventPermanentErr != nil {
-		err = multierr.Append(err, fetchEventsPermanentErr)
+		err = multierr.Append(err, handleEventPermanentErr)
 	}
 	return err
 }

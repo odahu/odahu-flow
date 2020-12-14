@@ -81,7 +81,7 @@ func (r UpdateHandler) Handle(object interface{}) (err error) {
 
 	event, ok := object.(event_types.RouteEvent)
 	if !ok {
-		return fmt.Errorf("unable to assert received object as event_types.DeploymentEvent: %+v", object)
+		return fmt.Errorf("unable to assert received object as event_types.RouteEvent: %+v", object)
 	}
 
 	log := r.Log.With("EntityID", event.EntityID,
