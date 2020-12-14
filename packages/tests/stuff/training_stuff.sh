@@ -12,6 +12,8 @@ TEST_DATA="${DIR}/data"
 LOCAL_TEST_DATA="${DIR}/../e2e/robot/tests/local/resources/artifacts"
 COMMAND=setup
 
+# packager image for local packaging
+PACKAGER_IMAGE=gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packager
 # Test connection points to the valid gppi archive
 TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
 # Test connection points to the odahu file inside valid gppi archive
@@ -208,6 +210,18 @@ function local_setup() {
 
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
+
+  local_cleanup
+}
+
+# remove packager images locally
+function local_cleanup() {
+  echo "PACKAGER_IMAGE: ${PACKAGER_IMAGE}"
+  LIST_IMAGES=$(docker images -a -q ${PACKAGER_IMAGE})
+  echo "LIST_IMAGES: ${LIST_IMAGES}"
+  if [ ! -z "${LIST_IMAGES}" ]
+  then docker rmi -f ${LIST_IMAGES}
+  fi
 }
 
 # Main entrypoint for setup command.
@@ -246,7 +260,7 @@ function setup() {
 }
 
 # Main entrypoint for cleanup command.
-# The function deletes the model packaings and the toolchain integrations.
+# The function deletes the model packagings and the toolchain integrations and the pulled locally packager image
 function cleanup() {
   for mp_id in "${MODEL_NAMES[@]}"; do
     cleanup_pack_model "${mp_id}" &
@@ -257,6 +271,8 @@ function cleanup() {
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_INVALID_GPPI_DIR_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_INVALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
+
+  local_cleanup
 }
 
 # Prints the help message
