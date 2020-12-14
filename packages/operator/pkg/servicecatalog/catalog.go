@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
+	"go.uber.org/zap"
 	"sync"
 	"text/template"
 
@@ -37,6 +38,7 @@ type ModelRouteCatalog struct {
 	sync.RWMutex
 	routes map[string]*ModelRouteInfo
 	routeMap map[string]route
+	log *zap.SugaredLogger
 }
 
 func NewModelRouteCatalog() *ModelRouteCatalog {
@@ -62,6 +64,31 @@ func PrefixSwaggerUrls(prefix string, swagger model_types.Swagger2) (result mode
 	}
 
 	swaggerMap["paths"] = prefixedPaths
+
+	result.Raw, err = json.Marshal(swaggerMap)
+
+	return result, err
+
+}
+
+func TagSwaggerMethods(tags []string, swagger model_types.Swagger2) (result model_types.Swagger2, err error) {
+
+	swaggerRaw := swagger.Raw
+
+	swaggerMap := map[string]interface{}{}
+	if err = json.Unmarshal(swaggerRaw, &swaggerMap); err != nil {
+		return result, err
+	}
+	paths := swaggerMap["paths"].(map[string]interface{})
+
+	for _, method := range paths {
+
+		realMethod := method.(map[string]interface{})
+		for _, content := range realMethod {
+			realContent := content.(map[string]interface{})
+			realContent["tags"] = tags
+		}
+	}
 
 	result.Raw, err = json.Marshal(swaggerMap)
 
@@ -108,6 +135,10 @@ func (mdc *ModelRouteCatalog) AddModelRoute(mr *v1alpha1.ModelRoute, infoRespons
 // Route's model swagger modified by prefixing using route prefix
 // And add to local store (index of routes)
 func (mdc *ModelRouteCatalog) CreateOrUpdate(route route) error {
+
+	mdc.Lock()
+	defer mdc.Unlock()
+
 	prefixedSwagger, err := PrefixSwaggerUrls(route.prefix, route.model.ServedModel.Swagger)
 	if err != nil {
 		return err
@@ -119,6 +150,8 @@ func (mdc *ModelRouteCatalog) CreateOrUpdate(route route) error {
 
 
 func (mdc *ModelRouteCatalog) Delete(routeID string) {
+	mdc.Lock()
+	defer mdc.Unlock()
 	delete(mdc.routeMap, routeID)
 }
 

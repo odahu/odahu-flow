@@ -47,6 +47,17 @@ func TestPrefixSwaggerUrls(t *testing.T) {
 	assertJSONEqualFile(t, prefixed.Raw, "testdata/prefixed_swagger.json")
 }
 
+func TestTagSwaggerMethods(t *testing.T) {
+
+	raw, err := ioutil.ReadFile("testdata/swagger.json")
+	assert.NoError(t, err)
+	tagged, err := servicecatalog.TagSwaggerMethods([]string{"simple"}, model.Swagger2{
+		Raw: raw,
+	})
+	assert.NoError(t, err)
+	assertJSONEqualFile(t, tagged.Raw, "testdata/tagged_swagger.json")
+}
+
 func TestProcessSwaggerJSON(t *testing.T) {
 	raw, err := ioutil.ReadFile("testdata/swagger.json")
 	assert.NoError(t, err)
