@@ -2,12 +2,11 @@ package servicecatalog_test
 
 import (
 	"encoding/json"
-	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 )
 
@@ -61,17 +60,24 @@ func TestTagSwaggerMethods(t *testing.T) {
 func TestProcessSwaggerJSON(t *testing.T) {
 	raw, err := ioutil.ReadFile("testdata/swagger.json")
 	assert.NoError(t, err)
-	catalog := servicecatalog.NewModelRouteCatalog()
 
-	route := v1alpha1.ModelRoute{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "simple",
+	log, err := zap.NewDevelopment()
+	assert.NoError(t, err)
+	catalog := servicecatalog.NewModelRouteCatalog(log.Sugar())
+
+
+	assert.NoError(t, catalog.CreateOrUpdate(servicecatalog.Route{
+		ID:     "simple",
+		Prefix: "/model/simple",
+		Model: model.DeployedModel{
+			DeploymentID: "simple",
+			ServedModel: model.ServedModel{
+				Metadata: model.Metadata{},
+				MLServer: "",
+				Swagger:  model.Swagger2{Raw: raw},
+			},
 		},
-		Spec:       v1alpha1.ModelRouteSpec{
-			URLPrefix: "/model/simple",
-		},
-	}
-	assert.NoError(t, catalog.AddModelRoute(&route, raw))
+	}))
 
 	combinedSwagger, err := catalog.ProcessSwaggerJSON()
 	assert.NoError(t, err)

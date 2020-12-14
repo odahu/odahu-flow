@@ -36,7 +36,8 @@ import (
 )
 
 
-func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger) (servicecatalog.Reflector, error) {
+func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
+	catalog servicecatalog.Catalog) (servicecatalog.Reflector, error) {
 	aCfg := cfg.Auth
 	httpClient := http.NewBaseAPIClient(
 		aCfg.APIURL, aCfg.APIToken, aCfg.ClientID, aCfg.ClientSecret, aCfg.OAuthOIDCTokenEndpoint, "api/v1",
@@ -58,7 +59,7 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger) (servic
 					HTTPClient: &httpClient,
 				},
 			},
-			Catalog:     nil,
+			Catalog:     catalog,
 		},
 		C:             servicecatalog.RouteEventFetcher{
 			APIClient: event.ModelRouteEventClient{
@@ -92,7 +93,6 @@ var mainCmd = &cobra.Command{
 	Short: "Odahu-flow service catalog server",
 	Run: func(cmd *cobra.Command, args []string) {
 		odahuConfig := config.MustLoadConfig()
-		routeCatalog := servicecatalog.NewModelRouteCatalog()
 
 		// Initialize
 
@@ -103,10 +103,13 @@ var mainCmd = &cobra.Command{
 
 		sLogger := logger.Sugar().With("OdahuVersion", odahuConfig.Common.Version)
 
-		reflector, err := initReflector(odahuConfig.ServiceCatalog, sLogger)
+		routeCatalog := servicecatalog.NewModelRouteCatalog(sLogger)
+
+		reflector, err := initReflector(odahuConfig.ServiceCatalog, sLogger, routeCatalog)
 		if err != nil {
 			sLogger.Fatalf("Unable set up service-catalog reflector. Error %v", err)
 		}
+
 
 		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
 		if err != nil {

@@ -20,16 +20,21 @@ func (t temporaryErr) Temporary() bool  {
 	return true
 }
 
-type route struct {
-	id string
-	prefix string
+type Route struct {
+	ID     string
+	Prefix string
 
-	isDefault bool
+	IsDefault bool
 	// If route serves more than one model than model is chosen randomly
-	model model_types.DeployedModel
+	Model model_types.DeployedModel
 }
 
 type LatestGenericEvents struct {
 	Cursor int
 	Events []interface{}
+}
+
+type Catalog interface {
+	Delete(RouteID string)
+	CreateOrUpdate(route Route) error
 }

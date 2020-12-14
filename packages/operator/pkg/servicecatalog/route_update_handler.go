@@ -25,10 +25,7 @@ type ModelServerDiscoverer interface {
 	GetMLServerName() model_types.MLServerName
 }
 
-type Catalog interface {
-	Delete(RouteID string)
-	CreateOrUpdate(route route) error
-}
+
 
 type UpdateHandler struct {
 	Log             *zap.SugaredLogger
@@ -103,14 +100,14 @@ func (r UpdateHandler) Handle(object interface{}) (err error) {
 		}
 	}
 
-	route := route{
-		id:        event.EntityID,
-		prefix:    event.Payload.Spec.URLPrefix,
-		isDefault: event.Payload.Default,
+	route := Route{
+		ID:        event.EntityID,
+		Prefix:    event.Payload.Spec.URLPrefix,
+		IsDefault: event.Payload.Default,
 	}
 
 	var servedModel model_types.ServedModel
-	servedModel, err = r.discoverModel(route.prefix, log)
+	servedModel, err = r.discoverModel(route.Prefix, log)
 	if err != nil {
 		return err
 	}
@@ -119,7 +116,7 @@ func (r UpdateHandler) Handle(object interface{}) (err error) {
 		ServedModel:  servedModel,
 	}
 
-	route.model = deployedModel
+	route.Model = deployedModel
 
 	if err != r.Catalog.CreateOrUpdate(route) {
 		return err

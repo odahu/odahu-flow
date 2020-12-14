@@ -23,12 +23,7 @@ import (
 	"go.uber.org/zap"
 	"sync"
 	"text/template"
-
-	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
-
-var log = logf.Log.WithName("catalog")
 
 type ModelRouteInfo struct {
 	Data map[string]map[string]interface{}
@@ -37,16 +32,19 @@ type ModelRouteInfo struct {
 type ModelRouteCatalog struct {
 	sync.RWMutex
 	routes map[string]*ModelRouteInfo
-	routeMap map[string]route
+	routeMap map[string]Route
 	log *zap.SugaredLogger
 }
 
-func NewModelRouteCatalog() *ModelRouteCatalog {
+func NewModelRouteCatalog(log *zap.SugaredLogger) *ModelRouteCatalog {
 	return &ModelRouteCatalog{
 		routes: map[string]*ModelRouteInfo{},
+		routeMap: map[string]Route{},
+		log: log,
 	}
 }
 
+// PrefixSwaggerUrls prefix all URLs in swagger using prefix
 func PrefixSwaggerUrls(prefix string, swagger model_types.Swagger2) (result model_types.Swagger2, err error) {
 
 	swaggerMap := map[string]interface{}{}
@@ -71,6 +69,7 @@ func PrefixSwaggerUrls(prefix string, swagger model_types.Swagger2) (result mode
 
 }
 
+// TagSwaggerMethods add tags into swagger
 func TagSwaggerMethods(tags []string, swagger model_types.Swagger2) (result model_types.Swagger2, err error) {
 
 	swaggerRaw := swagger.Raw
@@ -96,82 +95,55 @@ func TagSwaggerMethods(tags []string, swagger model_types.Swagger2) (result mode
 
 }
 
-func (mdc *ModelRouteCatalog) AddModelRoute(mr *v1alpha1.ModelRoute, infoResponse []byte) error {
-	mdc.Lock()
-	defer mdc.Unlock()
-	log.Info("Add model route", "model route id", mr.Name)
-
-	modelSwagger := map[string]interface{}{}
-	if err := json.Unmarshal(infoResponse, &modelSwagger); err != nil {
-		log.Error(err, "Unmarshal swagger model", "mr id", mr.Name)
-		return err
-	}
-	paths := modelSwagger["paths"].(map[string]interface{})
-
-	for url, method := range paths {
-		realURL := mr.Spec.URLPrefix + url
-
-		realMethod := method.(map[string]interface{})
-		for _, content := range realMethod {
-			realContent := content.(map[string]interface{})
-			realContent["tags"] = []string{mr.Name}
-		}
-
-		log.Info("Add model url", "model url", realURL, "model route id", mr.Name)
-
-		mri, ok := mdc.routes[mr.Name]
-		if !ok {
-			mri = &ModelRouteInfo{}
-			mri.Data = make(map[string]map[string]interface{})
-			mdc.routes[mr.Name] = mri
-		}
-
-		mri.Data[realURL] = realMethod
-	}
-
-	return nil
-}
-
-// Route's model swagger modified by prefixing using route prefix
-// And add to local store (index of routes)
-func (mdc *ModelRouteCatalog) CreateOrUpdate(route route) error {
+// CreateOrUpdate create or update route in catalog
+// All URLs of original swagger of model behind the route will be prefixed by route.Prefix
+func (mdc *ModelRouteCatalog) CreateOrUpdate(route Route) error {
 
 	mdc.Lock()
 	defer mdc.Unlock()
 
-	prefixedSwagger, err := PrefixSwaggerUrls(route.prefix, route.model.ServedModel.Swagger)
+	prefixedSwagger, err := PrefixSwaggerUrls(route.Prefix, route.Model.ServedModel.Swagger)
 	if err != nil {
 		return err
 	}
-	route.model.ServedModel.Swagger = prefixedSwagger
-	mdc.routeMap[route.id] = route
+	route.Model.ServedModel.Swagger = prefixedSwagger
+	mdc.routeMap[route.ID] = route
 	return nil
 }
 
-
+// Delete delete route from catalog
 func (mdc *ModelRouteCatalog) Delete(routeID string) {
 	mdc.Lock()
 	defer mdc.Unlock()
 	delete(mdc.routeMap, routeID)
 }
 
-func (mdc *ModelRouteCatalog) DeleteModelRoute(mrName string) {
-	mdc.Lock()
-	defer mdc.Unlock()
-	log.Info("Delete model route", "model route id", mrName)
 
-	delete(mdc.routes, mrName)
-}
-
-// Combine swagger `paths` of different models into single swagger page
-// And return its content
+// ProcessSwaggerJSON combine URLs of all models in catalog. It separates endpoints by tagging them using
+// route.ID
 func (mdc *ModelRouteCatalog) ProcessSwaggerJSON() (string, error) {
 	mdc.RLock()
 	defer mdc.RUnlock()
-	allURLs := map[string]map[string]interface{}{}
+	allURLs := map[string]interface{}{}
 
-	for _, mri := range mdc.routes {
-		for url, data := range mri.Data {
+	for _, route := range mdc.routeMap {
+
+		logger := mdc.log.With("route.id", route.ID)
+
+		taggedSwagger, err := TagSwaggerMethods([]string{route.ID}, route.Model.ServedModel.Swagger)
+		if err != nil {
+			logger.Errorw("Unable to tag route swagger urls", err)
+			continue
+		}
+		swaggerMap := map[string]interface{}{}
+		if err := json.Unmarshal(taggedSwagger.Raw, &swaggerMap); err != nil {
+			logger.Errorw("Unable to unmarshall route swagger", err)
+			continue
+		}
+
+		paths := swaggerMap["paths"].(map[string]interface{})
+
+		for url, data := range paths {
 			allURLs[url] = data
 		}
 	}
