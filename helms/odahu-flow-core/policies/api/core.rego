@@ -6,7 +6,7 @@ import data.odahu.permissions.permissions
 
 default allow = false
 
-# Static role based policy
+## Static role based policy
 allow {
   any_user_role := parsed_input.user.roles[_]
   any_permission_of_user_role := permissions[any_user_role][_]
@@ -27,5 +27,11 @@ allow {
 # Swagger are not protected
 allow {
   parsed_input.action == "GET"
-  re_match("/swagger*", parsed_input.resource)
+  re_match("/swagger.*", parsed_input.resource)
+}
+
+# Health
+allow {
+  parsed_input.action == "GET"
+  re_match("^/health$", parsed_input.resource)
 }
