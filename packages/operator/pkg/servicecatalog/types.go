@@ -25,6 +25,7 @@ type route struct {
 	prefix string
 
 	isDefault bool
+	// If route serves more than one model than model is chosen randomly
 	model model_types.DeployedModel
 }
 

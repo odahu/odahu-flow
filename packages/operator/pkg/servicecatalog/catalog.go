@@ -19,6 +19,7 @@ package servicecatalog
 import (
 	"bytes"
 	"encoding/json"
+	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
 	"sync"
 	"text/template"
 
@@ -35,12 +36,37 @@ type ModelRouteInfo struct {
 type ModelRouteCatalog struct {
 	sync.RWMutex
 	routes map[string]*ModelRouteInfo
+	routeMap map[string]route
 }
 
 func NewModelRouteCatalog() *ModelRouteCatalog {
 	return &ModelRouteCatalog{
 		routes: map[string]*ModelRouteInfo{},
 	}
+}
+
+func PrefixSwaggerUrls(prefix string, swagger model_types.Swagger2) (result model_types.Swagger2, err error) {
+
+	swaggerMap := map[string]interface{}{}
+	if err = json.Unmarshal(swagger.Raw, &swaggerMap); err != nil {
+		return result, err
+	}
+
+	paths := swaggerMap["paths"].(map[string]interface{})
+
+	prefixedPaths := make(map[string]interface{})
+
+	for origURL, data := range paths {
+		prefixedURL := prefix +origURL
+		prefixedPaths[prefixedURL] = data
+	}
+
+	swaggerMap["paths"] = prefixedPaths
+
+	result.Raw, err = json.Marshal(swaggerMap)
+
+	return result, err
+
 }
 
 func (mdc *ModelRouteCatalog) AddModelRoute(mr *v1alpha1.ModelRoute, infoResponse []byte) error {
@@ -79,20 +105,21 @@ func (mdc *ModelRouteCatalog) AddModelRoute(mr *v1alpha1.ModelRoute, infoRespons
 	return nil
 }
 
-func (mdc *ModelRouteCatalog) UpdateModelRouteCatalog(mrList *v1alpha1.ModelRouteList) {
-	mdc.Lock()
-	defer mdc.Unlock()
-
-	routes := map[string]*ModelRouteInfo{}
-	for _, mr := range mrList.Items {
-		if data, ok := mdc.routes[mr.Name]; ok {
-			log.Info("Stay alive model route", "model route id", mr.Name)
-
-			routes[mr.Name] = data
-		}
+// Route's model swagger modified by prefixing using route prefix
+// And add to local store (index of routes)
+func (mdc *ModelRouteCatalog) CreateOrUpdate(route route) error {
+	prefixedSwagger, err := PrefixSwaggerUrls(route.prefix, route.model.ServedModel.Swagger)
+	if err != nil {
+		return err
 	}
+	route.model.ServedModel.Swagger = prefixedSwagger
+	mdc.routeMap[route.id] = route
+	return nil
+}
 
-	mdc.routes = routes
+
+func (mdc *ModelRouteCatalog) Delete(routeID string) {
+	delete(mdc.routeMap, routeID)
 }
 
 func (mdc *ModelRouteCatalog) DeleteModelRoute(mrName string) {
@@ -103,6 +130,8 @@ func (mdc *ModelRouteCatalog) DeleteModelRoute(mrName string) {
 	delete(mdc.routes, mrName)
 }
 
+// Combine swagger `paths` of different models into single swagger page
+// And return its content
 func (mdc *ModelRouteCatalog) ProcessSwaggerJSON() (string, error) {
 	mdc.RLock()
 	defer mdc.RUnlock()
@@ -152,7 +181,7 @@ const templateStr = `
         "version": "1.0"
     },
     "schemes": [
-      "https",
+      "https"
     ],
     "host": "",
     "basePath": "",

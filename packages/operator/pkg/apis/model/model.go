@@ -4,7 +4,7 @@ type Metadata struct {
 }
 
 type Swagger2 struct {
-	Content map[string]interface{}
+	Raw []byte
 }
 
 type MLServerName string

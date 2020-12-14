@@ -1,7 +1,6 @@
 package servicecatalog
 
 import (
-	"encoding/json"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -44,13 +43,8 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 	rawBody, err := ioutil.ReadAll(response.Body)
 	log.Info("Get response from model", "content", string(rawBody))
 
-	content := map[string]interface{}{}
-	if err := json.Unmarshal(rawBody, &content); err != nil {
-		log.Errorw("Unmarshal swagger model", zap.Error(err))
-		return swagger, err
-	}
 
-	swagger = model_types.Swagger2{Content: content}
+	swagger = model_types.Swagger2{Raw: rawBody}
 	return swagger, nil
 
 }
