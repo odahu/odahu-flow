@@ -6,7 +6,7 @@ import data.odahu.permissions.permissions
 
 default allow = false
 
-## Static role based policy
+# Static role based policy
 allow {
   any_user_role := parsed_input.user.roles[_]
   any_permission_of_user_role := permissions[any_user_role][_]
