@@ -13,7 +13,6 @@ permissions := {
     	["GET", "^/api/v1/packaging/integration.*"],
     	["GET", "^/api/v1/user.*"],
     	["GET", "^/api/v1/toolchain/integration.*"],
-    	["GET", "^/health$"],
     ],
   roles.admin : [
       [".*", ".*"]
@@ -28,6 +27,5 @@ permissions := {
     	["GET", "^/api/v1/packaging/integration.*"],
     	["GET", "^/api/v1/user.*"],
     	["GET", "^/api/v1/toolchain/integration.*"],
-    	["GET", "^/health$"],
   ]
 }

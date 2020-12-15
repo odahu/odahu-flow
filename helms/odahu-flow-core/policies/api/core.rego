@@ -27,5 +27,11 @@ allow {
 # Swagger are not protected
 allow {
   parsed_input.action == "GET"
-  re_match("/swagger*", parsed_input.resource)
+  re_match("/swagger.*", parsed_input.resource)
+}
+
+# Health
+allow {
+  parsed_input.action == "GET"
+  re_match("^/health$", parsed_input.resource)
 }
