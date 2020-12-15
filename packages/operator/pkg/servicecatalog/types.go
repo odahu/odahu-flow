@@ -29,9 +29,14 @@ type Route struct {
 	Model model_types.DeployedModel
 }
 
+type GenericEvent struct {
+	EntityID string
+	Embedded interface{}
+}
+
 type LatestGenericEvents struct {
 	Cursor int
-	Events []interface{}
+	Events []GenericEvent
 }
 
 type Catalog interface {

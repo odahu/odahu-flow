@@ -27,108 +27,158 @@ type Reflector struct {
 	C             eventFetcher
 	FetchTimeout  time.Duration
 	HandleTimeout time.Duration
+	JobCapacity int
+	WorkersCount int
 
 }
 
-func (u Reflector) Run(ctx context.Context) error {
 
-	// We need two goroutines that communicate with each other through queue.
-	// First goroutine fill queue by events,
-	// Second goroutine retrieves events and pass them to handlers.
-	// If handler return error for some event then second goroutine push this event back to queue to try handle it later
+type versionedEvent struct {
+	version int
+	event   GenericEvent
+}
 
-	queue := NewQueue()
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
+
+// RunProcessor process events in jobChan. Can re-schedule events in case of temporary errors.
+func (r Reflector) RunProcessor(ctx context.Context,
+	jobChan <-chan versionedEvent, schedChan chan<- versionedEvent) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case event := <-jobChan:
+			if err := r.H.Handle(event.event.Embedded); err != nil {
+				if !IsTemporary(err){
+					return err
+				}
+				r.Log.Warnw("Temporary error during event handling. Reschedule versionedEvent",
+					"event", event, zap.Error(err))
+				schedChan <- event
+			}
+		}
+	}
+}
+
+
+// RunFetcher fetch events from API server and schedule them to processing.
+func (r Reflector) RunFetcher(ctx context.Context, schedChan chan<- versionedEvent) error {
+	var cursor int
+	t := time.NewTicker(r.FetchTimeout)
+
+	for {
+
+		select {
+		case  <-ctx.Done():
+			return nil
+		case  <-t.C:
+			lastEvents, err := r.C.GetLastEvents(cursor)
+			if err != nil {
+				r.Log.Errorw("Unable to get last events", zap.Error(err))
+
+				if !IsTemporary(err) {
+					return err
+				}
+
+				r.Log.Warnw("Temporary error during event fetching.", zap.Error(err))
+				continue
+			}
+			cursor = lastEvents.Cursor
+
+			for _, event := range lastEvents.Events {
+				schedChan <- versionedEvent{
+					version: cursor,
+					event:   event,
+				}
+			}
+		}
+
+	}
+}
+
+
+// RunScheduler fills jobChan according some rules.
+// Event skipped if more fresh version of event was scheduled previously.
+func (r Reflector) RunScheduler(ctx context.Context,
+	jobChan chan<- versionedEvent, schedChan <-chan versionedEvent) {
+
+	lastCursorForEntityID := make(map[string]int)
+
+	var log = r.Log
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Debugw("Cancel event was received")
+			return
+		case item := <-schedChan:
+
+			log = log.With("eventVersion", item.version, "entityID", item.event.EntityID)
+
+			log.Debugw("New event is scheduled")
+
+			lastScheduledVersion, ok := lastCursorForEntityID[item.event.EntityID]
+			if !ok || lastScheduledVersion <= item.version {
+				lastCursorForEntityID[item.event.EntityID] = item.version
+				jobChan <- item
+				log.Debugw("Event was enqueued for jobChan")
+			} else {
+				log.Debugw("Event version is stale. Skip enqueueing",
+					"lastScheduledVersion", lastScheduledVersion)
+			}
+
+		}
+	}
+
+}
+
+
+func (r Reflector) Run(ctx context.Context) error {
+
+
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	var fetchEventsPermanentErr error
-	var handleEventPermanentErr error
 
-	// Fill queue from API Server
+	jobChan := make(chan versionedEvent, r.JobCapacity)
+	schedChan := make(chan versionedEvent, r.JobCapacity)
+
+	// Grab all goroutines error into err
+	var err error
+	errLock := sync.Mutex{}
+	wg := &sync.WaitGroup{}
+
+	// Goroutine fetch events from API server and schedule them
+	wg.Add(1)
 	go func() {
-
 		defer wg.Done()
-		defer cancel()
-
-		var cursor int
-		t := time.NewTicker(u.FetchTimeout)
-
-		for {
-
-			select {
-			case  <-ctx.Done():
-				return
-			case  <-t.C:
-				lastEvents, err := u.C.GetLastEvents(cursor)
-				if err != nil {
-					u.Log.Errorw("Unable to get last events", zap.Error(err))
-
-					if !IsTemporary(err) {
-						fetchEventsPermanentErr = err
-						return
-					}
-
-					u.Log.Warnw("Temporary error during event fetching. Will try fetch later", zap.Error(err))
-					continue
-				}
-				cursor = lastEvents.Cursor
-
-				for _, event := range lastEvents.Events {
-					queue.Push(ctx, &Item{Value: event})
-				}
-			}
-
-		}
-
-	}()
-
-	// Process queue
-	go func() {
-
-		defer wg.Done()
-		defer cancel()
-
-		t := time.NewTicker(u.HandleTimeout)
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-t.C:
-				for {
-					item := queue.Pop()
-					if item == nil {
-						// Queue is empty. Sleep again
-						break
-					}
-
-					event := item.Value
-					if err := u.H.Handle(event); err != nil {
-
-						if !IsTemporary(err){
-							handleEventPermanentErr = err
-							return
-						}
-						u.Log.Warnw("Transient error during event handling. Push event back to queue",
-							"event", event, zap.Error(err))
-						queue.Push(ctx, item)
-					}
-
-
-				}
-			}
-
+		if gErr := r.RunFetcher(ctx, schedChan); gErr != nil {
+			errLock.Lock()
+			err = multierr.Append(err, gErr)
+			errLock.Unlock()
 		}
 	}()
+
+	// Scheduler
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		r.RunScheduler(ctx, jobChan, schedChan)
+	}()
+
+	// Handler. Can re-schedule event if temporary error happens
+	for i := 0; i < r.WorkersCount; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if gErr := r.RunProcessor(ctx, jobChan, schedChan); gErr != nil {
+				errLock.Lock()
+				err = multierr.Append(err, gErr)
+				errLock.Unlock()
+			}
+		}()
+	}
 
 	wg.Wait()
-	var err error
-	if fetchEventsPermanentErr != nil {
-		err = multierr.Append(err, fetchEventsPermanentErr)
-	}
-	if handleEventPermanentErr != nil {
-		err = multierr.Append(err, handleEventPermanentErr)
-	}
+
 	return err
 }

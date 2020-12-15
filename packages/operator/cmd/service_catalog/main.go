@@ -69,6 +69,8 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 		},
 		FetchTimeout:  cfg.FetchTimeout,
 		HandleTimeout: cfg.HandleTimeout,
+		JobCapacity: cfg.JobCapacity,
+		WorkersCount: cfg.WorkersCount,
 	}, nil
 }
 
