@@ -220,7 +220,8 @@ function local_cleanup() {
   LIST_IMAGES=$(docker images -a -q ${PACKAGER_IMAGE})
   echo "LIST_IMAGES: ${LIST_IMAGES}"
   if [ ! -z "${LIST_IMAGES}" ]
-  then docker rmi -f ${LIST_IMAGES}
+  then
+    docker rmi -f ${LIST_IMAGES}
   fi
 }
 
