@@ -23,6 +23,9 @@ ${MP_COUNTER_MODEL}                     counter
 ${MP_FEEDBACK_MODEL}                    feedback
 ${CONN_SECRET_MASK}                     *****
 
+# Wine Model
+${WINE_MODEL_RESULT}                    {"prediction": [6.3881577909662886], "columns": ["quality"]}
+
 # Errors
 ${INVALID_URL_ERROR}                    Error: Can not reach
 ${INVALID_CREDENTIALS_ERROR}            Error: Credentials are not correct.

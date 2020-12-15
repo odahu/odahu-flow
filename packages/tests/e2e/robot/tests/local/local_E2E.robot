@@ -3,7 +3,6 @@ ${RES_DIR}                      ${CURDIR}/resources
 ${ARTIFACT_DIR}                 ${RES_DIR}/artifacts/odahuflow
 
 ${LOCAL_CONFIG}                 odahuflow/E2E_local
-${MODEL_RESULT}                 {"prediction": [6.3881577909662886, 4.675934265196686], "columns": ["quality"]}
 
 ${LOCAL_DOCKER_CONTAINER}       E2E_local_model
 ${CLUSTER_DOCKER_CONTAINER}     E2E_spec_on_cluster_model
@@ -18,8 +17,8 @@ Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
-Suite Setup         Set Environment Variable    ODAHUFLOW_CONFIG    ${LOCAL_CONFIG}
-Suite Teardown      Remove File   ${LOCAL_CONFIG}
+Suite Setup         Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+Suite Teardown      Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  e2e
 Test Timeout        90 minutes
 
@@ -86,4 +85,4 @@ Run E2E spec on cluster model
     # model invoke
     ${MODEL_HOST}    Get local model host
     ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
-    Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
+    Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}

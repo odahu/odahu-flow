@@ -6,8 +6,6 @@ ${RESULT_DIR}               ${CURDIR}/packaging_train_results
 ${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 
-${MODEL_RESULT}             {"prediction": [6.3881577909662886, 4.675934265196686], "columns": ["quality"]}
-
 ${LOCAL_CONFIG}             odahuflow/local_packaging
 
 *** Settings ***
@@ -45,7 +43,7 @@ Run Training with api server spec
         ${result_path}  StrictShell  echo "${response.stdout}" | tail -n 1 | awk '{ print $3 }'
 
         ${response}   Get File  ${result_path.stdout}
-        Should be equal as Strings  ${response}  ${MODEL_RESULT}
+        Should be equal as Strings  ${response}  ${WINE_MODEL_RESULT}
 
 Run Packaging with local spec
     [Teardown]  Shell  docker stop -t 3 ${container_id.stdout}
@@ -64,7 +62,7 @@ Run Packaging with local spec
 
         ${MODEL_HOST}    Get local model host
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5002 --json-file ${RES_DIR}/request.json
-        Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
+        Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
 
 Try Run Training with api server spec
     [Arguments]  ${error}  ${command}
