@@ -108,7 +108,6 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'SA_DATA_SCIENTIST': test_sa_ds,
                 'SA_VIEWER': test_sa_viewer,
                 'SA_CUSTOM_USER': test_sa_custom_role,
-                'SA_CUSTOM_ROLE': test_sa_custom_role.roles,
 
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
