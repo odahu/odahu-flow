@@ -1,15 +1,21 @@
 *** Variables ***
-${LOCAL_CONFIG}         odahuflow/api_status_codes_400-401-403
+${LOCAL_CONFIG}         odahuflow/api_status_codes_400-403
 ${RES_DIR}              ${CURDIR}/resources
 ${invalid_token}        not-valid-token
+${NOT_EXIST_ENTITY}     simple-model-deploy
+
+${REQUEST}              SEPARATOR=
+...                     { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 
 
 *** Settings ***
-Documentation       tests for API status codes 400, 401, 403
+Documentation       tests for API status codes 400, 403
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
+Library             String
+Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
 Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
@@ -21,9 +27,10 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
+...                 Shell  odahuflowctl config set MODEL_HOST ${EDGE_URL}
 ...                 Login to the api and edge
 # Suite Teardown      Remove File  ${LOCAL_CONFIG}
-Force Tags          api  sdk  negative
+Force Tags          api  sdk  negative  test
 Test Timeout        1 minute
 
 *** Keywords ***
@@ -32,10 +39,11 @@ Try Call API - Bad Request
     ${error}        format string   ${format_string}  ${error}
     Call API and get Error  ${error}  ${command}  @{options}
 
-Try Call API - Unathorized
-    [Arguments]  ${command}  @{options}
-    Call API and get Error  ${IncorrectToken}  ${command}  @{options}  token=${EMPTY}
-    Call API and get Error  ${IncorrectToken}  ${command}  @{options}  token=${invalid_token}
+Try Call API - Forbidden
+    [Arguments]  ${command}  @{options}  &{keyword arguments}
+    Log many   ${API_URL}  ${EDGE_URL}
+    ${403 Forbidden}  format string  ${403 Forbidden Template}   None
+    Call API and get Error  ${403 Forbidden}  ${command}  @{options}  &{keyword arguments}
 
 *** Test Cases ***
 Status Code 400 - Bad Request
@@ -103,116 +111,71 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
 
-Status Code 401 - Unathorized
-    [Template]  Try Call API - Unathorized
-    [Setup]     Run keywords
-    ...         Remove File  ${LOCAL_CONFIG}  AND
-    ...         Set Environment Variable  ODAHUFLOW_CONFIG  odahuflow/api_status_code_401  AND
-    ...         Shell  odahuflowctl config set API_URL ${API_URL}
-    [Teardown]  Login to the api and edge
-    # config
-    config get
+Status Code 403 - Forbidden - Admin
+    [Template]  Call API
+    [Setup]     run keywords
+    ...         Login to the api and edge  AND
+    ...         reload config
+    # model
+    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
+    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
+
+Status Code 403 - Forbidden - Data Scientist
+    [Template]  Try Call API - Forbidden
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_DATA_SCIENTIST}  AND
+    ...         reload config
+    # [Teardown]  Remove File  ${LOCAL_CONFIG}
     # connection
-    connection get
-    connection get id  ${VCS_CONNECTION}
+    connection get id decrypted  ${VCS_CONNECTION}
+    # toolchains
+    toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
+    toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
+    toolchain delete  ${NOT_EXIST_ENTITY}
+    # packagers
+    packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
+    packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
+    packager delete  ${NOT_EXIST_ENTITY}
+    # route
+    route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
+    route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
+    route delete  ${NOT_EXIST_ENTITY}
+
+Status Code 403 - Forbidden - Viewer
+    [Template]  Try Call API - Forbidden
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_VIEWER}  AND
+    ...         reload config
+    # [Teardown]  Remove File  ${LOCAL_CONFIG}
+    # connection
     connection get id decrypted  ${VCS_CONNECTION}
     connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
     connection put  ${RES_DIR}/connection/valid/git_connection_update.yaml
-    connection delete  not-exist
+    connection delete  ${NOT_EXIST_ENTITY}
     # toolchains
-    toolchain get
-    toolchain get id  ${TOOLCHAIN_INTEGRATION}
     toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
     toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
-    toolchain delete  not-exist
+    toolchain delete  ${NOT_EXIST_ENTITY}
     # packagers
-    packager get
-    packager get id  ${PI_REST}
     packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
     packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
-    packager delete  not-exist
+    packager delete  ${NOT_EXIST_ENTITY}
     # training
-    training get
-    training get id
-    training get log
-    training post
-    training put
-    training delete
+    training post  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
+    training put  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
+    training delete  ${NOT_EXIST_ENTITY}
     # packaging
-    packaging get
-    packaging get id
-    packaging get log
-    packaging post
-    packaging put
-    packaging delete
+    packaging post  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
+    packaging put  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
+    packaging delete  ${NOT_EXIST_ENTITY}
     # deployment
-    deployment get
-    deployment get id
-    deployment post
-    deployment put
-    deployment delete
+    deployment post  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
+    deployment put  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
+    deployment delete  ${NOT_EXIST_ENTITY}
     # route
-    route get
-    route get id
-    route post
-    route put
-    route delete
+    route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
+    route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
+    route delete  ${NOT_EXIST_ENTITY}
     # model
-    model get
-    model post
-
-## also create 403 for different user types (data-scientist, viewer, admin)
-#
-#Status Code 403 - Forbidden
-#    [Template]  Template Error Keyword
-#    # config
-#    config get
-#    # connection
-#    connection get
-#    connection get id
-#    connection get id decrypted
-#    connection post
-#    connection put
-#    connection delete
-#    # toolchains
-#    toolchain get
-#    toolchain get id
-#    toolchain post
-#    toolchain put
-#    toolchain delete
-#    # packagers
-#    packager get
-#    packager get id
-#    packager post
-#    packager put
-#    packager delete
-#    # training
-#    training get
-#    training get id
-#    training get log
-#    training post
-#    training put
-#    training delete
-#    # packaging
-#    packaging get
-#    packaging get id
-#    packaging get log
-#    packaging post
-#    packaging put
-#    packaging delete
-#    # deployment
-#    deployment get
-#    deployment get id
-#    deployment post
-#    deployment put
-#    deployment delete
-#    # route
-#    route get
-#    route get id
-#    route post
-#    route put
-#    route delete
-#    # model
-#    model get
-#    model post
-#
+    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
+    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
