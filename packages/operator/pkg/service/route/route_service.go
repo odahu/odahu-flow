@@ -193,15 +193,17 @@ func (s serviceImpl) UpdateModelRouteStatus(
 		return err
 	}
 
-	event := event.Event{
+	e := event.Event{
 		EntityID:   id,
 		EventType:  event.ModelRouteStatusUpdatedEventType,
 		EventGroup: event.ModelRouteEventGroup,
 		Payload: route.ModelRoute{
+			ID: id,
+			Spec: spec,
 			Status: status,
 		},
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 
