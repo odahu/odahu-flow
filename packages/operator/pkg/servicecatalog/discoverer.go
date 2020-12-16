@@ -1,6 +1,7 @@
 package servicecatalog
 
 import (
+	"fmt"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -33,6 +34,36 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 		)
 		return swagger, err
 	}
+
+	if response.StatusCode >= 400 {
+		for _, tempCode := range []int{
+			http.StatusRequestTimeout,
+			http.StatusBadGateway,
+			http.StatusServiceUnavailable,
+			http.StatusGatewayTimeout,
+
+			http.StatusNotFound,
+			http.StatusInternalServerError,
+
+
+			// Client can be used in reactive workloads (background workers) that suppose backoff retries
+			// So workload can retry attempt to get data after error on server will be
+			// fixed
+			http.StatusInternalServerError,
+		} {
+			if tempCode == response.StatusCode {
+				return swagger, temporaryErr{
+					fmt.Errorf("not correct status code: %d. Maybe temporary", response.StatusCode),
+				}
+			}
+		}
+
+		return swagger, fmt.Errorf("not correct status code: %d", response.StatusCode)
+
+	}
+
+
+
 
 	defer func() {
 		if err := response.Body.Close(); err != nil {

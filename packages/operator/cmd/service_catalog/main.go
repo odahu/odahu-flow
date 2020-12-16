@@ -19,19 +19,21 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/event"
+	"k8s.io/client-go/util/workqueue"
+	"log"
+	nethttp "net/http"
 	"net/url"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-	"log"
 	"time"
 )
 
@@ -48,47 +50,29 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 		return servicecatalog.Reflector{}, err
 	}
 
-	return servicecatalog.Reflector{
-		Log:           logger,
-		H:             servicecatalog.UpdateHandler{
-			Log:         logger,
-			Discoverers: []servicecatalog.ModelServerDiscoverer{
-				servicecatalog.OdahuMLServerDiscoverer{
-					EdgeURL:    *edgeURL,
-					EdgeHost:   cfg.EdgeHost,
-					HTTPClient: &httpClient,
-				},
-			},
-			Catalog:     catalog,
-		},
-		C:             servicecatalog.RouteEventFetcher{
-			APIClient: event.ModelRouteEventClient{
+	return servicecatalog.NewReflector(logger, servicecatalog.UpdateHandler{
+		Log:         logger,
+		Discoverers: []servicecatalog.ModelServerDiscoverer{
+			servicecatalog.OdahuMLServerDiscoverer{
+				EdgeURL:    *edgeURL,
+				EdgeHost:   cfg.EdgeHost,
 				HTTPClient: &httpClient,
-				Log:        logger,
 			},
 		},
-		FetchTimeout:  cfg.FetchTimeout,
-		HandleTimeout: cfg.HandleTimeout,
-		JobCapacity: cfg.JobCapacity,
+		Catalog:     catalog,
+	}, servicecatalog.RouteEventFetcher{
+		APIClient: event.ModelRouteEventClient{
+			HTTPClient: &httpClient,
+			Log:        logger,
+		},
+	}, workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+	servicecatalog.ReflectorOpts{
 		WorkersCount: cfg.WorkersCount,
-	}, nil
+		FetchTimeout: cfg.FetchTimeout * time.Second,
+	}), nil
+
 }
 
-
-func stopGracefully(wg *sync.WaitGroup, logger *zap.SugaredLogger) {
-	gracefulCtx, gracefulFinish := context.WithTimeout(context.Background(), time.Second * 5)
-
-	go func() {
-		wg.Wait()
-		gracefulFinish()
-	}()
-
-	<-gracefulCtx.Done()
-	_, isDeadline := gracefulCtx.Deadline()
-	if isDeadline {
-		logger.Fatal("Unable to stop app gracefully")
-	}
-}
 
 var mainCmd = &cobra.Command{
 	Use:   "service-catalog",
@@ -107,17 +91,13 @@ var mainCmd = &cobra.Command{
 
 		routeCatalog := servicecatalog.NewModelRouteCatalog(sLogger)
 
+
+		// Run reflector (keep state of service catalog up to date with ODAHU API Server)
+
 		reflector, err := initReflector(odahuConfig.ServiceCatalog, sLogger, routeCatalog)
 		if err != nil {
 			sLogger.Fatalf("Unable set up service-catalog reflector. Error %v", err)
 		}
-
-
-		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
-		if err != nil {
-			sLogger.Fatalf("Unable set up service-catalog server. Error %v", err)
-		}
-
 
 		ctx, cancel := context.WithCancel(context.Background())
 		wg := sync.WaitGroup{}
@@ -133,16 +113,26 @@ var mainCmd = &cobra.Command{
 			cancel()
 		}()
 
-		// Launch
+		// Run webserver. API for getting information about deployed models, swaggers, metadata, etc
 
+		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
+		if err != nil {
+			sLogger.Fatalf("Unable set up service-catalog server. Error %v", err)
+		}
 		go func() {
 			defer wg.Done()
-			if err := mainServer.Run(":5000"); err != nil {
+			if err := mainServer.ListenAndServe(); err != nil && err != nethttp.ErrServerClosed {
 				sLogger.Errorw("Web server was stopped with errors", zap.Error(err))
 			} else {
 				sLogger.Info("Reflector was stopped gracefully")
 			}
 			cancel()
+		}()
+		go func() {  // Monitors cancel signal and calls .Shutdown for webserver
+			<-ctx.Done()
+			if err := mainServer.Shutdown(context.TODO()); err != nil {
+				sLogger.Errorw("Error during server shutdown", zap.Error(err))
+			}
 		}()
 
 
@@ -159,8 +149,15 @@ var mainCmd = &cobra.Command{
 			sLogger.Info("Application trying to stop itself because of error")
 		}
 
-		// Wait full stop gracefully
-		stopGracefully(&wg, sLogger)
+		sLogger.Info("Try to stop gracefully")
+		go func() {
+			t := time.NewTimer(time.Second * 5)
+			<-t.C
+			sLogger.Warn("Timeout to stop gracefully. Exit process")
+			os.Exit(1)
+		}()
+		wg.Wait()
+		sLogger.Info("Application was gracefully stopped")
 
 	},
 }

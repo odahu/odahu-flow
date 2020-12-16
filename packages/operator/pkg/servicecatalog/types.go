@@ -29,8 +29,13 @@ type Route struct {
 	Model model_types.DeployedModel
 }
 
-type GenericEvent struct {
+type VersionedID struct {
 	EntityID string
+	Version int
+}
+
+type GenericEvent struct {
+	VersionedID VersionedID
 	Embedded interface{}
 }
 

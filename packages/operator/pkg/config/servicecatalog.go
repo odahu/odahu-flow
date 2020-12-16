@@ -27,7 +27,7 @@ type ServiceCatalog struct {
 	EdgeURL string `json:"edgeURL"`
 	// ServiceCatalog set EdgeHost as Host header in requests to ML servers
 	EdgeHost string `json:"edgeHost"`
-	// How many workers will process events. Default: 4
+	// How many workers will process events. Default: 1
 	WorkersCount int `json:"workersCount"`
 	// Capacity of job queue with events (channel). Default: 100
 	JobCapacity int `json:"jobCapacity"`
@@ -35,9 +35,9 @@ type ServiceCatalog struct {
 
 func NewDefaultServiceCatalogConfig() ServiceCatalog {
 	return ServiceCatalog{
-		FetchTimeout: 2 * time.Second,
-		HandleTimeout: 2 * time.Second,
-		WorkersCount: 4,
-		JobCapacity: 100,
+		FetchTimeout: 5,
+		HandleTimeout: 2,
+		WorkersCount: 1,
+		JobCapacity: 0,
 	}
 }

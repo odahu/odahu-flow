@@ -24,7 +24,10 @@ func (d RouteEventFetcher) GetLastEvents(cursor int) (LatestGenericEvents, error
 	generic.Cursor = routeEvents.Cursor
 	for _, de := range routeEvents.Events {
 		generic.Events = append(generic.Events, GenericEvent{
-			EntityID: de.EntityID,
+			VersionedID: VersionedID{
+				EntityID: de.EntityID,
+				Version:  routeEvents.Cursor,
+			},
 			Embedded: de,
 		})
 	}

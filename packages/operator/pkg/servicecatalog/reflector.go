@@ -4,10 +4,10 @@ import (
 	"context"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
+	"k8s.io/client-go/util/workqueue"
 	"sync"
 	"time"
 )
-
 
 
 type eventFetcher interface {
@@ -26,42 +26,69 @@ type Reflector struct {
 	H             eventHandler
 	C             eventFetcher
 	FetchTimeout  time.Duration
-	HandleTimeout time.Duration
-	JobCapacity int
 	WorkersCount int
-
+	q workqueue.RateLimitingInterface
+	eventCache map[interface{}]interface{}
+	eventCacheMu *sync.RWMutex
 }
 
-
-type versionedEvent struct {
-	version int
-	event   GenericEvent
+type ReflectorOpts struct {
+	WorkersCount int
+	FetchTimeout time.Duration
 }
 
+func NewReflector(log *zap.SugaredLogger, handler eventHandler, fetcher eventFetcher,
+	q workqueue.RateLimitingInterface, opts ReflectorOpts) Reflector {
 
-// RunProcessor process events in jobChan. Can re-schedule events in case of temporary errors.
-func (r Reflector) RunProcessor(ctx context.Context,
-	jobChan <-chan versionedEvent, schedChan chan<- versionedEvent) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		case event := <-jobChan:
-			if err := r.H.Handle(event.event.Embedded); err != nil {
-				if !IsTemporary(err){
-					return err
-				}
-				r.Log.Warnw("Temporary error during event handling. Reschedule versionedEvent",
-					"event", event, zap.Error(err))
-				schedChan <- event
-			}
-		}
+	r := Reflector{
+		Log:          log,
+		H:            handler,
+		C:            fetcher,
+		q:            q,
+		eventCache:   make(map[interface{}]interface{}),
+		eventCacheMu: &sync.RWMutex{},
+		WorkersCount: 1,
+		FetchTimeout: 10 * time.Second,
 	}
+
+	if opts.WorkersCount != 0 {
+		r.WorkersCount = opts.WorkersCount
+	}
+	if opts.FetchTimeout != 0 {
+		r.FetchTimeout = opts.FetchTimeout
+	}
+
+	return r
+
 }
 
 
-// RunFetcher fetch events from API server and schedule them to processing.
-func (r Reflector) RunFetcher(ctx context.Context, schedChan chan<- versionedEvent) error {
+func (r Reflector) RunProcessor(ctx context.Context) error {
+
+	for {
+		EntityID, shutdown := r.q.Get()
+		r.eventCacheMu.RLock()
+		event := r.eventCache[EntityID]
+		r.eventCacheMu.RUnlock()
+
+		if shutdown {
+			return nil
+		}
+
+		err := r.H.Handle(event)
+		r.q.Done(EntityID)
+		if err != nil {
+			r.q.AddRateLimited(EntityID)
+			continue
+		}
+		r.q.Forget(EntityID)
+
+	}
+
+}
+
+
+func (r Reflector) RunFetcher(ctx context.Context) error {
 	var cursor int
 	t := time.NewTicker(r.FetchTimeout)
 
@@ -85,50 +112,14 @@ func (r Reflector) RunFetcher(ctx context.Context, schedChan chan<- versionedEve
 			cursor = lastEvents.Cursor
 
 			for _, event := range lastEvents.Events {
-				schedChan <- versionedEvent{
-					version: cursor,
-					event:   event,
-				}
+				r.q.Add(event.VersionedID.EntityID)
+				r.eventCacheMu.Lock()
+				r.eventCache[event.VersionedID.EntityID] = event.Embedded
+				r.eventCacheMu.Unlock()
 			}
 		}
 
 	}
-}
-
-
-// RunScheduler fills jobChan according some rules.
-// Event skipped if more fresh version of event was scheduled previously.
-func (r Reflector) RunScheduler(ctx context.Context,
-	jobChan chan<- versionedEvent, schedChan <-chan versionedEvent) {
-
-	lastCursorForEntityID := make(map[string]int)
-
-	var log = r.Log
-
-	for {
-		select {
-		case <-ctx.Done():
-			log.Debugw("Cancel event was received")
-			return
-		case item := <-schedChan:
-
-			log = log.With("eventVersion", item.version, "entityID", item.event.EntityID)
-
-			log.Debugw("New event is scheduled")
-
-			lastScheduledVersion, ok := lastCursorForEntityID[item.event.EntityID]
-			if !ok || lastScheduledVersion <= item.version {
-				lastCursorForEntityID[item.event.EntityID] = item.version
-				jobChan <- item
-				log.Debugw("Event was enqueued for jobChan")
-			} else {
-				log.Debugw("Event version is stale. Skip enqueueing",
-					"lastScheduledVersion", lastScheduledVersion)
-			}
-
-		}
-	}
-
 }
 
 
@@ -139,8 +130,6 @@ func (r Reflector) Run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	jobChan := make(chan versionedEvent, r.JobCapacity)
-	schedChan := make(chan versionedEvent, r.JobCapacity)
 
 	// Grab all goroutines error into err
 	var err error
@@ -151,32 +140,36 @@ func (r Reflector) Run(ctx context.Context) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if gErr := r.RunFetcher(ctx, schedChan); gErr != nil {
+		if gErr := r.RunFetcher(ctx); gErr != nil {
 			errLock.Lock()
 			err = multierr.Append(err, gErr)
 			errLock.Unlock()
+			r.Log.Errorw("Error during fetching events. Send signal to stop", zap.Error(err))
+			cancel()
 		}
 	}()
 
-	// Scheduler
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		r.RunScheduler(ctx, jobChan, schedChan)
-	}()
 
 	// Handler. Can re-schedule event if temporary error happens
 	for i := 0; i < r.WorkersCount; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if gErr := r.RunProcessor(ctx, jobChan, schedChan); gErr != nil {
+			if gErr := r.RunProcessor(ctx); gErr != nil {
 				errLock.Lock()
 				err = multierr.Append(err, gErr)
 				errLock.Unlock()
+				r.Log.Errorw("Error during processing events. Send signal to stop", zap.Error(err))
+				cancel()
 			}
 		}()
 	}
+
+	go func() {
+		<-ctx.Done()
+		r.Log.Debug("Get cancel signal. Shutdown queue")
+		r.q.ShutDown()
+	}()
 
 	wg.Wait()
 
