@@ -51,7 +51,7 @@ Try Run Training with local spec
         should contain  ${result}  ${error}
 
 Run Packaging with api server spec
-    [Teardown]  Shell  docker stop -t 3 ${container_id.stdout}
+    [Teardown]  Shell  docker rm -f ${container_id.stdout}
     [Arguments]  ${command}
         ${pack_result}  StrictShell  odahuflowctl --verbose ${command}
 

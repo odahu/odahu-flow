@@ -46,7 +46,7 @@ Run Training with api server spec
         Should be equal as Strings  ${response}  ${WINE_MODEL_RESULT}
 
 Run Packaging with local spec
-    [Teardown]  Shell  docker stop -t 3 ${container_id.stdout}
+    [Teardown]  Shell  docker rm -f ${container_id.stdout}
     [Arguments]  ${options}
         ${pack_result}  StrictShell  odahuflowctl --verbose local packaging run ${options}
 

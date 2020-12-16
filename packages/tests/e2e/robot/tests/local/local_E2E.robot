@@ -36,7 +36,7 @@ Run E2E local model
     [Setup]       StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${LOCAL_MODEL_OUTPUT_DIR}
     [Teardown]    Run Keywords
     ...           Remove Directory  ${LOCAL_MODEL_OUTPUT_DIR}  recursive=True  AND
-    ...           Shell  docker stop -t 3 "${LOCAL_DOCKER_CONTAINER}"
+    ...           Shell  docker rm -f "${LOCAL_DOCKER_CONTAINER}"
     # training
     ${result_train}             StrictShell     odahuflowctl --verbose local train run --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
     # check that training artifact exists and take artifact name for packaging
@@ -67,7 +67,7 @@ Run E2E spec on cluster model
     [Teardown]    Run Keywords
     ...           Remove Directory  ${CLUSTER_MODEL_OUTPUT_DIR}  recursive=True  AND
     ...           Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
-    ...           Shell  docker stop -t 3 "${CLUSTER_DOCKER_CONTAINER}"
+    ...           Shell  docker rm -f "${CLUSTER_DOCKER_CONTAINER}"
     # training & packaging
     ${result_train}             StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
     ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
