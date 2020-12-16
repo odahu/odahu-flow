@@ -210,6 +210,8 @@ function upload_test_dags() {
 
 # Upload files for local training and packaging
 function local_setup() {
+  local_cleanup
+
   wget -O "${LOCAL_TEST_DATA}/../request.json" "${GIT_REPO_DATA}/mlflow/sklearn/wine/odahuflow/request.json"
   wget -O "${LOCAL_TEST_DATA}/MLproject" "${GIT_REPO_DATA}/mlflow/sklearn/wine/MLproject"
   wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
@@ -219,22 +221,23 @@ function local_setup() {
 
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
-
-  local_cleanup
 }
 
 # remove packager images locally
 function local_cleanup() {
   echo "IMAGE_REPOS: ${IMAGE_REPO[*]}"
   for repo in ${IMAGE_REPO[@]}; do
-    LIST_IMAGES=$(docker images -a -q ${repo})
-    echo "LIST_IMAGES: ${LIST_IMAGES}"
+    list_images=$(docker images -a -q ${repo})
+    echo "LIST_IMAGES: ${list_images}"
 
-    if [ ! -z "${LIST_IMAGES}" ]; then
-      for image in ${LIST_IMAGES[@]}; do
-        docker rm --force $(docker ps -aq --filter ancestor=${image})
+    if [ ! -z "${list_images}" ]; then
+      for image in ${list_images[@]}; do
+        containers=$(docker ps -aq --filter ancestor=${image})
+        if [ ! -z "${containers}" ]; then
+          docker rm --force ${containers}
+        fi
       done
-      docker rmi --force ${LIST_IMAGES}
+      docker rmi --force ${list_images}
     fi
   done
 }
