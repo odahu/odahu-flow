@@ -42,7 +42,7 @@ Run Training with local spec
         ${result_path}  StrictShell  echo "${response.stdout}" | tail -n 1 | awk '{ print $3 }'
 
         ${response}   Get File  ${result_path.stdout}
-        Should be equal as Strings  ${response}  ${MODEL_RESULT}
+        Should be equal as Strings  ${response}  ${WINE_MODEL_RESULT}
 
 Try Run Training with local spec
     [Arguments]  ${error}  ${train options}

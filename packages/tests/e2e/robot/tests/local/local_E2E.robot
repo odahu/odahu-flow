@@ -57,7 +57,7 @@ Run E2E local model
     # model invoke
     ${MODEL_HOST}    Get local model host
     ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
-    Should be equal as Strings  ${result_model.stdout}  ${MODEL_RESULT}
+    Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
 
 Run E2E spec on cluster model
     [Setup]       Run Keywords
