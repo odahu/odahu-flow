@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/util/workqueue"
 	"log"
 	nethttp "net/http"
 	"net/url"
@@ -51,7 +50,6 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 	}
 
 	return servicecatalog.NewReflector(logger, servicecatalog.UpdateHandler{
-		Log:         logger,
 		Discoverers: []servicecatalog.ModelServerDiscoverer{
 			servicecatalog.OdahuMLServerDiscoverer{
 				EdgeURL:    *edgeURL,
@@ -65,7 +63,7 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 			HTTPClient: &httpClient,
 			Log:        logger,
 		},
-	}, workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+	},
 	servicecatalog.ReflectorOpts{
 		WorkersCount: cfg.WorkersCount,
 		FetchTimeout: cfg.FetchTimeout * time.Second,

@@ -28,7 +28,6 @@ type ModelServerDiscoverer interface {
 
 
 type UpdateHandler struct {
-	Log             *zap.SugaredLogger
 	Discoverers     []ModelServerDiscoverer
 	Catalog         Catalog
 }
@@ -77,16 +76,14 @@ func (r UpdateHandler) discoverModel(
 	return model, err
 }
 
-func (r UpdateHandler) Handle(object interface{}) (err error) {
+func (r UpdateHandler) Handle(object interface{}, log *zap.SugaredLogger) (err error) {
 
 	event, ok := object.(event_types.RouteEvent)
 	if !ok {
 		return fmt.Errorf("unable to assert received object as event_types.RouteEvent: %+v", object)
 	}
 
-	log := r.Log.With("EntityID", event.EntityID,
-		"EventType", event.EventType,
-		"EventDatetime", event.Datetime.String())
+	log = log.With("EventType", event.EventType, "EventDatetime", event.Datetime.String())
 
 	if event.EventType == event_types.ModelRouteDeletedEventType {
 		r.Catalog.Delete(event.EntityID)

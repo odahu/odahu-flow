@@ -29,14 +29,9 @@ type Route struct {
 	Model model_types.DeployedModel
 }
 
-type VersionedID struct {
-	EntityID string
-	Version int
-}
-
 type GenericEvent struct {
-	VersionedID VersionedID
-	Embedded interface{}
+	EntityID string
+	Event    interface{}
 }
 
 type LatestGenericEvents struct {
