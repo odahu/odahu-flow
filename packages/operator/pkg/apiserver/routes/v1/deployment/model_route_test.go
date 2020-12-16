@@ -20,23 +20,29 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	dep_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
+	route_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -48,19 +54,23 @@ const (
 
 type ModelRouteSuite struct {
 	suite.Suite
-	g            *GomegaWithT
-	server       *gin.Engine
-	mdService    md_service.Service
-	mdKubeClient kube_client.Client
+	g              *GomegaWithT
+	server         *gin.Engine
+	mdService      md_service.Service
+	mrService      mr_service.Service
+	mrRepo         route_repository_db.RouteRepo
+	mrEventsGetter *mocks.RoutesEventGetter
 }
 
 func (s *ModelRouteSuite) SetupSuite() {
 
-	s.mdKubeClient = kube_client.NewClientWithOptions(
-		testNamespace, kubeClient, metav1.DeletePropagationBackground,
-	)
-
-	s.mdService = md_service.NewService(dep_repository_db.DeploymentRepo{DB: db})
+	s.mrRepo = route_repository_db.RouteRepo{DB: db}
+	s.mdService = md_service.NewService(
+		dep_repository_db.DeploymentRepo{DB: db},
+		route_repository_db.RouteRepo{DB: db},
+		outbox.EventPublisher{DB: db})
+	s.mrService = mr_service.NewService(s.mrRepo, outbox.EventPublisher{DB: db})
+	s.mrEventsGetter = &mocks.RoutesEventGetter{}
 
 	err := s.mdService.CreateModelDeployment(context.Background(), &deployment.ModelDeployment{
 		ID: mdID1,
@@ -114,12 +124,13 @@ func (s *ModelRouteSuite) SetupTest() {
 func (s *ModelRouteSuite) registerHTTPHandlers(deploymentConfig config.ModelDeploymentConfig) {
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
-	dep_route.ConfigureRoutes(v1Group, s.mdService, s.mdKubeClient, deploymentConfig, config.NvidiaResourceName)
+	dep_route.ConfigureRoutes(v1Group, s.mdService, nil, s.mrService, s.mrEventsGetter,
+		deploymentConfig, config.NvidiaResourceName)
 }
 
 func (s *ModelRouteSuite) TearDownTest() {
 	for _, mdID := range []string{mrID, mrID1, mrID2} {
-		if err := s.mdKubeClient.DeleteModelRoute(mdID); err != nil && !errors.IsNotFoundError(err) {
+		if err := s.mrService.DeleteModelRoute(context.Background(), mdID); err != nil && !errors.IsNotFoundError(err) {
 			panic(err)
 		}
 	}
@@ -146,7 +157,7 @@ func TestModelRouteSuite(t *testing.T) {
 
 func (s *ModelRouteSuite) TestGetMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -185,7 +196,7 @@ func (s *ModelRouteSuite) TestGetMRNotFound() {
 
 func (s *ModelRouteSuite) TestGetAllModelRoutes() {
 	conn := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(conn)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), conn)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -201,9 +212,17 @@ func (s *ModelRouteSuite) TestGetAllModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(1))
-	s.g.Expect(result[0].ID).Should(Equal(conn.ID))
-	s.g.Expect(result[0].Spec).Should(Equal(conn.Spec))
+	s.g.Expect(result).Should(HaveLen(3))  // two defaults and one that we created
+
+	ids := make([]string, len(result))
+	specs := make([]odahuflowv1alpha1.ModelRouteSpec, len(result))
+	for i, v := range result {
+		ids[i] = v.ID
+		specs[i] = v.Spec
+	}
+
+	s.g.Expect(ids).Should(ContainElement(conn.ID))
+	s.g.Expect(specs).Should(ContainElement(conn.Spec))
 }
 
 func (s *ModelRouteSuite) TestGetAllEmptyModelRoutes() {
@@ -221,17 +240,17 @@ func (s *ModelRouteSuite) TestGetAllEmptyModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(0))
+	s.g.Expect(result).Should(HaveLen(2)) // only suite deployments default routes
 }
 
 func (s *ModelRouteSuite) TestGetAllModelRoutesPaging() {
 	mr1 := newStubMr()
 	mr1.ID = mrID1
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr1)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr1)).NotTo(HaveOccurred())
 
 	mr2 := newStubMr()
 	mr2.ID = mrID2
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr2)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr2)).NotTo(HaveOccurred())
 
 	connNames := map[string]interface{}{mrID1: nil, mrID2: nil}
 
@@ -283,7 +302,7 @@ func (s *ModelRouteSuite) TestGetAllModelRoutesPaging() {
 
 	query = req.URL.Query()
 	query.Set("size", "1")
-	query.Set("page", "2")
+	query.Set("page", "4")
 	req.URL.RawQuery = query.Encode()
 
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -316,7 +335,7 @@ func (s *ModelRouteSuite) TestCreateMR() {
 	s.g.Expect(mrResponse.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mrResponse.Spec).To(Equal(mrEntity.Spec))
 
-	mr, err := s.mdKubeClient.GetModelRoute(mrID)
+	mr, err := s.mrService.GetModelRoute(context.Background(), mrID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(mr.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
@@ -324,7 +343,7 @@ func (s *ModelRouteSuite) TestCreateMR() {
 
 func (s *ModelRouteSuite) TestCreateDuplicateMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	mrEntityBody, err := json.Marshal(mr)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -364,7 +383,7 @@ func (s *ModelRouteSuite) TestValidateCreateMR() {
 
 func (s *ModelRouteSuite) TestUpdateMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	newURL := "/new/url"
 	mrEntity := newStubMr()
@@ -386,10 +405,45 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 	s.g.Expect(mrResponse.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mrResponse.Spec).To(Equal(mrEntity.Spec))
 
-	mr, err = s.mdKubeClient.GetModelRoute(mrID)
+	mr, err = s.mrService.GetModelRoute(context.Background(), mrID)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(mr.ID).To(Equal(mrEntity.ID))
 	s.g.Expect(mr.Spec).To(Equal(mrEntity.Spec))
+}
+
+func (s *ModelRouteSuite) TestUpdateDefaultRoute() {
+
+	ctx := context.Background()
+
+	r, err := md_service.GetDefaultModelRoute(ctx, nil, mdID1, s.mrRepo)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	// API request
+
+	newURL := "/new/url"
+	mrEntity := newStubMr()
+	mrEntity.Spec.URLPrefix = newURL
+	mrEntity.ID = r
+	mrEntityBody, err := json.Marshal(mrEntity)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodPut,
+		dep_route.UpdateModelRouteURL,
+		bytes.NewReader(mrEntityBody),
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	s.g.Expect(w.Code).Should(Equal(403))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	errMsg := fmt.Sprintf("access forbidden: unable to update default route with ID \"%v\"", r)
+	s.g.Expect(result.Message).Should(Equal(errMsg))
+
 }
 
 func (s *ModelRouteSuite) TestUpdateMRNotFound() {
@@ -413,7 +467,7 @@ func (s *ModelRouteSuite) TestUpdateMRNotFound() {
 
 func (s *ModelRouteSuite) TestValidateUpdateMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	mr.Spec.URLPrefix = ""
 	connEntityBody, err := json.Marshal(mr)
@@ -434,7 +488,7 @@ func (s *ModelRouteSuite) TestValidateUpdateMR() {
 
 func (s *ModelRouteSuite) TestDeleteMR() {
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -452,9 +506,36 @@ func (s *ModelRouteSuite) TestDeleteMR() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
 
-	mrList, err := s.mdKubeClient.GetModelRouteList()
+	mrList, err := s.mrService.GetModelRouteList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
-	s.g.Expect(mrList).To(HaveLen(0))
+	s.g.Expect(mrList).To(HaveLen(2))  // only suite default routes
+}
+
+func (s *ModelRouteSuite) TestDeleteDefaultRoute() {
+
+	ctx := context.Background()
+
+	r, err := md_service.GetDefaultModelRoute(ctx, nil, mdID1, s.mrRepo)
+	s.g.Expect(err).NotTo(HaveOccurred())
+
+	// API request
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodDelete,
+		strings.Replace(dep_route.DeleteModelRouteURL, ":id", r, -1),
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+
+	s.g.Expect(w.Code).Should(Equal(403))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	errMsg := fmt.Sprintf("access forbidden: unable to delete default route with ID \"%v\"", r)
+	s.g.Expect(result.Message).Should(Equal(errMsg))
+
 }
 
 func (s *ModelRouteSuite) TestDeleteMRNotFound() {
@@ -481,7 +562,7 @@ func (s *ModelRouteSuite) TestDisabledAPIGetMR() {
 	s.registerHTTPHandlers(deploymentConfig)
 
 	mr := newStubMr()
-	s.g.Expect(s.mdKubeClient.CreateModelRoute(mr)).NotTo(HaveOccurred())
+	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -519,7 +600,7 @@ func (s *ModelRouteSuite) TestDisabledAPIGetAllModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(0))
+	s.g.Expect(result).Should(HaveLen(2))  // only suite deployments default routes
 }
 
 func (s *ModelRouteSuite) TestDisabledAPICreateMR() {
@@ -587,4 +668,93 @@ func (s *ModelRouteSuite) TestDisabledAPIDeleteMR() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
 	s.g.Expect(result.Message).Should(ContainSubstring(routes.DisabledAPIErrorMessage))
+}
+
+func (s *ModelRouteSuite) TestGetRouteEventsIncorrectCursor() {
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelRouteURL + "?cursor=not-number",
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(400))
+
+	var result routes.HTTPResult
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.g.Expect(result.Message).Should(ContainSubstring("Incorrect \"cursor\" query parameter"))
+}
+
+func (s *ModelRouteSuite) TestGetRouteEvents() {
+
+	events := []event.RouteEvent{
+		{
+			Payload:   deployment.ModelRoute{ID: "route-1"},
+			EventType: event.ModelRouteCreatedEventType,
+			Datetime:  time.Time{},
+		},
+		{
+			EntityID:  "route-2",
+			EventType: event.ModelRouteDeletedEventType,
+			Datetime:  time.Time{},
+		},
+	}
+
+	s.mrEventsGetter.On("Get", mock.Anything, 0).Return(events, 5, nil)
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelRouteURL,
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(200))
+
+	var result event.LatestRouteEvents
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(result.Cursor).Should(Equal(5))
+	s.g.Expect(result.Events).Should(Equal(events))
+	s.g.Expect(err).NotTo(HaveOccurred())
+}
+
+func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
+
+	events := []event.RouteEvent{
+		{
+			Payload:   deployment.ModelRoute{ID: "route-1"},
+			EventType: event.ModelRouteCreatedEventType,
+			Datetime:  time.Time{},
+		},
+		{
+			EntityID:  "route-2",
+			EventType: event.ModelRouteDeletedEventType,
+			Datetime:  time.Time{},
+		},
+	}
+
+	s.mrEventsGetter.On("Get", mock.Anything, 6).Return(events, 9, nil)
+
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(
+		http.MethodGet,
+		dep_route.EventsModelRouteURL + "?cursor=6",
+		nil,
+	)
+	s.g.Expect(err).NotTo(HaveOccurred())
+	s.server.ServeHTTP(w, req)
+	s.g.Expect(w.Code).Should(Equal(200))
+
+	var result event.LatestRouteEvents
+	err = json.Unmarshal(w.Body.Bytes(), &result)
+	s.g.Expect(result.Cursor).Should(Equal(9))
+	s.g.Expect(result.Events).Should(Equal(events))
+	s.g.Expect(err).NotTo(HaveOccurred())
 }

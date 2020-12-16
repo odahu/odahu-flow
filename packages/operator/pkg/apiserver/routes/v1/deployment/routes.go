@@ -20,17 +20,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	md_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 )
 
-func ConfigureRoutes(routeGroup *gin.RouterGroup,
-	mdService md_service.Service, deployKubeClient md_kube_client.Client,
-	deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
+func ConfigureRoutes(routeGroup *gin.RouterGroup, mdService md_service.Service,
+	mdEventsReader ModelDeploymentEventGetter,
+	mrService mr_service.Service,
+	mrEventsReader RoutesEventGetter, deploymentConfig config.ModelDeploymentConfig, gpuResourceName string, ) {
 
 	mdController := ModelDeploymentController{
 		mdService:   mdService,
 		mdValidator: NewModelDeploymentValidator(deploymentConfig, gpuResourceName),
+		eventsReader: mdEventsReader,
 	}
 	routeGroup = routeGroup.Group("", routes.DisableAPIMiddleware(deploymentConfig.Enabled))
 
@@ -39,14 +41,18 @@ func ConfigureRoutes(routeGroup *gin.RouterGroup,
 	routeGroup.POST(CreateModelDeploymentURL, mdController.createMD)
 	routeGroup.PUT(UpdateModelDeploymentURL, mdController.updateMD)
 	routeGroup.DELETE(DeleteModelDeploymentURL, mdController.deleteMD)
+	routeGroup.GET(GetModelDeploymentDefaultRouteURL, mdController.getDefaultRoute)
+	routeGroup.GET(EventsModelDeploymentURL, mdController.getDeploymentEvents)
 
 	mrController := ModelRouteController{
-		deployKubeClient: deployKubeClient,
+		service: mrService,
 		validator:        NewMrValidator(mdService),
+		eventsReader: mrEventsReader,
 	}
 	routeGroup.GET(GetModelRouteURL, mrController.getMR)
 	routeGroup.GET(GetAllModelRouteURL, mrController.getAllMRs)
 	routeGroup.POST(CreateModelRouteURL, mrController.createMR)
 	routeGroup.PUT(UpdateModelRouteURL, mrController.updateMR)
 	routeGroup.DELETE(DeleteModelRouteURL, mrController.deleteMR)
+	routeGroup.GET(EventsModelRouteURL, mrController.getRouteEvents)
 }

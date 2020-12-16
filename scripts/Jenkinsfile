@@ -137,7 +137,6 @@ pipeline {
                                 cicdLibrary.buildDockerImage('odahu-flow-service-catalog', ".", "containers/operator/Dockerfile", "--target service-catalog --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                                 cicdLibrary.buildDockerImage('odahu-flow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                                 cicdLibrary.buildDockerImage('odahu-flow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
-                                cicdLibrary.buildDockerImage('odahu-flow-migrate', ".", "containers/operator/Dockerfile", "--target odahu-migrate --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                                 cicdLibrary.buildDockerImage('odahu-flow-controller', ".", "containers/operator/Dockerfile", "--target controller --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                             }
                         }
@@ -264,15 +263,6 @@ pipeline {
                         timeout(time: param_upload_timeout, unit: 'MINUTES') {
                             script {
                                 cicdLibrary.uploadDockerImage('odahu-flow-controller', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
-                            }
-                        }
-                    }
-                }
-                stage('Upload Migrate Docker image') {
-                    steps {
-                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
-                            script {
-                                cicdLibrary.uploadDockerImage('odahu-flow-migrate', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                             }
                         }
                     }

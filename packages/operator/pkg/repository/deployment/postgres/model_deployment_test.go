@@ -14,7 +14,6 @@ import (
 
 const (
 	mdID = "foo"
-	mtID = "foo"
 )
 
 func TestModelDeploymentRepository(t *testing.T) {
@@ -33,7 +32,9 @@ func TestModelDeploymentRepository(t *testing.T) {
 
 	as.NoError(repo.CreateModelDeployment(context.Background(), nil, created))
 
-	as.Exactly(repo.CreateModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{Entity: mdID})
+	as.Exactly(repo.CreateModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{
+		Entity: mdID,
+	})
 
 	fetched, err := repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)
@@ -80,51 +81,4 @@ func TestModelDeploymentRepository(t *testing.T) {
 
 	as.Error(err)
 	as.Exactly(err, odahuErrors.NotFoundError{Entity: mdID})
-}
-
-func TestModelRouteRepository(t *testing.T) {
-
-	repo := postgres_repo.DeploymentRepo{DB: db}
-
-	as := assert.New(t)
-
-	created := &deployment.ModelRoute{
-		ID: mtID,
-		Spec: v1alpha1.ModelRouteSpec{
-			URLPrefix: "not-updated",
-		},
-	}
-
-	as.NoError(repo.CreateModelRoute(created))
-
-	as.Exactly(repo.CreateModelRoute(created), odahuErrors.AlreadyExistError{Entity: mtID})
-
-	fetched, err := repo.GetModelRoute(mtID)
-	as.NoError(err)
-	as.Exactly(fetched.ID, created.ID)
-	as.Exactly(fetched.Spec, created.Spec)
-
-	updated := &deployment.ModelRoute{
-		ID: mtID,
-		Spec: v1alpha1.ModelRouteSpec{
-			URLPrefix: "updated",
-		},
-	}
-
-	as.NoError(repo.UpdateModelRoute(updated))
-
-	fetched, err = repo.GetModelRoute(mtID)
-	as.NoError(err)
-	as.Exactly(fetched.Spec, updated.Spec)
-	as.Exactly(fetched.Spec.URLPrefix, "updated")
-
-	tis, err := repo.GetModelRouteList()
-	as.NoError(err)
-	as.Len(tis, 1)
-
-	as.NoError(repo.DeleteModelRoute(mtID))
-	_, err = repo.GetModelRoute(mtID)
-
-	as.Error(err)
-	as.Exactly(err, odahuErrors.NotFoundError{Entity: mtID})
 }

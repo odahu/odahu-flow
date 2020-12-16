@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver"
+	migrator_package "github.com/odahu/odahu-flow/packages/operator/pkg/database/migrators/postgres"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
@@ -45,6 +46,17 @@ var mainCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		cfg := config.MustLoadConfig()
+
+		migr, err := migrator_package.NewMigrator(cfg.Common.DatabaseConnectionString)
+		if err != nil {
+			log.Error(err, "Unable to create migrator")
+			os.Exit(1)
+		}
+		err = migr.MigrateToLatest()
+		if err != nil {
+			log.Error(err, "Unable to migrate")
+			os.Exit(1)
+		}
 
 		// Run API Server
 		apiServer, err := apiserver.NewAPIServer(cfg)

@@ -187,7 +187,7 @@ definitions:
         description: Kubernetes namespace, where model deployments will be deployed
         type: string
       nodePools:
-        description: Node pools to run training tasks on
+        description: Node pools to run deployments
         items:
           $ref: '#/definitions/NodePool'
         type: array
@@ -339,6 +339,9 @@ definitions:
     type: object
   ServiceCatalog:
     properties:
+      auth:
+        $ref: '#/definitions/AuthConfig'
+        type: object
       baseUrl:
         type: string
     type: object
@@ -420,8 +423,25 @@ definitions:
         description: UpdatedAt
         type: string
     type: object
+  ModelDeploymentEventsResponse:
+    properties:
+      cursor:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/outbox.DeploymentEvent'
+        type: array
+    type: object
   ModelRoute:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
+      default:
+        description: |-
+          Default routes cannot be deleted by  They are managed by system
+          One ModelDeployment has exactly one default Route that gives 100% traffic to the model
+        type: boolean
       id:
         description: Model route id
         type: string
@@ -433,10 +453,72 @@ definitions:
         $ref: '#/definitions/ModelRouteStatus'
         description: Model route status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
+    type: object
+  RouteEventsResponse:
+    properties:
+      cursor:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/outbox.RouteEvent'
+        type: array
     type: object
   feedback.ModelFeedbackRequest:
     type: object
   feedback.ModelFeedbackResponse:
+    type: object
+  outbox.DeploymentEvent:
+    properties:
+      datetime:
+        description: When event is raised
+        type: string
+      entityID:
+        description: |-
+          EntityID contains ID of ModelDeployment for ModelDeploymentDeleted and ModelDeploymentDeletionMarkIsSet
+          event types
+          Does not make sense in case of ModelDeploymentUpdate, ModelDeploymentCreate, ModelDeploymentStatusUpdated events
+        type: string
+      payload:
+        $ref: '#/definitions/ModelDeployment'
+        description: |-
+          Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,
+          ModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of
+          ModelDeploymentStatusUpdated update
+          Does not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events
+        type: object
+      type:
+        description: |-
+          Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted,
+          ModelDeploymentDeletionMarkIsSet, ModelDeploymentStatusUpdated
+        type: string
+    type: object
+  outbox.RouteEvent:
+    properties:
+      datetime:
+        description: When event is raised
+        type: string
+      entityID:
+        description: |-
+          EntityID contains ID of ModelRoute for ModelRouteDeleted and ModelRouteDeletionMarkIsSet
+          event types
+          Does not make sense in case of ModelRouteUpdate, ModelRouteCreate, ModelRouteStatusUpdated events
+        type: string
+      payload:
+        $ref: '#/definitions/ModelRoute'
+        description: |-
+          Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,
+          ModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of
+          ModelRouteStatusUpdated update
+          Does not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events
+        type: object
+      type:
+        description: |-
+          Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,
+          ModelRouteDeletionMarkIsSet, ModelRouteStatusUpdated
+        type: string
     type: object
   JsonSchema:
     properties:
@@ -1421,6 +1503,30 @@ paths:
       summary: Update a Model deployment
       tags:
       - Deployment
+  /api/v1/model/deployment-events:
+    get:
+      consumes:
+      - application/json
+      description: Get Last Changes for ModelDeployment entity
+      parameters:
+      - description: Cursor can be passed to get only new changes
+        in: query
+        name: cursor
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ModelDeploymentEventsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get Last Changes for ModelDeployment entities
+      tags:
+      - Route
   /api/v1/model/deployment/{id}:
     delete:
       consumes:
@@ -1476,6 +1582,35 @@ paths:
           schema:
             $ref: '#/definitions/HTTPResult'
       summary: Get a Model deployment
+      tags:
+      - Deployment
+  /api/v1/model/deployment/{id}/default-route:
+    get:
+      consumes:
+      - application/json
+      description: Get a Model deployment default route
+      parameters:
+      - description: Model deployment id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ModelRoute'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get a Model deployment default route
       tags:
       - Deployment
   /api/v1/model/packaging:
@@ -1767,6 +1902,30 @@ paths:
           schema:
             $ref: '#/definitions/HTTPResult'
       summary: Update a Model route
+      tags:
+      - Route
+  /api/v1/model/route-events:
+    get:
+      consumes:
+      - application/json
+      description: Get Last Changes for ModelRoute entity
+      parameters:
+      - description: Cursor can be passed to get only new changes
+        in: query
+        name: cursor
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/RouteEventsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get Last Changes for ModelRoute entities
       tags:
       - Route
   /api/v1/model/route/{id}:

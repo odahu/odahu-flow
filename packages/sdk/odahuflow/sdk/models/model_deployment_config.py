@@ -225,7 +225,7 @@ class ModelDeploymentConfig(Model):
     def node_pools(self) -> List[NodePool]:
         """Gets the node_pools of this ModelDeploymentConfig.
 
-        Node pools to run training tasks on  # noqa: E501
+        Node pools to run deployments  # noqa: E501
 
         :return: The node_pools of this ModelDeploymentConfig.
         :rtype: List[NodePool]
@@ -236,7 +236,7 @@ class ModelDeploymentConfig(Model):
     def node_pools(self, node_pools: List[NodePool]):
         """Sets the node_pools of this ModelDeploymentConfig.
 
-        Node pools to run training tasks on  # noqa: E501
+        Node pools to run deployments  # noqa: E501
 
         :param node_pools: The node_pools of this ModelDeploymentConfig.
         :type node_pools: List[NodePool]

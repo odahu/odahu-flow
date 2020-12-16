@@ -32,19 +32,20 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	deploy_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 
 	conn_repo_type "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
+	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
 func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql.DB, cfg config.Config) (err error) {
@@ -75,6 +76,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	piRepo := pack_repo.PackagingIntegrationRepository{DB: db}
 	packRepo := pack_repo.PackagingRepo{DB: db}
 	deployRepo := deploy_repo.DeploymentRepo{DB: db}
+	routeRepo := route_repo.RouteRepo{DB: db}
 
 	trainKubeClient := train_kube_client.NewClient(
 		cfg.Training.Namespace,
@@ -88,17 +90,21 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		k8sClient,
 		k8sConfig,
 	)
-	deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, k8sClient)
 
 	connService := conn_service.NewService(connRepository)
 	trainService := mt_service.NewService(trainRepo)
 	packService := mp_service.NewService(packRepo)
-	depService := md_service.NewService(deployRepo)
+	depService := md_service.NewService(deployRepo, routeRepo, outbox.EventPublisher{DB: db})
+	mrService := mr_service.NewService(routeRepo, outbox.EventPublisher{DB: db})
 
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 
-	deployment.ConfigureRoutes(routeGroup, depService, deployKubeClient, cfg.Deployment, cfg.Common.ResourceGPUName)
+	mdEventGetter := outbox.DeploymentEventGetter{DB: db}
+	mrEventGetter := outbox.RouteEventGetter{DB: db}
+
+	deployment.ConfigureRoutes(routeGroup, depService, mdEventGetter, mrService, mrEventGetter,
+		cfg.Deployment, cfg.Common.ResourceGPUName)
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))
 	packaging.ConfigureRoutes(
 		packagingRouteGroup, packKubeClient, packService,
