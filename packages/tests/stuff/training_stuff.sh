@@ -12,8 +12,16 @@ TEST_DATA="${DIR}/data"
 LOCAL_TEST_DATA="${DIR}/../e2e/robot/tests/local/resources/artifacts"
 COMMAND=setup
 
-# packager image for local packaging
-PACKAGER_IMAGE=gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packager
+# array of image repos for local tests (in removal order)
+IMAGE_REPO=(
+  odahu/odahu-flow-mlflow-toolchain
+  odahu/odahu-flow-docker-packager-base
+  odahu/odahu-flow-packagers
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers
+)
+
 # Test connection points to the valid gppi archive
 TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
 # Test connection points to the odahu file inside valid gppi archive
@@ -217,13 +225,18 @@ function local_setup() {
 
 # remove packager images locally
 function local_cleanup() {
-  echo "PACKAGER_IMAGE: ${PACKAGER_IMAGE}"
-  LIST_IMAGES=$(docker images -a -q ${PACKAGER_IMAGE})
-  echo "LIST_IMAGES: ${LIST_IMAGES}"
-  if [ ! -z "${LIST_IMAGES}" ]
-  then
-    docker rmi -f ${LIST_IMAGES}
-  fi
+  echo "IMAGE_REPOS: ${IMAGE_REPO[*]}"
+  for repo in ${IMAGE_REPO[@]}; do
+    LIST_IMAGES=$(docker images -a -q ${repo})
+    echo "LIST_IMAGES: ${LIST_IMAGES}"
+
+    if [ ! -z "${LIST_IMAGES}" ]; then
+      for image in ${LIST_IMAGES[@]}; do
+        docker rm --force $(docker ps -aq --filter ancestor=${image})
+      done
+      docker rmi --force ${LIST_IMAGES}
+    fi
+  done
 }
 
 # Main entrypoint for setup command.
