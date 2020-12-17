@@ -23,6 +23,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"net/http"
@@ -72,7 +73,7 @@ func (mrc *ModelRouteController) getMR(c *gin.Context) {
 	mr, err := mrc.service.GetModelRoute(c.Request.Context(), mrID)
 	if err != nil {
 		logMR.Error(err, fmt.Sprintf("Retrieving %s model route", mrID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -106,7 +107,7 @@ func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 	)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model routes")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -142,7 +143,7 @@ func (mrc *ModelRouteController) createMR(c *gin.Context) {
 
 	if err := mrc.service.CreateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Creation of the model route: %+v", mr))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -179,7 +180,7 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 
 	if err := mrc.service.UpdateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Update of the model route: %+v", mr))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -203,7 +204,7 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 
 	if err := mrc.service.DeleteModelRoute(c.Request.Context(), mrID); err != nil {
 		logMR.Error(err, fmt.Sprintf("Deletion of %s model route is failed", mrID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -231,7 +232,7 @@ func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 	events, newCursor, err := mrc.eventsReader.Get(c.Request.Context(), cursor)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model route events")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 	}
 
 	response := event.LatestRouteEvents{

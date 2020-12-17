@@ -21,11 +21,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
+	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"net/http"
 	"reflect"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -82,7 +83,7 @@ func (mpc *ModelPackagingController) getMP(c *gin.Context) {
 	mp, err := mpc.packService.GetModelPackaging(c.Request.Context(), mpID)
 	if err != nil {
 		logMP.Error(err, fmt.Sprintf("Retrieving %s model packaging", mpID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -118,7 +119,7 @@ func (mpc *ModelPackagingController) getAllMPs(c *gin.Context) {
 	)
 	if err != nil {
 		logMP.Error(err, "Retrieving list of model packagings")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -154,7 +155,7 @@ func (mpc *ModelPackagingController) createMP(c *gin.Context) {
 
 	if err := mpc.packService.CreateModelPackaging(c.Request.Context(), &mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Creation of the model packaging: %+v", mp))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -191,7 +192,7 @@ func (mpc *ModelPackagingController) updateMP(c *gin.Context) {
 
 	if err := mpc.packService.UpdateModelPackaging(c.Request.Context(), &mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Update of the model packaging: %+v", mp))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -224,7 +225,7 @@ func (mpc *ModelPackagingController) saveMPResults(c *gin.Context) {
 
 	if err := mpc.kubeClient.SaveModelPackagingResult(mpID, mpResult); err != nil {
 		logMP.Error(err, fmt.Sprintf("Save the result of the model packaging: %+v", mpResult))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -248,7 +249,7 @@ func (mpc *ModelPackagingController) deleteMP(c *gin.Context) {
 
 	if err := mpc.packService.DeleteModelPackaging(c.Request.Context(), mpID); err != nil {
 		logMP.Error(err, fmt.Sprintf("Deletion of %s model packaging is failed", mpID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -288,7 +289,7 @@ func (mpc *ModelPackagingController) getModelPackagingLog(c *gin.Context) {
 
 	if err := mpc.kubeClient.GetModelPackagingLogs(mpID, c.Writer, follow); err != nil {
 		logMP.Error(err, fmt.Sprintf("Getting %s model packaging logs is failed", mpID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}

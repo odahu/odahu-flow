@@ -18,6 +18,7 @@ package training
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	"net/http"
 	"reflect"
@@ -26,10 +27,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
-	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
+	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -83,7 +84,7 @@ func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 	mt, err := mtc.trainService.GetModelTraining(c.Request.Context(), mtID)
 	if err != nil {
 		logMT.Error(err, fmt.Sprintf("Retrieving of %s model training", mtID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -119,7 +120,7 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 	)
 	if err != nil {
 		logMT.Error(err, "Retrieving list of model trainings")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -155,7 +156,7 @@ func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 
 	if err := mtc.trainService.CreateModelTraining(c.Request.Context(), &mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -192,7 +193,7 @@ func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 
 	if err := mtc.trainService.UpdateModelTraining(c.Request.Context(), &mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -225,7 +226,7 @@ func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 
 	if err := mtc.kubeClient.SaveModelTrainingResult(mtID, mtResult); err != nil {
 		logMT.Error(err, fmt.Sprintf("Save the result of the model training: %+v", mtResult))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -249,7 +250,7 @@ func (mtc *ModelTrainingController) deleteMT(c *gin.Context) {
 
 	if err := mtc.trainService.DeleteModelTraining(c.Request.Context(), mtID); err != nil {
 		logMT.Error(err, fmt.Sprintf("Deletion of %s model training is failed", mtID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -289,7 +290,7 @@ func (mtc *ModelTrainingController) getModelTrainingLog(c *gin.Context) {
 
 	if err := mtc.kubeClient.GetModelTrainingLogs(mtID, c.Writer, follow); err != nil {
 		logMT.Error(err, fmt.Sprintf("Getting %s model training logs is failed", mtID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}

@@ -20,9 +20,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -64,7 +65,7 @@ func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Contex
 	ti, err := tic.repository.GetToolchainIntegration(tiID)
 	if err != nil {
 		logTI.Error(err, fmt.Sprintf("Retrieving %s toolchain integration", tiID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -97,7 +98,7 @@ func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Co
 	)
 	if err != nil {
 		logTI.Error(err, "Retrieving list of toolchain integrations")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -133,7 +134,7 @@ func (tic *ToolchainIntegrationController) createToolchainIntegration(c *gin.Con
 
 	if err := tic.repository.CreateToolchainIntegration(&ti); err != nil {
 		logTI.Error(err, fmt.Sprintf("Creation of toolchain integration: %v", ti))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -170,7 +171,7 @@ func (tic *ToolchainIntegrationController) updateToolchainIntegration(c *gin.Con
 
 	if err := tic.repository.UpdateToolchainIntegration(&ti); err != nil {
 		logTI.Error(err, fmt.Sprintf("Update of toolchain integration: %v", ti))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -194,7 +195,7 @@ func (tic *ToolchainIntegrationController) deleteToolchainIntegration(c *gin.Con
 
 	if err := tic.repository.DeleteToolchainIntegration(tiID); err != nil {
 		logTI.Error(err, fmt.Sprintf("Deletion of %s toolchain integration is failed", tiID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}

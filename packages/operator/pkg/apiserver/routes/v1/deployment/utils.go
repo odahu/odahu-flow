@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"net/http"
 	"strconv"
 )
@@ -19,7 +20,7 @@ func ValidateAndParseCursor(c *gin.Context, cursor *int) (err error) {
 				Message: fmt.Sprintf(text, cursorParam, numErr),
 			})
 		} else if err != nil && !isNumErr {
-			c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+			c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 		}
 	}
 	return

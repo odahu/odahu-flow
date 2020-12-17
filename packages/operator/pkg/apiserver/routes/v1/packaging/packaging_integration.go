@@ -20,9 +20,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -64,7 +65,7 @@ func (pic *PackagingIntegrationController) getPackagingIntegration(c *gin.Contex
 	pi, err := pic.repository.GetPackagingIntegration(piID)
 	if err != nil {
 		logPi.Error(err, fmt.Sprintf("Retrieving %s packaging integration", piID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -97,7 +98,7 @@ func (pic *PackagingIntegrationController) getAllPackagingIntegrations(c *gin.Co
 	)
 	if err != nil {
 		logPi.Error(err, "Retrieving list of packaging integrations")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -133,7 +134,7 @@ func (pic *PackagingIntegrationController) createPackagingIntegration(c *gin.Con
 
 	if err := pic.repository.CreatePackagingIntegration(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Creation of the packaging integration: %+v", pi))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -170,7 +171,7 @@ func (pic *PackagingIntegrationController) updatePackagingIntegration(c *gin.Con
 
 	if err := pic.repository.UpdatePackagingIntegration(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Update of the packaging integration: %+v", pi))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -194,7 +195,7 @@ func (pic *PackagingIntegrationController) deletePackagingIntegration(c *gin.Con
 
 	if err := pic.repository.DeletePackagingIntegration(piID); err != nil {
 		logPi.Error(err, fmt.Sprintf("Deletion of %s packaging integration is failed", piID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}

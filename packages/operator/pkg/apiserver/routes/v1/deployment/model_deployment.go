@@ -23,6 +23,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
@@ -84,7 +85,7 @@ func (mdc *ModelDeploymentController) getMD(c *gin.Context) {
 	md, err := mdc.mdService.GetModelDeployment(c.Request.Context(), mdID)
 	if err != nil {
 		logMD.Error(err, fmt.Sprintf("Retrieving %s model deployment", mdID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -120,7 +121,7 @@ func (mdc *ModelDeploymentController) getAllMDs(c *gin.Context) {
 	)
 	if err != nil {
 		logMD.Error(err, "Retrieving list of model deployments")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -156,7 +157,7 @@ func (mdc *ModelDeploymentController) createMD(c *gin.Context) {
 
 	if err := mdc.mdService.CreateModelDeployment(c.Request.Context(), &md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Creation of the model deployment: %+v", md))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -193,7 +194,7 @@ func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 
 	if err := mdc.mdService.UpdateModelDeployment(c.Request.Context(), &md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Update of the model deployment: %+v", md))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -217,7 +218,7 @@ func (mdc *ModelDeploymentController) deleteMD(c *gin.Context) {
 
 	if err := mdc.mdService.SetDeletionMark(c.Request.Context(), mdID, true); err != nil {
 		logMD.Error(err, fmt.Sprintf("Deletion of %s model deployment is failed", mdID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -242,7 +243,7 @@ func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
 	mr, err := mdc.mdService.GetDefaultModelRoute(c.Request.Context(),  mdID)
 	if err != nil {
 		logMD.Error(err, fmt.Sprintf("Retrieving %s model deployment default route", mdID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -269,7 +270,7 @@ func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
 	events, newCursor, err := mdc.eventsReader.Get(c.Request.Context(), cursor)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model deployment events")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
 	}
 
 	response := event.LatestDeploymentEvents{
