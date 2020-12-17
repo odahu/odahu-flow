@@ -210,8 +210,6 @@ function upload_test_dags() {
 
 # Upload files for local training and packaging
 function local_setup() {
-  local_cleanup
-
   wget -O "${LOCAL_TEST_DATA}/../request.json" "${GIT_REPO_DATA}/mlflow/sklearn/wine/odahuflow/request.json"
   wget -O "${LOCAL_TEST_DATA}/MLproject" "${GIT_REPO_DATA}/mlflow/sklearn/wine/MLproject"
   wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
@@ -227,9 +225,8 @@ function local_setup() {
 function local_cleanup() {
   echo "IMAGE_REPOS: ${IMAGE_REPO[*]}"
   for repo in ${IMAGE_REPO[@]}; do
-    list_images=$(docker images -a -q ${repo})
+    list_images=$(docker images -aq ${repo})
     for image in ${list_images}; do
-      echo $PWD $DIR
       sh ${DIR}/docker-remove-image.sh ${image}
     done
   done
