@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
+	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"go.uber.org/zap"
 	"sync"
 	"text/template"
@@ -28,12 +29,15 @@ import (
 type ModelRouteCatalog struct {
 	sync.RWMutex
 	routeMap map[string]Route
+	// Key Deployment ID
+	modelsMap map[string]model_types.DeployedModel
 	log *zap.SugaredLogger
 }
 
 func NewModelRouteCatalog(log *zap.SugaredLogger) *ModelRouteCatalog {
 	return &ModelRouteCatalog{
 		routeMap: map[string]Route{},
+		modelsMap: map[string]model_types.DeployedModel{},
 		log: log,
 	}
 }
@@ -102,6 +106,9 @@ func (mdc *ModelRouteCatalog) CreateOrUpdate(route Route) error {
 	}
 	route.Model.ServedModel.Swagger = prefixedSwagger
 	mdc.routeMap[route.ID] = route
+	if route.IsDefault {
+		mdc.modelsMap[route.Model.DeploymentID] = route.Model
+	}
 	return nil
 }
 
@@ -113,8 +120,14 @@ func (mdc *ModelRouteCatalog) Delete(routeID string) {
 }
 
 // GetDeployedModel returns information about deployed model
-func (mdc *ModelRouteCatalog) GetDeployedModel(deploymentID string) model_types.DeployedModel {
-	return model_types.DeployedModel{}
+func (mdc *ModelRouteCatalog) GetDeployedModel(deploymentID string) (model_types.DeployedModel, error) {
+	mdc.RLock()
+	defer mdc.RUnlock()
+	model, ok := mdc.modelsMap[deploymentID]
+	if !ok {
+		return model, odahu_errors.NotFoundError{Entity: deploymentID}
+	}
+	return model, nil
 }
 
 // ProcessSwaggerJSON combine URLs of all models in catalog. It separates endpoints by tagging them using
