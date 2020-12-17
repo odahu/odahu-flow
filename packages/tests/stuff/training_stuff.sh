@@ -15,11 +15,11 @@ COMMAND=setup
 # array of image repos for local tests (in removal order)
 IMAGE_REPO=(
   odahu/odahu-flow-mlflow-toolchain
-  odahu/odahu-flow-docker-packager-base
   odahu/odahu-flow-packagers
+  odahu/odahu-flow-docker-packager-base
   gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain
-  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base
   gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base
 )
 
 # Test connection points to the valid gppi archive
@@ -228,17 +228,10 @@ function local_cleanup() {
   echo "IMAGE_REPOS: ${IMAGE_REPO[*]}"
   for repo in ${IMAGE_REPO[@]}; do
     list_images=$(docker images -a -q ${repo})
-    echo "LIST_IMAGES: ${list_images}"
-
-    if [ ! -z "${list_images}" ]; then
-      for image in ${list_images[@]}; do
-        containers=$(docker ps -aq --filter ancestor=${image})
-        if [ ! -z "${containers}" ]; then
-          docker rm --force ${containers}
-        fi
-      done
-      docker rmi --force ${list_images}
-    fi
+    for image in ${list_images}; do
+      echo $PWD $DIR
+      sh ${DIR}/docker-remove-image.sh ${image}
+    done
   done
 }
 
