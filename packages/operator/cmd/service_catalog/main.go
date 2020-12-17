@@ -80,7 +80,7 @@ var mainCmd = &cobra.Command{
 
 		// Initialize
 
-		logger, err := zap.NewDevelopment()
+		logger, err := zap.NewProduction()
 		if err != nil {
 			log.Fatal("Unable to initialize logger")
 		}

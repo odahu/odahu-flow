@@ -152,7 +152,7 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 
 		EntityID, shutdown := r.queue.Get()
 		processingTraceID := uuid.New().String()
-		log = log.With("EntityID", EntityID, "TraceID", processingTraceID)
+		log := log.With("EntityID", EntityID, "TraceID", processingTraceID)
 		if shutdown {
 			return
 		}
@@ -162,7 +162,7 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 		err := r.handler.Handle(event, log)
 		r.queue.Done(EntityID)
 		if err != nil {
-			log.Warn("Error during processing event. Retry.")
+			log.Errorf("Error during processing event: %s. Retry", err.Error())
 			r.queue.AddRateLimited(EntityID)
 			continue
 		}
@@ -192,7 +192,9 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 				r.log.Warnw("Temporary error during event fetching.", zap.Error(err))
 				continue
 			}
-			cursor = lastEvents.Cursor
+			if lastEvents.Cursor > cursor {
+				cursor = lastEvents.Cursor
+			}
 
 			for _, event := range lastEvents.Events {
 				r.queue.Add(event.EntityID)

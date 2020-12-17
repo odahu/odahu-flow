@@ -25,5 +25,5 @@ import (
 )
 
 func SetUpSwagger(rg *gin.RouterGroup, apiStaticFS http.FileSystem, reader routes.SwaggerDefinitionReader) {
-	rg.GET("/swagger/*any", routes.SwaggerHandler(apiStaticFS, reader))
+	rg.GET("/catalog/*any", routes.SwaggerHandler(apiStaticFS, reader))
 }

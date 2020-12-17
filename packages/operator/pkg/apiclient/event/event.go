@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	"go.uber.org/zap"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
-	"strings"
 )
 
 type httpClient interface {
-	DoRequestGetBody(httpMethod, path string, body interface{}) ([]byte, error)
+	Do(req *http.Request) (*http.Response, error)
 }
 
 type ModelRouteEventClient struct {
@@ -23,13 +24,22 @@ func (m ModelRouteEventClient) GetLastEvents(cursor int) (events event.LatestRou
 	
 
 	var buf []byte
-	buf, err = m.HTTPClient.DoRequestGetBody(
-		http.MethodGet,
-		strings.Replace("/model/route-events?cursor=:cursor", ":cursor", strconv.Itoa(cursor), 1),
-		nil,
-	)
+	req := &http.Request{
+		Method: http.MethodGet,
+		URL:    &url.URL{
+			Path:     "/model/route-events",
+		},
+	}
+	q := req.URL.Query()
+	q.Add("cursor", strconv.Itoa(cursor))
+	req.URL.RawQuery = q.Encode()
+	response, err := m.HTTPClient.Do(req)
 	if err != nil {
-		m.Log.Errorw("Unable to fetch last ModelRoute events", zap.Error(err))
+		return events, err
+	}
+	defer response.Body.Close()
+	buf, err = ioutil.ReadAll(response.Body)
+	if err != nil {
 		return events, err
 	}
 

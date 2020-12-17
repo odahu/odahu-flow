@@ -48,7 +48,7 @@ func TestSwaggerRouteSuite(t *testing.T) {
 
 func (s *SwaggerRouteSuite) TestSwaggerRootPage() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/swagger/index.html"), nil)
+	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/catalog/index.html"), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
@@ -71,14 +71,14 @@ func (s *SwaggerRouteSuite) verifyMimeType(url, mimeType string) {
 }
 
 func (s *SwaggerRouteSuite) TestSwaggerMimeType() {
-	s.verifyMimeType(path.Join(pathPrefix, "/swagger/index.html"), "text/html")
-	s.verifyMimeType(path.Join(pathPrefix, "/swagger/swagger-ui.css"), "text/css")
-	s.verifyMimeType(path.Join(pathPrefix, "/swagger/swagger-ui.js"), "application/javascript")
+	s.verifyMimeType(path.Join(pathPrefix, "/catalog/index.html"), "text/html")
+	s.verifyMimeType(path.Join(pathPrefix, "/catalog/swagger-ui.css"), "text/css")
+	s.verifyMimeType(path.Join(pathPrefix, "/catalog/swagger-ui.js"), "application/javascript")
 }
 
 func (s *SwaggerRouteSuite) TestAPISwaggerDefinition() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/swagger/data.json"), nil)
+	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/catalog/data.json"), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
