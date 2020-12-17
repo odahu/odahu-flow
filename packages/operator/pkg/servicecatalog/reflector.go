@@ -194,6 +194,7 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 			}
 			if lastEvents.Cursor > cursor {
 				cursor = lastEvents.Cursor
+				r.log.Info("New events found. Move cursor further")
 			}
 
 			for _, event := range lastEvents.Events {
