@@ -25,20 +25,14 @@ import (
 	"text/template"
 )
 
-type ModelRouteInfo struct {
-	Data map[string]map[string]interface{}
-}
-
 type ModelRouteCatalog struct {
 	sync.RWMutex
-	routes map[string]*ModelRouteInfo
 	routeMap map[string]Route
 	log *zap.SugaredLogger
 }
 
 func NewModelRouteCatalog(log *zap.SugaredLogger) *ModelRouteCatalog {
 	return &ModelRouteCatalog{
-		routes: map[string]*ModelRouteInfo{},
 		routeMap: map[string]Route{},
 		log: log,
 	}
@@ -118,6 +112,10 @@ func (mdc *ModelRouteCatalog) Delete(routeID string) {
 	delete(mdc.routeMap, routeID)
 }
 
+// GetDeployedModel returns information about deployed model
+func (mdc *ModelRouteCatalog) GetDeployedModel(deploymentID string) model_types.DeployedModel {
+	return model_types.DeployedModel{}
+}
 
 // ProcessSwaggerJSON combine URLs of all models in catalog. It separates endpoints by tagging them using
 // route.ID
