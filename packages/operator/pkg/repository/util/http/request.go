@@ -18,7 +18,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -133,11 +132,6 @@ func (bec *BaseAPIClient) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	return resp, err
-}
-
-func (bec *BaseAPIClient) DoContext(ctx context.Context, req *http.Request) (*http.Response, error) {
-	req = req.WithContext(ctx)
-	return bec.Do(req)
 }
 
 func loginRequired(response *http.Response) bool {
