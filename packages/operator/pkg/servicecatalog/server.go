@@ -19,6 +19,7 @@ package servicecatalog
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/routes"
 	"github.com/rakyll/statik/fs"
 	"net/http"
 )
@@ -35,8 +36,8 @@ func SetUPMainServer(
 	router := gin.Default()
 	rootRouteGroup := router.Group(config.BaseURL)
 
-	SetUpSwagger(rootRouteGroup, staticFS, mrc.ProcessSwaggerJSON)
-	SetUpHealthCheck(router)
+	routes.SetUpSwagger(rootRouteGroup, staticFS, mrc.ProcessSwaggerJSON)
+	routes.SetUpHealthCheck(router)
 
 
 	server := &http.Server{

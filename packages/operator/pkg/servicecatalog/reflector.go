@@ -128,15 +128,8 @@ func (r Reflector) Run(ctx context.Context) error {
 		log := r.log.With("WorkerID", i)
 		go func() {
 			defer wg.Done()
-			if gErr := r.runProcessor(log); gErr != nil {
-				errLock.Lock()
-				err = multierr.Append(err, gErr)
-				errLock.Unlock()
-				log.Errorw("Error during processing events. Send signal to stop", zap.Error(err))
-				cancel()
-			} else {
-				log.Info("Worker was stopped")
-			}
+			r.runProcessor(log)
+			log.Info("Worker was stopped")
 		}()
 	}
 	r.log.Infof("Start %d workers", r.workersCount)
@@ -153,7 +146,7 @@ func (r Reflector) Run(ctx context.Context) error {
 }
 
 
-func (r Reflector) runProcessor(log *zap.SugaredLogger) error {
+func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 
 	for {
 
@@ -161,7 +154,7 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) error {
 		processingTraceID := uuid.New().String()
 		log = log.With("EntityID", EntityID, "TraceID", processingTraceID)
 		if shutdown {
-			return nil
+			return
 		}
 		event := r.eventCache.get(EntityID)
 

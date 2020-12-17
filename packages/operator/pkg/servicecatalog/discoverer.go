@@ -20,6 +20,26 @@ type OdahuMLServerDiscoverer struct {
 	HTTPClient httpClient
 }
 
+
+func (o OdahuMLServerDiscoverer) Discover(
+	prefix string, log *zap.SugaredLogger) (model model_types.ServedModel, err error) {
+
+	model.Swagger, err = o.discoverSwagger(prefix, log)
+	if err != nil {
+		return
+	}
+	model.MLServer = o.GetMLServerName()
+
+	model.Metadata, err = o.discoverMetadata(prefix, log)
+
+	return
+
+}
+
+func (o OdahuMLServerDiscoverer) GetMLServerName() model_types.MLServerName {
+	return model_types.MLServerODAHU
+}
+
 // ODAHU ML Server has not hardcoded swagger spec. But claims that "GET /" request
 // return Swagger 2.0 spec for current deployed Model
 func (o OdahuMLServerDiscoverer) discoverSwagger(
@@ -86,26 +106,6 @@ func (o OdahuMLServerDiscoverer) discoverMetadata(
 	prefix string, log *zap.SugaredLogger) (metadata model_types.Metadata, err error) {
 	return metadata, nil
 }
-
-func (o OdahuMLServerDiscoverer) Discover(
-	prefix string, log *zap.SugaredLogger) (model model_types.ServedModel, err error) {
-
-	model.Swagger, err = o.discoverSwagger(prefix, log)
-	if err != nil {
-		return
-	}
-	model.MLServer = o.GetMLServerName()
-
-	model.Metadata, err = o.discoverMetadata(prefix, log)
-
-	return
-
-}
-
-func (o OdahuMLServerDiscoverer) GetMLServerName() model_types.MLServerName {
-	 return model_types.MLServerODAHU
-}
-
 
 func (o OdahuMLServerDiscoverer) generateModelRequest(prefix string) *http.Request {
 

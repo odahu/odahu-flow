@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package servicecatalog
+package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/odahu/odahu-flow/packages/operator/docs" //nolint
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 )
 
-const (
-	HealthCheckURL = "/health"
-)
-
-func healthCheck(c *gin.Context) {
-	c.AbortWithStatusJSON(http.StatusOK, gin.H{})
-}
-
-func SetUpHealthCheck(server *gin.Engine) {
-	server.GET(HealthCheckURL, healthCheck)
+func SetUpSwagger(rg *gin.RouterGroup, apiStaticFS http.FileSystem, reader routes.SwaggerDefinitionReader) {
+	rg.GET("/swagger/*any", routes.SwaggerHandler(apiStaticFS, reader))
 }
