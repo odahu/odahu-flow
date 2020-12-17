@@ -37,6 +37,7 @@ func SetUPMainServer(
 	rootRouteGroup := router.Group(config.BaseURL)
 
 	routes.SetUpSwagger(rootRouteGroup, staticFS, mrc.ProcessSwaggerJSON)
+	routes.SetupDeployedModelRoute(rootRouteGroup, mrc.GetDeployedModel)
 	routes.SetUpHealthCheck(router)
 
 
