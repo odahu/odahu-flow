@@ -1,33 +1,41 @@
 definitions:
-  httputil.HTTPResult:
+  HTTPResult:
     properties:
       message:
         description: Success of error message
         type: string
     type: object
-  model.DeployedModel:
+  DeployedModel:
     properties:
       deploymentID:
         description: deploymentID is ModelDeployment that deploys this model
         type: string
       servedModel:
-        $ref: '#/definitions/model.ServedModel'
+        $ref: '#/definitions/ServedModel'
+        type: object
     type: object
-  model.Metadata:
+  Metadata:
+    properties:
+      others:
+        additionalProperties: true
+        description: Optional metadata key, value
+        type: object
     type: object
-  model.ServedModel:
+  ServedModel:
     properties:
       metadata:
-        $ref: '#/definitions/model.Metadata'
+        $ref: '#/definitions/Metadata'
+        type: object
       mlServer:
         description: |-
           MLServer name that serves a model
           Possible values: ODAHU, Triton
         type: string
       swagger2:
-        $ref: '#/definitions/model.Swagger2'
+        $ref: '#/definitions/Swagger2'
+        type: object
     type: object
-  model.Swagger2:
+  Swagger2:
     properties:
       raw:
         description: Base64 encoded OpenAPI 2.0 definition of MLServer API
@@ -62,14 +70,14 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.DeployedModel'
+            $ref: '#/definitions/DeployedModel'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/httputil.HTTPResult'
+            $ref: '#/definitions/HTTPResult'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/httputil.HTTPResult'
+            $ref: '#/definitions/HTTPResult'
       summary: Get info about deployed model
 swagger: "2.0"

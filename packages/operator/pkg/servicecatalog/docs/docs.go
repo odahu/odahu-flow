@@ -52,19 +52,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.DeployedModel"
+                            "$ref": "#/definitions/DeployedModel"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/httputil.HTTPResult"
+                            "$ref": "#/definitions/HTTPResult"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/httputil.HTTPResult"
+                            "$ref": "#/definitions/HTTPResult"
                         }
                     }
                 }
@@ -72,7 +72,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "httputil.HTTPResult": {
+        "HTTPResult": {
             "type": "object",
             "properties": {
                 "message": {
@@ -81,7 +81,7 @@ var doc = `{
                 }
             }
         },
-        "model.DeployedModel": {
+        "DeployedModel": {
             "type": "object",
             "properties": {
                 "deploymentID": {
@@ -89,29 +89,39 @@ var doc = `{
                     "type": "string"
                 },
                 "servedModel": {
-                    "$ref": "#/definitions/model.ServedModel"
+                    "type": "object",
+                    "$ref": "#/definitions/ServedModel"
                 }
             }
         },
-        "model.Metadata": {
-            "type": "object"
+        "Metadata": {
+            "type": "object",
+            "properties": {
+                "others": {
+                    "description": "Optional metadata key, value",
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
         },
-        "model.ServedModel": {
+        "ServedModel": {
             "type": "object",
             "properties": {
                 "metadata": {
-                    "$ref": "#/definitions/model.Metadata"
+                    "type": "object",
+                    "$ref": "#/definitions/Metadata"
                 },
                 "mlServer": {
                     "description": "MLServer name that serves a model\nPossible values: ODAHU, Triton",
                     "type": "string"
                 },
                 "swagger2": {
-                    "$ref": "#/definitions/model.Swagger2"
+                    "type": "object",
+                    "$ref": "#/definitions/Swagger2"
                 }
             }
         },
-        "model.Swagger2": {
+        "Swagger2": {
             "type": "object",
             "properties": {
                 "raw": {

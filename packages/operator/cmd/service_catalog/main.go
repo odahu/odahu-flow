@@ -80,12 +80,22 @@ var mainCmd = &cobra.Command{
 
 		// Initialize
 
-		logger, err := zap.NewProduction()
+		var err error
+		var logger *zap.Logger
+		if odahuConfig.ServiceCatalog.Debug {
+			logger, err = zap.NewDevelopment()
+		} else {
+			logger, err = zap.NewProduction(zap.WithCaller(false))
+		}
 		if err != nil {
 			log.Fatal("Unable to initialize logger")
 		}
 
 		sLogger := logger.Sugar().With("OdahuVersion", odahuConfig.Common.Version)
+
+		if odahuConfig.ServiceCatalog.Debug {
+			sLogger.Info("Debug mode is enabled")
+		}
 
 		routeCatalog := servicecatalog.NewModelRouteCatalog(sLogger)
 

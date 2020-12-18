@@ -151,8 +151,8 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 	for {
 
 		EntityID, shutdown := r.queue.Get()
-		processingTraceID := uuid.New().String()
-		log := log.With("EntityID", EntityID, "TraceID", processingTraceID)
+		processingJobID := uuid.New().String()
+		log := log.With("EntityID", EntityID, "ProcessingJobID", processingJobID)
 		if shutdown {
 			return
 		}
