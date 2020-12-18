@@ -21,13 +21,13 @@ type ServiceCatalog struct {
 	Auth AuthConfig `json:"auth"`
 	// BaseURL is a prefix to service catalog web server endpoints
 	BaseURL string `json:"baseUrl"`
-	// FetchTimeout configures how often new events will be fetched
+	// FetchTimeout configures how often new events will be fetched. Default 5 seconds.
 	FetchTimeout int `json:"fetchTimeout"`
 	// ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
 	EdgeURL string `json:"edgeURL"`
 	// ServiceCatalog set EdgeHost as Host header in requests to ML servers
 	EdgeHost string `json:"edgeHost"`
-	// WorkersCount configures how many workers will process events. Default: 1
+	// WorkersCount configures how many workers will process events. Default: 4
 	WorkersCount int `json:"workersCount"`
 	// enabled Debug increase logger verbosity and format. Default: false
 	Debug bool `json:"debug"`
@@ -36,6 +36,6 @@ type ServiceCatalog struct {
 func NewDefaultServiceCatalogConfig() ServiceCatalog {
 	return ServiceCatalog{
 		FetchTimeout: 5,
-		WorkersCount: 1,
+		WorkersCount: 4,
 	}
 }

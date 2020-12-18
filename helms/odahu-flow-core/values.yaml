@@ -525,9 +525,38 @@ config:
 
   # Service catalog configuration
   serviceCatalog:
-    # Base URL prefix for the model deployment swagger UI
+    # Auth configures connection parameters to ODAHU API Server
+    auth:
+      # ODAHU API URL
+      # Required
+      apiUrl: http://odahu-flow-api.odahu-flow.svc.cluster.local
+      # It is a mock for the future. Currently, it is always empty.
+      apiToken: ""
+      # OpenID client_id credential for service account
+      clientId: ""
+      # OpenID client_secret credential for service account
+      clientSecret: ""
+      # OpenID token url. Example: https://keycloak.cicd.odahu.org/auth/realms/legion/protocol/openid-connect/token
+      oauthOidcTokenEndpoint: ""
+    # BaseURL is a prefix to service catalog web server endpoints
     # Type: string
+    # Required
     baseUrl: /service-catalog
+    # FetchTimeout configures how often new events will be fetched. Default 5 seconds.
+    # Type: int
+    fetchTimeout:
+    # ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
+    # Required
+    edgeURL:
+    # ServiceCatalog set EdgeHost as Host header in requests to ML servers
+    # Required
+    edgeHost:
+    # WorkersCount configures how many workers will process events. Default: 4
+    # Type: int
+    workersCount:
+    # enabled Debug increase logger verbosity and format. Default: false
+    # Type: bool
+    debug:
 
 
 # Service account used to upload odahu resources via odahuflowctl
