@@ -33,9 +33,9 @@ Run Training with api server spec
         ${result}  StrictShell  odahuflowctl --verbose ${command}
 
         # fetch the training artifact name from stdout
-        Create File  ${RES_DIR}/train_result.txt  ${result.stdout}
-        ${artifact_name}    Shell  (tail -n 1 ${RES_DIR}/train_result.txt | awk '{ print $2 }')
-        Remove File  ${RES_DIR}/train_result.txt
+        Create File  ${RESULT_DIR}/train_result.txt  ${result.stdout}
+        ${artifact_name}    Shell  (tail -n 1 ${RESULT_DIR}/train_result.txt | awk '{ print $2 }')
+        Remove File  ${RESULT_DIR}/train_result.txt
         ${full artifact path}  set variable  ${artifact path}/${artifact_name.stdout}
 
         # check the training artifact validity
@@ -50,9 +50,9 @@ Run Packaging with local spec
     [Arguments]  ${options}
         ${pack_result}  StrictShell  odahuflowctl --verbose local packaging run ${options}
 
-        Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
-        ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
-        Remove File  ${RES_DIR}/pack_result.txt
+        Create File  ${RESULT_DIR}/pack_result.txt  ${pack_result.stdout}
+        ${image_name}    Shell  tail -n 1 ${RESULT_DIR}/pack_result.txt | awk '{ print $4 }'
+        Remove File  ${RESULT_DIR}/pack_result.txt
 
         StrictShell  docker images --all
         ${container_id}  Shell  docker run -d --rm -p 5002:5000 ${image_name.stdout}

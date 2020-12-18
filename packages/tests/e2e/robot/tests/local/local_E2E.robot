@@ -46,9 +46,9 @@ Run E2E local model
     Should Be Equal As Strings  ${artifact_name_cmd.stdout}  @{artifact_name_dir}
     # packaing
     ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
-    Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
-    ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
-    Remove File  ${RES_DIR}/pack_result.txt
+    Create File  ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt  ${pack_result.stdout}
+    ${image_name}    Shell  tail -n 1 ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
+    Remove File  ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt
     # deployment
     StrictShell  docker images --all
     StrictShell  docker run --name "${LOCAL_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
@@ -73,9 +73,9 @@ Run E2E spec on cluster model
     ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
     ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --id e2e-pack-file-image -a simple-model --no-disable-package-targets
 
-    Create File  ${RES_DIR}/pack_result.txt  ${pack_result.stdout}
-    ${image_name}    Shell  tail -n 1 ${RES_DIR}/pack_result.txt | awk '{ print $4 }'
-    Remove File  ${RES_DIR}/pack_result.txt
+    Create File  ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt  ${pack_result.stdout}
+    ${image_name}    Shell  tail -n 1 ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
+    Remove File  ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt
     # deployment
     StrictShell  docker images --all
     StrictShell  docker run --name "${CLUSTER_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
