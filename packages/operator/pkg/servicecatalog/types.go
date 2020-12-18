@@ -1,6 +1,9 @@
 package servicecatalog
 
-import model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
+import (
+	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
+	"go.uber.org/zap"
+)
 
 type temporaryError interface {
 	Temporary() bool
@@ -40,6 +43,6 @@ type LatestGenericEvents struct {
 }
 
 type Catalog interface {
-	Delete(RouteID string)
+	Delete(RouteID string, log *zap.SugaredLogger)
 	CreateOrUpdate(route Route) error
 }

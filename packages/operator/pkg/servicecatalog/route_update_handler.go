@@ -86,8 +86,12 @@ func (r UpdateHandler) Handle(object interface{}, log *zap.SugaredLogger) (err e
 	log = log.With("EventType", event.EventType, "EventDatetime", event.Datetime.String())
 
 	if event.EventType == event_types.ModelRouteDeletedEventType {
-		r.Catalog.Delete(event.EntityID)
-		log.Info("Route was deleted")
+		r.Catalog.Delete(event.EntityID, log)
+		return nil
+	}
+
+	if !event.Payload.Default {
+		log.Debug("Not default route will not be processed")
 		return nil
 	}
 

@@ -106,17 +106,19 @@ func (mdc *ModelRouteCatalog) CreateOrUpdate(route Route) error {
 	}
 	route.Model.ServedModel.Swagger = prefixedSwagger
 	mdc.routeMap[route.ID] = route
-	if route.IsDefault {
-		mdc.modelsMap[route.Model.DeploymentID] = route.Model
-	}
+	mdc.modelsMap[route.Model.DeploymentID] = route.Model
 	return nil
 }
 
 // Delete delete route from catalog
-func (mdc *ModelRouteCatalog) Delete(routeID string) {
+func (mdc *ModelRouteCatalog) Delete(routeID string, log *zap.SugaredLogger) {
 	mdc.Lock()
 	defer mdc.Unlock()
-	delete(mdc.routeMap, routeID)
+	_, ok := mdc.routeMap[routeID]
+	if ok {
+		delete(mdc.routeMap, routeID)
+		log.Info("Model route was deleted")
+	}
 }
 
 // GetDeployedModel returns information about deployed model
