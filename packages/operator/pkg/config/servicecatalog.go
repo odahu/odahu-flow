@@ -16,15 +16,13 @@
 
 package config
 
-import "time"
-
 type ServiceCatalog struct {
 	// Auth configures connection parameters to ODAHU API Server
 	Auth AuthConfig `json:"auth"`
 	// BaseURL is a prefix to service catalog web server endpoints
 	BaseURL string `json:"baseUrl"`
 	// FetchTimeout configures how often new events will be fetched
-	FetchTimeout time.Duration `json:"fetchTimeout"`
+	FetchTimeout int `json:"fetchTimeout"`
 	// ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
 	EdgeURL string `json:"edgeURL"`
 	// ServiceCatalog set EdgeHost as Host header in requests to ML servers

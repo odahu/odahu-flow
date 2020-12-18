@@ -102,7 +102,8 @@ manifests: controller-gen
 
 ## swag: Generate swagger files
 swag:
-	swag init -g pkg/apiserver/server.go
+	swag init -g pkg/apiserver/server.go --exclude pkg/servicecatalog
+	swag init  -g pkg/servicecatalog/server.go  --exclude pkg/apiserver -o pkg/servicecatalog/docs
 	# Remove the line with generated timestamp
 	"${SED_BIN}" -i '3d' docs/docs.go
 	"${SED_BIN}" -i 's/connection\.//g' docs/*

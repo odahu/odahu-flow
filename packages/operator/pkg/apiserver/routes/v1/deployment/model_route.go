@@ -26,7 +26,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -65,8 +65,8 @@ type ModelRouteController struct {
 // @Produce  json
 // @Param id path string true "Model route id"
 // @Success 200 {object} deployment.ModelRoute
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/route/{id} [get]
 func (mrc *ModelRouteController) getMR(c *gin.Context) {
 	mrID := c.Param(IDMrURLParam)
@@ -90,7 +90,7 @@ func (mrc *ModelRouteController) getMR(c *gin.Context) {
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} deployment.ModelRoute
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/route [get]
 func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
@@ -123,7 +123,7 @@ func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} deployment.ModelRoute
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/route [post]
 func (mrc *ModelRouteController) createMR(c *gin.Context) {
 	var mr deployment.ModelRoute
@@ -159,8 +159,8 @@ func (mrc *ModelRouteController) createMR(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} deployment.ModelRoute
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/route [put]
 func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 	var mr deployment.ModelRoute
@@ -196,9 +196,9 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Model route id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/route/{id} [delete]
 func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 	mrID := c.Param(IDMrURLParam)
@@ -220,7 +220,7 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 // @Produce  json
 // @Param cursor query int false "Cursor can be passed to get only new changes"
 // @Success 200 {object} event.LatestRouteEvents
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/route-events [get]
 func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 	var cursor int

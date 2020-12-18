@@ -91,8 +91,8 @@ func ConfigureRoutes(
 // @Produce  json
 // @Param id path string true "Connection id"
 // @Success 200 {object} connection.Connection
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection/{id} [get]
 func (cc *controller) getConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
@@ -116,8 +116,8 @@ func (cc *controller) getConnection(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "Connection id"
 // @Success 200 {object} connection.Connection
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection/{id}/decrypted [get]
 func (cc *controller) getDecryptedConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
@@ -142,7 +142,7 @@ func (cc *controller) getDecryptedConnection(c *gin.Context) {
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} connection.Connection
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection [get]
 func (cc *controller) getAllConnections(c *gin.Context) {
 	filter := &conn_repository.Filter{}
@@ -175,7 +175,7 @@ func (cc *controller) getAllConnections(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} connection.Connection
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection [post]
 func (cc *controller) createConnection(c *gin.Context) {
 	var conn connection.Connection
@@ -212,9 +212,9 @@ func (cc *controller) createConnection(c *gin.Context) {
 // @Tags Connection
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection [put]
 func (cc *controller) updateConnection(c *gin.Context) {
 	var conn connection.Connection
@@ -251,9 +251,9 @@ func (cc *controller) updateConnection(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Connection id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection/{id} [delete]
 func (cc *controller) deleteConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)

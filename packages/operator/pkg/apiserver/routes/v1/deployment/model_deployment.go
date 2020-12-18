@@ -77,8 +77,8 @@ type ModelDeploymentController struct {
 // @Produce  json
 // @Param id path string true "Model deployment id"
 // @Success 200 {object} deployment.ModelDeployment
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment/{id} [get]
 func (mdc *ModelDeploymentController) getMD(c *gin.Context) {
 	mdID := c.Param(IDMdURLParam)
@@ -102,7 +102,7 @@ func (mdc *ModelDeploymentController) getMD(c *gin.Context) {
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} deployment.ModelDeployment
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment [get]
 func (mdc *ModelDeploymentController) getAllMDs(c *gin.Context) {
 	f := &md_repository.MdFilter{}
@@ -137,7 +137,7 @@ func (mdc *ModelDeploymentController) getAllMDs(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} deployment.ModelDeployment
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment [post]
 func (mdc *ModelDeploymentController) createMD(c *gin.Context) {
 	var md deployment.ModelDeployment
@@ -173,8 +173,8 @@ func (mdc *ModelDeploymentController) createMD(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} deployment.ModelDeployment
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment [put]
 func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 	var md deployment.ModelDeployment
@@ -210,9 +210,9 @@ func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Model deployment id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment/{id} [delete]
 func (mdc *ModelDeploymentController) deleteMD(c *gin.Context) {
 	mdID := c.Param(IDMdURLParam)
@@ -235,8 +235,8 @@ func (mdc *ModelDeploymentController) deleteMD(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "Model deployment id"
 // @Success 200 {object} deployment.ModelRoute
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment/{id}/default-route [get]
 func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
 	mdID := c.Param(IDMdURLParam)
@@ -259,7 +259,7 @@ func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
 // @Produce  json
 // @Param cursor query int false "Cursor can be passed to get only new changes"
 // @Success 200 {object} event.LatestDeploymentEvents
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/deployment-events [get]
 func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
 	var cursor int

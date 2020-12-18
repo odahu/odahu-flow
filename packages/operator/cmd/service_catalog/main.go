@@ -66,7 +66,7 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 	},
 	servicecatalog.ReflectorOpts{
 		WorkersCount: cfg.WorkersCount,
-		FetchTimeout: cfg.FetchTimeout * time.Second,
+		FetchTimeout: time.Duration(cfg.FetchTimeout) * time.Second,
 	}), nil
 
 }

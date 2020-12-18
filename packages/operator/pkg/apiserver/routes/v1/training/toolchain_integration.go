@@ -57,8 +57,8 @@ type ToolchainIntegrationController struct {
 // @Produce  json
 // @Param id path string true "ToolchainIntegration id"
 // @Success 200 {object} training.ToolchainIntegration
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/toolchain/integration/{id} [get]
 func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Context) {
 	tiID := c.Param(IDTiURLParam)
@@ -82,7 +82,7 @@ func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Contex
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} training.ToolchainIntegration
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/toolchain/integration [get]
 func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
@@ -114,7 +114,7 @@ func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Co
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} training.ToolchainIntegration
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/toolchain/integration [post]
 func (tic *ToolchainIntegrationController) createToolchainIntegration(c *gin.Context) {
 	var ti training.ToolchainIntegration
@@ -150,8 +150,8 @@ func (tic *ToolchainIntegrationController) createToolchainIntegration(c *gin.Con
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} training.ToolchainIntegration
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/toolchain/integration [put]
 func (tic *ToolchainIntegrationController) updateToolchainIntegration(c *gin.Context) {
 	var ti training.ToolchainIntegration
@@ -187,9 +187,9 @@ func (tic *ToolchainIntegrationController) updateToolchainIntegration(c *gin.Con
 // @Accept  json
 // @Produce  json
 // @Param id path string true "ToolchainIntegration id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/toolchain/integration/{id} [delete]
 func (tic *ToolchainIntegrationController) deleteToolchainIntegration(c *gin.Context) {
 	tiID := c.Param(IDTiURLParam)

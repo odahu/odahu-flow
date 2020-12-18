@@ -76,8 +76,8 @@ type ModelTrainingController struct {
 // @Produce  json
 // @Param id path string true "Model Training id"
 // @Success 200 {object} training.ModelTraining
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training/{id} [get]
 func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
@@ -104,7 +104,7 @@ func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 // @Param model_version path int false "Model version"
 // @Param toolchain path int false "Toolchain name"
 // @Success 200 {array} training.ModelTraining
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [get]
 func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 	f := &mt_repository.MTFilter{}
@@ -136,7 +136,7 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} training.ModelTraining
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [post]
 func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 	var mt training.ModelTraining
@@ -172,8 +172,8 @@ func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} training.ModelTraining
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [put]
 func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 	var mt training.ModelTraining
@@ -211,8 +211,8 @@ func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 // @Param MP body v1alpha1.TrainingResult true "Model Training result"
 // @Param id path string true "Model Training id"
 // @Success 200 {array} v1alpha1.TrainingResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training/{id}/result [put]
 func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
@@ -242,9 +242,9 @@ func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Model Training id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training/{id} [delete]
 func (mtc *ModelTrainingController) deleteMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)

@@ -57,8 +57,8 @@ type PackagingIntegrationController struct {
 // @Produce  json
 // @Param id path string true "PackagingIntegration id"
 // @Success 200 {object} packaging.PackagingIntegration
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/packaging/integration/{id} [get]
 func (pic *PackagingIntegrationController) getPackagingIntegration(c *gin.Context) {
 	piID := c.Param(IDPiURLParam)
@@ -82,7 +82,7 @@ func (pic *PackagingIntegrationController) getPackagingIntegration(c *gin.Contex
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} packaging.PackagingIntegration
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/packaging/integration [get]
 func (pic *PackagingIntegrationController) getAllPackagingIntegrations(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
@@ -114,7 +114,7 @@ func (pic *PackagingIntegrationController) getAllPackagingIntegrations(c *gin.Co
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} packaging.PackagingIntegration
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/packaging/integration [post]
 func (pic *PackagingIntegrationController) createPackagingIntegration(c *gin.Context) {
 	var pi packaging.PackagingIntegration
@@ -150,8 +150,8 @@ func (pic *PackagingIntegrationController) createPackagingIntegration(c *gin.Con
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} packaging.PackagingIntegration
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/packaging/integration [put]
 func (pic *PackagingIntegrationController) updatePackagingIntegration(c *gin.Context) {
 	var pi packaging.PackagingIntegration
@@ -187,9 +187,9 @@ func (pic *PackagingIntegrationController) updatePackagingIntegration(c *gin.Con
 // @Accept  json
 // @Produce  json
 // @Param id path string true "PackagingIntegration id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/packaging/integration/{id} [delete]
 func (pic *PackagingIntegrationController) deletePackagingIntegration(c *gin.Context) {
 	piID := c.Param(IDPiURLParam)

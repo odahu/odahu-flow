@@ -2,6 +2,8 @@ package model
 
 // Metadata of a model
 type Metadata struct {
+	// Optional metadata key, value
+	Others map[string]interface{} `json:"others"`
 }
 
 // Swagger is base64 encoded OpenAPI 2.0 definition of MLServer API

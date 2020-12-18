@@ -75,8 +75,8 @@ type ModelPackagingController struct {
 // @Produce  json
 // @Param id path string true "Model Packaging id"
 // @Success 200 {object} packaging.ModelPackaging
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/packaging/{id} [get]
 func (mpc *ModelPackagingController) getMP(c *gin.Context) {
 	mpID := c.Param(IDMpURLParam)
@@ -100,7 +100,7 @@ func (mpc *ModelPackagingController) getMP(c *gin.Context) {
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} packaging.ModelPackaging
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/packaging [get]
 func (mpc *ModelPackagingController) getAllMPs(c *gin.Context) {
 	f := &mp_repository.MPFilter{}
@@ -135,7 +135,7 @@ func (mpc *ModelPackagingController) getAllMPs(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} packaging.ModelPackaging
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/packaging [post]
 func (mpc *ModelPackagingController) createMP(c *gin.Context) {
 	var mp packaging.ModelPackaging
@@ -171,8 +171,8 @@ func (mpc *ModelPackagingController) createMP(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} packaging.ModelPackaging
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/packaging [put]
 func (mpc *ModelPackagingController) updateMP(c *gin.Context) {
 	var mp packaging.ModelPackaging
@@ -210,8 +210,8 @@ func (mpc *ModelPackagingController) updateMP(c *gin.Context) {
 // @Param MP body v1alpha1.ModelPackagingResult true "Model Packaging result"
 // @Param id path string true "Model Packaging id"
 // @Success 200 {array} v1alpha1.ModelPackagingResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/packaging/{id}/result [put]
 func (mpc *ModelPackagingController) saveMPResults(c *gin.Context) {
 	mpID := c.Param(IDMpURLParam)
@@ -241,9 +241,9 @@ func (mpc *ModelPackagingController) saveMPResults(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Model Packaging id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/packaging/{id} [delete]
 func (mpc *ModelPackagingController) deleteMP(c *gin.Context) {
 	mpID := c.Param(IDMpURLParam)

@@ -100,7 +100,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "metadata": {
-                    "description": "docstring",
                     "$ref": "#/definitions/model.Metadata"
                 },
                 "mlServer": {

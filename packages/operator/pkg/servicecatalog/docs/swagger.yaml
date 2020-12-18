@@ -19,7 +19,6 @@ definitions:
     properties:
       metadata:
         $ref: '#/definitions/model.Metadata'
-        description: docstring
       mlServer:
         description: |-
           MLServer name that serves a model
