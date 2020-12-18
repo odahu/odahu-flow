@@ -90,9 +90,9 @@ func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) (err error
 		}
 	}
 
-	event := event.Event{EntityID: id, EventType: event.ModelRouteDeletedEventType,
+	e := event.Event{EntityID: id, EventType: event.ModelRouteDeletedEventType,
 		EventGroup: event.ModelRouteEventGroup, Payload:    nil}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return
 	}
 
@@ -107,12 +107,12 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	}
 	defer func(){db_utils.FinishTx(tx, err, log)}()
 
-	event := event.Event{
+	e := event.Event{
 		EntityID:   id,
 		EventType:  event.ModelRouteDeletionMarkIsSetEventType,
 		EventGroup: event.ModelRouteEventGroup,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 
@@ -144,13 +144,13 @@ func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute)
 		}
 	}
 
-	event := event.Event{
+	e := event.Event{
 		EntityID:   md.ID,
 		EventType:  event.ModelRouteUpdatedEventType,
 		EventGroup: event.ModelRouteEventGroup,
 		Payload:    *md,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 	return s.repo.UpdateModelRoute(ctx, tx, md)
@@ -169,23 +169,18 @@ func (s serviceImpl) UpdateModelRouteStatus(
 		db_utils.FinishTx(tx, err, log)
 	}()
 
-	oldMt, err := s.repo.GetModelRoute(ctx, tx, id)
+	oldRoute, err := s.repo.GetModelRoute(ctx, tx, id)
 	if err != nil {
 		return err
 	}
 
-	oldHash, err := hashutil.Hash(oldMt.Spec)
-	if err != nil {
-		return err
-	}
-
-	specHash, err := hashutil.Hash(spec)
-	if err != nil {
-		return err
-	}
-
-	if oldHash != specHash {
+	if !hashutil.Equal(oldRoute.Spec, spec) {
 		return odahu_errors.SpecWasTouched{Entity: id}
+	}
+
+	if hashutil.Equal(oldRoute.Status, status) {
+		// Status is not changed. Skip updating in database and publishing event
+		return nil
 	}
 
 	err = s.repo.UpdateModelRouteStatus(ctx, tx, id, status)
@@ -193,15 +188,14 @@ func (s serviceImpl) UpdateModelRouteStatus(
 		return err
 	}
 
+	updatedRoute := *oldRoute
+	updatedRoute.Status = status
+
 	e := event.Event{
 		EntityID:   id,
 		EventType:  event.ModelRouteStatusUpdatedEventType,
 		EventGroup: event.ModelRouteEventGroup,
-		Payload: route.ModelRoute{
-			ID: id,
-			Spec: spec,
-			Status: status,
-		},
+		Payload:    updatedRoute,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
@@ -239,13 +233,13 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 		},
 	}
 
-	event := event.Event{
+	e := event.Event{
 		EntityID:   md.ID,
 		EventType:  event.ModelRouteCreatedEventType,
 		EventGroup: event.ModelRouteEventGroup,
 		Payload:    *md,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 
