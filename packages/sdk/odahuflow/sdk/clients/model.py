@@ -136,7 +136,7 @@ class ModelClient:
 
         if not 200 <= response.status_code < 400:
             url = response.url if hasattr(response, 'url') else None
-            raise Exception('Wrong status code returned: {}. Data: {}. URL: {}'
+            raise Exception('Wrong status code returned: {}. Data: "{}". URL: "{}"'
                             .format(response.status_code, data, url))
 
         return data
