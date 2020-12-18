@@ -227,7 +227,7 @@ function local_cleanup() {
   for repo in ${IMAGE_REPO[@]}; do
     list_images=$(docker images -aq ${repo})
     for image in ${list_images}; do
-      sh ${DIR}/docker-remove-image.sh ${image}
+      bash ${DIR}/docker-remove-image.sh ${image}
     done
   done
 }

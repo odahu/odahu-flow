@@ -6,7 +6,7 @@
 RED="\033[0;31m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
-NC="\033[0m"
+NC="\033[0m\n"
 
 # Check to see if the specified image exists.
 function sanity_check() {
@@ -91,13 +91,13 @@ function remove_image() {
     return 1
   fi
 
-  echo -e "                 START remove_containers"
+  echo -e "\t\t\tSTART remove_containers"
   remove_containers $IMAGE
-  echo -e "                 END remove_containers"
+  echo -e "\t\t\tEND remove_containers"
   printf "#${RED} Processing image ${IMAGE}...${NC}"
-  echo -e "                 START remove_child_images"
+  echo -e "\t\t\tSTART remove_child_images"
   remove_child_images $IMAGE
-  echo -e "                 END remove_child_images"
+  echo -e "\t\t\tEND remove_child_images"
   docker rmi -f $IMAGE
 }
 
