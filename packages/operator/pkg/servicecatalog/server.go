@@ -19,11 +19,20 @@ package servicecatalog
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/servicecatalogroutes"
+	_ "github.com/odahu/odahu-flow/packages/operator/pkg/static" //nolint
 	"github.com/rakyll/statik/fs"
 	"net/http"
 )
 
+
+// @title API Gateway
+// @version 1.0
+// @description Service catalog serves information about deployed models
+// @termsOfService http://swagger.io/terms/
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 func SetUPMainServer(
 	mrc *ModelRouteCatalog,
 	config config.ServiceCatalog,
@@ -36,9 +45,10 @@ func SetUPMainServer(
 	router := gin.Default()
 	rootRouteGroup := router.Group(config.BaseURL)
 
-	routes.SetUpSwagger(rootRouteGroup, staticFS, mrc.ProcessSwaggerJSON)
-	routes.SetupDeployedModelRoute(rootRouteGroup, mrc.GetDeployedModel)
-	routes.SetUpHealthCheck(router)
+	servicecatalogroutes.SetUpCatalogSwagger(rootRouteGroup, staticFS, mrc.ProcessSwaggerJSON)
+	servicecatalogroutes.SetUpSwagger(rootRouteGroup, staticFS)
+	servicecatalogroutes.SetupDeployedModelRoute(rootRouteGroup, mrc.GetDeployedModel)
+	servicecatalogroutes.SetUpHealthCheck(router)
 
 
 	server := &http.Server{

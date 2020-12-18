@@ -27,6 +27,7 @@ import (
 	md_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"reflect"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -85,7 +86,7 @@ func (mdc *ModelDeploymentController) getMD(c *gin.Context) {
 	md, err := mdc.mdService.GetModelDeployment(c.Request.Context(), mdID)
 	if err != nil {
 		logMD.Error(err, fmt.Sprintf("Retrieving %s model deployment", mdID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -108,7 +109,7 @@ func (mdc *ModelDeploymentController) getAllMDs(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, f, fieldsCache)
 	if err != nil {
 		logMD.Error(err, "Malformed url parameters of model deployment request")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -121,7 +122,7 @@ func (mdc *ModelDeploymentController) getAllMDs(c *gin.Context) {
 	)
 	if err != nil {
 		logMD.Error(err, "Retrieving list of model deployments")
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -143,21 +144,21 @@ func (mdc *ModelDeploymentController) createMD(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&md); err != nil {
 		logMD.Error(err, "JSON binding of the model deployment is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mdc.mdValidator.ValidatesMDAndSetDefaults(&md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Validation of the model deployment is failed: %v", md))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mdc.mdService.CreateModelDeployment(c.Request.Context(), &md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Creation of the model deployment: %+v", md))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -180,21 +181,21 @@ func (mdc *ModelDeploymentController) updateMD(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&md); err != nil {
 		logMD.Error(err, "JSON binding of the model deployment is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mdc.mdValidator.ValidatesMDAndSetDefaults(&md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Validation of the model deployment is failed: %v", md))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mdc.mdService.UpdateModelDeployment(c.Request.Context(), &md); err != nil {
 		logMD.Error(err, fmt.Sprintf("Update of the model deployment: %+v", md))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -218,12 +219,12 @@ func (mdc *ModelDeploymentController) deleteMD(c *gin.Context) {
 
 	if err := mdc.mdService.SetDeletionMark(c.Request.Context(), mdID, true); err != nil {
 		logMD.Error(err, fmt.Sprintf("Deletion of %s model deployment is failed", mdID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model deployment %s was deleted", mdID)})
+	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Model deployment %s was deleted", mdID)})
 }
 
 // @Summary Get a Model deployment default route
@@ -243,7 +244,7 @@ func (mdc *ModelDeploymentController) getDefaultRoute(c *gin.Context) {
 	mr, err := mdc.mdService.GetDefaultModelRoute(c.Request.Context(),  mdID)
 	if err != nil {
 		logMD.Error(err, fmt.Sprintf("Retrieving %s model deployment default route", mdID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -270,7 +271,7 @@ func (mdc *ModelDeploymentController) getDeploymentEvents(c *gin.Context) {
 	events, newCursor, err := mdc.eventsReader.Get(c.Request.Context(), cursor)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model deployment events")
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 	}
 
 	response := event.LatestDeploymentEvents{

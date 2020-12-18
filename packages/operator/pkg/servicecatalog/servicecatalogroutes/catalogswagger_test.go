@@ -1,14 +1,14 @@
-package routes_test
+package servicecatalogroutes_test
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/servicecatalogroutes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/swagger"
 	"net/http"
 	"net/http/httptest"
 	"path"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/routes"
-	apiserver_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	. "github.com/onsi/gomega"
 	"github.com/rakyll/statik/fs"
 	"github.com/stretchr/testify/suite"
@@ -33,7 +33,7 @@ func (s *SwaggerRouteSuite) SetupSuite() {
 
 	s.server = gin.Default()
 	rg := s.server.Group(pathPrefix)
-	routes.SetUpSwagger(rg, staticFS, func() (s string, e error) {
+	servicecatalogroutes.SetUpCatalogSwagger(rg, staticFS, func() (s string, e error) {
 		return testSwaggerDefinition, nil
 	})
 }
@@ -67,7 +67,7 @@ func (s *SwaggerRouteSuite) verifyMimeType(url, mimeType string) {
 	s.server.ServeHTTP(w, req)
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(w.Header().Get(apiserver_routes.ContentTypeHeaderKey)).Should(ContainSubstring(mimeType))
+	s.g.Expect(w.Header().Get(swagger.ContentTypeHeaderKey)).Should(ContainSubstring(mimeType))
 }
 
 func (s *SwaggerRouteSuite) TestSwaggerMimeType() {

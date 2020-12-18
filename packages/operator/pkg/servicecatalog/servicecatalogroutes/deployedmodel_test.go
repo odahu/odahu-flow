@@ -1,15 +1,15 @@
-package routes_test
+package servicecatalogroutes_test
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/servicecatalogroutes"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
 )
 
@@ -37,7 +37,7 @@ func TestDeployedModelHandler (t *testing.T) {
 	}))
 
 	engine := gin.Default()
-	routes.SetupDeployedModelRoute(engine.Group(""), catalog.GetDeployedModel)
+	servicecatalogroutes.SetupDeployedModelRoute(engine.Group(""), catalog.GetDeployedModel)
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, "/model-info/simple-model", nil)
 

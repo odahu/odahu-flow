@@ -24,6 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -65,7 +66,7 @@ func (pic *PackagingIntegrationController) getPackagingIntegration(c *gin.Contex
 	pi, err := pic.repository.GetPackagingIntegration(piID)
 	if err != nil {
 		logPi.Error(err, fmt.Sprintf("Retrieving %s packaging integration", piID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -87,7 +88,7 @@ func (pic *PackagingIntegrationController) getAllPackagingIntegrations(c *gin.Co
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
 	if err != nil {
 		logPi.Error(err, "Malformed url parameters of packaging integration request")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -98,7 +99,7 @@ func (pic *PackagingIntegrationController) getAllPackagingIntegrations(c *gin.Co
 	)
 	if err != nil {
 		logPi.Error(err, "Retrieving list of packaging integrations")
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -120,21 +121,21 @@ func (pic *PackagingIntegrationController) createPackagingIntegration(c *gin.Con
 
 	if err := c.ShouldBindJSON(&pi); err != nil {
 		logPi.Error(err, "JSON binding of the packaging integration is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := pic.validator.ValidateAndSetDefaults(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Validation of the packaging integration is failed: %v", pi))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := pic.repository.CreatePackagingIntegration(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Creation of the packaging integration: %+v", pi))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -157,21 +158,21 @@ func (pic *PackagingIntegrationController) updatePackagingIntegration(c *gin.Con
 
 	if err := c.ShouldBindJSON(&pi); err != nil {
 		logPi.Error(err, "JSON binding of the packaging integration is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := pic.validator.ValidateAndSetDefaults(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Validation of the packaging integration is failed: %v", pi))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := pic.repository.UpdatePackagingIntegration(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Update of the packaging integration: %+v", pi))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -195,10 +196,10 @@ func (pic *PackagingIntegrationController) deletePackagingIntegration(c *gin.Con
 
 	if err := pic.repository.DeletePackagingIntegration(piID); err != nil {
 		logPi.Error(err, fmt.Sprintf("Deletion of %s packaging integration is failed", piID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Packaging integration %s was deleted", piID)})
+	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Packaging integration %s was deleted", piID)})
 }

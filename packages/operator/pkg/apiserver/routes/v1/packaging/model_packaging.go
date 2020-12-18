@@ -27,6 +27,7 @@ import (
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"reflect"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
@@ -83,7 +84,7 @@ func (mpc *ModelPackagingController) getMP(c *gin.Context) {
 	mp, err := mpc.packService.GetModelPackaging(c.Request.Context(), mpID)
 	if err != nil {
 		logMP.Error(err, fmt.Sprintf("Retrieving %s model packaging", mpID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -106,7 +107,7 @@ func (mpc *ModelPackagingController) getAllMPs(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, f, fieldsCache)
 	if err != nil {
 		logMP.Error(err, "Malformed url parameters of model packaging request")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -119,7 +120,7 @@ func (mpc *ModelPackagingController) getAllMPs(c *gin.Context) {
 	)
 	if err != nil {
 		logMP.Error(err, "Retrieving list of model packagings")
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -141,21 +142,21 @@ func (mpc *ModelPackagingController) createMP(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&mp); err != nil {
 		logMP.Error(err, "JSON binding of the model packaging is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mpc.validator.ValidateAndSetDefaults(&mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Validation of the model packaging is failed: %v", mp))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mpc.packService.CreateModelPackaging(c.Request.Context(), &mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Creation of the model packaging: %+v", mp))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -178,21 +179,21 @@ func (mpc *ModelPackagingController) updateMP(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&mp); err != nil {
 		logMP.Error(err, "JSON binding of the model packaging is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mpc.validator.ValidateAndSetDefaults(&mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Validation of the model packaging is failed: %v", mp))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mpc.packService.UpdateModelPackaging(c.Request.Context(), &mp); err != nil {
 		logMP.Error(err, fmt.Sprintf("Update of the model packaging: %+v", mp))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -218,14 +219,14 @@ func (mpc *ModelPackagingController) saveMPResults(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&mpResult); err != nil {
 		logMP.Error(err, "JSON binding of the model packaging result is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mpc.kubeClient.SaveModelPackagingResult(mpID, mpResult); err != nil {
 		logMP.Error(err, fmt.Sprintf("Save the result of the model packaging: %+v", mpResult))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -249,12 +250,12 @@ func (mpc *ModelPackagingController) deleteMP(c *gin.Context) {
 
 	if err := mpc.packService.DeleteModelPackaging(c.Request.Context(), mpID); err != nil {
 		logMP.Error(err, fmt.Sprintf("Deletion of %s model packaging is failed", mpID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model packaging %s was deleted", mpID)})
+	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Model packaging %s was deleted", mpID)})
 }
 
 // @Summary Stream logs from model packaging pod
@@ -281,7 +282,7 @@ func (mpc *ModelPackagingController) getModelPackagingLog(c *gin.Context) {
 		if err != nil {
 			errMessage := fmt.Sprintf("Convert %s to bool", followParam)
 			logMP.Error(err, errMessage)
-			c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: errMessage})
+			c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: errMessage})
 
 			return
 		}
@@ -289,7 +290,7 @@ func (mpc *ModelPackagingController) getModelPackagingLog(c *gin.Context) {
 
 	if err := mpc.kubeClient.GetModelPackagingLogs(mpID, c.Writer, follow); err != nil {
 		logMP.Error(err, fmt.Sprintf("Getting %s model packaging logs is failed", mpID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}

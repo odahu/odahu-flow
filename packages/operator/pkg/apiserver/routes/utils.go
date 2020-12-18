@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"reflect"
@@ -34,11 +35,6 @@ const (
 	PageURLParamName        = "page"
 	DisabledAPIErrorMessage = "This API is disabled"
 )
-
-type HTTPResult struct {
-	// Success of error message
-	Message string `json:"message"`
-}
 
 func URLParamsToFilter(c *gin.Context, filter interface{}, fields map[string]int) (size int, page int, err error) {
 	urlParameters := c.Request.URL.Query()
@@ -79,7 +75,7 @@ func URLParamsToFilter(c *gin.Context, filter interface{}, fields map[string]int
 func DisableAPIMiddleware(enabledAPI bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !enabledAPI && c.Request.Method != http.MethodGet {
-			c.AbortWithStatusJSON(http.StatusBadRequest, HTTPResult{Message: DisabledAPIErrorMessage})
+			c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: DisabledAPIErrorMessage})
 		}
 	}
 }

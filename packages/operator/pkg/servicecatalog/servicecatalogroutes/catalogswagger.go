@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package routes
+package servicecatalogroutes
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/swagger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/odahu/odahu-flow/packages/operator/docs" //nolint
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 )
 
-func SetUpSwagger(rg *gin.RouterGroup, apiStaticFS http.FileSystem, reader routes.SwaggerDefinitionReader) {
-	rg.GET("/catalog/*any", routes.SwaggerHandler(apiStaticFS, reader))
+// SetUpCatalogSwagger serves swagger documentation that combine all deployed models on a single page
+func SetUpCatalogSwagger(rg *gin.RouterGroup, apiStaticFS http.FileSystem, reader swagger.DefinitionReader) {
+	rg.GET("/catalog/*any", swagger.Handler(apiStaticFS, reader))
 }

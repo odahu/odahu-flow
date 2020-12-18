@@ -1,4 +1,4 @@
-package routes
+package servicecatalogroutes
 
 import (
 	"github.com/gin-gonic/gin"
@@ -32,6 +32,15 @@ func (t *DeployedModelHandler) Handle(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
+
+// @Summary Get info about deployed model
+// @Description Get info about deployed model
+// @Name id
+// @Accept  json
+// @Produce  json
+// @Param id path string true "ModelDeployment ID"
+// @Success 200 {object} model.DeployedModel
+// @Router /service-catalog/model-info/{id} [get]
 func SetupDeployedModelRoute(rg *gin.RouterGroup, getter GetDeployedModelFunc) {
 	handler := DeployedModelHandler{GetDeployedModel: getter}
 	rg.GET(GetDeployedModelInfoURL, handler.Handle)

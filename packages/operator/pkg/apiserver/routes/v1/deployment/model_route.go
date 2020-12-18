@@ -26,6 +26,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -73,7 +74,7 @@ func (mrc *ModelRouteController) getMR(c *gin.Context) {
 	mr, err := mrc.service.GetModelRoute(c.Request.Context(), mrID)
 	if err != nil {
 		logMR.Error(err, fmt.Sprintf("Retrieving %s model route", mrID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -95,7 +96,7 @@ func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
 	if err != nil {
 		logMR.Error(err, "Malformed url parameters of model route request")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -107,7 +108,7 @@ func (mrc *ModelRouteController) getAllMRs(c *gin.Context) {
 	)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model routes")
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -129,21 +130,21 @@ func (mrc *ModelRouteController) createMR(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&mr); err != nil {
 		logMR.Error(err, "JSON binding of the model route is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mrc.validator.ValidatesAndSetDefaults(&mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Validation of the model route is failed: %v", mr))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mrc.service.CreateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Creation of the model route: %+v", mr))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -166,21 +167,21 @@ func (mrc *ModelRouteController) updateMR(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&mr); err != nil {
 		logMR.Error(err, "JSON binding of the model route is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mrc.validator.ValidatesAndSetDefaults(&mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Validation of the model route is failed: %v", mr))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mrc.service.UpdateModelRoute(c.Request.Context(), &mr); err != nil {
 		logMR.Error(err, fmt.Sprintf("Update of the model route: %+v", mr))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -204,12 +205,12 @@ func (mrc *ModelRouteController) deleteMR(c *gin.Context) {
 
 	if err := mrc.service.DeleteModelRoute(c.Request.Context(), mrID); err != nil {
 		logMR.Error(err, fmt.Sprintf("Deletion of %s model route is failed", mrID))
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model route %s was deleted", mrID)})
+	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Model route %s was deleted", mrID)})
 }
 
 // @Summary Get Last Changes for ModelRoute entities
@@ -232,7 +233,7 @@ func (mrc *ModelRouteController) getRouteEvents(c *gin.Context) {
 	events, newCursor, err := mrc.eventsReader.Get(c.Request.Context(), cursor)
 	if err != nil {
 		logMR.Error(err, "Retrieving list of model route events")
-		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 	}
 
 	response := event.LatestRouteEvents{

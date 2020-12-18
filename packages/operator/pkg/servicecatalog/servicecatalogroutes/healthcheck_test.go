@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package routes_test
+package servicecatalogroutes_test
 
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/routes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/servicecatalogroutes"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -35,7 +35,7 @@ type HealthCheckSuite struct {
 
 func (s *HealthCheckSuite) SetupSuite() {
 	s.server = gin.Default()
-	routes.SetUpHealthCheck(s.server)
+	servicecatalogroutes.SetUpHealthCheck(s.server)
 }
 
 func (s *HealthCheckSuite) SetupTest() {
@@ -48,7 +48,7 @@ func TestHealthCheckSuite(t *testing.T) {
 
 func (s *HealthCheckSuite) TestHealthCheck() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, routes.HealthCheckURL, nil)
+	req, err := http.NewRequest(http.MethodGet, servicecatalogroutes.HealthCheckURL, nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 

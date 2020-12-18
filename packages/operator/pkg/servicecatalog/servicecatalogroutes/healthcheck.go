@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package routes
+package servicecatalogroutes
 
 import (
 	"github.com/gin-gonic/gin"
