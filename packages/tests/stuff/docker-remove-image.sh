@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # This script will remove an image, but first it will remove all child images of that image.
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
 # ANSI codes for printing out different colors.
 RED="\033[0;31m"
 GREEN="\033[0;32m"
