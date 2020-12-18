@@ -547,7 +547,7 @@ config:
     fetchTimeout:
     # ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
     # Required
-    edgeURL:
+    edgeURL: http://istio-ingressgateway.istio-system.svc.cluster.local
     # ServiceCatalog set EdgeHost as Host header in requests to ML servers
     # Required
     edgeHost:
