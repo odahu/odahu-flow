@@ -2496,11 +2496,11 @@ var doc = `{
                     "type": "string"
                 },
                 "fetchTimeout": {
-                    "description": "FetchTimeout configures how often new events will be fetched",
+                    "description": "FetchTimeout configures how often new events will be fetched. Default 5 seconds.",
                     "type": "integer"
                 },
                 "workersCount": {
-                    "description": "WorkersCount configures how many workers will process events. Default: 1",
+                    "description": "WorkersCount configures how many workers will process events. Default: 4",
                     "type": "integer"
                 }
             }

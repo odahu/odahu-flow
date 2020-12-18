@@ -118,6 +118,7 @@ swag:
 	"${SED_BIN}" -i 's/v1alpha1\.//g' docs/*
 	"${SED_BIN}" -i 's/v1alpha1\.//g' docs/*
 
+	swag init  -g pkg/servicecatalog/server.go  --exclude pkg/apiserver -o pkg/servicecatalog/docs
 	"${SED_BIN}" -i 's/model\.//g' pkg/servicecatalog/docs/*
 	"${SED_BIN}" -i 's/httputil\.//g' pkg/servicecatalog/docs/*
 
