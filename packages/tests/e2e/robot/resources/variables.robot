@@ -28,16 +28,16 @@ ${PI_CLI}                             docker-cli
 ${CONN_SECRET_MASK}                   *****
 
 # ---------------------------------  Error Templates  ---------------------------------
-${400 BadRequest Template}      WrongHttpStatusCode: Got error from server: {} (status: 400)
-${403 Forbidden Template}       WrongHttpStatusCode: Got error from server: {} (status: 403)
-${404 NotFound Template}        WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
-${404 Model NotFoundTemplate}   Wrong status code returned: 404. Data: . URL: {}
-${409 Conflict Template}        EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
-
-${APIConnectionException}       APIConnectionException: Can not reach {base url}
-${IncorrectRefreshToken}        IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
-${IncorrectCredentials}         IncorrectAuthorizationToken: Credentials are not correct.\nPlease provide correct temporary token or disable non interactive mode
-${IncorrectTemporaryToken}      IncorrectAuthorizationToken: Credentials are missed.\nPlease provide correct temporary token or disable non interactive mode
+${400 BadRequest Template}          WrongHttpStatusCode: Got error from server: {} (status: 400)
+${403 Forbidden Template}           WrongHttpStatusCode: Got error from server: {} (status: 403)
+${404 NotFound Template}            WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
+${404 Model NotFoundTemplate}       Wrong status code returned: 404. Data: . URL: {}
+${409 Conflict Template}            EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
+${Model WrongStatusCode Template}   Wrong status code returned: {status code}. Data: "{data}". URL: "{url}"
+${APIConnectionException}           APIConnectionException: Can not reach {base url}
+${IncorrectRefreshToken}            IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
+${IncorrectCredentials}             IncorrectAuthorizationToken: Credentials are not correct.\nPlease provide correct temporary token or disable non interactive mode
+${IncorrectTemporaryToken}          IncorrectAuthorizationToken: Credentials are missed.\nPlease provide correct temporary token or disable non interactive mode
 
 # ---------------------------------  Validation checks  ---------------------------------
 ${FailedConn}   Validation of connection is failed:

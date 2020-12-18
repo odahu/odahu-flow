@@ -30,7 +30,7 @@ Suite Setup         Run Keywords
 ...                 Login to the api and edge  AND
 ...                 reload config
 Suite Teardown      Remove File  ${LOCAL_CONFIG}
-Force Tags          api  sdk  negative  400-403-status-code
+Force Tags          api  sdk  negative  status-code-400-403
 Test Timeout        1 minute
 
 *** Keywords ***
@@ -40,10 +40,16 @@ Try Call API - Bad Request
     Call API and get Error  ${error}  ${command}  @{options}
 
 Try Call API - Forbidden
-    [Arguments]  ${command}  @{options}  &{keyword arguments}
+    [Arguments]  ${command}  @{options}  &{kwargs}
     Log many   ${API_URL}  ${EDGE_URL}
-    ${403 Forbidden}  format string  ${403 Forbidden Template}   None
-    Call API and get Error  ${403 Forbidden}  ${command}  @{options}  &{keyword arguments}
+    ${403 Forbidden}  format string  ${403 Forbidden Template}  None
+    Call API and get Error  ${403 Forbidden}  ${command}  @{options}  &{kwargs}
+
+Try Call API - Forbidden.Model
+    [Arguments]  ${command}  &{kwargs}
+    Log many   Keyword: &{kwargs}
+    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY} url=&{kwargs}.get("url")
+    Call API and get Error  ${403 Forbidden}  ${command}  &{kwargs}
 
 *** Test Cases ***
 Status Code 400 - Bad Request
@@ -116,7 +122,7 @@ Status Code 403 - Forbidden - Data Scientist
     [Setup]     run keywords
     ...         Login to the api and edge  ${SA_DATA_SCIENTIST}  AND
     ...         reload config
-    # [Teardown]  Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Remove File  ${LOCAL_CONFIG}
     # connection
     connection get id decrypted  ${VCS_CONNECTION}
     # toolchains
@@ -137,7 +143,7 @@ Status Code 403 - Forbidden - Viewer
     [Setup]     run keywords
     ...         Login to the api and edge  ${SA_VIEWER}  AND
     ...         reload config
-    # [Teardown]  Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Remove File  ${LOCAL_CONFIG}
     # connection
     connection get id decrypted  ${VCS_CONNECTION}
     connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
@@ -167,7 +173,15 @@ Status Code 403 - Forbidden - Viewer
     route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route delete  ${NOT_EXIST_ENTITY}
+
+Model. Status Code 403 - Forbidden - Viewer
+    [Template]  Try Call API - Forbidden.Model
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_VIEWER}  AND
+    ...         reload config
+    [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
+
     model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
     model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
 
@@ -176,7 +190,7 @@ Status Code 403 - Forbidden - Custom Role
     [Setup]     run keywords
     ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
     ...         reload config
-    # [Teardown]  Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Remove File  ${LOCAL_CONFIG}
     # config
     config get
     # connection
@@ -224,6 +238,13 @@ Status Code 403 - Forbidden - Custom Role
     route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
     route delete  ${NOT_EXIST_ENTITY}
+
+Model. Status Code 403 - Forbidden - Custom Role
+    [Template]  Try Call API - Forbidden.Model
+    [Setup]     run keywords
+    ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
+    ...         reload config
+    [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
     model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
     model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
