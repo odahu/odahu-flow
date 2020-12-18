@@ -40,6 +40,8 @@ func (t *DeployedModelHandler) Handle(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "ModelDeployment ID"
 // @Success 200 {object} model.DeployedModel
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /service-catalog/model-info/{id} [get]
 func SetupDeployedModelRoute(rg *gin.RouterGroup, getter GetDeployedModelFunc) {
 	handler := DeployedModelHandler{GetDeployedModel: getter}

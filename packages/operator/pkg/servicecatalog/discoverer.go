@@ -92,7 +92,7 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 	}()
 
 	rawBody, err := ioutil.ReadAll(response.Body)
-	log.Info("Get response from model", "content", string(rawBody))
+	log.Debugw("Get response from model", "content", string(rawBody))
 
 
 	swagger = model_types.Swagger2{Raw: rawBody}

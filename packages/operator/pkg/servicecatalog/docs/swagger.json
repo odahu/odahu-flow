@@ -1,0 +1,111 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Service catalog serves information about deployed models",
+        "title": "Service Catalog",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "paths": {
+        "/service-catalog/model-info/{id}": {
+            "get": {
+                "description": "Get info about deployed model",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get info about deployed model",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ModelDeployment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.DeployedModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.HTTPResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "httputil.HTTPResult": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Success of error message",
+                    "type": "string"
+                }
+            }
+        },
+        "model.DeployedModel": {
+            "type": "object",
+            "properties": {
+                "deploymentID": {
+                    "description": "deploymentID is ModelDeployment that deploys this model",
+                    "type": "string"
+                },
+                "servedModel": {
+                    "$ref": "#/definitions/model.ServedModel"
+                }
+            }
+        },
+        "model.Metadata": {
+            "type": "object"
+        },
+        "model.ServedModel": {
+            "type": "object",
+            "properties": {
+                "metadata": {
+                    "description": "docstring",
+                    "$ref": "#/definitions/model.Metadata"
+                },
+                "mlServer": {
+                    "description": "MLServer name that serves a model\nPossible values: ODAHU, Triton",
+                    "type": "string"
+                },
+                "swagger2": {
+                    "$ref": "#/definitions/model.Swagger2"
+                }
+            }
+        },
+        "model.Swagger2": {
+            "type": "object",
+            "properties": {
+                "raw": {
+                    "description": "Base64 encoded OpenAPI 2.0 definition of MLServer API",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
+    }
+}

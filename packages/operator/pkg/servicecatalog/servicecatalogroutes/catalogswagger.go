@@ -21,7 +21,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/odahu/odahu-flow/packages/operator/docs" //nolint
+	_ "github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/docs" //nolint
 )
 
 // SetUpCatalogSwagger serves swagger documentation that combine all deployed models on a single page

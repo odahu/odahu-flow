@@ -1,9 +1,12 @@
 package model
 
+// Metadata of a model
 type Metadata struct {
 }
 
+// Swagger is base64 encoded OpenAPI 2.0 definition of MLServer API
 type Swagger2 struct {
+	// Base64 encoded OpenAPI 2.0 definition of MLServer API
 	Raw []byte
 }
 
@@ -14,19 +17,18 @@ const (
 	MLServerTriton MLServerName = "Triton"
 )
 
+// ServedModel contains information about served model
 type ServedModel struct {
-	// Metadata of a model
-	Metadata Metadata
-	// MLServer that serves a model
-	MLServer MLServerName
-	// OpenAPI 2.0 Specification for Endpoint API. Nil if model does not support it
-	// Swagger URLs already prefixed by URL prefix of default route
-	Swagger Swagger2
+	Metadata Metadata `json:"metadata"`
+	// MLServer name that serves a model
+	// Possible values: ODAHU, Triton
+	MLServer MLServerName `json:"mlServer"`
+	Swagger Swagger2 `json:"swagger2"`
 }
 
+// DeployedModel contains information about deployed model
 type DeployedModel struct {
-	// DeployedModel belongs to ModelDeployment with this ID
-	DeploymentID string
-	// WebService contains info about ML Server and serving ML Model
-	ServedModel ServedModel
+	// deploymentID is ModelDeployment that deploys this model
+	DeploymentID string `json:"deploymentID"`
+	ServedModel ServedModel `json:"servedModel"`
 }

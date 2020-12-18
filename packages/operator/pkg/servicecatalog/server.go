@@ -26,7 +26,7 @@ import (
 )
 
 
-// @title API Gateway
+// @title Service Catalog
 // @version 1.0
 // @description Service catalog serves information about deployed models
 // @termsOfService http://swagger.io/terms/
