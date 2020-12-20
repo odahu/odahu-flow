@@ -34,7 +34,7 @@ Run Training with api server spec
 
         # fetch the training artifact name from stdout
         Create File  ${RESULT_DIR}/train_result.txt  ${result.stdout}
-        ${artifact_name}    Shell  (tail -n 1 ${RESULT_DIR}/train_result.txt | awk '{ print $2 }')
+        ${artifact_name}    StrictShell  tail -n 1 ${RESULT_DIR}/train_result.txt | awk '{ print $2 }'
         Remove File  ${RESULT_DIR}/train_result.txt
         ${full artifact path}  set variable  ${artifact path}/${artifact_name.stdout}
 
@@ -51,14 +51,14 @@ Run Packaging with local spec
         ${pack_result}  StrictShell  odahuflowctl --verbose local packaging run ${options}
 
         Create File  ${RESULT_DIR}/pack_result.txt  ${pack_result.stdout}
-        ${image_name}    Shell  tail -n 1 ${RESULT_DIR}/pack_result.txt | awk '{ print $4 }'
+        ${image_name}    StrictShell  tail -n 1 ${RESULT_DIR}/pack_result.txt | awk '{ print $4 }'
         Remove File  ${RESULT_DIR}/pack_result.txt
 
         StrictShell  docker images --all
-        ${container_id}  Shell  docker run -d --rm -p 5002:5000 ${image_name.stdout}
+        ${container_id}  StrictShell  docker run -d --rm -p 5002:5000 ${image_name.stdout}
 
         Sleep  5 sec
-        Shell  docker container list -as -f id=${container_id.stdout}
+        StrictShell  docker container list -as -f id=${container_id.stdout}
 
         ${MODEL_HOST}    Get local model host
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5002 --json-file ${RES_DIR}/request.json

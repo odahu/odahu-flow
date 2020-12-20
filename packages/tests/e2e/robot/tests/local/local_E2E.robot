@@ -34,26 +34,26 @@ Run Packaging with api server spec
 *** Test Cases ***
 Run E2E local model
     [Setup]       StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${LOCAL_MODEL_OUTPUT_DIR}
-    [Teardown]    Run Keywords
+    [Teardown]    run keywords
     ...           Remove Directory  ${LOCAL_MODEL_OUTPUT_DIR}  recursive=True  AND
-    ...           Shell  docker rm -f "${LOCAL_DOCKER_CONTAINER}"
+    ...           StrictShell  docker rm -f "${LOCAL_DOCKER_CONTAINER}"
     # training
-    ${result_train}             StrictShell     odahuflowctl --verbose local train run --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
+    ${result_train}       StrictShell  odahuflowctl --verbose local train run --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
     # check that training artifact exists and take artifact name for packaging
-    ${result_list}              StrictShell  odahuflowctl --verbose local train list
-    ${artifact_name_cmd}        StrictShell  echo "${result_list.stdout}" | tail -n 1 | awk '{ print $2 }'
-    ${artifact_name_dir}        list directory  ${LOCAL_MODEL_OUTPUT_DIR}
+    ${result_list}        StrictShell  odahuflowctl --verbose local train list
+    ${artifact_name_cmd}  StrictShell  echo "${result_list.stdout}" | tail -n 1 | awk '{ print $2 }'
+    ${artifact_name_dir}  list directory  ${LOCAL_MODEL_OUTPUT_DIR}
     Should Be Equal As Strings  ${artifact_name_cmd.stdout}  @{artifact_name_dir}
     # packaing
-    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
+    ${pack_result}   StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
     Create File  ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt  ${pack_result.stdout}
-    ${image_name}    Shell  tail -n 1 ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
+    ${image_name}    StrictShell  tail -n 1 ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
     Remove File  ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt
     # deployment
     StrictShell  docker images --all
     StrictShell  docker run --name "${LOCAL_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
     Sleep  5 sec
-    Shell     docker container list -as -f name=${LOCAL_DOCKER_CONTAINER}
+    StrictShell  docker container list -as -f name=${LOCAL_DOCKER_CONTAINER}
     # model invoke
     ${MODEL_HOST}    Get local model host
     ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
@@ -62,26 +62,26 @@ Run E2E local model
 Run E2E spec on cluster model
     [Setup]       Run Keywords
     ...           Login to the api and edge  AND
-    ...           Shell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${CLUSTER_MODEL_OUTPUT_DIR}  AND
+    ...           StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${CLUSTER_MODEL_OUTPUT_DIR}  AND
     ...           StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/e2e.training.yaml
     [Teardown]    Run Keywords
     ...           Remove Directory  ${CLUSTER_MODEL_OUTPUT_DIR}  recursive=True  AND
     ...           Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
-    ...           Shell  docker rm -f "${CLUSTER_DOCKER_CONTAINER}"
+    ...           StrictShell  docker rm -f "${CLUSTER_DOCKER_CONTAINER}"
     # training & packaging
-    ${result_train}             StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
-    ${artifact_name_dir}        list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
-    ${pack_result}              StrictShell  odahuflowctl --verbose local pack run --id e2e-pack-file-image -a simple-model --no-disable-package-targets
+    ${result_train}       StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
+    ${artifact_name_dir}  list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
+    ${pack_result}        StrictShell  odahuflowctl --verbose local pack run --id e2e-pack-file-image -a simple-model --no-disable-package-targets
 
     Create File  ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt  ${pack_result.stdout}
-    ${image_name}    Shell  tail -n 1 ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
+    ${image_name}  StrictShell  tail -n 1 ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
     Remove File  ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt
     # deployment
     StrictShell  docker images --all
     StrictShell  docker run --name "${CLUSTER_DOCKER_CONTAINER}" -d --rm -p 5000:5000 ${image_name.stdout}
 
     Sleep  5 sec
-    Shell  docker container list -as -f name=${CLUSTER_DOCKER_CONTAINER}
+    StrictShell  docker container list -as -f name=${CLUSTER_DOCKER_CONTAINER}
     # model invoke
     ${MODEL_HOST}    Get local model host
     ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
