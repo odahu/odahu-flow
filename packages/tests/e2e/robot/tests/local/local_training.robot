@@ -120,7 +120,7 @@ Run Valid Packaging with api server spec
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with api server spec
     # id	file/dir	artifact path	artifact name	package-targets
-    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0 --no-disable-package-targets --disable-target docker-push
+    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id pack-dir --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0 --no-disable-package-targets
     local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id pack-dir --artifact-name simple-model --no-disable-package-targets --disable-target docker-push
 
 List trainings in default output dir
