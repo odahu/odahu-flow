@@ -116,7 +116,8 @@ function configure_rclone() {
       secret_access_key "${secret_access_key}" \
       1>/dev/null
 
-    aws ecr get-login
+    aws_account_id=$(aws sts get-caller-identity | jq .Account | xargs)
+    aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${aws_account_id}.dkr.ecr.${region}.amazonaws.com
     ;;
   azure)
     local sas_url
