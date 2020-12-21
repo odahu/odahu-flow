@@ -114,6 +114,8 @@ function configure_rclone() {
       access_key_id "${access_key_id}" \
       secret_access_key "${secret_access_key}" \
       1>/dev/null
+
+    aws ecr get-login
     ;;
   azure)
     local sas_url
@@ -122,6 +124,8 @@ function configure_rclone() {
     rclone config create "${RCLONE_PROFILE_NAME}" "azureblob" \
       sas_url "${sas_url}" \
       1>/dev/null
+
+    az acr login
     ;;
   gcp)
     local service_account_credentials
