@@ -9,7 +9,7 @@ type Metadata struct {
 // Swagger is base64 encoded OpenAPI 2.0 definition of MLServer API
 type Swagger2 struct {
 	// Base64 encoded OpenAPI 2.0 definition of MLServer API
-	Raw []byte
+	Raw []byte `json:"raw" swaggertype:"string" format:"base64"`
 }
 
 type MLServerName string

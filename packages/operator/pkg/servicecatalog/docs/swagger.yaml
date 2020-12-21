@@ -39,9 +39,8 @@ definitions:
     properties:
       raw:
         description: Base64 encoded OpenAPI 2.0 definition of MLServer API
-        items:
-          type: integer
-        type: array
+        format: base64
+        type: string
     type: object
 info:
   contact: {}

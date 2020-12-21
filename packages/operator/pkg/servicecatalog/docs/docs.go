@@ -126,10 +126,8 @@ var doc = `{
             "properties": {
                 "raw": {
                     "description": "Base64 encoded OpenAPI 2.0 definition of MLServer API",
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
+                    "type": "string",
+                    "format": "base64"
                 }
             }
         }
