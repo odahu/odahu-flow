@@ -63,7 +63,7 @@ function remove_child_images() {
   local parent_id=$(docker inspect --format '{{.Id}}' $1)
 
   echo "# Checking for child images of ${MAIN_IMAGE}...."
-  local IMAGES=$(print_child_images ${parent_id} | tail -n+2 | tail -r)
+  local IMAGES=$(print_child_images ${parent_id} | tail -n+2 | tac)
 
   if test ! "$IMAGES"; then
     echo "# No child images of ${MAIN_IMAGE}!"
