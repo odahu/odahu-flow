@@ -41,6 +41,7 @@ EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
 CLOUD_PROVIDER="$(jq '.cloud.type' -r "${CLUSTER_PROFILE}")"
 BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 
+GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
 RCLONE_PROFILE_NAME="robot-tests"
 
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
@@ -125,7 +126,8 @@ function configure_rclone() {
       sas_url "${sas_url}" \
       1>/dev/null
 
-    az acr login
+    RESOURCE_GROUP="$(jq '.cloud.azure.resource_group' -r "${CLUSTER_PROFILE}")"
+    az acr login --name $(az acr list -g ${RESOURCE_GROUP} --query "[0].name" | xargs)
     ;;
   gcp)
     local service_account_credentials
@@ -183,7 +185,7 @@ function create_test_data_connection() {
   local conn_file="test-data-connection.yaml"
 
   # Replaced the uri with the test data directory and added the kind field
-  odahuflowctl conn get --id models-output --decrypted  -o json |
+  odahuflowctl conn get --id models-output --decrypted -o json |
     conn_uri="${conn_uri}" jq '.[0].spec.uri = env.conn_uri | .[] | .kind = "Connection"' \
       >"${conn_file}"
 
@@ -194,22 +196,21 @@ function create_test_data_connection() {
 
 # Upload test dags from odahu-examples repository to the cluster dags object storage bucket
 function upload_test_dags() {
-    git_url="https://github.com/odahu/odahu-examples.git"
-    dag_dirs=("mlflow/sklearn/wine/airflow")
-    tmp_odahu_example_dir=$(mktemp -d -t upload-test-dags-XXXXXXXXXX)
+  git_url="https://github.com/odahu/odahu-examples.git"
+  dag_dirs=("mlflow/sklearn/wine/airflow")
+  tmp_odahu_example_dir=$(mktemp -d -t upload-test-dags-XXXXXXXXXX)
 
-    git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
+  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
-    local dag_bucket dag_bucket_path
-    dag_bucket="$(jq -r ".airflow.dag_bucket |= if . == null or . == \"\" then \"$BUCKET_NAME\" else . end | .airflow.dag_bucket" "${CLUSTER_PROFILE}")"
-    dag_bucket_path="$(jq -r '.airflow.dag_bucket_path |= if . == null or . == "" then "/dags" else . end | .airflow.dag_bucket_path' "${CLUSTER_PROFILE}")"
+  local dag_bucket dag_bucket_path
+  dag_bucket="$(jq -r ".airflow.dag_bucket |= if . == null or . == \"\" then \"$BUCKET_NAME\" else . end | .airflow.dag_bucket" "${CLUSTER_PROFILE}")"
+  dag_bucket_path="$(jq -r '.airflow.dag_bucket_path |= if . == null or . == "" then "/dags" else . end | .airflow.dag_bucket_path' "${CLUSTER_PROFILE}")"
 
-    for dag_dir in "${dag_dirs[@]}" ;
-    do
-      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "${dag_bucket}${dag_bucket_path}/${dag_dir}/"
-    done
+  for dag_dir in "${dag_dirs[@]}"; do
+    copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "${dag_bucket}${dag_bucket_path}/${dag_dir}/"
+  done
 
-    rm -rf "${tmp_odahu_example_dir}"
+  rm -rf "${tmp_odahu_example_dir}"
 }
 
 # Upload files for local training and packaging
@@ -219,7 +220,7 @@ function local_setup() {
   wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
   wget -O "${LOCAL_TEST_DATA}/conda.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.yaml"
   # from setup() function
-  cp "${TEST_DATA}/wine-quality.csv"  "${LOCAL_TEST_DATA}/wine-quality.csv"
+  cp "${TEST_DATA}/wine-quality.csv" "${LOCAL_TEST_DATA}/wine-quality.csv"
 
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
@@ -244,13 +245,12 @@ function setup() {
   done
 
   # Create training-data-helper toolchain integration
-  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" > "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
   odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
 
   # Download training data for the wine model
-  GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
   wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # Pushes a test data to the bucket and create a file with the connection
