@@ -17,7 +17,8 @@ definitions:
   Metadata:
     properties:
       others:
-        additionalProperties: true
+        additionalProperties:
+          type: string
         description: Optional metadata key, value
         type: object
     type: object

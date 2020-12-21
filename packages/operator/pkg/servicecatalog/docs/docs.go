@@ -100,7 +100,9 @@ var doc = `{
                 "others": {
                     "description": "Optional metadata key, value",
                     "type": "object",
-                    "additionalProperties": true
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
