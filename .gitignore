@@ -164,5 +164,3 @@ packages/operator/config/
 packages/feedback/vendor/
 /.hiera_keys/
 /.secrets/
-
-/Users/vladislav_tokarev/go/src/github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/docs
