@@ -82,9 +82,8 @@ function remove_child_images() {
 # Remove an image.
 function remove_image() {
   local IMAGE=$1
-  printf "# Sanity check ..."
+  echo "# Sanity check ..."
   sanity_check $IMAGE
-  echo "Return value $?"
 
   # stop the function execution if sanity check failed
   if [$? == 1]; then
