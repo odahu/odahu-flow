@@ -123,7 +123,7 @@ Try Run and Fail invalid Packaging
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
     ...  --id pack-file-image --no-disable-package-targets --disable-target docker-pull
 
-Run Valid Packaging with local spec
+Run Valid Packaging with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with local spec
