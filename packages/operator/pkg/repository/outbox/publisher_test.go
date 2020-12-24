@@ -68,7 +68,7 @@ func TestRaiseEvent(t *testing.T) {
 		EntityID:   "CustomID",
 		EventType:  "Create",
 		EventGroup: "CustomEventGroup",
-		Datetime:   time.Now().UTC(),
+		Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    CustomPayload{Name: "test"},
 	}
 	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
@@ -77,7 +77,7 @@ func TestRaiseEvent(t *testing.T) {
 		EntityID:   "CustomID-2",
 		EventType:  "Create",
 		EventGroup: "CustomEventGroup",
-		Datetime:   time.Now().UTC(),
+		Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    CustomPayload{Name: "test"},
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
@@ -86,7 +86,7 @@ func TestRaiseEvent(t *testing.T) {
 		EntityID:   "CustomID",
 		EventType:  "Delete",
 		EventGroup: "CustomEventGroup",
-		Datetime:   time.Now().UTC(),
+		Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    CustomPayload{Name: "test"},
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event1Delete)
