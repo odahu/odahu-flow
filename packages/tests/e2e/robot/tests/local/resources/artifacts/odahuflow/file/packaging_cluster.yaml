@@ -3,7 +3,8 @@ kind: ModelPackaging
 spec:
   artifactName: "<fill-in>"
   integrationName: docker-rest
-  imageName: "{{ .Name }}-{{ .Version }}"
+  arguments:
+    imageName: "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
   resources:
     limits:
       cpu: 1
@@ -18,7 +19,7 @@ spec:
   artifactName: "simple-model.zip"
   integrationName: docker-rest
   arguments:
-    imageName: "{{ Name }}-{{ Version }}"
+    imageName: "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
   resources:
     limits:
       cpu: 1
