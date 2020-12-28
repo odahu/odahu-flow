@@ -86,7 +86,7 @@ function remove_image() {
   sanity_check $IMAGE
 
   # stop the function execution if sanity check failed
-  if [$? == 1]; then
+  if [ "$?" -eq "1"]; then
     return 1
   fi
 
