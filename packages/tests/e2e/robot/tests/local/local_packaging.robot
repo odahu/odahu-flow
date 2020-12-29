@@ -128,11 +128,13 @@ Run Valid Packaging with local & cluster specs
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
-    --id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
+    # local
+    --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
     --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
     --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
     --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
-    --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
-    --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing
+    --id local-file-image-template --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
+    # cluster
+    --id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
+    --id local-cluster-spec-targets -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
+    --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-push --disable-target not-existing
