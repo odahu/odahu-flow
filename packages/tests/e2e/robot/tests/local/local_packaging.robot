@@ -89,10 +89,10 @@ Try Run and Fail Training with invalid credentials
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     [Template]  Try Run Training with api server spec
-    ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
-    ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
-    ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
-    ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id train-artifact-hardcoded
+    ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
 
 Try Run and Fail invalid Packaging
     [Tags]  negative
