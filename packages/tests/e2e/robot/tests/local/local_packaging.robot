@@ -107,11 +107,11 @@ Try Run and Fail invalid Packaging
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
     ...  --pack-id pack-dir --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
     Error: ${ARTIFACT_DIR}/file/packaging.yaml is not a directory
-    ...  --id pack-file-image -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
+    ...  --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
-    ...  --id pack-file-image -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-name-1
+    ...  --id local-file-image-template -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-name-1
     Error: [Errno 2] No such file or directory: '${RESULT_DIR}/not-existing/mp.json'
-    ...  --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/not-existing
+    ...  --id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/not-existing
     # no training either locally or on the server
     Error: Got error from server: entity "not-existing-packaging" is not found (status: 404)
     ...  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model

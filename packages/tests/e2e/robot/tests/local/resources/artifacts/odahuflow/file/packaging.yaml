@@ -1,4 +1,4 @@
-id: pack-file-image
+id: local-file-image-template
 kind: ModelPackaging
 spec:
   artifactName: "<fill-in>"
