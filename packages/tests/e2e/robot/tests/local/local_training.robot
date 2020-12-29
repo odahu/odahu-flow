@@ -109,7 +109,7 @@ Run Valid Training with local spec
     [Template]  Run Training with local spec
     # id	file/dir	output
     --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
-    --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
+    --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
     --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
     --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
 

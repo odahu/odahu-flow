@@ -38,7 +38,7 @@ Run E2E local model
     ...           Remove Directory  ${LOCAL_MODEL_OUTPUT_DIR}  recursive=True  AND
     ...           StrictShell  docker rm -f "${LOCAL_DOCKER_CONTAINER}"
     # training
-    ${result_train}       StrictShell  odahuflowctl --verbose local train run --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
+    ${result_train}       StrictShell  odahuflowctl --verbose local train run --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
     # check that training artifact exists and take artifact name for packaging
     ${result_list}        StrictShell  odahuflowctl --verbose local train list
     ${artifact_name_cmd}  StrictShell  echo "${result_list.stdout}" | tail -n 1 | awk '{ print $2 }'

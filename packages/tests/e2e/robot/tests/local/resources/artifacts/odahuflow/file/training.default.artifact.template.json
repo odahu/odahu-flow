@@ -8,7 +8,7 @@
 },
 {
   "kind": "ModelTraining",
-  "id": "wine-e2e-default-template",
+  "id": "local-host-default-template",
   "spec": {
     "entrypoint": "main",
     "hyperParameters": {
