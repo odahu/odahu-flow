@@ -105,7 +105,7 @@ Try Run and Fail invalid Packaging
     # not valid value for option
     # for file & dir options
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  --pack-id pack-dir --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
+    ...  --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
     Error: ${ARTIFACT_DIR}/file/packaging.yaml is not a directory
     ...  --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
@@ -117,22 +117,22 @@ Try Run and Fail invalid Packaging
     ...  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model
     # manifest on cluster but disabled target docker-pull (image not pulled locally)
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
+    ...  --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  --id pack-dir -a wine-name-1 --artifact-path ${RESULT_DIR}
+    ...  --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR}
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  --id pack-file-image --no-disable-package-targets --disable-target docker-pull
+    ...  --id local-cluster --no-disable-package-targets --disable-target docker-pull
 
 Run Valid Packaging with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
-    --id pack-dir -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
+    --id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
     --pack-id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
-    --id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
-    --pack-id pack-dir -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
+    --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
+    --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
     --id pack-file-image -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
-    --pack-id pack-dir --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
+    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
     --id pack-file-image --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
     --id pack-file-image --no-disable-package-targets --disable-target docker-push --disable-target not-existing

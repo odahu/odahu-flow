@@ -45,7 +45,7 @@ Run E2E local model
     ${artifact_name_dir}  list directory  ${LOCAL_MODEL_OUTPUT_DIR}
     Should Be Equal As Strings  ${artifact_name_cmd.stdout}  @{artifact_name_dir}
     # packaing
-    ${pack_result}   StrictShell  odahuflowctl --verbose local pack run --pack-id pack-dir -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
+    ${pack_result}   StrictShell  odahuflowctl --verbose local pack run --pack-id local-dir-spec-targets -d "${ARTIFACT_DIR}/dir" --artifact-name ${artifact_name_cmd.stdout}
     Create File  ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt  ${pack_result.stdout}
     ${image_name}    StrictShell  tail -n 1 ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
     Remove File  ${LOCAL_MODEL_OUTPUT_DIR}/pack_result.txt

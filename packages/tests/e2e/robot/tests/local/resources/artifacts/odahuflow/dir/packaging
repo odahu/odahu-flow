@@ -1,4 +1,4 @@
-id: pack-dir
+id: local-dir-spec-targets
 kind: ModelPackaging
 spec:
   targets:
