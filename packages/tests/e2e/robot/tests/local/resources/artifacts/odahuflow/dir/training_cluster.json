@@ -1,6 +1,6 @@
 [{
   "kind": "ModelTraining",
-  "id": "wine-packaging",
+  "id": "local-dir-cluster-artifact-template",
   "spec": {
     "entrypoint": "main",
     "hyperParameters": {
@@ -28,7 +28,7 @@
 },
 {
   "kind": "ModelTraining",
-  "id": "train-artifact-hardcoded",
+  "id": "local-dir-cluster-artifact-hardcoded",
   "spec": {
     "model": {
       "name": "wine-artifact-hardcoded",
