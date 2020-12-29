@@ -2,12 +2,6 @@
 #
 # This script will remove an image, but first it will remove all child images of that image.
 
-# ANSI codes for printing out different colors.
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-YELLOW="\033[0;33m"
-NC="\033[0m\n"
-
 # Check to see if the specified image exists.
 function sanity_check() {
   local IMAGE=$1
@@ -16,7 +10,7 @@ function sanity_check() {
   echo "Result: ${RESULT}"
   if test ! "$RESULT"; then
     echo "! "
-    echo "! ${YELLOW}-> Sorry, image ${IMAGE} not found!${NC}"
+    echo "! -> Sorry, image ${IMAGE} not found!"
     echo "! "
     return 1
   fi
@@ -69,7 +63,7 @@ function remove_child_images() {
     echo "# No child images of ${MAIN_IMAGE}!"
     return 0
   fi
-  printf "# ${RED}-> Found the following child images of ${MAIN_IMAGE}:${NC}"
+  printf "# -> Found the following child images of ${MAIN_IMAGE}:"
   echo "# ${IMAGES}"
 
   for IMAGE in $IMAGES; do
@@ -93,7 +87,7 @@ function remove_image() {
   echo -e "\t\t\tSTART remove_containers"
   remove_containers $IMAGE
   echo -e "\t\t\tEND remove_containers"
-  printf "#${RED} Processing image ${IMAGE}...${NC}"
+  printf "# Processing image ${IMAGE}..."
   echo -e "\t\t\tSTART remove_child_images"
   remove_child_images $IMAGE
   echo -e "\t\t\tEND remove_child_images"
@@ -110,4 +104,4 @@ MAIN_IMAGE=$1
 
 remove_image $MAIN_IMAGE
 
-printf "# ${GREEN}Done removing image ${MAIN_IMAGE} and its children!${NC}"
+printf "# Done removing image ${MAIN_IMAGE} and its children!"
