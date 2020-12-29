@@ -70,7 +70,7 @@ function remove_child_images() {
     remove_image ${IMAGE}
   done
 
-  printf "# ${GREEN}<- Done removing child images of ${MAIN_IMAGE}${NC}"
+  printf "# <- Done removing child images of ${MAIN_IMAGE}"
 }
 
 # Remove an image.
