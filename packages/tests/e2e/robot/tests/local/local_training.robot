@@ -98,9 +98,9 @@ Try Run and Fail invalid Training
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
     ...  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
     Error: ${ARTIFACT_DIR}/file/training.yaml is not a directory
-    ...  --id "wine id file" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
+    ...  --id "local id file with spaces" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
-    ...  --id "wine id file" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
+    ...  --id "local id file with spaces" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
     # no training either locally or on the server
     Error: Got error from server: entity "not-existing-training" is not found (status: 404)
     ...  --train-id not-existing-training
@@ -110,7 +110,7 @@ Run Valid Training with local spec
     # id	file/dir	output
     --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     --train-id wine-e2e-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
-    --id "wine id file" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
+    --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
     --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with api server spec
