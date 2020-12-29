@@ -5,13 +5,10 @@
 # Check to see if the specified image exists.
 function sanity_check() {
   local IMAGE=$1
-  echo "# Verifying that image ${IMAGE} exists..."
   RESULT=$(docker images -aq | grep $IMAGE || true)
   echo "Result: ${RESULT}"
   if test ! "$RESULT"; then
-    echo "! "
     echo "! -> Sorry, image ${IMAGE} not found!"
-    echo "! "
     return 1
   fi
 }
@@ -63,20 +60,19 @@ function remove_child_images() {
     echo "# No child images of ${MAIN_IMAGE}!"
     return 0
   fi
-  printf "# -> Found the following child images of ${MAIN_IMAGE}:"
+  echo "# -> Found the following child images of ${MAIN_IMAGE}:"
   echo "# ${IMAGES}"
 
   for IMAGE in $IMAGES; do
     remove_image ${IMAGE}
   done
 
-  printf "# <- Done removing child images of ${MAIN_IMAGE}"
+  echo "# <- Done removing child images of ${MAIN_IMAGE}"
 }
 
 # Remove an image.
 function remove_image() {
   local IMAGE=$1
-  echo "# Sanity check ..."
   sanity_check $IMAGE
 
   # stop the function execution if sanity check failed
@@ -87,7 +83,7 @@ function remove_image() {
   echo -e "\t\t\tSTART remove_containers"
   remove_containers $IMAGE
   echo -e "\t\t\tEND remove_containers"
-  printf "# Processing image ${IMAGE}..."
+  echo "# Processing image ${IMAGE}..."
   echo -e "\t\t\tSTART remove_child_images"
   remove_child_images $IMAGE
   echo -e "\t\t\tEND remove_child_images"
@@ -95,13 +91,11 @@ function remove_image() {
 }
 
 if test ! "$1"; then
-  echo "! "
   echo "! Syntax: $0 docker_image_id"
-  echo "! "
 fi
 
 MAIN_IMAGE=$1
 
 remove_image $MAIN_IMAGE
 
-printf "# Done removing image ${MAIN_IMAGE} and its children!"
+echo "# Done removing image ${MAIN_IMAGE} and its children!"
