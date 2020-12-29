@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: e2e-artifact-hardcoded
+id: local-e2e-artifact-hardcoded
 spec:
   model:
     name: e2e-artifact-hardcoded
@@ -19,8 +19,8 @@ spec:
       cpu: 1
       memory: 1Gi
 ---
-id: e2e-pack-file-image
 kind: ModelPackaging
+id: local-e2e-cluster
 spec:
   artifactName: "<fill-in>"
   integrationName: docker-rest

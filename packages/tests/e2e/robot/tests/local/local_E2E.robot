@@ -63,15 +63,15 @@ Run E2E spec on cluster model
     [Setup]       Run Keywords
     ...           Login to the api and edge  AND
     ...           StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${CLUSTER_MODEL_OUTPUT_DIR}  AND
-    ...           StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/e2e.training.yaml
+    ...           StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/e2e.cluster.yaml
     [Teardown]    Run Keywords
     ...           Remove Directory  ${CLUSTER_MODEL_OUTPUT_DIR}  recursive=True  AND
-    ...           Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.training.yaml  AND
+    ...           Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/e2e.cluster.yaml  AND
     ...           StrictShell  docker rm -f "${CLUSTER_DOCKER_CONTAINER}"
     # training & packaging
-    ${result_train}       StrictShell  odahuflowctl --verbose local train run --train-id e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
+    ${result_train}       StrictShell  odahuflowctl --verbose local train run --train-id local-e2e-artifact-hardcoded -d "${ARTIFACT_DIR}/file"
     ${artifact_name_dir}  list directory  ${CLUSTER_MODEL_OUTPUT_DIR}
-    ${pack_result}        StrictShell  odahuflowctl --verbose local pack run --id e2e-pack-file-image -a simple-model --no-disable-package-targets
+    ${pack_result}        StrictShell  odahuflowctl --verbose local pack run --id local-e2e-cluster -a simple-model --no-disable-package-targets
 
     Create File  ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt  ${pack_result.stdout}
     ${image_name}  StrictShell  tail -n 1 ${CLUSTER_MODEL_OUTPUT_DIR}/pack_result.txt | awk '{ print $4 }'
