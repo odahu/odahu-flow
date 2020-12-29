@@ -96,7 +96,7 @@ Try Run and Fail invalid Training
     # not valid value for option
     # for file & dir options
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  --id "wine-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
+    ...  --id "local-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
     Error: ${ARTIFACT_DIR}/file/training.yaml is not a directory
     ...  --id "local id file with spaces" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
@@ -108,7 +108,7 @@ Try Run and Fail invalid Training
 Run Valid Training with local spec
     [Template]  Run Training with local spec
     # id	file/dir	output
-    --id wine-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
     --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
     --train-id train-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}

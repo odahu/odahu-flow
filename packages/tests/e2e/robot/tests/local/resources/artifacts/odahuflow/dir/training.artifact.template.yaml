@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: wine-dir-artifact-template
+id: local-dir-artifact-template
 spec:
   model:
     name: wine-dir
