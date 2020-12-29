@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/squirrel v1.4.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/aspenmesh/istio-client-go v0.0.0-20190426173040-3e73c27b9ace
-	github.com/aws/aws-sdk-go v1.31.12
+	github.com/aws/aws-sdk-go v1.32.11
 	github.com/awslabs/amazon-ecr-credential-helper v0.3.1
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -32,9 +32,9 @@ require (
 	github.com/pborman/uuid v1.2.0
 	github.com/pierrec/lz4 v2.3.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/common v0.9.1
+	github.com/prometheus/common v0.10.0
 	github.com/rakyll/statik v0.1.6
-	github.com/rclone/rclone v1.52.0
+	github.com/rclone/rclone v1.53.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
