@@ -74,7 +74,7 @@ func NewReflector(log *zap.SugaredLogger, handler EventHandler, fetcher EventFet
 		fetcher: fetcher,
 		queue:   workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		eventCache:   &eventCache{
-			store: make(map[interface{}]interface{}),
+			store: make(map[interface{}]versionedEvent),
 			mu:    &sync.RWMutex{},
 		},
 		workersCount: 1,
@@ -159,7 +159,7 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 		event := r.eventCache.get(EntityID)
 
 		log.Info("Start processing event")
-		err := r.handler.Handle(event, log)
+		err := r.handler.Handle(event.event, log)
 		r.queue.Done(EntityID)
 		if err != nil {
 			log.Errorf("Error during processing event: %s. Retry", err.Error())
@@ -168,6 +168,7 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 		}
 		log.Info("Event was processed successfully")
 		r.queue.Forget(EntityID)
+		r.eventCache.delete(EntityID, event.version)
 	}
 }
 
@@ -192,14 +193,20 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 				r.log.Warnw("Temporary error during event fetching.", zap.Error(err))
 				continue
 			}
-			if lastEvents.Cursor > cursor {
-				cursor = lastEvents.Cursor
-				r.log.Info("New events found. Move cursor further")
+			if lastEvents.Cursor <= cursor {
+				r.log.Debug("There are no new events")
+				continue
 			}
+
+			cursor = lastEvents.Cursor
+			r.log.Info("New events found. Move cursor further")
 
 			for _, event := range lastEvents.Events {
 				r.queue.Add(event.EntityID)
-				r.eventCache.put(event.EntityID, event.Event)
+				r.eventCache.put(event.EntityID, versionedEvent{
+					event:   event,
+					version: cursor,
+				})
 			}
 		}
 
@@ -207,19 +214,35 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 }
 
 type eventCache struct {
-	store map[interface{}]interface{}
+	store map[interface{}]versionedEvent
 	mu *sync.RWMutex
 }
 
-func (e *eventCache) get(key interface{}) interface{} {
+type versionedEvent struct {
+	event interface{}
+	version int
+}
+
+func (e *eventCache) get(key interface{}) versionedEvent {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 	return e.store[key]
 }
 
-func (e *eventCache) put(key interface{}, obj interface{}) {
+func (e *eventCache) put(key interface{}, obj versionedEvent) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.store[key] = obj
+}
+
+// delete happens only if passed version equals to version of event in cache
+// To avoid situations when we delete
+func (e *eventCache) delete(key interface{}, version int) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	event := e.store[key]
+	if event.version == version {
+		delete(e.store, key)
+	}
 }
 
