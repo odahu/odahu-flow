@@ -204,7 +204,7 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 			for _, event := range lastEvents.Events {
 				r.queue.Add(event.EntityID)
 				r.eventCache.put(event.EntityID, versionedEvent{
-					event:   event,
+					event:   event.Event,
 					version: cursor,
 				})
 			}
