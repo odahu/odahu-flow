@@ -76,11 +76,14 @@ Try Run Packaging with local spec
         should contain  ${result}  ${error}
 
 *** Test Cases ***
-Run Valid Training with server spec
+Run Valid Training with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
     [Template]  Run Training with server spec
     # auth data     id      file/dir        output
+    # local
+    local train run  -id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    # cluster
     local train run -f ${ARTIFACT_DIR}/dir/packaging --id local-dir-cluster-artifact-template --output ${RESULT_DIR}  ${RESULT_DIR}
     local training --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
@@ -105,7 +108,7 @@ Try Run and Fail invalid Packaging
     # not valid value for option
     # for file & dir options
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
+    ...  --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-cluster-1
     Error: ${ARTIFACT_DIR}/file/packaging.yaml is not a directory
     ...  --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
@@ -129,7 +132,7 @@ Run Valid Packaging with local & cluster specs
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
     # local
-    run --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
+    run --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-cluster-1
     run --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
     run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
     run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}

@@ -11,8 +11,8 @@ spec:
   hyperParameters: 
     alpha: "1.0"
   model: 
-    artifactNameTemplate: "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
-    name: wine-name
+    artifactNameTemplate: "{{ .Name }}-{{ .Version }}.zip"
+    name: wine-local
     version: 1.0
   toolchain: mlflow
   workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"

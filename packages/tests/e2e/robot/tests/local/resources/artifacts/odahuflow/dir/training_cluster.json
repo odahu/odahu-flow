@@ -8,7 +8,7 @@
     },
     "model": {
       "artifactNameTemplate": "{{ .Name }}-{{ .Version }}.zip",
-      "name": "wine-name",
+      "name": "wine-cluster",
       "version": 1
     },
     "resources": {

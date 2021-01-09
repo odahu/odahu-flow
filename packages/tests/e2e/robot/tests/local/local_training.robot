@@ -95,7 +95,7 @@ Run Valid Packaging with local spec
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
     run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
+    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} -a wine-local-1.0
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
