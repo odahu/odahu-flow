@@ -27,28 +27,30 @@ Force Tags          cli  local  training
 Test Timeout        180 minutes
 
 *** Keywords ***
-Run Training with local spec
-    [Arguments]  ${train options}  ${artifact path}
-        ${result}  StrictShell  odahuflowctl --verbose local train run ${train options}
-
-        # fetch the training artifact name from stdout
-        Create File  ${RESULT_DIR}/train_result.txt  ${result.stdout}
-        ${artifact_name}    StrictShell  tail -n 1 ${RESULT_DIR}/train_result.txt | awk '{ print $2 }'
-        Remove File  ${RESULT_DIR}/train_result.txt
-        ${full artifact path}  set variable  ${artifact path}/${artifact_name.stdout}
-
-        # check the training artifact validity
-        ${response}  StrictShell  odahuflowctl --verbose gppi -m ${full artifact path} predict ${INPUT_FILE} ${RESULT_DIR}
-        ${result_path}  StrictShell  echo "${response.stdout}" | tail -n 1 | awk '{ print $3 }'
-
-        ${response}   Get File  ${result_path.stdout}
-        Should be equal as Strings  ${response}  ${WINE_MODEL_RESULT}
-
 Try Run Training
     [Arguments]  ${error}  ${train options}
-        ${result}  FailedShell  odahuflowctl --verbose ${train options}
+        ${result}  FailedShell  odahuflowctl --verbose local training ${train options}
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
         should contain  ${result}  ${error}
+
+Run Packaging
+    [Teardown]  Shell  docker rm -f ${container_id.stdout}
+    [Arguments]  ${options}
+        ${pack_result}  StrictShell  odahuflowctl --verbose local pack run ${options}
+
+        Create File  ${RESULT_DIR}/pack_result.txt  ${pack_result.stdout}
+        ${image_name}    StrictShell  tail -n 1 ${RESULT_DIR}/pack_result.txt | awk '{ print $4 }'
+        Remove File  ${RESULT_DIR}/pack_result.txt
+
+        StrictShell  docker images --all
+        ${container_id}  StrictShell  docker run -d --rm -p 5000:5000 ${image_name.stdout}
+
+        Sleep  5 sec
+        StrictShell  docker container list -as -f id=${container_id.stdout}
+
+        ${MODEL_HOST}    Get local model host
+        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
+        Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
 
 *** Test Cases ***
 Try Run and Fail Training with invalid credentials
@@ -56,10 +58,10 @@ Try Run and Fail Training with invalid credentials
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     [Template]  Try Run Training
-    ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
-    ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
-    ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
-    ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_CREDENTIALS_ERROR}    --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${MISSED_CREDENTIALS_ERROR}     --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_URL_ERROR}            --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_URL_ERROR}            --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
 
 Try Run and Fail invalid Training
     [Tags]   negative
@@ -82,20 +84,20 @@ Try Run and Fail invalid Training
     ...  run --train-id not-existing-training
 
 Run Valid Training with local spec
-    [Template]  Run Training with local spec
+    [Template]  Run Training
     # id	file/dir	output
-    --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
-    --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
-    --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
-    --train-id local-dir-cluster-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
+    run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    run --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
+    run --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
+    run --train-id local-dir-cluster-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with local spec
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Template]  Run Packaging with local spec
+    [Template]  Run Packaging
     # id	file/dir	artifact path	artifact name	package-targets
-    run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} -a wine-local-1.0
+    --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
+    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} -a wine-local-1.0
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list

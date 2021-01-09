@@ -157,3 +157,21 @@ Run example model
 
     ${res}=  Shell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
     should not be equal  ${res.rc}  0
+
+    # --------- LOCAL COMMAND SECTION -----------
+Run Training
+    [Arguments]  ${train options}  ${artifact path}
+        ${result}  StrictShell  odahuflowctl --verbose local train ${train options}
+
+        # fetch the training artifact name from stdout
+        Create File  ${RESULT_DIR}/train_result.txt  ${result.stdout}
+        ${artifact_name}    StrictShell  tail -n 1 ${RESULT_DIR}/train_result.txt | awk '{ print $2 }'
+        Remove File  ${RESULT_DIR}/train_result.txt
+        ${full artifact path}  set variable  ${artifact path}/${artifact_name.stdout}
+
+        # check the training artifact validity
+        ${response}  StrictShell  odahuflowctl --verbose gppi -m ${full artifact path} predict ${INPUT_FILE} ${RESULT_DIR}
+        ${result_path}  StrictShell  echo "${response.stdout}" | tail -n 1 | awk '{ print $3 }'
+
+        ${response}   Get File  ${result_path.stdout}
+        Should be equal as Strings  ${response}  ${WINE_MODEL_RESULT}
