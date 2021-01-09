@@ -87,6 +87,7 @@ function remove_image() {
   echo -e "\t\t\tSTART remove_child_images"
   remove_child_images $IMAGE
   echo -e "\t\t\tEND remove_child_images"
+  echo "# Remove image ${IMAGE}..."
   docker rmi -f $IMAGE
 }
 
