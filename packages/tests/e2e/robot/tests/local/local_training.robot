@@ -44,9 +44,9 @@ Run Training with local spec
         ${response}   Get File  ${result_path.stdout}
         Should be equal as Strings  ${response}  ${WINE_MODEL_RESULT}
 
-Try Run Training with local spec
+Try Run Training
     [Arguments]  ${error}  ${train options}
-        ${result}  FailedShell  odahuflowctl --verbose local train run ${train options}
+        ${result}  FailedShell  odahuflowctl --verbose ${train options}
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
         should contain  ${result}  ${error}
 
@@ -55,7 +55,7 @@ Try Run and Fail Training with invalid credentials
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Training with server spec
+    [Template]  Try Run Training
     ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
     ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
@@ -65,21 +65,21 @@ Try Run and Fail invalid Training
     [Tags]   negative
     [Setup]  Login to the api and edge
     [Teardown]  Shell  odahuflowctl logout
-    [Template]  Try Run Training with local spec
+    [Template]  Try Run Training
     # missing required option
     Error: Missing option '--train-id' / '--id'.
-    ...  -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
+    ...  run -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
     # not valid value for option
     # for file & dir options
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  --id "local-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
+    ...  run --id "local-dir-artifact-template" --manifest-file "${ARTIFACT_DIR}/dir" --output ${RESULT_DIR}
     Error: ${ARTIFACT_DIR}/file/training.yaml is not a directory
-    ...  --id "local id file with spaces" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
+    ...  run --id "local id file with spaces" -d "${ARTIFACT_DIR}/file/training.yaml" --output-dir ${RESULT_DIR}
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
-    ...  --id "local id file with spaces" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
+    ...  run --id "local id file with spaces" -f "${ARTIFACT_DIR}/file/not-existing.yaml" --manifest-dir "${ARTIFACT_DIR}/not-existing" --output-dir ${RESULT_DIR}
     # no training either locally or on the server
     Error: Got error from server: entity "not-existing-training" is not found (status: 404)
-    ...  --train-id not-existing-training
+    ...  run --train-id not-existing-training
 
 Run Valid Training with local spec
     [Template]  Run Training with local spec

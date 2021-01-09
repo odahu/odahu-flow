@@ -64,12 +64,7 @@ Run Packaging with local spec
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5002 --json-file ${RES_DIR}/request.json
         Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
 
-Try Run Training with server spec
-    [Arguments]  ${error}  ${command}
-        ${result}  FailedShell  odahuflowctl --verbose ${command}
-        should contain  ${result.stdout}  ${error}
-
-Try Run Packaging with local spec
+Try Run Packaging
     [Arguments]  ${error}  ${options}
         ${result}  FailedShell  odahuflowctl --verbose local packaging ${options}
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
@@ -91,7 +86,7 @@ Try Run and Fail Packaging with invalid credentials
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Packaging with server spec
+    [Template]  Try Run Packaging
     ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
     ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
@@ -99,32 +94,32 @@ Try Run and Fail Packaging with invalid credentials
 
 Try Run and Fail invalid Packaging
     [Tags]  negative
-    [Template]  Try Run Packaging with local spec
+    [Template]  Try Run Packaging
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
-    ...  --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
+    ...  run --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
     # not valid value for option
     # for file & dir options
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-cluster-1
+    ...  run --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-cluster-1
     Error: ${ARTIFACT_DIR}/file/packaging.yaml is not a directory
-    ...  --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
+    ...  run --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
-    ...  --id local-file-image-template -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-name-1
+    ...  run --id local-file-image-template -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-name-1
     Error: [Errno 2] No such file or directory: '${RESULT_DIR}/not-existing/mp.json'
-    ...  --id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/not-existing
+    ...  run --id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/not-existing
     # no training either locally or on the server
     Error: Got error from server: entity "not-existing-packaging" is not found (status: 404)
-    ...  --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model
+    ...  run --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model
     # manifest on cluster but disabled target docker-pull (image not pulled locally)
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
+    ...  run --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR}
+    ...  run --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR}
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  --id local-cluster --no-disable-package-targets --disable-target docker-pull
+    ...  run --id local-cluster --no-disable-package-targets --disable-target docker-pull
 
 Run Valid Packaging with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
