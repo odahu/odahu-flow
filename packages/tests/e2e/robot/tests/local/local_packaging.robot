@@ -28,7 +28,7 @@ Force Tags          cli  local  packaging
 Test Timeout        180 minutes
 
 *** Keywords ***
-Run Training with api server spec
+Run Training with server spec
     [Arguments]  ${command}  ${artifact path}
         ${result}  StrictShell  odahuflowctl --verbose ${command}
 
@@ -64,35 +64,35 @@ Run Packaging with local spec
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5002 --json-file ${RES_DIR}/request.json
         Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
 
-Try Run Training with api server spec
+Try Run Training with server spec
     [Arguments]  ${error}  ${command}
         ${result}  FailedShell  odahuflowctl --verbose ${command}
         should contain  ${result.stdout}  ${error}
 
 Try Run Packaging with local spec
     [Arguments]  ${error}  ${options}
-        ${result}  FailedShell  odahuflowctl --verbose local packaging run ${options}
+        ${result}  FailedShell  odahuflowctl --verbose local packaging ${options}
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
         should contain  ${result}  ${error}
 
 *** Test Cases ***
-Run Valid Training with api server spec
+Run Valid Training with server spec
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
-    [Template]  Run Training with api server spec
+    [Template]  Run Training with server spec
     # auth data     id      file/dir        output
     local train run -f ${ARTIFACT_DIR}/dir/packaging --id local-dir-cluster-artifact-template --output ${RESULT_DIR}  ${RESULT_DIR}
     local training --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
-Try Run and Fail Training with invalid credentials
+Try Run and Fail Packaging with invalid credentials
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Training with api server spec
-    ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
-    ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
-    ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
-    ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    [Template]  Try Run Packaging with server spec
+    ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
+    ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
+    ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
+    ${INVALID_URL_ERROR}            local pack --url "${EMPTY}" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.yaml --id not-exist
 
 Try Run and Fail invalid Packaging
     [Tags]  negative
@@ -129,12 +129,14 @@ Run Valid Packaging with local & cluster specs
     [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
     # local
-    --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
-    --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
-    --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
-    --id local-file-image-template --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
+    run --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml --artifact-path ${RESULT_DIR} --artifact-name wine-name-1
+    run --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --disable-package-targets
+    run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
+    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
+    run --id local-file-image-template --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
     # cluster
-    --id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    --id local-cluster-spec-targets -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
-    --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-push --disable-target not-existing
+    run --id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
+    run --id local-cluster-spec-targets -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
+    run --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-push --disable-target not-existing
+    run -f ${ARTIFACT_DIR}/dir/packaging --id local-cluster --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0 --no-disable-package-targets
+    --url ${API_URL} --token ${AUTH_TOKEN} run --id local-cluster-spec-targets --artifact-name simple-model --no-disable-package-targets --disable-target docker-push

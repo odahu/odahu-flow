@@ -50,40 +50,16 @@ Try Run Training with local spec
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
         should contain  ${result}  ${error}
 
-Run Packaging with api server spec
-    [Teardown]  Shell  docker rm -f ${container_id.stdout}
-    [Arguments]  ${command}
-        ${pack_result}  StrictShell  odahuflowctl --verbose ${command}
-
-        Create File  ${RESULT_DIR}/pack_result.txt  ${pack_result.stdout}
-        ${image_name}  StrictShell  tail -n 1 ${RESULT_DIR}/pack_result.txt | awk '{ print $4 }'
-        Remove File  ${RESULT_DIR}/pack_result.txt
-
-        StrictShell  docker images --all
-        ${container_id}  StrictShell  docker run -d --rm -p 5001:5000 ${image_name.stdout}
-
-        Sleep  5 sec
-        StrictShell  docker container list -as -f id=${container_id.stdout}
-
-        ${MODEL_HOST}    Get local model host
-        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5001 --json-file ${RES_DIR}/request.json
-        Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
-
-Try Run Packaging with api server spec
-    [Arguments]  ${error}  ${command}
-        ${result}  FailedShell  odahuflowctl --verbose ${command}
-        should contain  ${result.stdout}  ${error}
-
 *** Test Cases ***
-Try Run and Fail Packaging with invalid credentials
+Try Run and Fail Training with invalid credentials
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Packaging with api server spec
-    ${INVALID_CREDENTIALS_ERROR}    local pack --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/packaging.yaml --id local-file-image-template
-    ${MISSED_CREDENTIALS_ERROR}     local pack --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/packaging.yaml --id local-file-image-template
-    ${INVALID_URL_ERROR}            local pack --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.yaml --id local-file-image-template
-    ${INVALID_URL_ERROR}            local pack --url "${EMPTY}" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.yaml --id local-file-image-template
+    [Template]  Try Run Training with server spec
+    ${INVALID_CREDENTIALS_ERROR}    local training --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${MISSED_CREDENTIALS_ERROR}     local training --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_URL_ERROR}            local training --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
+    ${INVALID_URL_ERROR}            local training --url "${EMPTY}" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.yaml --id not-exist
 
 Try Run and Fail invalid Training
     [Tags]   negative
@@ -113,15 +89,13 @@ Run Valid Training with local spec
     --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
     --train-id local-dir-cluster-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
 
-Run Valid Packaging with api server spec
-    [Setup]     Run Keywords
-    ...         Login to the api and edge  AND
-    ...         StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+Run Valid Packaging with local spec
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Template]  Run Packaging with api server spec
+    [Template]  Run Packaging with local spec
     # id	file/dir	artifact path	artifact name	package-targets
-    local pack run -f ${ARTIFACT_DIR}/dir/packaging --id local-cluster --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0 --no-disable-package-targets
-    local packaging --url ${API_URL} --token ${AUTH_TOKEN} run --id local-cluster-spec-targets --artifact-name simple-model --no-disable-package-targets --disable-target docker-push
+    run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
+    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR}
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
