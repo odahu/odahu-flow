@@ -12,9 +12,9 @@ A clear and concise description of what the bug is, summative description.
 
 **Steps to Reproduce**
 1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Click on '....'
+1. Scroll down to '....'
+1. See error
 
 **Actual result**
 A clear and concise description of what really happened.
