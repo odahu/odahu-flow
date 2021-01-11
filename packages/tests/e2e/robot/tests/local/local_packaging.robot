@@ -82,15 +82,15 @@ Try Run and Fail invalid Packaging
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
-    ...  run --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-name-1
+    ...  run --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-cluster-1
     # not valid value for option
     # for file & dir options
     Error: [Errno 21] Is a directory: '${ARTIFACT_DIR}/dir'
-    ...  run --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-cluster-1
+    ...  run --pack-id local-dir-spec-targets --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-dir-1
     Error: ${ARTIFACT_DIR}/file/packaging.yaml is not a directory
-    ...  run --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1
+    ...  run --id local-file-image-template -d ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-dir-1
     Error: Resource file '${ARTIFACT_DIR}/file/not-existing.yaml' not found
-    ...  run --id local-file-image-template -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-name-1
+    ...  run --id local-file-image-template -f ${ARTIFACT_DIR}/file/not-existing.yaml -a ${RESULT_DIR}/wine-dir-1
     Error: [Errno 2] No such file or directory: '${RESULT_DIR}/not-existing/mp.json'
     ...  run --id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/not-existing
     # no training either locally or on the server
@@ -98,9 +98,9 @@ Try Run and Fail invalid Packaging
     ...  run --id not-existing-packaging --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model
     # manifest on cluster but disabled target docker-pull (image not pulled locally)
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  run --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR} --disable-package-targets
+    ...  run --id local-cluster -a wine-cluster-1 --artifact-path ${RESULT_DIR} --disable-package-targets
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  run --id local-cluster -a wine-name-1 --artifact-path ${RESULT_DIR}
+    ...  run --id local-cluster -a wine-cluster-1 --artifact-path ${RESULT_DIR}
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
     ...  run --id local-cluster --no-disable-package-targets --disable-target docker-pull
 
@@ -117,7 +117,8 @@ Run Valid Packaging with local & cluster specs
     run --id local-file-image-template --manifest-file ${ARTIFACT_DIR}/file/packaging.yaml -a simple-model --disable-package-targets
     # cluster
     run --id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    run --id local-cluster-spec-targets -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-name-1 --no-disable-package-targets  # watch for this
+    # path & artifact name as --artifact-name
+    run --id local-cluster-spec-targets -f ${ARTIFACT_DIR}/file/packaging.yaml -a ${RESULT_DIR}/wine-cluster-1 --no-disable-package-targets
     --url ${API_URL} --token ${AUTH_TOKEN} run --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-push --disable-target not-existing
     run -f ${ARTIFACT_DIR}/dir/packaging --id local-cluster --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0 --no-disable-package-targets
     --url ${API_URL} --token ${AUTH_TOKEN} run --id local-cluster-spec-targets --artifact-name simple-model --no-disable-package-targets --disable-target docker-push

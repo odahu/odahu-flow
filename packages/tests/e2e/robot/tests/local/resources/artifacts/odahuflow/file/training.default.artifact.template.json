@@ -15,7 +15,7 @@
       "alpha": "1.0"
     },
     "model": {
-      "name": "wine-name",
+      "name": "wine-local",
       "version": 1
     },
     "resources": {
