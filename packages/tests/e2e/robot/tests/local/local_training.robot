@@ -83,13 +83,18 @@ Try Run and Fail invalid Training
     Error: Got error from server: entity "not-existing-training" is not found (status: 404)
     ...  run --train-id not-existing-training
 
-Run Valid Training with local spec
+Run Valid Training with local & cluster specs
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
+    [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
     [Template]  Run Training
     # id	file/dir	output
+    # local
     run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     run --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
     run --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.yaml" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.json" --output ${RESULT_DIR}  ${RESULT_DIR}
-    run --train-id local-dir-cluster-artifact-hardcoded --manifest-dir "${ARTIFACT_DIR}/dir"  ${DEFAULT_RESULT_DIR}
+    # cluster
+    run -f ${ARTIFACT_DIR}/dir/packaging --id local-dir-cluster-artifact-template --output ${DEFAULT_RESULT_DIR}  ${DEFAULT_RESULT_DIR}
+    --url ${API_URL} --token "${AUTH_TOKEN}" run --train-id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with local spec
     [Template]  Run Packaging
@@ -97,11 +102,13 @@ Run Valid Packaging with local spec
     --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
     --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} -a wine-local-1.0
 
+
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
     Should contain  ${list_result.stdout}  Training artifacts:
     Should contain  ${list_result.stdout}  simple-model
-    Should contain  ${list_result.stdout}  wine-name-1
+    Should contain  ${list_result.stdout}  wine-local-1.0
+    Should contain  ${list_result.stdout}  wine-cluster-1
     ${line number}  Split To Lines  ${list_result.stdout}
     ${line number}  Get length   ${line number}
     Should be equal as integers  ${line number}  3
