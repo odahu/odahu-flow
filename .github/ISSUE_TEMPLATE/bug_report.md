@@ -23,7 +23,7 @@ A clear and concise description of what really happened.
 A clear and concise description of what you expected to happen.
 
 **Attachments**
-If applicable, add screenshots to help explain your problem.
+If applicable, add attachments to help explain your problem.
 
 **Environment:**
  - OS: [e.g. iOS, Win10]
