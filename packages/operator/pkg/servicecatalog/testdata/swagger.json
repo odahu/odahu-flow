@@ -1,0 +1,115 @@
+{
+  "basePath": "",
+  "host": "",
+  "info": {
+    "contact": {},
+    "description": "This is a EDI server.",
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "termsOfService": "http://swagger.io/terms/",
+    "title": "Model API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/model/info": {
+      "get": {
+        "consumes": [],
+        "description": "Return a swagger info about model",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Info",
+            "type": "object"
+          }
+        },
+        "summary": "Info"
+      }
+    },
+    "/api/model/invoke": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Execute prediction",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "PredictionParameters",
+            "required": true,
+            "schema": {
+              "properties": {
+                "columns": {
+                  "example": [
+                    "a",
+                    "b"
+                  ],
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "data": {
+                  "example": [
+                    [
+                      "1",
+                      "2"
+                    ]
+                  ],
+                  "items": {
+                    "items": {
+                      "type": "number"
+                    },
+                    "type": "array"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Results of prediction",
+            "name": "PredictionResponse",
+            "properties": {
+              "columns": {
+                "example": [
+                  "integer"
+                ],
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "prediction": {
+                "example": [
+                  [
+                    "42"
+                  ]
+                ],
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              }
+            }
+          },
+          "type": "object"
+        },
+        "summary": "Prediction"
+      }
+    }
+  },
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0"
+}

@@ -18,7 +18,9 @@ package training
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -26,10 +28,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
-	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
+	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -74,8 +76,8 @@ type ModelTrainingController struct {
 // @Produce  json
 // @Param id path string true "Model Training id"
 // @Success 200 {object} training.ModelTraining
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training/{id} [get]
 func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
@@ -83,7 +85,7 @@ func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 	mt, err := mtc.trainService.GetModelTraining(c.Request.Context(), mtID)
 	if err != nil {
 		logMT.Error(err, fmt.Sprintf("Retrieving of %s model training", mtID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -102,14 +104,14 @@ func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 // @Param model_version path int false "Model version"
 // @Param toolchain path int false "Toolchain name"
 // @Success 200 {array} training.ModelTraining
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [get]
 func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 	f := &mt_repository.MTFilter{}
 	size, page, err := routes.URLParamsToFilter(c, f, fieldsCache)
 	if err != nil {
 		logMT.Error(err, "Malformed url parameters of model training request")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -119,7 +121,7 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 	)
 	if err != nil {
 		logMT.Error(err, "Retrieving list of model trainings")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -134,28 +136,28 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} training.ModelTraining
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [post]
 func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 	var mt training.ModelTraining
 
 	if err := c.ShouldBindJSON(&mt); err != nil {
 		logMT.Error(err, "JSON binding of the model training is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mtc.validator.ValidatesAndSetDefaults(&mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Validation of the model training is failed: %v", mt))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mtc.trainService.CreateModelTraining(c.Request.Context(), &mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -170,29 +172,29 @@ func (mtc *ModelTrainingController) createMT(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} training.ModelTraining
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [put]
 func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 	var mt training.ModelTraining
 
 	if err := c.ShouldBindJSON(&mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("JSON binding of the model training is failed: %v", mt))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mtc.validator.ValidatesAndSetDefaults(&mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mtc.trainService.UpdateModelTraining(c.Request.Context(), &mt); err != nil {
 		logMT.Error(err, fmt.Sprintf("Creation of the model training: %v", mt))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -209,8 +211,8 @@ func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 // @Param MP body v1alpha1.TrainingResult true "Model Training result"
 // @Param id path string true "Model Training id"
 // @Success 200 {array} v1alpha1.TrainingResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training/{id}/result [put]
 func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
@@ -218,14 +220,14 @@ func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(mtResult); err != nil {
 		logMT.Error(err, "JSON binding of the model training result is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := mtc.kubeClient.SaveModelTrainingResult(mtID, mtResult); err != nil {
 		logMT.Error(err, fmt.Sprintf("Save the result of the model training: %+v", mtResult))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -240,21 +242,21 @@ func (mtc *ModelTrainingController) saveMTResult(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Model Training id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training/{id} [delete]
 func (mtc *ModelTrainingController) deleteMT(c *gin.Context) {
 	mtID := c.Param(IDMtURLParam)
 
 	if err := mtc.trainService.DeleteModelTraining(c.Request.Context(), mtID); err != nil {
 		logMT.Error(err, fmt.Sprintf("Deletion of %s model training is failed", mtID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Model training %s was deleted", mtID)})
+	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Model training %s was deleted", mtID)})
 }
 
 // @Summary Stream logs from model training pod
@@ -281,7 +283,7 @@ func (mtc *ModelTrainingController) getModelTrainingLog(c *gin.Context) {
 		if err != nil {
 			errMessage := fmt.Sprintf("Convert %s to bool", followParam)
 			logMT.Error(err, errMessage)
-			c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: errMessage})
+			c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: errMessage})
 
 			return
 		}
@@ -289,7 +291,7 @@ func (mtc *ModelTrainingController) getModelTrainingLog(c *gin.Context) {
 
 	if err := mtc.kubeClient.GetModelTrainingLogs(mtID, c.Writer, follow); err != nil {
 		logMT.Error(err, fmt.Sprintf("Getting %s model training logs is failed", mtID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}

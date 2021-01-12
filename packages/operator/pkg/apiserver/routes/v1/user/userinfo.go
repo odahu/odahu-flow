@@ -22,7 +22,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/user"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 
@@ -66,7 +66,7 @@ func (cc *controller) getUserInfo(c *gin.Context) {
 		const errorMessage = "Unexpected error during extraction a token from headers"
 		log.Error(err, errorMessage)
 
-		c.JSON(http.StatusBadRequest, routes.HTTPResult{
+		c.JSON(http.StatusBadRequest, httputil.HTTPResult{
 			Message: errorMessage,
 		})
 		return
@@ -74,7 +74,7 @@ func (cc *controller) getUserInfo(c *gin.Context) {
 
 	userInfo, err := utils.ExtractUserInfoFromToken(token, cc.config)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, routes.HTTPResult{
+		c.JSON(http.StatusBadRequest, httputil.HTTPResult{
 			Message: fmt.Sprintf("Malformed JWT: %s", err.Error()),
 		})
 		return

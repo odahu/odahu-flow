@@ -1,14 +1,14 @@
-package servicecatalog_test
+package servicecatalogroutes_test
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/servicecatalogroutes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/swagger"
 	"net/http"
 	"net/http/httptest"
 	"path"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	. "github.com/onsi/gomega"
 	"github.com/rakyll/statik/fs"
 	"github.com/stretchr/testify/suite"
@@ -33,7 +33,7 @@ func (s *SwaggerRouteSuite) SetupSuite() {
 
 	s.server = gin.Default()
 	rg := s.server.Group(pathPrefix)
-	servicecatalog.SetUpSwagger(rg, staticFS, func() (s string, e error) {
+	servicecatalogroutes.SetUpCatalogSwagger(rg, staticFS, func() (s string, e error) {
 		return testSwaggerDefinition, nil
 	})
 }
@@ -48,7 +48,7 @@ func TestSwaggerRouteSuite(t *testing.T) {
 
 func (s *SwaggerRouteSuite) TestSwaggerRootPage() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/swagger/index.html"), nil)
+	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/catalog/index.html"), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
@@ -67,18 +67,18 @@ func (s *SwaggerRouteSuite) verifyMimeType(url, mimeType string) {
 	s.server.ServeHTTP(w, req)
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(w.Header().Get(routes.ContentTypeHeaderKey)).Should(ContainSubstring(mimeType))
+	s.g.Expect(w.Header().Get(swagger.ContentTypeHeaderKey)).Should(ContainSubstring(mimeType))
 }
 
 func (s *SwaggerRouteSuite) TestSwaggerMimeType() {
-	s.verifyMimeType(path.Join(pathPrefix, "/swagger/index.html"), "text/html")
-	s.verifyMimeType(path.Join(pathPrefix, "/swagger/swagger-ui.css"), "text/css")
-	s.verifyMimeType(path.Join(pathPrefix, "/swagger/swagger-ui.js"), "application/javascript")
+	s.verifyMimeType(path.Join(pathPrefix, "/catalog/index.html"), "text/html")
+	s.verifyMimeType(path.Join(pathPrefix, "/catalog/swagger-ui.css"), "text/css")
+	s.verifyMimeType(path.Join(pathPrefix, "/catalog/swagger-ui.js"), "application/javascript")
 }
 
 func (s *SwaggerRouteSuite) TestAPISwaggerDefinition() {
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/swagger/data.json"), nil)
+	req, err := http.NewRequest(http.MethodGet, path.Join(pathPrefix, "/catalog/data.json"), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 

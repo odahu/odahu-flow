@@ -19,14 +19,16 @@ package connection
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"reflect"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
@@ -89,8 +91,8 @@ func ConfigureRoutes(
 // @Produce  json
 // @Param id path string true "Connection id"
 // @Success 200 {object} connection.Connection
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection/{id} [get]
 func (cc *controller) getConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
@@ -98,7 +100,7 @@ func (cc *controller) getConnection(c *gin.Context) {
 	conn, err := cc.connService.GetConnection(connID, true)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Retrieving %s connection", connID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -114,8 +116,8 @@ func (cc *controller) getConnection(c *gin.Context) {
 // @Produce  json
 // @Param id path string true "Connection id"
 // @Success 200 {object} connection.Connection
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection/{id}/decrypted [get]
 func (cc *controller) getDecryptedConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
@@ -123,7 +125,7 @@ func (cc *controller) getDecryptedConnection(c *gin.Context) {
 	conn, err := cc.connService.GetConnection(connID, false)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Retrieving %s connection", connID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -140,14 +142,14 @@ func (cc *controller) getDecryptedConnection(c *gin.Context) {
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} connection.Connection
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection [get]
 func (cc *controller) getAllConnections(c *gin.Context) {
 	filter := &conn_repository.Filter{}
 	size, page, err := routes.URLParamsToFilter(c, filter, fieldsCache)
 	if err != nil {
 		logC.Error(err, "Malformed url parameters of connection request")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -159,7 +161,7 @@ func (cc *controller) getAllConnections(c *gin.Context) {
 	)
 	if err != nil {
 		logC.Error(err, "Retrieving list of connections")
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -173,21 +175,21 @@ func (cc *controller) getAllConnections(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Success 201 {object} connection.Connection
-// @Failure 400 {object} routes.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection [post]
 func (cc *controller) createConnection(c *gin.Context) {
 	var conn connection.Connection
 
 	if err := c.ShouldBindJSON(&conn); err != nil {
 		logC.Error(err, "JSON binding of the connection is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := cc.validator.ValidatesAndSetDefaults(&conn); err != nil {
 		logC.Error(err, fmt.Sprintf("Validation of the connection is failed: %v", conn))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -196,7 +198,7 @@ func (cc *controller) createConnection(c *gin.Context) {
 	var err error
 	if createdConnection, err = cc.connService.CreateConnection(conn); err != nil {
 		logC.Error(err, fmt.Sprintf("Creation of the connection: %+v", conn))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -210,23 +212,23 @@ func (cc *controller) createConnection(c *gin.Context) {
 // @Tags Connection
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection [put]
 func (cc *controller) updateConnection(c *gin.Context) {
 	var conn connection.Connection
 
 	if err := c.ShouldBindJSON(&conn); err != nil {
 		logC.Error(err, "JSON binding of the connection is failed")
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
 	if err := cc.validator.ValidatesAndSetDefaults(&conn); err != nil {
 		logC.Error(err, fmt.Sprintf("Validation of the connection is failed: %v", conn))
-		c.AbortWithStatusJSON(http.StatusBadRequest, routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -234,7 +236,7 @@ func (cc *controller) updateConnection(c *gin.Context) {
 	updatedConnection, err := cc.connService.UpdateConnection(conn)
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Update of the connection: %+v", conn))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
@@ -249,19 +251,19 @@ func (cc *controller) updateConnection(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Connection id"
-// @Success 200 {object} routes.HTTPResult
-// @Failure 404 {object} routes.HTTPResult
-// @Failure 400 {object} routes.HTTPResult
+// @Success 200 {object} httputil.HTTPResult
+// @Failure 404 {object} httputil.HTTPResult
+// @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/connection/{id} [delete]
 func (cc *controller) deleteConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
 
 	if err := cc.connService.DeleteConnection(connID); err != nil {
 		logC.Error(err, fmt.Sprintf("Deletion of %s connection is failed", connID))
-		c.AbortWithStatusJSON(routes.CalculateHTTPStatusCode(err), routes.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
 		return
 	}
 
-	c.JSON(http.StatusOK, routes.HTTPResult{Message: fmt.Sprintf("Connection %s was deleted", connID)})
+	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Connection %s was deleted", connID)})
 }

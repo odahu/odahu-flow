@@ -34,6 +34,7 @@ import (
 	route_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -191,7 +192,7 @@ func (s *ModelDeploymentRouteSuite) TestGetMDNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -382,7 +383,7 @@ func (s *ModelDeploymentRouteSuite) TestCreateMDValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -404,7 +405,7 @@ func (s *ModelDeploymentRouteSuite) TestCreateDuplicateMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -464,7 +465,7 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMDValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -483,7 +484,7 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMDNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -505,7 +506,7 @@ func (s *ModelDeploymentRouteSuite) TestDeleteMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -530,7 +531,7 @@ func (s *ModelDeploymentRouteSuite) TestDeleteMDNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -615,7 +616,7 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPICreateMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -637,7 +638,7 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIUpdateMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -659,7 +660,7 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIDeleteMD() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -700,7 +701,7 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsIncorrectCursor() {
 	s.server.ServeHTTP(w, req)
 	s.g.Expect(w.Code).Should(Equal(400))
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(result.Message).Should(ContainSubstring("Incorrect \"cursor\" query parameter"))

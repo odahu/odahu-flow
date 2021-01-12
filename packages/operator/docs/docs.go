@@ -523,7 +523,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ModelDeploymentEventsResponse"
+                            "$ref": "#/definitions/LatestDeploymentEvents"
                         }
                     },
                     "400": {
@@ -1132,7 +1132,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RouteEventsResponse"
+                            "$ref": "#/definitions/LatestRouteEvents"
                         }
                     },
                     "400": {
@@ -2475,11 +2475,33 @@ var doc = `{
             "type": "object",
             "properties": {
                 "auth": {
+                    "description": "Auth configures connection parameters to ODAHU API Server",
                     "type": "object",
                     "$ref": "#/definitions/AuthConfig"
                 },
                 "baseUrl": {
+                    "description": "BaseURL is a prefix to service catalog web server endpoints",
                     "type": "string"
+                },
+                "debug": {
+                    "description": "enabled Debug increase logger verbosity and format. Default: false",
+                    "type": "boolean"
+                },
+                "edgeHost": {
+                    "description": "ServiceCatalog set EdgeHost as Host header in requests to ML servers",
+                    "type": "string"
+                },
+                "edgeURL": {
+                    "description": "ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path",
+                    "type": "string"
+                },
+                "fetchTimeout": {
+                    "description": "FetchTimeout configures how often new events will be fetched. Default 5 seconds.",
+                    "type": "integer"
+                },
+                "workersCount": {
+                    "description": "WorkersCount configures how many workers will process events. Default: 4",
+                    "type": "integer"
                 }
             }
         },
@@ -2588,20 +2610,6 @@ var doc = `{
                 }
             }
         },
-        "ModelDeploymentEventsResponse": {
-            "type": "object",
-            "properties": {
-                "cursor": {
-                    "type": "integer"
-                },
-                "events": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/outbox.DeploymentEvent"
-                    }
-                }
-            }
-        },
         "ModelRoute": {
             "type": "object",
             "properties": {
@@ -2633,27 +2641,7 @@ var doc = `{
                 }
             }
         },
-        "RouteEventsResponse": {
-            "type": "object",
-            "properties": {
-                "cursor": {
-                    "type": "integer"
-                },
-                "events": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/outbox.RouteEvent"
-                    }
-                }
-            }
-        },
-        "feedback.ModelFeedbackRequest": {
-            "type": "object"
-        },
-        "feedback.ModelFeedbackResponse": {
-            "type": "object"
-        },
-        "outbox.DeploymentEvent": {
+        "DeploymentEvent": {
             "type": "object",
             "properties": {
                 "datetime": {
@@ -2665,7 +2653,7 @@ var doc = `{
                     "type": "string"
                 },
                 "payload": {
-                    "description": "Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,\nModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of\nModelDeploymentStatusUpdated update\nDoes not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events",
+                    "description": "Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,\nModelDeploymentStatusUpdated  events.\nDoes not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events",
                     "type": "object",
                     "$ref": "#/definitions/ModelDeployment"
                 },
@@ -2675,7 +2663,35 @@ var doc = `{
                 }
             }
         },
-        "outbox.RouteEvent": {
+        "LatestDeploymentEvents": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "integer"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DeploymentEvent"
+                    }
+                }
+            }
+        },
+        "LatestRouteEvents": {
+            "type": "object",
+            "properties": {
+                "cursor": {
+                    "type": "integer"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/RouteEvent"
+                    }
+                }
+            }
+        },
+        "RouteEvent": {
             "type": "object",
             "properties": {
                 "datetime": {
@@ -2687,12 +2703,27 @@ var doc = `{
                     "type": "string"
                 },
                 "payload": {
-                    "description": "Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,\nModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of\nModelRouteStatusUpdated update\nDoes not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events",
+                    "description": "Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,\nModelRouteStatusUpdated  events.\nDoes not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events",
                     "type": "object",
                     "$ref": "#/definitions/ModelRoute"
                 },
                 "type": {
                     "description": "Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,\nModelRouteDeletionMarkIsSet, ModelRouteStatusUpdated",
+                    "type": "string"
+                }
+            }
+        },
+        "feedback.ModelFeedbackRequest": {
+            "type": "object"
+        },
+        "feedback.ModelFeedbackResponse": {
+            "type": "object"
+        },
+        "HTTPResult": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Success of error message",
                     "type": "string"
                 }
             }
@@ -2917,15 +2948,6 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/TargetSchema"
                     }
-                }
-            }
-        },
-        "HTTPResult": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "description": "Success of error message",
-                    "type": "string"
                 }
             }
         },
