@@ -107,7 +107,6 @@ Delete Model Deployment and Check that Model Deployment does not exist
     Call API and get Error      ${404NotFound}  deployment get id  ${DEPLOYMENT}
 
 
-
 #############################
 #    NEGATIVE TEST CASES    #
 #############################
