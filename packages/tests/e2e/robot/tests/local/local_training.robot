@@ -17,8 +17,10 @@ Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
+...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}  AND
+...                 StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
 Suite Teardown      Run Keywords
+...                 StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
 ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
 ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
 ...                 Remove File  ${LOCAL_CONFIG}
@@ -81,8 +83,6 @@ Try Run and Fail invalid Training
     ...  run --train-id not-existing-training
 
 Run Valid Training with local & cluster specs
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
-    [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
     [Template]  Run Training
     # id	file/dir	output
     # local
