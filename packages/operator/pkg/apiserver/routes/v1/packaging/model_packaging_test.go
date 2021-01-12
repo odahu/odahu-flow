@@ -25,20 +25,21 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
-	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"net/http/httptest"
@@ -208,7 +209,7 @@ func (s *ModelPackagingRouteSuite) TestGetMPNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -353,7 +354,7 @@ func (s *ModelPackagingRouteSuite) TestCreateDuplicateMP() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -399,7 +400,7 @@ func (s *ModelPackagingRouteSuite) TestUpdateMPNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -420,7 +421,7 @@ func (s *ModelPackagingRouteSuite) TestDeleteMP() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -442,7 +443,7 @@ func (s *ModelPackagingRouteSuite) TestDeleteMPNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -506,7 +507,7 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPIDeleteMP() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -529,7 +530,7 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPIUpdateMP() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -552,7 +553,7 @@ func (s *ModelPackagingRouteSuite) TestDisabledAPICreateMP() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 

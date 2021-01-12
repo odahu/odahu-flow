@@ -102,7 +102,8 @@ manifests: controller-gen
 
 ## swag: Generate swagger files
 swag:
-	swag init -g pkg/apiserver/server.go
+	swag init -g pkg/apiserver/server.go --exclude pkg/servicecatalog
+
 	# Remove the line with generated timestamp
 	"${SED_BIN}" -i '3d' docs/docs.go
 	"${SED_BIN}" -i 's/connection\.//g' docs/*
@@ -112,7 +113,14 @@ swag:
 	"${SED_BIN}" -i 's/packaging\.//g' docs/*
 	"${SED_BIN}" -i 's/config\.//g' docs/*
 	"${SED_BIN}" -i 's/user\.//g' docs/*
+	"${SED_BIN}" -i 's/httputil\.//g' docs/*
+	"${SED_BIN}" -i 's/event\.//g' docs/*
 	"${SED_BIN}" -i 's/v1alpha1\.//g' docs/*
+	"${SED_BIN}" -i 's/v1alpha1\.//g' docs/*
+
+	swag init  -g pkg/servicecatalog/server.go  --exclude pkg/apiserver -o pkg/servicecatalog/docs
+	"${SED_BIN}" -i 's/model\.//g' pkg/servicecatalog/docs/*
+	"${SED_BIN}" -i 's/httputil\.//g' pkg/servicecatalog/docs/*
 
 
 ## generate-all: Execute all code generators

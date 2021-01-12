@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -29,10 +30,10 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
-	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
+	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -155,7 +156,7 @@ func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegrationNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -226,7 +227,7 @@ func (s *PackagingIntegrationRouteSuite) TestCreateDuplicatePackagingIntegration
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -303,7 +304,7 @@ func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegrationNotFound(
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -320,7 +321,7 @@ func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -338,7 +339,7 @@ func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegrationNotFound(
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -404,7 +405,7 @@ func (s *PackagingIntegrationRouteSuite) TestDisabledAPICreatePackagingIntegrati
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -426,7 +427,7 @@ func (s *PackagingIntegrationRouteSuite) TestDisabledAPIUpdatePackagingIntegrati
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -444,7 +445,7 @@ func (s *PackagingIntegrationRouteSuite) TestDisabledAPIDeletePackagingIntegrati
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 

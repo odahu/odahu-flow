@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"k8s.io/api/apps/v1beta2"
@@ -44,35 +43,35 @@ func TestUtilsSuite(t *testing.T) {
 
 // TODO: Remove the test after implementing custom exceptions for ALL entity's repositories
 func (s *UtilsSuite) TestKubernetesErrors() {
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		errors.NewNotFound(v1beta2.Resource("statefulset"), "test"),
 	)).Should(Equal(http.StatusNotFound))
 
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		errors.NewAlreadyExists(v1beta2.Resource("statefulset"), "test"),
 	)).Should(Equal(409))
 }
 
 func (s *UtilsSuite) TestOdahuflowErrors() {
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		odahuflow_errors.NotFoundError{},
 	)).Should(Equal(http.StatusNotFound))
 
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		odahuflow_errors.AlreadyExistError{},
 	)).Should(Equal(http.StatusConflict))
 
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		odahuflow_errors.SerializationError{},
 	)).Should(Equal(http.StatusInternalServerError))
 
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		odahuflow_errors.ForbiddenError{},
 	)).Should(Equal(http.StatusForbidden))
 }
 
 func (s *UtilsSuite) TestUnknownError() {
-	s.g.Expect(routes.CalculateHTTPStatusCode(
+	s.g.Expect(odahuflow_errors.CalculateHTTPStatusCode(
 		fmt.Errorf("some exception"),
 	)).Should(Equal(http.StatusInternalServerError))
 }

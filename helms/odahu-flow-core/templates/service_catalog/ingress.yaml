@@ -13,7 +13,7 @@ spec:
     - host: {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "%s") }}
       http:
         paths:
-          - path: "{{ .Values.config.serviceCatalog.baseUrl }}/swagger"
+          - path: "{{ .Values.config.serviceCatalog.baseUrl }}"
             backend:
               serviceName: "{{ .Release.Name }}-service-catalog"
               servicePort: 5000
