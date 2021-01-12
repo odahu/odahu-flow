@@ -64,8 +64,6 @@ Try Run and Fail Training with invalid credentials
 
 Try Run and Fail invalid Training
     [Tags]   negative
-    [Setup]  Login to the api and edge
-    [Teardown]  Shell  odahuflowctl logout
     [Template]  Try Run Training
     # missing required option
     Error: Missing option '--train-id' / '--id'.
