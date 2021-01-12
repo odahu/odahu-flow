@@ -60,7 +60,7 @@ Run Valid Training with local & cluster specs
     [Template]  Run Training
     # auth data     id      file/dir        output
     # local
-    run -id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     # cluster
     run -f ${ARTIFACT_DIR}/dir/packaging --id local-dir-cluster-artifact-template --output ${RESULT_DIR}  ${RESULT_DIR}
     --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
@@ -102,7 +102,7 @@ Try Run and Fail invalid Packaging
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
     ...  run --id local-cluster -a wine-cluster-1 --artifact-path ${RESULT_DIR}
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
-    ...  run --id local-cluster --no-disable-package-targets --disable-target docker-pull
+    ...  run --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-pull
 
 Run Valid Packaging with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
