@@ -1,7 +1,7 @@
 *** Variables ***
 ${RES_DIR}                  ${CURDIR}/resources
 ${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
-${RESULT_DIR}               ${CURDIR}/packaging_train_results
+${RESULT_DIR}               ${CURDIR}/local_pack_results
 
 ${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output

@@ -1,13 +1,12 @@
 *** Variables ***
 ${RES_DIR}                  ${CURDIR}/resources
 ${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
-${RESULT_DIR}               ${CURDIR}/training_train_results
+${RESULT_DIR}               ${CURDIR}/local_train_results
 
 ${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_training/training_output
 
 ${LOCAL_CONFIG}             odahuflow/local_training
-
 
 *** Settings ***
 Documentation       local trainings & packagings with spec on cluster
