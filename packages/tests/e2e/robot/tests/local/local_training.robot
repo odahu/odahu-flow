@@ -97,14 +97,14 @@ Run Valid Packaging with local spec
     [Template]  Run Packaging
     # id	file/dir	artifact path	artifact name	package-targets
     --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} -a wine-local-1.0
+    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1.0
 
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
     Should contain  ${list_result.stdout}  Training artifacts:
     Should contain  ${list_result.stdout}  simple-model
-    Should contain  ${list_result.stdout}  wine-local-1.0
+    Should contain  ${list_result.stdout}  wine-local-1
     Should contain  ${list_result.stdout}  wine-cluster-1
     ${line number}  Split To Lines  ${list_result.stdout}
     ${line number}  Get length   ${line number}
