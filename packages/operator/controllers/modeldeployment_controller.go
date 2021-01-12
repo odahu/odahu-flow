@@ -72,13 +72,14 @@ const (
 	DefaultKnativeAutoscalingMetric      = "concurrency"
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	DodelNameAnnotationKey               = "modelName"
+	ModelDeploymentVersionKey            = "ModelDeploymentVersion"
 
-	IstioRewriteHTTPProbesAnnotation     = "sidecar.istio.io/rewriteAppHTTPProbers"
-	OdahuAuthorizationLabel          	 = "odahu-flow-authorization"
+	IstioRewriteHTTPProbesAnnotation = "sidecar.istio.io/rewriteAppHTTPProbers"
+	OdahuAuthorizationLabel          = "odahu-flow-authorization"
 
-	deploymentIDLabel 					 = "odahu.org/deploymentID"
-	cmPolicySuffix    					 = "opa-policy"
-	podPolicyLabel   					 = "opa-policy-config-map-name"
+	deploymentIDLabel = "odahu.org/deploymentID"
+	cmPolicySuffix    = "opa-policy"
+	podPolicyLabel    = "opa-policy-config-map-name"
 )
 
 var (
@@ -147,6 +148,9 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      KnativeConfigurationName(modelDeploymentCR),
 			Namespace: modelDeploymentCR.Namespace,
+			Annotations: map[string]string{
+				ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion,
+			},
 		},
 		Spec: knservingv1.ConfigurationSpec{
 			Template: knservingv1.RevisionTemplateSpec{
@@ -159,16 +163,16 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 						// replicas are scaled to 0 even if user set minScale > 0
 						// TODO in future: move from creating knservingv1.Configuration -> knservingv1.Service
 						// https://github.com/knative/serving/blob/a333742324081d769d1b234622f3fc4cfd181ca4/pkg/apis/autoscaling/v1alpha1/pa_lifecycle.go#L85
-						serving.RouteLabelKey: modelDeploymentCR.Name,
+						serving.RouteLabelKey:   modelDeploymentCR.Name,
 						OdahuAuthorizationLabel: "enabled",
-						podPolicyLabel: getCMPolicyName(modelDeploymentCR),
+						podPolicyLabel:          getCMPolicyName(modelDeploymentCR),
 					},
 					Annotations: map[string]string{
-						KnativeAutoscalingClass:     DefaultKnativeAutoscalingClass,
-						KnativeAutoscalingMetric:    DefaultKnativeAutoscalingMetric,
-						KnativeMinReplicasKey:       strconv.Itoa(int(*modelDeploymentCR.Spec.MinReplicas)),
-						KnativeMaxReplicasKey:       strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
-						KnativeAutoscalingTargetKey: KnativeAutoscalingTargetDefaultValue,
+						KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
+						KnativeAutoscalingMetric:         DefaultKnativeAutoscalingMetric,
+						KnativeMinReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MinReplicas)),
+						KnativeMaxReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
+						KnativeAutoscalingTargetKey:      KnativeAutoscalingTargetDefaultValue,
 						IstioRewriteHTTPProbesAnnotation: "true",
 					},
 				},
@@ -192,11 +196,6 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 		return err
 	}
 
-	if err := odahuflow.StoreHashKnative(knativeConfiguration); err != nil {
-		log.Error(err, "Cannot apply obj hash")
-		return err
-	}
-
 	found := &knservingv1.Configuration{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: knativeConfiguration.Name, Namespace: knativeConfiguration.Namespace,
@@ -209,26 +208,25 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 		return err
 	}
 
-	if !odahuflow.ObjsEqualByHash(knativeConfiguration, found) {
-		log.Info(fmt.Sprintf(
-			"Knative Configuration hashes aren't equal. Update the %s Knative Configuration",
-			knativeConfiguration.Name,
-		))
+	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
+	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
+		log.Info("Model Deployment version is up to date, skipping")
+		return nil
+	}
 
-		found.Spec = knativeConfiguration.Spec
-		found.ObjectMeta.Annotations = knativeConfiguration.ObjectMeta.Annotations
-		found.ObjectMeta.Labels = knativeConfiguration.ObjectMeta.Labels
+	log.Info(fmt.Sprintf(
+		"Knative Configuration bases on version %s, update to reflect version %s",
+		modelDeploymentVersion, modelDeploymentCR.ResourceVersion,
+	))
 
-		log.Info(fmt.Sprintf("Updating %s Knative Configuration", knativeConfiguration.ObjectMeta.Name))
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Info(fmt.Sprintf(
-			"Knative Configuration hashes equal. Skip updating of the %s Knative Configuration",
-			knativeConfiguration.Name,
-		))
+	found.Spec = knativeConfiguration.Spec
+	found.ObjectMeta.Annotations = knativeConfiguration.ObjectMeta.Annotations
+	found.ObjectMeta.Labels = knativeConfiguration.ObjectMeta.Labels
+
+	log.Info(fmt.Sprintf("Updating %s Knative Configuration", knativeConfiguration.ObjectMeta.Name))
+	err = r.Update(context.TODO(), found)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -662,8 +660,6 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	log.Info("Run reconciling of model deployment")
 
-
-
 	if err := r.reconcilePolicyCM(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile policy config map")
 		return reconcile.Result{}, err
@@ -687,14 +683,14 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	}
 
 	if !configurationReady {
-		log.Info("Configuration was not updated yet. Put the Model Deployment back in the queue")
+		log.Info("Configuration was not updated yet. Update Status and Put the Model Deployment back in the queue")
 
 		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, "")
 
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
 	}
 
-	log.Info("Reconcile default Model Route")
+	log.Info("Reconcile K8s Service")
 
 	if err := r.reconcileService(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile the k8s service")
@@ -708,6 +704,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	}
 
 	if err := r.Client.Get(context.TODO(), modelDeploymentKey, modelDeployment); errors.IsNotFound(err) {
+		log.Info("Knative Revision Deployment not found. Re-queueing...")
 		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, latestReadyRevision)
 
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
@@ -722,6 +719,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	modelDeploymentCR.Status.Deployment = modelDeployment.Name
 
 	if modelDeploymentCR.Status.Replicas != modelDeploymentCR.Status.AvailableReplicas {
+		log.Info(fmt.Sprintf("Not enough replicas running. Requeue after %s", DefaultRequeueDelay))
 		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, latestReadyRevision)
 
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
