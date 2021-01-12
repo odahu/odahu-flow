@@ -35,6 +35,7 @@ import (
 	route_repository_db "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -186,7 +187,7 @@ func (s *ModelRouteSuite) TestGetMRNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -353,7 +354,7 @@ func (s *ModelRouteSuite) TestCreateDuplicateMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -373,7 +374,7 @@ func (s *ModelRouteSuite) TestValidateCreateMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -438,7 +439,7 @@ func (s *ModelRouteSuite) TestUpdateDefaultRoute() {
 
 	s.g.Expect(w.Code).Should(Equal(403))
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	errMsg := fmt.Sprintf("access forbidden: unable to update default route with ID \"%v\"", r)
@@ -457,7 +458,7 @@ func (s *ModelRouteSuite) TestUpdateMRNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -478,7 +479,7 @@ func (s *ModelRouteSuite) TestValidateUpdateMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -499,7 +500,7 @@ func (s *ModelRouteSuite) TestDeleteMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -530,7 +531,7 @@ func (s *ModelRouteSuite) TestDeleteDefaultRoute() {
 
 	s.g.Expect(w.Code).Should(Equal(403))
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	errMsg := fmt.Sprintf("access forbidden: unable to delete default route with ID \"%v\"", r)
@@ -548,7 +549,7 @@ func (s *ModelRouteSuite) TestDeleteMRNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -617,7 +618,7 @@ func (s *ModelRouteSuite) TestDisabledAPICreateMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -640,7 +641,7 @@ func (s *ModelRouteSuite) TestDisabledAPIUpdateMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -662,7 +663,7 @@ func (s *ModelRouteSuite) TestDisabledAPIDeleteMR() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -683,7 +684,7 @@ func (s *ModelRouteSuite) TestGetRouteEventsIncorrectCursor() {
 	s.server.ServeHTTP(w, req)
 	s.g.Expect(w.Code).Should(Equal(400))
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.g.Expect(result.Message).Should(ContainSubstring("Incorrect \"cursor\" query parameter"))

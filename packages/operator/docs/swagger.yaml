@@ -341,9 +341,26 @@ definitions:
     properties:
       auth:
         $ref: '#/definitions/AuthConfig'
+        description: Auth configures connection parameters to ODAHU API Server
         type: object
       baseUrl:
+        description: BaseURL is a prefix to service catalog web server endpoints
         type: string
+      debug:
+        description: 'enabled Debug increase logger verbosity and format. Default: false'
+        type: boolean
+      edgeHost:
+        description: ServiceCatalog set EdgeHost as Host header in requests to ML servers
+        type: string
+      edgeURL:
+        description: ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
+        type: string
+      fetchTimeout:
+        description: FetchTimeout configures how often new events will be fetched. Default 5 seconds.
+        type: integer
+      workersCount:
+        description: 'WorkersCount configures how many workers will process events. Default: 4'
+        type: integer
     type: object
   TrainerConfig:
     properties:
@@ -423,15 +440,6 @@ definitions:
         description: UpdatedAt
         type: string
     type: object
-  ModelDeploymentEventsResponse:
-    properties:
-      cursor:
-        type: integer
-      events:
-        items:
-          $ref: '#/definitions/outbox.DeploymentEvent'
-        type: array
-    type: object
   ModelRoute:
     properties:
       createdAt:
@@ -457,20 +465,7 @@ definitions:
         description: UpdatedAt
         type: string
     type: object
-  RouteEventsResponse:
-    properties:
-      cursor:
-        type: integer
-      events:
-        items:
-          $ref: '#/definitions/outbox.RouteEvent'
-        type: array
-    type: object
-  feedback.ModelFeedbackRequest:
-    type: object
-  feedback.ModelFeedbackResponse:
-    type: object
-  outbox.DeploymentEvent:
+  DeploymentEvent:
     properties:
       datetime:
         description: When event is raised
@@ -485,8 +480,7 @@ definitions:
         $ref: '#/definitions/ModelDeployment'
         description: |-
           Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,
-          ModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of
-          ModelDeploymentStatusUpdated update
+          ModelDeploymentStatusUpdated  events.
           Does not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events
         type: object
       type:
@@ -495,7 +489,25 @@ definitions:
           ModelDeploymentDeletionMarkIsSet, ModelDeploymentStatusUpdated
         type: string
     type: object
-  outbox.RouteEvent:
+  LatestDeploymentEvents:
+    properties:
+      cursor:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/DeploymentEvent'
+        type: array
+    type: object
+  LatestRouteEvents:
+    properties:
+      cursor:
+        type: integer
+      events:
+        items:
+          $ref: '#/definitions/RouteEvent'
+        type: array
+    type: object
+  RouteEvent:
     properties:
       datetime:
         description: When event is raised
@@ -510,14 +522,23 @@ definitions:
         $ref: '#/definitions/ModelRoute'
         description: |-
           Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,
-          ModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of
-          ModelRouteStatusUpdated update
+          ModelRouteStatusUpdated  events.
           Does not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events
         type: object
       type:
         description: |-
           Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,
           ModelRouteDeletionMarkIsSet, ModelRouteStatusUpdated
+        type: string
+    type: object
+  feedback.ModelFeedbackRequest:
+    type: object
+  feedback.ModelFeedbackResponse:
+    type: object
+  HTTPResult:
+    properties:
+      message:
+        description: Success of error message
         type: string
     type: object
   JsonSchema:
@@ -684,12 +705,6 @@ definitions:
         items:
           $ref: '#/definitions/TargetSchema'
         type: array
-    type: object
-  HTTPResult:
-    properties:
-      message:
-        description: Success of error message
-        type: string
     type: object
   InputDataBindingDir:
     properties:
@@ -1519,7 +1534,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ModelDeploymentEventsResponse'
+            $ref: '#/definitions/LatestDeploymentEvents'
         "400":
           description: Bad Request
           schema:
@@ -1920,7 +1935,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/RouteEventsResponse'
+            $ref: '#/definitions/LatestRouteEvents'
         "400":
           description: Bad Request
           schema:

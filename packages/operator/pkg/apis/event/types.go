@@ -47,8 +47,7 @@ type RouteEvent struct {
 	// Does not make sense in case of ModelRouteUpdate, ModelRouteCreate, ModelRouteStatusUpdated events
 	EntityID string `json:"entityID"`
 	// Payload contains ModelRoute for ModelRouteUpdate, ModelRouteCreate,
-	// ModelRouteStatusUpdated  events. Only .Status part of payload makes sense in case of
-	// ModelRouteStatusUpdated update
+	// ModelRouteStatusUpdated  events.
 	// Does not make sense in case of ModelRouteDelete, ModelRouteDeletionMarkIsSet events
 	Payload deployment.ModelRoute `json:"payload"`
 	// Possible values: ModelRouteCreate, ModelRouteUpdate, ModelRouteDeleted,
@@ -64,8 +63,7 @@ type DeploymentEvent struct {
 	// Does not make sense in case of ModelDeploymentUpdate, ModelDeploymentCreate, ModelDeploymentStatusUpdated events
 	EntityID string `json:"entityID"`
 	// Payload contains ModelDeployment for ModelDeploymentUpdate, ModelDeploymentCreate,
-	// ModelDeploymentStatusUpdated  events. Only .Status part of payload makes sense in case of
-	// ModelDeploymentStatusUpdated update
+	// ModelDeploymentStatusUpdated  events.
 	// Does not make sense in case of ModelDeploymentDelete, ModelDeploymentDeletionMarkIsSet events
 	Payload deployment.ModelDeployment `json:"payload"`
 	// Possible values: ModelDeploymentCreate, ModelDeploymentUpdate, ModelRouteDeleted,

@@ -1,0 +1,83 @@
+definitions:
+  HTTPResult:
+    properties:
+      message:
+        description: Success of error message
+        type: string
+    type: object
+  DeployedModel:
+    properties:
+      deploymentID:
+        description: deploymentID is ModelDeployment that deploys this model
+        type: string
+      servedModel:
+        $ref: '#/definitions/ServedModel'
+        type: object
+    type: object
+  Metadata:
+    properties:
+      others:
+        additionalProperties:
+          type: string
+        description: Optional metadata key, value
+        type: object
+    type: object
+  ServedModel:
+    properties:
+      metadata:
+        $ref: '#/definitions/Metadata'
+        type: object
+      mlServer:
+        description: |-
+          MLServer name that serves a model
+          Possible values: ODAHU, Triton
+        type: string
+      swagger2:
+        $ref: '#/definitions/Swagger2'
+        type: object
+    type: object
+  Swagger2:
+    properties:
+      raw:
+        description: Base64 encoded OpenAPI 2.0 definition of MLServer API
+        format: base64
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Service catalog serves information about deployed models
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Service Catalog
+  version: "1.0"
+paths:
+  /service-catalog/model-info/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get info about deployed model
+      parameters:
+      - description: ModelDeployment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/DeployedModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get info about deployed model
+swagger: "2.0"

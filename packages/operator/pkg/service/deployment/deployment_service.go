@@ -123,17 +123,17 @@ func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err 
 		if err = s.mrRepo.DeleteModelRoute(ctx, tx, mrDefaultID); err != nil {
 			return
 		}
-		event := event.Event{EntityID: mrDefaultID, EventType: event.ModelRouteDeletedEventType,
+		e := event.Event{EntityID: mrDefaultID, EventType: event.ModelRouteDeletedEventType,
 			EventGroup: event.ModelRouteEventGroup, Payload:    nil}
-		if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+		if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 			return
 		}
 	}
 
 	err = s.repo.DeleteModelDeployment(ctx, tx, id)
-	event := event.Event{EntityID: id, EventType: event.ModelDeploymentDeletedEventType,
+	e := event.Event{EntityID: id, EventType: event.ModelDeploymentDeletedEventType,
 		EventGroup: event.ModelDeploymentEventGroup, Payload:    nil}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return
 	}
 	return
@@ -147,12 +147,12 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	}
 	defer func(){db_utils.FinishTx(tx, err, log)}()
 
-	event := event.Event{
+	e := event.Event{
 		EntityID:   id,
 		EventType:  event.ModelDeploymentDeletionMarkIsSetEventType,
 		EventGroup: event.ModelDeploymentEventGroup,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 
@@ -171,13 +171,13 @@ func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.M
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelDeploymentStatus{}
 
-	event := event.Event{
+	e := event.Event{
 		EntityID:   md.ID,
 		EventType:  event.ModelDeploymentUpdatedEventType,
 		EventGroup: event.ModelDeploymentEventGroup,
 		Payload:    *md,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 	return s.repo.UpdateModelDeployment(ctx, tx, md)
@@ -195,39 +195,36 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 
 	defer func(){db_utils.FinishTx(tx, err, log)}()
 
-	oldMt, err := s.repo.GetModelDeployment(ctx, tx, id)
+	oldDeploy, err := s.repo.GetModelDeployment(ctx, tx, id)
 	if err != nil {
 		return err
 	}
 
-	oldHash, err := hashutil.Hash(oldMt.Spec)
-	if err != nil {
-		return err
-	}
 
-	specHash, err := hashutil.Hash(spec)
-	if err != nil {
-		return err
-	}
-
-	if oldHash != specHash {
+	if !hashutil.Equal(oldDeploy.Spec, spec) {
 		err = odahu_errors.SpecWasTouched{Entity: id}
 		return err
+	}
+
+	if hashutil.Equal(oldDeploy.Status, status) {
+		// Status is not changed. Skip updating in database and publishing event
+		return nil
 	}
 
 	if err = s.repo.UpdateModelDeploymentStatus(ctx, tx, id, status); err != nil {
 		return err
 	}
 
-	event := event.Event{
+	updatedDeploy := *oldDeploy
+	updatedDeploy.Status = status
+
+	e := event.Event{
 		EntityID:   id,
 		EventType:  event.ModelDeploymentStatusUpdatedEventType,
 		EventGroup: event.ModelDeploymentEventGroup,
-		Payload: deployment.ModelDeployment{
-			Status: status,
-		},
+		Payload: updatedDeploy,
 	}
-	if err = s.eventPub.PublishEvent(ctx, tx, event); err != nil {
+	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 

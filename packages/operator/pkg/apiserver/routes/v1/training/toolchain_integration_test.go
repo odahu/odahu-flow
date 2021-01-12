@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -28,10 +29,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
+	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 )
@@ -138,7 +139,7 @@ func (s *TIGenericRouteSuite) TestGetToolchainIntegrationNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -315,7 +316,7 @@ func (s *TIGenericRouteSuite) TestCreateToolchainIntegrationValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var resultResponse routes.HTTPResult
+	var resultResponse httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &resultResponse)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -338,7 +339,7 @@ func (s *TIGenericRouteSuite) TestCreateDuplicateToolchainIntegration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -426,7 +427,7 @@ func (s *TIGenericRouteSuite) TestUpdateToolchainIntegrationValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var resultResponse routes.HTTPResult
+	var resultResponse httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &resultResponse)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -445,7 +446,7 @@ func (s *TIGenericRouteSuite) TestUpdateToolchainIntegrationNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var response routes.HTTPResult
+	var response httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -464,7 +465,7 @@ func (s *TIGenericRouteSuite) TestDeleteToolchainIntegration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -484,7 +485,7 @@ func (s *TIGenericRouteSuite) TestDeleteToolchainIntegrationNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -504,7 +505,7 @@ func (s *TIGenericRouteSuite) TestDisabledAPIDeleteToolchainIntegration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -527,7 +528,7 @@ func (s *TIGenericRouteSuite) TestDisabledAPIUpdateToolchainIntegration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -552,7 +553,7 @@ func (s *TIGenericRouteSuite) TestDisabledAPICreateToolchainIntegrationValidatio
 	)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 

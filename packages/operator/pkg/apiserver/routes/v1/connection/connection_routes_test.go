@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -27,11 +28,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	conn_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/connection"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
-	conn_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/connection"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 )
@@ -143,7 +144,7 @@ func (s *ConnectionRouteGenericSuite) TestGetConnectionNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -415,7 +416,7 @@ func (s *ConnectionRouteGenericSuite) TestCreateDuplicateConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -435,7 +436,7 @@ func (s *ConnectionRouteGenericSuite) TestValidateCreateConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -483,7 +484,7 @@ func (s *ConnectionRouteGenericSuite) TestUpdateConnectionNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -505,7 +506,7 @@ func (s *ConnectionRouteGenericSuite) TestValidateUpdateConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -527,7 +528,7 @@ func (s *ConnectionRouteGenericSuite) TestDeleteConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -549,7 +550,7 @@ func (s *ConnectionRouteGenericSuite) TestDeleteConnectionNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -600,7 +601,7 @@ func (s *ConnectionRouteGenericSuite) TestGetDecryptedConnectionNotFound() {
 
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -622,7 +623,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -677,7 +678,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIGetDecryptedConnection() {
 
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -700,7 +701,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPICreateConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -726,7 +727,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIUpdateConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -751,7 +752,7 @@ func (s *ConnectionRouteGenericSuite) TestDisabledAPIDeleteConnection() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 

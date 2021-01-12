@@ -1,6 +1,7 @@
 package routes_test
 
 import (
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/swagger"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -58,7 +59,7 @@ func (s *SwaggerRouteSuite) verifyMimeType(url, mimeType string) {
 	s.server.ServeHTTP(w, req)
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(w.Header().Get(routes.ContentTypeHeaderKey)).Should(ContainSubstring(mimeType))
+	s.g.Expect(w.Header().Get(swagger.ContentTypeHeaderKey)).Should(ContainSubstring(mimeType))
 }
 
 func (s *SwaggerRouteSuite) TestSwaggerMimeType() {
