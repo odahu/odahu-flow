@@ -9,7 +9,8 @@ ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_training/training_output
 ${LOCAL_CONFIG}             odahuflow/local_training
 
 *** Settings ***
-Documentation       local trainings & packagings with spec on cluster
+Documentation       local run of trainings with specs on cluster and host
+...                 and packagings with specs on host, accent on traingings
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
@@ -20,12 +21,12 @@ Suite Setup         Run Keywords
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}  AND
 ...                 StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
 Suite Teardown      Run Keywords
-...                 StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json
+...                 StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json  AND
 ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
 ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
-Test Timeout        180 minutes
+Test Timeout        120 minutes
 
 *** Keywords ***
 Try Run Training

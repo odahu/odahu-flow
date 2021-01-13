@@ -9,7 +9,8 @@ ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 ${LOCAL_CONFIG}             odahuflow/local_packaging
 
 *** Settings ***
-Documentation       trainings with spec on cluster & local packagings
+Documentation       local run of trainings and packagings
+...                 with specs on cluster and host, accent on packagings
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
@@ -25,7 +26,7 @@ Suite Teardown      Run Keywords
 ...                 Remove File  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl logout
 Force Tags          cli  local  packaging
-Test Timeout        180 minutes
+Test Timeout        120 minutes
 
 *** Keywords ***
 Run Packaging
