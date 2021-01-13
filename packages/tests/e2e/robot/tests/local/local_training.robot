@@ -20,9 +20,9 @@ Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}  AND
 ...                 Login to the api and edge  AND
-...                 StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
+...                 Shell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
 Suite Teardown      Run Keywords
-...                 StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json  AND
+...                 Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.json  AND
 ...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
 ...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
 ...                 Remove File  ${LOCAL_CONFIG}

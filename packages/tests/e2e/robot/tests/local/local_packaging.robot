@@ -56,7 +56,7 @@ Try Run Packaging
 
 *** Test Cases ***
 Run Valid Training with local & cluster specs
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
+    [Setup]     Shell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
     [Template]  Run Training
     # auth data     id      file/dir        output
     # local
