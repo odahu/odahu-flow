@@ -53,7 +53,7 @@ func (e *EnqueueRequestForImplicitOwner) Generic(evt event.GenericEvent, q workq
 
 func (e *EnqueueRequestForImplicitOwner) addEvent(meta metav1.Object, q workqueue.RateLimitingInterface) {
 	labels := meta.GetLabels()
-	name, ok := labels[DodelNameAnnotationKey]
+	name, ok := labels[ModelNameAnnotationKey]
 	if !ok {
 		return
 	}

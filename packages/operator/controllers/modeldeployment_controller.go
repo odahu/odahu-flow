@@ -71,8 +71,8 @@ const (
 	KnativeAutoscalingMetric             = "autoscaling.knative.dev/metric"
 	DefaultKnativeAutoscalingMetric      = "concurrency"
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
-	DodelNameAnnotationKey               = "modelName"
-	ModelDeploymentVersionKey            = "ModelDeploymentVersion"
+	ModelNameAnnotationKey               = "modelName"
+	ModelDeploymentVersionKey            = "modelDeploymentVersion"
 
 	IstioRewriteHTTPProbesAnnotation = "sidecar.istio.io/rewriteAppHTTPProbers"
 	OdahuAuthorizationLabel          = "odahu-flow-authorization"
@@ -156,7 +156,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 			Template: knservingv1.RevisionTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						DodelNameAnnotationKey: modelDeploymentCR.Name,
+						ModelNameAnnotationKey: modelDeploymentCR.Name,
 						deploymentIDLabel:      modelDeploymentCR.Name,
 						// We must provide it because we don't use knative built-in routing
 						// And w/o this label revision is considered as "Unreachable" so then minScale is ignored and
@@ -220,8 +220,12 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 	))
 
 	found.Spec = knativeConfiguration.Spec
-	found.ObjectMeta.Annotations = knativeConfiguration.ObjectMeta.Annotations
-	found.ObjectMeta.Labels = knativeConfiguration.ObjectMeta.Labels
+	for k, v := range knativeConfiguration.Labels {
+		found.Labels[k] = v
+	}
+	for k, v := range knativeConfiguration.Annotations {
+		found.Annotations[k] = v
+	}
 
 	log.Info(fmt.Sprintf("Updating %s Knative Configuration", knativeConfiguration.ObjectMeta.Name))
 	err = r.Update(context.TODO(), found)
@@ -332,6 +336,9 @@ func (r *ModelDeploymentReconciler) reconcileService(
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      modelDeploymentCR.Name,
 			Namespace: modelDeploymentCR.Namespace,
+			Annotations: map[string]string{
+				ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion,
+			},
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -350,11 +357,6 @@ func (r *ModelDeploymentReconciler) reconcileService(
 		return err
 	}
 
-	if err := odahuflow.StoreHash(service); err != nil {
-		log.Error(err, "Cannot apply obj hash")
-		return err
-	}
-
 	found := &corev1.Service{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name: service.Name, Namespace: service.Namespace,
@@ -367,25 +369,27 @@ func (r *ModelDeploymentReconciler) reconcileService(
 		return err
 	}
 
-	if !odahuflow.ObjsEqualByHash(service, found) {
-		log.Info(fmt.Sprintf("Service hashes aren't equal. Update the %s service", service.Name))
-
-		// ClusterIP must not change
-		clusterIP := found.Spec.ClusterIP
-		found.Spec = service.Spec
-		found.Spec.ClusterIP = clusterIP
-
-		log.Info(fmt.Sprintf("Updating %s k8s service", service.ObjectMeta.Name))
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Info(fmt.Sprintf("k8s service hashes equal. Skip updating of the %s service", service.Name))
+	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
+	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
+		log.Info("K8s Service is associated with up-to-date Model Deployment version, skipping")
+		return nil
 	}
 
-	if err := r.reconcileEndpoints(log, modelDeploymentCR); err != nil {
-		log.Error(err, "Can not reconcile endpoints")
+	log.Info(fmt.Sprintf("K8s Service is associated with outdated Model Deployment version. "+
+		"Update the %s service", service.Name))
+
+	// ClusterIP must not change
+	clusterIP := found.Spec.ClusterIP
+	found.Spec = service.Spec
+	found.Spec.ClusterIP = clusterIP
+	for k, v := range service.Annotations {
+		found.Annotations[k] = v
+	}
+
+	log.Info(fmt.Sprintf("Updating %s k8s service", service.Name))
+	err = r.Update(context.TODO(), found)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -419,16 +423,14 @@ func (r *ModelDeploymentReconciler) reconcileEndpoints(
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      modelDeploymentCR.Name,
 			Namespace: modelDeploymentCR.Namespace,
+			Annotations: map[string]string{
+				ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion,
+			},
 		},
 		Subsets: knativeEndpoints.Subsets,
 	}
 
 	if err := controllerutil.SetControllerReference(modelDeploymentCR, endpoints, r.scheme); err != nil {
-		return err
-	}
-
-	if err := odahuflow.StoreHash(endpoints); err != nil {
-		log.Error(err, "Cannot apply obj hash")
 		return err
 	}
 
@@ -444,18 +446,23 @@ func (r *ModelDeploymentReconciler) reconcileEndpoints(
 		return err
 	}
 
-	if !odahuflow.ObjsEqualByHash(endpoints, found) {
-		log.Info(fmt.Sprintf("Endpoints hashes aren't equal. Update the %s endpoints", endpoints.Name))
+	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
+	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
+		log.Info("Endpoints are associated with up-to-date Model Deployment version, skipping")
+		return nil
+	}
 
-		found.Subsets = endpoints.Subsets
+	log.Info(fmt.Sprintf("Endpoints hashes aren't equal. Update the %s endpoints", endpoints.Name))
 
-		log.Info(fmt.Sprintf("Updating %s k8s endpoints", endpoints.ObjectMeta.Name))
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Info(fmt.Sprintf("k8s endpoints hashes equal. Skip updating of the %s endpoints", endpoints.Name))
+	found.Subsets = endpoints.Subsets
+	for k, v := range endpoints.Annotations {
+		found.Annotations[k] = v
+	}
+
+	log.Info(fmt.Sprintf("Updating %s k8s endpoints", endpoints.ObjectMeta.Name))
+	err = r.Update(context.TODO(), found)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -500,7 +507,7 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 	knativeRevisions := &knservingv1.RevisionList{}
 
 	labelSelectorReq, err := labels.NewRequirement(
-		DodelNameAnnotationKey,
+		ModelNameAnnotationKey,
 		selection.DoubleEquals,
 		[]string{modelDeploymentCR.Name},
 	)
@@ -528,7 +535,7 @@ func (r *ModelDeploymentReconciler) cleanupOldRevisions(
 		// pin variable
 		kr := kr
 
-		modelDeploymentName, ok := kr.Labels[DodelNameAnnotationKey]
+		modelDeploymentName, ok := kr.Labels[ModelNameAnnotationKey]
 		if !ok || modelDeploymentName != modelDeploymentCR.Name {
 			continue
 		}
@@ -694,6 +701,11 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	if err := r.reconcileService(log, modelDeploymentCR); err != nil {
 		log.Error(err, "Reconcile the k8s service")
+		return reconcile.Result{}, err
+	}
+
+	if err := r.reconcileEndpoints(log, modelDeploymentCR); err != nil {
+		log.Error(err, "Can not reconcile endpoints")
 		return reconcile.Result{}, err
 	}
 

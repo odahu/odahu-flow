@@ -17,13 +17,7 @@
 package odahuflow
 
 import (
-	"crypto/sha512"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
 const (
@@ -47,59 +41,4 @@ func GenerateTrainingResultCMName(mtID string) string {
 
 func GenerateDeploymentConnectionSecretName(connName string) string {
 	return fmt.Sprintf("%s-regsecret", connName)
-}
-
-// Compute hash and store it in the annotations
-func StoreHash(obj metav1.Object) error {
-	h := sha512.New()
-	jsonData, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-	_, err = h.Write(jsonData)
-	if err != nil {
-		return err
-	}
-
-	annotations := map[string]string{}
-	if obj.GetAnnotations() != nil {
-		for k, v := range obj.GetAnnotations() {
-			annotations[k] = v
-		}
-	}
-	annotations[LastAppliedHashAnnotation] = base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-	obj.SetAnnotations(annotations)
-
-	return nil
-}
-
-// Compute hash and store it in the annotations
-func StoreHashKnative(obj *knservingv1.Configuration) error {
-	h := sha512.New()
-	jsonData, err := json.Marshal(obj)
-	if err != nil {
-		return err
-	}
-
-	_, err = h.Write(jsonData)
-	if err != nil {
-		return err
-	}
-
-	annotations := map[string]string{}
-	if obj.GetAnnotations() != nil {
-		for k, v := range obj.GetAnnotations() {
-			annotations[k] = v
-		}
-	}
-	annotations[LastAppliedHashAnnotation] = base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-	obj.SetAnnotations(annotations)
-
-	return nil
-}
-
-func ObjsEqualByHash(firstObj, secondObj metav1.Object) bool {
-	return firstObj.GetAnnotations()[LastAppliedHashAnnotation] == secondObj.GetAnnotations()[LastAppliedHashAnnotation]
 }

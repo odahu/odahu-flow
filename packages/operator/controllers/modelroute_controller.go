@@ -22,7 +22,6 @@ import (
 	v1alpha3_istio_api "github.com/aspenmesh/istio-client-go/pkg/apis/networking/v1alpha3"
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	v1alpha3_istio "istio.io/api/networking/v1alpha3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -47,11 +46,12 @@ import (
 )
 
 const (
-	knativeRevisionHeader                   = "knative-serving-revision"
-	knativeNamespaceHeader                  = "knative-serving-namespace"
-	defaultRetryAttempts                    = 30
-	defaultListOfRetryCauses                = "5xx,connect-failure,refused-stream"
-	routeForLabelPrefix						= "odahu-route-for-"
+	knativeRevisionHeader    = "knative-serving-revision"
+	knativeNamespaceHeader   = "knative-serving-namespace"
+	defaultRetryAttempts     = 30
+	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
+	routeForLabelPrefix      = "odahu-route-for-"
+	ModelRouteVersionKey     = "modelRouteVersion"
 )
 
 var (
@@ -177,6 +177,9 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      VirtualServiceName(modelRouteCR),
 			Namespace: modelRouteCR.Namespace,
+			Annotations: map[string]string{
+				ModelRouteVersionKey: modelRouteCR.ResourceVersion,
+			},
 		},
 		Spec: v1alpha3_istio_api.VirtualServiceSpec{
 			VirtualService: v1alpha3_istio.VirtualService{
@@ -234,11 +237,6 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		return reconileAgain, err
 	}
 
-	if err := odahuflow.StoreHash(vservice); err != nil {
-		log.Error(err, "Cannot apply obj hash")
-		return reconileAgain, err
-	}
-
 	found := &v1alpha3_istio_api.VirtualService{}
 	err := r.Get(context.TODO(), types.NamespacedName{
 		Name: vservice.Name, Namespace: vservice.Namespace,
@@ -251,23 +249,26 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		return reconileAgain, err
 	}
 
-	if !odahuflow.ObjsEqualByHash(vservice, found) {
-		log.Info(fmt.Sprintf("Istio Virtual Service hashes don't equal. Update the %s Model route", vservice.Name))
+	modelDeploymentVersion := found.Annotations[ModelRouteVersionKey]
+	if modelDeploymentVersion == modelRouteCR.ResourceVersion {
+		log.Info("Istio VService is associated with up-to-date Model Route version, skipping")
+		return reconileAgain, err
+	}
 
-		found.Spec = vservice.Spec
-		found.ObjectMeta.Annotations = vservice.ObjectMeta.Annotations
-		found.ObjectMeta.Labels = vservice.ObjectMeta.Labels
+	log.Info(fmt.Sprintf("Istio Virtual Service hashes don't equal. Update the %s Model route", vservice.Name))
 
-		log.Info(fmt.Sprintf("Updating %s k8s Istio Virtual Service", vservice.ObjectMeta.Name))
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return reconileAgain, err
-		}
-	} else {
-		log.Info(fmt.Sprintf(
-			"Istio Virtual Service hashes equal. Skip updating of the %s Istio Virtual Service",
-			vservice.Name),
-		)
+	found.Spec = vservice.Spec
+	for k, v := range vservice.Labels {
+		found.Labels[k] = v
+	}
+	for k, v := range vservice.Annotations {
+		found.Annotations[k] = v
+	}
+
+	log.Info(fmt.Sprintf("Updating %s k8s Istio Virtual Service", vservice.ObjectMeta.Name))
+	err = r.Update(context.TODO(), found)
+	if err != nil {
+		return reconileAgain, err
 	}
 
 	return reconileAgain, err
@@ -338,7 +339,7 @@ func (r *ModelRouteReconciler) reconcileRouteForLabels(route *odahuflowv1alpha1.
 		}
 	}
 
-	var newRouteForLabels []string  //nolint
+	var newRouteForLabels []string //nolint
 	for _, md := range route.Spec.ModelDeploymentTargets {
 		newRouteForLabels = append(newRouteForLabels, routeForLabelKey(md.Name))
 	}
@@ -375,42 +376,42 @@ func (r *ModelRouteReconciler) SetupBuilder(mgr ctrl.Manager) *ctrl.Builder {
 		Owns(&v1alpha3_istio_api.VirtualService{}).
 		// Route should reacts on changes in any ModelDeployment from its targets
 		Watches(&source.Kind{Type: &odahuflowv1alpha1.ModelDeployment{}}, &handler.EnqueueRequestsFromMapFunc{
-		ToRequests: handler.ToRequestsFunc(func(object handler.MapObject) []reconcile.Request {
+			ToRequests: handler.ToRequestsFunc(func(object handler.MapObject) []reconcile.Request {
 
-			mdName := object.Meta.GetName()
+				mdName := object.Meta.GetName()
 
-			var result []reconcile.Request
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second * 5)
-			defer cancel()
+				var result []reconcile.Request
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				defer cancel()
 
-			selector := labels.NewSelector()
-			req, err := labels.NewRequirement(routeForLabelKey(mdName), selection.Exists, nil)
-			if err != nil {
-				log.Error(err, "Unable to create label requirement")
+				selector := labels.NewSelector()
+				req, err := labels.NewRequirement(routeForLabelKey(mdName), selection.Exists, nil)
+				if err != nil {
+					log.Error(err, "Unable to create label requirement")
+					return result
+				}
+				selector.Add(*req)
+
+				modelRoutes := &odahuflowv1alpha1.ModelRouteList{}
+				if err := r.List(ctx, modelRoutes, &client.ListOptions{
+					LabelSelector: selector,
+				}); err != nil {
+					log.Error(err, "Unable to fetch ModelRouteList for ModelDeployment")
+					return result
+				}
+
+				for _, mr := range modelRoutes.Items {
+					result = append(result, reconcile.Request{
+						NamespacedName: types.NamespacedName{
+							Namespace: mr.Namespace,
+							Name:      mr.Name,
+						},
+					})
+				}
+
 				return result
-			}
-			selector.Add(*req)
-
-			modelRoutes := &odahuflowv1alpha1.ModelRouteList{}
-			if err := r.List(ctx, modelRoutes, &client.ListOptions{
-				LabelSelector: selector,
-			}); err != nil {
-				log.Error(err, "Unable to fetch ModelRouteList for ModelDeployment")
-				return result
-			}
-
-			for _, mr := range modelRoutes.Items {
-				result = append(result, reconcile.Request{
-					NamespacedName: types.NamespacedName{
-						Namespace: mr.Namespace,
-						Name: mr.Name,
-					},
-				})
-			}
-
-			return result
-		}),
-	})
+			}),
+		})
 }
 
 func (r *ModelRouteReconciler) SetupWithManager(mgr ctrl.Manager) error {

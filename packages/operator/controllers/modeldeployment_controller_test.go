@@ -161,8 +161,8 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 
 	configurationLabels := knativeConfiguration.Spec.Template.ObjectMeta.Labels
 	s.Assertions.Len(configurationLabels, 5)
-	s.Assertions.Contains(configurationLabels, DodelNameAnnotationKey)
-	s.Assertions.Equal(md.Name, configurationLabels[DodelNameAnnotationKey])
+	s.Assertions.Contains(configurationLabels, ModelNameAnnotationKey)
+	s.Assertions.Equal(md.Name, configurationLabels[ModelNameAnnotationKey])
 
 	podSpec := knativeConfiguration.Spec.Template.Spec
 	s.Assertions.Len(podSpec.Containers, 1)
@@ -281,9 +281,7 @@ func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.
 	return func() { s.k8sClient.Delete(context.TODO(), md) }
 }
 
-func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) (
-	*knservingv1.Configuration,
-) {
+func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment) *knservingv1.Configuration {
 	configuration := &knservingv1.Configuration{}
 	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
 	s.Assertions.Eventually(
