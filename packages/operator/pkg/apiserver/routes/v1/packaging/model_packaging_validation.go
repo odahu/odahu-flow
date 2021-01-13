@@ -133,8 +133,8 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 	}
 
 	if mp.Spec.Resources == nil {
-		logMP.Info("Packaging resource parameter is nil. Set the default value",
-			"name", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
+		logMP.Info("Packaging resources parameter is nil. Set the default value",
+			"id", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
 		mp.Spec.Resources = mpv.packagingConfig.DefaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources, mpv.gpuResourceName)
