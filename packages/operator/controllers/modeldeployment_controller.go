@@ -332,62 +332,76 @@ func (r *ModelDeploymentReconciler) reconcileService(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
 ) error {
-	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      modelDeploymentCR.Name,
-			Namespace: modelDeploymentCR.Namespace,
-			Annotations: map[string]string{
-				ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion,
-			},
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name:       "http",
-					Protocol:   corev1.ProtocolTCP,
-					Port:       80,
-					TargetPort: intstr.FromInt(8012),
-				},
-			},
-			Type: corev1.ServiceTypeClusterIP,
-		},
+
+	// Ensures that Service has a required port
+	fulfilServiceObject := func(service *corev1.Service) (updated bool) {
+		requiredPort := corev1.ServicePort{
+			Name:       "http",
+			Protocol:   corev1.ProtocolTCP,
+			Port:       80,
+			TargetPort: intstr.FromInt(8012),
+		}
+
+		found := false
+		for i, port := range service.Spec.Ports {
+			if port.Name != requiredPort.Name {
+				continue
+			}
+			found = true
+			if port != requiredPort {
+				service.Spec.Ports[i] = requiredPort
+				updated = true
+			}
+		}
+
+		if !found {
+			service.Spec.Ports = append(service.Spec.Ports, requiredPort)
+			updated = true
+		}
+
+		return updated
 	}
 
-	if err := controllerutil.SetControllerReference(modelDeploymentCR, service, r.scheme); err != nil {
-		return err
+	serviceNamespacedName := types.NamespacedName{
+		Name: modelDeploymentCR.Name, Namespace: modelDeploymentCR.Namespace,
 	}
 
-	found := &corev1.Service{}
-	err := r.Get(context.TODO(), types.NamespacedName{
-		Name: service.Name, Namespace: service.Namespace,
-	}, found)
+	foundService := &corev1.Service{}
+	err := r.Get(context.TODO(), serviceNamespacedName, foundService)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s service", service.ObjectMeta.Name))
-		err = r.Create(context.TODO(), service)
+		log.Info(fmt.Sprintf("Creating %s k8s service", serviceNamespacedName.Name))
+
+		newService := &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      serviceNamespacedName.Name,
+				Namespace: serviceNamespacedName.Namespace,
+			},
+			Spec: corev1.ServiceSpec{
+				Type: corev1.ServiceTypeClusterIP,
+			},
+		}
+		fulfilServiceObject(newService)
+
+		if err := controllerutil.SetControllerReference(modelDeploymentCR, newService, r.scheme); err != nil {
+			return err
+		}
+
+		err = r.Create(context.TODO(), newService)
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
-	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
-		log.Info("K8s Service is associated with up-to-date Model Deployment version, skipping")
+	needToUpdate := fulfilServiceObject(foundService)
+
+	if !needToUpdate {
+		log.Info("K8s Service already has required port, skipping")
 		return nil
 	}
 
-	log.Info(fmt.Sprintf("K8s Service is associated with outdated Model Deployment version. "+
-		"Update the %s service", service.Name))
+	log.Info(fmt.Sprintf("Update ports of %s K8s Service...", foundService.Name))
 
-	// ClusterIP must not change
-	clusterIP := found.Spec.ClusterIP
-	found.Spec = service.Spec
-	found.Spec.ClusterIP = clusterIP
-	for k, v := range service.Annotations {
-		found.Annotations[k] = v
-	}
-
-	log.Info(fmt.Sprintf("Updating %s k8s service", service.Name))
-	err = r.Update(context.TODO(), found)
+	err = r.Update(context.TODO(), foundService)
 	if err != nil {
 		return err
 	}
