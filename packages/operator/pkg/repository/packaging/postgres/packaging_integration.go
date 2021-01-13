@@ -59,7 +59,7 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 	case err != nil:
 		return nil, err
 	default:
-		return ti, nil
+		return pi, nil
 	}
 
 }
@@ -124,38 +124,38 @@ func (pir PackagingIntegrationRepository) DeletePackagingIntegration(name string
 	return nil
 }
 
-func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
-	oldPi, err := pir.GetPackagingIntegration(md.ID)
+	oldPi, err := pir.GetPackagingIntegration(pi.ID)
 	if err != nil {
 		return err
 	}
 
-	md.Status = oldPi.Status
-	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+	pi.Status = oldPi.Status
+	pi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", packagingIntegrationTable)
-	_, err = pir.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
+	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.ID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (pir PackagingIntegrationRepository) CreatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (pir PackagingIntegrationRepository) CreatePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
-	md.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+	pi.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	pi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	_, err := pir.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", packagingIntegrationTable),
-		md.ID, md.Spec, md.Status,
+		pi.ID, pi.Spec, pi.Status,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
 		if ok && pqError.Code == uniqueViolationPostgresCode {
-			return odahuErrors.AlreadyExistError{Entity: md.ID}
+			return odahuErrors.AlreadyExistError{Entity: pi.ID}
 		}
 		return err
 	}
