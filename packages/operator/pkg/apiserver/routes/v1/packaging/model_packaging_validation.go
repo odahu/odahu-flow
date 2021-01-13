@@ -113,7 +113,7 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 			err = multierr.Append(err, k8sErr)
 		} else {
 			mp.Spec.Image = packagingIntegration.Spec.DefaultImage
-			logMP.Info("Model packaging id is empty. Set a packaging integration image",
+			logMP.Info("Model packaging Image parameter is empty. Set the packaging integration defaultImage",
 				"id", mp.ID, "image", mp.Spec.Image)
 		}
 	}
@@ -123,8 +123,8 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 	}
 
 	if mp.Spec.Resources == nil {
-		logMP.Info("Packaging resource parameter is nil. Set the default value",
-			"name", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
+		logMP.Info("Packaging resources parameter is nil. Set the default value",
+			"id", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
 		mp.Spec.Resources = mpv.packagingConfig.DefaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources, mpv.gpuResourceName)
