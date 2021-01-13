@@ -51,13 +51,19 @@ matrix:
     ### DOCKER IMAGES ###
     #####################
     - language: bash
+      before_script:
+        - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
       script:
         - make docker-build-robot-tests
     - language: bash
+      before_script:
+        - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
       script:
         - make docker-build-feedback-collector
         - make docker-build-feedback-rq-catcher
     - language: bash
+      before_script:
+        - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USER" --password-stdin
       script:
         - make docker-build-api
         - make docker-build-operator
