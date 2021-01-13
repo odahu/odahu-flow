@@ -19,9 +19,10 @@ package packaging
 import (
 	"errors"
 	"fmt"
+	"reflect"
+
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	"reflect"
 
 	uuid "github.com/nu7hatch/gouuid"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -78,7 +79,6 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 
 			err = multierr.Append(err, mpv.validateTargets(pi, mp))
 		}
-
 	}
 
 	err = multierr.Append(err, mpv.validateOutputConnection(mp))
