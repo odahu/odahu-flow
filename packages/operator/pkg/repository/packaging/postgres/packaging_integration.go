@@ -19,12 +19,13 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 const (
@@ -45,12 +46,12 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 	*packaging.PackagingIntegration, error,
 ) {
 
-	ti := new(packaging.PackagingIntegration)
+	pi := new(packaging.PackagingIntegration)
 
 	err := pir.DB.QueryRow(
 		fmt.Sprintf("SELECT id, spec, status FROM %s WHERE id = $1", packagingIntegrationTable),
 		name,
-	).Scan(&ti.ID, &ti.Spec, &ti.Status)
+	).Scan(&pi.ID, &pi.Spec, &pi.Status)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -126,12 +127,12 @@ func (pir PackagingIntegrationRepository) DeletePackagingIntegration(name string
 func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
-	oldTi, err := pir.GetPackagingIntegration(md.ID)
+	oldPi, err := pir.GetPackagingIntegration(md.ID)
 	if err != nil {
 		return err
 	}
 
-	md.Status = oldTi.Status
+	md.Status = oldPi.Status
 	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", packagingIntegrationTable)
