@@ -19,10 +19,10 @@ package packaging
 import (
 	"errors"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"reflect"
+
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 
 	uuid "github.com/nu7hatch/gouuid"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
