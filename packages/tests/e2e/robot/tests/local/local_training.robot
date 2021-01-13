@@ -107,8 +107,8 @@ List trainings in default output dir
     Should contain  ${list_result.stdout}  simple-model
     Should contain  ${list_result.stdout}  wine-local-1
     Should contain  ${list_result.stdout}  wine-cluster-1
-    ${line number}  Split To Lines  ${list_result.stdout}
-    ${line number}  Get length   ${line number}
+    ${lines}  Split To Lines  ${list_result.stdout}
+    ${line number}  Get length   ${lines}
     Should be equal as integers  ${line number}  4
 
 Cleanup training artifacts from default output dir
