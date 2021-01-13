@@ -36,6 +36,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/serving/pkg/apis/serving"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -417,63 +418,57 @@ func (r *ModelDeploymentReconciler) reconcileEndpoints(
 	lastRevisionName := modelDeploymentCR.Status.LastRevisionName
 	if len(lastRevisionName) == 0 {
 		log.Info("Last revision name is empty")
-
 		return nil
 	}
 
 	knativeEndpoints := &corev1.Endpoints{}
-
 	if err := r.Get(context.TODO(), types.NamespacedName{
 		Namespace: modelDeploymentCR.Namespace,
 		Name:      lastRevisionName,
 	}, knativeEndpoints); err != nil {
 		log.Error(err, "Cannot get the knative endpoints endpoints",
 			"last revision name", lastRevisionName)
-
 		return err
 	}
 
-	endpoints := &corev1.Endpoints{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      modelDeploymentCR.Name,
-			Namespace: modelDeploymentCR.Namespace,
-			Annotations: map[string]string{
-				ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion,
-			},
-		},
-		Subsets: knativeEndpoints.Subsets,
-	}
-
-	if err := controllerutil.SetControllerReference(modelDeploymentCR, endpoints, r.scheme); err != nil {
-		return err
+	endpointsNamespacedName := types.NamespacedName{
+		Name:      modelDeploymentCR.Name,
+		Namespace: modelDeploymentCR.Namespace,
 	}
 
 	found := &corev1.Endpoints{}
-	err := r.Get(context.TODO(), types.NamespacedName{
-		Name: endpoints.Name, Namespace: endpoints.Namespace,
-	}, found)
+	err := r.Get(context.TODO(), endpointsNamespacedName, found)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s endpoints", endpoints.ObjectMeta.Name))
+		log.Info(fmt.Sprintf("Creating %s k8s endpoints", endpointsNamespacedName.Name))
+
+		endpoints := &corev1.Endpoints{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      endpointsNamespacedName.Name,
+				Namespace: endpointsNamespacedName.Namespace,
+			},
+			Subsets: knativeEndpoints.Subsets,
+		}
+
+		if err := controllerutil.SetControllerReference(modelDeploymentCR, endpoints, r.scheme); err != nil {
+			return err
+		}
+
 		err = r.Create(context.TODO(), endpoints)
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
-	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
+	if reflect.DeepEqual(found.Subsets, knativeEndpoints.Subsets) {
 		log.Info("Endpoints are associated with up-to-date Model Deployment version, skipping")
 		return nil
 	}
 
-	log.Info(fmt.Sprintf("Endpoints hashes aren't equal. Update the %s endpoints", endpoints.Name))
+	log.Info(fmt.Sprintf("Endpoints are not up-to-date with latest Knative revision."+
+		"Update the %s endpoints", found.Name))
 
-	found.Subsets = endpoints.Subsets
-	for k, v := range endpoints.Annotations {
-		found.Annotations[k] = v
-	}
+	found.Subsets = knativeEndpoints.Subsets
 
-	log.Info(fmt.Sprintf("Updating %s k8s endpoints", endpoints.ObjectMeta.Name))
 	err = r.Update(context.TODO(), found)
 	if err != nil {
 		return err
