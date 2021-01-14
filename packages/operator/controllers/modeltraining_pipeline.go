@@ -30,7 +30,6 @@ import (
 
 const (
 	pathToTrainerBin  = "/opt/odahu-flow/trainer"
-	modelValidatorBin = "odahuflowctl"
 	workspacePath     = "/workspace"
 	outputDir         = "output"
 	configVolumeName  = "config"
@@ -57,7 +56,6 @@ func (r *ModelTrainingReconciler) generateTrainerTaskSpec(
 			r.createInitTrainerStep(helperContainerResources, trainingCR.Name),
 			r.createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
 			r.createResultTrainerStep(helperContainerResources, trainingCR),
-			r.createArtifactValidationStep(helperContainerResources, trainingCR),
 		},
 		Volumes: []corev1.Volume{
 			{
@@ -139,24 +137,6 @@ func (r *ModelTrainingReconciler) createMainTrainerStep(
 	}
 }
 
-func (r *ModelTrainingReconciler) createArtifactValidationStep(
-	validatorResources corev1.ResourceRequirements, trainingCR *odahuflowv1alpha1.ModelTraining,
-) tektonv1beta1.Step {
-	return tektonv1beta1.Step{
-		Container: corev1.Container{
-			Name:    odahuflow.TrainerValidationStep,
-			Image:   trainingCR.Spec.Image,
-			Command: []string{modelValidatorBin},
-			Args: []string{
-				"gppi",
-				"-m",
-				path.Join(workspacePath, outputDir),
-				"test",
-			},
-			Resources: validatorResources,
-		},
-	}
-}
 
 func (r *ModelTrainingReconciler) createResultTrainerStep(
 	res corev1.ResourceRequirements, mt *odahuflowv1alpha1.ModelTraining,
