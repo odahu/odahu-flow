@@ -79,6 +79,7 @@ jobs:
             cd packages/operator
             make test
             bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+            sleep 900
   feedback_aggregator:
     docker:
       - image: circleci/golang:1.14
