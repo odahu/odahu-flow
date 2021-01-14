@@ -52,9 +52,8 @@ jobs:
   operator:
     machine:
       image: ubuntu-2004:202010-01
-    working_directory: /go/src/github.com/odahu/odahu-flow
+    working_directory: /home/circleci/go/src/github.com/odahu/odahu-flow
     steps:
-      - checkout
       - run:
           name: Setup deps
           command: |
@@ -73,6 +72,7 @@ jobs:
             sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
             sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
             go get github.com/t-yuki/gocover-cobertura
+      - checkout
       - run:
           name: Lint
           command: |
