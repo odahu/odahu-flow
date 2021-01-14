@@ -50,8 +50,8 @@ jobs:
           command: |
             make python-lint
   operator:
-    docker:
-      - image: circleci/golang:1.14
+    machine:
+      - image: ubuntu-2004:202010-01
     working_directory: /go/src/github.com/odahu/odahu-flow
     steps:
       - checkout
@@ -59,7 +59,7 @@ jobs:
           name: Setup deps
           command: |
             sudo apt-get update -qq
-            sudo apt-get install pigz
+            sudo apt-get install pigz golang-1.14
             wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
             sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
             sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
