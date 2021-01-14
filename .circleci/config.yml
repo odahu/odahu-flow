@@ -52,7 +52,7 @@ jobs:
   operator:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/odahu/$CIRCLE_PROJECT_REPONAME
     steps:
       - checkout
       - run:
@@ -87,7 +87,7 @@ jobs:
   feedback_aggregator:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/odahu/$CIRCLE_PROJECT_REPONAME
     steps:
       - checkout
       - run:
