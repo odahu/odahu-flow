@@ -3,24 +3,116 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  vulnerabilities:
     docker:
-      # specify the version
-      - image: circleci/golang:1.9
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+      - image: circleci/python:3.6
     steps:
       - checkout
+      - run: sudo make install-vulnerabilities-checker
+      - run: make check-vulnerabilities
+  python_test:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - run: wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+      - run: bash miniconda.sh -b -p $HOME/miniconda
+      - run: source "$HOME/miniconda/etc/profile.d/conda.sh"
+      - run: conda --version
+      - run: make install-all
+      - run: make install-python-tests
+      - run: pip install codecov
+      - run: pip install pytest-cov
+      - run: make python-unittests
+      - run: bash <(curl -s https://codecov.io/bash) -cF python
+  python_lint:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - run: make install-all
+      - run: make install-python-linter
+      - run: make python-lint
+  operator:
+    docker:
+      - image: circleci/go:1.14
+    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    steps:
+      - run: sudo apt-get update -qq
+      - run: sudo apt-get install wget make gcc pigz
+      - run: wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
+      - run: sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
+      - run: sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
+      - run: wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
+      - run: sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
+      - run: sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
+      - run: wget -q https://github.com/swaggo/swag/releases/download/v1.6.5/swag_1.6.5_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
+      - run: sudo tar -zxvf /tmp/swag.tar.gz -C /usr/local/
+      - run: sudo mv /usr/local/swag /usr/bin/
+      - run: wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.5.0/gotestsum_0.5.0_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+      - run: sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+      - run: sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+      - run: go get github.com/t-yuki/gocover-cobertura
+      - run: cd packages/operator
+      - run: make test
+      - run: bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+      - run: make lint
+  feedback_aggregator:
+    docker:
+      - image: circleci/go:1.14
+    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    steps:
+      - run: sudo apt-get update -qq
+      - run: sudo apt-get install wget make gcc
+      - run: wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
+      - run: sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
+      - run: sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
+      - run: sudo wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep
+      - run: sudo chmod +x /usr/local/bin/dep
+      - run: wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+      - run: sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+      - run: sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+      - run: go get github.com/t-yuki/gocover-cobertura
+      - run: cd packages/feedback
+      - run: dep ensure -v -vendor-only
+      - run: make test
+      - run: bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+      - run: make lint
+  build:
+    docker:
+      - image: cimg/base:2021.01
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_TOKEN
+    steps:
+      - checkout
+      - setup_remote_docker:
+        version: 19.03.13
+      - run: make docker-build-robot-tests
+      - run: make docker-build-feedback-collector
+      - run: make docker-build-feedback-rq-catcher
+      - run: make docker-build-api
+      - run: make docker-build-operator
+      - run: make docker-build-model-trainer
+      - run: make docker-build-model-packager
+      - run: make docker-build-service-catalog
 
-      # specify any bash command here prefixed with `run: `
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
+      
+
+workflows:
+  build_and_test:
+    jobs:
+      - vulnerabilities
+      - python_test
+      - python_lint
+      - operator
+      - feedback_aggregator
+      - build:
+          context:
+            - hub.docker.com
+          requires:
+            - vulnerabilities
+            - python_test
+            - python_lint
+            - operator
+            - feedback_aggregator
