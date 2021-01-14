@@ -52,7 +52,7 @@ jobs:
   operator:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/odahu/$CIRCLE_PROJECT_REPONAME
+    working_directory: /go/src/github.com/odahu/odahu-flow
     steps:
       - checkout
       - run:
@@ -87,14 +87,13 @@ jobs:
   feedback_aggregator:
     docker:
       - image: circleci/golang:1.14
-    working_directory: /go/src/github.com/odahu/$CIRCLE_PROJECT_REPONAME
+    working_directory: /go/src/github.com/odahu/odahu-flow
     steps:
       - checkout
       - run:
           name: Setup deps
           command: |
             sudo apt-get update -qq
-            sudo apt-get install wget make gcc
             wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
             sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
             sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
