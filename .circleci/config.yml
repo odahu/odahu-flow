@@ -1,6 +1,3 @@
-# Golang CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2.1
 jobs:
   vulnerabilities:
@@ -96,8 +93,6 @@ jobs:
       - run: make docker-build-model-trainer
       - run: make docker-build-model-packager
       - run: make docker-build-service-catalog
-
-      
 
 workflows:
   build_and_test:
