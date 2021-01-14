@@ -28,7 +28,7 @@ Wine model
 
     StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/training.odahuflow.yaml --id ${EXAMPLE_ID}
 
-    ${res}=  StrictShell  odahuflowctl train get --id ${EXAMPLE_ID}  -o 'jsonpath=$[0].status.artifacts[0].artifactName'
+    ${res}=  StrictShell  odahuflowctl train get --id ${EXAMPLE_ID} -o 'jsonpath=$[0].status.artifacts[0].artifactName'
 
     StrictShell  odahuflowctl --verbose pack create -f ${RES_DIR}/packaging.odahuflow.yaml --artifact-name ${res.stdout} --id ${EXAMPLE_ID}
-    ${res}=  StrictShell  odahuflowctl pack get --id ${EXAMPLE_ID}  -o 'jsonpath=$[0].status.results[0].value'
+    ${res}=  StrictShell  odahuflowctl pack get --id ${EXAMPLE_ID} -o 'jsonpath=$[0].status.results[0].value'
