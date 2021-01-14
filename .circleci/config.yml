@@ -12,24 +12,43 @@ jobs:
       - image: circleci/python:3.6
     steps:
       - checkout
-      - run: wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-      - run: bash miniconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH"
-      - run: conda --version
-      - run: make install-all
-      - run: make install-python-tests
-      - run: pip install codecov
-      - run: pip install pytest-cov
-      - run: make python-unittests
-      - run: bash <(curl -s https://codecov.io/bash) -cF python
+      - run:
+          name: Setup miniconda
+          command: |
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            bash miniconda.sh -b -p $HOME/miniconda
+      - run:
+          name: Install deps
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make install-all
+            make install-python-tests
+      - run:
+          name: Code coverage
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            pip install codecov
+            pip install pytest-cov
+      - run:
+          name: Test
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make python-unittests
+            bash <(curl -s https://codecov.io/bash) -cF python
   python_lint:
     docker:
       - image: circleci/python:3.6
     steps:
       - checkout
-      - run: make install-all
-      - run: make install-python-linter
-      - run: make python-lint
+      - run:
+          name: Install deps
+          command: |
+            make install-all
+            make install-python-linter
+      - run:
+          name: Lint
+          command: |
+            make python-lint
   operator:
     docker:
       - image: circleci/golang:1.14
