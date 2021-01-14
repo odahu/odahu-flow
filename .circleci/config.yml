@@ -51,7 +51,7 @@ jobs:
             make python-lint
   operator:
     machine:
-      - image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202010-01
     working_directory: /go/src/github.com/odahu/odahu-flow
     steps:
       - checkout
