@@ -16,7 +16,7 @@ spec:
 kind: PackagingIntegration
 id: docker-rest
 spec:
-  entrypoint: "/usr/local/bin/odahu-flow-pack-to-flask"
+  entrypoint: "/usr/local/bin/odahu-flow-pack-to-rest"
   defaultImage: "odahu/odahu-flow-packagers:latest"
   privileged: true
   schema:
