@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run: sudo make install-vulnerabilities-checker
       - run: make check-vulnerabilities
-  python_test:
+  python:
     docker:
       - image: circleci/python:3.6
     steps:
@@ -23,6 +23,7 @@ jobs:
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make install-all
             make install-python-tests
+            make install-python-linter
       - run:
           name: Code coverage
           command: |
@@ -30,25 +31,15 @@ jobs:
             pip install codecov
             pip install pytest-cov
       - run:
+          name: Lint
+          command: |
+            make python-lint
+      - run:
           name: Test
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
             bash <(curl -s https://codecov.io/bash) -cF python
-  python_lint:
-    docker:
-      - image: circleci/python:3.6
-    steps:
-      - checkout
-      - run:
-          name: Install deps
-          command: |
-            make install-all
-            make install-python-linter
-      - run:
-          name: Lint
-          command: |
-            make python-lint
   operator:
     machine:
       image: ubuntu-2004:202010-01
@@ -130,11 +121,10 @@ jobs:
       - run: make docker-build-service-catalog
 
 workflows:
-  build_and_test:
+  main:
     jobs:
       - vulnerabilities
-      - python_test
-      - python_lint
+      - python
       - operator
       - feedback_aggregator
       - build:
@@ -142,7 +132,6 @@ workflows:
             - hub.docker.com
           requires:
             - vulnerabilities
-            - python_test
-            - python_lint
+            - python
             - operator
             - feedback_aggregator
