@@ -17,7 +17,7 @@ kind: PackagingIntegration
 id: docker-rest
 spec:
   entrypoint: "/usr/local/bin/odahu-flow-pack-to-flask"
-  defaultImage: "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers:1.3.0-b1610666184675"
+  defaultImage: "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers:<tag>"
   privileged: true
   schema:
     targets:
@@ -46,7 +46,7 @@ spec:
             - name: type
               value: string
             - name: default
-              value: 'odahu/odahu-flow-docker-packager-base:latest'
+              value: 'odahu/odahu-flow-docker-packager-base:<tag>'
         - name: dockerfileCondaEnvsLocation
           parameters:
             - name: description
