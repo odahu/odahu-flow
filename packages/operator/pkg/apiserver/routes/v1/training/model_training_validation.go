@@ -121,20 +121,9 @@ func (mtv *MtValidator) validateTrainingName(name string) (err error) {
 }
 
 func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err error) {
+	err = multierr.Append(err, validation.ValidateID(mt.ID))
 	err = multierr.Append(err, mtv.validateTrainingName(mt.Spec.Model.Name))
 	err = multierr.Append(err, mtv.validateTrainingVersion(mt.Spec.Model.Version))
-
-	if len(mt.ID) == 0 {
-		u4, uuidErr := uuid.NewV4()
-		if uuidErr != nil {
-			err = multierr.Append(err, uuidErr)
-		} else {
-			mt.ID = fmt.Sprintf(defaultIDTemplate, mt.Spec.Model.Name, mt.Spec.Model.Version, u4.String())
-			logMT.Info("Training id is empty. Generate a default value", "id", mt.ID)
-		}
-	}
-
-	err = multierr.Append(err, validation.ValidateID(mt.ID))
 
 	if len(mt.Spec.Model.ArtifactNameTemplate) == 0 {
 		logMT.Info("Artifact output template is empty. Set the default value",
