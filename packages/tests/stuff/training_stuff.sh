@@ -214,8 +214,24 @@ function upload_test_dags() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
+# updated tag for image in toolchain & packager specifications
+function change_image_tag() {
+  yq_args=""
+  file_name=$1
+  spec_path=$2
+  tag=$3
+
+  if [[ -n "$4" ]]; then
+    yq_args=$4
+  fi
+  image=$(yq r ${yq_args} "${file_name}" "${spec_path}" | awk '{p=index($1,":");print substr($1,0, p)}')
+  image=${image}${tag}
+  yq w -i ${yq_args} "${file_name}" "${spec_path}" "${image}"
+}
+
 # Upload files for local training and packaging
 function local_setup() {
+  # download example files
   wget -O "${LOCAL_TEST_DATA}/../request.json" "${GIT_REPO_DATA}/mlflow/sklearn/wine/odahuflow/request.json"
   wget -O "${LOCAL_TEST_DATA}/MLproject" "${GIT_REPO_DATA}/mlflow/sklearn/wine/MLproject"
   wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
@@ -225,6 +241,16 @@ function local_setup() {
 
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
+
+  # update specification files (docker image tags)
+  ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
+  pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration" "spec.defaultImage" "${ti_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.yaml" "spec.defaultImage" "${ti_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration" "spec.defaultImage" "${pi_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration" "spec.schema.arguments.properties.[1].parameters.[2].value" "${pi_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.yaml" "spec.defaultImage" "${pi_version}" "-d 1"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.yaml" "spec.schema.arguments.properties.[1].parameters.[2].value" "${pi_version}" "-d 1"
 }
 
 # remove packager images locally
