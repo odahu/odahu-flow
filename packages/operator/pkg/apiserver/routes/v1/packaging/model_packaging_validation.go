@@ -95,16 +95,6 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 }
 
 func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (err error) {
-	if len(mp.ID) == 0 {
-		u4, uuidErr := uuid.NewV4()
-		if uuidErr != nil {
-			err = multierr.Append(err, uuidErr)
-		} else {
-			mp.ID = fmt.Sprintf(defaultIDTemplate, mp.Spec.ArtifactName, mp.Spec.IntegrationName, u4.String())
-			logMP.Info("Model packaging id is empty. Generate a default value", "id", mp.ID)
-		}
-	}
-
 	err = multierr.Append(err, validation.ValidateID(mp.ID))
 
 	if len(mp.Spec.Image) == 0 {
