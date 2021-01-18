@@ -221,8 +221,7 @@ function change_image_tag() {
   tag=$3
 
   image=$(jq -r "${json_path}" "${file_name}" | awk '{p=index($1,":");print substr($1,0, p)}')
-  image=${image}${tag}
-  jq -r --arg image "$image" '${json_path}=${image}' "${file_name}" jq '.' > "${file_name}"
+  echo ${image}${tag}
 }
 
 # Upload files for local training and packaging
@@ -237,20 +236,24 @@ function local_setup() {
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
 
-  # install yq
-  YQ_VERSION="3.4.1"
-  wget https://github.com/mikefarah/yq/archive/${YQ_VERSION}.tar.gz -O - |
-  tar xz && mv "yq-${YQ_VERSION}" /usr/bin/yq
-
   # update specification files (docker image tags)
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
   pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.defaultImage" "${pi_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.defaultImage" "${pi_version}" "-d 1"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}")
+  jq --arg image "${image}" '.spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" | jq '.' > "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}")
+  jq -r --arg image "$image" '.[0].spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/file/training.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/file/training.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.defaultImage" "${pi_version}")
+  jq -r --arg image "$image" '.spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
+  jq -r --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=${image}' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.defaultImage" "${pi_version}")
+  jq -r --arg image "$image" '.spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
+  jq -r --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=${image}' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
 }
 
 # remove packager images locally
