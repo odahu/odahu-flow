@@ -94,7 +94,7 @@ var (
 	}
 	validNodeSelector = map[string]string{"mode": "valid"}
 	validPackaging    = packaging.ModelPackaging{
-	    id: "valid-id",
+	    ID: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
@@ -361,7 +361,7 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 
 func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
 	ti := &packaging.ModelPackaging{
-	    id: "valid-id",
+	    ID: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
