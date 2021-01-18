@@ -63,7 +63,7 @@ func ValidateID(id string) error {
 	}
 	err := ErrIDValidation
 	if len(id) == 0 {
-	    err = multierr.Append(err, ValidateEmpty(id))
+	    err = multierr.Append(err, ValidateEmpty("ID", id))
 	}
 	return err
 }
