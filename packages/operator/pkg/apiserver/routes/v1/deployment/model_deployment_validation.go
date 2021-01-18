@@ -74,7 +74,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	if md.Spec.RoleName == nil || len(*md.Spec.RoleName) == 0 {
 		defaultRoleName := DefaultRolePrefix + md.ID
 		logMD.Info("Role name parameter is nil or empty. Set the model Role as the model ID with a prefix",
-			"Deployment name", md.ID, "role name", defaultRoleName)
+			"ID", md.ID, "role name", defaultRoleName)
 		md.Spec.RoleName = &defaultRoleName
 	} else {
 		err = multierr.Append(err, validation.ValidateK8sLabel(*md.Spec.RoleName))
@@ -82,7 +82,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.MinReplicas == nil {
 		logMD.Info("Minimum number of replicas parameter is nil. Set the default value",
-			"Deployment name", md.ID, "replicas", MdDefaultMinimumReplicas)
+			"ID", md.ID, "replicas", MdDefaultMinimumReplicas)
 		md.Spec.MinReplicas = &MdDefaultMinimumReplicas
 	} else if *md.Spec.MinReplicas < 0 {
 		err = multierr.Append(errors.New(NegativeMinReplicasErrorMessage), err)
@@ -96,7 +96,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 		}
 
 		logMD.Info("Maximum number of replicas parameter is nil. Set the default value",
-			"Deployment name", md.ID, "replicas", *md.Spec.MinReplicas)
+			"ID", md.ID, "replicas", *md.Spec.MinReplicas)
 	} else if *md.Spec.MaxReplicas < 1 {
 		err = multierr.Append(errors.New(NegativeMaxReplicasErrorMessage), err)
 	}
@@ -107,7 +107,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.Resources == nil {
 		logMD.Info("Deployment resources parameter is nil. Set the default value",
-			"Deployment name", md.ID, "resources", mdv.defaultResources)
+			"ID", md.ID, "resources", mdv.defaultResources)
 		md.Spec.Resources = mdv.defaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources, mdv.gpuResourceName)
@@ -116,7 +116,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.ReadinessProbeInitialDelay == nil {
 		logMD.Info("readinessProbeInitialDelay parameter is nil. Set the default value",
-			"Deployment name", md.ID, "readinessProbeInitialDelay", MdDefaultReadinessProbeInitialDelay)
+			"ID", md.ID, "readinessProbeInitialDelay", MdDefaultReadinessProbeInitialDelay)
 		md.Spec.ReadinessProbeInitialDelay = &MdDefaultReadinessProbeInitialDelay
 	} else if *md.Spec.ReadinessProbeInitialDelay < 0 {
 		err = multierr.Append(errors.New(ReadinessProbeErrorMessage), err)
@@ -124,7 +124,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.LivenessProbeInitialDelay == nil {
 		logMD.Info("livenessProbeInitialDelay is nil. Set the default value",
-			"Deployment name", md.ID, "livenessProbeInitialDelay", MdDefaultLivenessProbeInitialDelay)
+			"ID", md.ID, "livenessProbeInitialDelay", MdDefaultLivenessProbeInitialDelay)
 
 		md.Spec.LivenessProbeInitialDelay = &MdDefaultLivenessProbeInitialDelay
 	} else if *md.Spec.LivenessProbeInitialDelay < 0 {
@@ -134,7 +134,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	if md.Spec.ImagePullConnectionID == nil || len(*md.Spec.ImagePullConnectionID) == 0 {
 		logMD.Info(
 			"imagePullConnID parameter is nil. Set the default value",
-			"Deployment name", md.ID,
+			"ID", md.ID,
 			"imagePullConnID", mdv.modelDeploymentConfig.DefaultDockerPullConnName,
 		)
 
