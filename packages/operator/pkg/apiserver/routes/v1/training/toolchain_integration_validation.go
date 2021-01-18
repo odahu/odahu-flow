@@ -19,7 +19,6 @@ package training
 import (
 	"errors"
 	"fmt"
-	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"

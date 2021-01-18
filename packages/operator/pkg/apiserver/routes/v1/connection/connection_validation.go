@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api"
-	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"

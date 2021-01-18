@@ -23,7 +23,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"reflect"
 
-	uuid "github.com/nu7hatch/gouuid"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"

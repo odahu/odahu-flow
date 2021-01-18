@@ -19,7 +19,6 @@ package training
 import (
 	"errors"
 	"fmt"
-	uuid "github.com/nu7hatch/gouuid"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
