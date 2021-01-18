@@ -244,7 +244,7 @@ function local_setup() {
   # install yq
   YQ_VERSION="3.4.1"
   wget https://github.com/mikefarah/yq/archive/${YQ_VERSION}.tar.gz -O - |
-  tar xz && mv ${YQ_VERSION} /usr/bin/yq
+  tar xz && mv "yq-${YQ_VERSION}" /usr/bin/yq
 
   # update specification files (docker image tags)
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
