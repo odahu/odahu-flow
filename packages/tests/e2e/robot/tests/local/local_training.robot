@@ -92,7 +92,7 @@ Run Valid Training with local & cluster specs
     run --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"  ${DEFAULT_RESULT_DIR}
     run --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.json" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.yaml" --output ${RESULT_DIR}  ${RESULT_DIR}
     # cluster
-    run -f ${ARTIFACT_DIR}/dir/packaging --id local-dir-cluster-artifact-template --output ${DEFAULT_RESULT_DIR}  ${DEFAULT_RESULT_DIR}
+    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${DEFAULT_RESULT_DIR}  ${DEFAULT_RESULT_DIR}
     --url ${API_URL} --token "${AUTH_TOKEN}" run --train-id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
 Run Valid Packaging with local spec
