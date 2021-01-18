@@ -209,6 +209,12 @@ func (cv *ConnValidator) validateDockerType(conn *connection.Connection) (err er
 
 func (cv *ConnValidator) validateGitType(conn *connection.Connection) (err error) {
 	if len(conn.Spec.PublicKey) == 0 {
+
+		if conn.Spec.URI == "" {
+			return fmt.Errorf("can't evaluate Git Public Key. " +
+				"Because .Spec.PublicKey and .Spec.URI are both empty")
+		}
+
 		publicKey, keyError := cv.keyEvaluator(conn.Spec.URI)
 		if keyError != nil {
 			err = multierr.Append(keyError, fmt.Errorf(GitTypePublicKeyExtractionErrorMessage, keyError.Error()))
