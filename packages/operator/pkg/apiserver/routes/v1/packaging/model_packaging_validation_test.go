@@ -201,15 +201,6 @@ func TestModelPackagingValidationSuite(t *testing.T) {
 	suite.Run(t, new(ModelPackagingValidationSuite))
 }
 
-func (s *ModelPackagingValidationSuite) TestMpIDGeneration() {
-	ti := &packaging.ModelPackaging{
-		Spec: packaging.ModelPackagingSpec{},
-	}
-
-	_ = s.validator.ValidateAndSetDefaults(ti)
-	s.g.Expect(ti.ID).ShouldNot(BeEmpty())
-}
-
 func (s *ModelPackagingValidationSuite) TestMpIDExplicitly() {
 	id := "some-id"
 	mp := &packaging.ModelPackaging{
