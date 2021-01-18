@@ -242,6 +242,12 @@ function local_setup() {
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
 
+  # install yq
+  YQ_VERSION="v4.4.1"
+  YQ_BINARY="yq_linux_amd64"
+  wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - |\
+  tar xz && mv ${BINARY} /usr/bin/yq
+
   # update specification files (docker image tags)
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
   pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
