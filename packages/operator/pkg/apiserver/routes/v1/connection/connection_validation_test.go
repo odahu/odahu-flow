@@ -57,19 +57,6 @@ func TestConnectionValidationSuite(t *testing.T) {
 	suite.Run(t, new(ConnectionValidationSuite))
 }
 
-func (s *ConnectionValidationSuite) TestIDGeneration() {
-	conn := &connection.Connection{
-		Spec: v1alpha1.ConnectionSpec{
-			Type:      "not-existed",
-			URI:       connURI,
-			Reference: connReference,
-			KeySecret: creds,
-		},
-	}
-	_ = s.v.ValidatesAndSetDefaults(conn)
-	s.g.Expect(conn.ID).ShouldNot(BeEmpty())
-}
-
 func (s *ConnectionValidationSuite) TestEmptyURL() {
 	conn := &connection.Connection{
 		Spec: v1alpha1.ConnectionSpec{

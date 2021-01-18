@@ -48,7 +48,7 @@ func (s *PackagingIntegrationValidationSuite) TestPiIDValidation() {
 
 	err := pack_route.NewPiValidator().ValidateAndSetDefaults(pi)
 	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyIDErrorMessage))
+	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ValidateEmpty("ID", id)))
 }
 
 func (s *PackagingIntegrationValidationSuite) TestPiEntrypointValidation() {
