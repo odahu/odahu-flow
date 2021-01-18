@@ -20,8 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	k8_serror "k8s.io/apimachinery/pkg/api/errors"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"reflect"
@@ -36,39 +35,6 @@ const (
 	PageURLParamName        = "page"
 	DisabledAPIErrorMessage = "This API is disabled"
 )
-
-type HTTPResult struct {
-	// Success of error message
-	Message string `json:"message"`
-}
-
-// We should develop a custom exception on the repository layer.
-// But we rely on kubernetes exceptions for now.
-// TODO: implement Odahuflow exceptions
-func CalculateHTTPStatusCode(err error) int {
-	errStatus, ok := err.(*k8_serror.StatusError)
-	if ok {
-		return int(errStatus.ErrStatus.Code)
-	}
-
-	if odahuflow_errors.IsNotFoundError(err) {
-		return http.StatusNotFound
-	}
-
-	if odahuflow_errors.IsAlreadyExistError(err) {
-		return http.StatusConflict
-	}
-
-	if odahuflow_errors.IsForbiddenError(err) {
-		return http.StatusForbidden
-	}
-
-	if _, ok = err.(odahuflow_errors.InvalidEntityError); ok {
-		return http.StatusBadRequest
-	}
-
-	return http.StatusInternalServerError
-}
 
 func URLParamsToFilter(c *gin.Context, filter interface{}, fields map[string]int) (size int, page int, err error) {
 	urlParameters := c.Request.URL.Query()
@@ -109,7 +75,7 @@ func URLParamsToFilter(c *gin.Context, filter interface{}, fields map[string]int
 func DisableAPIMiddleware(enabledAPI bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !enabledAPI && c.Request.Method != http.MethodGet {
-			c.AbortWithStatusJSON(http.StatusBadRequest, HTTPResult{Message: DisabledAPIErrorMessage})
+			c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: DisabledAPIErrorMessage})
 		}
 	}
 }

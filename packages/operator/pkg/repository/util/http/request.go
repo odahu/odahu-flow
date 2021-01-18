@@ -187,6 +187,40 @@ func (bec *BaseAPIClient) Login() error {
 
 }
 
+func isTemporaryStatusCode(code int) bool {
+	for tempCode := range []int{
+		http.StatusRequestTimeout,
+		http.StatusBadGateway,
+		http.StatusServiceUnavailable,
+		http.StatusGatewayTimeout,
+
+		// Client can be used in reactive workloads (background workers) that suppose backoff retries
+		// So workload can retry attempt to get data after error on server will be
+		// fixed
+		http.StatusInternalServerError,
+	} {
+		if code == tempCode {
+			return true
+		}
+	}
+
+	return false
+}
+
+type temporaryErr struct {
+	error
+}
+
+func (t temporaryErr) Temporary() bool {
+	return true
+}
+
+
+// DoRequest makes HTTP request with some pre- and post- processing
+// body will be encoded to json if not nil
+// response will be checked on status code > 2xx. If so error will be returned with
+// func Temporary() bool interface in mind
+// So that caller can assert mentioned interface to make decision to retry later
 func (bec *BaseAPIClient) DoRequest(httpMethod, path string, body interface{}) (*http.Response, error) {
 	var bodyStream io.ReadCloser
 
@@ -199,11 +233,61 @@ func (bec *BaseAPIClient) DoRequest(httpMethod, path string, body interface{}) (
 		bodyStream = ioutil.NopCloser(bytes.NewReader(data))
 	}
 
-	return bec.Do(&http.Request{
+	var response *http.Response
+	var err error
+	response, err = bec.Do(&http.Request{
 		Method: httpMethod,
 		URL: &url.URL{
 			Path: path,
 		},
 		Body: bodyStream,
 	})
+
+	if err != nil {
+		log.Error(err, "Retrieving of the ModelRoute events is failed")
+		return response, err
+	}
+
+	var buf []byte
+	buf, err =  ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Error(err, "Unable to read response body")
+		if err := response.Body.Close(); err != nil {
+			log.Error(err,"Unable to close connection")
+		}
+		return response, err
+	}
+	if err := response.Body.Close(); err != nil {
+		log.Error(err,"Unable to close connection")
+		return response, err
+	}
+
+	// Caller should be able to read response body by himself
+	response.Body = ioutil.NopCloser(bytes.NewBuffer(buf))
+
+	if response.StatusCode >= 400 {
+		if isTemporaryStatusCode(response.StatusCode) {
+			return response, temporaryErr{
+				error: fmt.Errorf(
+					"not correct status code: %d. Maybe temporary. Response body: %s",
+					response.StatusCode, buf,
+				),
+			}
+		}
+		return response, fmt.Errorf(
+			"not correct status code: %d. Response body: %s",
+			response.StatusCode, buf,
+		)
+	}
+	return response, err
+}
+
+func (bec *BaseAPIClient) DoRequestGetBody(httpMethod, path string, body interface{}) ([]byte, error) {
+	var buf []byte
+	response, err := bec.DoRequest(httpMethod, path, body)
+	if err != nil {
+		return buf, err
+	}
+	defer response.Body.Close()
+	return ioutil.ReadAll(response.Body)
 }

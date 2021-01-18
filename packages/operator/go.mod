@@ -13,7 +13,7 @@ require (
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.9.5+incompatible
-	github.com/gin-gonic/gin v1.3.0
+	github.com/gin-gonic/gin v1.6.2
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang-migrate/migrate v3.5.4+incompatible
@@ -41,11 +41,11 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.5.0
 	github.com/tektoncd/pipeline v0.13.1-0.20200625065359-44f22a067b75
-	github.com/ugorji/go v1.1.7 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0
 	go.uber.org/multierr v1.5.0
+	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	gopkg.in/src-d/go-git.v4 v4.13.1

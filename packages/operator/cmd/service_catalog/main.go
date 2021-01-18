@@ -17,105 +17,156 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/catalog"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"log"
+	nethttp "net/http"
+	"net/url"
 	"os"
 	"os/signal"
-	k8s_config "sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"sync"
 	"syscall"
+	"time"
 )
 
-var log = logf.Log.WithName("service-catalog")
+
+func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
+	catalog servicecatalog.Catalog) (servicecatalog.Reflector, error) {
+	aCfg := cfg.Auth
+	httpClient := http.NewBaseAPIClient(
+		aCfg.APIURL, aCfg.APIToken, aCfg.ClientID, aCfg.ClientSecret, aCfg.OAuthOIDCTokenEndpoint, "api/v1",
+	)
+
+	edgeURL, err := url.Parse(cfg.EdgeURL)
+	if err != nil {
+		return servicecatalog.Reflector{}, err
+	}
+
+	return servicecatalog.NewReflector(logger, servicecatalog.UpdateHandler{
+		Discoverers: []servicecatalog.ModelServerDiscoverer{
+			servicecatalog.OdahuMLServerDiscoverer{
+				EdgeURL:    *edgeURL,
+				EdgeHost:   cfg.EdgeHost,
+				HTTPClient: &httpClient,
+			},
+		},
+		Catalog:     catalog,
+	}, servicecatalog.RouteEventFetcher{
+		APIClient: event.ModelRouteEventClient{
+			HTTPClient: &httpClient,
+			Log:        logger,
+		},
+	},
+	servicecatalog.ReflectorOpts{
+		WorkersCount: cfg.WorkersCount,
+		FetchTimeout: time.Duration(cfg.FetchTimeout) * time.Second,
+	}), nil
+
+}
+
 
 var mainCmd = &cobra.Command{
 	Use:   "service-catalog",
 	Short: "Odahu-flow service catalog server",
 	Run: func(cmd *cobra.Command, args []string) {
 		odahuConfig := config.MustLoadConfig()
-		routeCatalog := catalog.NewModelRouteCatalog()
 
-		log.Info("setting up client for manager")
-		cfg, err := k8s_config.GetConfig()
+		// Initialize
+
+		var err error
+		var logger *zap.Logger
+		if odahuConfig.ServiceCatalog.Debug {
+			logger, err = zap.NewDevelopment()
+		} else {
+			logger, err = zap.NewProduction(zap.WithCaller(false))
+		}
 		if err != nil {
-			log.Error(err, "unable to set up client config")
-			os.Exit(1)
+			log.Fatal("Unable to initialize logger")
 		}
 
-		log.Info("setting up manager")
-		mgr, err := manager.New(
-			cfg,
-			manager.Options{
-				//MetricsBindAddress: fmt.Sprintf(":%d", viper.GetInt(legion.PrometheusMetricsPort)),
-			},
-		)
+		sLogger := logger.Sugar().With("OdahuVersion", odahuConfig.Common.Version)
 
+		if odahuConfig.ServiceCatalog.Debug {
+			sLogger.Info("Debug mode is enabled")
+		}
+
+		routeCatalog := servicecatalog.NewModelRouteCatalog(sLogger)
+
+
+		// Run reflector (keep state of service catalog up to date with ODAHU API Server)
+
+		reflector, err := initReflector(odahuConfig.ServiceCatalog, sLogger, routeCatalog)
 		if err != nil {
-			log.Error(err, "unable to set up overall controller manager")
-			os.Exit(1)
+			sLogger.Fatalf("Unable set up service-catalog reflector. Error %v", err)
 		}
 
-		log.Info("Registering Components.")
+		ctx, cancel := context.WithCancel(context.Background())
+		wg := sync.WaitGroup{}
+		wg.Add(2)
+		go func() {
+			defer wg.Done()
+			sLogger.Info("Starting the reflector.")
+			if err := reflector.Run(ctx); err != nil {
+				sLogger.Errorw("Reflector was stopped with errors", zap.Error(err))
+			} else {
+				sLogger.Info("Reflector was stopped gracefully")
+			}
+			cancel()
+		}()
 
-		log.Info("Setting up odahu-flow scheme")
-		if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-			log.Error(err, "unable add odahu-flow APIs to scheme")
-			os.Exit(1)
-		}
-
-		log.Info("Setting up controller")
-		r := servicecatalog.NewModelRouteReconciler(
-			mgr, routeCatalog, odahuConfig.Deployment, odahuConfig.ServiceCatalog,
-		)
-		if err = r.SetupWithManager(mgr); err != nil {
-			log.Error(err, "unable to register controllers to the manager")
-			os.Exit(1)
-		}
+		// Run webserver. API for getting information about deployed models, swaggers, metadata, etc
 
 		mainServer, err := servicecatalog.SetUPMainServer(routeCatalog, odahuConfig.ServiceCatalog)
-
 		if err != nil {
-			log.Error(err, "Can't set up service-catalog server")
-			os.Exit(1)
+			sLogger.Fatalf("Unable set up service-catalog server. Error %v", err)
 		}
-
-		exitCh := make(chan int, 1)
-
 		go func() {
-			log.Info("Starting the operator.")
-			if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-				exitCh <- 1
+			defer wg.Done()
+			if err := mainServer.ListenAndServe(); err != nil && err != nethttp.ErrServerClosed {
+				sLogger.Errorw("Web server was stopped with errors", zap.Error(err))
 			} else {
-				exitCh <- 0
+				sLogger.Info("Reflector was stopped gracefully")
+			}
+			cancel()
+		}()
+		go func() {  // Monitors cancel signal and calls .Shutdown for webserver
+			<-ctx.Done()
+			if err := mainServer.Shutdown(context.TODO()); err != nil {
+				sLogger.Errorw("Error during server shutdown", zap.Error(err))
 			}
 		}()
 
-		go func() {
-			if err := mainServer.Run(":5000"); err != nil {
-				exitCh <- 1
-			} else {
-				exitCh <- 0
-			}
-		}()
+
+		// Wait signal or error in some goroutine
 
 		sigs := make(chan os.Signal, 1)
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 		select {
-		case sig := <-sigs:
-			log.Info("Getting signal. Stop", "signal", sig.String())
-			os.Exit(0)
-		case exitCode := <-exitCh:
-			log.Info("Application stopped")
-			os.Exit(exitCode)
+		case sig := <-sigs:  // Signal to stop
+			sLogger.Info("Getting signal. Stop", "signal", sig.String())
+			cancel()
+		case <-ctx.Done():  // Error in goroutine
+			sLogger.Info("Application trying to stop itself because of error")
 		}
+
+		sLogger.Info("Try to stop gracefully")
+		go func() {
+			t := time.NewTimer(time.Second * 5)
+			<-t.C
+			sLogger.Warn("Timeout to stop gracefully. Exit process")
+			os.Exit(1)
+		}()
+		wg.Wait()
+		sLogger.Info("Application was gracefully stopped")
+
 	},
 }
 

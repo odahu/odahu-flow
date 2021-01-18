@@ -249,11 +249,6 @@ func (r *ModelPackagingReconciler) reconcileTaskRun(
 		return nil, err
 	}
 
-	if err := odahuflow.StoreHash(taskRun); err != nil {
-		log.Error(err, "Cannot apply obj hash")
-		return nil, err
-	}
-
 	found := &tektonv1beta1.TaskRun{}
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: taskRun.Name, Namespace: r.packagingConfig.Namespace,
@@ -283,11 +278,6 @@ func (r *ModelPackagingReconciler) createResultConfigMap(packagingCR *odahuflowv
 	}
 
 	if err := controllerutil.SetControllerReference(packagingCR, resultCM, r.scheme); err != nil {
-		return err
-	}
-
-	if err := odahuflow.StoreHash(resultCM); err != nil {
-		log.Error(err, "Cannot apply obj hash")
 		return err
 	}
 

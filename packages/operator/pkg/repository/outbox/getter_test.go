@@ -21,7 +21,7 @@ func TestModelRouteGet(t *testing.T) {
 	payload1 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
 	event1 := event.Event{
 		EntityID:   "event1", EventType: event.ModelRouteCreatedEventType,
-		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
+		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    payload1,
 	}
 	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
@@ -39,7 +39,7 @@ func TestModelRouteGet(t *testing.T) {
 	payload2 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
 	event2 := event.Event{
 		EntityID:   "event2", EventType: event.ModelRouteCreatedEventType,
-		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
+		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    payload2,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
@@ -48,7 +48,7 @@ func TestModelRouteGet(t *testing.T) {
 	payload3 := deployment.ModelRoute{Spec: v1alpha1.ModelRouteSpec{URLPrefix: "Test"}}
 	event3 := event.Event{
 		EntityID:   "event3", EventType: event.ModelRouteCreatedEventType,
-		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().UTC(),
+		EventGroup: event.ModelRouteEventGroup, Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    payload3,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event3)
@@ -82,7 +82,7 @@ func TestModelDeploymentGet(t *testing.T) {
 	payload1 := deployment.ModelDeployment{Spec: v1alpha1.ModelDeploymentSpec{Image: "Image"}}
 	event1 := event.Event{
 		EntityID:   "event1", EventType: event.ModelDeploymentCreatedEventType,
-		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
+		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    payload1,
 	}
 	err := eventPublisher.PublishEvent(context.Background(), nil, event1)
@@ -100,7 +100,7 @@ func TestModelDeploymentGet(t *testing.T) {
 	payload2 := deployment.ModelDeployment{Spec: v1alpha1.ModelDeploymentSpec{Image: "Image"}}
 	event2 := event.Event{
 		EntityID:   "event2", EventType: event.ModelDeploymentCreatedEventType,
-		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
+		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    payload2,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event2)
@@ -108,7 +108,7 @@ func TestModelDeploymentGet(t *testing.T) {
 
 	event3 := event.Event{
 		EntityID:   "event3", EventType: event.ModelDeploymentDeletedEventType,
-		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().UTC(),
+		EventGroup: event.ModelDeploymentEventGroup, Datetime:   time.Now().Round(time.Microsecond).UTC(),
 		Payload:    nil,
 	}
 	err = eventPublisher.PublishEvent(context.Background(), nil, event3)

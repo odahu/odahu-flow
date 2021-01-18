@@ -25,17 +25,18 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
-	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	corev1 "k8s.io/api/core/v1"
@@ -224,7 +225,7 @@ func (s *ModelTrainingRouteSuite) TestGetMTNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -437,7 +438,7 @@ func (s *ModelTrainingRouteSuite) TestCreateMTCheckValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var messageResponse routes.HTTPResult
+	var messageResponse httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &messageResponse)
 
 	s.g.Expect(err).ShouldNot(HaveOccurred())
@@ -458,7 +459,7 @@ func (s *ModelTrainingRouteSuite) TestCreateDuplicateMT() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -514,7 +515,7 @@ func (s *ModelTrainingRouteSuite) TestUpdateMTCheckValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var mtResponse routes.HTTPResult
+	var mtResponse httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &mtResponse)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -533,7 +534,7 @@ func (s *ModelTrainingRouteSuite) TestUpdateMTNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -552,7 +553,7 @@ func (s *ModelTrainingRouteSuite) TestDeleteMT() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -572,7 +573,7 @@ func (s *ModelTrainingRouteSuite) TestDeleteMTNotFound() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -735,7 +736,7 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIDeleteMT() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -758,7 +759,7 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPIUpdateMT() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -781,7 +782,7 @@ func (s *ModelTrainingRouteSuite) TestDisabledAPICreateMT() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result routes.HTTPResult
+	var result httputil.HTTPResult
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
