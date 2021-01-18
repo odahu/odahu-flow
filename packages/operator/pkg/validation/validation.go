@@ -29,9 +29,8 @@ import (
 )
 
 const (
-	EmptyIDErrorMessage                = "id must be nonempty"
 	SpecSectionValidationFailedMessage = "\"Spec.%q\" validation errors: %s"
-	EmptyValueStringError              = "%q parameter must be not empty"
+	EmptyValueStringError              = "\"%q\" must be not empty"
 )
 
 func ValidateEmpty(parameterName, value string) error {
@@ -62,10 +61,9 @@ func ValidateID(id string) error {
 	if idRegex.MatchString(id) {
 		return nil
 	}
-
 	err := ErrIDValidation
 	if len(id) == 0 {
-	    err = multierr.Append(err, EmptyIDErrorMessage)
+	    err = multierr.Append(err, ValidateEmpty(id))
 	}
 	return err
 }
