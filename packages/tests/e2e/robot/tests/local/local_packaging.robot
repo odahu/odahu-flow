@@ -56,11 +56,11 @@ Try Run Packaging
 
 *** Test Cases ***
 Run Valid Training with local & cluster specs
-    [Setup]     Shell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.json
+    [Setup]     Shell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
     [Template]  Run Training
     # auth data     id      file/dir        output
     # local
-    run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.yaml --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.json --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     # cluster
     run -f ${ARTIFACT_DIR}/dir/packaging --id local-dir-cluster-artifact-template --output ${RESULT_DIR}  ${RESULT_DIR}
     --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
