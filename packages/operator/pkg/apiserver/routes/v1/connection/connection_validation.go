@@ -20,7 +20,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-
 	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
@@ -97,6 +96,8 @@ func (cv *ConnValidator) ValidatesAndSetDefaults(conn *connection.Connection) (e
 		err = multierr.Append(err, cv.validateAzureBlobType(conn))
 	case connection.DockerType:
 		err = multierr.Append(err, cv.validateDockerType(conn))
+	case connection.EcrType:
+		err = multierr.Append(err, cv.validateEcrType(conn))
 	default:
 		err = multierr.Append(err, fmt.Errorf(UnknownTypeErrorMessage, conn.Spec.Type, connection.AllConnectionTypes))
 	}
