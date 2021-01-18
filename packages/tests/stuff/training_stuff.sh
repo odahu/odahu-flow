@@ -216,17 +216,13 @@ function upload_test_dags() {
 
 # updated tag for image in toolchain & packager specifications
 function change_image_tag() {
-  yq_args=""
   file_name=$1
-  spec_path=$2
+  json_path=$2
   tag=$3
 
-  if [[ -n "$4" ]]; then
-    yq_args=$4
-  fi
-  image=$(yq r ${yq_args} "${file_name}" "${spec_path}" | awk '{p=index($1,":");print substr($1,0, p)}')
+  image=$(jq -r "${json_path}" "${file_name}" | awk '{p=index($1,":");print substr($1,0, p)}')
   image=${image}${tag}
-  yq w -i ${yq_args} "${file_name}" "${spec_path}" "${image}"
+  jq -r --arg image "$image" '${json_path}=${image}' "${file_name}" jq '.' > "${file_name}"
 }
 
 # Upload files for local training and packaging
@@ -249,12 +245,12 @@ function local_setup() {
   # update specification files (docker image tags)
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
   pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration" "spec.defaultImage" "${ti_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.yaml" "spec.defaultImage" "${ti_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration" "spec.defaultImage" "${pi_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration" "spec.schema.arguments.properties.[1].parameters.[2].value" "${pi_version}"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.yaml" "spec.defaultImage" "${pi_version}" "-d 1"
-  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.yaml" "spec.schema.arguments.properties.[1].parameters.[2].value" "${pi_version}" "-d 1"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.defaultImage" "${pi_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.defaultImage" "${pi_version}" "-d 1"
+  change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}"
 }
 
 # remove packager images locally
@@ -271,33 +267,33 @@ function local_cleanup() {
 # Main entrypoint for setup command.
 # The function creates the model packagings and the toolchain integrations.
 function setup() {
-  #  for mp_id in "${MODEL_NAMES[@]}"; do
-  #    pack_model "${mp_id}" &
-  #  done
-  #
-  #   # Create training-data-helper toolchain integration
-  #   jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-  #   odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
-  #   odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-  #   rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-  #
-  #   # Download training data for the wine model
-  #   wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
-  #
-  #   # Pushes a test data to the bucket and create a file with the connection
-  #   copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
-  #
-  #   # Update test-data connections
-  #   create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
-  #   create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
-  #   create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "test-data/data/invalid_gppi/odahuflow.project.yaml"
-  #   create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "test-data/data/invalid_gppi/"
-  #   create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
-  #   create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
-  #
-  #   upload_test_dags
-  #
-  #   wait_all_background_task
+  for mp_id in "${MODEL_NAMES[@]}"; do
+    pack_model "${mp_id}" &
+  done
+
+  # Create training-data-helper toolchain integration
+  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
+  odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+
+  # Download training data for the wine model
+  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
+
+  # Pushes a test data to the bucket and create a file with the connection
+  copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
+
+  # Update test-data connections
+  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
+  create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "test-data/data/invalid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "test-data/data/invalid_gppi/"
+  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
+  create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
+
+  upload_test_dags
+
+  wait_all_background_task
 
   local_setup
 }
