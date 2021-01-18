@@ -361,7 +361,7 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 
 func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
 	ti := &packaging.ModelPackaging{
-	    id: "valid-id"
+	    id: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
