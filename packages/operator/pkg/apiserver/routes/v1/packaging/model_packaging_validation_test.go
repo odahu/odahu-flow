@@ -289,6 +289,10 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNameEmpty() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyIntegrationNameErrorMessage))
+	// "not found" substring here is expected in case when packaging integration can't be found by
+	// .Spec.IntegrationName, but because .Spec.IntegrationName is empty we shouldn't try to find
+	// it at all
+	s.g.Expect(err.Error()).Should(Not(ContainSubstring("not found")))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {

@@ -107,10 +107,13 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 
 	err = multierr.Append(err, validation.ValidateID(mp.ID))
 
+	// If image is empty then set image from Packaging Integration
 	if len(mp.Spec.Image) == 0 {
-		packagingIntegration, k8sErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName)
-		if k8sErr != nil {
-			err = multierr.Append(err, k8sErr)
+		packagingIntegration, getPiErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName)
+		if getPiErr != nil {
+			logMP.Info(
+				"Unable to extract default image from Packaging integration because it is empty",
+			)
 		} else {
 			mp.Spec.Image = packagingIntegration.Spec.DefaultImage
 			logMP.Info("Model packaging id is empty. Set a packaging integration image",
