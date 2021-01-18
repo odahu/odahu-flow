@@ -1,0 +1,137 @@
+version: 2.1
+jobs:
+  vulnerabilities:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - run: sudo make install-vulnerabilities-checker
+      - run: make check-vulnerabilities
+  python:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - run:
+          name: Setup miniconda
+          command: |
+            wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+            bash miniconda.sh -b -p $HOME/miniconda
+      - run:
+          name: Install deps
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make install-all
+            make install-python-tests
+            make install-python-linter
+      - run:
+          name: Code coverage
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            pip install codecov
+            pip install pytest-cov
+      - run:
+          name: Lint
+          command: |
+            make python-lint
+      - run:
+          name: Test
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make python-unittests
+            bash <(curl -s https://codecov.io/bash) -cF python
+  operator:
+    machine:
+      image: ubuntu-2004:202010-01
+    working_directory: /home/circleci/go/src/github.com/odahu/odahu-flow
+    steps:
+      - checkout
+      - run:
+          name: Setup deps
+          command: |
+            sudo apt-get update -qq
+            sudo apt-get install pigz golang-1.14
+            wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
+            sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
+            sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
+            wget -q https://github.com/kubernetes-sigs/kubebuilder/releases/download/v2.3.1/kubebuilder_2.3.1_linux_amd64.tar.gz -O /tmp/kubebuilder.tar.gz
+            sudo tar -zxvf /tmp/kubebuilder.tar.gz -C /usr/local/
+            sudo mv /usr/local/kubebuilder_* /usr/local/kubebuilder
+            wget -q https://github.com/swaggo/swag/releases/download/v1.6.5/swag_1.6.5_Linux_x86_64.tar.gz -O /tmp/swag.tar.gz
+            sudo tar -zxvf /tmp/swag.tar.gz -C /usr/local/
+            sudo mv /usr/local/swag /usr/bin/
+            wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.5.0/gotestsum_0.5.0_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+            sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+            sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+            go get github.com/t-yuki/gocover-cobertura
+      - run:
+          name: Test
+          command: |
+            cd packages/operator
+            make test
+            bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+  feedback_aggregator:
+    docker:
+      - image: circleci/golang:1.14
+    working_directory: /go/src/github.com/odahu/odahu-flow
+    steps:
+      - checkout
+      - run:
+          name: Setup deps
+          command: |
+            sudo apt-get update -qq
+            wget -q https://github.com/golangci/golangci-lint/releases/download/v1.30.0/golangci-lint-1.30.0-linux-amd64.tar.gz -O /tmp/golangci-lint.tar.gz
+            sudo tar -zxvf /tmp/golangci-lint.tar.gz -C /usr/local/
+            sudo mv /usr/local/golangci-lint*/golangci-lint /usr/bin/golangci-lint
+            sudo wget -q https://github.com/golang/dep/releases/download/v0.5.1/dep-linux-amd64 -O /usr/local/bin/dep
+            sudo chmod +x /usr/local/bin/dep
+            wget -q https://github.com/gotestyourself/gotestsum/releases/download/v0.3.4/gotestsum_0.3.4_linux_amd64.tar.gz -O /tmp/gotestsum.tar.gz
+            sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
+            sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
+            go get github.com/t-yuki/gocover-cobertura
+      - run:
+          name: Lint
+          command: |
+            cd packages/feedback
+            dep ensure -v -vendor-only
+            make lint
+      - run:
+          name: Test
+          command: |
+            cd packages/feedback
+            dep ensure -v -vendor-only
+            make test
+            bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+  build:
+    docker:
+      - image: cimg/base:2021.01
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_TOKEN
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: make docker-build-robot-tests
+      - run: make docker-build-feedback-collector
+      - run: make docker-build-feedback-rq-catcher
+      - run: make docker-build-api
+      - run: make docker-build-operator
+      - run: make docker-build-model-trainer
+      - run: make docker-build-model-packager
+      - run: make docker-build-service-catalog
+
+workflows:
+  main:
+    jobs:
+      - vulnerabilities
+      - python
+      - operator
+      - feedback_aggregator
+      - build:
+          context:
+            - hub.docker.com
+          requires:
+            - vulnerabilities
+            - python
+            - operator
+            - feedback_aggregator
