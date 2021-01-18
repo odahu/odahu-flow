@@ -211,8 +211,8 @@ func (cv *ConnValidator) validateGitType(conn *connection.Connection) (err error
 	if len(conn.Spec.PublicKey) == 0 {
 
 		if conn.Spec.URI == "" {
-			return fmt.Errorf("can't evaluate Git Public Key. " +
-				"Because .Spec.PublicKey and .Spec.URI are both empty")
+			logC.Info(".Spec.URI is empty. Skip extracting Git Public Key from URI")
+			return nil
 		}
 
 		publicKey, keyError := cv.keyEvaluator(conn.Spec.URI)
