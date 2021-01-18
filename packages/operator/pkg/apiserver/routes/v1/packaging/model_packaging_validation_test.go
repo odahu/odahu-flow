@@ -94,7 +94,7 @@ var (
 	}
 	validNodeSelector = map[string]string{"mode": "valid"}
 	validPackaging    = packaging.ModelPackaging{
-	    id: "valid-id"
+	    id: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
