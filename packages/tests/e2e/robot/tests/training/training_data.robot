@@ -37,7 +37,6 @@ Cleanup all resources
     StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-found-remote-file
     StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-valid-dir-path
     StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-valid-remote-dir
-    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-invalid-gppi
 
 Cleanup resources
     [Arguments]  ${training id}
@@ -86,7 +85,3 @@ Invaild data downloading parameters
     ${TRAIN_ID}-not-valid-dir-path          not_valid_dir_path.training.odahuflow.yaml
     ${TRAIN_ID}-not-valid-remote-dir        not_valid_remote_dir.training.odahuflow.yaml
 
-Invalid GPPI output
-    [Documentation]  Verify that validator step checks GPPI correctness and raise error if GPPI is not correct
-    [Template]  Train model that create invalid GPPI artifact
-    ${TRAIN_ID}-invalid-gppi                invalid_gppi_artifact.training.odahuflow.yaml
