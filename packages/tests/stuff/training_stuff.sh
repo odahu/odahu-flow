@@ -245,7 +245,7 @@ function local_setup() {
   wget -O "${LOCAL_TEST_DATA}/conda.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.yaml"
   wget -O "${LOCAL_TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
-  install_packages "sponge"
+  install_packages "moreutils"
 
   # update specification files (docker image tags)
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
