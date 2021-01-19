@@ -246,19 +246,6 @@ func (s *ModelPackagingValidationSuite) TestMpImageExplicitly() {
 	s.g.Expect(mp.Spec.Image).Should(Equal(image))
 }
 
-func (s *ModelPackagingValidationSuite) TestMpImageNotFound() {
-	mp := &packaging.ModelPackaging{
-		Spec: packaging.ModelPackagingSpec{
-			IntegrationName: "not found",
-		},
-	}
-
-	err := s.validator.ValidateAndSetDefaults(mp)
-	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"entity \"not found\" is not found"))
-}
-
 func (s *ModelPackagingValidationSuite) TestMpArtifactName() {
 	mp := &packaging.ModelPackaging{
 		Spec: packaging.ModelPackagingSpec{
@@ -289,6 +276,10 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNameEmpty() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(pack_route.EmptyIntegrationNameErrorMessage))
+	// "not found" substring here is expected in case when packaging integration can't be found by
+	// .Spec.IntegrationName, but because .Spec.IntegrationName is empty we shouldn't try to find
+	// it at all
+	s.g.Expect(err.Error()).Should(Not(ContainSubstring("not found")))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {
@@ -301,7 +292,7 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"entity \"some-packaging-name\" is not found"))
+		"packaging integration with name .Spec.IntegrationName = \"some-packaging-name\" is not found"))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpNotValidArgumentsSchema() {
