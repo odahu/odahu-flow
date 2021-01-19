@@ -48,10 +48,8 @@ RCLONE_PROFILE_NAME="robot-tests"
 function install_packages() {
   local packagesNeeded=$1
   if    [ -x "$(command -v apk)" ];     then apk add --no-cache $packagesNeeded
-  elif  [ -x "$(command -v apt-get)" ]; then apt-get install $packagesNeeded
+  elif  [ -x "$(command -v apt-get)" ]; then apt-get update; apt-get install -y $packagesNeeded
   elif  [ -x "$(command -v brew)" ];    then brew install $packagesNeeded
-  elif  [ -x "$(command -v dnf)" ];     then dnf install $packagesNeeded
-  elif  [ -x "$(command -v zypper)" ];  then zypper install $packagesNeeded
   else echo "FAILED TO INSTALL PACKAGE: Package manager not found. You must manually install: $packagesNeeded">&2
   fi
 }
