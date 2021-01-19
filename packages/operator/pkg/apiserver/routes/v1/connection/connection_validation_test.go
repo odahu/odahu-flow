@@ -83,6 +83,22 @@ func (s *ConnectionValidationSuite) TestEmptyURL() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(conn_route.EmptyURIErrorMessage))
 }
 
+
+func (s *ConnectionValidationSuite) TestEmptyURLEcr() {
+	conn := &connection.Connection{
+		Spec: v1alpha1.ConnectionSpec{
+			Type:      connection.EcrType,
+			Reference: connReference,
+			KeySecret: creds,
+		},
+	}
+	err := s.v.ValidatesAndSetDefaults(conn)
+	s.g.Expect(err).Should(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(conn_route.EmptyURIErrorMessage))
+	// If URI is empty then not validate ECR specific format of URI
+	s.g.Expect(err.Error()).Should(Not(ContainSubstring(conn_route.ECRTypeNotValidURI)))
+}
+
 func (s *ConnectionValidationSuite) TestUnknownTypeType() {
 	connType := v1alpha1.ConnectionType("not-existed")
 	conn := &connection.Connection{

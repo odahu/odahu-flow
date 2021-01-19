@@ -138,14 +138,16 @@ func (cv *ConnValidator) validateBase64Fields(conn *connection.Connection) error
 
 func (cv *ConnValidator) validateEcrType(conn *connection.Connection) (err error) {
 	// Try to parse URI
-	registry, urlParsingErr := api.ExtractRegistry(conn.Spec.URI)
-	if urlParsingErr != nil {
-		err = multierr.Append(err, fmt.Errorf(ECRTypeNotValidURI, urlParsingErr.Error()))
-	}
+	if conn.Spec.URI != "" {  // If URI is empty then skip extracting Registry and further logic
+		registry, urlParsingErr := api.ExtractRegistry(conn.Spec.URI)
+		if urlParsingErr != nil {
+			err = multierr.Append(err, fmt.Errorf(ECRTypeNotValidURI, urlParsingErr.Error()))
+		}
 
-	if len(conn.Spec.Region) == 0 && registry != nil {
-		conn.Spec.Region = registry.Region
-		logC.Info("Connection region is empty. Set region from url", "id", conn.ID, "region", registry.Region)
+		if len(conn.Spec.Region) == 0 && registry != nil {
+			conn.Spec.Region = registry.Region
+			logC.Info("Connection region is empty. Set region from url", "id", conn.ID, "region", registry.Region)
+		}
 	}
 
 	if len(conn.Spec.KeySecret) == 0 || len(conn.Spec.KeyID) == 0 {
