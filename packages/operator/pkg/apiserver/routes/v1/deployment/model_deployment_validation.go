@@ -34,8 +34,8 @@ const (
 	NegativeMaxReplicasErrorMessage    = "maximum number of replicas parameter must not be less than 1"
 	MaxMoreThanMinReplicasErrorMessage = "maximum number of replicas parameter must not be less than minimum number " +
 		"of replicas parameter"
-	ReadinessProbeErrorMessage = "readinessProbeInitialDelay must be non-negative integer"
-	LivenessProbeErrorMessage  = "livenessProbeInitialDelay must be non-negative integer"
+	ReadinessProbeErrorMessage = "readiness probe must be positive number"
+	LivenessProbeErrorMessage  = "liveness probe parameter must be positive number"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
 	DefaultRolePrefix		   = "role-"
 )
@@ -43,8 +43,8 @@ const (
 var (
 	MdDefaultMinimumReplicas            = int32(0)
 	MdDefaultMaximumReplicas            = int32(1)
-	MdDefaultLivenessProbeInitialDelay  = int32(0)
-	MdDefaultReadinessProbeInitialDelay = int32(0)
+	MdDefaultLivenessProbeInitialDelay  = int32(2)
+	MdDefaultReadinessProbeInitialDelay = int32(2)
 )
 
 type ModelDeploymentValidator struct {
@@ -74,7 +74,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	if md.Spec.RoleName == nil || len(*md.Spec.RoleName) == 0 {
 		defaultRoleName := DefaultRolePrefix + md.ID
 		logMD.Info("Role name parameter is nil or empty. Set the model Role as the model ID with a prefix",
-			"id", md.ID, "role name", defaultRoleName)
+			"Deployment name", md.ID, "role name", defaultRoleName)
 		md.Spec.RoleName = &defaultRoleName
 	} else {
 		err = multierr.Append(err, validation.ValidateK8sLabel(*md.Spec.RoleName))
@@ -82,7 +82,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.MinReplicas == nil {
 		logMD.Info("Minimum number of replicas parameter is nil. Set the default value",
-			"id", md.ID, "replicas", MdDefaultMinimumReplicas)
+			"Deployment name", md.ID, "replicas", MdDefaultMinimumReplicas)
 		md.Spec.MinReplicas = &MdDefaultMinimumReplicas
 	} else if *md.Spec.MinReplicas < 0 {
 		err = multierr.Append(errors.New(NegativeMinReplicasErrorMessage), err)
@@ -96,7 +96,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 		}
 
 		logMD.Info("Maximum number of replicas parameter is nil. Set the default value",
-			"id", md.ID, "replicas", *md.Spec.MinReplicas)
+			"Deployment name", md.ID, "replicas", *md.Spec.MinReplicas)
 	} else if *md.Spec.MaxReplicas < 1 {
 		err = multierr.Append(errors.New(NegativeMaxReplicasErrorMessage), err)
 	}
@@ -107,7 +107,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if md.Spec.Resources == nil {
 		logMD.Info("Deployment resources parameter is nil. Set the default value",
-			"id", md.ID, "resources", mdv.defaultResources)
+			"name", md.ID, "resources", mdv.defaultResources)
 		md.Spec.Resources = mdv.defaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(md.Spec.Resources, mdv.gpuResourceName)
@@ -115,27 +115,27 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	}
 
 	if md.Spec.ReadinessProbeInitialDelay == nil {
-		logMD.Info("readinessProbeInitialDelay parameter is nil. Set the default value",
-			"id", md.ID, "readinessProbeInitialDelay", MdDefaultReadinessProbeInitialDelay)
+		logMD.Info("Readiness probe parameter is nil. Set the default value",
+			"name", md.ID, "readiness_probe", MdDefaultReadinessProbeInitialDelay)
 		md.Spec.ReadinessProbeInitialDelay = &MdDefaultReadinessProbeInitialDelay
-	} else if *md.Spec.ReadinessProbeInitialDelay < 0 {
+	} else if *md.Spec.ReadinessProbeInitialDelay <= 0 {
 		err = multierr.Append(errors.New(ReadinessProbeErrorMessage), err)
 	}
 
 	if md.Spec.LivenessProbeInitialDelay == nil {
-		logMD.Info("livenessProbeInitialDelay is nil. Set the default value",
-			"id", md.ID, "livenessProbeInitialDelay", MdDefaultLivenessProbeInitialDelay)
+		logMD.Info("Liveness probe parameter is nil. Set the default value",
+			"name", md.ID, "replicas", MdDefaultLivenessProbeInitialDelay)
 
 		md.Spec.LivenessProbeInitialDelay = &MdDefaultLivenessProbeInitialDelay
-	} else if *md.Spec.LivenessProbeInitialDelay < 0 {
+	} else if *md.Spec.LivenessProbeInitialDelay <= 0 {
 		err = multierr.Append(errors.New(LivenessProbeErrorMessage), err)
 	}
 
 	if md.Spec.ImagePullConnectionID == nil || len(*md.Spec.ImagePullConnectionID) == 0 {
 		logMD.Info(
-			"imagePullConnID parameter is nil. Set the default value",
-			"id", md.ID,
-			"imagePullConnID", mdv.modelDeploymentConfig.DefaultDockerPullConnName,
+			"Docker pull connection name parameter is nil. Set the default value",
+			"name", md.ID,
+			"replicas", mdv.modelDeploymentConfig.DefaultDockerPullConnName,
 		)
 
 		md.Spec.ImagePullConnectionID = &mdv.modelDeploymentConfig.DefaultDockerPullConnName
