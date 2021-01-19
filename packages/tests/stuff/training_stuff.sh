@@ -230,8 +230,8 @@ function change_image_tag() {
   local json_path=$2
   local tag=$3
 
-  image=$(jq -r "${json_path}" "${file_name}" | awk '{p=index($1,":");print substr($1,0, p)}')
-  echo ${image}${tag}
+  image=$(jq -r "${json_path}" "${file_name}" | cut -d ':' -f 1)
+  echo ${image}:${tag}
 }
 
 # Upload files for local training and packaging
@@ -262,10 +262,10 @@ function local_setup() {
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
   jq --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
 
-  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.defaultImage" "${pi_version}")
-  jq --arg image "$image" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
-  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
-  jq --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".[1].spec.defaultImage" "${pi_version}")
+  jq --arg image "$image" '.[1].spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".[1].spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
+  jq --arg image "$image" '.[1].spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
 }
 
 # remove packager images locally
