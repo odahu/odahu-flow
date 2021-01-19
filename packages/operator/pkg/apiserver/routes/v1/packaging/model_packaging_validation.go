@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"reflect"
 
@@ -65,32 +66,51 @@ func NewMpValidator(
 	}
 }
 
+// ValidateAndSetDefaultsPIRequired validates ModelPackaging fields using a corresponding PackagingIntegration
+func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPackaging) (err error) {
+
+	pi, piErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName)
+	switch {
+	case piErr == nil:
+		if len(mp.Spec.Image) == 0 {
+			mp.Spec.Image = pi.Spec.DefaultImage
+			logMP.Info("Model packaging id is empty. Set a packaging integration image",
+				"id", mp.ID, "image", mp.Spec.Image)
+		}
+		err = multierr.Append(err, mpv.validateArguments(pi, mp))
+		err = multierr.Append(err, mpv.validateTargets(pi, mp))
+	case odahu_errs.IsNotFoundError(piErr):
+		err = multierr.Append(err,
+			fmt.Errorf(
+				"packaging integration with name .Spec.IntegrationName = \"%s\" is not found",
+				mp.Spec.IntegrationName,
+			))
+	default:
+		// We are not able to complete validation in this case
+		panic(fmt.Errorf(
+			"unable to get Packaging Integration: %v", piErr,
+		))
+	}
+
+	return err
+}
+
 func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (err error) {
+
+
 	err = multierr.Append(err, mpv.validateMainParameters(mp))
+	err = multierr.Append(err, mpv.validateOutputConnection(mp))
+	err = multierr.Append(err, mpv.validateNodeSelector(mp))
+	err = multierr.Append(err, validation.ValidateResources(mp.Spec.Resources, config.NvidiaResourceName))
 
 	if len(mp.Spec.IntegrationName) == 0 {
 		err = multierr.Append(err, errors.New(EmptyIntegrationNameErrorMessage))
 	} else {
-		if pi, k8sErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName); k8sErr != nil {
-			err = multierr.Append(err, k8sErr)
-		} else {
-			err = multierr.Append(err, mpv.validateArguments(pi, mp))
-
-			err = multierr.Append(err, mpv.validateTargets(pi, mp))
-		}
-
+		err = multierr.Append(err, mpv.ValidateAndSetDefaultsPIRequired(mp))
 	}
-
-	err = multierr.Append(err, mpv.validateOutputConnection(mp))
-
-	err = multierr.Append(err, mpv.validateNodeSelector(mp))
-
-	err = multierr.Append(err, validation.ValidateResources(mp.Spec.Resources, config.NvidiaResourceName))
-
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMpErrorMessage, err.Error())
 	}
-
 	return nil
 }
 
@@ -107,19 +127,6 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 
 	err = multierr.Append(err, validation.ValidateID(mp.ID))
 
-	// If image is empty then set image from Packaging Integration
-	if len(mp.Spec.Image) == 0 {
-		packagingIntegration, getPiErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName)
-		if getPiErr != nil {
-			logMP.Info(
-				"Unable to extract default image from Packaging integration because it is empty",
-			)
-		} else {
-			mp.Spec.Image = packagingIntegration.Spec.DefaultImage
-			logMP.Info("Model packaging id is empty. Set a packaging integration image",
-				"id", mp.ID, "image", mp.Spec.Image)
-		}
-	}
 
 	if len(mp.Spec.ArtifactName) == 0 {
 		err = multierr.Append(err, errors.New(TrainingIDOrArtifactNameErrorMessage))

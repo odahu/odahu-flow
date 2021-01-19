@@ -246,19 +246,6 @@ func (s *ModelPackagingValidationSuite) TestMpImageExplicitly() {
 	s.g.Expect(mp.Spec.Image).Should(Equal(image))
 }
 
-func (s *ModelPackagingValidationSuite) TestMpImageNotFound() {
-	mp := &packaging.ModelPackaging{
-		Spec: packaging.ModelPackagingSpec{
-			IntegrationName: "not found",
-		},
-	}
-
-	err := s.validator.ValidateAndSetDefaults(mp)
-	s.g.Expect(err).Should(HaveOccurred())
-	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"entity \"not found\" is not found"))
-}
-
 func (s *ModelPackagingValidationSuite) TestMpArtifactName() {
 	mp := &packaging.ModelPackaging{
 		Spec: packaging.ModelPackagingSpec{
@@ -305,7 +292,7 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"entity \"some-packaging-name\" is not found"))
+		"packaging integration with name .Spec.IntegrationName = \"some-packaging-name\" is not found"))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpNotValidArgumentsSchema() {
