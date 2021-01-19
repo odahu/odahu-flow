@@ -240,20 +240,20 @@ function local_setup() {
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
   pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}")
-  jq --arg image "${image}" '.spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" | jq '.' > "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json"
+  jq --arg image "${image}" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json"
 
-  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}")
-  jq -r --arg image "$image" '.[0].spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/file/training.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/file/training.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}"
+  jq --arg image "$image" '.[0].spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/training.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/training.json"
 
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.defaultImage" "${pi_version}")
-  jq -r --arg image "$image" '.spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
+  jq --arg image "$image" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
-  jq -r --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=${image}' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
+  jq --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json") | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
 
-  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.defaultImage" "${pi_version}")
-  jq -r --arg image "$image" '.spec.defaultImage=${image}' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.defaultImage" "${pi_version}"
+  jq --arg image "$image" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
-  jq -r --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=${image}' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" jq '.' > "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+  jq --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
 }
 
 # remove packager images locally
