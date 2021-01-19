@@ -30,6 +30,7 @@ import (
 
 const (
 	EmptyImageErrorMessage             = "the image parameter is empty"
+	EmptyPredictorErrorMessage         = "the predictor parameter is empty"
 	NegativeMinReplicasErrorMessage    = "minimum number of replicas parameter must not be less than 0"
 	NegativeMaxReplicasErrorMessage    = "maximum number of replicas parameter must not be less than 1"
 	MaxMoreThanMinReplicasErrorMessage = "maximum number of replicas parameter must not be less than minimum number " +
@@ -37,7 +38,7 @@ const (
 	ReadinessProbeErrorMessage = "readiness probe must be positive number"
 	LivenessProbeErrorMessage  = "liveness probe parameter must be positive number"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
-	DefaultRolePrefix		   = "role-"
+	DefaultRolePrefix          = "role-"
 )
 
 var (
@@ -69,6 +70,10 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	if len(md.Spec.Image) == 0 {
 		err = multierr.Append(err, errors.New(EmptyImageErrorMessage))
+	}
+
+	if len(md.Spec.Predictor) == 0 {
+		err = multierr.Append(err, errors.New(EmptyPredictorErrorMessage))
 	}
 
 	if md.Spec.RoleName == nil || len(*md.Spec.RoleName) == 0 {
