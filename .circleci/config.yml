@@ -96,7 +96,6 @@ jobs:
           name: Test
           command: |
             cd packages/feedback
-            dep ensure -v -vendor-only
             make test
             bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
   build:
