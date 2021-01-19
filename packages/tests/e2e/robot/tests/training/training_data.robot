@@ -37,7 +37,6 @@ Cleanup all resources
     StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-found-remote-file
     StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-valid-dir-path
     StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-not-valid-remote-dir
-    StrictShell  odahuflowctl --verbose train delete --ignore-not-found --id ${TRAIN_ID}-invalid-gppi
 
 Cleanup resources
     [Arguments]  ${training id}
