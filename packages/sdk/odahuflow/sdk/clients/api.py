@@ -25,8 +25,11 @@ import threading
 from collections.abc import AsyncIterable
 from typing import Any, Callable, Dict, Iterator, Mapping, Optional, Tuple, Union
 from urllib.parse import urlencode, urlparse
+from http.client import responses
+
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
+
 
 import aiohttp
 import requests
@@ -56,7 +59,12 @@ class WrongHttpStatusCode(Exception):
         """
         if http_result is None:
             http_result = {}
-        super().__init__(f'Got error from server: {http_result.get("message")} (status: {status_code})')
+
+        default_message = responses[status_code]
+
+        message = http_result.get("message", default_message)
+
+        super().__init__(f'Got error from server: {message} (status: {status_code})')
 
         self.status_code = status_code
 
