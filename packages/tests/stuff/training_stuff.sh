@@ -44,6 +44,18 @@ BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
 RCLONE_PROFILE_NAME="robot-tests"
 
+# installs passed packages depending on packager manager
+function install_packages() {
+  local packagesNeeded=$1
+  if    [ -x "$(command -v apk)" ];     then sudo apk add --no-cache $packagesNeeded
+  elif  [ -x "$(command -v apt-get)" ]; then sudo apt-get install $packagesNeeded
+  elif  [ -x "$(command -v brew)" ];    then brew install $packagesNeeded
+  elif  [ -x "$(command -v dnf)" ];     then sudo dnf install $packagesNeeded
+  elif  [ -x "$(command -v zypper)" ];  then sudo zypper install $packagesNeeded
+  else echo "FAILED TO INSTALL PACKAGE: Package manager not found. You must manually install: $packagesNeeded">&2
+  fi
+}
+
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
 # Arguments:
 # $1 - Model packaging ID. It must be the same as the directory name where it locates.
@@ -214,11 +226,11 @@ function upload_test_dags() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
-# updated tag for image in toolchain & packager specifications
+# updates tag for image in specifications for local tests
 function change_image_tag() {
-  file_name=$1
-  json_path=$2
-  tag=$3
+  local file_name=$1
+  local json_path=$2
+  local tag=$3
 
   image=$(jq -r "${json_path}" "${file_name}" | awk '{p=index($1,":");print substr($1,0, p)}')
   echo ${image}${tag}
@@ -233,8 +245,7 @@ function local_setup() {
   wget -O "${LOCAL_TEST_DATA}/conda.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.yaml"
   wget -O "${LOCAL_TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
-  # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
-  gcloud auth configure-docker
+  install_packages "sponge"
 
   # update specification files (docker image tags)
   ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
