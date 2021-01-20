@@ -24,6 +24,7 @@ jobs:
             make install-all
             make install-python-tests
             make install-python-linter
+            make install-python-formatter
       - run:
           name: Code coverage
           command: |
