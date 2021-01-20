@@ -97,7 +97,7 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 	s.k8sManager = mgr
 	s.stubTIClient = stubclients.NewTIStubClient()
 
-	s.requests = make(chan reconcile.Request)
+	s.requests = make(chan reconcile.Request, 1000)
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}
@@ -366,7 +366,6 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -425,7 +424,6 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
@@ -479,7 +477,6 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())

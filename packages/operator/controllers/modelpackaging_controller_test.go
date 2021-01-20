@@ -125,7 +125,7 @@ func (s *ModelPackagingControllerSuite) SetupTest() {
 	s.k8sManager = mgr
 	s.stubPIClient = stubclients.NewPIStubClient()
 
-	s.requests = make(chan reconcile.Request)
+	s.requests = make(chan reconcile.Request, 1000)
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}
@@ -294,7 +294,6 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 	defer s.k8sClient.Delete(context.TODO(), mp)
 
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 
 	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
@@ -350,7 +349,6 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mp)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 
 	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
