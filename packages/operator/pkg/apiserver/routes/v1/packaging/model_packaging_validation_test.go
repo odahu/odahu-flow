@@ -292,7 +292,7 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"packaging integration with name .Spec.IntegrationName = \"some-packaging-name\" is not found"))
+		"packaging integration with name .spec.integrationName = \"some-packaging-name\" is not found"))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpNotValidArgumentsSchema() {
