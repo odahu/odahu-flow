@@ -10,7 +10,7 @@ import (
 const roleName = "TestRole"
 
 func TestReadDefaultPoliciesAndRender(t *testing.T) {
-	data, err := ReadDefaultPoliciesAndRender(roleName, odahuflow.OdahuMLServer.ID)
+	data, err := ReadDefaultPoliciesAndRender(roleName, odahuflow.OdahuMLServer.OpaPolicyFilename)
 	assert.NoError(t, err)
 
 	assert.Len(t, data, 3)

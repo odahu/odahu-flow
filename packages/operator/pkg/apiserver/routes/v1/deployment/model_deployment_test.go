@@ -29,6 +29,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	dep_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
@@ -78,10 +79,10 @@ var (
 
 type ModelDeploymentRouteSuite struct {
 	suite.Suite
-	g            *GomegaWithT
-	server       *gin.Engine
-	mdService    md_service.Service
-	mrService    mr_service.Service
+	g              *GomegaWithT
+	server         *gin.Engine
+	mdService      md_service.Service
+	mrService      mr_service.Service
 	mdEventsGetter *mocks.ModelDeploymentEventGetter
 }
 
@@ -119,6 +120,7 @@ func newStubMd() *deployment.ModelDeployment {
 		ID: mdID,
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      mdImage,
+			Predictor:                  odahuflow.OdahuMLServer.ID,
 			MinReplicas:                &mdMinReplicas,
 			MaxReplicas:                &mdMaxReplicas,
 			LivenessProbeInitialDelay:  &mdLivenessInitialDelay,
@@ -690,11 +692,10 @@ func (s *ModelDeploymentRouteSuite) TestGetDefaultRoute() {
 
 func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsIncorrectCursor() {
 
-
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
 		http.MethodGet,
-		dep_route.EventsModelDeploymentURL + "?cursor=not-number",
+		dep_route.EventsModelDeploymentURL+"?cursor=not-number",
 		nil,
 	)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -723,7 +724,6 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEvents() {
 	}
 
 	s.mdEventsGetter.On("Get", mock.Anything, 0).Return(events, 5, nil)
-
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -759,11 +759,10 @@ func (s *ModelDeploymentRouteSuite) TestGetDeploymentEventsWithCursor() {
 
 	s.mdEventsGetter.On("Get", mock.Anything, 6).Return(events, 9, nil)
 
-
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
 		http.MethodGet,
-		dep_route.EventsModelDeploymentURL + "?cursor=6",
+		dep_route.EventsModelDeploymentURL+"?cursor=6",
 		nil,
 	)
 	s.g.Expect(err).NotTo(HaveOccurred())

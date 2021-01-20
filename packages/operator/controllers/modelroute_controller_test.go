@@ -164,7 +164,7 @@ func TestBasicReconcile(t *testing.T) {
 	vsKey := types.NamespacedName{Name: VirtualServiceName(mr), Namespace: testNamespace}
 	g.Expect(c.Get(context.TODO(), vsKey, vs)).ToNot(HaveOccurred())
 
-	g.Expect(vs.Spec.Http).To(HaveLen(2))
+	g.Expect(vs.Spec.Http).To(HaveLen(1))
 
 	for _, host := range vs.Spec.Http {
 		g.Expect(host.Mirror).ToNot(BeNil())
@@ -212,7 +212,7 @@ func TestEmptyMirror(t *testing.T) {
 	vsKey := types.NamespacedName{Name: VirtualServiceName(mr), Namespace: testNamespace}
 	g.Expect(c.Get(context.TODO(), vsKey, vs)).ToNot(HaveOccurred())
 
-	g.Expect(vs.Spec.Http).To(HaveLen(2))
+	g.Expect(vs.Spec.Http).To(HaveLen(1))
 
 	for _, host := range vs.Spec.Http {
 		g.Expect(host.Mirror).To(BeNil())
@@ -256,7 +256,7 @@ func TestNotReadyEmptyMirror(t *testing.T) {
 	vsKey := types.NamespacedName{Name: VirtualServiceName(mr), Namespace: testNamespace}
 	g.Expect(c.Get(context.TODO(), vsKey, vs)).ToNot(HaveOccurred())
 
-	g.Expect(vs.Spec.Http).To(HaveLen(2))
+	g.Expect(vs.Spec.Http).To(HaveLen(1))
 
 	for _, host := range vs.Spec.Http {
 		g.Expect(host.Mirror).To(BeNil())
@@ -303,7 +303,7 @@ func TestMultipleTargets(t *testing.T) {
 	vsKey := types.NamespacedName{Name: VirtualServiceName(mr), Namespace: testNamespace}
 	g.Expect(c.Get(context.TODO(), vsKey, vs)).ToNot(HaveOccurred())
 
-	g.Expect(vs.Spec.Http).To(HaveLen(2))
+	g.Expect(vs.Spec.Http).To(HaveLen(1))
 
 	for _, host := range vs.Spec.Http {
 		g.Expect(host.Route).To(HaveLen(2))
