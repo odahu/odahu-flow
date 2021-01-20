@@ -51,9 +51,6 @@ const (
 )
 
 var (
-	mpExpectedRequest = reconcile.Request{
-		NamespacedName: types.NamespacedName{Name: mpName, Namespace: testNamespace},
-	}
 	validPackaging = odahuflowv1alpha1.ModelPackaging{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      mpName,
@@ -277,22 +274,20 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 	k8sPackagingResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(packResources, config.NvidiaResourceName)
 	s.g.Expect(err).Should(BeNil())
 
-	mp := &odahuflowv1alpha1.ModelPackaging{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mpName,
-			Namespace: testNamespace,
-		},
-		Spec: odahuflowv1alpha1.ModelPackagingSpec{
-			Image:     integrationImage,
-			Resources: packResources,
-			Type:      testPackagingIntegrationID,
-		},
+	mp := newValidPackaging()
+	mp.Spec = odahuflowv1alpha1.ModelPackagingSpec{
+		Image:     integrationImage,
+		Resources: packResources,
+		Type:      testPackagingIntegrationID,
 	}
 
 	err = s.k8sClient.Create(context.TODO(), mp)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mp)
 
+	mpExpectedRequest := reconcile.Request{
+		NamespacedName: types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace},
+	}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 
 	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
@@ -335,20 +330,18 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	packagingConfig.Timeout = 3 * time.Hour
 	s.initReconciler(packagingConfig)
 
-	mp := &odahuflowv1alpha1.ModelPackaging{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mpName,
-			Namespace: testNamespace,
-		},
-		Spec: odahuflowv1alpha1.ModelPackagingSpec{
-			Type: testPackagingIntegrationID,
-		},
+	mp := newValidPackaging()
+	mp.Spec = odahuflowv1alpha1.ModelPackagingSpec{
+		Type: testPackagingIntegrationID,
 	}
 
 	err := s.k8sClient.Create(context.TODO(), mp)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mp)
 
+	mpExpectedRequest := reconcile.Request{
+		NamespacedName: types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace},
+	}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(mpExpectedRequest)))
 
 	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
