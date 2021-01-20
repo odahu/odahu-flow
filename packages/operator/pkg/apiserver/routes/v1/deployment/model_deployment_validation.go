@@ -43,8 +43,8 @@ const (
 var (
 	MdDefaultMinimumReplicas            = int32(0)
 	MdDefaultMaximumReplicas            = int32(1)
-	MdDefaultLivenessProbeInitialDelay  = int32(0)
-	MdDefaultReadinessProbeInitialDelay = int32(0)
+	MdDefaultLivenessProbeInitialDelay  = int32(2)
+	MdDefaultReadinessProbeInitialDelay = int32(2)
 )
 
 type ModelDeploymentValidator struct {
