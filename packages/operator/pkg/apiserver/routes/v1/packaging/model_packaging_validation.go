@@ -74,7 +74,7 @@ func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPack
 	case piErr == nil:
 		if len(mp.Spec.Image) == 0 {
 			mp.Spec.Image = pi.Spec.DefaultImage
-			logMP.Info("Model packaging id is empty. Set a packaging integration image",
+			logMP.Info("Model packaging .spec.image is empty. Set a packaging integration .spec.defaultImage",
 				"id", mp.ID, "image", mp.Spec.Image)
 		}
 		err = multierr.Append(err, mpv.validateArguments(pi, mp))
@@ -82,7 +82,7 @@ func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPack
 	case odahu_errs.IsNotFoundError(piErr):
 		err = multierr.Append(err,
 			fmt.Errorf(
-				"packaging integration with name .Spec.IntegrationName = \"%s\" is not found",
+				"packaging integration with name .spec.integrationName = \"%s\" is not found",
 				mp.Spec.IntegrationName,
 			))
 	default:
@@ -125,17 +125,6 @@ func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (er
 	}
 
 	err = multierr.Append(err, validation.ValidateID(mp.ID))
-
-	if len(mp.Spec.Image) == 0 {
-		packagingIntegration, k8sErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName)
-		if k8sErr != nil {
-			err = multierr.Append(err, k8sErr)
-		} else {
-			mp.Spec.Image = packagingIntegration.Spec.DefaultImage
-			logMP.Info("Model packaging Image parameter is empty. Set the packaging integration defaultImage",
-				"id", mp.ID, "image", mp.Spec.Image)
-		}
-	}
 
 	if len(mp.Spec.ArtifactName) == 0 {
 		err = multierr.Append(err, errors.New(TrainingIDOrArtifactNameErrorMessage))
