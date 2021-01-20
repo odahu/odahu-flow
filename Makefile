@@ -169,7 +169,7 @@ install-python-linter:
 	cd packages/cli && pipenv install --system --three --dev
 
 ## python-lint: Lints python source code
-python-lint:
+python-lint: python-format
 	scripts/lint.sh
 
 ## generate-python-client: Generate python models
@@ -237,6 +237,21 @@ install-vulnerabilities-checker:
 check-vulnerabilities:
 	./scripts/install-git-secrets-hook.sh install_hooks
 	git secrets --scan -r
+
+
+## install-python-formatter: Install python formatter
+install-python-formatter:
+	pip install black==20.8b1
+
+## python-format: Format python packages
+python-format:
+	black packages/sdk
+	black packages/cli
+	black packages/robot
+
+## configure-git: Configure repo git config
+configure-git:
+	git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 ## help: Show the help message
 help: Makefile
