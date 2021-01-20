@@ -16,7 +16,13 @@ class PackagingIntegrationSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_image: str=None, entrypoint: str=None, privileged: bool=None, schema: Schema=None):  # noqa: E501
+    def __init__(
+        self,
+        default_image: str = None,
+        entrypoint: str = None,
+        privileged: bool = None,
+        schema: Schema = None,
+    ):  # noqa: E501
         """PackagingIntegrationSpec - a model defined in Swagger
 
         :param default_image: The default_image of this PackagingIntegrationSpec.  # noqa: E501
@@ -29,17 +35,17 @@ class PackagingIntegrationSpec(Model):
         :type schema: Schema
         """
         self.swagger_types = {
-            'default_image': str,
-            'entrypoint': str,
-            'privileged': bool,
-            'schema': Schema
+            "default_image": str,
+            "entrypoint": str,
+            "privileged": bool,
+            "schema": Schema,
         }
 
         self.attribute_map = {
-            'default_image': 'defaultImage',
-            'entrypoint': 'entrypoint',
-            'privileged': 'privileged',
-            'schema': 'schema'
+            "default_image": "defaultImage",
+            "entrypoint": "entrypoint",
+            "privileged": "privileged",
+            "schema": "schema",
         }
 
         self._default_image = default_image
@@ -48,7 +54,7 @@ class PackagingIntegrationSpec(Model):
         self._schema = schema
 
     @classmethod
-    def from_dict(cls, dikt) -> 'PackagingIntegrationSpec':
+    def from_dict(cls, dikt) -> "PackagingIntegrationSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

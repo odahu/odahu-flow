@@ -9,54 +9,63 @@ from click.testing import CliRunner
 from odahuflow.cli.parsers.local.packaging import run
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.local import packaging as packaging_sdk
-from odahuflow.sdk.models import ConnectionSpec, K8sPackager, ModelPackaging, ModelPackagingSpec, ModelPackagingStatus, \
-    PackagingIntegration, \
-    PackagerTarget, \
-    PackagingIntegrationSpec, Schema, Target, \
-    Connection, TargetSchema
+from odahuflow.sdk.models import (
+    ConnectionSpec,
+    K8sPackager,
+    ModelPackaging,
+    ModelPackagingSpec,
+    ModelPackagingStatus,
+    PackagingIntegration,
+    PackagerTarget,
+    PackagingIntegrationSpec,
+    Schema,
+    Target,
+    Connection,
+    TargetSchema,
+)
 from pytest_mock import MockFixture
 
-PLAIN_VALUE = 'Value'
+PLAIN_VALUE = "Value"
 
 conn1 = Connection(
-    id='conn1',
+    id="conn1",
     spec=ConnectionSpec(
-        key_id=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        key_secret=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        public_key=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        password=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        type='gcr'
-    )
+        key_id=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        key_secret=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        public_key=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        password=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        type="gcr",
+    ),
 )
 conn2 = Connection(
-    id='conn2',
+    id="conn2",
     spec=ConnectionSpec(
-        key_id=base64.standard_b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        key_secret=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        public_key=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        password=base64.b64encode(bytes(PLAIN_VALUE, 'utf-8')).decode('utf-8'),
-        type='gcr'
-    )
+        key_id=base64.standard_b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        key_secret=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        public_key=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        password=base64.b64encode(bytes(PLAIN_VALUE, "utf-8")).decode("utf-8"),
+        type="gcr",
+    ),
 )
 conn_d1 = Connection(
-    id='conn1',
+    id="conn1",
     spec=ConnectionSpec(
         key_id=PLAIN_VALUE,
         key_secret=PLAIN_VALUE,
         public_key=PLAIN_VALUE,
         password=PLAIN_VALUE,
-        type='gcr'
-    )
+        type="gcr",
+    ),
 )
 conn_d2 = Connection(
-    id='conn2',
+    id="conn2",
     spec=ConnectionSpec(
         key_id=PLAIN_VALUE,
         key_secret=PLAIN_VALUE,
         public_key=PLAIN_VALUE,
         password=PLAIN_VALUE,
-        type='gcr'
-    )
+        type="gcr",
+    ),
 )
 target_pull = Target("conn1", "docker-pull")
 target_push = Target("conn2", "docker-push")
@@ -65,26 +74,30 @@ pi_target_push = PackagerTarget(conn_d2, "docker-push")
 
 
 pack1 = ModelPackaging(
-    id='pack1',
-    spec=ModelPackagingSpec(
-        integration_name="pi",
-        targets=[target_pull, target_push]
-    ),
-    status=ModelPackagingStatus()
+    id="pack1",
+    spec=ModelPackagingSpec(integration_name="pi", targets=[target_pull, target_push]),
+    status=ModelPackagingStatus(),
 )
 
-pi = PackagingIntegration(id="pi", spec=PackagingIntegrationSpec(
-    schema=Schema(
-        targets=[
-            TargetSchema(
-                connection_types=['gcr', 'ecr', 'docker'], name='docker-push', required=True
-            ),
-            TargetSchema(
-                connection_types=['gcr', 'ecr', 'docker'], name='docker-pull', required=False
-            )
-        ]
-    )
-))
+pi = PackagingIntegration(
+    id="pi",
+    spec=PackagingIntegrationSpec(
+        schema=Schema(
+            targets=[
+                TargetSchema(
+                    connection_types=["gcr", "ecr", "docker"],
+                    name="docker-push",
+                    required=True,
+                ),
+                TargetSchema(
+                    connection_types=["gcr", "ecr", "docker"],
+                    name="docker-pull",
+                    required=False,
+                ),
+            ]
+        )
+    ),
+)
 
 
 @dataclass
@@ -110,50 +123,61 @@ class Case:
 
 test_cases: List[Case] = [
     Case(  # all manifests are locally stored, default run without options
-        input=I(
-            cmd=["--pack-id", "pack1"],
-            local=[conn1, conn2, pi, pack1], remote=[]),
-        expected=E(targets=[])
+        input=I(cmd=["--pack-id", "pack1"], local=[conn1, conn2, pi, pack1], remote=[]),
+        expected=E(targets=[]),
     ),
     Case(  # no global targets disable
         input=I(
             cmd=["--pack-id", "pack1", "--no-disable-package-targets"],
-            local=[conn1, conn2, pi, pack1], remote=[]),
-        expected=E(targets=[pi_target_pull, pi_target_push])
+            local=[conn1, conn2, pi, pack1],
+            remote=[],
+        ),
+        expected=E(targets=[pi_target_pull, pi_target_push]),
     ),
     Case(  # no global targets disable, but specific target is disabled
         input=I(
             cmd=[
-                "--pack-id", "pack1", "--no-disable-package-targets",
-                "--disable-target", "docker-pull"
+                "--pack-id",
+                "pack1",
+                "--no-disable-package-targets",
+                "--disable-target",
+                "docker-pull",
             ],
-            local=[conn1, conn2, pi, pack1], remote=[]),
-        expected=E(targets=[pi_target_push])
+            local=[conn1, conn2, pi, pack1],
+            remote=[],
+        ),
+        expected=E(targets=[pi_target_push]),
     ),
     Case(  # manifests on the server
-        input=I(
-            cmd=["--pack-id", "pack1"],
-            local=[], remote=[conn1, conn2, pi, pack1]),
-        expected=E(targets=[])
+        input=I(cmd=["--pack-id", "pack1"], local=[], remote=[conn1, conn2, pi, pack1]),
+        expected=E(targets=[]),
     ),
     Case(  # some manifests are local stored, some in the server
-        input=I(
-            cmd=["--pack-id", "pack1"],
-            local=[pi, conn2], remote=[conn1, pack1]),
-        expected=E(targets=[])
+        input=I(cmd=["--pack-id", "pack1"], local=[pi, conn2], remote=[conn1, pack1]),
+        expected=E(targets=[]),
     ),
     Case(  # pack not found
-        input=I(
-            cmd=["--pack-id", "pack1"],
-            local=[], remote=[conn1, conn2, pi]),
-        expected=E(targets=[], exit_code=1, exc=WrongHttpStatusCode(404, {"message": f"Not found {pack1.id}"}))
+        input=I(cmd=["--pack-id", "pack1"], local=[], remote=[conn1, conn2, pi]),
+        expected=E(
+            targets=[],
+            exit_code=1,
+            exc=WrongHttpStatusCode(404, {"message": f"Not found {pack1.id}"}),
+        ),
     ),
     Case(  # no global targets disable, conn missed
         input=I(
             cmd=["--pack-id", "pack1", "--no-disable-package-targets"],
-            local=[conn1, pi, pack1], remote=[]),
-        expected=E(targets=[], exit_code=1, exc=SystemExit(1,),
-                   output_subs="\"conn2\" connection of \"docker-push\" target is not found")
+            local=[conn1, pi, pack1],
+            remote=[],
+        ),
+        expected=E(
+            targets=[],
+            exit_code=1,
+            exc=SystemExit(
+                1,
+            ),
+            output_subs='"conn2" connection of "docker-push" target is not found',
+        ),
     ),
 ]
 
@@ -178,16 +202,16 @@ def test_run_targets(cli_runner: CliRunner, test_case: Case, mocker: MockFixture
 
     mocker.patch(
         "odahuflow.cli.parsers.local.packaging.PackagingIntegrationClient.construct_from_other",
-        new=Mock(return_value=api_client)
+        new=Mock(return_value=api_client),
     )
     mocker.patch(
         "odahuflow.cli.parsers.local.packaging.ConnectionClient.construct_from_other",
-        new=Mock(return_value=api_client)
+        new=Mock(return_value=api_client),
     )
 
     # Prepare entities that are stored locally
     with cli_runner.isolated_filesystem():
-        with open('manifest.yaml', 'w') as f:
+        with open("manifest.yaml", "w") as f:
             docs = []
             for en in local:
                 d = en.to_dict()

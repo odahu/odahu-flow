@@ -15,7 +15,7 @@ class ModelDeploymentIstioConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, namespace: str=None, service_name: str=None):  # noqa: E501
+    def __init__(self, namespace: str = None, service_name: str = None):  # noqa: E501
         """ModelDeploymentIstioConfig - a model defined in Swagger
 
         :param namespace: The namespace of this ModelDeploymentIstioConfig.  # noqa: E501
@@ -23,21 +23,15 @@ class ModelDeploymentIstioConfig(Model):
         :param service_name: The service_name of this ModelDeploymentIstioConfig.  # noqa: E501
         :type service_name: str
         """
-        self.swagger_types = {
-            'namespace': str,
-            'service_name': str
-        }
+        self.swagger_types = {"namespace": str, "service_name": str}
 
-        self.attribute_map = {
-            'namespace': 'namespace',
-            'service_name': 'serviceName'
-        }
+        self.attribute_map = {"namespace": "namespace", "service_name": "serviceName"}
 
         self._namespace = namespace
         self._service_name = service_name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentIstioConfig':
+    def from_dict(cls, dikt) -> "ModelDeploymentIstioConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

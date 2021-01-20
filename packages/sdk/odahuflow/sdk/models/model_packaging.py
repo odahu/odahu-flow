@@ -6,8 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.model_packaging_spec import ModelPackagingSpec  # noqa: F401,E501
-from odahuflow.sdk.models.model_packaging_status import ModelPackagingStatus  # noqa: F401,E501
+from odahuflow.sdk.models.model_packaging_spec import (
+    ModelPackagingSpec,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.model_packaging_status import (
+    ModelPackagingStatus,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -17,7 +21,14 @@ class ModelPackaging(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, id: str=None, spec: ModelPackagingSpec=None, status: ModelPackagingStatus=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        id: str = None,
+        spec: ModelPackagingSpec = None,
+        status: ModelPackagingStatus = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelPackaging - a model defined in Swagger
 
         :param created_at: The created_at of this ModelPackaging.  # noqa: E501
@@ -32,19 +43,19 @@ class ModelPackaging(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'id': str,
-            'spec': ModelPackagingSpec,
-            'status': ModelPackagingStatus,
-            'updated_at': str
+            "created_at": str,
+            "id": str,
+            "spec": ModelPackagingSpec,
+            "status": ModelPackagingStatus,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'id': 'id',
-            'spec': 'spec',
-            'status': 'status',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "id": "id",
+            "spec": "spec",
+            "status": "status",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -54,7 +65,7 @@ class ModelPackaging(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelPackaging':
+    def from_dict(cls, dikt) -> "ModelPackaging":
         """Returns the dict as a model
 
         :param dikt: A dict.

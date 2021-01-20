@@ -16,7 +16,16 @@ class CommonConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, database_connection_string: str=None, external_urls: List[ExternalUrl]=None, graceful_timeout: str=None, launch_period: str=None, oauth_oidc_token_endpoint: str=None, resource_gpu_name: str=None, version: str=None):  # noqa: E501
+    def __init__(
+        self,
+        database_connection_string: str = None,
+        external_urls: List[ExternalUrl] = None,
+        graceful_timeout: str = None,
+        launch_period: str = None,
+        oauth_oidc_token_endpoint: str = None,
+        resource_gpu_name: str = None,
+        version: str = None,
+    ):  # noqa: E501
         """CommonConfig - a model defined in Swagger
 
         :param database_connection_string: The database_connection_string of this CommonConfig.  # noqa: E501
@@ -35,23 +44,23 @@ class CommonConfig(Model):
         :type version: str
         """
         self.swagger_types = {
-            'database_connection_string': str,
-            'external_urls': List[ExternalUrl],
-            'graceful_timeout': str,
-            'launch_period': str,
-            'oauth_oidc_token_endpoint': str,
-            'resource_gpu_name': str,
-            'version': str
+            "database_connection_string": str,
+            "external_urls": List[ExternalUrl],
+            "graceful_timeout": str,
+            "launch_period": str,
+            "oauth_oidc_token_endpoint": str,
+            "resource_gpu_name": str,
+            "version": str,
         }
 
         self.attribute_map = {
-            'database_connection_string': 'databaseConnectionString',
-            'external_urls': 'externalUrls',
-            'graceful_timeout': 'gracefulTimeout',
-            'launch_period': 'launchPeriod',
-            'oauth_oidc_token_endpoint': 'oauthOidcTokenEndpoint',
-            'resource_gpu_name': 'resourceGpuName',
-            'version': 'version'
+            "database_connection_string": "databaseConnectionString",
+            "external_urls": "externalUrls",
+            "graceful_timeout": "gracefulTimeout",
+            "launch_period": "launchPeriod",
+            "oauth_oidc_token_endpoint": "oauthOidcTokenEndpoint",
+            "resource_gpu_name": "resourceGpuName",
+            "version": "version",
         }
 
         self._database_connection_string = database_connection_string
@@ -63,7 +72,7 @@ class CommonConfig(Model):
         self._version = version
 
     @classmethod
-    def from_dict(cls, dikt) -> 'CommonConfig':
+    def from_dict(cls, dikt) -> "CommonConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

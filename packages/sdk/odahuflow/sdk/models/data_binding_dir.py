@@ -15,7 +15,9 @@ class DataBindingDir(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, conn_name: str=None, local_path: str=None, remote_path: str=None):  # noqa: E501
+    def __init__(
+        self, conn_name: str = None, local_path: str = None, remote_path: str = None
+    ):  # noqa: E501
         """DataBindingDir - a model defined in Swagger
 
         :param conn_name: The conn_name of this DataBindingDir.  # noqa: E501
@@ -25,16 +27,12 @@ class DataBindingDir(Model):
         :param remote_path: The remote_path of this DataBindingDir.  # noqa: E501
         :type remote_path: str
         """
-        self.swagger_types = {
-            'conn_name': str,
-            'local_path': str,
-            'remote_path': str
-        }
+        self.swagger_types = {"conn_name": str, "local_path": str, "remote_path": str}
 
         self.attribute_map = {
-            'conn_name': 'connName',
-            'local_path': 'localPath',
-            'remote_path': 'remotePath'
+            "conn_name": "connName",
+            "local_path": "localPath",
+            "remote_path": "remotePath",
         }
 
         self._conn_name = conn_name
@@ -42,7 +40,7 @@ class DataBindingDir(Model):
         self._remote_path = remote_path
 
     @classmethod
-    def from_dict(cls, dikt) -> 'DataBindingDir':
+    def from_dict(cls, dikt) -> "DataBindingDir":
         """Returns the dict as a model
 
         :param dikt: A dict.

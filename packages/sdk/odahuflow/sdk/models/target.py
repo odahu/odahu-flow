@@ -15,7 +15,7 @@ class Target(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, connection_name: str=None, name: str=None):  # noqa: E501
+    def __init__(self, connection_name: str = None, name: str = None):  # noqa: E501
         """Target - a model defined in Swagger
 
         :param connection_name: The connection_name of this Target.  # noqa: E501
@@ -23,21 +23,15 @@ class Target(Model):
         :param name: The name of this Target.  # noqa: E501
         :type name: str
         """
-        self.swagger_types = {
-            'connection_name': str,
-            'name': str
-        }
+        self.swagger_types = {"connection_name": str, "name": str}
 
-        self.attribute_map = {
-            'connection_name': 'connectionName',
-            'name': 'name'
-        }
+        self.attribute_map = {"connection_name": "connectionName", "name": "name"}
 
         self._connection_name = connection_name
         self._name = name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Target':
+    def from_dict(cls, dikt) -> "Target":
         """Returns the dict as a model
 
         :param dikt: A dict.

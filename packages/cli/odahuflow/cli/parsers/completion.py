@@ -19,8 +19,11 @@ import click_completion.core
 
 
 @click.command()
-@click.argument('shell', required=False, type=click_completion.DocumentedChoice(
-    click_completion.core.shells))
+@click.argument(
+    "shell",
+    required=False,
+    type=click_completion.DocumentedChoice(click_completion.core.shells),
+)
 def completion(shell):
     """
     Output odahuflowctl completion code to stdout.\n

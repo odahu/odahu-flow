@@ -15,7 +15,7 @@ class PackagingIntegrationStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(self, created_at: str = None, updated_at: str = None):  # noqa: E501
         """PackagingIntegrationStatus - a model defined in Swagger
 
         :param created_at: The created_at of this PackagingIntegrationStatus.  # noqa: E501
@@ -23,21 +23,15 @@ class PackagingIntegrationStatus(Model):
         :param updated_at: The updated_at of this PackagingIntegrationStatus.  # noqa: E501
         :type updated_at: str
         """
-        self.swagger_types = {
-            'created_at': str,
-            'updated_at': str
-        }
+        self.swagger_types = {"created_at": str, "updated_at": str}
 
-        self.attribute_map = {
-            'created_at': 'createdAt',
-            'updated_at': 'updatedAt'
-        }
+        self.attribute_map = {"created_at": "createdAt", "updated_at": "updatedAt"}
 
         self._created_at = created_at
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'PackagingIntegrationStatus':
+    def from_dict(cls, dikt) -> "PackagingIntegrationStatus":
         """Returns the dict as a model
 
         :param dikt: A dict.

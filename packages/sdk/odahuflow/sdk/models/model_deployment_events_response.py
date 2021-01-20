@@ -6,7 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.outbox_deployment_event import OutboxDeploymentEvent  # noqa: F401,E501
+from odahuflow.sdk.models.outbox_deployment_event import (
+    OutboxDeploymentEvent,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -16,7 +18,9 @@ class ModelDeploymentEventsResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, cursor: int=None, events: List[OutboxDeploymentEvent]=None):  # noqa: E501
+    def __init__(
+        self, cursor: int = None, events: List[OutboxDeploymentEvent] = None
+    ):  # noqa: E501
         """ModelDeploymentEventsResponse - a model defined in Swagger
 
         :param cursor: The cursor of this ModelDeploymentEventsResponse.  # noqa: E501
@@ -24,21 +28,15 @@ class ModelDeploymentEventsResponse(Model):
         :param events: The events of this ModelDeploymentEventsResponse.  # noqa: E501
         :type events: List[OutboxDeploymentEvent]
         """
-        self.swagger_types = {
-            'cursor': int,
-            'events': List[OutboxDeploymentEvent]
-        }
+        self.swagger_types = {"cursor": int, "events": List[OutboxDeploymentEvent]}
 
-        self.attribute_map = {
-            'cursor': 'cursor',
-            'events': 'events'
-        }
+        self.attribute_map = {"cursor": "cursor", "events": "events"}
 
         self._cursor = cursor
         self._events = events
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentEventsResponse':
+    def from_dict(cls, dikt) -> "ModelDeploymentEventsResponse":
         """Returns the dict as a model
 
         :param dikt: A dict.

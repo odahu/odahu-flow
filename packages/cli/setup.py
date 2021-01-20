@@ -19,7 +19,7 @@ import re
 from setuptools import find_namespace_packages, setup
 
 PACKAGE_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-VERSION_FILE = os.path.join(PACKAGE_ROOT_PATH, 'odahuflow/cli', 'version.py')
+VERSION_FILE = os.path.join(PACKAGE_ROOT_PATH, "odahuflow/cli", "version.py")
 
 
 def extract_version() -> str:
@@ -28,7 +28,7 @@ def extract_version() -> str:
 
     :return: Odahuflow version
     """
-    with open(VERSION_FILE, 'rt') as version_file:
+    with open(VERSION_FILE, "rt") as version_file:
         file_content = version_file.read()
         VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
         mo = re.search(VSRE, file_content, re.M)
@@ -38,20 +38,20 @@ def extract_version() -> str:
             raise RuntimeError("Unable to find version string in %s." % (file_content,))
 
 
-with open('requirements.txt') as f:
-    requirements = [f'odahu-flow-sdk=={extract_version()}'] + f.read().splitlines()
+with open("requirements.txt") as f:
+    requirements = [f"odahu-flow-sdk=={extract_version()}"] + f.read().splitlines()
 
 setup(
-    name='odahu-flow-cli',
+    name="odahu-flow-cli",
     version=extract_version(),
-    description='Odahu-flow CLI',
+    description="Odahu-flow CLI",
     packages=find_namespace_packages(),
-    url='https://github.com/odahu/odahu-flow',
-    author='Vlad Tokarev, Vitalik Solodilov',
-    author_email='vlad.tokarev.94@gmail.com, mcdkr@yandex.ru',
-    license='Apache v2',
+    url="https://github.com/odahu/odahu-flow",
+    author="Vlad Tokarev, Vitalik Solodilov",
+    author_email="vlad.tokarev.94@gmail.com, mcdkr@yandex.ru",
+    license="Apache v2",
     entry_points={
-        'console_scripts': ['odahuflowctl=odahuflow.cli.main:main'],
+        "console_scripts": ["odahuflowctl=odahuflow.cli.main:main"],
     },
     install_requires=requirements,
 )

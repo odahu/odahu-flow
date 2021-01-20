@@ -16,7 +16,9 @@ class RouteEventsResponse(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, cursor: int=None, events: List[OutboxRouteEvent]=None):  # noqa: E501
+    def __init__(
+        self, cursor: int = None, events: List[OutboxRouteEvent] = None
+    ):  # noqa: E501
         """RouteEventsResponse - a model defined in Swagger
 
         :param cursor: The cursor of this RouteEventsResponse.  # noqa: E501
@@ -24,21 +26,15 @@ class RouteEventsResponse(Model):
         :param events: The events of this RouteEventsResponse.  # noqa: E501
         :type events: List[OutboxRouteEvent]
         """
-        self.swagger_types = {
-            'cursor': int,
-            'events': List[OutboxRouteEvent]
-        }
+        self.swagger_types = {"cursor": int, "events": List[OutboxRouteEvent]}
 
-        self.attribute_map = {
-            'cursor': 'cursor',
-            'events': 'events'
-        }
+        self.attribute_map = {"cursor": "cursor", "events": "events"}
 
         self._cursor = cursor
         self._events = events
 
     @classmethod
-    def from_dict(cls, dikt) -> 'RouteEventsResponse':
+    def from_dict(cls, dikt) -> "RouteEventsResponse":
         """Returns the dict as a model
 
         :param dikt: A dict.

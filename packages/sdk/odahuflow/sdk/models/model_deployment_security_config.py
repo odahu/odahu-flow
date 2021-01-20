@@ -16,7 +16,7 @@ class ModelDeploymentSecurityConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, jwks: JWKS=None, role_name: str=None):  # noqa: E501
+    def __init__(self, jwks: JWKS = None, role_name: str = None):  # noqa: E501
         """ModelDeploymentSecurityConfig - a model defined in Swagger
 
         :param jwks: The jwks of this ModelDeploymentSecurityConfig.  # noqa: E501
@@ -24,21 +24,15 @@ class ModelDeploymentSecurityConfig(Model):
         :param role_name: The role_name of this ModelDeploymentSecurityConfig.  # noqa: E501
         :type role_name: str
         """
-        self.swagger_types = {
-            'jwks': JWKS,
-            'role_name': str
-        }
+        self.swagger_types = {"jwks": JWKS, "role_name": str}
 
-        self.attribute_map = {
-            'jwks': 'jwks',
-            'role_name': 'roleName'
-        }
+        self.attribute_map = {"jwks": "jwks", "role_name": "roleName"}
 
         self._jwks = jwks
         self._role_name = role_name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentSecurityConfig':
+    def from_dict(cls, dikt) -> "ModelDeploymentSecurityConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

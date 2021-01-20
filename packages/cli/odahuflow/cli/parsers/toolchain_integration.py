@@ -19,9 +19,15 @@ import click
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
-    check_id_or_file_params_present
-from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
+from odahuflow.cli.utils.error_handler import (
+    IGNORE_NOT_FOUND_ERROR_MESSAGE,
+    check_id_or_file_params_present,
+)
+from odahuflow.cli.utils.output import (
+    format_output,
+    DEFAULT_OUTPUT_FORMAT,
+    validate_output_format,
+)
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
@@ -30,8 +36,8 @@ from odahuflow.sdk.models import ToolchainIntegration
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def toolchain_integration(ctx: click.core.Context, url: str, token: str):
     """
@@ -42,9 +48,15 @@ def toolchain_integration(ctx: click.core.Context, url: str, token: str):
 
 
 @toolchain_integration.command()
-@click.option('--ti-id', '--id', help='Toolchain integration ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--ti-id", "--id", help="Toolchain integration ID")
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def get(client: ToolchainIntegrationClient, ti_id: str, output_format: str):
     """
@@ -68,12 +80,26 @@ def get(client: ToolchainIntegrationClient, ti_id: str, output_format: str):
 
 
 @toolchain_integration.command()
-@click.option('--ti-id', '--id', help='Toolchain integration ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with toolchain integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--ti-id", "--id", help="Toolchain integration ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with toolchain integration",
+)
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
-def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_format: str):
+def create(
+    client: ToolchainIntegrationClient, ti_id: str, file: str, output_format: str
+):
     """
     Create a toolchain integration.\n
     You should specify a path to file with a toolchain integration.
@@ -91,7 +117,7 @@ def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_for
     """
     ti = parse_resources_file_with_one_item(file).resource
     if not isinstance(ti, ToolchainIntegration):
-        raise ValueError(f'Toolchain integration expected, but {type(ti)} provided')
+        raise ValueError(f"Toolchain integration expected, but {type(ti)} provided")
 
     if ti_id:
         ti.id = ti_id
@@ -100,10 +126,22 @@ def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_for
 
 
 @toolchain_integration.command()
-@click.option('--ti-id', '--id', help='Toolchain integration ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with toolchain integration')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--ti-id", "--id", help="Toolchain integration ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with toolchain integration",
+)
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def edit(client: ToolchainIntegrationClient, ti_id: str, file: str, output_format: str):
     """
@@ -123,7 +161,7 @@ def edit(client: ToolchainIntegrationClient, ti_id: str, file: str, output_forma
     """
     ti = parse_resources_file_with_one_item(file).resource
     if not isinstance(ti, ToolchainIntegration):
-        raise ValueError(f'Toolchain integration expected, but {type(ti)} provided')
+        raise ValueError(f"Toolchain integration expected, but {type(ti)} provided")
 
     if ti_id:
         ti.id = ti_id
@@ -132,12 +170,22 @@ def edit(client: ToolchainIntegrationClient, ti_id: str, file: str, output_forma
 
 
 @toolchain_integration.command()
-@click.option('--ti-id', '--id', help='Toolchain integration ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with toolchain integration')
-@click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if toolchain integration is not found')
+@click.option("--ti-id", "--id", help="Toolchain integration ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    help="Path to the file with toolchain integration",
+)
+@click.option(
+    "--ignore-not-found/--not-ignore-not-found",
+    default=False,
+    help="ignore if toolchain integration is not found",
+)
 @pass_obj
-def delete(client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not_found: bool):
+def delete(
+    client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not_found: bool
+):
     """
     Delete a toolchain integration.\n
     For this command, you must provide a toolchain integration ID or path to file with one toolchain integration.
@@ -159,7 +207,7 @@ def delete(client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not
     if file:
         ti = parse_resources_file_with_one_item(file).resource
         if not isinstance(ti, ToolchainIntegration):
-            raise ValueError(f'Toolchain Integration expected, but {type(ti)} provided')
+            raise ValueError(f"Toolchain Integration expected, but {type(ti)} provided")
 
         ti_id = ti.id
 
@@ -169,4 +217,8 @@ def delete(client: ToolchainIntegrationClient, ti_id: str, file: str, ignore_not
         if e.status_code != http.HTTPStatus.NOT_FOUND or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ToolchainIntegration.__name__, id=ti_id))
+        click.echo(
+            IGNORE_NOT_FOUND_ERROR_MESSAGE.format(
+                kind=ToolchainIntegration.__name__, id=ti_id
+            )
+        )

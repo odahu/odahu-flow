@@ -15,7 +15,7 @@ class EnvironmentVariable(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name: str=None, value: str=None):  # noqa: E501
+    def __init__(self, name: str = None, value: str = None):  # noqa: E501
         """EnvironmentVariable - a model defined in Swagger
 
         :param name: The name of this EnvironmentVariable.  # noqa: E501
@@ -23,21 +23,15 @@ class EnvironmentVariable(Model):
         :param value: The value of this EnvironmentVariable.  # noqa: E501
         :type value: str
         """
-        self.swagger_types = {
-            'name': str,
-            'value': str
-        }
+        self.swagger_types = {"name": str, "value": str}
 
-        self.attribute_map = {
-            'name': 'name',
-            'value': 'value'
-        }
+        self.attribute_map = {"name": "name", "value": "value"}
 
         self._name = name
         self._value = value
 
     @classmethod
-    def from_dict(cls, dikt) -> 'EnvironmentVariable':
+    def from_dict(cls, dikt) -> "EnvironmentVariable":
         """Returns the dict as a model
 
         :param dikt: A dict.

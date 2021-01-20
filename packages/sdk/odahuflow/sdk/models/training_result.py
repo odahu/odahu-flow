@@ -15,7 +15,9 @@ class TrainingResult(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, artifact_name: str=None, commit_id: str=None, run_id: str=None):  # noqa: E501
+    def __init__(
+        self, artifact_name: str = None, commit_id: str = None, run_id: str = None
+    ):  # noqa: E501
         """TrainingResult - a model defined in Swagger
 
         :param artifact_name: The artifact_name of this TrainingResult.  # noqa: E501
@@ -25,16 +27,12 @@ class TrainingResult(Model):
         :param run_id: The run_id of this TrainingResult.  # noqa: E501
         :type run_id: str
         """
-        self.swagger_types = {
-            'artifact_name': str,
-            'commit_id': str,
-            'run_id': str
-        }
+        self.swagger_types = {"artifact_name": str, "commit_id": str, "run_id": str}
 
         self.attribute_map = {
-            'artifact_name': 'artifactName',
-            'commit_id': 'commitID',
-            'run_id': 'runId'
+            "artifact_name": "artifactName",
+            "commit_id": "commitID",
+            "run_id": "runId",
         }
 
         self._artifact_name = artifact_name
@@ -42,7 +40,7 @@ class TrainingResult(Model):
         self._run_id = run_id
 
     @classmethod
-    def from_dict(cls, dikt) -> 'TrainingResult':
+    def from_dict(cls, dikt) -> "TrainingResult":
         """Returns the dict as a model
 
         :param dikt: A dict.

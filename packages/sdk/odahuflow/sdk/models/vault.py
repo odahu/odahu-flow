@@ -15,7 +15,14 @@ class Vault(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, insecure: bool=None, role: str=None, secret_engine_path: str=None, token: str=None, url: str=None):  # noqa: E501
+    def __init__(
+        self,
+        insecure: bool = None,
+        role: str = None,
+        secret_engine_path: str = None,
+        token: str = None,
+        url: str = None,
+    ):  # noqa: E501
         """Vault - a model defined in Swagger
 
         :param insecure: The insecure of this Vault.  # noqa: E501
@@ -30,19 +37,19 @@ class Vault(Model):
         :type url: str
         """
         self.swagger_types = {
-            'insecure': bool,
-            'role': str,
-            'secret_engine_path': str,
-            'token': str,
-            'url': str
+            "insecure": bool,
+            "role": str,
+            "secret_engine_path": str,
+            "token": str,
+            "url": str,
         }
 
         self.attribute_map = {
-            'insecure': 'insecure',
-            'role': 'role',
-            'secret_engine_path': 'secretEnginePath',
-            'token': 'token',
-            'url': 'url'
+            "insecure": "insecure",
+            "role": "role",
+            "secret_engine_path": "secretEnginePath",
+            "token": "token",
+            "url": "url",
         }
 
         self._insecure = insecure
@@ -52,7 +59,7 @@ class Vault(Model):
         self._url = url
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Vault':
+    def from_dict(cls, dikt) -> "Vault":
         """Returns the dict as a model
 
         :param dikt: A dict.

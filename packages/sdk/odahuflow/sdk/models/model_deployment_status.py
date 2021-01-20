@@ -15,7 +15,19 @@ class ModelDeploymentStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, available_replicas: int=None, created_at: str=None, deployment: str=None, last_revision_name: str=None, last_updated_time: str=None, replicas: int=None, service: str=None, service_url: str=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        available_replicas: int = None,
+        created_at: str = None,
+        deployment: str = None,
+        last_revision_name: str = None,
+        last_updated_time: str = None,
+        replicas: int = None,
+        service: str = None,
+        service_url: str = None,
+        state: str = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelDeploymentStatus - a model defined in Swagger
 
         :param available_replicas: The available_replicas of this ModelDeploymentStatus.  # noqa: E501
@@ -40,29 +52,29 @@ class ModelDeploymentStatus(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'available_replicas': int,
-            'created_at': str,
-            'deployment': str,
-            'last_revision_name': str,
-            'last_updated_time': str,
-            'replicas': int,
-            'service': str,
-            'service_url': str,
-            'state': str,
-            'updated_at': str
+            "available_replicas": int,
+            "created_at": str,
+            "deployment": str,
+            "last_revision_name": str,
+            "last_updated_time": str,
+            "replicas": int,
+            "service": str,
+            "service_url": str,
+            "state": str,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'available_replicas': 'availableReplicas',
-            'created_at': 'createdAt',
-            'deployment': 'deployment',
-            'last_revision_name': 'lastRevisionName',
-            'last_updated_time': 'lastUpdatedTime',
-            'replicas': 'replicas',
-            'service': 'service',
-            'service_url': 'serviceURL',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            "available_replicas": "availableReplicas",
+            "created_at": "createdAt",
+            "deployment": "deployment",
+            "last_revision_name": "lastRevisionName",
+            "last_updated_time": "lastUpdatedTime",
+            "replicas": "replicas",
+            "service": "service",
+            "service_url": "serviceURL",
+            "state": "state",
+            "updated_at": "updatedAt",
         }
 
         self._available_replicas = available_replicas
@@ -77,7 +89,7 @@ class ModelDeploymentStatus(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentStatus':
+    def from_dict(cls, dikt) -> "ModelDeploymentStatus":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -19,9 +19,15 @@ import click
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, \
-    IGNORE_NOT_FOUND_ERROR_MESSAGE
-from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
+from odahuflow.cli.utils.error_handler import (
+    check_id_or_file_params_present,
+    IGNORE_NOT_FOUND_ERROR_MESSAGE,
+)
+from odahuflow.cli.utils.output import (
+    format_output,
+    DEFAULT_OUTPUT_FORMAT,
+    validate_output_format,
+)
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
@@ -30,8 +36,8 @@ from odahuflow.sdk.models import Connection
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def connection(ctx: click.core.Context, url: str, token: str):
     """
@@ -42,11 +48,22 @@ def connection(ctx: click.core.Context, url: str, token: str):
 
 
 @connection.command()
-@click.option('--conn-id', '--id', help='Connection ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
-@click.option('--decrypted', '-d', help='Flag means that connection sensitive data should be decrypted',
-              default=False, is_flag=True)
+@click.option("--conn-id", "--id", help="Connection ID")
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
+@click.option(
+    "--decrypted",
+    "-d",
+    help="Flag means that connection sensitive data should be decrypted",
+    default=False,
+    is_flag=True,
+)
 @pass_obj
 def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: bool):
     """
@@ -83,10 +100,22 @@ def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: b
 
 
 @connection.command()
-@click.option('--conn-id', '--id', help='Connection ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with connection')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--conn-id", "--id", help="Connection ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with connection",
+)
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def create(client: ConnectionClient, conn_id: str, file: str, output_format: str):
     """
@@ -107,7 +136,7 @@ def create(client: ConnectionClient, conn_id: str, file: str, output_format: str
     """
     conn = parse_resources_file_with_one_item(file).resource
     if not isinstance(conn, Connection):
-        raise ValueError(f'Connection expected, but {type(conn)} provided')
+        raise ValueError(f"Connection expected, but {type(conn)} provided")
 
     if conn_id:
         conn.id = conn_id
@@ -116,10 +145,22 @@ def create(client: ConnectionClient, conn_id: str, file: str, output_format: str
 
 
 @connection.command()
-@click.option('--conn-id', '--id', help='Connection ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with connection')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--conn-id", "--id", help="Connection ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with connection",
+)
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
     """
@@ -140,7 +181,7 @@ def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
     """
     conn = parse_resources_file_with_one_item(file).resource
     if not isinstance(conn, Connection):
-        raise ValueError(f'Connection expected, but {type(conn)} provided')
+        raise ValueError(f"Connection expected, but {type(conn)} provided")
 
     if conn_id:
         conn.id = conn_id
@@ -149,10 +190,15 @@ def edit(client: ConnectionClient, conn_id: str, file: str, output_format: str):
 
 
 @connection.command()
-@click.option('--conn-id', '--id', help='Connection ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with connection')
-@click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if connection is not found')
+@click.option("--conn-id", "--id", help="Connection ID")
+@click.option(
+    "--file", "-f", type=click.Path(), help="Path to the file with connection"
+)
+@click.option(
+    "--ignore-not-found/--not-ignore-not-found",
+    default=False,
+    help="ignore if connection is not found",
+)
 @pass_obj
 def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: bool):
     """
@@ -179,7 +225,7 @@ def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: 
     if file:
         conn = parse_resources_file_with_one_item(file).resource
         if not isinstance(conn, Connection):
-            raise ValueError(f'Connection expected, but {type(conn)} provided')
+            raise ValueError(f"Connection expected, but {type(conn)} provided")
 
         conn_id = conn.id
 
@@ -189,4 +235,6 @@ def delete(client: ConnectionClient, conn_id: str, file: str, ignore_not_found: 
         if e.status_code != http.HTTPStatus.NOT_FOUND or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=Connection.__name__, id=conn_id))
+        click.echo(
+            IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=Connection.__name__, id=conn_id)
+        )

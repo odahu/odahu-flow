@@ -7,10 +7,16 @@ from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.edge_config import EdgeConfig  # noqa: F401,E501
-from odahuflow.sdk.models.model_deployment_istio_config import ModelDeploymentIstioConfig  # noqa: F401,E501
-from odahuflow.sdk.models.model_deployment_security_config import ModelDeploymentSecurityConfig  # noqa: F401,E501
+from odahuflow.sdk.models.model_deployment_istio_config import (
+    ModelDeploymentIstioConfig,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.model_deployment_security_config import (
+    ModelDeploymentSecurityConfig,
+)  # noqa: F401,E501
 from odahuflow.sdk.models.node_pool import NodePool  # noqa: F401,E501
-from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import (
+    ResourceRequirements,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -20,7 +26,18 @@ class ModelDeploymentConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_docker_pull_conn_name: str=None, default_resources: ResourceRequirements=None, edge: EdgeConfig=None, enabled: bool=None, istio: ModelDeploymentIstioConfig=None, namespace: str=None, node_pools: List[NodePool]=None, security: ModelDeploymentSecurityConfig=None, tolerations: str=None):  # noqa: E501
+    def __init__(
+        self,
+        default_docker_pull_conn_name: str = None,
+        default_resources: ResourceRequirements = None,
+        edge: EdgeConfig = None,
+        enabled: bool = None,
+        istio: ModelDeploymentIstioConfig = None,
+        namespace: str = None,
+        node_pools: List[NodePool] = None,
+        security: ModelDeploymentSecurityConfig = None,
+        tolerations: str = None,
+    ):  # noqa: E501
         """ModelDeploymentConfig - a model defined in Swagger
 
         :param default_docker_pull_conn_name: The default_docker_pull_conn_name of this ModelDeploymentConfig.  # noqa: E501
@@ -43,27 +60,27 @@ class ModelDeploymentConfig(Model):
         :type tolerations: str
         """
         self.swagger_types = {
-            'default_docker_pull_conn_name': str,
-            'default_resources': ResourceRequirements,
-            'edge': EdgeConfig,
-            'enabled': bool,
-            'istio': ModelDeploymentIstioConfig,
-            'namespace': str,
-            'node_pools': List[NodePool],
-            'security': ModelDeploymentSecurityConfig,
-            'tolerations': str
+            "default_docker_pull_conn_name": str,
+            "default_resources": ResourceRequirements,
+            "edge": EdgeConfig,
+            "enabled": bool,
+            "istio": ModelDeploymentIstioConfig,
+            "namespace": str,
+            "node_pools": List[NodePool],
+            "security": ModelDeploymentSecurityConfig,
+            "tolerations": str,
         }
 
         self.attribute_map = {
-            'default_docker_pull_conn_name': 'defaultDockerPullConnName',
-            'default_resources': 'defaultResources',
-            'edge': 'edge',
-            'enabled': 'enabled',
-            'istio': 'istio',
-            'namespace': 'namespace',
-            'node_pools': 'nodePools',
-            'security': 'security',
-            'tolerations': 'tolerations'
+            "default_docker_pull_conn_name": "defaultDockerPullConnName",
+            "default_resources": "defaultResources",
+            "edge": "edge",
+            "enabled": "enabled",
+            "istio": "istio",
+            "namespace": "namespace",
+            "node_pools": "nodePools",
+            "security": "security",
+            "tolerations": "tolerations",
         }
 
         self._default_docker_pull_conn_name = default_docker_pull_conn_name
@@ -77,7 +94,7 @@ class ModelDeploymentConfig(Model):
         self._tolerations = tolerations
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentConfig':
+    def from_dict(cls, dikt) -> "ModelDeploymentConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

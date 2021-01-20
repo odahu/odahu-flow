@@ -25,21 +25,24 @@ from odahuflow.sdk.clients.oauth_handler import do_client_cred_authentication
 from odahuflow.sdk.clients.oidc import OpenIdProviderConfiguration
 from odahuflow.sdk import config
 
-API_URL_PARAM_NAME = 'API_URL'
-AUTH_TOKEN_PARAM_NAME = 'AUTH_TOKEN'
+API_URL_PARAM_NAME = "API_URL"
+AUTH_TOKEN_PARAM_NAME = "AUTH_TOKEN"
 
-CLUSTER_PROFILE = 'CLUSTER_PROFILE'
+CLUSTER_PROFILE = "CLUSTER_PROFILE"
 
 # Key in cluster_profile.json that contain creds for
-TEST_SA_ADMIN = 'test'
-TEST_SA_DS = 'test_data_scientist'
+TEST_SA_ADMIN = "test"
+TEST_SA_DS = "test_data_scientist"
 
 
 class ServiceAccount:
-
     def __init__(self, profile_json, service_account_key):
-        self._client_id = profile_json['service_accounts'][service_account_key]['client_id']
-        self._client_secret = profile_json['service_accounts'][service_account_key]['client_secret']
+        self._client_id = profile_json["service_accounts"][service_account_key][
+            "client_id"
+        ]
+        self._client_secret = profile_json["service_accounts"][service_account_key][
+            "client_secret"
+        ]
 
     @property
     def client_id(self):
@@ -63,11 +66,11 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
     profile = profile or os.getenv(CLUSTER_PROFILE)
 
     if not profile:
-        raise Exception('Can\'t get profile at path {}'.format(profile))
+        raise Exception("Can't get profile at path {}".format(profile))
     if not os.path.exists(profile):
-        raise Exception('Can\'t get profile - {} file not found'.format(profile))
+        raise Exception("Can't get profile - {} file not found".format(profile))
 
-    with open(profile, 'r') as json_file:
+    with open(profile, "r") as json_file:
         data = json.load(json_file)
         variables = {}
 
@@ -76,49 +79,69 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
             test_sa_admin = ServiceAccount(data, TEST_SA_ADMIN)
             test_sa_ds = ServiceAccount(data, TEST_SA_DS)
 
-            host_base_domain = data['dns']['domain']
+            host_base_domain = data["dns"]["domain"]
             variables = {
-                'HOST_BASE_DOMAIN': host_base_domain,
-                'CLUSTER_NAME': data.get('cluster_name'),
-                'CLUSTER_CONTEXT': data.get('cluster_context'),
-                'FEEDBACK_BUCKET': data.get('data_bucket'),
-                'EXAMPLES_VERSION': data.get('examples_version'),
-                'CLOUD_TYPE': data['cloud']['type'],
-                'EDGE_URL': os.getenv('EDGE_URL', f'https://{host_base_domain}'),
-                API_URL_PARAM_NAME: os.getenv(API_URL_PARAM_NAME, f'https://{host_base_domain}'),
-                'GRAFANA_URL': os.getenv('GRAFANA_URL', f'https://{host_base_domain}/grafana'),
-                'PROMETHEUS_URL': os.getenv('PROMETHEUS_URL', f'https://{host_base_domain}/prometheus'),
-                'ALERTMANAGER_URL': os.getenv('ALERTMANAGER_URL', f'https://{host_base_domain}/alertmanager'),
-                'JUPYTERLAB_URL': os.getenv('JUPITERLAB_URL', f'https://{host_base_domain}/jupyterlab'),
-                'MLFLOW_URL': os.getenv('MLFLOW_URL', f'https://{host_base_domain}/mlflow'),
-                'AIRFLOW_URL': os.getenv('AIRFLOW_URL', f'https://{host_base_domain}/airflow'),
-                'IS_GPU_ENABLED': 'training_gpu' in data['node_pools'],
-                'SA_CLIENT_ID': test_sa_admin.client_id,
-                'SA_CLIENT_SECRET': test_sa_admin.client_secret,
-                'SA_ADMIN': test_sa_admin,
-                'SA_DATA_SCIENTIST': test_sa_ds,
-                'ISSUER': data.get('oauth_oidc_issuer_url')
+                "HOST_BASE_DOMAIN": host_base_domain,
+                "CLUSTER_NAME": data.get("cluster_name"),
+                "CLUSTER_CONTEXT": data.get("cluster_context"),
+                "FEEDBACK_BUCKET": data.get("data_bucket"),
+                "EXAMPLES_VERSION": data.get("examples_version"),
+                "CLOUD_TYPE": data["cloud"]["type"],
+                "EDGE_URL": os.getenv("EDGE_URL", f"https://{host_base_domain}"),
+                API_URL_PARAM_NAME: os.getenv(
+                    API_URL_PARAM_NAME, f"https://{host_base_domain}"
+                ),
+                "GRAFANA_URL": os.getenv(
+                    "GRAFANA_URL", f"https://{host_base_domain}/grafana"
+                ),
+                "PROMETHEUS_URL": os.getenv(
+                    "PROMETHEUS_URL", f"https://{host_base_domain}/prometheus"
+                ),
+                "ALERTMANAGER_URL": os.getenv(
+                    "ALERTMANAGER_URL", f"https://{host_base_domain}/alertmanager"
+                ),
+                "JUPYTERLAB_URL": os.getenv(
+                    "JUPITERLAB_URL", f"https://{host_base_domain}/jupyterlab"
+                ),
+                "MLFLOW_URL": os.getenv(
+                    "MLFLOW_URL", f"https://{host_base_domain}/mlflow"
+                ),
+                "AIRFLOW_URL": os.getenv(
+                    "AIRFLOW_URL", f"https://{host_base_domain}/airflow"
+                ),
+                "IS_GPU_ENABLED": "training_gpu" in data["node_pools"],
+                "SA_CLIENT_ID": test_sa_admin.client_id,
+                "SA_CLIENT_SECRET": test_sa_admin.client_secret,
+                "SA_ADMIN": test_sa_admin,
+                "SA_DATA_SCIENTIST": test_sa_ds,
+                "ISSUER": data.get("oauth_oidc_issuer_url"),
             }
         except Exception as err:
-            raise Exception("Can\'t get variable from cluster profile: {}".format(err)) from err
+            raise Exception(
+                "Can't get variable from cluster profile: {}".format(err)
+            ) from err
 
         try:
             client_id = test_sa_admin.client_id
             client_secret = test_sa_admin.client_secret
-            issuer = data['oauth_oidc_issuer_url']
+            issuer = data["oauth_oidc_issuer_url"]
             conf = OpenIdProviderConfiguration(issuer)
             conf.fetch_configuration()
 
             login_result = do_client_cred_authentication(
-                issue_token_url=conf.token_endpoint, client_id=client_id, client_secret=client_secret
+                issue_token_url=conf.token_endpoint,
+                client_id=client_id,
+                client_secret=client_secret,
             )
 
             if login_result:
                 variables[AUTH_TOKEN_PARAM_NAME] = login_result.id_token
             else:
-                variables[AUTH_TOKEN_PARAM_NAME] = ''
+                variables[AUTH_TOKEN_PARAM_NAME] = ""
         except Exception as err:
-            raise Exception("Can\'t get dex authentication data: {}".format(err)) from err
+            raise Exception(
+                "Can't get dex authentication data: {}".format(err)
+            ) from err
 
     # Increase retries and backoff for robot tests against defaults
     config.RETRY_ATTEMPTS = 10

@@ -64,7 +64,7 @@ class AWS_S3(ObjectStorage):
         Init client
         """
         self._bucket_name = bucket_name
-        self._client = boto3.client('s3')  # type: boto3.S3.Client
+        self._client = boto3.client("s3")  # type: boto3.S3.Client
 
     def list_files(self, prefix=None, limit=None) -> typing.List[str]:
         """
@@ -77,16 +77,17 @@ class AWS_S3(ObjectStorage):
         kwargs = {}
 
         if limit:
-            kwargs['MaxKeys'] = int(limit)
+            kwargs["MaxKeys"] = int(limit)
 
-        response = self._client.list_objects(Bucket=self._bucket_name,
-                                             Prefix=prefix)
-        if 'Contents' not in response:
+        response = self._client.list_objects(Bucket=self._bucket_name, Prefix=prefix)
+        if "Contents" not in response:
             return []
 
-        files = sorted((item for item in response['Contents']), key=lambda x: x['LastModified'])
+        files = sorted(
+            (item for item in response["Contents"]), key=lambda x: x["LastModified"]
+        )
 
-        return [file['Key'] for file in files]
+        return [file["Key"] for file in files]
 
     def read_file(self, file_name: str) -> str:
         """
@@ -97,9 +98,11 @@ class AWS_S3(ObjectStorage):
         """
         try:
             obj = self._client.get_object(Bucket=self._bucket_name, Key=file_name)
-            return obj['Body'].read().decode('utf-8')
+            return obj["Body"].read().decode("utf-8")
         except self._client.exceptions.NoSuchKey as e:
-            raise Exception('File {} not found in bucket {}'.format(file_name, self._bucket_name)) from e
+            raise Exception(
+                "File {} not found in bucket {}".format(file_name, self._bucket_name)
+            ) from e
 
 
 class GCP_CloudStorage(ObjectStorage):
@@ -123,7 +126,12 @@ class GCP_CloudStorage(ObjectStorage):
         :param limit: response keys limit
         :return: list of file names
         """
-        return list(map(lambda f: f.name, self._bucket.list_blobs(prefix=prefix, max_results=limit)))
+        return list(
+            map(
+                lambda f: f.name,
+                self._bucket.list_blobs(prefix=prefix, max_results=limit),
+            )
+        )
 
     def read_file(self, file_name: str) -> str:
         """
@@ -132,7 +140,7 @@ class GCP_CloudStorage(ObjectStorage):
         :param file_name: file path in bucket
         :return: file content
         """
-        return self._bucket.get_blob(file_name).download_as_string().decode('utf-8')
+        return self._bucket.get_blob(file_name).download_as_string().decode("utf-8")
 
 
 class AzureBlobStorage(ObjectStorage):
@@ -155,11 +163,13 @@ class AzureBlobStorage(ObjectStorage):
         :param limit: response keys limit
         :return: list of file names
         """
-        return list(self._bb_client.list_blob_names(
-            self._container_name,
-            prefix=prefix,
-            num_results=limit,
-        ))
+        return list(
+            self._bb_client.list_blob_names(
+                self._container_name,
+                prefix=prefix,
+                num_results=limit,
+            )
+        )
 
     def read_file(self, file_name: str) -> str:
         """
@@ -171,7 +181,7 @@ class AzureBlobStorage(ObjectStorage):
         return self._bb_client.get_blob_to_bytes(
             self._container_name,
             file_name,
-        ).content.decode('utf-8')
+        ).content.decode("utf-8")
 
     @staticmethod
     def create_azure_bb_service(cluster_name: str) -> BlockBlobService:
@@ -183,21 +193,30 @@ class AzureBlobStorage(ObjectStorage):
         :param cluster_name: cluster name
         :return: BlockBlobService client
         """
-        sm_client: StorageManagementClient = get_client_from_cli_profile(StorageManagementClient)
+        sm_client: StorageManagementClient = get_client_from_cli_profile(
+            StorageManagementClient
+        )
 
         for storage_account in sm_client.storage_accounts.list():
-            if storage_account.tags.get('cluster') == cluster_name\
-                    and storage_account.tags.get('purpose') == 'Odahuflow models storage':
+            if (
+                storage_account.tags.get("cluster") == cluster_name
+                and storage_account.tags.get("purpose") == "Odahuflow models storage"
+            ):
                 sa_name = storage_account.name
                 break
         else:
-            raise ValueError(f'Cannot find a storage account for the cluster {cluster_name} name')
+            raise ValueError(
+                f"Cannot find a storage account for the cluster {cluster_name} name"
+            )
 
         # We assume that resource group name the same as cluster name
-        sa_keys = sm_client.storage_accounts.list_keys(resource_group_name=cluster_name, account_name=sa_name)
+        sa_keys = sm_client.storage_accounts.list_keys(
+            resource_group_name=cluster_name, account_name=sa_name
+        )
         if not sa_keys.keys:
             raise ValueError(
-                f'Cannot find keys for the {sa_name} storage account in the {cluster_name} resource group')
+                f"Cannot find keys for the {sa_name} storage account in the {cluster_name} resource group"
+            )
 
         return BlockBlobService(
             account_name=sa_name,

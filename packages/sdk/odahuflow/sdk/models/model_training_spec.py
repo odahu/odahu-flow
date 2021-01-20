@@ -7,9 +7,13 @@ from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.data_binding_dir import DataBindingDir  # noqa: F401,E501
-from odahuflow.sdk.models.environment_variable import EnvironmentVariable  # noqa: F401,E501
+from odahuflow.sdk.models.environment_variable import (
+    EnvironmentVariable,
+)  # noqa: F401,E501
 from odahuflow.sdk.models.model_identity import ModelIdentity  # noqa: F401,E501
-from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import (
+    ResourceRequirements,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -19,7 +23,23 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(
+        self,
+        args: List[str] = None,
+        data: List[DataBindingDir] = None,
+        entrypoint: str = None,
+        envs: List[EnvironmentVariable] = None,
+        hyper_parameters: Dict[str, str] = None,
+        image: str = None,
+        model: ModelIdentity = None,
+        node_selector: Dict[str, str] = None,
+        output_connection: str = None,
+        reference: str = None,
+        resources: ResourceRequirements = None,
+        toolchain: str = None,
+        vcs_name: str = None,
+        work_dir: str = None,
+    ):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
         :param args: The args of this ModelTrainingSpec.  # noqa: E501
@@ -52,37 +72,37 @@ class ModelTrainingSpec(Model):
         :type work_dir: str
         """
         self.swagger_types = {
-            'args': List[str],
-            'data': List[DataBindingDir],
-            'entrypoint': str,
-            'envs': List[EnvironmentVariable],
-            'hyper_parameters': Dict[str, str],
-            'image': str,
-            'model': ModelIdentity,
-            'node_selector': Dict[str, str],
-            'output_connection': str,
-            'reference': str,
-            'resources': ResourceRequirements,
-            'toolchain': str,
-            'vcs_name': str,
-            'work_dir': str
+            "args": List[str],
+            "data": List[DataBindingDir],
+            "entrypoint": str,
+            "envs": List[EnvironmentVariable],
+            "hyper_parameters": Dict[str, str],
+            "image": str,
+            "model": ModelIdentity,
+            "node_selector": Dict[str, str],
+            "output_connection": str,
+            "reference": str,
+            "resources": ResourceRequirements,
+            "toolchain": str,
+            "vcs_name": str,
+            "work_dir": str,
         }
 
         self.attribute_map = {
-            'args': 'args',
-            'data': 'data',
-            'entrypoint': 'entrypoint',
-            'envs': 'envs',
-            'hyper_parameters': 'hyperParameters',
-            'image': 'image',
-            'model': 'model',
-            'node_selector': 'nodeSelector',
-            'output_connection': 'outputConnection',
-            'reference': 'reference',
-            'resources': 'resources',
-            'toolchain': 'toolchain',
-            'vcs_name': 'vcsName',
-            'work_dir': 'workDir'
+            "args": "args",
+            "data": "data",
+            "entrypoint": "entrypoint",
+            "envs": "envs",
+            "hyper_parameters": "hyperParameters",
+            "image": "image",
+            "model": "model",
+            "node_selector": "nodeSelector",
+            "output_connection": "outputConnection",
+            "reference": "reference",
+            "resources": "resources",
+            "toolchain": "toolchain",
+            "vcs_name": "vcsName",
+            "work_dir": "workDir",
         }
 
         self._args = args
@@ -101,7 +121,7 @@ class ModelTrainingSpec(Model):
         self._work_dir = work_dir
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelTrainingSpec':
+    def from_dict(cls, dikt) -> "ModelTrainingSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

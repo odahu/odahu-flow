@@ -15,7 +15,7 @@ class Parameter(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name: str=None, value: object=None):  # noqa: E501
+    def __init__(self, name: str = None, value: object = None):  # noqa: E501
         """Parameter - a model defined in Swagger
 
         :param name: The name of this Parameter.  # noqa: E501
@@ -23,21 +23,15 @@ class Parameter(Model):
         :param value: The value of this Parameter.  # noqa: E501
         :type value: object
         """
-        self.swagger_types = {
-            'name': str,
-            'value': object
-        }
+        self.swagger_types = {"name": str, "value": object}
 
-        self.attribute_map = {
-            'name': 'name',
-            'value': 'value'
-        }
+        self.attribute_map = {"name": "name", "value": "value"}
 
         self._name = name
         self._value = value
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Parameter':
+    def from_dict(cls, dikt) -> "Parameter":
         """Returns the dict as a model
 
         :param dikt: A dict.

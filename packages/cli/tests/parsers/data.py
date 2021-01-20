@@ -19,8 +19,15 @@ Test data for entity CLI commands
 import typing
 
 import click
-from odahuflow.cli.parsers import connection, training, toolchain_integration, packaging, packaging_integration, \
-    deployment, route
+from odahuflow.cli.parsers import (
+    connection,
+    training,
+    toolchain_integration,
+    packaging,
+    packaging_integration,
+    deployment,
+    route,
+)
 from odahuflow.sdk.clients.api import RemoteAPIClient
 from odahuflow.sdk.clients.connection import ConnectionClient
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient, READY_STATE
@@ -29,13 +36,30 @@ from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClie
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
-from odahuflow.sdk.models import ModelTraining, Connection, ConnectionSpec, ModelTrainingSpec, ModelIdentity, \
-    ToolchainIntegration, ToolchainIntegrationSpec, ModelPackaging, ModelPackagingSpec, PackagingIntegration, \
-    PackagingIntegrationSpec, ModelDeployment, ModelDeploymentSpec, ModelRoute, ModelRouteSpec, \
-    ModelTrainingStatus, ModelPackagingStatus, ModelDeploymentStatus, ModelRouteStatus
+from odahuflow.sdk.models import (
+    ModelTraining,
+    Connection,
+    ConnectionSpec,
+    ModelTrainingSpec,
+    ModelIdentity,
+    ToolchainIntegration,
+    ToolchainIntegrationSpec,
+    ModelPackaging,
+    ModelPackagingSpec,
+    PackagingIntegration,
+    PackagingIntegrationSpec,
+    ModelDeployment,
+    ModelDeploymentSpec,
+    ModelRoute,
+    ModelRouteSpec,
+    ModelTrainingStatus,
+    ModelPackagingStatus,
+    ModelDeploymentStatus,
+    ModelRouteStatus,
+)
 from odahuflow.sdk.models.base_model_ import Model
 
-ENTITY_ID = 'entity-id'
+ENTITY_ID = "entity-id"
 
 
 # This interface for any test cases that tests CLI commands for entities
@@ -66,7 +90,7 @@ CONNECTION = EntityTestData(
         ),
     ),
     connection.connection,
-    'Connection',
+    "Connection",
 )
 
 TRAINING = EntityTestData(
@@ -74,18 +98,12 @@ TRAINING = EntityTestData(
     ModelTraining(
         id=ENTITY_ID,
         spec=ModelTrainingSpec(
-            work_dir="/1/2/3",
-            model=ModelIdentity(
-                name="name",
-                version="version"
-            )
+            work_dir="/1/2/3", model=ModelIdentity(name="name", version="version")
         ),
-        status=ModelTrainingStatus(
-            state=SUCCEEDED_STATE
-        )
+        status=ModelTrainingStatus(state=SUCCEEDED_STATE),
     ),
     training.training,
-    'ModelTraining'
+    "ModelTraining",
 )
 
 TOOLCHAIN = EntityTestData(
@@ -98,7 +116,7 @@ TOOLCHAIN = EntityTestData(
         ),
     ),
     toolchain_integration.toolchain_integration,
-    'ToolchainIntegration',
+    "ToolchainIntegration",
 )
 
 PACKAGING = EntityTestData(
@@ -106,15 +124,14 @@ PACKAGING = EntityTestData(
     ModelPackaging(
         id=ENTITY_ID,
         spec=ModelPackagingSpec(
-            artifact_name='test-artifact-name',
-            integration_name='test'
+            artifact_name="test-artifact-name", integration_name="test"
         ),
         status=ModelPackagingStatus(
             state=SUCCEEDED_STATE,
-        )
+        ),
     ),
     packaging.packaging,
-    'ModelPackaging',
+    "ModelPackaging",
 )
 
 PACKAGING_INTEGRATION = EntityTestData(
@@ -122,29 +139,25 @@ PACKAGING_INTEGRATION = EntityTestData(
     PackagingIntegration(
         id=ENTITY_ID,
         spec=PackagingIntegrationSpec(
-            default_image="odahu:image",
-            entrypoint="some_entrypoint"
+            default_image="odahu:image", entrypoint="some_entrypoint"
         ),
     ),
     packaging_integration.packaging_integration,
-    'PackagingIntegration',
+    "PackagingIntegration",
 )
 
 DEPLOYMENT = EntityTestData(
     ModelDeploymentClient(),
     ModelDeployment(
         id=ENTITY_ID,
-        spec=ModelDeploymentSpec(
-            image="odahu:image",
-            min_replicas=0
-        ),
+        spec=ModelDeploymentSpec(image="odahu:image", min_replicas=0),
         status=ModelDeploymentStatus(
             state=READY_STATE,
             available_replicas=1,
-        )
+        ),
     ),
     deployment.deployment,
-    'ModelDeployment',
+    "ModelDeployment",
 )
 
 ROUTER = EntityTestData(
@@ -156,8 +169,8 @@ ROUTER = EntityTestData(
         ),
         status=ModelRouteStatus(
             state=READY_STATE,
-        )
+        ),
     ),
     route.route,
-    'ModelRoute',
+    "ModelRoute",
 )

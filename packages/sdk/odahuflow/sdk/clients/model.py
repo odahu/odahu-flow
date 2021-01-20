@@ -30,8 +30,14 @@ from odahuflow.sdk.utils import ensure_function_succeed
 LOGGER = logging.getLogger(__name__)
 
 
-def calculate_url(host: str, url: str = None, model_route: str = None, model_deployment: str = None,
-                  url_prefix: str = None, mr_client: ModelRouteClient = None):
+def calculate_url(
+    host: str,
+    url: str = None,
+    model_route: str = None,
+    model_deployment: str = None,
+    url_prefix: str = None,
+    mr_client: ModelRouteClient = None,
+):
     """
     Calculate url for model
 
@@ -47,8 +53,8 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
         return url
 
     if url_prefix:
-        LOGGER.debug('')
-        return f'{host}{url_prefix}'
+        LOGGER.debug("")
+        return f"{host}{url_prefix}"
 
     if model_route:
         if mr_client is None:
@@ -56,13 +62,13 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
 
         model_route = mr_client.get(model_route)
 
-        LOGGER.debug('Found model route: %s', model_route)
+        LOGGER.debug("Found model route: %s", model_route)
         return model_route.status.edge_url
 
     if model_deployment:
         md_client = ModelDeploymentClient()
         model_route = md_client.get_default_route(model_deployment)
-        LOGGER.debug('Found default model route: %s', model_route)
+        LOGGER.debug("Found default model route: %s", model_route)
         return model_route.status.edge_url
 
     raise NotImplementedError("Cannot create a model url")
@@ -73,9 +79,14 @@ class ModelClient:
     Model HTTP client
     """
 
-    def __init__(self, url=None, token=None, http_client=requests,
-                 http_exception=requests.exceptions.RequestException,
-                 timeout=None):
+    def __init__(
+        self,
+        url=None,
+        token=None,
+        http_client=requests,
+        http_exception=requests.exceptions.RequestException,
+        timeout=None,
+    ):
         """
         Build client
 
@@ -94,7 +105,14 @@ class ModelClient:
         self._http_exception = http_exception
         self._timeout = timeout
 
-        LOGGER.debug('Model client params: %s, %s, %s, %s, %s', url, token, http_client, http_exception, timeout)
+        LOGGER.debug(
+            "Model client params: %s, %s, %s, %s, %s",
+            url,
+            token,
+            http_client,
+            http_exception,
+            timeout,
+        )
 
     @property
     def api_url(self):
@@ -103,8 +121,7 @@ class ModelClient:
 
         :return: str -- api root url
         """
-        return '{host}/api/model'.format(host=self._url)
-
+        return "{host}/api/model".format(host=self._url)
 
     @property
     def info_url(self):
@@ -113,7 +130,7 @@ class ModelClient:
 
         :return: str -- info url
         """
-        return self.api_url + '/info'
+        return self.api_url + "/info"
 
     @staticmethod
     def _parse_response(response):
@@ -124,10 +141,10 @@ class ModelClient:
         :type response: object with .text or .data and .status_code attributes
         :return: dict -- parsed response
         """
-        data = response.text if hasattr(response, 'text') else response.data
+        data = response.text if hasattr(response, "text") else response.data
 
         if isinstance(data, bytes):
-            data = data.decode('utf-8')
+            data = data.decode("utf-8")
 
         try:
             data = json.loads(data)
@@ -135,9 +152,12 @@ class ModelClient:
             pass
 
         if not 200 <= response.status_code < 400:
-            url = response.url if hasattr(response, 'url') else None
-            raise Exception('Wrong status code returned: {}. Data: {}. URL: {}'
-                            .format(response.status_code, data, url))
+            url = response.url if hasattr(response, "url") else None
+            raise Exception(
+                "Wrong status code returned: {}. Data: {}. URL: {}".format(
+                    response.status_code, data, url
+                )
+            )
 
         return data
 
@@ -150,12 +170,16 @@ class ModelClient:
         """
         kwargs = {}
         if self._token:
-            kwargs['headers'] = {'Authorization': 'Bearer {token}'.format(token=self._token)}
+            kwargs["headers"] = {
+                "Authorization": "Bearer {token}".format(token=self._token)
+            }
         if self._timeout is not None:
-            kwargs['timeout'] = self._timeout
+            kwargs["timeout"] = self._timeout
         return kwargs
 
-    def _request(self, http_method, url, data=None, files=None, retries=10, sleep=3, **kwargs):
+    def _request(
+        self, http_method, url, data=None, files=None, retries=10, sleep=3, **kwargs
+    ):
         """
         Send request with provided method and other parameters
         :param http_method: HTTP method
@@ -177,19 +201,19 @@ class ModelClient:
         client_method = getattr(self._http_client, http_method)
 
         if data:
-            kwargs['data'] = data
+            kwargs["data"] = data
         if files:
-            kwargs['files'] = files
+            kwargs["files"] = files
 
         def check_function():
             try:
                 return client_method(url, **kwargs)
             except (self._http_exception, HTTPError) as e:
-                LOGGER.error('Failed to connect to {}: {}.'.format(url, e))
+                LOGGER.error("Failed to connect to {}: {}.".format(url, e))
 
         response = ensure_function_succeed(check_function, retries, sleep)
         if response is None:
-            raise self._http_exception('HTTP request failed')
+            raise self._http_exception("HTTP request failed")
         return self._parse_response(response)
 
     def invoke(self, **parameters):
@@ -200,7 +224,9 @@ class ModelClient:
         :type parameters: dict[str, object] -- dictionary with parameters
         :return: dict -- parsed model response
         """
-        return self._request('post', f'{self.api_url}/invoke', **self._additional_kwargs, json=parameters)
+        return self._request(
+            "post", f"{self.api_url}/invoke", **self._additional_kwargs, json=parameters
+        )
 
     def info(self):
         """
@@ -208,4 +234,4 @@ class ModelClient:
 
         :return: dict -- parsed model info
         """
-        return self._request('get', self.info_url, **self._additional_kwargs)
+        return self._request("get", self.info_url, **self._additional_kwargs)

@@ -16,7 +16,7 @@ class UserConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, claims: Claims=None, sign_out_url: str=None):  # noqa: E501
+    def __init__(self, claims: Claims = None, sign_out_url: str = None):  # noqa: E501
         """UserConfig - a model defined in Swagger
 
         :param claims: The claims of this UserConfig.  # noqa: E501
@@ -24,21 +24,15 @@ class UserConfig(Model):
         :param sign_out_url: The sign_out_url of this UserConfig.  # noqa: E501
         :type sign_out_url: str
         """
-        self.swagger_types = {
-            'claims': Claims,
-            'sign_out_url': str
-        }
+        self.swagger_types = {"claims": Claims, "sign_out_url": str}
 
-        self.attribute_map = {
-            'claims': 'claims',
-            'sign_out_url': 'signOutUrl'
-        }
+        self.attribute_map = {"claims": "claims", "sign_out_url": "signOutUrl"}
 
         self._claims = claims
         self._sign_out_url = sign_out_url
 
     @classmethod
-    def from_dict(cls, dikt) -> 'UserConfig':
+    def from_dict(cls, dikt) -> "UserConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

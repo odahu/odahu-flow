@@ -35,8 +35,8 @@ def render_template(template_name, values=None):
     :return: str rendered template
     """
     env = Environment(
-        loader=PackageLoader(__name__, 'templates'),
-        autoescape=select_autoescape(['tmpl'])
+        loader=PackageLoader(__name__, "templates"),
+        autoescape=select_autoescape(["tmpl"]),
     )
 
     if not values:
@@ -44,7 +44,6 @@ def render_template(template_name, values=None):
 
     template = env.get_template(template_name)
     return template.render(values)
-
 
 
 def get_function_description(callable_object):
@@ -57,11 +56,11 @@ def get_function_description(callable_object):
     """
     object_class_name = callable_object.__class__.__name__
     if not callable(callable_object):
-        return '<not callable object: {}>'.format(object_class_name)
+        return "<not callable object: {}>".format(object_class_name)
 
     object_name = callable_object.__name__
     module_name = inspect.getmodule(callable_object)
-    return '<{} {} in {}>'.format(object_class_name, object_name, module_name)
+    return "<{} {} in {}>".format(object_class_name, object_name, module_name)
 
 
 def ensure_function_succeed(function_to_call, retries, timeout, boolean_check=False):
@@ -81,7 +80,7 @@ def ensure_function_succeed(function_to_call, retries, timeout, boolean_check=Fa
     """
     function_description = get_function_description(function_to_call)
     for no in range(retries):
-        LOGGER.debug('Calling {}'.format(function_description))
+        LOGGER.debug("Calling {}".format(function_description))
         result = function_to_call()
 
         if boolean_check:
@@ -92,10 +91,10 @@ def ensure_function_succeed(function_to_call, retries, timeout, boolean_check=Fa
                 return result
 
         if no < retries:
-            LOGGER.debug('Retry {}/{} was failed'.format(no + 1, retries))
+            LOGGER.debug("Retry {}/{} was failed".format(no + 1, retries))
         if no < retries - 1:
-            LOGGER.debug('Waiting {}s before next retry analysis'.format(timeout))
+            LOGGER.debug("Waiting {}s before next retry analysis".format(timeout))
             time.sleep(timeout)
 
-    LOGGER.error('No retries left for function {}'.format(function_description))
+    LOGGER.error("No retries left for function {}".format(function_description))
     return False if boolean_check else None

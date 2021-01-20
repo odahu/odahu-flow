@@ -15,24 +15,20 @@ class EdgeConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, host: str=None):  # noqa: E501
+    def __init__(self, host: str = None):  # noqa: E501
         """EdgeConfig - a model defined in Swagger
 
         :param host: The host of this EdgeConfig.  # noqa: E501
         :type host: str
         """
-        self.swagger_types = {
-            'host': str
-        }
+        self.swagger_types = {"host": str}
 
-        self.attribute_map = {
-            'host': 'host'
-        }
+        self.attribute_map = {"host": "host"}
 
         self._host = host
 
     @classmethod
-    def from_dict(cls, dikt) -> 'EdgeConfig':
+    def from_dict(cls, dikt) -> "EdgeConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -56,16 +56,16 @@ def normalize_name(name, dns_1035=False):
     :type dns_1035: bool
     :return: str -- normalized name
     """
-    invalid_delimiters = ' ', '_', '+'
-    invalid_chars = r'[^a-zA-Z0-9\-\.]'
+    invalid_delimiters = " ", "_", "+"
+    invalid_chars = r"[^a-zA-Z0-9\-\.]"
     if dns_1035:
-        invalid_chars = r'[^a-zA-Z0-9\-]'
-        invalid_delimiters = ' ', '_', '+', '.'
+        invalid_chars = r"[^a-zA-Z0-9\-]"
+        invalid_delimiters = " ", "_", "+", "."
 
     for char in invalid_delimiters:
-        name = name.replace(char, '-')
+        name = name.replace(char, "-")
 
-    return re.sub(invalid_chars, '', name)
+    return re.sub(invalid_chars, "", name)
 
 
 class ContextThread(threading.Thread):
@@ -73,7 +73,7 @@ class ContextThread(threading.Thread):
     Context manager thread
     """
 
-    def __init__(self, threaded_function, name='ContextThread'):
+    def __init__(self, threaded_function, name="ContextThread"):
         """
         Construct context manager
 
@@ -106,7 +106,7 @@ class ContextThread(threading.Thread):
             self._ready = True
             self._function()
         finally:
-            LOGGER.debug('ContextThread finished his work')
+            LOGGER.debug("ContextThread finished his work")
 
     def stop(self):
         """
@@ -117,7 +117,7 @@ class ContextThread(threading.Thread):
         try:
             self.join(0)
         finally:
-            LOGGER.debug('ContextThread has been stopped')
+            LOGGER.debug("ContextThread has been stopped")
 
     def __enter__(self):
         """

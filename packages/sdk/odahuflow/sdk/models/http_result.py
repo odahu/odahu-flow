@@ -15,24 +15,20 @@ class HTTPResult(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, message: str=None):  # noqa: E501
+    def __init__(self, message: str = None):  # noqa: E501
         """HTTPResult - a model defined in Swagger
 
         :param message: The message of this HTTPResult.  # noqa: E501
         :type message: str
         """
-        self.swagger_types = {
-            'message': str
-        }
+        self.swagger_types = {"message": str}
 
-        self.attribute_map = {
-            'message': 'message'
-        }
+        self.attribute_map = {"message": "message"}
 
         self._message = message
 
     @classmethod
-    def from_dict(cls, dikt) -> 'HTTPResult':
+    def from_dict(cls, dikt) -> "HTTPResult":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -16,7 +16,9 @@ class ModelProperty(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, name: str=None, parameters: List[Parameter]=None):  # noqa: E501
+    def __init__(
+        self, name: str = None, parameters: List[Parameter] = None
+    ):  # noqa: E501
         """ModelProperty - a model defined in Swagger
 
         :param name: The name of this ModelProperty.  # noqa: E501
@@ -24,21 +26,15 @@ class ModelProperty(Model):
         :param parameters: The parameters of this ModelProperty.  # noqa: E501
         :type parameters: List[Parameter]
         """
-        self.swagger_types = {
-            'name': str,
-            'parameters': List[Parameter]
-        }
+        self.swagger_types = {"name": str, "parameters": List[Parameter]}
 
-        self.attribute_map = {
-            'name': 'name',
-            'parameters': 'parameters'
-        }
+        self.attribute_map = {"name": "name", "parameters": "parameters"}
 
         self._name = name
         self._parameters = parameters
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelProperty':
+    def from_dict(cls, dikt) -> "ModelProperty":
         """Returns the dict as a model
 
         :param dikt: A dict.

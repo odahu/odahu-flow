@@ -1,9 +1,14 @@
 import pytest
-from odahuflow.sdk.clients.templates import get_odahuflow_template_names, get_odahuflow_template_content
+from odahuflow.sdk.clients.templates import (
+    get_odahuflow_template_names,
+    get_odahuflow_template_content,
+)
 
 
 def test_list_of_templates():
-    assert {"deployment", "mlflow_training", "gcp_connection"}.issubset(get_odahuflow_template_names())
+    assert {"deployment", "mlflow_training", "gcp_connection"}.issubset(
+        get_odahuflow_template_names()
+    )
 
 
 def test_get_template_by_name():

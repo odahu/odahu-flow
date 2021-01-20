@@ -17,7 +17,7 @@
 legion headers (for meta-information)
 """
 
-REQUEST_ID = 'x-request-id'
-MODEL_REQUEST_ID = 'request-id'
-MODEL_NAME = 'Model-Name'
-MODEL_VERSION = 'Model-Version'
+REQUEST_ID = "x-request-id"
+MODEL_REQUEST_ID = "request-id"
+MODEL_NAME = "Model-Name"
+MODEL_VERSION = "Model-Version"

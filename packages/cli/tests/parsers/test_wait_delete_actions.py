@@ -39,23 +39,33 @@ def entity_test_data(request) -> EntityTestData:
     return ENTITY_TEST_DATA[request.param]
 
 
-def test_delete_by_file(tmp_path: pathlib.Path, mocker: MockFixture, cli_runner: CliRunner,
-                        entity_test_data: EntityTestData):
+def test_delete_by_file(
+    tmp_path: pathlib.Path,
+    mocker: MockFixture,
+    cli_runner: CliRunner,
+    entity_test_data: EntityTestData,
+):
     message = "was deleted"
     entity_file = tmp_path / "entity.yaml"
     entity_file.write_text(
         json.dumps(
-            {**entity_test_data.entity.to_dict(), **{'kind': entity_test_data.kind}}))
-    delete_client_mock = mocker.patch.object(entity_test_data.entity_client.__class__,
-                                             'delete',
-                                             return_value=message)
-    get_client_mock = mocker.patch.object(entity_test_data.entity_client.__class__,
-                                          'get',
-                                          side_effect=WrongHttpStatusCode(status_code=http.HTTPStatus.NOT_FOUND))
+            {**entity_test_data.entity.to_dict(), **{"kind": entity_test_data.kind}}
+        )
+    )
+    delete_client_mock = mocker.patch.object(
+        entity_test_data.entity_client.__class__, "delete", return_value=message
+    )
+    get_client_mock = mocker.patch.object(
+        entity_test_data.entity_client.__class__,
+        "get",
+        side_effect=WrongHttpStatusCode(status_code=http.HTTPStatus.NOT_FOUND),
+    )
 
-    result = cli_runner.invoke(entity_test_data.click_group,
-                               ['delete', '-f', entity_file],
-                               obj=entity_test_data.entity_client)
+    result = cli_runner.invoke(
+        entity_test_data.click_group,
+        ["delete", "-f", entity_file],
+        obj=entity_test_data.entity_client,
+    )
 
     assert result.exit_code == 0
     assert message in result.stdout
@@ -63,19 +73,24 @@ def test_delete_by_file(tmp_path: pathlib.Path, mocker: MockFixture, cli_runner:
     get_client_mock.assert_called_once()
 
 
-def test_delete_by_id(mocker: MockFixture, cli_runner: CliRunner,
-                      entity_test_data: EntityTestData):
+def test_delete_by_id(
+    mocker: MockFixture, cli_runner: CliRunner, entity_test_data: EntityTestData
+):
     message = "was deleted"
-    delete_client_mock = mocker.patch.object(entity_test_data.entity_client.__class__,
-                                             'delete',
-                                             return_value=message)
-    get_client_mock = mocker.patch.object(entity_test_data.entity_client.__class__,
-                                          'get',
-                                          side_effect=WrongHttpStatusCode(status_code=http.HTTPStatus.NOT_FOUND))
+    delete_client_mock = mocker.patch.object(
+        entity_test_data.entity_client.__class__, "delete", return_value=message
+    )
+    get_client_mock = mocker.patch.object(
+        entity_test_data.entity_client.__class__,
+        "get",
+        side_effect=WrongHttpStatusCode(status_code=http.HTTPStatus.NOT_FOUND),
+    )
 
-    result = cli_runner.invoke(entity_test_data.click_group,
-                               ['delete', '--id', ENTITY_ID],
-                               obj=entity_test_data.entity_client)
+    result = cli_runner.invoke(
+        entity_test_data.click_group,
+        ["delete", "--id", ENTITY_ID],
+        obj=entity_test_data.entity_client,
+    )
 
     assert result.exit_code == 0
     assert message in result.stdout

@@ -29,8 +29,8 @@ _LOGGER = logging.getLogger()
 
 _INI_FILE_TRIED_TO_BE_LOADED = False
 _INI_FILE_CONTENT: configparser.ConfigParser = None
-_INI_FILE_DEFAULT_CONFIG_PATH = Path.home().joinpath('.odahuflow/config')
-_DEFAULT_INI_SECTION = 'general'
+_INI_FILE_DEFAULT_CONFIG_PATH = Path.home().joinpath(".odahuflow/config")
+_DEFAULT_INI_SECTION = "general"
 
 
 def reset_context():
@@ -53,9 +53,13 @@ def get_config_file_path():
 
     :return: Path -- config path
     """
-    config_path_from_env = os.getenv('ODAHUFLOW_CONFIG')
+    config_path_from_env = os.getenv("ODAHUFLOW_CONFIG")
 
-    return Path(config_path_from_env) if config_path_from_env else _INI_FILE_DEFAULT_CONFIG_PATH
+    return (
+        Path(config_path_from_env)
+        if config_path_from_env
+        else _INI_FILE_DEFAULT_CONFIG_PATH
+    )
 
 
 def _load_config_file():
@@ -72,7 +76,7 @@ def _load_config_file():
     config_path = get_config_file_path()
     _INI_FILE_TRIED_TO_BE_LOADED = True
 
-    _LOGGER.debug('Trying to load configuration file {}'.format(config_path))
+    _LOGGER.debug("Trying to load configuration file {}".format(config_path))
 
     try:
         if config_path.exists():
@@ -82,11 +86,13 @@ def _load_config_file():
             global _INI_FILE_CONTENT
             _INI_FILE_CONTENT = config
 
-            _LOGGER.debug('Configuration file {} has been loaded'.format(config_path))
+            _LOGGER.debug("Configuration file {} has been loaded".format(config_path))
         else:
-            _LOGGER.debug('Cannot find configuration file {}'.format(config_path))
+            _LOGGER.debug("Cannot find configuration file {}".format(config_path))
     except Exception as exc:
-        _LOGGER.exception('Cannot read config file {}'.format(config_path), exc_info=exc)
+        _LOGGER.exception(
+            "Cannot read config file {}".format(config_path), exc_info=exc
+        )
 
 
 def get_config_file_section(section=_DEFAULT_INI_SECTION, silent=False):
@@ -104,7 +110,7 @@ def get_config_file_section(section=_DEFAULT_INI_SECTION, silent=False):
         if silent:
             return dict()
         else:
-            raise Exception('Configuration file cannot be loaded')
+            raise Exception("Configuration file cannot be loaded")
 
     if not _INI_FILE_CONTENT.has_section(section):
         return {}
@@ -163,7 +169,7 @@ def update_config_file(section=_DEFAULT_INI_SECTION, **new_values):
             if section in content and key in content[section]:
                 del content[section][key]
 
-    with config_path.open('w') as config_file:
+    with config_path.open("w") as config_file:
         content.write(config_file)
 
     _INI_FILE_TRIED_TO_BE_LOADED = True
@@ -171,7 +177,7 @@ def update_config_file(section=_DEFAULT_INI_SECTION, **new_values):
 
     reinitialize_variables()
 
-    _LOGGER.debug('Configuration file {} has been updated'.format(config_path))
+    _LOGGER.debug("Configuration file {} has been updated".format(config_path))
 
 
 def _load_variable(name, cast_type=None, configurable_manually=True):
@@ -288,7 +294,7 @@ def cast_bool(value):
     if isinstance(value, bool):
         return value
 
-    return value.lower() in ['true', '1', 't', 'y', 'yes']
+    return value.lower() in ["true", "1", "t", "y", "yes"]
 
 
 def reinitialize_variables():
@@ -298,10 +304,14 @@ def reinitialize_variables():
     :return: None
     """
     for value_information in ALL_VARIABLES.values():
-        explicit_value = _load_variable(value_information.name,
-                                        value_information.cast_func,
-                                        value_information.configurable_manually)
-        value = explicit_value if explicit_value is not None else value_information.default
+        explicit_value = _load_variable(
+            value_information.name,
+            value_information.cast_func,
+            value_information.configurable_manually,
+        )
+        value = (
+            explicit_value if explicit_value is not None else value_information.default
+        )
 
         globals()[value_information.name] = value
 
@@ -311,7 +321,14 @@ class ConfigVariableDeclaration:
     Class that builds declaration of variable (and returns it's value as an instance)
     """
 
-    def __new__(cls, name, default=None, cast_func=str, description=None, configurable_manually=True):
+    def __new__(
+        cls,
+        name,
+        default=None,
+        cast_func=str,
+        description=None,
+        configurable_manually=True,
+    ):
         """
         Create new instance
 
@@ -327,7 +344,9 @@ class ConfigVariableDeclaration:
         :type configurable_manually: bool
         :return: Any -- default or explicit value
         """
-        information = ConfigVariableInformation(name, default, cast_func, description, configurable_manually)
+        information = ConfigVariableInformation(
+            name, default, cast_func, description, configurable_manually
+        )
 
         explicit_value = _load_variable(name, cast_func, configurable_manually)
         value = explicit_value if explicit_value is not None else default
@@ -338,90 +357,118 @@ class ConfigVariableDeclaration:
 # Transport (HTTP)
 
 RETRY_ATTEMPTS = ConfigVariableDeclaration(
-    'RETRY_ATTEMPTS', 3, int,
-    'How many retries HTTP client should make in case of transient error', True
+    "RETRY_ATTEMPTS",
+    3,
+    int,
+    "How many retries HTTP client should make in case of transient error",
+    True,
 )
 
 BACKOFF_FACTOR = ConfigVariableDeclaration(
-    'BACKOFF_FACTOR', 1, int,
-    'Backoff factor for retries (See https://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html)', True
+    "BACKOFF_FACTOR",
+    1,
+    int,
+    "Backoff factor for retries (See https://urllib3.readthedocs.io/en/latest/reference/urllib3.util.html)",
+    True,
 )
 
 # Verbose tracing
-DEBUG = ConfigVariableDeclaration('DEBUG', False, cast_bool,
-                                  'Enable verbose program output',
-                                  True)
+DEBUG = ConfigVariableDeclaration(
+    "DEBUG", False, cast_bool, "Enable verbose program output", True
+)
 
 # Model invocation testing
-MODEL_SERVER_URL = ConfigVariableDeclaration('MODEL_SERVER_URL', '', str, 'Default url of model server', True)
+MODEL_SERVER_URL = ConfigVariableDeclaration(
+    "MODEL_SERVER_URL", "", str, "Default url of model server", True
+)
 
-MODEL_HOST = ConfigVariableDeclaration('MODEL_HOST', '', str, 'Default host of model server', True)
+MODEL_HOST = ConfigVariableDeclaration(
+    "MODEL_HOST", "", str, "Default host of model server", True
+)
 
-MODEL_DEPLOYMENT_NAME = ConfigVariableDeclaration('MODEL_DEPLOYMENT_NAME', '', str, 'Model deployment name', True)
+MODEL_DEPLOYMENT_NAME = ConfigVariableDeclaration(
+    "MODEL_DEPLOYMENT_NAME", "", str, "Model deployment name", True
+)
 
-MODEL_ROUTE_NAME = ConfigVariableDeclaration('MODEL_ROUTE_NAME', '', str, 'Model route name', True)
+MODEL_ROUTE_NAME = ConfigVariableDeclaration(
+    "MODEL_ROUTE_NAME", "", str, "Model route name", True
+)
 
 # API endpoint
-API_URL = ConfigVariableDeclaration('API_URL', 'http://localhost:5000', str,
-                                    'URL of API server',
-                                    True)
-API_TOKEN = ConfigVariableDeclaration('API_TOKEN', None, str,
-                                      'Token for API server authorisation',
-                                      True)
-API_REFRESH_TOKEN = ConfigVariableDeclaration('API_REFRESH_TOKEN', None, str,
-                                              'Refresh token',
-                                              True)
-API_ISSUING_URL = ConfigVariableDeclaration('API_ISSUING_URL', None, str,
-                                            'URL for refreshing and issuing tokens',
-                                            True)
+API_URL = ConfigVariableDeclaration(
+    "API_URL", "http://localhost:5000", str, "URL of API server", True
+)
+API_TOKEN = ConfigVariableDeclaration(
+    "API_TOKEN", None, str, "Token for API server authorisation", True
+)
+API_REFRESH_TOKEN = ConfigVariableDeclaration(
+    "API_REFRESH_TOKEN", None, str, "Refresh token", True
+)
+API_ISSUING_URL = ConfigVariableDeclaration(
+    "API_ISSUING_URL", None, str, "URL for refreshing and issuing tokens", True
+)
 
-ISSUER_URL = ConfigVariableDeclaration('ISSUER_URL', None, str, 'OIDC Issuer URL', True)
+ISSUER_URL = ConfigVariableDeclaration("ISSUER_URL", None, str, "OIDC Issuer URL", True)
 
 # Auth
-ODAHUFLOWCTL_OAUTH_CLIENT_ID = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLIENT_ID', 'legion-cli', str,
-                                                         'Set OAuth2 Client id',
-                                                         True)
+ODAHUFLOWCTL_OAUTH_CLIENT_ID = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_CLIENT_ID", "legion-cli", str, "Set OAuth2 Client id", True
+)
 
-ODAHUFLOWCTL_OAUTH_CLIENT_SECRET = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_CLIENT_SECRET', '', str,
-                                                             'Set OAuth2 Client secret',
-                                                             True)
+ODAHUFLOWCTL_OAUTH_CLIENT_SECRET = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_CLIENT_SECRET", "", str, "Set OAuth2 Client secret", True
+)
 
-ODAHUFLOWCTL_OAUTH_SCOPE = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_SCOPE',
-                                                     'openid profile email offline_access groups', str,
-                                                     'Set OAuth2 scope',
-                                                     True)
+ODAHUFLOWCTL_OAUTH_SCOPE = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_SCOPE",
+    "openid profile email offline_access groups",
+    str,
+    "Set OAuth2 scope",
+    True,
+)
 
-ODAHUFLOWCTL_OAUTH_LOOPBACK_HOST = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_LOOPBACK_HOST',
-                                                             '127.0.0.1', str,
-                                                             'Target redirect for OAuth2 interactive authorization',
-                                                             True)
+ODAHUFLOWCTL_OAUTH_LOOPBACK_HOST = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_LOOPBACK_HOST",
+    "127.0.0.1",
+    str,
+    "Target redirect for OAuth2 interactive authorization",
+    True,
+)
 
-ODAHUFLOWCTL_OAUTH_LOOPBACK_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_LOOPBACK_URL',
-                                                            '/oauth/callback', str,
-                                                            'Target redirect url for OAuth2 interactive authorization',
-                                                            True)
+ODAHUFLOWCTL_OAUTH_LOOPBACK_URL = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_LOOPBACK_URL",
+    "/oauth/callback",
+    str,
+    "Target redirect url for OAuth2 interactive authorization",
+    True,
+)
 
-ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL',
-                                                                 '', str,
-                                                                 'OAuth2 token issuing URL',
-                                                                 True)
+ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_TOKEN_ISSUING_URL", "", str, "OAuth2 token issuing URL", True
+)
 
-ODAHUFLOWCTL_OAUTH_AUTH_URL = ConfigVariableDeclaration('ODAHUFLOWCTL_OAUTH_AUTH_URL',
-                                                        '',
-                                                        str,
-                                                        'OAuth2 authorization URL',
-                                                        True)
+ODAHUFLOWCTL_OAUTH_AUTH_URL = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_OAUTH_AUTH_URL", "", str, "OAuth2 authorization URL", True
+)
 
-JUPYTER_REDIRECT_URL = ConfigVariableDeclaration('JUPYTER_REDIRECT_URL',
-                                                 '', str,
-                                                 'JupyterLab external URL',
-                                                 True)
+JUPYTER_REDIRECT_URL = ConfigVariableDeclaration(
+    "JUPYTER_REDIRECT_URL", "", str, "JupyterLab external URL", True
+)
 
-ODAHUFLOWCTL_NONINTERACTIVE = ConfigVariableDeclaration('ODAHUFLOWCTL_NONINTERACTIVE', False,
-                                                        bool, 'Disable any interaction (e.g. authorization)', True)
+ODAHUFLOWCTL_NONINTERACTIVE = ConfigVariableDeclaration(
+    "ODAHUFLOWCTL_NONINTERACTIVE",
+    False,
+    bool,
+    "Disable any interaction (e.g. authorization)",
+    True,
+)
 
 # Local
 
-LOCAL_MODEL_OUTPUT_DIR = ConfigVariableDeclaration('LOCAL_MODEL_OUTPUT_DIR',
-                                                   str(Path.home().joinpath(".odahuflow", "training_output")),
-                                                   str, 'Directory where model artifacts will be saved', True)
+LOCAL_MODEL_OUTPUT_DIR = ConfigVariableDeclaration(
+    "LOCAL_MODEL_OUTPUT_DIR",
+    str(Path.home().joinpath(".odahuflow", "training_output")),
+    str,
+    "Directory where model artifacts will be saved",
+    True,
+)

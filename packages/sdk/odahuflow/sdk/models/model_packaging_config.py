@@ -7,7 +7,9 @@ from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.node_pool import NodePool  # noqa: F401,E501
-from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import (
+    ResourceRequirements,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -17,7 +19,20 @@ class ModelPackagingConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, default_resources: ResourceRequirements=None, enabled: bool=None, model_packager_image: str=None, namespace: str=None, node_pools: List[NodePool]=None, output_connection_id: str=None, packager_integration_namespace: str=None, packaging_integration_repository_type: str=None, service_account: str=None, timeout: str=None, tolerations: str=None):  # noqa: E501
+    def __init__(
+        self,
+        default_resources: ResourceRequirements = None,
+        enabled: bool = None,
+        model_packager_image: str = None,
+        namespace: str = None,
+        node_pools: List[NodePool] = None,
+        output_connection_id: str = None,
+        packager_integration_namespace: str = None,
+        packaging_integration_repository_type: str = None,
+        service_account: str = None,
+        timeout: str = None,
+        tolerations: str = None,
+    ):  # noqa: E501
         """ModelPackagingConfig - a model defined in Swagger
 
         :param default_resources: The default_resources of this ModelPackagingConfig.  # noqa: E501
@@ -44,31 +59,31 @@ class ModelPackagingConfig(Model):
         :type tolerations: str
         """
         self.swagger_types = {
-            'default_resources': ResourceRequirements,
-            'enabled': bool,
-            'model_packager_image': str,
-            'namespace': str,
-            'node_pools': List[NodePool],
-            'output_connection_id': str,
-            'packager_integration_namespace': str,
-            'packaging_integration_repository_type': str,
-            'service_account': str,
-            'timeout': str,
-            'tolerations': str
+            "default_resources": ResourceRequirements,
+            "enabled": bool,
+            "model_packager_image": str,
+            "namespace": str,
+            "node_pools": List[NodePool],
+            "output_connection_id": str,
+            "packager_integration_namespace": str,
+            "packaging_integration_repository_type": str,
+            "service_account": str,
+            "timeout": str,
+            "tolerations": str,
         }
 
         self.attribute_map = {
-            'default_resources': 'defaultResources',
-            'enabled': 'enabled',
-            'model_packager_image': 'modelPackagerImage',
-            'namespace': 'namespace',
-            'node_pools': 'nodePools',
-            'output_connection_id': 'outputConnectionID',
-            'packager_integration_namespace': 'packagerIntegrationNamespace',
-            'packaging_integration_repository_type': 'packagingIntegrationRepositoryType',
-            'service_account': 'serviceAccount',
-            'timeout': 'timeout',
-            'tolerations': 'tolerations'
+            "default_resources": "defaultResources",
+            "enabled": "enabled",
+            "model_packager_image": "modelPackagerImage",
+            "namespace": "namespace",
+            "node_pools": "nodePools",
+            "output_connection_id": "outputConnectionID",
+            "packager_integration_namespace": "packagerIntegrationNamespace",
+            "packaging_integration_repository_type": "packagingIntegrationRepositoryType",
+            "service_account": "serviceAccount",
+            "timeout": "timeout",
+            "tolerations": "tolerations",
         }
 
         self._default_resources = default_resources
@@ -78,13 +93,15 @@ class ModelPackagingConfig(Model):
         self._node_pools = node_pools
         self._output_connection_id = output_connection_id
         self._packager_integration_namespace = packager_integration_namespace
-        self._packaging_integration_repository_type = packaging_integration_repository_type
+        self._packaging_integration_repository_type = (
+            packaging_integration_repository_type
+        )
         self._service_account = service_account
         self._timeout = timeout
         self._tolerations = tolerations
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelPackagingConfig':
+    def from_dict(cls, dikt) -> "ModelPackagingConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -261,7 +278,9 @@ class ModelPackagingConfig(Model):
         return self._packaging_integration_repository_type
 
     @packaging_integration_repository_type.setter
-    def packaging_integration_repository_type(self, packaging_integration_repository_type: str):
+    def packaging_integration_repository_type(
+        self, packaging_integration_repository_type: str
+    ):
         """Sets the packaging_integration_repository_type of this ModelPackagingConfig.
 
         Storage backend for packaging integrations. Available options:   * kubernetes   * postgres  # noqa: E501
@@ -270,7 +289,9 @@ class ModelPackagingConfig(Model):
         :type packaging_integration_repository_type: str
         """
 
-        self._packaging_integration_repository_type = packaging_integration_repository_type
+        self._packaging_integration_repository_type = (
+            packaging_integration_repository_type
+        )
 
     @property
     def service_account(self) -> str:

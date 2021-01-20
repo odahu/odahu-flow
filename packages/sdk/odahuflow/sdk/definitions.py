@@ -17,13 +17,15 @@
 odahuflow k8s definitions functions
 """
 
-API_VERSION = 'v1'
-CONFIGURATION_URL = '/api/{version}/configuration'
-CONNECTION_URL = '/api/{version}/connection'
-MODEL_TRAINING_URL = '/api/{version}/model/training'
-TOOLCHAIN_INTEGRATION_URL = '/api/{version}/toolchain/integration'
-MODEL_DEPLOYMENT_URL = '/api/{version}/model/deployment'
-MODEL_DEPLOYMENT_DEFAULT_ROUTE_URL = '/api/{version}/model/deployment/{id}/default-route'
-MODEL_ROUTE_URL = '/api/{version}/model/route'
-MODEL_PACKING_URL = '/api/{version}/model/packaging'
-PACKING_INTEGRATION_URL = '/api/{version}/packaging/integration'
+API_VERSION = "v1"
+CONFIGURATION_URL = "/api/{version}/configuration"
+CONNECTION_URL = "/api/{version}/connection"
+MODEL_TRAINING_URL = "/api/{version}/model/training"
+TOOLCHAIN_INTEGRATION_URL = "/api/{version}/toolchain/integration"
+MODEL_DEPLOYMENT_URL = "/api/{version}/model/deployment"
+MODEL_DEPLOYMENT_DEFAULT_ROUTE_URL = (
+    "/api/{version}/model/deployment/{id}/default-route"
+)
+MODEL_ROUTE_URL = "/api/{version}/model/route"
+MODEL_PACKING_URL = "/api/{version}/model/packaging"
+PACKING_INTEGRATION_URL = "/api/{version}/packaging/integration"

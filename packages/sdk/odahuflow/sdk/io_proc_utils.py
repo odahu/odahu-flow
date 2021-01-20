@@ -32,24 +32,33 @@ def run(*args: str, cwd=None, stream_output: bool = True):
     :return: typing.Union[int, typing.Tuple[int, str, str]] -- exit_code (for stream_output mode)
              or exit_code + stdout + stderr.
     """
-    args_line = ' '.join(args)
+    args_line = " ".join(args)
     logging.info(f'Running command "{args_line}"')
 
     cmd_env = os.environ.copy()
     if stream_output:
-        child = subprocess.Popen(args, env=cmd_env, cwd=cwd, universal_newlines=True,
-                                 stdin=subprocess.PIPE)
+        child = subprocess.Popen(
+            args, env=cmd_env, cwd=cwd, universal_newlines=True, stdin=subprocess.PIPE
+        )
         exit_code = child.wait()
         if exit_code != 0:
             raise Exception("Non-zero exitcode: %s" % exit_code)
         return exit_code
     else:
         child = subprocess.Popen(
-            args, env=cmd_env, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
-            cwd=cwd, universal_newlines=True)
+            args,
+            env=cmd_env,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=cwd,
+            universal_newlines=True,
+        )
         (stdout, stderr) = child.communicate()
         exit_code = child.wait()
         if exit_code != 0:
-            raise Exception("Non-zero exit code: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======" %
-                            (exit_code, stdout, stderr))
+            raise Exception(
+                "Non-zero exit code: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======"
+                % (exit_code, stdout, stderr)
+            )
         return exit_code, stdout, stderr

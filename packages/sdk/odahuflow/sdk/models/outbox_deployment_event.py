@@ -16,7 +16,13 @@ class OutboxDeploymentEvent(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, _datetime: str=None, entity_id: str=None, payload: ModelDeployment=None, type: str=None):  # noqa: E501
+    def __init__(
+        self,
+        _datetime: str = None,
+        entity_id: str = None,
+        payload: ModelDeployment = None,
+        type: str = None,
+    ):  # noqa: E501
         """OutboxDeploymentEvent - a model defined in Swagger
 
         :param _datetime: The _datetime of this OutboxDeploymentEvent.  # noqa: E501
@@ -29,17 +35,17 @@ class OutboxDeploymentEvent(Model):
         :type type: str
         """
         self.swagger_types = {
-            '_datetime': str,
-            'entity_id': str,
-            'payload': ModelDeployment,
-            'type': str
+            "_datetime": str,
+            "entity_id": str,
+            "payload": ModelDeployment,
+            "type": str,
         }
 
         self.attribute_map = {
-            '_datetime': 'datetime',
-            'entity_id': 'entityID',
-            'payload': 'payload',
-            'type': 'type'
+            "_datetime": "datetime",
+            "entity_id": "entityID",
+            "payload": "payload",
+            "type": "type",
         }
 
         self.__datetime = _datetime
@@ -48,7 +54,7 @@ class OutboxDeploymentEvent(Model):
         self._type = type
 
     @classmethod
-    def from_dict(cls, dikt) -> 'OutboxDeploymentEvent':
+    def from_dict(cls, dikt) -> "OutboxDeploymentEvent":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -26,21 +26,27 @@ from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.output import PLAIN_TEXT_OUTPUT_FORMAT, JSON_OUTPUT_FORMAT
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.api_aggregated import \
-    parse_resources_file, \
-    parse_resources_dir, OdahuflowCloudResourceUpdatePair
+from odahuflow.sdk.clients.api_aggregated import (
+    parse_resources_file,
+    parse_resources_dir,
+    OdahuflowCloudResourceUpdatePair,
+)
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTraining, ModelTrainingClient
-from odahuflow.sdk.local.training import start_train, list_local_trainings, cleanup_local_artifacts, \
-    cleanup_training_docker_containers
+from odahuflow.sdk.local.training import (
+    start_train,
+    list_local_trainings,
+    cleanup_local_artifacts,
+    cleanup_training_docker_containers,
+)
 from odahuflow.sdk.models import ToolchainIntegration, K8sTrainer
 
 LOGGER = logging.getLogger(__name__)
 
 
-@click.group(name='training', cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.group(name="training", cls=click_utils.BetterHelpGroup)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def training_group(ctx: click.core.Context, url: str, token: str):
     """
@@ -51,8 +57,13 @@ def training_group(ctx: click.core.Context, url: str, token: str):
 
 
 @training_group.command("list")
-@click.option('--output-format', '-o', 'output_format',
-              default=PLAIN_TEXT_OUTPUT_FORMAT, type=click.Choice([PLAIN_TEXT_OUTPUT_FORMAT, JSON_OUTPUT_FORMAT]))
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    default=PLAIN_TEXT_OUTPUT_FORMAT,
+    type=click.Choice([PLAIN_TEXT_OUTPUT_FORMAT, JSON_OUTPUT_FORMAT]),
+)
 def training_list(output_format: str):
     """
     \b
@@ -72,16 +83,16 @@ def training_list(output_format: str):
         click.echo(json.dumps(artifacts, indent=2))
     else:
         if not artifacts:
-            click.echo('Artifacts not found')
+            click.echo("Artifacts not found")
             return
 
-        click.echo('Training artifacts:')
+        click.echo("Training artifacts:")
 
         for artifact in artifacts:
-            click.echo(f'* {artifact}')
+            click.echo(f"* {artifact}")
 
 
-@training_group.command('cleanup-artifacts')
+@training_group.command("cleanup-artifacts")
 def cleanup_artifacts():
     """
     \b
@@ -94,7 +105,7 @@ def cleanup_artifacts():
     cleanup_local_artifacts()
 
 
-@training_group.command('cleanup-containers')
+@training_group.command("cleanup-containers")
 def cleanup_containers():
     """
     \b
@@ -108,16 +119,35 @@ def cleanup_containers():
 
 
 @training_group.command()
-@click.option('--train-id', '--id', help='Model training ID', required=True)
-@click.option('--manifest-file', '-f', type=click.Path(), multiple=True,
-              help='Path to an ODAHU-flow manifest file')
-@click.option('--manifest-dir', '-d', type=click.Path(), multiple=True,
-              help='Path to a directory with ODAHU-flow manifest files')
-@click.option('--output-dir', '--output', type=click.Path(),
-              help='Directory where model artifact will be saved.')
+@click.option("--train-id", "--id", help="Model training ID", required=True)
+@click.option(
+    "--manifest-file",
+    "-f",
+    type=click.Path(),
+    multiple=True,
+    help="Path to an ODAHU-flow manifest file",
+)
+@click.option(
+    "--manifest-dir",
+    "-d",
+    type=click.Path(),
+    multiple=True,
+    help="Path to a directory with ODAHU-flow manifest files",
+)
+@click.option(
+    "--output-dir",
+    "--output",
+    type=click.Path(),
+    help="Directory where model artifact will be saved.",
+)
 @pass_obj
-def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], manifest_dir: List[str],
-        output_dir: str):
+def run(
+    client: ModelTrainingClient,
+    train_id: str,
+    manifest_file: List[str],
+    manifest_dir: List[str],
+    output_dir: str,
+):
     """
     \b
     Start a training process locally.
@@ -144,13 +174,19 @@ def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], ma
             mt = entity
 
     if not mt:
-        click.echo(f'{train_id} training not found. Trying to retrieve it from API server')
+        click.echo(
+            f"{train_id} training not found. Trying to retrieve it from API server"
+        )
         mt = client.get(train_id)
 
     toolchain = toolchains.get(mt.spec.toolchain)
     if not toolchain:
-        click.echo(f'{toolchain} toolchain not found. Trying to retrieve it from API server')
-        toolchain = ToolchainIntegrationClient.construct_from_other(client).get(mt.spec.toolchain)
+        click.echo(
+            f"{toolchain} toolchain not found. Trying to retrieve it from API server"
+        )
+        toolchain = ToolchainIntegrationClient.construct_from_other(client).get(
+            mt.spec.toolchain
+        )
 
     trainer = K8sTrainer(
         model_training=mt,

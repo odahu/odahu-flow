@@ -21,6 +21,7 @@ from odahuflow.sdk.clients.api import APIConnectionException
 
 # TODO: Write a complete set of unit tests for security module
 
+
 def test_login_invalid_url(cli_runner: CliRunner, mocker: MockFixture):
     """
     Tests fix for issue #257 (https://github.com/odahu/odahu-flow/issues/257)
@@ -29,12 +30,12 @@ def test_login_invalid_url(cli_runner: CliRunner, mocker: MockFixture):
     :param mocker: pytest mocker fixture
     """
 
-    mocker.patch.object(security, 'update_config_file')
+    mocker.patch.object(security, "update_config_file")
 
-    api_client_class_mock: Mock = mocker.patch.object(security.api, 'RemoteAPIClient')
+    api_client_class_mock: Mock = mocker.patch.object(security.api, "RemoteAPIClient")
     api_client: Mock = api_client_class_mock.return_value
     api_client.info.side_effect = APIConnectionException
 
-    result = cli_runner.invoke(security.login, ['--url', '--help'])
+    result = cli_runner.invoke(security.login, ["--url", "--help"])
     assert result.exit_code != 0
     assert isinstance(result.exception, APIConnectionException)

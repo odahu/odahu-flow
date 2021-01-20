@@ -16,7 +16,9 @@ class JsonSchema(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, properties: List[ModelProperty]=None, required: List[str]=None):  # noqa: E501
+    def __init__(
+        self, properties: List[ModelProperty] = None, required: List[str] = None
+    ):  # noqa: E501
         """JsonSchema - a model defined in Swagger
 
         :param properties: The properties of this JsonSchema.  # noqa: E501
@@ -24,21 +26,15 @@ class JsonSchema(Model):
         :param required: The required of this JsonSchema.  # noqa: E501
         :type required: List[str]
         """
-        self.swagger_types = {
-            'properties': List[ModelProperty],
-            'required': List[str]
-        }
+        self.swagger_types = {"properties": List[ModelProperty], "required": List[str]}
 
-        self.attribute_map = {
-            'properties': 'properties',
-            'required': 'required'
-        }
+        self.attribute_map = {"properties": "properties", "required": "required"}
 
         self._properties = properties
         self._required = required
 
     @classmethod
-    def from_dict(cls, dikt) -> 'JsonSchema':
+    def from_dict(cls, dikt) -> "JsonSchema":
         """Returns the dict as a model
 
         :param dikt: A dict.

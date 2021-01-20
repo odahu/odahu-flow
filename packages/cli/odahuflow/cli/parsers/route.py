@@ -23,9 +23,16 @@ import click
 from click import pass_obj
 
 from odahuflow.cli.utils import click_utils
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
-    IGNORE_NOT_FOUND_ERROR_MESSAGE
-from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
+from odahuflow.cli.utils.error_handler import (
+    check_id_or_file_params_present,
+    TIMEOUT_ERROR_MESSAGE,
+    IGNORE_NOT_FOUND_ERROR_MESSAGE,
+)
+from odahuflow.cli.utils.output import (
+    DEFAULT_OUTPUT_FORMAT,
+    format_output,
+    validate_output_format,
+)
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
@@ -36,8 +43,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def route(ctx: click.core.Context, url: str, token: str):
     """
@@ -47,9 +54,15 @@ def route(ctx: click.core.Context, url: str, token: str):
 
 
 @route.command()
-@click.option('--mr-id', '--id', 'mr_id', help='ModelRoute ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--mr-id", "--id", "mr_id", help="ModelRoute ID")
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def get(client: ModelRouteClient, mr_id: str, output_format: str):
     """
@@ -73,12 +86,23 @@ def get(client: ModelRouteClient, mr_id: str, output_format: str):
 
 
 @route.command()
-@click.option('--mr-id', '--id', 'mr_id', help='ModelRoute ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with model route')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=600, type=int,
-              help='timeout in seconds. for wait (if no-wait is off)')
+@click.option("--mr-id", "--id", "mr_id", help="ModelRoute ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with model route",
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=600,
+    type=int,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
 @pass_obj
 def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: int):
     """
@@ -98,7 +122,7 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
     """
     route_resource = parse_resources_file_with_one_item(file).resource
     if not isinstance(route_resource, ModelRoute):
-        raise ValueError(f'ModelRoute expected, but {type(route_resource)} provided')
+        raise ValueError(f"ModelRoute expected, but {type(route_resource)} provided")
 
     if mr_id:
         route_resource.id = mr_id
@@ -109,12 +133,23 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
 
 
 @route.command()
-@click.option('--route-id', '--id', 'mr_id', help='ModelRoute ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with model route')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=600, type=int,
-              help='timeout in seconds. for wait (if no-wait is off)')
+@click.option("--route-id", "--id", "mr_id", help="ModelRoute ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with model route",
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=600,
+    type=int,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
 @pass_obj
 def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: int):
     """
@@ -134,7 +169,7 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
     """
     route_resource = parse_resources_file_with_one_item(file).resource
     if not isinstance(route_resource, ModelRoute):
-        raise ValueError(f'ModelRoute expected, but {type(route_resource)} provided')
+        raise ValueError(f"ModelRoute expected, but {type(route_resource)} provided")
 
     if mr_id:
         route_resource.id = mr_id
@@ -145,10 +180,15 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
 
 
 @route.command()
-@click.option('--route-id', '--id', 'mr_id', help='ModelRoute ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with model route')
-@click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if Model Deployment is not found')
+@click.option("--route-id", "--id", "mr_id", help="ModelRoute ID")
+@click.option(
+    "--file", "-f", type=click.Path(), help="Path to the file with model route"
+)
+@click.option(
+    "--ignore-not-found/--not-ignore-not-found",
+    default=False,
+    help="ignore if Model Deployment is not found",
+)
 @pass_obj
 def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bool):
     """
@@ -172,7 +212,9 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
     if file:
         route_resource = parse_resources_file_with_one_item(file).resource
         if not isinstance(route_resource, ModelRoute):
-            raise ValueError(f'ModelRoute expected, but {type(route_resource)} provided')
+            raise ValueError(
+                f"ModelRoute expected, but {type(route_resource)} provided"
+            )
 
         mr_id = route_resource.id
 
@@ -182,10 +224,14 @@ def delete(client: ModelRouteClient, mr_id: str, file: str, ignore_not_found: bo
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelRoute.__name__, id=mr_id))
+        click.echo(
+            IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelRoute.__name__, id=mr_id)
+        )
 
 
-def wait_operation_finish(timeout: int, wait: bool, mr_id: str, mr_client: ModelRouteClient):
+def wait_operation_finish(
+    timeout: int, wait: bool, mr_id: str, mr_client: ModelRouteClient
+):
     """
     Wait route to finish according command line arguments
 
@@ -201,7 +247,7 @@ def wait_operation_finish(timeout: int, wait: bool, mr_id: str, mr_client: Model
 
     start = time.time()
     if timeout <= 0:
-        raise Exception('Invalid --timeout argument: should be positive integer')
+        raise Exception("Invalid --timeout argument: should be positive integer")
 
     while True:
         elapsed = time.time() - start
@@ -211,14 +257,14 @@ def wait_operation_finish(timeout: int, wait: bool, mr_id: str, mr_client: Model
         try:
             mr = mr_client.get(mr_id)
             if mr.status.state == READY_STATE:
-                print(f'Model Route {mr_id} is ready')
+                print(f"Model Route {mr_id} is ready")
                 return
             elif mr.status.state == "":
                 print(f"Can't determine the state of {mr.id}. Sleeping...")
             else:
-                print(f'Current route state is {mr.status.state}. Sleeping...')
+                print(f"Current route state is {mr.status.state}. Sleeping...")
         except WrongHttpStatusCode:
-            LOGGER.info('Callback have not confirmed completion of the operation')
+            LOGGER.info("Callback have not confirmed completion of the operation")
 
-        LOGGER.debug('Sleep before next request')
+        LOGGER.debug("Sleep before next request")
         time.sleep(DEFAULT_WAIT_TIMEOUT)

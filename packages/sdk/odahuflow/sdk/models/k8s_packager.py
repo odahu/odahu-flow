@@ -9,7 +9,9 @@ from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.connection import Connection  # noqa: F401,E501
 from odahuflow.sdk.models.model_packaging import ModelPackaging  # noqa: F401,E501
 from odahuflow.sdk.models.packager_target import PackagerTarget  # noqa: F401,E501
-from odahuflow.sdk.models.packaging_integration import PackagingIntegration  # noqa: F401,E501
+from odahuflow.sdk.models.packaging_integration import (
+    PackagingIntegration,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -19,7 +21,14 @@ class K8sPackager(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, model_holder: Connection=None, model_packaging: ModelPackaging=None, packaging_integration: PackagingIntegration=None, targets: List[PackagerTarget]=None, training_zip_name: str=None):  # noqa: E501
+    def __init__(
+        self,
+        model_holder: Connection = None,
+        model_packaging: ModelPackaging = None,
+        packaging_integration: PackagingIntegration = None,
+        targets: List[PackagerTarget] = None,
+        training_zip_name: str = None,
+    ):  # noqa: E501
         """K8sPackager - a model defined in Swagger
 
         :param model_holder: The model_holder of this K8sPackager.  # noqa: E501
@@ -34,19 +43,19 @@ class K8sPackager(Model):
         :type training_zip_name: str
         """
         self.swagger_types = {
-            'model_holder': Connection,
-            'model_packaging': ModelPackaging,
-            'packaging_integration': PackagingIntegration,
-            'targets': List[PackagerTarget],
-            'training_zip_name': str
+            "model_holder": Connection,
+            "model_packaging": ModelPackaging,
+            "packaging_integration": PackagingIntegration,
+            "targets": List[PackagerTarget],
+            "training_zip_name": str,
         }
 
         self.attribute_map = {
-            'model_holder': 'modelHolder',
-            'model_packaging': 'modelPackaging',
-            'packaging_integration': 'packagingIntegration',
-            'targets': 'targets',
-            'training_zip_name': 'trainingZipName'
+            "model_holder": "modelHolder",
+            "model_packaging": "modelPackaging",
+            "packaging_integration": "packagingIntegration",
+            "targets": "targets",
+            "training_zip_name": "trainingZipName",
         }
 
         self._model_holder = model_holder
@@ -56,7 +65,7 @@ class K8sPackager(Model):
         self._training_zip_name = training_zip_name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'K8sPackager':
+    def from_dict(cls, dikt) -> "K8sPackager":
         """Returns the dict as a model
 
         :param dikt: A dict.

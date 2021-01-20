@@ -15,24 +15,20 @@ class APILocalBackendConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, local_backend_crd_path: str=None):  # noqa: E501
+    def __init__(self, local_backend_crd_path: str = None):  # noqa: E501
         """APILocalBackendConfig - a model defined in Swagger
 
         :param local_backend_crd_path: The local_backend_crd_path of this APILocalBackendConfig.  # noqa: E501
         :type local_backend_crd_path: str
         """
-        self.swagger_types = {
-            'local_backend_crd_path': str
-        }
+        self.swagger_types = {"local_backend_crd_path": str}
 
-        self.attribute_map = {
-            'local_backend_crd_path': 'localBackendCrdPath'
-        }
+        self.attribute_map = {"local_backend_crd_path": "localBackendCrdPath"}
 
         self._local_backend_crd_path = local_backend_crd_path
 
     @classmethod
-    def from_dict(cls, dikt) -> 'APILocalBackendConfig':
+    def from_dict(cls, dikt) -> "APILocalBackendConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -6,7 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.model_packaging_result import ModelPackagingResult  # noqa: F401,E501
+from odahuflow.sdk.models.model_packaging_result import (
+    ModelPackagingResult,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -16,7 +18,17 @@ class ModelPackagingStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, exit_code: int=None, message: str=None, pod_name: str=None, reason: str=None, results: List[ModelPackagingResult]=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        exit_code: int = None,
+        message: str = None,
+        pod_name: str = None,
+        reason: str = None,
+        results: List[ModelPackagingResult] = None,
+        state: str = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelPackagingStatus - a model defined in Swagger
 
         :param created_at: The created_at of this ModelPackagingStatus.  # noqa: E501
@@ -37,25 +49,25 @@ class ModelPackagingStatus(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'exit_code': int,
-            'message': str,
-            'pod_name': str,
-            'reason': str,
-            'results': List[ModelPackagingResult],
-            'state': str,
-            'updated_at': str
+            "created_at": str,
+            "exit_code": int,
+            "message": str,
+            "pod_name": str,
+            "reason": str,
+            "results": List[ModelPackagingResult],
+            "state": str,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'exit_code': 'exitCode',
-            'message': 'message',
-            'pod_name': 'podName',
-            'reason': 'reason',
-            'results': 'results',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "exit_code": "exitCode",
+            "message": "message",
+            "pod_name": "podName",
+            "reason": "reason",
+            "results": "results",
+            "state": "state",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -68,7 +80,7 @@ class ModelPackagingStatus(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelPackagingStatus':
+    def from_dict(cls, dikt) -> "ModelPackagingStatus":
         """Returns the dict as a model
 
         :param dikt: A dict.

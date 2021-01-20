@@ -23,15 +23,26 @@ import click
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
-    IGNORE_NOT_FOUND_ERROR_MESSAGE
-from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
+from odahuflow.cli.utils.error_handler import (
+    check_id_or_file_params_present,
+    TIMEOUT_ERROR_MESSAGE,
+    IGNORE_NOT_FOUND_ERROR_MESSAGE,
+)
+from odahuflow.cli.utils.output import (
+    DEFAULT_OUTPUT_FORMAT,
+    format_output,
+    validate_output_format,
+)
 from odahuflow.cli.utils.verifiers import positive_number
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
-from odahuflow.sdk.clients.deployment import ModelDeployment, ModelDeploymentClient, READY_STATE, \
-    FAILED_STATE
+from odahuflow.sdk.clients.deployment import (
+    ModelDeployment,
+    ModelDeploymentClient,
+    READY_STATE,
+    FAILED_STATE,
+)
 
 DEFAULT_WAIT_TIMEOUT = 5
 # 20 minutes
@@ -42,8 +53,8 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@click.option("--url", help="API server host", default=config.API_URL)
+@click.option("--token", help="API server jwt token", default=config.API_TOKEN)
 @click.pass_context
 def deployment(ctx: click.core.Context, url: str, token: str):
     """
@@ -54,9 +65,15 @@ def deployment(ctx: click.core.Context, url: str, token: str):
 
 
 @deployment.command()
-@click.option('--md-id', '--id', help='Model deployment ID')
-@click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
-              default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
+@click.option("--md-id", "--id", help="Model deployment ID")
+@click.option(
+    "--output-format",
+    "-o",
+    "output_format",
+    help="Output format  [json|table|yaml|jsonpath]",
+    default=DEFAULT_OUTPUT_FORMAT,
+    callback=validate_output_format,
+)
 @pass_obj
 def get(client: ModelDeploymentClient, md_id: str, output_format: str):
     """
@@ -84,18 +101,40 @@ def get(client: ModelDeploymentClient, md_id: str, output_format: str):
 
 
 @deployment.command()
-@click.option('--md-id', '--id', help='Model deployment ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with deployment')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=DEFAULT_DEPLOYMENT_TIMEOUT, type=int, callback=positive_number,
-              help='timeout in seconds. for wait (if no-wait is off)')
-@click.option('--image', type=str, help='Override Docker image from file')
-@click.option('--ignore-if-exists', is_flag=True,
-              help='Ignore if entity is already exists on API server. Return success status code')
+@click.option("--md-id", "--id", help="Model deployment ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with deployment",
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=DEFAULT_DEPLOYMENT_TIMEOUT,
+    type=int,
+    callback=positive_number,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
+@click.option("--image", type=str, help="Override Docker image from file")
+@click.option(
+    "--ignore-if-exists",
+    is_flag=True,
+    help="Ignore if entity is already exists on API server. Return success status code",
+)
 @pass_obj
-def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeout: int, image: str,
-           ignore_if_exists: bool):
+def create(
+    client: ModelDeploymentClient,
+    md_id: str,
+    file: str,
+    wait: bool,
+    timeout: int,
+    image: str,
+    ignore_if_exists: bool,
+):
     """
     \b
     Create a deployment.
@@ -117,7 +156,7 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
     """
     md = parse_resources_file_with_one_item(file).resource
     if not isinstance(md, ModelDeployment):
-        raise ValueError(f'Model deployment expected, but {type(md)} provided')
+        raise ValueError(f"Model deployment expected, but {type(md)} provided")
 
     if md_id:
         md.id = md_id
@@ -129,8 +168,8 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
         res = client.create(md)
     except EntityAlreadyExists as e:
         if ignore_if_exists:
-            LOGGER.debug(f'--ignore-if-exists was passed: {e} will be suppressed')
-            click.echo('Deployment already exists')
+            LOGGER.debug(f"--ignore-if-exists was passed: {e} will be suppressed")
+            click.echo("Deployment already exists")
             return
         raise
 
@@ -140,15 +179,34 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
 
 
 @deployment.command()
-@click.option('--md-id', '--id', help='Model deployment ID')
-@click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with deployment')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=DEFAULT_DEPLOYMENT_TIMEOUT, type=int, callback=positive_number,
-              help='timeout in seconds. for wait (if no-wait is off)')
-@click.option('--image', type=str, help='Override Docker image from file')
+@click.option("--md-id", "--id", help="Model deployment ID")
+@click.option(
+    "--file",
+    "-f",
+    type=click.Path(),
+    required=True,
+    help="Path to the file with deployment",
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=DEFAULT_DEPLOYMENT_TIMEOUT,
+    type=int,
+    callback=positive_number,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
+@click.option("--image", type=str, help="Override Docker image from file")
 @pass_obj
-def edit(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeout: int, image: str):
+def edit(
+    client: ModelDeploymentClient,
+    md_id: str,
+    file: str,
+    wait: bool,
+    timeout: int,
+    image: str,
+):
     """
     \b
     Update a deployment.
@@ -169,7 +227,7 @@ def edit(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeo
     """
     md = parse_resources_file_with_one_item(file).resource
     if not isinstance(md, ModelDeployment):
-        raise ValueError(f'Model deployment expected, but {type(md)} provided')
+        raise ValueError(f"Model deployment expected, but {type(md)} provided")
 
     if md_id:
         md.id = md_id
@@ -183,17 +241,34 @@ def edit(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, timeo
 
 
 @deployment.command()
-@click.option('--md-id', '--id', help='Model deployment ID')
-@click.option('--file', '-f', type=click.Path(), help='Path to the file with deployment')
-@click.option('--wait/--no-wait', default=True,
-              help='no wait until scale will be finished')
-@click.option('--timeout', default=DEFAULT_DEPLOYMENT_TIMEOUT, type=int, callback=positive_number,
-              help='timeout in seconds. for wait (if no-wait is off)')
-@click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if Model Deployment is not found')
+@click.option("--md-id", "--id", help="Model deployment ID")
+@click.option(
+    "--file", "-f", type=click.Path(), help="Path to the file with deployment"
+)
+@click.option(
+    "--wait/--no-wait", default=True, help="no wait until scale will be finished"
+)
+@click.option(
+    "--timeout",
+    default=DEFAULT_DEPLOYMENT_TIMEOUT,
+    type=int,
+    callback=positive_number,
+    help="timeout in seconds. for wait (if no-wait is off)",
+)
+@click.option(
+    "--ignore-not-found/--not-ignore-not-found",
+    default=False,
+    help="ignore if Model Deployment is not found",
+)
 @pass_obj
-def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_found: bool,
-           wait: bool, timeout: int):
+def delete(
+    client: ModelDeploymentClient,
+    md_id: str,
+    file: str,
+    ignore_not_found: bool,
+    wait: bool,
+    timeout: int,
+):
     """
     \b
     Delete a deployment.
@@ -219,7 +294,7 @@ def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_foun
     if file:
         md = parse_resources_file_with_one_item(file).resource
         if not isinstance(md, ModelDeployment):
-            raise ValueError(f'Model deployment expected, but {type(md)} provided')
+            raise ValueError(f"Model deployment expected, but {type(md)} provided")
 
         md_id = md.id
 
@@ -232,10 +307,16 @@ def delete(client: ModelDeploymentClient, md_id: str, file: str, ignore_not_foun
         if e.status_code != 404 or not ignore_not_found:
             raise e
 
-        click.echo(IGNORE_NOT_FOUND_ERROR_MESSAGE.format(kind=ModelDeployment.__name__, id=md_id))
+        click.echo(
+            IGNORE_NOT_FOUND_ERROR_MESSAGE.format(
+                kind=ModelDeployment.__name__, id=md_id
+            )
+        )
 
 
-def wait_delete_operation_finish(timeout: int, wait: bool, md_id: str, md_client: ModelDeploymentClient):
+def wait_delete_operation_finish(
+    timeout: int, wait: bool, md_id: str, md_client: ModelDeploymentClient
+):
     """
     Wait delete operation
 
@@ -251,25 +332,27 @@ def wait_delete_operation_finish(timeout: int, wait: bool, md_id: str, md_client
 
     start = time.time()
     if timeout <= 0:
-        raise Exception('Invalid --timeout argument: should be positive integer')
+        raise Exception("Invalid --timeout argument: should be positive integer")
 
     while True:
         elapsed = time.time() - start
         if elapsed > timeout:
-            raise Exception('Time out: operation has not been confirmed')
+            raise Exception("Time out: operation has not been confirmed")
 
         try:
             md_client.get(md_id)
         except WrongHttpStatusCode as e:
             if e.status_code == 404:
                 return
-            LOGGER.info('Callback have not confirmed completion of the operation')
+            LOGGER.info("Callback have not confirmed completion of the operation")
 
-        print(f'Model deployment {md_id} is still being deleted...')
+        print(f"Model deployment {md_id} is still being deleted...")
         time.sleep(DEFAULT_WAIT_TIMEOUT)
 
 
-def wait_deployment_finish(timeout: int, wait: bool, md_id: str, md_client: ModelDeploymentClient):
+def wait_deployment_finish(
+    timeout: int, wait: bool, md_id: str, md_client: ModelDeploymentClient
+):
     """
     Wait for deployment to finish according to command line arguments
 
@@ -285,7 +368,7 @@ def wait_deployment_finish(timeout: int, wait: bool, md_id: str, md_client: Mode
 
     start = time.time()
     if timeout <= 0:
-        raise Exception('Invalid --timeout argument: should be positive integer')
+        raise Exception("Invalid --timeout argument: should be positive integer")
 
     while True:
         elapsed = time.time() - start
@@ -296,20 +379,24 @@ def wait_deployment_finish(timeout: int, wait: bool, md_id: str, md_client: Mode
             md: ModelDeployment = md_client.get(md_id)
             if md.status.state == READY_STATE:
                 if md.spec.min_replicas <= md.status.available_replicas:
-                    print(f'Model {md_id} was deployed. '
-                          f'Deployment process took {round(time.time() - start)} seconds')
+                    print(
+                        f"Model {md_id} was deployed. "
+                        f"Deployment process took {round(time.time() - start)} seconds"
+                    )
                     return
                 else:
-                    print(f'Model {md_id} was deployed. '
-                          f'Number of available pods is {md.status.available_replicas}/{md.spec.min_replicas}')
+                    print(
+                        f"Model {md_id} was deployed. "
+                        f"Number of available pods is {md.status.available_replicas}/{md.spec.min_replicas}"
+                    )
             elif md.status.state == FAILED_STATE:
-                raise Exception(f'Model deployment {md_id} was failed')
+                raise Exception(f"Model deployment {md_id} was failed")
             elif md.status.state == "":
                 print(f"Can't determine the state of {md.id}. Sleeping...")
             else:
-                print(f'Current deployment state is {md.status.state}. Sleeping...')
+                print(f"Current deployment state is {md.status.state}. Sleeping...")
         except WrongHttpStatusCode:
-            LOGGER.info('Callback have not confirmed completion of the operation')
+            LOGGER.info("Callback have not confirmed completion of the operation")
 
-        LOGGER.debug('Sleep before next request')
+        LOGGER.debug("Sleep before next request")
         time.sleep(DEFAULT_WAIT_TIMEOUT)

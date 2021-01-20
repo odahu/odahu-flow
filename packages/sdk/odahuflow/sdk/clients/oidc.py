@@ -19,11 +19,11 @@ OIDC configuration tool
 
 import requests
 
-WELL_KNOWN_CONFIGURATION_URL = '.well-known/openid-configuration'
+WELL_KNOWN_CONFIGURATION_URL = ".well-known/openid-configuration"
 
 # Some OpenID Provider configuration keys
 # (defined at https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata)
-TOKEN_ENDPOINT = 'token_endpoint'
+TOKEN_ENDPOINT = "token_endpoint"
 
 
 def fetch_openid_configuration(issuer: str) -> str:
@@ -55,8 +55,10 @@ class OpenIdProviderConfiguration:
 
     def extract_value(self, key):
         if self._config_json is None:
-            raise RuntimeError('You must fetch OpenID Provider configuration via .fetch_configuration() '
-                               'or .async_fetch_configuration() method before refer some properties')
+            raise RuntimeError(
+                "You must fetch OpenID Provider configuration via .fetch_configuration() "
+                "or .async_fetch_configuration() method before refer some properties"
+            )
 
         return self._config_json.get(key)
 
@@ -69,14 +71,16 @@ class OpenIdProviderConfiguration:
         if response.status_code == 200:
             self._config_json = response.json()
         elif 400 <= response.status_code < 600:
-            raise RuntimeError(f'Some error during attempt to fetch OpenID Provider configuration. '
-                               f'Reason: {response.reason}')
+            raise RuntimeError(
+                f"Some error during attempt to fetch OpenID Provider configuration. "
+                f"Reason: {response.reason}"
+            )
         else:
-            raise RuntimeError(f'Not expected status code: {response.status_code}')
+            raise RuntimeError(f"Not expected status code: {response.status_code}")
 
     @property
     def configuration_url(self) -> str:
-        return f'{self._issuer}/{WELL_KNOWN_CONFIGURATION_URL}'
+        return f"{self._issuer}/{WELL_KNOWN_CONFIGURATION_URL}"
 
     @property
     def token_endpoint(self) -> str:

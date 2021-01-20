@@ -25,24 +25,54 @@ from os import listdir
 from os.path import isdir, join, isfile
 
 import yaml
-from odahuflow.sdk.clients.api import RemoteAPIClient, WrongHttpStatusCode, AsyncRemoteAPIClient
+from odahuflow.sdk.clients.api import (
+    RemoteAPIClient,
+    WrongHttpStatusCode,
+    AsyncRemoteAPIClient,
+)
 from odahuflow.sdk.clients.connection import ConnectionClient, AsyncConnectionClient
-from odahuflow.sdk.clients.deployment import ModelDeploymentClient, ModelDeployment, AsyncModelDeploymentClient
-from odahuflow.sdk.clients.packaging import ModelPackagingClient, AsyncModelPackagingClient
-from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient, AsyncPackagingIntegrationClient
-from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, AsyncModelRouteClient
-from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient, AsyncToolchainIntegrationClient
-from odahuflow.sdk.clients.training import ModelTrainingClient, ModelTraining, AsyncModelTrainingClient
-from odahuflow.sdk.models import Connection, ToolchainIntegration, ModelPackaging, PackagingIntegration
+from odahuflow.sdk.clients.deployment import (
+    ModelDeploymentClient,
+    ModelDeployment,
+    AsyncModelDeploymentClient,
+)
+from odahuflow.sdk.clients.packaging import (
+    ModelPackagingClient,
+    AsyncModelPackagingClient,
+)
+from odahuflow.sdk.clients.packaging_integration import (
+    PackagingIntegrationClient,
+    AsyncPackagingIntegrationClient,
+)
+from odahuflow.sdk.clients.route import (
+    ModelRoute,
+    ModelRouteClient,
+    AsyncModelRouteClient,
+)
+from odahuflow.sdk.clients.toolchain_integration import (
+    ToolchainIntegrationClient,
+    AsyncToolchainIntegrationClient,
+)
+from odahuflow.sdk.clients.training import (
+    ModelTrainingClient,
+    ModelTraining,
+    AsyncModelTrainingClient,
+)
+from odahuflow.sdk.models import (
+    Connection,
+    ToolchainIntegration,
+    ModelPackaging,
+    PackagingIntegration,
+)
 
 TARGET_CLASSES = {
-    'ModelTraining': ModelTraining,
-    'ToolchainIntegration': ToolchainIntegration,
-    'ModelDeployment': ModelDeployment,
-    'ModelRoute': ModelRoute,
-    'Connection': Connection,
-    'ModelPackaging': ModelPackaging,
-    'PackagingIntegration': PackagingIntegration,
+    "ModelTraining": ModelTraining,
+    "ToolchainIntegration": ToolchainIntegration,
+    "ModelDeployment": ModelDeployment,
+    "ModelRoute": ModelRoute,
+    "Connection": Connection,
+    "ModelPackaging": ModelPackaging,
+    "PackagingIntegration": PackagingIntegration,
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -85,7 +115,9 @@ class ApplyResult(typing.NamedTuple):
 
 
 # pylint: disable=R0911
-def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteAPIClient) -> typing.Optional[object]:
+def build_client(
+    resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteAPIClient
+) -> typing.Optional[object]:
     """
     Build client for particular resource (e.g. it builds ModelTrainingClient for ModelTraining resource)
 
@@ -108,13 +140,13 @@ def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteA
     elif isinstance(resource.resource, PackagingIntegration):
         return PackagingIntegrationClient.construct_from_other(api_client)
     else:
-        raise InvalidResourceType('{!r} is invalid resource '.format(resource.resource))
+        raise InvalidResourceType("{!r} is invalid resource ".format(resource.resource))
 
 
 # pylint: disable=R0911
-def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
-                       async_api_client: AsyncRemoteAPIClient
-                       ) -> typing.Optional[object]:
+def build_async_client(
+    resource: OdahuflowCloudResourceUpdatePair, async_api_client: AsyncRemoteAPIClient
+) -> typing.Optional[object]:
     """
     Build client for particular resource (e.g. it builds ModelTrainingClient for ModelTraining resource)
 
@@ -137,7 +169,7 @@ def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
     elif isinstance(resource.resource, PackagingIntegration):
         return AsyncPackagingIntegrationClient.construct_from_other(async_api_client)
     else:
-        raise InvalidResourceType('{!r} is invalid resource '.format(resource.resource))
+        raise InvalidResourceType("{!r} is invalid resource ".format(resource.resource))
 
 
 def build_resource(declaration: dict) -> OdahuflowCloudResourceUpdatePair:
@@ -147,22 +179,19 @@ def build_resource(declaration: dict) -> OdahuflowCloudResourceUpdatePair:
     :param declaration: declaration of resource
     :return: built resource
     """
-    resource_type = declaration.get('kind')
+    resource_type = declaration.get("kind")
     if resource_type is None:
-        raise Exception(f'Kind of object {declaration} must be not null')
+        raise Exception(f"Kind of object {declaration} must be not null")
 
     if not isinstance(resource_type, str):
-        raise Exception(f'Kind of object {declaration} should be string')
+        raise Exception(f"Kind of object {declaration} should be string")
 
     if resource_type not in TARGET_CLASSES:
-        raise Exception(f'Unknown kind of object: \'{resource_type}\'')
+        raise Exception(f"Unknown kind of object: '{resource_type}'")
 
     resource = TARGET_CLASSES[resource_type].from_dict(declaration)
 
-    return OdahuflowCloudResourceUpdatePair(
-        resource_id=resource.id,
-        resource=resource
-    )
+    return OdahuflowCloudResourceUpdatePair(resource_id=resource.id, resource=resource)
 
 
 def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateList:
@@ -179,7 +208,7 @@ def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateLis
         # So we have to try parse as json first.
         items = json.load(data_stream)
 
-        LOGGER.debug('Successfully parsed as JSON format')
+        LOGGER.debug("Successfully parsed as JSON format")
     except json.JSONDecodeError:
         try:
             # Return to the beginning of the stream
@@ -187,9 +216,9 @@ def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateLis
 
             items = tuple(yaml.load_all(data_stream, Loader=yaml.SafeLoader))
 
-            LOGGER.debug('Successfully parsed as YAML format')
+            LOGGER.debug("Successfully parsed as YAML format")
         except yaml.YAMLError as e:
-            raise Exception('not valid JSON or YAML') from e
+            raise Exception("not valid JSON or YAML") from e
 
     if not isinstance(items, (list, tuple)):
         items = [items]
@@ -201,13 +230,11 @@ def parse_stream(data_stream: typing.TextIO) -> OdahuflowCloudResourcesUpdateLis
             continue
 
         if not isinstance(item, dict):
-            raise ValueError(f'Invalid Odahuflow resource in file: {item}')
+            raise ValueError(f"Invalid Odahuflow resource in file: {item}")
 
         result.append(build_resource(item))
 
-    return OdahuflowCloudResourcesUpdateList(
-        changes=tuple(result)
-    )
+    return OdahuflowCloudResourcesUpdateList(changes=tuple(result))
 
 
 def parse_resources_dir(path: str) -> typing.List[OdahuflowCloudResourceUpdatePair]:
@@ -220,21 +247,20 @@ def parse_resources_dir(path: str) -> typing.List[OdahuflowCloudResourceUpdatePa
     :return: parsed resources
     """
     if not os.path.exists(path):
-        raise FileNotFoundError(f'Resource directory {path} not found')
+        raise FileNotFoundError(f"Resource directory {path} not found")
 
     if not isdir(path):
-        raise FileNotFoundError(f'{path} is not a directory')
+        raise FileNotFoundError(f"{path} is not a directory")
 
-    resource_files = [join(path, f) for f in listdir(path) if
-                      isfile(join(path, f))]
+    resource_files = [join(path, f) for f in listdir(path) if isfile(join(path, f))]
 
     entities: typing.List[OdahuflowCloudResourceUpdatePair] = []
     for file in resource_files:
         try:
-            LOGGER.debug(f'Parsing the {file} file')
+            LOGGER.debug(f"Parsing the {file} file")
             entities.extend(parse_resources_file(file).changes)
         except Exception:
-            LOGGER.exception('parse error')
+            LOGGER.exception("parse error")
 
     return entities
 
@@ -249,9 +275,9 @@ def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
     :return: parsed resources
     """
     if not os.path.exists(path):
-        raise FileNotFoundError(f'Resource file \'{path}\' not found')
+        raise FileNotFoundError(f"Resource file '{path}' not found")
 
-    with open(path, 'r') as data_stream:
+    with open(path, "r") as data_stream:
         return parse_stream(data_stream)
 
 
@@ -267,13 +293,17 @@ def parse_resources_file_with_one_item(path: str) -> OdahuflowCloudResourceUpdat
     """
     resources = parse_resources_file(path)
     if len(resources.changes) != 1:
-        raise Exception('{!r} should contain 1 item, but {!r} found'.format(path, len(resources)))
+        raise Exception(
+            "{!r} should contain 1 item, but {!r} found".format(path, len(resources))
+        )
     return resources.changes[0]
 
 
-async def async_apply(updates: OdahuflowCloudResourcesUpdateList,
-                      async_api_client: AsyncRemoteAPIClient,
-                      is_removal: bool) -> ApplyResult:
+async def async_apply(
+    updates: OdahuflowCloudResourcesUpdateList,
+    async_api_client: AsyncRemoteAPIClient,
+    is_removal: bool,
+) -> ApplyResult:
     """
     Apply changes on Odahuflow cloud
 
@@ -289,14 +319,20 @@ async def async_apply(updates: OdahuflowCloudResourcesUpdateList,
 
     # Operate over all resources
     for idx, change in enumerate(updates.changes):
-        resource_str_identifier = f'#{idx + 1}. {change.resource_id}' if change.resource_id else f'#{idx + 1}'
+        resource_str_identifier = (
+            f"#{idx + 1}. {change.resource_id}" if change.resource_id else f"#{idx + 1}"
+        )
 
-        LOGGER.debug('Processing resource %r', resource_str_identifier)
+        LOGGER.debug("Processing resource %r", resource_str_identifier)
         # Build and check client
         try:
             client = build_async_client(change, async_api_client)
         except Exception as general_exception:
-            errors.append(Exception(f'Can not get build client for {resource_str_identifier}: {general_exception}'))
+            errors.append(
+                Exception(
+                    f"Can not get build client for {resource_str_identifier}: {general_exception}"
+                )
+            )
             continue
 
         # Check is resource exist or not
@@ -307,12 +343,20 @@ async def async_apply(updates: OdahuflowCloudResourcesUpdateList,
             if http_exception.status_code == 404:
                 resource_exist = False
             else:
-                errors.append(Exception(f'Can not get status of resource '
-                                        f'{resource_str_identifier}: {http_exception}'))
+                errors.append(
+                    Exception(
+                        f"Can not get status of resource "
+                        f"{resource_str_identifier}: {http_exception}"
+                    )
+                )
                 continue
         except Exception as general_exception:
-            errors.append(Exception(f'Can not get status of resource '
-                                    f'{resource_str_identifier}: {general_exception}'))
+            errors.append(
+                Exception(
+                    f"Can not get status of resource "
+                    f"{resource_str_identifier}: {general_exception}"
+                )
+            )
             continue
 
         # Change resource (update/create/delete)
@@ -320,30 +364,51 @@ async def async_apply(updates: OdahuflowCloudResourcesUpdateList,
             # If not removal (creation / update)
             if not is_removal:
                 if resource_exist:
-                    LOGGER.info('Editing of #%d %s (name: %s)', idx + 1, change.resource, change.resource_id)
+                    LOGGER.info(
+                        "Editing of #%d %s (name: %s)",
+                        idx + 1,
+                        change.resource,
+                        change.resource_id,
+                    )
                     await client.edit(change.resource)
                     changed.append(change)
                 else:
-                    LOGGER.info('Creating of #%d %s (name: %s)', idx + 1, change.resource, change.resource_id)
+                    LOGGER.info(
+                        "Creating of #%d %s (name: %s)",
+                        idx + 1,
+                        change.resource,
+                        change.resource_id,
+                    )
                     await client.create(change.resource)
                     created.append(change)
             # If removal
             else:
                 # Only if resource exists on a cluster
                 if resource_exist:
-                    LOGGER.info('Removing of #%d %s (name: %s)', idx + 1, change.resource, change.resource_id)
+                    LOGGER.info(
+                        "Removing of #%d %s (name: %s)",
+                        idx + 1,
+                        change.resource,
+                        change.resource_id,
+                    )
                     await client.delete(change.resource_id)
                     removed.append(change)
         except Exception as general_exception:
-            errors.append(Exception(f'Can not update resource {resource_str_identifier}: {general_exception}'))
+            errors.append(
+                Exception(
+                    f"Can not update resource {resource_str_identifier}: {general_exception}"
+                )
+            )
             continue
 
     return ApplyResult(tuple(created), tuple(removed), tuple(changed), tuple(errors))
 
 
-def apply(updates: OdahuflowCloudResourcesUpdateList,
-          api_client: typing.Union[AsyncRemoteAPIClient, RemoteAPIClient],
-          is_removal: bool) -> ApplyResult:
+def apply(
+    updates: OdahuflowCloudResourcesUpdateList,
+    api_client: typing.Union[AsyncRemoteAPIClient, RemoteAPIClient],
+    is_removal: bool,
+) -> ApplyResult:
     """
     Apply changes on Odahuflow cloud (wrapper for async_apply). Used for not async client (For backward compatibility)
 

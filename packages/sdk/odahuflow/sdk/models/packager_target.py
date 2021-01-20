@@ -16,7 +16,7 @@ class PackagerTarget(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, connection: Connection=None, name: str=None):  # noqa: E501
+    def __init__(self, connection: Connection = None, name: str = None):  # noqa: E501
         """PackagerTarget - a model defined in Swagger
 
         :param connection: The connection of this PackagerTarget.  # noqa: E501
@@ -24,21 +24,15 @@ class PackagerTarget(Model):
         :param name: The name of this PackagerTarget.  # noqa: E501
         :type name: str
         """
-        self.swagger_types = {
-            'connection': Connection,
-            'name': str
-        }
+        self.swagger_types = {"connection": Connection, "name": str}
 
-        self.attribute_map = {
-            'connection': 'connection',
-            'name': 'name'
-        }
+        self.attribute_map = {"connection": "connection", "name": "name"}
 
         self._connection = connection
         self._name = name
 
     @classmethod
-    def from_dict(cls, dikt) -> 'PackagerTarget':
+    def from_dict(cls, dikt) -> "PackagerTarget":
         """Returns the dict as a model
 
         :param dikt: A dict.

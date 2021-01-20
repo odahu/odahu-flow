@@ -15,7 +15,7 @@ class ModelDeploymentTarget(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, md_name: str=None, weight: int=None):  # noqa: E501
+    def __init__(self, md_name: str = None, weight: int = None):  # noqa: E501
         """ModelDeploymentTarget - a model defined in Swagger
 
         :param md_name: The md_name of this ModelDeploymentTarget.  # noqa: E501
@@ -23,21 +23,15 @@ class ModelDeploymentTarget(Model):
         :param weight: The weight of this ModelDeploymentTarget.  # noqa: E501
         :type weight: int
         """
-        self.swagger_types = {
-            'md_name': str,
-            'weight': int
-        }
+        self.swagger_types = {"md_name": str, "weight": int}
 
-        self.attribute_map = {
-            'md_name': 'mdName',
-            'weight': 'weight'
-        }
+        self.attribute_map = {"md_name": "mdName", "weight": "weight"}
 
         self._md_name = md_name
         self._weight = weight
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelDeploymentTarget':
+    def from_dict(cls, dikt) -> "ModelDeploymentTarget":
         """Returns the dict as a model
 
         :param dikt: A dict.

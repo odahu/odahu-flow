@@ -9,9 +9,15 @@ from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.api_config import APIConfig  # noqa: F401,E501
 from odahuflow.sdk.models.common_config import CommonConfig  # noqa: F401,E501
 from odahuflow.sdk.models.connection_config import ConnectionConfig  # noqa: F401,E501
-from odahuflow.sdk.models.model_deployment_config import ModelDeploymentConfig  # noqa: F401,E501
-from odahuflow.sdk.models.model_packaging_config import ModelPackagingConfig  # noqa: F401,E501
-from odahuflow.sdk.models.model_training_config import ModelTrainingConfig  # noqa: F401,E501
+from odahuflow.sdk.models.model_deployment_config import (
+    ModelDeploymentConfig,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.model_packaging_config import (
+    ModelPackagingConfig,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.model_training_config import (
+    ModelTrainingConfig,
+)  # noqa: F401,E501
 from odahuflow.sdk.models.operator_config import OperatorConfig  # noqa: F401,E501
 from odahuflow.sdk.models.packager_config import PackagerConfig  # noqa: F401,E501
 from odahuflow.sdk.models.service_catalog import ServiceCatalog  # noqa: F401,E501
@@ -26,7 +32,20 @@ class Config(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, api: APIConfig=None, common: CommonConfig=None, connection: ConnectionConfig=None, deployment: ModelDeploymentConfig=None, operator: OperatorConfig=None, packager: PackagerConfig=None, packaging: ModelPackagingConfig=None, service_catalog: ServiceCatalog=None, trainer: TrainerConfig=None, training: ModelTrainingConfig=None, users: UserConfig=None):  # noqa: E501
+    def __init__(
+        self,
+        api: APIConfig = None,
+        common: CommonConfig = None,
+        connection: ConnectionConfig = None,
+        deployment: ModelDeploymentConfig = None,
+        operator: OperatorConfig = None,
+        packager: PackagerConfig = None,
+        packaging: ModelPackagingConfig = None,
+        service_catalog: ServiceCatalog = None,
+        trainer: TrainerConfig = None,
+        training: ModelTrainingConfig = None,
+        users: UserConfig = None,
+    ):  # noqa: E501
         """Config - a model defined in Swagger
 
         :param api: The api of this Config.  # noqa: E501
@@ -53,31 +72,31 @@ class Config(Model):
         :type users: UserConfig
         """
         self.swagger_types = {
-            'api': APIConfig,
-            'common': CommonConfig,
-            'connection': ConnectionConfig,
-            'deployment': ModelDeploymentConfig,
-            'operator': OperatorConfig,
-            'packager': PackagerConfig,
-            'packaging': ModelPackagingConfig,
-            'service_catalog': ServiceCatalog,
-            'trainer': TrainerConfig,
-            'training': ModelTrainingConfig,
-            'users': UserConfig
+            "api": APIConfig,
+            "common": CommonConfig,
+            "connection": ConnectionConfig,
+            "deployment": ModelDeploymentConfig,
+            "operator": OperatorConfig,
+            "packager": PackagerConfig,
+            "packaging": ModelPackagingConfig,
+            "service_catalog": ServiceCatalog,
+            "trainer": TrainerConfig,
+            "training": ModelTrainingConfig,
+            "users": UserConfig,
         }
 
         self.attribute_map = {
-            'api': 'api',
-            'common': 'common',
-            'connection': 'connection',
-            'deployment': 'deployment',
-            'operator': 'operator',
-            'packager': 'packager',
-            'packaging': 'packaging',
-            'service_catalog': 'serviceCatalog',
-            'trainer': 'trainer',
-            'training': 'training',
-            'users': 'users'
+            "api": "api",
+            "common": "common",
+            "connection": "connection",
+            "deployment": "deployment",
+            "operator": "operator",
+            "packager": "packager",
+            "packaging": "packaging",
+            "service_catalog": "serviceCatalog",
+            "trainer": "trainer",
+            "training": "training",
+            "users": "users",
         }
 
         self._api = api
@@ -93,7 +112,7 @@ class Config(Model):
         self._users = users
 
     @classmethod
-    def from_dict(cls, dikt) -> 'Config':
+    def from_dict(cls, dikt) -> "Config":
         """Returns the dict as a model
 
         :param dikt: A dict.

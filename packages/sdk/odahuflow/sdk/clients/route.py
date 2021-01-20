@@ -42,7 +42,7 @@ class ModelRouteClient(RemoteAPIClient):
         :type name: str
         :return: Model Route
         """
-        return ModelRoute.from_dict(self.query(f'{MODEL_ROUTE_URL}/{name}'))
+        return ModelRoute.from_dict(self.query(f"{MODEL_ROUTE_URL}/{name}"))
 
     def get_all(self) -> typing.List[ModelRoute]:
         """
@@ -60,7 +60,7 @@ class ModelRouteClient(RemoteAPIClient):
         :return Message from API server
         """
         return ModelRoute.from_dict(
-            self.query(MODEL_ROUTE_URL, action='POST', payload=mr.to_dict())
+            self.query(MODEL_ROUTE_URL, action="POST", payload=mr.to_dict())
         )
 
     def edit(self, mr: ModelRoute) -> ModelRoute:
@@ -71,7 +71,7 @@ class ModelRouteClient(RemoteAPIClient):
         :return Message from API server
         """
         return ModelRoute.from_dict(
-            self.query(MODEL_ROUTE_URL, action='PUT', payload=mr.to_dict())
+            self.query(MODEL_ROUTE_URL, action="PUT", payload=mr.to_dict())
         )
 
     def delete(self, name: str) -> str:
@@ -81,7 +81,7 @@ class ModelRouteClient(RemoteAPIClient):
         :param name: Name of a Model Route
         :return Message from API server
         """
-        return self.query(f'{MODEL_ROUTE_URL}/{name}', action='DELETE')
+        return self.query(f"{MODEL_ROUTE_URL}/{name}", action="DELETE")
 
 
 class AsyncModelRouteClient(AsyncRemoteAPIClient):
@@ -97,7 +97,7 @@ class AsyncModelRouteClient(AsyncRemoteAPIClient):
         :type name: str
         :return: Model Route
         """
-        return ModelRoute.from_dict(await self.query(f'{MODEL_ROUTE_URL}/{name}'))
+        return ModelRoute.from_dict(await self.query(f"{MODEL_ROUTE_URL}/{name}"))
 
     async def get_all(self) -> typing.List[ModelRoute]:
         """
@@ -115,7 +115,7 @@ class AsyncModelRouteClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ModelRoute.from_dict(
-            await self.query(MODEL_ROUTE_URL, action='POST', payload=mr.to_dict())
+            await self.query(MODEL_ROUTE_URL, action="POST", payload=mr.to_dict())
         )
 
     async def edit(self, mr: ModelRoute) -> ModelRoute:
@@ -126,7 +126,7 @@ class AsyncModelRouteClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return ModelRoute.from_dict(
-            await self.query(MODEL_ROUTE_URL, action='PUT', payload=mr.to_dict())
+            await self.query(MODEL_ROUTE_URL, action="PUT", payload=mr.to_dict())
         )
 
     async def delete(self, name: str) -> str:
@@ -136,4 +136,4 @@ class AsyncModelRouteClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Route
         :return Message from API server
         """
-        return await self.query(f'{MODEL_ROUTE_URL}/{name}', action='DELETE')
+        return await self.query(f"{MODEL_ROUTE_URL}/{name}", action="DELETE")

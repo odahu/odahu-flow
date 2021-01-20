@@ -34,14 +34,11 @@ def render_template(template_name, values=None, use_filesystem_loader=False):
     :type use_filesystem_loader: bool
     :return: str rendered template
     """
-    environment = PackageLoader(__name__, 'templates')
+    environment = PackageLoader(__name__, "templates")
     if use_filesystem_loader:
-        environment = FileSystemLoader('/')
+        environment = FileSystemLoader("/")
 
-    env = Environment(
-        loader=environment,
-        autoescape=select_autoescape(['tmpl'])
-    )
+    env = Environment(loader=environment, autoescape=select_autoescape(["tmpl"]))
 
     if not values:
         values = {}

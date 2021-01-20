@@ -25,6 +25,7 @@ def pass_obj(f):
     :param f: command function
     :return: wrapper
     """
+
     @click.pass_context
     def new_func(ctx, *args, **kwargs):
         return ctx.invoke(f, ctx.obj, *args, **kwargs)

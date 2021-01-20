@@ -63,12 +63,11 @@ COMMAND_GROUPS = [
 # Initialize shell completion
 click_completion.init()
 
-CONTEXT_SETTINGS = dict(max_content_width=100,
-                        help_option_names=['-h', '--help'])
+CONTEXT_SETTINGS = dict(max_content_width=100, help_option_names=["-h", "--help"])
 
 
 @click.group(cls=click_utils.AbbreviationGroup, context_settings=CONTEXT_SETTINGS)
-@click.option('--verbose/--non-verbose', default=False)
+@click.option("--verbose/--non-verbose", default=False)
 def base(verbose=False):
     """
     odahuflowctl controls the ODAHU cluster
@@ -93,5 +92,5 @@ def main():
         base()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -12,6 +12,6 @@ def positive_number(ctx, param: click.core.Option, value):
     :return: cli value
     """
     if int(value) <= 0:
-        raise click.BadParameter(f'{param.name} must be positive integer')
+        raise click.BadParameter(f"{param.name} must be positive integer")
 
     return value

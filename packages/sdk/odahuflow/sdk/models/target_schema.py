@@ -15,7 +15,13 @@ class TargetSchema(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, connection_types: List[str]=None, default: str=None, name: str=None, required: bool=None):  # noqa: E501
+    def __init__(
+        self,
+        connection_types: List[str] = None,
+        default: str = None,
+        name: str = None,
+        required: bool = None,
+    ):  # noqa: E501
         """TargetSchema - a model defined in Swagger
 
         :param connection_types: The connection_types of this TargetSchema.  # noqa: E501
@@ -28,17 +34,17 @@ class TargetSchema(Model):
         :type required: bool
         """
         self.swagger_types = {
-            'connection_types': List[str],
-            'default': str,
-            'name': str,
-            'required': bool
+            "connection_types": List[str],
+            "default": str,
+            "name": str,
+            "required": bool,
         }
 
         self.attribute_map = {
-            'connection_types': 'connectionTypes',
-            'default': 'default',
-            'name': 'name',
-            'required': 'required'
+            "connection_types": "connectionTypes",
+            "default": "default",
+            "name": "name",
+            "required": "required",
         }
 
         self._connection_types = connection_types
@@ -47,7 +53,7 @@ class TargetSchema(Model):
         self._required = required
 
     @classmethod
-    def from_dict(cls, dikt) -> 'TargetSchema':
+    def from_dict(cls, dikt) -> "TargetSchema":
         """Returns the dict as a model
 
         :param dikt: A dict.

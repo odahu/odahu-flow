@@ -36,7 +36,9 @@ class PackagingIntegrationClient(RemoteAPIClient):
         :type name: str
         :return: Packaging Integration
         """
-        return PackagingIntegration.from_dict(self.query(f'{PACKING_INTEGRATION_URL}/{name}'))
+        return PackagingIntegration.from_dict(
+            self.query(f"{PACKING_INTEGRATION_URL}/{name}")
+        )
 
     def get_all(self) -> typing.List[PackagingIntegration]:
         """
@@ -44,7 +46,10 @@ class PackagingIntegrationClient(RemoteAPIClient):
 
         :return: all Packaging Integrations
         """
-        return [PackagingIntegration.from_dict(mr) for mr in self.query(PACKING_INTEGRATION_URL)]
+        return [
+            PackagingIntegration.from_dict(mr)
+            for mr in self.query(PACKING_INTEGRATION_URL)
+        ]
 
     def create(self, mr: PackagingIntegration) -> PackagingIntegration:
         """
@@ -54,7 +59,7 @@ class PackagingIntegrationClient(RemoteAPIClient):
         :return Message from API server
         """
         return PackagingIntegration.from_dict(
-            self.query(PACKING_INTEGRATION_URL, action='POST', payload=mr.to_dict())
+            self.query(PACKING_INTEGRATION_URL, action="POST", payload=mr.to_dict())
         )
 
     def edit(self, mr: PackagingIntegration) -> PackagingIntegration:
@@ -65,7 +70,7 @@ class PackagingIntegrationClient(RemoteAPIClient):
         :return Message from API server
         """
         return PackagingIntegration.from_dict(
-            self.query(PACKING_INTEGRATION_URL, action='PUT', payload=mr.to_dict())
+            self.query(PACKING_INTEGRATION_URL, action="PUT", payload=mr.to_dict())
         )
 
     def delete(self, name: str) -> str:
@@ -75,7 +80,7 @@ class PackagingIntegrationClient(RemoteAPIClient):
         :param name: Name of a Packaging Integration
         :return Message from API server
         """
-        return self.query(f'{PACKING_INTEGRATION_URL}/{name}', action='DELETE')
+        return self.query(f"{PACKING_INTEGRATION_URL}/{name}", action="DELETE")
 
 
 class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
@@ -91,7 +96,9 @@ class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
         :type name: str
         :return: Packaging Integration
         """
-        return PackagingIntegration.from_dict(await self.query(f'{PACKING_INTEGRATION_URL}/{name}'))
+        return PackagingIntegration.from_dict(
+            await self.query(f"{PACKING_INTEGRATION_URL}/{name}")
+        )
 
     async def get_all(self) -> typing.List[PackagingIntegration]:
         """
@@ -99,7 +106,10 @@ class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
 
         :return: all Packaging Integrations
         """
-        return [PackagingIntegration.from_dict(mr) for mr in await self.query(PACKING_INTEGRATION_URL)]
+        return [
+            PackagingIntegration.from_dict(mr)
+            for mr in await self.query(PACKING_INTEGRATION_URL)
+        ]
 
     async def create(self, mr: PackagingIntegration) -> PackagingIntegration:
         """
@@ -109,7 +119,9 @@ class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return PackagingIntegration.from_dict(
-            await self.query(PACKING_INTEGRATION_URL, action='POST', payload=mr.to_dict())
+            await self.query(
+                PACKING_INTEGRATION_URL, action="POST", payload=mr.to_dict()
+            )
         )
 
     async def edit(self, mr: PackagingIntegration) -> PackagingIntegration:
@@ -120,7 +132,9 @@ class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
         :return Message from API server
         """
         return PackagingIntegration.from_dict(
-            await self.query(PACKING_INTEGRATION_URL, action='PUT', payload=mr.to_dict())
+            await self.query(
+                PACKING_INTEGRATION_URL, action="PUT", payload=mr.to_dict()
+            )
         )
 
     async def delete(self, name: str) -> str:
@@ -130,4 +144,4 @@ class AsyncPackagingIntegrationClient(AsyncRemoteAPIClient):
         :param name: Name of a Packaging Integration
         :return Message from API server
         """
-        return await self.query(f'{PACKING_INTEGRATION_URL}/{name}', action='DELETE')
+        return await self.query(f"{PACKING_INTEGRATION_URL}/{name}", action="DELETE")

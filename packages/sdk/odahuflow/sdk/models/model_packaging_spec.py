@@ -6,7 +6,9 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
+from odahuflow.sdk.models.resource_requirements import (
+    ResourceRequirements,
+)  # noqa: F401,E501
 from odahuflow.sdk.models.target import Target  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
@@ -17,7 +19,17 @@ class ModelPackagingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, arguments: object=None, artifact_name: str=None, image: str=None, integration_name: str=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, targets: List[Target]=None):  # noqa: E501
+    def __init__(
+        self,
+        arguments: object = None,
+        artifact_name: str = None,
+        image: str = None,
+        integration_name: str = None,
+        node_selector: Dict[str, str] = None,
+        output_connection: str = None,
+        resources: ResourceRequirements = None,
+        targets: List[Target] = None,
+    ):  # noqa: E501
         """ModelPackagingSpec - a model defined in Swagger
 
         :param arguments: The arguments of this ModelPackagingSpec.  # noqa: E501
@@ -38,25 +50,25 @@ class ModelPackagingSpec(Model):
         :type targets: List[Target]
         """
         self.swagger_types = {
-            'arguments': object,
-            'artifact_name': str,
-            'image': str,
-            'integration_name': str,
-            'node_selector': Dict[str, str],
-            'output_connection': str,
-            'resources': ResourceRequirements,
-            'targets': List[Target]
+            "arguments": object,
+            "artifact_name": str,
+            "image": str,
+            "integration_name": str,
+            "node_selector": Dict[str, str],
+            "output_connection": str,
+            "resources": ResourceRequirements,
+            "targets": List[Target],
         }
 
         self.attribute_map = {
-            'arguments': 'arguments',
-            'artifact_name': 'artifactName',
-            'image': 'image',
-            'integration_name': 'integrationName',
-            'node_selector': 'nodeSelector',
-            'output_connection': 'outputConnection',
-            'resources': 'resources',
-            'targets': 'targets'
+            "arguments": "arguments",
+            "artifact_name": "artifactName",
+            "image": "image",
+            "integration_name": "integrationName",
+            "node_selector": "nodeSelector",
+            "output_connection": "outputConnection",
+            "resources": "resources",
+            "targets": "targets",
         }
 
         self._arguments = arguments
@@ -69,7 +81,7 @@ class ModelPackagingSpec(Model):
         self._targets = targets
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelPackagingSpec':
+    def from_dict(cls, dikt) -> "ModelPackagingSpec":
         """Returns the dict as a model
 
         :param dikt: A dict.

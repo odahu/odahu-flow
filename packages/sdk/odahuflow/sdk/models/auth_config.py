@@ -15,7 +15,14 @@ class AuthConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, api_token: str=None, api_url: str=None, client_id: str=None, client_secret: str=None, oauth_oidc_token_endpoint: str=None):  # noqa: E501
+    def __init__(
+        self,
+        api_token: str = None,
+        api_url: str = None,
+        client_id: str = None,
+        client_secret: str = None,
+        oauth_oidc_token_endpoint: str = None,
+    ):  # noqa: E501
         """AuthConfig - a model defined in Swagger
 
         :param api_token: The api_token of this AuthConfig.  # noqa: E501
@@ -30,19 +37,19 @@ class AuthConfig(Model):
         :type oauth_oidc_token_endpoint: str
         """
         self.swagger_types = {
-            'api_token': str,
-            'api_url': str,
-            'client_id': str,
-            'client_secret': str,
-            'oauth_oidc_token_endpoint': str
+            "api_token": str,
+            "api_url": str,
+            "client_id": str,
+            "client_secret": str,
+            "oauth_oidc_token_endpoint": str,
         }
 
         self.attribute_map = {
-            'api_token': 'apiToken',
-            'api_url': 'apiUrl',
-            'client_id': 'clientId',
-            'client_secret': 'clientSecret',
-            'oauth_oidc_token_endpoint': 'oauthOidcTokenEndpoint'
+            "api_token": "apiToken",
+            "api_url": "apiUrl",
+            "client_id": "clientId",
+            "client_secret": "clientSecret",
+            "oauth_oidc_token_endpoint": "oauthOidcTokenEndpoint",
         }
 
         self._api_token = api_token
@@ -52,7 +59,7 @@ class AuthConfig(Model):
         self._oauth_oidc_token_endpoint = oauth_oidc_token_endpoint
 
     @classmethod
-    def from_dict(cls, dikt) -> 'AuthConfig':
+    def from_dict(cls, dikt) -> "AuthConfig":
         """Returns the dict as a model
 
         :param dikt: A dict.

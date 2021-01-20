@@ -15,7 +15,9 @@ class ExternalUrl(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, image_url: str=None, name: str=None, url: str=None):  # noqa: E501
+    def __init__(
+        self, image_url: str = None, name: str = None, url: str = None
+    ):  # noqa: E501
         """ExternalUrl - a model defined in Swagger
 
         :param image_url: The image_url of this ExternalUrl.  # noqa: E501
@@ -25,24 +27,16 @@ class ExternalUrl(Model):
         :param url: The url of this ExternalUrl.  # noqa: E501
         :type url: str
         """
-        self.swagger_types = {
-            'image_url': str,
-            'name': str,
-            'url': str
-        }
+        self.swagger_types = {"image_url": str, "name": str, "url": str}
 
-        self.attribute_map = {
-            'image_url': 'imageUrl',
-            'name': 'name',
-            'url': 'url'
-        }
+        self.attribute_map = {"image_url": "imageUrl", "name": "name", "url": "url"}
 
         self._image_url = image_url
         self._name = name
         self._url = url
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ExternalUrl':
+    def from_dict(cls, dikt) -> "ExternalUrl":
         """Returns the dict as a model
 
         :param dikt: A dict.

@@ -5,12 +5,16 @@ from io import StringIO
 
 import pytest
 import yaml
-from odahuflow.sdk.clients.api_aggregated import parse_resources_file, parse_stream, parse_resources_dir
+from odahuflow.sdk.clients.api_aggregated import (
+    parse_resources_file,
+    parse_stream,
+    parse_resources_dir,
+)
 from odahuflow.sdk.models import Connection, ConnectionSpec
 
 NOT_EXISTED_FILE = "not-existed-file"
 NOT_VALID_YAML_OR_JSON = "{not': valid-yaml-or-json"
-CONNECTION_RES = Connection(id='test', spec=ConnectionSpec(type="git"))
+CONNECTION_RES = Connection(id="test", spec=ConnectionSpec(type="git"))
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -24,7 +28,9 @@ def conn_manifest_file() -> str:
     Returns path to a temporary Connection file
     """
     with tempfile.NamedTemporaryFile(mode="w") as temp_file:
-        temp_file.write(json.dumps({**CONNECTION_RES.to_dict(), **{"kind": "Connection"}}))
+        temp_file.write(
+            json.dumps({**CONNECTION_RES.to_dict(), **{"kind": "Connection"}})
+        )
         temp_file.flush()
 
         yield temp_file.name
@@ -36,7 +42,9 @@ def conn_manifest_yaml_file() -> str:
     Returns path to a temporary Connection YAML file
     """
     with tempfile.NamedTemporaryFile(mode="w") as temp_file:
-        temp_file.write(yaml.dump({**CONNECTION_RES.to_dict(), **{"kind": "Connection"}}))
+        temp_file.write(
+            yaml.dump({**CONNECTION_RES.to_dict(), **{"kind": "Connection"}})
+        )
         temp_file.flush()
 
         yield temp_file.name
@@ -49,7 +57,9 @@ def conn_manifest_dir() -> str:
     """
     with tempfile.TemporaryDirectory() as temp_dir:
         with tempfile.NamedTemporaryFile(mode="w", dir=temp_dir) as temp_file:
-            temp_file.write(json.dumps({**CONNECTION_RES.to_dict(), **{"kind": "Connection"}}))
+            temp_file.write(
+                json.dumps({**CONNECTION_RES.to_dict(), **{"kind": "Connection"}})
+            )
             temp_file.flush()
 
             yield temp_dir
@@ -66,7 +76,7 @@ def test_parse_not_existed_resources_file_with_one_item():
 
 
 def test_parse_stream_not_valid_json_or_yaml():
-    with pytest.raises(Exception, match=r'^not valid JSON or YAML$'):
+    with pytest.raises(Exception, match=r"^not valid JSON or YAML$"):
         parse_stream(StringIO(NOT_VALID_YAML_OR_JSON))
 
 

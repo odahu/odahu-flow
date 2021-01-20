@@ -6,8 +6,12 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.model_training_spec import ModelTrainingSpec  # noqa: F401,E501
-from odahuflow.sdk.models.model_training_status import ModelTrainingStatus  # noqa: F401,E501
+from odahuflow.sdk.models.model_training_spec import (
+    ModelTrainingSpec,
+)  # noqa: F401,E501
+from odahuflow.sdk.models.model_training_status import (
+    ModelTrainingStatus,
+)  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -17,7 +21,14 @@ class ModelTraining(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, id: str=None, spec: ModelTrainingSpec=None, status: ModelTrainingStatus=None, updated_at: str=None):  # noqa: E501
+    def __init__(
+        self,
+        created_at: str = None,
+        id: str = None,
+        spec: ModelTrainingSpec = None,
+        status: ModelTrainingStatus = None,
+        updated_at: str = None,
+    ):  # noqa: E501
         """ModelTraining - a model defined in Swagger
 
         :param created_at: The created_at of this ModelTraining.  # noqa: E501
@@ -32,19 +43,19 @@ class ModelTraining(Model):
         :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
-            'id': str,
-            'spec': ModelTrainingSpec,
-            'status': ModelTrainingStatus,
-            'updated_at': str
+            "created_at": str,
+            "id": str,
+            "spec": ModelTrainingSpec,
+            "status": ModelTrainingStatus,
+            "updated_at": str,
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
-            'id': 'id',
-            'spec': 'spec',
-            'status': 'status',
-            'updated_at': 'updatedAt'
+            "created_at": "createdAt",
+            "id": "id",
+            "spec": "spec",
+            "status": "status",
+            "updated_at": "updatedAt",
         }
 
         self._created_at = created_at
@@ -54,7 +65,7 @@ class ModelTraining(Model):
         self._updated_at = updated_at
 
     @classmethod
-    def from_dict(cls, dikt) -> 'ModelTraining':
+    def from_dict(cls, dikt) -> "ModelTraining":
         """Returns the dict as a model
 
         :param dikt: A dict.
