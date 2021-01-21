@@ -147,7 +147,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	err = multierr.Append(err, validation.ValidateResources(md.Spec.Resources, config.NvidiaResourceName))
 
 	if err != nil {
-		return fmt.Errorf("%s: %s", ValidationMdErrorMessage, err.Error())
+		return multierr.Append(ValidationMdErrorMessage, err)
 	}
 
 	return err
