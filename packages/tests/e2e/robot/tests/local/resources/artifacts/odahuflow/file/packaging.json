@@ -79,7 +79,7 @@
               },
               {
                 "name": "default",
-                "value": "odahu/odahu-flow-docker-packager-base:<tag>"
+                "value": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base:<tag>"
               }
             ]
           },
