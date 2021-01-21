@@ -390,7 +390,7 @@ func (s *ModelDeploymentRouteSuite) TestCreateMDValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
-	s.g.Expect(result.Message).To(Equal(dep_route.EmptyImageErrorMessage))
+	s.g.Expect(result.Message).To(ContainSubstring(dep_route.EmptyImageErrorMessage))
 }
 
 func (s *ModelDeploymentRouteSuite) TestCreateDuplicateMD() {
@@ -472,7 +472,7 @@ func (s *ModelDeploymentRouteSuite) TestUpdateMDValidation() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusBadRequest))
-	s.g.Expect(result.Message).To(Equal(dep_route.EmptyImageErrorMessage))
+	s.g.Expect(result.Message).To(ContainSubstring(dep_route.EmptyImageErrorMessage))
 }
 
 func (s *ModelDeploymentRouteSuite) TestUpdateMDNotFound() {

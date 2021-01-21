@@ -29,6 +29,7 @@ import (
 )
 
 const (
+	ValidationMdErrorMessage             = "Validation of model deployment is failed"
 	EmptyImageErrorMessage             = "the image parameter is empty"
 	EmptyPredictorErrorMessage         = "the predictor parameter is empty"
 	NegativeMinReplicasErrorMessage    = "minimum number of replicas parameter must not be less than 0"
@@ -149,6 +150,10 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	err = multierr.Append(mdv.validateNodeSelector(md), err)
 
 	err = multierr.Append(err, validation.ValidateResources(md.Spec.Resources, config.NvidiaResourceName))
+
+	if err != nil {
+		return fmt.Errorf("%s: %s", ValidationMdErrorMessage, err.Error())
+	}
 
 	return err
 }
