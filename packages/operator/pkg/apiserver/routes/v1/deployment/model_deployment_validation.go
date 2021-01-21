@@ -86,7 +86,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 			"Deployment name", md.ID, "replicas", MdDefaultMinimumReplicas)
 		md.Spec.MinReplicas = &MdDefaultMinimumReplicas
 	} else if *md.Spec.MinReplicas < 0 {
-		err = multierr.Append(errors.New(NegativeMinReplicasErrorMessage), err)
+		err = multierr.Append(err, errors.New(NegativeMinReplicasErrorMessage))
 	}
 
 	if md.Spec.MaxReplicas == nil {
@@ -99,11 +99,11 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 		logMD.Info("Maximum number of replicas parameter is nil. Set the default value",
 			"Deployment name", md.ID, "replicas", *md.Spec.MinReplicas)
 	} else if *md.Spec.MaxReplicas < 1 {
-		err = multierr.Append(errors.New(NegativeMaxReplicasErrorMessage), err)
+		err = multierr.Append(err, errors.New(NegativeMaxReplicasErrorMessage))
 	}
 
 	if md.Spec.MaxReplicas != nil && md.Spec.MinReplicas != nil && *md.Spec.MinReplicas > *md.Spec.MaxReplicas {
-		err = multierr.Append(errors.New(MaxMoreThanMinReplicasErrorMessage), err)
+		err = multierr.Append(err, errors.New(MaxMoreThanMinReplicasErrorMessage))
 	}
 
 	if md.Spec.Resources == nil {
@@ -120,7 +120,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 			"name", md.ID, "readiness_probe", MdDefaultReadinessProbeInitialDelay)
 		md.Spec.ReadinessProbeInitialDelay = &MdDefaultReadinessProbeInitialDelay
 	} else if *md.Spec.ReadinessProbeInitialDelay <= 0 {
-		err = multierr.Append(errors.New(ReadinessProbeErrorMessage), err)
+		err = multierr.Append(err, errors.New(ReadinessProbeErrorMessage))
 	}
 
 	if md.Spec.LivenessProbeInitialDelay == nil {
@@ -129,7 +129,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 		md.Spec.LivenessProbeInitialDelay = &MdDefaultLivenessProbeInitialDelay
 	} else if *md.Spec.LivenessProbeInitialDelay <= 0 {
-		err = multierr.Append(errors.New(LivenessProbeErrorMessage), err)
+		err = multierr.Append(err, errors.New(LivenessProbeErrorMessage))
 	}
 
 	if md.Spec.ImagePullConnectionID == nil || len(*md.Spec.ImagePullConnectionID) == 0 {
@@ -142,7 +142,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 		md.Spec.ImagePullConnectionID = &mdv.modelDeploymentConfig.DefaultDockerPullConnName
 	}
 
-	err = multierr.Append(mdv.validateNodeSelector(md), err)
+	err = multierr.Append(err, mdv.validateNodeSelector(md))
 
 	err = multierr.Append(err, validation.ValidateResources(md.Spec.Resources, config.NvidiaResourceName))
 
