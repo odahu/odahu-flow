@@ -60,7 +60,7 @@ Run Valid Training with local & cluster specs
     [Template]  Run Training
     # auth data     id      file/dir        output
     # local
-    run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    run --id local-dir-artifact-template-pack -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
     # cluster
     run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${RESULT_DIR}  ${RESULT_DIR}
     --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
@@ -120,5 +120,5 @@ Run Valid Packaging with local & cluster specs
     # path & artifact name as --artifact-name
     run --id local-cluster-spec-targets -f ${ARTIFACT_DIR}/file/packaging.json -a ${RESULT_DIR}/wine-cluster-1 --no-disable-package-targets
     --url ${API_URL} --token ${AUTH_TOKEN} run --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-push --disable-target not-existing
-    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-cluster --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0 --no-disable-package-targets
+    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-cluster --artifact-path ${RESULT_DIR} --artifact-name wine-dir-1.0-pack --no-disable-package-targets
     --url ${API_URL} --token ${AUTH_TOKEN} run --id local-cluster-spec-targets --artifact-name simple-model --no-disable-package-targets --disable-target docker-push
