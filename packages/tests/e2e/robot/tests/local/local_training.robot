@@ -95,7 +95,9 @@ Run Valid Training with local & cluster specs
     run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${DEFAULT_RESULT_DIR}  ${DEFAULT_RESULT_DIR}
     --url ${API_URL} --token "${AUTH_TOKEN}" run --train-id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
 
-Run Valid Packaging with local spec
+Run Valid Packaging with local spec, logout from cluster
+    [Setup]  StrictShell  odahuflowctl logout
+    [Teardown]  Login to the api and edge
     [Template]  Run Packaging
     # id	file/dir	artifact path	artifact name	package-targets
     --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets
