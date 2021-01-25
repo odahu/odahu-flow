@@ -98,8 +98,8 @@ Run Valid Training with local & cluster specs
 Run Valid Packaging with local spec
     [Template]  Run Packaging
     # id	file/dir	artifact path	artifact name	package-targets
-    --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --disable-package-targets
-    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1.0
+    --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets
+    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1.0 --no-disable-package-targets
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
