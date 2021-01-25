@@ -231,7 +231,6 @@ function change_image_tag() {
   local tag=$3
 
   image=$(jq -r "${json_path}" "${file_name}" | cut -d ':' -f 1)
-  echo ${image}:${tag}
 }
 
 # Upload files for local training and packaging
@@ -248,9 +247,19 @@ function local_setup() {
 
   install_packages "moreutils"
 
-  # update specification files (docker image tags)
-  ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
-  pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
+  # update specifications
+  ## docker-pull target
+  local docker_uri="$(jq -r .docker_repo "${CLUSTER_PROFILE}")"
+  local docker_username="$(jq -r .docker_username "${CLUSTER_PROFILE}")"
+  local docker_password="$(jq -r .docker_password "${CLUSTER_PROFILE}")"
+
+  jq --arg uri "${docker_uri}" --arg username "${docker_username}" --arg password "${docker_password}" \
+  '.spec.uri=$uri | .spec.username=$username | .spec.password=$password' "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json" | jq "." | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json"
+
+  ## docker image tags
+  local ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
+  local pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
+
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}")
   jq --arg image "${image}" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json"
 
