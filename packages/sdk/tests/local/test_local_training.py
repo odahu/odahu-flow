@@ -68,7 +68,6 @@ def test_start_training__output_dir(output_dir: Optional[str], expected_output_d
     os_makedirs_mock = mocker.patch.object(training.os, 'makedirs')
     compile_artifact_name_template_mock = mocker.patch.object(training, 'compile_artifact_name_template')
     launch_training_container_mock = mocker.patch.object(training, 'launch_training_container')
-    launch_gppi_validation_container_mock = mocker.patch.object(training, 'launch_gppi_validation_container')
 
     config_mock.LOCAL_MODEL_OUTPUT_DIR = DEFAULT_OUTPUT_DIR
     compile_artifact_name_template_mock.return_value = 'model_dir_name'
@@ -79,7 +78,6 @@ def test_start_training__output_dir(output_dir: Optional[str], expected_output_d
 
     os_makedirs_mock.assert_called_with(expected_model_dir_path, exist_ok=ANY)
     launch_training_container_mock.assert_called_with(trainer, expected_model_dir_path)
-    launch_gppi_validation_container_mock.assert_called_with(trainer, expected_model_dir_path)
 
 
 @pytest.mark.parametrize(['template', 'expected_template'],
@@ -102,7 +100,6 @@ def test_start_training__artifact_name_template(template: Optional[str],
     os_makedirs_mock = mocker.patch.object(training.os, 'makedirs')
     compile_artifact_name_template_mock = mocker.patch.object(training, 'compile_artifact_name_template')
     launch_training_container_mock = mocker.patch.object(training, 'launch_training_container')
-    launch_gppi_validation_container_mock = mocker.patch.object(training, 'launch_gppi_validation_container')
 
     compile_artifact_name_template_mock.return_value = 'compiled_model_dir_name'
 
@@ -115,4 +112,3 @@ def test_start_training__artifact_name_template(template: Optional[str],
 
     os_makedirs_mock.assert_called_with(expected_model_dir_path, exist_ok=ANY)
     launch_training_container_mock.assert_called_with(trainer, expected_model_dir_path)
-    launch_gppi_validation_container_mock.assert_called_with(trainer, expected_model_dir_path)

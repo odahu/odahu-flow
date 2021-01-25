@@ -79,40 +79,6 @@ def launch_training_container(trainer: K8sTrainer, output_dir: str) -> None:
     raise_error_if_container_failed(container.id)
 
 
-def launch_gppi_validation_container(trainer: K8sTrainer, output_dir: str) -> None:
-    client = docker.from_env()
-    container: Container = client.containers.run(
-        trainer.model_training.spec.image or trainer.toolchain_integration.spec.default_image,
-        stderr=True,
-        stdout=True,
-        working_dir=WORKSPACE_PATH,
-        command=[
-            "odahuflowctl",
-            "--verbose",
-            "gppi",
-            "--gppi-model-path",
-            MODEL_OUTPUT_CONTAINER_PATH,
-            "--env-name",
-            "odahu_model",
-            "test"
-        ],
-        mounts=[
-            Mount(WORKSPACE_PATH, os.getcwd(), type="bind"),
-            Mount(MODEL_OUTPUT_CONTAINER_PATH, output_dir, type="bind")
-        ],
-        detach=True,
-        labels=TRAINING_DOCKER_LABELS,
-    )
-
-    container_info = client.api.inspect_container(container.id)
-    LOGGER.debug(f'Container info:\n{json.dumps(container_info, indent=2)}')
-
-    print(f'Validation docker image {container.id} has started. Stream logs:')
-    stream_container_logs(container)
-
-    raise_error_if_container_failed(container.id)
-
-
 def create_mt_config_file(trainer: K8sTrainer) -> None:
     with open(TRAINER_CONF_PATH, 'w') as f:
         trainer_dict = trainer.to_dict()
