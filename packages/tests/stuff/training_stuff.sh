@@ -252,7 +252,7 @@ function local_setup() {
   ## docker-pull target
   local docker_uri="$(jq -r .docker_repo "${CLUSTER_PROFILE}")"
   local docker_username="$(jq -r .docker_username "${CLUSTER_PROFILE}")"
-  local docker_password="$(jq -r .docker_password "${CLUSTER_PROFILE}" | base64)"
+  local docker_password="$(jq -r .docker_password "${CLUSTER_PROFILE}" | tr -d "\n" | base64)"
 
   jq --arg uri "${docker_uri}" --arg username "${docker_username}" --arg password "${docker_password}" \
   '.spec.uri=$uri | .spec.username=$username | .spec.password=$password' "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json" | jq "." | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json"
