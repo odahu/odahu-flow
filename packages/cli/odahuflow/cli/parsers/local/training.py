@@ -135,8 +135,6 @@ def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], ma
 
     mt: Optional[ModelTraining] = None
 
-    logging.debug(f"found local manifests:\n {entities}")
-
     # find a training
     toolchains: Dict[str, ToolchainIntegration] = {}
     for entity in map(lambda x: x.resource, entities):
