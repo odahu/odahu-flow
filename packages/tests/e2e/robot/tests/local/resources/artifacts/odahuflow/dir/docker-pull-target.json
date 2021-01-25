@@ -1,4 +1,5 @@
 {
+  "kind": "Connection",
   "id": "local-docker-repository",
   "spec": {
     "type": "docker",
