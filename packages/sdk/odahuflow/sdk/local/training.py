@@ -150,7 +150,6 @@ def start_train(trainer: K8sTrainer, output_dir: str) -> None:
     os.makedirs(model_dir_path, exist_ok=True)
 
     launch_training_container(trainer, model_dir_path)
-    launch_gppi_validation_container(trainer, model_dir_path)
 
     print(f'Model {model_dir_name} was saved in the {output_dir} directory')
 
