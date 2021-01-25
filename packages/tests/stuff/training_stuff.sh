@@ -231,6 +231,7 @@ function change_image_tag() {
   local tag=$3
 
   image=$(jq -r "${json_path}" "${file_name}" | cut -d ':' -f 1)
+  echo ${image}:${tag}
 }
 
 # Upload files for local training and packaging
