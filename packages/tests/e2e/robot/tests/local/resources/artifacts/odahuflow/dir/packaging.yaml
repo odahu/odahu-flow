@@ -2,10 +2,8 @@ id: local-dir-spec-targets
 kind: ModelPackaging
 spec:
   targets:
-    - name: docker-push
-      connectionName: docker-ci
     - name: docker-pull
-      connectionName: odahuflow-docker-repository
+      connectionName: local-docker-repository
   artifactName: "simple-model.zip"
   integrationName: docker-rest
   resources:

@@ -43,7 +43,7 @@
             "docker",
             "ecr"
           ],
-          "default": "odahuflow-docker-repository",
+          "default": "local-docker-repository",
           "required": false
         }
       ],
