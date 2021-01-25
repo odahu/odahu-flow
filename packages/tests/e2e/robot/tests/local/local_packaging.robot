@@ -111,8 +111,8 @@ Run Valid Packaging with local & cluster specs
     # id	file/dir	artifact path	artifact name	package-targets
     # local
     run --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.json -f ${ARTIFACT_DIR}/dir/docker-pull-target.json --artifact-path ${RESULT_DIR} --artifact-name wine-cluster-1 --no-disable-package-targets --disable-target docker-push
-    run --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --no-disable-package-targets
-    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets
+    run --id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --no-disable-package-targets  --disable-target docker-push
+    run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets  --disable-target docker-push
     # cluster
     run --id local-cluster-spec-targets -d ${ARTIFACT_DIR}/dir --no-disable-package-targets
     # path & artifact name as --artifact-name
