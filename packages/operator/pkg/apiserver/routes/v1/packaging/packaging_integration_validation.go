@@ -29,7 +29,6 @@ import (
 
 const (
 	ValidationPiErrorMessage               = "Validation of packaging integration is failed"
-	EmptyIDErrorMessage                    = "id must be nonempty"
 	EmptyEntrypointErrorMessage            = "entrypoint must be nonempty"
 	EmptyDefaultImageErrorMessage          = "default image must be nonempty"
 	TargetEmptyConnectionTypesErrorMessage = "%s target must have at least one connection type"
@@ -101,10 +100,6 @@ func (mpv *PiValidator) validateTargetsSchema(pi *packaging.PackagingIntegration
 }
 
 func (mpv *PiValidator) validateMainParameters(pi *packaging.PackagingIntegration) (err error) {
-	if len(pi.ID) == 0 {
-		err = multierr.Append(err, errors.New(EmptyIDErrorMessage))
-	}
-
 	err = multierr.Append(err, validation.ValidateID(pi.ID))
 
 	if len(pi.Spec.Entrypoint) == 0 {
