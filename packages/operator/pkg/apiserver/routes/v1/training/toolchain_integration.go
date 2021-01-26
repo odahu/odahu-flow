@@ -87,7 +87,7 @@ func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Contex
 func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Context) {
 	size, page, err := routes.URLParamsToFilter(c, nil, emptyCache)
 	if err != nil {
-		logTI.Error(err, "Mailformed url parameters of toolchain integration request")
+		logTI.Error(err, "Malformed url parameters of toolchain integration request")
 		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return
@@ -127,7 +127,7 @@ func (tic *ToolchainIntegrationController) createToolchainIntegration(c *gin.Con
 	}
 
 	if err := tic.validator.ValidatesAndSetDefaults(&ti); err != nil {
-		logMT.Error(err, fmt.Sprintf("Validation of the tollchain integration is failed: %v", ti))
+		logMT.Error(err, fmt.Sprintf("Validation of the toolchain integration is failed: %v", ti))
 		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
 
 		return

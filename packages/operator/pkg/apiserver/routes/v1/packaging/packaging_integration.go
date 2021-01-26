@@ -29,7 +29,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
 
-var logPi = logf.Log.WithName("toolchain-integration-controller")
+var logPi = logf.Log.WithName("packaging-integration-controller")
 
 const (
 	GetPackagingIntegrationURL    = "/packaging/integration/:id"

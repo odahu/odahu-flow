@@ -30,7 +30,7 @@ import (
 
 const (
 	SpecSectionValidationFailedMessage = "\"Spec.%q\" validation errors: %s"
-	EmptyValueStringError              = "\"%q\" must be not empty"
+	EmptyValueStringError              = "empty %q"
 )
 
 func ValidateEmpty(parameterName, value string) error {

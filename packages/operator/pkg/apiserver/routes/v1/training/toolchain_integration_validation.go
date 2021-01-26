@@ -26,8 +26,8 @@ import (
 
 const (
 	ValidationTiErrorMessage      = "Validation of toolchain integration is failed"
-	EmptyEntrypointErrorMessage   = "entrypoint must be no empty"
-	EmptyDefaultImageErrorMessage = "defaultImage must be no empty"
+	EmptyEntrypointErrorMessage   = "empty entrypoint"
+	EmptyDefaultImageErrorMessage = "empty defaultImage"
 )
 
 type TiValidator struct {
