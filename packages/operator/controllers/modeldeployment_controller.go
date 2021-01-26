@@ -128,8 +128,9 @@ func knativeDeploymentName(revisionName string) string {
 func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
+	predictor odahuflow.Predictor,
 ) error {
-	container, err := r.createModelContainer(modelDeploymentCR)
+	container, err := r.createModelContainer(modelDeploymentCR, predictor)
 	if err != nil {
 		return err
 	}
@@ -239,44 +240,26 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 
 func (r *ModelDeploymentReconciler) createModelContainer(
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
+	predictor odahuflow.Predictor,
 ) (*corev1.Container, error) {
-	httpGetAction := &corev1.HTTPGetAction{
-		Path: "/healthcheck",
-	}
 
 	depResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(modelDeploymentCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
 		return nil, err
 	}
 
+	// Merge Probes from predictor and MD Spec
+	livenessProbe := predictor.LivenessProbe
+	livenessProbe.InitialDelaySeconds = *modelDeploymentCR.Spec.LivenessProbeInitialDelay
+	readinessProbe := predictor.ReadinessProbe
+	readinessProbe.InitialDelaySeconds = *modelDeploymentCR.Spec.ReadinessProbeInitialDelay
+
 	return &corev1.Container{
-		Image:     modelDeploymentCR.Spec.Image,
-		Resources: depResources,
-		Ports: []corev1.ContainerPort{
-			{
-				Name:          DefaultPortName,
-				ContainerPort: DefaultModelPort,
-				Protocol:      corev1.ProtocolTCP,
-			},
-		},
-		LivenessProbe: &corev1.Probe{
-			Handler: corev1.Handler{
-				HTTPGet: httpGetAction,
-			},
-			FailureThreshold:    defaultLivenessFailureThreshold,
-			InitialDelaySeconds: *modelDeploymentCR.Spec.LivenessProbeInitialDelay,
-			PeriodSeconds:       defaultLivenessPeriod,
-			TimeoutSeconds:      defaultLivenessTimeout,
-		},
-		ReadinessProbe: &corev1.Probe{
-			Handler: corev1.Handler{
-				HTTPGet: httpGetAction,
-			},
-			FailureThreshold:    defaultReadinessFailureThreshold,
-			InitialDelaySeconds: *modelDeploymentCR.Spec.ReadinessProbeInitialDelay,
-			PeriodSeconds:       defaultReadinessPeriod,
-			TimeoutSeconds:      defaultReadinessTimeout,
-		},
+		Image:          modelDeploymentCR.Spec.Image,
+		Resources:      depResources,
+		Ports:          predictor.Ports,
+		LivenessProbe:  &livenessProbe,
+		ReadinessProbe: &readinessProbe,
 	}, nil
 }
 
@@ -582,7 +565,7 @@ func getCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) strin
 }
 
 func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) error {
+	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment, predictor odahuflow.Predictor) error {
 
 	rn := modelDeploymentCR.Spec.RoleName
 	if rn == nil {
@@ -590,7 +573,7 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 		return nil
 	}
 
-	policies, err := deployment.ReadDefaultPoliciesAndRender(*rn)
+	policies, err := deployment.ReadDefaultPoliciesAndRender(*rn, predictor.OpaPolicyFilename)
 	if err != nil {
 		return err
 	}
@@ -676,7 +659,12 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	log.Info("Run reconciling of model deployment")
 
-	if err := r.reconcilePolicyCM(log, modelDeploymentCR); err != nil {
+	predictor, ok := odahuflow.Predictors[modelDeploymentCR.Spec.Predictor]
+	if !ok {
+		return reconcile.Result{}, fmt.Errorf("unknown predictor %s", modelDeploymentCR.Spec.Predictor)
+	}
+
+	if err := r.reconcilePolicyCM(log, modelDeploymentCR, predictor); err != nil {
 		log.Error(err, "Reconcile policy config map")
 		return reconcile.Result{}, err
 	}
@@ -687,7 +675,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		return reconcile.Result{}, nil
 	}
 
-	if err := r.ReconcileKnativeConfiguration(log, modelDeploymentCR); err != nil {
+	if err := r.ReconcileKnativeConfiguration(log, modelDeploymentCR, predictor); err != nil {
 		log.Error(err, "Reconcile Knative Configuration")
 		return reconcile.Result{}, err
 	}

@@ -1,18 +1,26 @@
 package deployment
 
 import (
+	"bytes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/deployment/bindata" //nolint
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/deployment/bindata"  //nolint
+	"path"
 	"text/template"
-	"bytes"
 )
 
+const mlServerPoliciesDir = "ml_servers/"
 
-func ReadDefaultPoliciesAndRender(roleName string)  (map[string]string, error) {
+func ReadDefaultPoliciesAndRender(roleName string, predictorsPolicyFilename string) (map[string]string, error) {
 	policies := map[string]string{}
 
 	for _, name := range bindata.AssetNames() {
+		// Filter out policies related to other ML Servers
+		dir, file := path.Split(name)
+		if dir == mlServerPoliciesDir && file != predictorsPolicyFilename {
+			continue
+		}
+
 		bts, err := bindata.Asset(name)
 		if err != nil {
 			return nil, err
@@ -33,7 +41,7 @@ func ReadDefaultPoliciesAndRender(roleName string)  (map[string]string, error) {
 			return nil, err
 		}
 
-		policies[name] = b.String()
+		policies[file] = b.String()
 	}
 	return policies, nil
 }

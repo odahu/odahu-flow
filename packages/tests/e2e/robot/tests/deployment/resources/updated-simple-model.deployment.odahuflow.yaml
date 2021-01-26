@@ -2,6 +2,7 @@ id: simple-model
 kind: ModelDeployment
 spec:
   image: "<fill-in>"
+  predictor: odahu-ml-server
   minReplicas: 2
   resources:
     requests:
