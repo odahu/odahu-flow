@@ -3,6 +3,7 @@
   "id": "deployment-api-not-exist",
   "spec": {
     "image": null,
+    "predictor": "odahu-ml-server",
     "resources": {
       "limits": {
         "gpu": "",

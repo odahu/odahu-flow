@@ -2,6 +2,7 @@ kind: ModelDeployment
 id: wine-api-testing
 spec:
   image:
+  predictor: odahu-ml-server
   resources:
     limits:
       gpu: ''

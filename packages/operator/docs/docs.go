@@ -3197,6 +3197,10 @@ var doc = `{
                         "type": "string"
                     }
                 },
+                "predictor": {
+                    "description": "ID of Predictor to use",
+                    "type": "string"
+                },
                 "readinessProbeInitialDelay": {
                     "description": "Initial delay for readiness probe of model pod",
                     "type": "integer"

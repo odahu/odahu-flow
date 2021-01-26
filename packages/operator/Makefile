@@ -131,7 +131,7 @@ generate-all: generate manifests swag
 generate-resources:
 	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/database/migrations/postgres/sources
 	git add pkg/database/migrations/postgres/bindata.go
-	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/deployment/assets -o pkg/deployment/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/deployment/assets
+	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/deployment/assets -o pkg/deployment/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/deployment/assets pkg/deployment/assets/ml_servers
 	git add pkg/deployment/bindata/bindata.go
 
 

@@ -195,35 +195,14 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 						Match: []*v1alpha3_istio.HTTPMatchRequest{
 							{
 								Uri: &v1alpha3_istio.StringMatch{
-									MatchType: &v1alpha3_istio.StringMatch_Exact{
-										Exact: modelRouteCR.Spec.URLPrefix,
-									},
-								},
-							},
-						},
-						Rewrite: &v1alpha3_istio.HTTPRewrite{
-							Uri: "/api/model/info",
-						},
-						Route:  httpTargets,
-						Mirror: mirror,
-					},
-					{
-						Retries: &v1alpha3_istio.HTTPRetry{
-							Attempts:      defaultRetryAttempts,
-							PerTryTimeout: defaultTimeoutPerTry,
-							RetryOn:       defaultListOfRetryCauses,
-						},
-						Match: []*v1alpha3_istio.HTTPMatchRequest{
-							{
-								Uri: &v1alpha3_istio.StringMatch{
 									MatchType: &v1alpha3_istio.StringMatch_Prefix{
-										Prefix: fmt.Sprintf("%s/api", modelRouteCR.Spec.URLPrefix),
+										Prefix: modelRouteCR.Spec.URLPrefix + "/",
 									},
 								},
 							},
 						},
 						Rewrite: &v1alpha3_istio.HTTPRewrite{
-							Uri: "/api",
+							Uri: "/",
 						},
 						Route:  httpTargets,
 						Mirror: mirror,

@@ -27,6 +27,8 @@ import (
 type ModelDeploymentSpec struct {
 	// Model Docker image
 	Image string `json:"image"`
+	// ID of Predictor to use
+	Predictor string `json:"predictor"`
 	// Resources for model deployment
 	// The same format like k8s uses for pod resources.
 	Resources *ResourceRequirements `json:"resources,omitempty"`

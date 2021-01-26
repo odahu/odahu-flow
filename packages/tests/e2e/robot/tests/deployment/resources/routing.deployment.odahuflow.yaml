@@ -2,3 +2,4 @@ id: simple-model
 kind: ModelDeployment
 spec:
   image: "<fill-in>"
+  predictor: odahu-ml-server

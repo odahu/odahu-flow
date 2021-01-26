@@ -890,6 +890,9 @@ definitions:
           type: string
         description: Node selector for specifying a node pool
         type: object
+      predictor:
+        description: ID of Predictor to use
+        type: string
       readinessProbeInitialDelay:
         description: Initial delay for readiness probe of model pod
         type: integer
