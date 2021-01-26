@@ -20,7 +20,6 @@ type OdahuMLServerDiscoverer struct {
 	HTTPClient httpClient
 }
 
-
 func (o OdahuMLServerDiscoverer) Discover(
 	prefix string, log *zap.SugaredLogger) (model model_types.ServedModel, err error) {
 
@@ -56,6 +55,9 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 	}
 
 	if response.StatusCode >= 400 {
+		errorStr := fmt.Sprintf("Request to %s returned status code: %d.",
+			modelRequest.URL, response.StatusCode)
+
 		for _, tempCode := range []int{
 			http.StatusRequestTimeout,
 			http.StatusBadGateway,
@@ -65,7 +67,6 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 			http.StatusNotFound,
 			http.StatusInternalServerError,
 
-
 			// Client can be used in reactive workloads (background workers) that suppose backoff retries
 			// So workload can retry attempt to get data after error on server will be
 			// fixed
@@ -73,17 +74,12 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 		} {
 			if tempCode == response.StatusCode {
 				return swagger, temporaryErr{
-					fmt.Errorf("not correct status code: %d. Maybe temporary", response.StatusCode),
+					fmt.Errorf(errorStr + "; may be temporary"),
 				}
 			}
 		}
-
-		return swagger, fmt.Errorf("not correct status code: %d", response.StatusCode)
-
+		return swagger, fmt.Errorf(errorStr)
 	}
-
-
-
 
 	defer func() {
 		if err := response.Body.Close(); err != nil {
@@ -94,12 +90,10 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 	rawBody, err := ioutil.ReadAll(response.Body)
 	log.Debugw("Get response from model", "content", string(rawBody))
 
-
 	swagger = model_types.Swagger2{Raw: rawBody}
 	return swagger, nil
 
 }
-
 
 // ODAHU ML Server currently does not support metadata endpoints
 func (o OdahuMLServerDiscoverer) discoverMetadata(
@@ -111,9 +105,8 @@ func (o OdahuMLServerDiscoverer) generateModelRequest(prefix string) *http.Reque
 
 	MlServerURL := url.URL{
 		Scheme: o.EdgeURL.Scheme,
-		Host: o.EdgeURL.Host,
-		Path: path.Join(o.EdgeURL.Path, prefix),
-
+		Host:   o.EdgeURL.Host,
+		Path:   path.Join(o.EdgeURL.Path, prefix),
 	}
 
 	return &http.Request{

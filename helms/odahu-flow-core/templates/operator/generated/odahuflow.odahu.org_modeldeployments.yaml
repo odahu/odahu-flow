@@ -81,6 +81,9 @@ spec:
                 type: string
               description: Node selector for specifying a node pool
               type: object
+            predictor:
+              description: ID of Predictor to use
+              type: string
             readinessProbeInitialDelay:
               description: Initial delay for readiness probe of model pod
               format: int32
@@ -123,6 +126,7 @@ spec:
               type: string
           required:
           - image
+          - predictor
           type: object
         status:
           description: ModelDeploymentStatus defines the observed state of ModelDeployment

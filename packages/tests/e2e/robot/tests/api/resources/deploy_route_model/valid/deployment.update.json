@@ -3,6 +3,7 @@
   "id": "wine-api-testing",
   "spec": {
     "image": null,
+    "predictor": "odahu-ml-server",
     "resources": {
       "limits": {
         "gpu": "",

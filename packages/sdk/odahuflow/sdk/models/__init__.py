@@ -15,6 +15,7 @@ from odahuflow.sdk.models.connection_config import ConnectionConfig
 from odahuflow.sdk.models.connection_spec import ConnectionSpec
 from odahuflow.sdk.models.connection_status import ConnectionStatus
 from odahuflow.sdk.models.data_binding_dir import DataBindingDir
+from odahuflow.sdk.models.deployment_event import DeploymentEvent
 from odahuflow.sdk.models.edge_config import EdgeConfig
 from odahuflow.sdk.models.environment_variable import EnvironmentVariable
 from odahuflow.sdk.models.external_url import ExternalUrl
@@ -26,9 +27,10 @@ from odahuflow.sdk.models.jwks import JWKS
 from odahuflow.sdk.models.json_schema import JsonSchema
 from odahuflow.sdk.models.k8s_packager import K8sPackager
 from odahuflow.sdk.models.k8s_trainer import K8sTrainer
+from odahuflow.sdk.models.latest_deployment_events import LatestDeploymentEvents
+from odahuflow.sdk.models.latest_route_events import LatestRouteEvents
 from odahuflow.sdk.models.model_deployment import ModelDeployment
 from odahuflow.sdk.models.model_deployment_config import ModelDeploymentConfig
-from odahuflow.sdk.models.model_deployment_events_response import ModelDeploymentEventsResponse
 from odahuflow.sdk.models.model_deployment_istio_config import ModelDeploymentIstioConfig
 from odahuflow.sdk.models.model_deployment_security_config import ModelDeploymentSecurityConfig
 from odahuflow.sdk.models.model_deployment_spec import ModelDeploymentSpec
@@ -50,8 +52,6 @@ from odahuflow.sdk.models.model_training_spec import ModelTrainingSpec
 from odahuflow.sdk.models.model_training_status import ModelTrainingStatus
 from odahuflow.sdk.models.node_pool import NodePool
 from odahuflow.sdk.models.operator_config import OperatorConfig
-from odahuflow.sdk.models.outbox_deployment_event import OutboxDeploymentEvent
-from odahuflow.sdk.models.outbox_route_event import OutboxRouteEvent
 from odahuflow.sdk.models.packager_config import PackagerConfig
 from odahuflow.sdk.models.packager_target import PackagerTarget
 from odahuflow.sdk.models.packaging_integration import PackagingIntegration
@@ -60,7 +60,7 @@ from odahuflow.sdk.models.packaging_integration_status import PackagingIntegrati
 from odahuflow.sdk.models.parameter import Parameter
 from odahuflow.sdk.models.resource_list import ResourceList
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements
-from odahuflow.sdk.models.route_events_response import RouteEventsResponse
+from odahuflow.sdk.models.route_event import RouteEvent
 from odahuflow.sdk.models.schema import Schema
 from odahuflow.sdk.models.service_catalog import ServiceCatalog
 from odahuflow.sdk.models.target import Target

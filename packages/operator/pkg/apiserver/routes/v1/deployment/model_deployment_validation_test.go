@@ -21,6 +21,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/multierr"
@@ -36,6 +37,7 @@ var (
 		ID: "valid-id",
 		Spec: v1alpha1.ModelDeploymentSpec{
 			Image:        "image",
+			Predictor:    odahuflow.OdahuMLServer.ID,
 			NodeSelector: validNodeSelector,
 		},
 	}
@@ -316,7 +318,7 @@ func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Empty() {
 	mt.Spec.RoleName = &role
 	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
 	s.Assertions.NoError(err)
-	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix + mt.ID)
+	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix+mt.ID)
 }
 
 // Deployment has no Role Name; expect a model ID as suffix of default role
@@ -326,5 +328,5 @@ func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Nil() {
 	mt.Spec.RoleName = role
 	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
 	s.Assertions.NoError(err)
-	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix + mt.ID)
+	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix+mt.ID)
 }
