@@ -106,7 +106,7 @@ func (o OdahuMLServerDiscoverer) generateModelRequest(prefix string) *http.Reque
 	MlServerURL := url.URL{
 		Scheme: o.EdgeURL.Scheme,
 		Host:   o.EdgeURL.Host,
-		Path:   path.Join(o.EdgeURL.Path, prefix),
+		Path:   path.Join(o.EdgeURL.Path, prefix, "api/model/info"),
 	}
 
 	return &http.Request{
