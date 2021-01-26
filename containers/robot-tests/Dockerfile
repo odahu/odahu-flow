@@ -15,17 +15,19 @@
 #
 
 FROM python:3.6.8
-
 # Install python package dependencies and cloud CLI tools
 RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common \
-    make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 && \
-    DISTR="stretch" && \
+    make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 ca-certificates gnupg-agent && \
+    DISTR=$(lsb_release -cs) && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $DISTR stable" && \
+    echo "deb http://packages.cloud.google.com/apt cloud-sdk-$DISTR main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     echo "deb http://packages.cloud.google.com/apt cloud-sdk-$DISTR main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -s https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $DISTR main" | tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get -qqy update && \
-    apt-get install -y --no-install-recommends azure-cli google-cloud-sdk &&\
+    apt-get install -y --no-install-recommends azure-cli google-cloud-sdk docker-ce-cli &&\
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
 ENV CLI_RCLONE_VERSION=v1.52.3 \
