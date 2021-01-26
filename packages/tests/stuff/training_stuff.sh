@@ -330,8 +330,6 @@ function cleanup() {
   odahuflowctl ti delete --id ${TEST_DATA_TI_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_DIR_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
-  odahuflowctl conn delete --id ${TEST_INVALID_GPPI_DIR_ID} --ignore-not-found
-  odahuflowctl conn delete --id ${TEST_INVALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
 
   local_cleanup
 }
