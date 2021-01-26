@@ -95,7 +95,7 @@ func (s *ModelDeploymentControllerSuite) SetupTest() {
 	s.k8sClient = mgr.GetClient()
 	s.k8sManager = mgr
 
-	s.requests = make(chan reconcile.Request)
+	s.requests = make(chan reconcile.Request, 1000)
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}

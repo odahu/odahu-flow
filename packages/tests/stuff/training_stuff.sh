@@ -26,10 +26,6 @@ IMAGE_REPO=(
 TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
 # Test connection points to the odahu file inside valid gppi archive
 TEST_VALID_GPPI_ODAHU_FILE_ID=test-valid-gppi-odahu-file
-# Test connection points to the invalid gppi archive
-TEST_INVALID_GPPI_DIR_ID=test-invalid-gppi-dir
-# Test connection points to the odahu file inside invalid gppi archive
-TEST_INVALID_GPPI_ODAHU_FILE_ID=test-invalid-gppi-odahu-file
 # Wine data connection
 TEST_WINE_CONN_ID=wine
 
@@ -314,8 +310,6 @@ function setup() {
   # Update test-data connections
   create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
   create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
-  create_test_data_connection "${TEST_INVALID_GPPI_ODAHU_FILE_ID}" "test-data/data/invalid_gppi/odahuflow.project.yaml"
-  create_test_data_connection "${TEST_INVALID_GPPI_DIR_ID}" "test-data/data/invalid_gppi/"
   create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
   create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
 

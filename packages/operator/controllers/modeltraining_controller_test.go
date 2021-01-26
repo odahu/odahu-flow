@@ -54,8 +54,6 @@ var (
 	gpuNodeSelector = map[string]string{"gpu-key": "gpu-value"}
 	nodeSelector    = map[string]string{"node-key": "node-value"}
 
-	mtNamespacedName         = types.NamespacedName{Name: mtName, Namespace: testNamespace}
-	expectedTrainingRequest  = reconcile.Request{NamespacedName: mtNamespacedName}
 	testResValue             = "5"
 	testToolchainIntegration = &training_apis.ToolchainIntegration{
 		ID: testToolchainIntegrationID,
@@ -97,7 +95,7 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 	s.k8sManager = mgr
 	s.stubTIClient = stubclients.NewTIStubClient()
 
-	s.requests = make(chan reconcile.Request)
+	s.requests = make(chan reconcile.Request, 1000)
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}
@@ -349,25 +347,24 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	k8sTrainerResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainResources, config.NvidiaResourceName)
 	s.g.Expect(err).Should(BeNil())
 
-	mt := &odahuflowv1alpha1.ModelTraining{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      mtName,
-			Namespace: testNamespace,
-		},
-		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			Image:     toolchainImage,
-			Resources: trainResources,
-			Toolchain: testToolchainIntegrationID,
-		},
+
+	mt := newValidTraining()
+	mt.Spec = odahuflowv1alpha1.ModelTrainingSpec{
+		Image:     toolchainImage,
+		Resources: trainResources,
+		Toolchain: testToolchainIntegrationID,
 	}
 
 	err = s.k8sClient.Create(context.TODO(), mt)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	expectedTrainingRequest  := reconcile.Request{NamespacedName:
+		types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace},
+	}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
+	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
 	tr := &tektonv1beta1.TaskRun{}
@@ -424,7 +421,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
+	expectedTrainingRequest  := reconcile.Request{NamespacedName: mtNamespacedName}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
@@ -479,7 +477,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
+	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
+	expectedTrainingRequest  := reconcile.Request{NamespacedName: mtNamespacedName}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
