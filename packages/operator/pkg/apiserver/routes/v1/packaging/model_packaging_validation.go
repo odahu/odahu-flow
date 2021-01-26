@@ -76,7 +76,7 @@ func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPack
 		if len(mp.Spec.Image) == 0 {
 			mp.Spec.Image = pi.Spec.DefaultImage
 			logMP.Info("Model packaging .spec.image is empty. Set a packaging integration .spec.defaultImage",
-				"id", mp.ID, "image", mp.Spec.Image)
+				"id", mp.ID, "image", pi.Spec.DefaultImage)
 		}
 		err = multierr.Append(err, mpv.validateArguments(pi, mp))
 		err = multierr.Append(err, mpv.validateTargets(pi, mp))
