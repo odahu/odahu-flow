@@ -19,10 +19,11 @@ package packaging
 import (
 	"errors"
 	"fmt"
+	"reflect"
+
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	"reflect"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
@@ -35,9 +36,9 @@ import (
 
 const (
 	ValidationMpErrorMessage             = "Validation of model packaging is failed"
-	TrainingIDOrArtifactNameErrorMessage = "you should specify artifactName"
+	TrainingIDOrArtifactNameErrorMessage = "empty artifactName"
 	ArgumentValidationErrorMessage       = "argument validation is failed: %s"
-	EmptyIntegrationNameErrorMessage     = "integration name must be nonempty"
+	EmptyIntegrationNameErrorMessage     = "empty integrationName"
 	TargetNotFoundErrorMessage           = "cannot find %s target in packaging integration %s"
 	NotValidConnTypeErrorMessage         = "%s target has not valid connection type %s for packaging integration %s"
 	defaultIDTemplate                    = "%s-%s-%s"
@@ -73,15 +74,15 @@ func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPack
 	case piErr == nil:
 		if len(mp.Spec.Image) == 0 {
 			mp.Spec.Image = pi.Spec.DefaultImage
-			logMP.Info("Model packaging id is empty. Set a packaging integration image",
-				"id", mp.ID, "image", mp.Spec.Image)
+			logMP.Info("Model packaging .spec.image is empty. Set a packaging integration .spec.defaultImage",
+				"id", mp.ID, "image", pi.Spec.DefaultImage)
 		}
 		err = multierr.Append(err, mpv.validateArguments(pi, mp))
 		err = multierr.Append(err, mpv.validateTargets(pi, mp))
 	case odahu_errs.IsNotFoundError(piErr):
 		err = multierr.Append(err,
 			fmt.Errorf(
-				"packaging integration with name .Spec.IntegrationName = \"%s\" is not found",
+				"packaging integration with name .spec.integrationName = \"%s\" is not found",
 				mp.Spec.IntegrationName,
 			))
 	default:
@@ -95,7 +96,6 @@ func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPack
 }
 
 func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (err error) {
-
 
 	err = multierr.Append(err, mpv.validateMainParameters(mp))
 	err = multierr.Append(err, mpv.validateOutputConnection(mp))
@@ -116,14 +116,13 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (err error) {
 	err = multierr.Append(err, validation.ValidateID(mp.ID))
 
-
 	if len(mp.Spec.ArtifactName) == 0 {
 		err = multierr.Append(err, errors.New(TrainingIDOrArtifactNameErrorMessage))
 	}
 
 	if mp.Spec.Resources == nil {
-		logMP.Info("Packaging resource parameter is nil. Set the default value",
-			"name", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
+		logMP.Info("Packaging resources parameter is nil. Set the default value",
+			"id", mp.ID, "resources", mpv.packagingConfig.DefaultResources)
 		mp.Spec.Resources = mpv.packagingConfig.DefaultResources.DeepCopy()
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mp.Spec.Resources, mpv.gpuResourceName)
