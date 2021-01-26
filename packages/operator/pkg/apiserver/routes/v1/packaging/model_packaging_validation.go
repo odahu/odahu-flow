@@ -25,7 +25,6 @@ import (
 	odahu_errs "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 
-	uuid "github.com/nu7hatch/gouuid"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
@@ -115,16 +114,6 @@ func (mpv *MpValidator) ValidateAndSetDefaults(mp *packaging.ModelPackaging) (er
 }
 
 func (mpv *MpValidator) validateMainParameters(mp *packaging.ModelPackaging) (err error) {
-	if len(mp.ID) == 0 {
-		u4, uuidErr := uuid.NewV4()
-		if uuidErr != nil {
-			err = multierr.Append(err, uuidErr)
-		} else {
-			mp.ID = fmt.Sprintf(defaultIDTemplate, mp.Spec.ArtifactName, mp.Spec.IntegrationName, u4.String())
-			logMP.Info("Model packaging id is empty. Generate a default value", "id", mp.ID)
-		}
-	}
-
 	err = multierr.Append(err, validation.ValidateID(mp.ID))
 
 	if len(mp.Spec.ArtifactName) == 0 {

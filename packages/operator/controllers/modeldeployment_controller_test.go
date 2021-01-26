@@ -22,6 +22,7 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	. "github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -51,6 +52,7 @@ var (
 		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      image,
+			Predictor:                  odahuflow.OdahuMLServer.ID,
 			MinReplicas:                &mdMinReplicas,
 			MaxReplicas:                &mdMaxReplicas,
 			ReadinessProbeInitialDelay: &mdReadinessDelay,
@@ -95,7 +97,7 @@ func (s *ModelDeploymentControllerSuite) SetupTest() {
 	s.k8sClient = mgr.GetClient()
 	s.k8sManager = mgr
 
-	s.requests = make(chan reconcile.Request)
+	s.requests = make(chan reconcile.Request, 1000)
 
 	s.stopMgr = make(chan struct{})
 	s.mgrStopped = &sync.WaitGroup{}
@@ -128,6 +130,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      image,
+			Predictor:                  odahuflow.OdahuMLServer.ID,
 			MinReplicas:                &mdMinReplicas,
 			MaxReplicas:                &mdMaxReplicas,
 			ReadinessProbeInitialDelay: &mdReadinessDelay,
