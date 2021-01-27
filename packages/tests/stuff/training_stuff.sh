@@ -248,6 +248,8 @@ function local_setup() {
   if  [ -x "$(command -v brew)" ];  then CMDbase64=base64
   fi
 
+  echo $CMDbase64
+
   # update specifications
   ## docker-pull target
   local docker_uri="$(jq -r .docker_repo "${CLUSTER_PROFILE}")"
