@@ -96,6 +96,21 @@ Invoke model
     ${expected response}          evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result}  ${expected response}
 
+Invoke model - Custom Role
+    [Tags]      deployment  model
+    [Setup]     run keywords
+    ...         ${image}   Pick packaging image  ${PACKAGING}  AND
+    ...         StrictShell  odahuflowctl dep create -f ${RES_DIR}/valid/deployment.create.yaml --image ${image}  AND
+    ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
+    ...         reload config
+    [Teardown]  run keywords
+    ...         Login to the api and edge  AND
+    ...         reload config  AND
+    ...         StrictShell  odahuflowctl dep delete --id ${DEPLOYMENT}
+    ${model_url}      Get model Url  ${MODEL}
+    ${result}         Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
+    should be equal   ${result['info']['description']}  This is a EDI server.
+
 Delete Model Deployment and Check that Model Deployment does not exist
     [Tags]                      deployment
     [Documentation]             check that after deletion of deployment the model and route are also deleted
