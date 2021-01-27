@@ -244,8 +244,8 @@ function local_setup() {
 
   install_packages "moreutils"
 
-  CMDbase64=(base64 --wrap=0)
-  if  [ -x "$(command -v brew)" ];  then CMDbase64=base64
+  CMDbase64=base64
+  if  [ -x "$(command -v apt-get)" ] || [ -x "$(command -v apk)" ];  then CMDbase64=(base64 --wrap=0)
   fi
 
   echo $CMDbase64
