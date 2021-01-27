@@ -2,9 +2,12 @@
 ${LOCAL_CONFIG}                     odahuflow/api_deploy_route_model
 ${RES_DIR}                          ${CURDIR}/resources/deploy_route_model
 
+${PACKAGE_IMAGE_STUB}               packaging-image
 ${PACKAGING}                        simple-model
 ${DEPLOYMENT}                       wine-api-testing
 ${MODEL}                            ${DEPLOYMENT}
+${DEPLOY_CUSTOM_ROLE}               api-test-custom-role
+${MODEL_CUSTOM_ROLE}                ${DEPLOYMENT}
 ${REQUEST}                          SEPARATOR=
 ...                                 { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 ${REQUEST_RESPONSE}                 { "prediction": [ [ 42 ] ], "columns": [ "result" ] }
@@ -28,7 +31,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup All Resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
-Force Tags          api  sdk
+Force Tags          api  sdk  test
 Test Timeout        60 minutes
 
 *** Keywords ***
@@ -40,6 +43,12 @@ Get model Url
     [Arguments]       ${model_id}
     ${model_url}      set variable  ${EDGE_URL}/model/${model_id}
     [return]          ${model_url}
+
+Custom Role Setup
+    ${image}     Pick packaging image  ${PACKAGING}
+    StrictShell  odahuflowctl dep create -f ${RES_DIR}/valid/deployment.custom_role.yaml --image ${image}
+    Login to the api and edge  ${SA_CUSTOM_USER}
+    reload config
 
 *** Test Cases ***
 Check deployment doesn't exist
@@ -99,18 +108,17 @@ Invoke model
 
 Invoke model - Custom Role
     [Tags]      deployment  model
-    [Setup]     run keywords
-    ...         ${image}   Pick packaging image  ${PACKAGING}  AND
-    ...         StrictShell  odahuflowctl dep create -f ${RES_DIR}/valid/deployment.create.yaml --image ${image}  AND
-    ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
-    ...         reload config
+    [Setup]     Custom Role Setup
     [Teardown]  run keywords
     ...         Login to the api and edge  AND
     ...         reload config  AND
-    ...         StrictShell  odahuflowctl dep delete --id ${DEPLOYMENT}
-    ${model_url}      Get model Url  ${MODEL}
-    ${result}         Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
-    should be equal   ${result['info']['description']}  This is a EDI server.
+    ...         StrictShell  odahuflowctl dep delete --id ${DEPLOY_CUSTOM_ROLE}
+    ${model_url}            Get model Url  ${MODEL_CUSTOM_ROLE}
+    ${result_info}          Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
+    should be equal         ${result_info['info']['description']}  This is a EDI server.
+    ${result_invoke}        Call API  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
+    ${expected response}    evaluate  ${REQUEST_RESPONSE}
+    dictionaries should be equal  ${result_invoke}  ${expected response}
 
 Delete Model Deployment and Check that Model Deployment does not exist
     [Tags]                      deployment
