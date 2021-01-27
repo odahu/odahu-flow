@@ -244,7 +244,7 @@ function local_setup() {
 
   install_packages "moreutils"
 
-  CMDbase64=(base64 -w0)
+  CMDbase64=(base64 --wrap=0)
   if  [ -x "$(command -v brew)" ];  then CMDbase64=base64
   fi
 
