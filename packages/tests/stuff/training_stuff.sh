@@ -28,7 +28,6 @@ TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
 TEST_VALID_GPPI_ODAHU_FILE_ID=test-valid-gppi-odahu-file
 # Wine data connection
 TEST_WINE_CONN_ID=wine
-
 # Test connection to custom output model folder
 TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 
