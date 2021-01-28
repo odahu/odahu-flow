@@ -295,7 +295,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingStepConfiguration() {
 
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	s.g.Eventually(func() error { return s.k8sClient.Get(context.TODO(), trKey, tr) }).ShouldNot(HaveOccurred())
 
 	expectedHelperContainerResources := v1.ResourceRequirements{
 		Limits: v1.ResourceList{
@@ -371,9 +371,7 @@ func (s *ModelPackagingControllerSuite) createPackaging(mp *odahuflowv1alpha1.Mo
 	return func() { s.k8sClient.Delete(context.TODO(), mp) }
 }
 
-func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1alpha1.ModelPackaging) (
-	*tektonv1beta1.TaskRun,
-) {
+func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1alpha1.ModelPackaging) *tektonv1beta1.TaskRun {
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.Assertions.Eventually(
