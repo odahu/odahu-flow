@@ -42,10 +42,15 @@ RCLONE_PROFILE_NAME="robot-tests"
 # installs passed packages depending on packager manager
 function install_packages() {
   local packagesNeeded=$1
-  if    [ -x "$(command -v apk)" ];     then apk add --no-cache $packagesNeeded
-  elif  [ -x "$(command -v apt-get)" ]; then apt-get update; apt-get install -y $packagesNeeded
-  elif  [ -x "$(command -v brew)" ];    then brew install $packagesNeeded
-  else echo "FAILED TO INSTALL PACKAGE: Package manager not found. You must manually install: $packagesNeeded">&2
+  if [ -x "$(command -v apk)" ]; then
+    apk add --no-cache ${packagesNeeded}
+  elif [ -x "$(command -v apt-get)" ]; then
+    apt-get update
+    apt-get install -y $packagesNeeded
+  elif [ -x "$(command -v brew)" ]; then
+    brew install $packagesNeeded
+  else
+    echo "FAILED TO INSTALL PACKAGE: Package manager not found. You must manually install: $packagesNeeded" >&2
   fi
 }
 
@@ -243,11 +248,12 @@ function local_setup() {
 
   install_packages "moreutils"
 
-  CMDbase64=base64
-  if  [ -x "$(command -v apt-get)" ] || [ -x "$(command -v apk)" ];  then CMDbase64=(base64 --wrap=0)
+  CMDbase64="base64 --wrap=0"
+  if [ -x "$(command -v brew)" ]; then
+    CMDbase64=base64
   fi
 
-  echo $CMDbase64
+  echo ${CMDbase64}
 
   # update specifications
   ## docker-pull target
@@ -256,7 +262,7 @@ function local_setup() {
   local docker_password="$(jq -r .docker_password "${CLUSTER_PROFILE}" | tr -d "\n" | $CMDbase64)"
 
   jq --arg uri "${docker_uri}" --arg username "${docker_username}" --arg password "${docker_password}" \
-  '.spec.uri=$uri | .spec.username=$username | .spec.password=$password' "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json" | jq "." | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json"
+    '.spec.uri=$uri | .spec.username=$username | .spec.password=$password' "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json" | jq "." | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json"
 
   ## docker image tags
   local ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
