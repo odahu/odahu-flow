@@ -223,9 +223,6 @@ class Authenticator:
                 'Please try to log in again'
             )
 
-        # use default value if self._issuer_url is empty
-        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
-
         LOGGER.debug('Redirect has been detected. Trying to refresh a token')
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
@@ -256,9 +253,6 @@ class Authenticator:
             self._update_config_with_new_oauth_config(login_result)
 
     def _login_with_client_credentials(self):
-
-        # use default value if self._issuer_url is empty
-        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
 
         login_result = do_client_cred_authentication(
             issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
