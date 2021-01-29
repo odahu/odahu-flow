@@ -94,7 +94,7 @@ class IncorrectAuthorizationToken(APIConnectionException):
 
 class IncorrectClientCredentials(APIConnectionException):
     """
-    Exception that says that provided API authorization token is incorrect
+    Exception that says that provided API client credentials are incorrect
     """
 
     pass
