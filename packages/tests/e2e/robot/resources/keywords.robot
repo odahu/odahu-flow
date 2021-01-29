@@ -167,9 +167,9 @@ Run Training
         Create File  ${RESULT_DIR}/train_result.txt  ${result.stdout}
         ${artifact_name}    StrictShell  tail -n 1 ${RESULT_DIR}/train_result.txt | awk '{ print $2 }'
         Remove File  ${RESULT_DIR}/train_result.txt
-        ${full artifact path}  set variable  ${artifact path}/${artifact_name.stdout}
 
         # check the training artifact validity
+        ${full artifact path}  set variable  ${artifact path}/${artifact_name.stdout}
         ${response}  StrictShell  odahuflowctl --verbose gppi -m ${full artifact path} predict ${INPUT_FILE} ${RESULT_DIR}
         ${result_path}  StrictShell  echo "${response.stdout}" | tail -n 1 | awk '{ print $3 }'
 
