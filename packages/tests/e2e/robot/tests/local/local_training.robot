@@ -101,7 +101,7 @@ Run Valid Packaging with local spec, logout from cluster
     [Template]  Run Packaging
     # id	file/dir	artifact path	artifact name	package-targets
     --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets --disable-target docker-push
-    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1.0 --no-disable-package-targets --disable-target docker-push
+    --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1 --no-disable-package-targets --disable-target docker-push
 
 List trainings in default output dir
     ${list_result}  StrictShell  odahuflowctl --verbose local train list
