@@ -4,7 +4,7 @@ spec:
   artifactName: "<fill-in>"
   integrationName: docker-rest
   arguments:
-    imageName: "{{ Name }}-{{ Version }}:latest"
+    imageName: "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
   resources:
     limits:
       cpu: 1
