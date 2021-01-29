@@ -72,7 +72,7 @@ class OpenIdProviderConfiguration:
             raise RuntimeError(f'Some error during attempt to fetch OpenID Provider configuration. '
                                f'Reason: {response.reason}')
         else:
-            raise RuntimeError(f'Not expected status code: {response.status_code}')
+            raise RuntimeError(f'Not expected status code: {response.reason} ({response.status_code})')
 
     @property
     def configuration_url(self) -> str:
