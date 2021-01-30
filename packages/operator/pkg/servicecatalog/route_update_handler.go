@@ -88,12 +88,11 @@ func (r UpdateHandler) Handle(object interface{}, log *zap.SugaredLogger) (err e
 	}
 	route.Model = deployedModel
 
-	log.Infow("Adding a model to catalog", "route", route)
+	log.Infow("Adding a model to catalog", "route_id", route.ID)
 	if err != r.Catalog.CreateOrUpdate(route) {
 		log.Error(err, "adding to catalog")
 		return err
 	}
 
 	return nil
-
 }
