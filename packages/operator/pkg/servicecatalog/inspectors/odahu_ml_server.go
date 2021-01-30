@@ -1,4 +1,20 @@
-package servicecatalog
+/*
+ * Copyright 2021 EPAM Systems
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package inspectors
 
 import (
 	"fmt"
@@ -14,34 +30,27 @@ type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-type OdahuMLServerDiscoverer struct {
+type OdahuMLServerInspector struct {
 	EdgeHost   string
 	EdgeURL    url.URL
 	HTTPClient httpClient
 }
 
-func (o OdahuMLServerDiscoverer) Discover(
+func (o OdahuMLServerInspector) Inspect(
 	prefix string, log *zap.SugaredLogger) (model model_types.ServedModel, err error) {
 
 	model.Swagger, err = o.discoverSwagger(prefix, log)
 	if err != nil {
 		return
 	}
-	model.MLServer = o.GetMLServerName()
 
 	model.Metadata, err = o.discoverMetadata(prefix, log)
-
 	return
-
-}
-
-func (o OdahuMLServerDiscoverer) GetMLServerName() model_types.MLServerName {
-	return model_types.MLServerODAHU
 }
 
 // ODAHU ML Server doesn't have hardcoded swagger spec. But claims that "GET /api/model/info" request
 // return Swagger 2.0 spec for current deployed Model
-func (o OdahuMLServerDiscoverer) discoverSwagger(
+func (o OdahuMLServerInspector) discoverSwagger(
 	prefix string, log *zap.SugaredLogger) (swagger model_types.Swagger2, err error) {
 	modelRequest := o.generateModelRequest(prefix)
 
@@ -96,12 +105,12 @@ func (o OdahuMLServerDiscoverer) discoverSwagger(
 }
 
 // ODAHU ML Server currently does not support metadata endpoints
-func (o OdahuMLServerDiscoverer) discoverMetadata(
+func (o OdahuMLServerInspector) discoverMetadata(
 	prefix string, log *zap.SugaredLogger) (metadata model_types.Metadata, err error) {
 	return metadata, nil
 }
 
-func (o OdahuMLServerDiscoverer) generateModelRequest(prefix string) *http.Request {
+func (o OdahuMLServerInspector) generateModelRequest(prefix string) *http.Request {
 
 	MlServerURL := url.URL{
 		Scheme: o.EdgeURL.Scheme,

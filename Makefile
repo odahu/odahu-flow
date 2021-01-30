@@ -145,7 +145,7 @@ docker-push-operator:  check-tag
 ## docker-push-service-catalog: Push service catalog docker image
 docker-push-service-catalog:  check-tag
 	docker tag odahu/odahu-flow-service-catalog:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-service-catalog:${TAG}
-	docker push ${DOCKER_REGISTRY}/odahu/service-catalog:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-service-catalog:${TAG}
 
 ## docker-push-feedback-collector: Push feedback collector docker image
 docker-push-feedback-collector:  check-tag
