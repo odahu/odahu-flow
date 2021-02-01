@@ -358,8 +358,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	expectedTrainingRequest := reconcile.Request{NamespacedName: types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace},
-	}
+	expectedTrainingRequest := reconcile.Request{NamespacedName: types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
@@ -367,7 +366,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	s.g.Eventually(func() error { return s.k8sClient.Get(context.TODO(), trKey, tr) }).ShouldNot(HaveOccurred())
 
 	expectedHelperContainerResources := v1.ResourceRequirements{
 		Limits: v1.ResourceList{
