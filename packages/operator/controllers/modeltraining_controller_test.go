@@ -426,7 +426,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	s.g.Eventually(func() error { return s.k8sClient.Get(context.TODO(), trKey, tr) }).ShouldNot(HaveOccurred())
 
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
 }
