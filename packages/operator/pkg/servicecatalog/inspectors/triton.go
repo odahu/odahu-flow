@@ -90,8 +90,6 @@ func (t TritonInspector) Inspect(prefix string, log *zap.SugaredLogger) (model_t
 	}
 
 	specBytes := b.Bytes()
-	log.Info(string(specBytes))
-
 	return model_types.ServedModel{
 		Swagger:  model_types.Swagger2{Raw: specBytes},
 		Metadata: model_types.Metadata{},
