@@ -22,8 +22,7 @@ const (
 // ServedModel contains information about served model
 type ServedModel struct {
 	Metadata Metadata `json:"metadata"`
-	// Possible values: ODAHU, Triton
-	Swagger Swagger2 `json:"swagger2"`
+	Swagger  Swagger2 `json:"swagger2"`
 }
 
 // DeployedModel contains information about deployed model

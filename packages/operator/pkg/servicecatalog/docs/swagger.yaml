@@ -27,11 +27,6 @@ definitions:
       metadata:
         $ref: '#/definitions/Metadata'
         type: object
-      mlServer:
-        description: |-
-          MLServer name that serves a model
-          Possible values: ODAHU, Triton
-        type: string
       swagger2:
         $ref: '#/definitions/Swagger2'
         type: object
