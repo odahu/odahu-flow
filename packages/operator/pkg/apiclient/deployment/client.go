@@ -33,8 +33,8 @@ type apiClient struct {
 	http_util.BaseAPIClient
 }
 
-func NewClient(authConfig config.AuthConfig) apiClient {
-	return apiClient{http_util.NewBaseAPIClient(
+func NewClient(authConfig config.AuthConfig) Client {
+	return &apiClient{http_util.NewBaseAPIClient(
 		authConfig.APIURL,
 		authConfig.APIToken,
 		authConfig.ClientID,

@@ -67,7 +67,7 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 			},
 		},
 		Catalog:          catalog,
-		DeploymentClient: &deploymentClient,
+		DeploymentClient: deploymentClient,
 	}, servicecatalog.RouteEventFetcher{
 		APIClient: event.ModelRouteEventClient{
 			HTTPClient: &httpClient,
