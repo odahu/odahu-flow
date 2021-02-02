@@ -307,8 +307,8 @@ func (s *ModelDeploymentValidationSuite) TestValidateNodeSelector_Invalid() {
 	mt := validDeployment
 	mt.Spec.NodeSelector = map[string]string{"mode": "invalid"}
 	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&mt)
-	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(UnknownNodeSelector, md.Spec.NodeSelector))
+	s.Assertions.NotNil(err)
+	s.Assertions.Len(multierr.Errors(err), 1)
 }
 
 // Deployment has no Role Name; expect a model ID as suffix of default role
