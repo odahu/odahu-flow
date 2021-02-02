@@ -60,10 +60,10 @@ Run Valid Training with local & cluster specs
     [Template]  Run Training
     # auth data     id      file/dir        output
     # local
-    run --id local-dir-artifact-template-pack -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}  ${RESULT_DIR}
+    run --id local-dir-artifact-template-pack -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
     # cluster
-    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${RESULT_DIR}  ${RESULT_DIR}
-    --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded  ${DEFAULT_RESULT_DIR}
+    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${RESULT_DIR}
+    --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded
 
 Try Run and Fail Packaging with invalid credentials
     [Tags]   negative
