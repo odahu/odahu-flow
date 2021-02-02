@@ -19,7 +19,6 @@ package training
 import (
 	"errors"
 	"fmt"
-	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
@@ -27,8 +26,8 @@ import (
 
 const (
 	ValidationTiErrorMessage      = "Validation of toolchain integration is failed"
-	EmptyEntrypointErrorMessage   = "entrypoint must be no empty"
-	EmptyDefaultImageErrorMessage = "defaultImage must be no empty"
+	EmptyEntrypointErrorMessage   = "empty entrypoint"
+	EmptyDefaultImageErrorMessage = "empty defaultImage"
 )
 
 type TiValidator struct {
@@ -39,16 +38,6 @@ func NewTiValidator() *TiValidator {
 }
 
 func (tiv *TiValidator) ValidatesAndSetDefaults(ti *training.ToolchainIntegration) (err error) {
-	if len(ti.ID) == 0 {
-		u4, uuidErr := uuid.NewV4()
-		if uuidErr != nil {
-			err = multierr.Append(err, uuidErr)
-		} else {
-			ti.ID = u4.String()
-			logTI.Info("Toolchain integration id is empty. Generate a default value", "id", ti.ID)
-		}
-	}
-
 	err = multierr.Append(err, validation.ValidateID(ti.ID))
 
 	if len(ti.Spec.Entrypoint) == 0 {

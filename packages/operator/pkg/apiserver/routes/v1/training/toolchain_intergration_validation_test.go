@@ -44,15 +44,6 @@ func TestToolchainIntegrationValidationSuite(t *testing.T) {
 	suite.Run(t, new(ToolchainIntegrationValidationSuite))
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestTiIDGeneration() {
-	ti := &training.ToolchainIntegration{
-		Spec: v1alpha1.ToolchainIntegrationSpec{},
-	}
-
-	_ = s.validator.ValidatesAndSetDefaults(ti)
-	s.g.Expect(ti.ID).ShouldNot(BeEmpty())
-}
-
 func (s *ToolchainIntegrationValidationSuite) TestTiEntrypointEmpty() {
 	ti := &training.ToolchainIntegration{
 		Spec: v1alpha1.ToolchainIntegrationSpec{},

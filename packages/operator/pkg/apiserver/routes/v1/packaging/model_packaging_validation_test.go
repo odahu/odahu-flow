@@ -94,6 +94,7 @@ var (
 	}
 	validNodeSelector = map[string]string{"mode": "valid"}
 	validPackaging    = packaging.ModelPackaging{
+	    ID: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
@@ -201,15 +202,6 @@ func TestModelPackagingValidationSuite(t *testing.T) {
 	suite.Run(t, new(ModelPackagingValidationSuite))
 }
 
-func (s *ModelPackagingValidationSuite) TestMpIDGeneration() {
-	ti := &packaging.ModelPackaging{
-		Spec: packaging.ModelPackagingSpec{},
-	}
-
-	_ = s.validator.ValidateAndSetDefaults(ti)
-	s.g.Expect(ti.ID).ShouldNot(BeEmpty())
-}
-
 func (s *ModelPackagingValidationSuite) TestMpIDExplicitly() {
 	id := "some-id"
 	mp := &packaging.ModelPackaging{
@@ -292,7 +284,7 @@ func (s *ModelPackagingValidationSuite) TestMpIntegrationNotFound() {
 	err := s.validator.ValidateAndSetDefaults(mp)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(
-		"packaging integration with name .Spec.IntegrationName = \"some-packaging-name\" is not found"))
+		"packaging integration with name .spec.integrationName = \"some-packaging-name\" is not found"))
 }
 
 func (s *ModelPackagingValidationSuite) TestMpNotValidArgumentsSchema() {
@@ -360,6 +352,7 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 
 func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
 	ti := &packaging.ModelPackaging{
+	    ID: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
@@ -570,17 +563,17 @@ func (s *ModelPackagingValidationSuite) TestValidateNodeSelector_nil() {
 
 // Packaging object has valid node selector that exists in config
 func (s *ModelPackagingValidationSuite) TestValidateNodeSelector_Valid() {
-	mt := validPackaging
-	err := s.validator.ValidateAndSetDefaults(&mt)
+	mp := validPackaging
+	err := s.validator.ValidateAndSetDefaults(&mp)
 	s.Assertions.Nil(err)
 }
 
 // Packaging object has invalid node selector that does not exist in config
 // Expect validator to return exactly one error
 func (s *ModelPackagingValidationSuite) TestValidateNodeSelector_Invalid() {
-	mt := validPackaging
-	mt.Spec.NodeSelector = map[string]string{"mode": "invalid"}
-	err := s.validator.ValidateAndSetDefaults(&mt)
+	mp := validPackaging
+	mp.Spec.NodeSelector = map[string]string{"mode": "invalid"}
+	err := s.validator.ValidateAndSetDefaults(&mp)
 	s.Assertions.NotNil(err)
 	s.Assertions.Len(multierr.Errors(err), 1)
 }

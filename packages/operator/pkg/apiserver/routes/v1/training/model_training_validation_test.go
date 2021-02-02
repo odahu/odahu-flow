@@ -186,15 +186,6 @@ func (s *ModelTrainingValidationSuite) TestMtMtImageExplicitly() {
 	s.g.Expect(mt.Spec.Image).To(Equal(image))
 }
 
-func (s *ModelTrainingValidationSuite) TestMtIDGeneration() {
-	mt := &training.ModelTraining{
-		Spec: v1alpha1.ModelTrainingSpec{},
-	}
-
-	_ = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(mt.ID).ShouldNot(BeEmpty())
-}
-
 func (s *ModelTrainingValidationSuite) TestMtExplicitMTReference() {
 	mtExplicitReference := "test-ref"
 	mt := &training.ModelTraining{

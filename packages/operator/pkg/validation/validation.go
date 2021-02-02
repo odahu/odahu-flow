@@ -30,7 +30,7 @@ import (
 
 const (
 	SpecSectionValidationFailedMessage = "\"Spec.%q\" validation errors: %s"
-	EmptyValueStringError              = "%q parameter must be not empty"
+	EmptyValueStringError              = "empty %q"
 )
 
 func ValidateEmpty(parameterName, value string) error {
@@ -61,8 +61,11 @@ func ValidateID(id string) error {
 	if idRegex.MatchString(id) {
 		return nil
 	}
-
-	return ErrIDValidation
+	err := ErrIDValidation
+	if len(id) == 0 {
+	    err = multierr.Append(err, ValidateEmpty("ID", id))
+	}
+	return err
 }
 
 // K8s label must start/end with alphanumeric character, can consist of

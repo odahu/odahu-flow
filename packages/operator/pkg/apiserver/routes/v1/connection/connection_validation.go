@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/awslabs/amazon-ecr-credential-helper/ecr-login/api"
-	uuid "github.com/nu7hatch/gouuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
@@ -45,7 +44,7 @@ const (
 	GcsTypeRoleNotSupportedErrorMessage = "gcs type does not support role parameter yet" +
 		" must be non-empty"
 	AzureBlobTypeKeySecretEmptyErrorMessage = "azureblob type requires that keySecret parameter contains" +
-		"HTTP endpoint with SAS Token"
+		" HTTP endpoint with SAS Token"
 	S3TypeRegionErrorMessage         = "s3 type requires that region must be non-empty"
 	S3TypeKeySecretEmptyErrorMessage = "s3 type requires that keyID and keySecret parameters" +
 		" must be non-empty"
@@ -68,16 +67,6 @@ func NewConnValidator(keyEvaluator PublicKeyEvaluator) *ConnValidator {
 }
 
 func (cv *ConnValidator) ValidatesAndSetDefaults(conn *connection.Connection) (err error) {
-	if len(conn.ID) == 0 {
-		u4, uuidErr := uuid.NewV4()
-		if uuidErr != nil {
-			err = multierr.Append(err, uuidErr)
-		} else {
-			conn.ID = fmt.Sprintf(defaultIDTemplate, conn.Spec.Type, u4.String())
-			logC.Info("Connection id is empty. Generate a default value", "id", conn.ID)
-		}
-	}
-
 	err = multierr.Append(validation.ValidateID(conn.ID), err)
 	err = multierr.Append(cv.validateBase64Fields(conn), err)
 

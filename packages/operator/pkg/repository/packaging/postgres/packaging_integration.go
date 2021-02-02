@@ -19,12 +19,13 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 const (
@@ -45,12 +46,12 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 	*packaging.PackagingIntegration, error,
 ) {
 
-	ti := new(packaging.PackagingIntegration)
+	pi := new(packaging.PackagingIntegration)
 
 	err := pir.DB.QueryRow(
 		fmt.Sprintf("SELECT id, spec, status FROM %s WHERE id = $1", packagingIntegrationTable),
 		name,
-	).Scan(&ti.ID, &ti.Spec, &ti.Status)
+	).Scan(&pi.ID, &pi.Spec, &pi.Status)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -58,7 +59,7 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 	case err != nil:
 		return nil, err
 	default:
-		return ti, nil
+		return pi, nil
 	}
 
 }
@@ -123,38 +124,38 @@ func (pir PackagingIntegrationRepository) DeletePackagingIntegration(name string
 	return nil
 }
 
-func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
-	oldTi, err := pir.GetPackagingIntegration(md.ID)
+	oldPi, err := pir.GetPackagingIntegration(pi.ID)
 	if err != nil {
 		return err
 	}
 
-	md.Status = oldTi.Status
-	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+	pi.Status = oldPi.Status
+	pi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", packagingIntegrationTable)
-	_, err = pir.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
+	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.ID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (pir PackagingIntegrationRepository) CreatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (pir PackagingIntegrationRepository) CreatePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
-	md.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+	pi.Status.CreatedAt = &metav1.Time{Time: time.Now()}
+	pi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	_, err := pir.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", packagingIntegrationTable),
-		md.ID, md.Spec, md.Status,
+		pi.ID, pi.Spec, pi.Status,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
 		if ok && pqError.Code == uniqueViolationPostgresCode {
-			return odahuErrors.AlreadyExistError{Entity: md.ID}
+			return odahuErrors.AlreadyExistError{Entity: pi.ID}
 		}
 		return err
 	}
