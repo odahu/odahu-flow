@@ -23,10 +23,10 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/deployment"
 	apis "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
+	"odahu-commons/predictors"
 	"testing"
 )
 
@@ -35,7 +35,7 @@ var (
 		ID: "test-md",
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:     "image-name:tag",
-			Predictor: odahuflow.OdahuMLServer.ID,
+			Predictor: predictors.OdahuMLServer.ID,
 		},
 	}
 )

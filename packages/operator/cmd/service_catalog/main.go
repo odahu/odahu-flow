@@ -22,7 +22,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/inspectors"
@@ -32,6 +31,7 @@ import (
 	"log"
 	nethttp "net/http"
 	"net/url"
+	"odahu-commons/predictors"
 	"os"
 	"os/signal"
 	"sync"
@@ -55,12 +55,12 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 
 	return servicecatalog.NewReflector(logger, servicecatalog.UpdateHandler{
 		Inspectors: map[string]inspectors.ModelServerInspector{
-			odahuflow.OdahuMLServer.ID: inspectors.OdahuMLServerInspector{
+			predictors.OdahuMLServer.ID: inspectors.OdahuMLServerInspector{
 				EdgeURL:    *edgeURL,
 				EdgeHost:   cfg.EdgeHost,
 				HTTPClient: &httpClient,
 			},
-			odahuflow.Triton.ID: inspectors.TritonInspector{
+			predictors.Triton.ID: inspectors.TritonInspector{
 				EdgeURL:    *edgeURL,
 				EdgeHost:   cfg.EdgeHost,
 				HTTPClient: &httpClient,

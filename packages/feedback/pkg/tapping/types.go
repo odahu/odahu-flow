@@ -19,9 +19,13 @@ type TapRequest struct {
 	ConfigID  string `yaml:"config_id"`
 	TapConfig struct {
 		MatchConfig struct {
-			HttpRequestHeadersMatch struct {
-				Headers []TapRequestHeader `yaml:"headers"`
-			} `yaml:"http_request_headers_match"`
+			OrMatch struct {
+				Rules struct {
+					HttpRequestHeadersMatch struct {
+						Headers []TapRequestHeader `yaml:"headers"`
+					} `yaml:"http_request_headers_match"`
+				} `yaml:"rules"`
+			} `yaml:"or_match"`
 		} `yaml:"match_config"`
 		OutputConfig struct {
 			Sinks              []TapSink `yaml:"sinks"`

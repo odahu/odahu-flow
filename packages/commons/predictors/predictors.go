@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package odahuflow
+package predictors
 
 import corev1 "k8s.io/api/core/v1"
 
@@ -29,6 +29,8 @@ type Predictor struct {
 	ReadinessProbe corev1.Probe
 	// OPA policy filename
 	OpaPolicyFilename string
+	// Inference endpoint regex
+	InferenceEndpointRegex string
 }
 
 var (
@@ -60,6 +62,7 @@ var (
 			PeriodSeconds:    1,
 			TimeoutSeconds:   1,
 		},
+		InferenceEndpointRegex: ".*/api/model/invoke.*",
 	}
 
 	Triton = Predictor{
@@ -104,6 +107,7 @@ var (
 			PeriodSeconds:    1,
 			TimeoutSeconds:   1,
 		},
+		InferenceEndpointRegex: `/v2/models/[\w-]+(/versions/[\d]+)?/infer/?`,
 	}
 
 	Predictors = map[string]Predictor{
