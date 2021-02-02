@@ -227,7 +227,7 @@ class Authenticator:
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
             self._login_with_refresh_token()
-        elif self._client_id and self._client_secret and fetch_openid_configuration(self._issuer_url):
+        elif self._client_id and self._client_secret and self._issuer_url:
             self._login_with_client_credentials()
         elif self._interactive_mode_enabled:
             # Start interactive flow
@@ -253,18 +253,24 @@ class Authenticator:
             self._update_config_with_new_oauth_config(login_result)
 
     def _login_with_client_credentials(self):
+        try:
+            login_result = do_client_cred_authentication(
+                issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
+                client_secret=self._client_secret
+                )
+            if not login_result:
+                raise IncorrectClientCredentials(
+                    'Client credentials are not correct.\n'
+                    'Please check credentials and try again'
+                )
+            else:
+                self._update_config_with_new_oauth_config(login_result)
 
-        login_result = do_client_cred_authentication(
-            issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
-            client_secret=self._client_secret
-        )
-        if not login_result:
+        except RuntimeError:
             raise IncorrectClientCredentials(
                 'Client credentials are not correct.\n'
-                'Please login again'
+                'Please check credentials and try again'
             )
-        else:
-            self._update_config_with_new_oauth_config(login_result)
 
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()
