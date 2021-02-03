@@ -68,7 +68,7 @@ jobs:
           name: Lint
           command: |
             cd packages/operator
-            sleep 3600
+            make lint
       - run:
           name: Test
           command: |
