@@ -30,13 +30,13 @@ Force Tags          cli  local  training
 Test Timeout        120 minutes
 
 *** Keywords ***
-Try Run Training
+Try Run Local Training
     [Arguments]  ${error}  ${train options}
         ${result}  FailedShell  odahuflowctl --verbose local training ${train options}
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
         should contain  ${result}  ${error}
 
-Run Packaging
+Run Local Packaging
     [Teardown]  Shell  docker rm -f ${container_id.stdout}
     [Arguments]  ${options}
         ${pack_result}  StrictShell  odahuflowctl --verbose local pack run ${options}
@@ -60,7 +60,7 @@ Try Run and Fail Training with invalid credentials
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Training
+    [Template]  Try Run Local Training
     ${INVALID_CREDENTIALS_ERROR}    --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
     ${INVALID_URL_ERROR}            --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
@@ -68,7 +68,7 @@ Try Run and Fail Training with invalid credentials
 
 Try Run and Fail invalid Training
     [Tags]   negative
-    [Template]  Try Run Training
+    [Template]  Try Run Local Training
     # missing required option
     Error: Missing option '--train-id' / '--id'.
     ...  run -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
@@ -85,7 +85,7 @@ Try Run and Fail invalid Training
     ...  run --train-id not-existing-training
 
 Run Valid Training with local & cluster specs
-    [Template]  Run Training
+    [Template]  Run Local Training
     # id	file/dir	output
     # local
     run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.json --output-dir ${RESULT_DIR}
@@ -98,7 +98,7 @@ Run Valid Training with local & cluster specs
 Run Valid Packaging with local spec, logout from cluster
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Run Packaging
+    [Template]  Run Local Packaging
     # id	file/dir	artifact path	artifact name	package-targets
     --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets --disable-target docker-push
     --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1 --no-disable-package-targets --disable-target docker-push

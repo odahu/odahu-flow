@@ -29,7 +29,7 @@ Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
 *** Keywords ***
-Run Packaging
+Run Local Packaging
     [Teardown]  Shell  docker rm -f ${container_id.stdout}
     [Arguments]  ${options}
         ${pack_result}  StrictShell  odahuflowctl --verbose local packaging ${options}
@@ -48,7 +48,7 @@ Run Packaging
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5001 --json-file ${RES_DIR}/request.json
         Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
 
-Try Run Packaging
+Try Run Local Packaging
     [Arguments]  ${error}  ${options}
         ${result}  FailedShell  odahuflowctl --verbose local packaging ${options}
         ${result}  Catenate  ${result.stdout}  ${result.stderr}
@@ -57,7 +57,7 @@ Try Run Packaging
 *** Test Cases ***
 Run Valid Training with local & cluster specs
     [Setup]     Shell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
-    [Template]  Run Training
+    [Template]  Run Local Training
     # auth data     id      file/dir        output
     # local
     run --id local-dir-artifact-template-pack -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
@@ -69,7 +69,7 @@ Try Run and Fail Packaging with invalid credentials
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Packaging
+    [Template]  Try Run Local Packaging
     ${INVALID_CREDENTIALS_ERROR}    --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
     ${INVALID_URL_ERROR}            --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
@@ -77,7 +77,7 @@ Try Run and Fail Packaging with invalid credentials
 
 Try Run and Fail invalid Packaging
     [Tags]  negative
-    [Template]  Try Run Packaging
+    [Template]  Try Run Local Packaging
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
@@ -107,7 +107,7 @@ Try Run and Fail invalid Packaging
 Run Valid Packaging with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Template]  Run Packaging
+    [Template]  Run Local Packaging
     # id	file/dir	artifact path	artifact name	package-targets
     # local
     run --pack-id local-file-image-template -f ${ARTIFACT_DIR}/file/packaging.json -f ${ARTIFACT_DIR}/dir/docker-pull-target.json --artifact-path ${RESULT_DIR} --artifact-name wine-cluster-1 --no-disable-package-targets --disable-target docker-push

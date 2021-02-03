@@ -159,6 +159,6 @@ Run example model
     should not be equal  ${res.rc}  0
 
     # --------- LOCAL COMMAND SECTION -----------
-Run Training
+Run Local Training
     [Arguments]  ${train options}
         ${result}  StrictShell  odahuflowctl --verbose local train ${train options}
