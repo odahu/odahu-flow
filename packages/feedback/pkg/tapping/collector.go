@@ -42,14 +42,18 @@ func NewRequestCollector(
 		ConfigID: configId,
 	}
 
-	headers := make([]TapRequestHeader, 0, len(predictors.Predictors))
+	rules := make([]Rule, 0, len(predictors.Predictors))
 	for _, predictor := range predictors.Predictors {
-		headers = append(headers, TapRequestHeader{
-			Name:       filterHeaderKey,
-			RegexMatch: predictor.InferenceEndpointRegex,
+		rules = append(rules, Rule{
+			HttpRequestHeadersMatch: HttpRequestHeadersMatch{
+				Headers: []TapRequestHeader{{
+					Name:       filterHeaderKey,
+					RegexMatch: predictor.InferenceEndpointRegex,
+				}},
+			},
 		})
 	}
-	feedbackRequest.TapConfig.MatchConfig.OrMatch.Rules.HttpRequestHeadersMatch.Headers = headers
+	feedbackRequest.TapConfig.MatchConfig.OrMatch.Rules = rules
 
 	feedbackRequest.TapConfig.OutputConfig.Sinks = append(
 		feedbackRequest.TapConfig.OutputConfig.Sinks,
@@ -63,6 +67,7 @@ func NewRequestCollector(
 
 		return nil, err
 	}
+	log.Info("generated tapping request", "request_yaml", string(feedbackRequestYaml))
 
 	prohibitedHeadersMap := make(map[string]string, len(prohibitedHeaders))
 	for _, header := range prohibitedHeaders {

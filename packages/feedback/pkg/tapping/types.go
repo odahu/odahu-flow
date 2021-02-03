@@ -20,11 +20,7 @@ type TapRequest struct {
 	TapConfig struct {
 		MatchConfig struct {
 			OrMatch struct {
-				Rules struct {
-					HttpRequestHeadersMatch struct {
-						Headers []TapRequestHeader `yaml:"headers"`
-					} `yaml:"http_request_headers_match"`
-				} `yaml:"rules"`
+				Rules []Rule `yaml:"rules"`
 			} `yaml:"or_match"`
 		} `yaml:"match_config"`
 		OutputConfig struct {
@@ -33,6 +29,14 @@ type TapRequest struct {
 			MaxBufferedRxBytes int32     `yaml:"max_buffered_rx_bytes"`
 		} `yaml:"output_config"`
 	} `yaml:"tap_config"`
+}
+
+type Rule struct {
+	HttpRequestHeadersMatch HttpRequestHeadersMatch `yaml:"http_request_headers_match"`
+}
+
+type HttpRequestHeadersMatch struct {
+	Headers []TapRequestHeader `yaml:"headers"`
 }
 
 type Trace struct {

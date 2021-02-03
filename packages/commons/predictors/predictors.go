@@ -107,7 +107,7 @@ var (
 			PeriodSeconds:    1,
 			TimeoutSeconds:   1,
 		},
-		InferenceEndpointRegex: `/v2/models/[\w-]+(/versions/[\d]+)?/infer/?`,
+		InferenceEndpointRegex: `.*/v2/models/.*/infer/?`,
 	}
 
 	Predictors = map[string]Predictor{
