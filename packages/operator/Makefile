@@ -147,7 +147,7 @@ recreate-crds: delete-crds apply-crds
 
 ## lint: Start golangci-lint linter
 lint:
-	GOGC=20 golangci-lint run --timeout 10m0s ${LINTER_ADDITIONAL_ARGS}
+	golangci-lint run --timeout 10m0s ${LINTER_ADDITIONAL_ARGS}
 
 ## static-content: Generate static content for API server. Read more about installation and usage: https://github.com/rakyll/statik
 static-content:
