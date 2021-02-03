@@ -39,21 +39,6 @@ BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
 RCLONE_PROFILE_NAME="robot-tests"
 
-# installs passed packages depending on packager manager
-function install_packages() {
-  local packagesNeeded=$1
-  if [ -x "$(command -v apk)" ]; then
-    apk add --no-cache ${packagesNeeded}
-  elif [ -x "$(command -v apt-get)" ]; then
-    apt-get update
-    apt-get install -y $packagesNeeded
-  elif [ -x "$(command -v brew)" ]; then
-    brew install $packagesNeeded
-  else
-    echo "FAILED TO INSTALL PACKAGE: Package manager not found. You must manually install: $packagesNeeded" >&2
-  fi
-}
-
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
 # Arguments:
 # $1 - Model packaging ID. It must be the same as the directory name where it locates.
@@ -246,7 +231,10 @@ function local_setup() {
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
   gcloud auth configure-docker
 
-  install_packages "moreutils"
+  if [ ! -x "$(command -v sponge)" ]; then
+    printf "\nPlease install moreutils or sponge package to setup robot tests\n"
+    exit 1
+  fi
 
   CMDbase64="base64 --wrap=0"
   if [ -x "$(command -v brew)" ]; then
@@ -302,31 +290,31 @@ function local_cleanup() {
 # Main entrypoint for setup command.
 # The function creates the model packagings and the toolchain integrations.
 function setup() {
-  for mp_id in "${MODEL_NAMES[@]}"; do
-    pack_model "${mp_id}" &
-  done
-
-  # Create training-data-helper toolchain integration
-  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-  odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
-  odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-  rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-
-  # Download training data for the wine model
-  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
-
-  # Pushes a test data to the bucket and create a file with the connection
-  copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
-
-  # Update test-data connections
-  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
-  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
-  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
-  create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
-
-  upload_test_dags
-
-  wait_all_background_task
+#  for mp_id in "${MODEL_NAMES[@]}"; do
+#    pack_model "${mp_id}" &
+#  done
+#
+#  # Create training-data-helper toolchain integration
+#  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+#  odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
+#  odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+#  rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+#
+#  # Download training data for the wine model
+#  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
+#
+#  # Pushes a test data to the bucket and create a file with the connection
+#  copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
+#
+#  # Update test-data connections
+#  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
+#  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
+#  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
+#  create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
+#
+#  upload_test_dags
+#
+#  wait_all_background_task
 
   local_setup
 }
