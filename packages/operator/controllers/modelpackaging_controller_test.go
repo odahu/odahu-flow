@@ -347,8 +347,8 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
-	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
+	tr := s.getTektonPackagingTask(mp)
 	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
 
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
