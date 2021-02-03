@@ -371,7 +371,8 @@ func (s *ModelPackagingControllerSuite) createPackaging(mp *odahuflowv1alpha1.Mo
 	return func() { s.k8sClient.Delete(context.TODO(), mp) }
 }
 
-func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1alpha1.ModelPackaging) *tektonv1beta1.TaskRun {
+func (s *ModelPackagingControllerSuite) getTektonPackagingTask(
+	mp *odahuflowv1alpha1.ModelPackaging) *tektonv1beta1.TaskRun {
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.Assertions.Eventually(

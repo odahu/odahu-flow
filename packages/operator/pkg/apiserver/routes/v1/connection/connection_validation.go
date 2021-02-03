@@ -48,7 +48,6 @@ const (
 	S3TypeRegionErrorMessage         = "s3 type requires that region must be non-empty"
 	S3TypeKeySecretEmptyErrorMessage = "s3 type requires that keyID and keySecret parameters" +
 		" must be non-empty"
-	defaultIDTemplate                  = "%s-%s"
 	S3TypeRoleNotSupportedErrorMessage = "s3 type does not support role parameter yet"
 	ECRTypeKeySecretEmptyErrorMessage  = "ecr type requires that keyID and keySecret parameters" +
 		" must be non-empty"
