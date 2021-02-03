@@ -64,11 +64,18 @@ jobs:
             sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
             sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
             go get github.com/t-yuki/gocover-cobertura
+      - restore_cache:
+          keys:
+            - v1-lint-cache
       - run:
           name: Lint
           command: |
             cd packages/operator
             make lint
+      - save_cache:
+          key: v1-lint-cache
+          paths:
+            - /home/circleci/.cache/golangci-lint
       - run:
           name: Test
           command: |
