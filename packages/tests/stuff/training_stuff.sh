@@ -290,31 +290,31 @@ function local_cleanup() {
 # Main entrypoint for setup command.
 # The function creates the model packagings and the toolchain integrations.
 function setup() {
-#  for mp_id in "${MODEL_NAMES[@]}"; do
-#    pack_model "${mp_id}" &
-#  done
-#
-#  # Create training-data-helper toolchain integration
-#  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-#  odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
-#  odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-#  rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
-#
-#  # Download training data for the wine model
-#  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
-#
-#  # Pushes a test data to the bucket and create a file with the connection
-#  copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
-#
-#  # Update test-data connections
-#  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
-#  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
-#  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
-#  create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
-#
-#  upload_test_dags
-#
-#  wait_all_background_task
+  for mp_id in "${MODEL_NAMES[@]}"; do
+    pack_model "${mp_id}" &
+  done
+
+  # Create training-data-helper toolchain integration
+  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
+  odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+
+  # Download training data for the wine model
+  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
+
+  # Pushes a test data to the bucket and create a file with the connection
+  copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
+
+  # Update test-data connections
+  create_test_data_connection "${TEST_VALID_GPPI_ODAHU_FILE_ID}" "test-data/data/valid_gppi/odahuflow.project.yaml"
+  create_test_data_connection "${TEST_VALID_GPPI_DIR_ID}" "test-data/data/valid_gppi/"
+  create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
+  create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
+
+  upload_test_dags
+
+  wait_all_background_task
 
   local_setup
 }
