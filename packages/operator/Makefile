@@ -4,7 +4,7 @@ IMG ?= controller:latest
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 ODAHUFLOW_OPERATOR_GENERATED_ENTITIES = ../../helms/odahu-flow-core/templates/operator/generated
-LINTER_ADDITIONAL_ARGS=--verbose -j 10 --timeout=10m0s
+LINTER_ADDITIONAL_ARGS=--verbose -j 10 --timeout=30m0s
 KUBEBUILDER_CONTROLPLANE_START_TIMEOUT=600s
 
 ODAHUFLOW_NAMESPACE=odahu-flow
