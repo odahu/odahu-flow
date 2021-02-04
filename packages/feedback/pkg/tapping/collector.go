@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"odahu-commons/predictors"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
 
