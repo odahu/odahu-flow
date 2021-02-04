@@ -11,13 +11,13 @@ const (
 	maxRetryWait      = 1000
 )
 
-var logL = log.Log.WithName("config")
+var logger = log.Log.WithName("config")
 
 func NewDataLogger() (DataLogging, error) {
 	host := viper.GetString(CfgFluentdHost)
 	port := viper.GetInt(CfgFluentdPort)
 
-	logL.Info("Connecting to FluentD", "host", host, "port", port)
+	logger.Info("Connecting to FluentD", "host", host, "port", port)
 
 	return fluent.New(fluent.Config{
 		FluentPort:   port,
