@@ -266,11 +266,11 @@ class Authenticator:
             else:
                 self._update_config_with_new_oauth_config(login_result)
 
-        except RuntimeError:
+        except RuntimeError as error:
             raise IncorrectClientCredentials(
                 'Client credentials are not correct.\n'
                 'Please check credentials and try again'
-            )
+            ) from error
 
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()

@@ -75,8 +75,8 @@ class OpenIdProviderConfiguration:
             else:
                 raise RuntimeError(f'Not expected status code: {response.reason} ({response.status_code})')
 
-        except requests.RequestException:
-            raise RuntimeError(f'Cannot fetch OpenID Provider configuration from uri: {self._issuer}')
+        except requests.RequestException as error:
+            raise RuntimeError(f'Cannot fetch OpenID Provider configuration from uri: {self._issuer}') from error
 
     @property
     def configuration_url(self) -> str:
