@@ -5,7 +5,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+	zaplog "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 const (
@@ -23,7 +24,7 @@ const (
 
 var (
 	CfgFile string
-	logC    = logf.Log.WithName("config")
+	logC    = log.Log.WithName("config")
 )
 
 func InitBasicParams(cmd *cobra.Command) {
@@ -68,5 +69,5 @@ func initConfig() {
 }
 
 func setUpLogger() {
-	logf.SetLogger(logf.ZapLoggerTo(os.Stdout, true))
+	log.SetLogger(zaplog.New(zaplog.UseDevMode(true), zaplog.WriteTo(os.Stdout)))
 }
