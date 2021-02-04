@@ -4,7 +4,7 @@ IMG ?= controller:latest
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 ODAHUFLOW_OPERATOR_GENERATED_ENTITIES = ../../helms/odahu-flow-core/templates/operator/generated
-LINTER_ADDITIONAL_ARGS="--verbose"
+LINTER_ADDITIONAL_ARGS=--verbose -j 10 --timeout=20m0s
 KUBEBUILDER_CONTROLPLANE_START_TIMEOUT=600s
 
 ODAHUFLOW_NAMESPACE=odahu-flow
@@ -147,7 +147,7 @@ recreate-crds: delete-crds apply-crds
 
 ## lint: Start golangci-lint linter
 lint:
-	golangci-lint run ${LINTER_ADDITIONAL_ARGS}
+	golangci-lint run  ${LINTER_ADDITIONAL_ARGS}
 
 ## static-content: Generate static content for API server. Read more about installation and usage: https://github.com/rakyll/statik
 static-content:

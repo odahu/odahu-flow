@@ -41,7 +41,6 @@ const (
 	EmptyIntegrationNameErrorMessage     = "empty integrationName"
 	TargetNotFoundErrorMessage           = "cannot find %s target in packaging integration %s"
 	NotValidConnTypeErrorMessage         = "%s target has not valid connection type %s for packaging integration %s"
-	defaultIDTemplate                    = "%s-%s-%s"
 	UnknownNodeSelector                  = "node selector %v is not presented in ODAHU config"
 )
 

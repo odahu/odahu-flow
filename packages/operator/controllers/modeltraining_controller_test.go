@@ -367,9 +367,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
-	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	tr := s.getTektonTrainingTask(mt)
 
 	expectedHelperContainerResources := v1.ResourceRequirements{
 		Limits: v1.ResourceList{
@@ -427,9 +425,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
-	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	tr := s.getTektonTrainingTask(mt)
 
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
 }
@@ -483,9 +479,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
 
-	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mt.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	tr := s.getTektonTrainingTask(mt)
 
 	// second container is the training container
 	envs := tr.Spec.TaskSpec.Steps[1].Env
