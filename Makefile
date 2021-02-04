@@ -149,8 +149,12 @@ docker-push-service-catalog:  check-tag
 
 ## docker-push-feedback-collector: Push feedback collector docker image
 docker-push-feedback-collector:  check-tag
-	docker tag odahu/odahu-flow-feedback-collector:${BUILD_TAG} ${DOCKER_REGISTRY}odahu/odahu-flow-feedback-collector:${TAG}
-	docker push ${DOCKER_REGISTRY}odahu/odahu-flow-feedback-collector:${TAG}
+	docker tag odahu/odahu-flow-feedback-collector:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-feedback-collector:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-feedback-collector:${TAG}
+
+docker-push-feedback-rq-catcher:  check-tag
+	docker tag odahu/odahu-flow-feedback-rq-catcher:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-feedback-rq-catcher:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-feedback-rq-catcher:${TAG}
 
 ## docker-push-all: Push all docker images
 docker-push-all:  docker-push-robot-tests docker-push-api  docker-push-model-trainer  docker-push-operator  docker-push-feedback-collector docker-push-service-catalog
