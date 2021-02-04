@@ -3,7 +3,7 @@ package feedback
 import (
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/spf13/viper"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
