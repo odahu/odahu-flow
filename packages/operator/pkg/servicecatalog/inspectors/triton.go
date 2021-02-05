@@ -50,6 +50,7 @@ func (t TritonInspector) Inspect(prefix string, log *zap.SugaredLogger) (model_t
 
 	var models []TritonModelMeta
 	decoder := json.NewDecoder(response.Body)
+	defer response.Body.Close()
 	if decoder.Decode(&models) != nil {
 		log.Errorw("failed to unmarshall model repository", "prefix", prefix)
 		return model_types.ServedModel{}, fmt.Errorf("failed to unmarshall model repository on prefix %s", prefix)
@@ -97,7 +98,7 @@ func (t TritonInspector) Inspect(prefix string, log *zap.SugaredLogger) (model_t
 }
 
 func (t *TritonInspector) generateListModelsRequest(prefix string) *http.Request {
-	serverUrl := url.URL{
+	serverURL := url.URL{
 		Scheme: t.EdgeURL.Scheme,
 		Host:   t.EdgeURL.Host,
 		Path:   path.Join(t.EdgeURL.Path, prefix, "v2/repository/index"),
@@ -105,7 +106,7 @@ func (t *TritonInspector) generateListModelsRequest(prefix string) *http.Request
 
 	return &http.Request{
 		Method: http.MethodPost,
-		URL:    &serverUrl,
+		URL:    &serverURL,
 		Host:   t.EdgeHost,
 	}
 }

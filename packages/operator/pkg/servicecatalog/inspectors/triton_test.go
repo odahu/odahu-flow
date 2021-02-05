@@ -29,6 +29,10 @@ import (
 	"testing"
 )
 
+const (
+	someUrlPrefix = "some/prefix"
+)
+
 var (
 	logger *zap.Logger
 )
@@ -69,8 +73,7 @@ func (s *tritonInspectorSuite) TestInspect() {
 		},
 	}
 
-	prefix := "some/prefix"
-	model, err := s.inspector.Inspect(prefix, logger.Sugar())
+	model, err := s.inspector.Inspect(someUrlPrefix, logger.Sugar())
 	if err != nil {
 		panic(err)
 	}
@@ -99,8 +102,7 @@ func (s *tritonInspectorSuite) TestInspect_NoModels() {
 		},
 	}
 
-	prefix := "some/prefix"
-	_, err := s.inspector.Inspect(prefix, logger.Sugar())
+	_, err := s.inspector.Inspect(someUrlPrefix, logger.Sugar())
 
 	s.Assertions.Error(err)
 	s.Assertions.Contains(err.Error(), "server serves 0 models")
@@ -119,8 +121,7 @@ func (s *tritonInspectorSuite) TestInspect_MoreThanOneModel() {
 		},
 	}
 
-	prefix := "some/prefix"
-	model, err := s.inspector.Inspect(prefix, logger.Sugar())
+	model, err := s.inspector.Inspect(someUrlPrefix, logger.Sugar())
 	if err != nil {
 		panic(err)
 	}
@@ -145,8 +146,7 @@ func (s *tritonInspectorSuite) TestInspect_NoResponse() {
 		},
 	}
 
-	prefix := "some/prefix"
-	_, err := s.inspector.Inspect(prefix, logger.Sugar())
+	_, err := s.inspector.Inspect(someUrlPrefix, logger.Sugar())
 
 	s.Assertions.Error(err)
 	s.Assertions.Contains(err.Error(), "failed to fetch model repository")

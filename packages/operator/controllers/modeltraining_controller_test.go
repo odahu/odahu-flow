@@ -358,7 +358,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	expectedTrainingRequest := reconcile.Request{NamespacedName: types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}}
+	expectedTrainingRequest := reconcile.Request{
+		NamespacedName: types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
@@ -502,7 +503,9 @@ func (s *ModelTrainingControllerSuite) createTraining(training *odahuflowv1alpha
 	return func() { s.k8sClient.Delete(context.TODO(), training) }
 }
 
-func (s *ModelTrainingControllerSuite) getTektonTrainingTask(mt *odahuflowv1alpha1.ModelTraining) *tektonv1beta1.TaskRun {
+func (s *ModelTrainingControllerSuite) getTektonTrainingTask(
+	mt *odahuflowv1alpha1.ModelTraining,
+) *tektonv1beta1.TaskRun {
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
 	s.Assertions.Eventually(
