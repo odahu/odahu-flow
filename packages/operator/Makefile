@@ -132,6 +132,7 @@ generate-resources:
 	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/database/migrations/postgres/sources
 	git add pkg/database/migrations/postgres/bindata.go
 	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/deployment/assets -o pkg/deployment/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/deployment/assets pkg/deployment/assets/ml_servers
+	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/servicecatalog/inspectors/spec_templates -o pkg/servicecatalog/inspectors/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/servicecatalog/inspectors/spec_templates
 	git add pkg/deployment/bindata/bindata.go
 
 

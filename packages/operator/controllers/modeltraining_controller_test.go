@@ -347,7 +347,6 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	k8sTrainerResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainResources, config.NvidiaResourceName)
 	s.g.Expect(err).Should(BeNil())
 
-
 	mt := newValidTraining()
 	mt.Spec = odahuflowv1alpha1.ModelTrainingSpec{
 		Image:     toolchainImage,
@@ -359,9 +358,8 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
-	expectedTrainingRequest  := reconcile.Request{NamespacedName:
-		types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace},
-	}
+	expectedTrainingRequest := reconcile.Request{
+		NamespacedName: types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
@@ -420,7 +418,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
 	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
-	expectedTrainingRequest  := reconcile.Request{NamespacedName: mtNamespacedName}
+	expectedTrainingRequest := reconcile.Request{NamespacedName: mtNamespacedName}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
@@ -474,7 +472,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	defer s.k8sClient.Delete(context.TODO(), mt)
 
 	mtNamespacedName := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
-	expectedTrainingRequest  := reconcile.Request{NamespacedName: mtNamespacedName}
+	expectedTrainingRequest := reconcile.Request{NamespacedName: mtNamespacedName}
 	s.g.Eventually(s.requests, timeout).Should(Receive(Equal(expectedTrainingRequest)))
 
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mtNamespacedName, mt)).ToNot(HaveOccurred())
@@ -505,9 +503,9 @@ func (s *ModelTrainingControllerSuite) createTraining(training *odahuflowv1alpha
 	return func() { s.k8sClient.Delete(context.TODO(), training) }
 }
 
-func (s *ModelTrainingControllerSuite) getTektonTrainingTask(mt *odahuflowv1alpha1.ModelTraining) (
-	*tektonv1beta1.TaskRun,
-) {
+func (s *ModelTrainingControllerSuite) getTektonTrainingTask(
+	mt *odahuflowv1alpha1.ModelTraining,
+) *tektonv1beta1.TaskRun {
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mt.Name, Namespace: mt.Namespace}
 	s.Assertions.Eventually(

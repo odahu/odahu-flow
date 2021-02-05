@@ -113,10 +113,6 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/Metadata"
                 },
-                "mlServer": {
-                    "description": "MLServer name that serves a model\nPossible values: ODAHU, Triton",
-                    "type": "string"
-                },
                 "swagger2": {
                     "type": "object",
                     "$ref": "#/definitions/Swagger2"

@@ -21,6 +21,7 @@ WORKDIR "${FEEDBACK_DIR}"
 
 RUN apk add -u ca-certificates git gcc musl-dev make
 
+COPY packages/commons/ ../commons
 COPY packages/feedback/ ./
 
 RUN GOOS=linux GOARCH=amd64 make build-all

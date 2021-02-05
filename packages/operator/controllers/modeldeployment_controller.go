@@ -36,6 +36,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/serving/pkg/apis/serving"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	"odahu-commons/predictors"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -122,7 +123,7 @@ func knativeDeploymentName(revisionName string) string {
 func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-	predictor odahuflow.Predictor,
+	predictor predictors.Predictor,
 ) error {
 	container, err := r.createModelContainer(modelDeploymentCR, predictor)
 	if err != nil {
@@ -234,7 +235,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 
 func (r *ModelDeploymentReconciler) createModelContainer(
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-	predictor odahuflow.Predictor,
+	predictor predictors.Predictor,
 ) (*corev1.Container, error) {
 
 	depResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(modelDeploymentCR.Spec.Resources, r.gpuResourceName)
@@ -559,7 +560,7 @@ func getCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) strin
 }
 
 func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment, predictor odahuflow.Predictor) error {
+	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment, predictor predictors.Predictor) error {
 
 	rn := modelDeploymentCR.Spec.RoleName
 	if rn == nil {
@@ -653,7 +654,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	log.Info("Run reconciling of model deployment")
 
-	predictor, ok := odahuflow.Predictors[modelDeploymentCR.Spec.Predictor]
+	predictor, ok := predictors.Predictors[modelDeploymentCR.Spec.Predictor]
 	if !ok {
 		return reconcile.Result{}, fmt.Errorf("unknown predictor %s", modelDeploymentCR.Spec.Predictor)
 	}

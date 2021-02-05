@@ -19,23 +19,25 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/inspectors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"log"
 	nethttp "net/http"
 	"net/url"
+	"odahu-commons/predictors"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
 )
-
 
 func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 	catalog servicecatalog.Catalog) (servicecatalog.Reflector, error) {
@@ -49,28 +51,35 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 		return servicecatalog.Reflector{}, err
 	}
 
+	deploymentClient := deployment.NewClient(aCfg)
+
 	return servicecatalog.NewReflector(logger, servicecatalog.UpdateHandler{
-		Discoverers: []servicecatalog.ModelServerDiscoverer{
-			servicecatalog.OdahuMLServerDiscoverer{
+		Inspectors: map[string]inspectors.ModelServerInspector{
+			predictors.OdahuMLServer.ID: inspectors.OdahuMLServerInspector{
+				EdgeURL:    *edgeURL,
+				EdgeHost:   cfg.EdgeHost,
+				HTTPClient: &httpClient,
+			},
+			predictors.Triton.ID: inspectors.TritonInspector{
 				EdgeURL:    *edgeURL,
 				EdgeHost:   cfg.EdgeHost,
 				HTTPClient: &httpClient,
 			},
 		},
-		Catalog:     catalog,
+		Catalog:          catalog,
+		DeploymentClient: deploymentClient,
 	}, servicecatalog.RouteEventFetcher{
 		APIClient: event.ModelRouteEventClient{
 			HTTPClient: &httpClient,
 			Log:        logger,
 		},
 	},
-	servicecatalog.ReflectorOpts{
-		WorkersCount: cfg.WorkersCount,
-		FetchTimeout: time.Duration(cfg.FetchTimeout) * time.Second,
-	}), nil
+		servicecatalog.ReflectorOpts{
+			WorkersCount: cfg.WorkersCount,
+			FetchTimeout: time.Duration(cfg.FetchTimeout) * time.Second,
+		}), nil
 
 }
-
 
 var mainCmd = &cobra.Command{
 	Use:   "service-catalog",
@@ -98,7 +107,6 @@ var mainCmd = &cobra.Command{
 		}
 
 		routeCatalog := servicecatalog.NewModelRouteCatalog(sLogger)
-
 
 		// Run reflector (keep state of service catalog up to date with ODAHU API Server)
 
@@ -136,13 +144,12 @@ var mainCmd = &cobra.Command{
 			}
 			cancel()
 		}()
-		go func() {  // Monitors cancel signal and calls .Shutdown for webserver
+		go func() { // Monitors cancel signal and calls .Shutdown for webserver
 			<-ctx.Done()
 			if err := mainServer.Shutdown(context.TODO()); err != nil {
 				sLogger.Errorw("Error during server shutdown", zap.Error(err))
 			}
 		}()
-
 
 		// Wait signal or error in some goroutine
 
@@ -150,10 +157,10 @@ var mainCmd = &cobra.Command{
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 		select {
-		case sig := <-sigs:  // Signal to stop
+		case sig := <-sigs: // Signal to stop
 			sLogger.Info("Getting signal. Stop", "signal", sig.String())
 			cancel()
-		case <-ctx.Done():  // Error in goroutine
+		case <-ctx.Done(): // Error in goroutine
 			sLogger.Info("Application trying to stop itself because of error")
 		}
 

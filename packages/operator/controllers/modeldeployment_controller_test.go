@@ -22,7 +22,6 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	. "github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
@@ -30,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"math/rand"
+	"odahu-commons/predictors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -52,7 +52,7 @@ var (
 		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      image,
-			Predictor:                  odahuflow.OdahuMLServer.ID,
+			Predictor:                  predictors.OdahuMLServer.ID,
 			MinReplicas:                &mdMinReplicas,
 			MaxReplicas:                &mdMaxReplicas,
 			ReadinessProbeInitialDelay: &mdReadinessDelay,
@@ -130,7 +130,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      image,
-			Predictor:                  odahuflow.OdahuMLServer.ID,
+			Predictor:                  predictors.OdahuMLServer.ID,
 			MinReplicas:                &mdMinReplicas,
 			MaxReplicas:                &mdMaxReplicas,
 			ReadinessProbeInitialDelay: &mdReadinessDelay,

@@ -22,15 +22,12 @@ const (
 // ServedModel contains information about served model
 type ServedModel struct {
 	Metadata Metadata `json:"metadata"`
-	// MLServer name that serves a model
-	// Possible values: ODAHU, Triton
-	MLServer MLServerName `json:"mlServer"`
-	Swagger Swagger2 `json:"swagger2"`
+	Swagger  Swagger2 `json:"swagger2"`
 }
 
 // DeployedModel contains information about deployed model
 type DeployedModel struct {
 	// deploymentID is ModelDeployment that deploys this model
-	DeploymentID string `json:"deploymentID"`
-	ServedModel ServedModel `json:"servedModel"`
+	DeploymentID string      `json:"deploymentID"`
+	ServedModel  ServedModel `json:"servedModel"`
 }
