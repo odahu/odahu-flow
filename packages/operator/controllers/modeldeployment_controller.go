@@ -57,12 +57,6 @@ import (
 const (
 	deploymentControllerName             = "modeldeployment_controller"
 	DefaultModelPort                     = int32(5000)
-	defaultLivenessFailureThreshold      = 15
-	defaultLivenessPeriod                = 1
-	defaultLivenessTimeout               = 1
-	defaultReadinessFailureThreshold     = 15
-	defaultReadinessPeriod               = 1
-	defaultReadinessTimeout              = 1
 	DefaultRequeueDelay                  = 10 * time.Second
 	DefaultPortName                      = "http1"
 	KnativeMinReplicasKey                = "autoscaling.knative.dev/minScale"

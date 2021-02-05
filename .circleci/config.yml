@@ -64,12 +64,34 @@ jobs:
             sudo tar -zxvf /tmp/gotestsum.tar.gz -C /usr/local/
             sudo mv /usr/local/gotestsum* /usr/bin/gotestsum
             go get github.com/t-yuki/gocover-cobertura
+      - restore_cache:
+          keys:
+            - v1-lint-cache-{{ .Branch }}
+            - v1-lint-cache
+      - restore_cache:
+          keys:
+            - v1-go-mod-{{ checksum "packages/operator/go.sum" }}
+            - v1-go-mod
+      - run:
+          name: Lint
+          command: |
+            cd packages/operator
+            make lint
       - run:
           name: Test
           command: |
             cd packages/operator
             make test
             bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+      - save_cache:
+          key: v1-lint-cache-{{ .Branch }}
+          paths:
+            - /home/circleci/.cache/golangci-lint
+      - save_cache:
+          key: v1-go-mod-{{ checksum "packages/operator/go.sum" }}
+          paths:
+            - /home/circleci/.go_workspace/pkg/mod
+            - /home/circleci/.cache/go-build
   feedback_aggregator:
     docker:
       - image: circleci/golang:1.14
