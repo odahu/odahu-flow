@@ -39,7 +39,7 @@ func (o OdahuMLServerDiscoverer) GetMLServerName() model_types.MLServerName {
 	return model_types.MLServerODAHU
 }
 
-// ODAHU ML Server has not hardcoded swagger spec. But claims that "GET /" request
+// ODAHU ML Server doesn't have hardcoded swagger spec. But claims that "GET /api/model/info" request
 // return Swagger 2.0 spec for current deployed Model
 func (o OdahuMLServerDiscoverer) discoverSwagger(
 	prefix string, log *zap.SugaredLogger) (swagger model_types.Swagger2, err error) {
@@ -106,7 +106,7 @@ func (o OdahuMLServerDiscoverer) generateModelRequest(prefix string) *http.Reque
 	MlServerURL := url.URL{
 		Scheme: o.EdgeURL.Scheme,
 		Host:   o.EdgeURL.Host,
-		Path:   path.Join(o.EdgeURL.Path, prefix),
+		Path:   path.Join(o.EdgeURL.Path, prefix, "api/model/info"),
 	}
 
 	return &http.Request{
