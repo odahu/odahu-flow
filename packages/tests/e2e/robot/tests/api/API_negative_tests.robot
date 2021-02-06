@@ -42,21 +42,20 @@ Try Call API - Bad Request
 Try Call API - Forbidden
     [Arguments]  ${command}  @{options}  &{kwargs}
     Log many   ${API_URL}  ${EDGE_URL}
-    ${403 Forbidden}  format string  ${403 Forbidden Template}  None
+    ${403 Forbidden}  format string  ${403 Forbidden Template}  Forbidden
     Call API and get Error  ${403 Forbidden}  ${command}  @{options}  &{kwargs}
 
 Try Call API - Forbidden.Model
     [Arguments]  ${command}  &{kwargs}
-    Log many   Keyword: &{kwargs}
-    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY} url=&{kwargs}.get("url")
+    ${type kwargs.get("url")}    Evaluate     type($kwargs.get("url"))
+    Log many   ${kwargs.get("url")}  ${type kwargs.get("url")}
+    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY}  url=${kwargs.get("url")}
     Call API and get Error  ${403 Forbidden}  ${command}  &{kwargs}
 
 *** Test Cases ***
 Status Code 400 - Bad Request
     [Template]  Try Call API - Bad Request
     # connection
-#    ${400 BadRequest Template}  ${FailedConn} ${unknown type}
-#    ...  connection post  ${RES_DIR}/connection/invalid/no_type
     ${400 BadRequest Template}  ${FailedConn} ${invalid_id}
     ...  connection put   ${RES_DIR}/connection/invalid/conn_invalid_id.yaml
     ${400 BadRequest Template}  ${FailedConn} ${s3_empty_keyID_keySecret}
@@ -71,17 +70,17 @@ Status Code 400 - Bad Request
     ...  connection post  ${RES_DIR}/connection/invalid/azureblob_no_required_parameters.json
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${azureblob_req_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/azureblob_no_required_parameters.json
-#    ${400 BadRequest Template}  Error
-#     ...  connection post  ${RES_DIR}/connection/invalid/git_no_required_parameters.json
-#    ${400 BadRequest Template}  Error
-#     ...  connection put   ${RES_DIR}/connection/invalid/git_no_required_parameters.json
+    ${400 BadRequest Template}  Error
+     ...  connection post  ${RES_DIR}/connection/invalid/git_no_required_parameters.json
+    ${400 BadRequest Template}  Error
+     ...  connection put   ${RES_DIR}/connection/invalid/git_no_required_parameters.json
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}
     ...  connection post  ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}
     ...  connection put   ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
-    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_invalid_uri}; ${ecr_empty_keyID_keySecret}
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_empty_keyID_keySecret}
     ...  connection post  ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
-    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_invalid_uri}; ${ecr_empty_keyID_keySecret}
+    ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_empty_keyID_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
     # toolchains
     ${400 BadRequest Template}  ${FailedTI} ${TI_empty_entrypoint}; ${TI_empty_defaultImage}
@@ -103,18 +102,18 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS}; ${empty_toolchain}
     ...  training put  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
     # model packaging
-    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; ${empty_artifactName}; ${empty_integrationName}
+    ${400 BadRequest Template}  ${FailedPack} ${empty_artifactName}; ${empty_integrationName}
     ...  packaging post  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
-    ${400 BadRequest Template}  ${FailedPack} entity "" is not found; ${empty_artifactName}; ${empty_integrationName}
+    ${400 BadRequest Template}  ${FailedPack} ${empty_artifactName}; ${empty_integrationName}
     ...  packaging put  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
     # model deployment
-    ${400 BadRequest Template}  ${max_smaller_min_replicas}; ${empty_image}
+    ${400 BadRequest Template}  ${FailedDeploy} ${max_smaller_min_replicas}; ${empty_image}; ${empty_predictor}
     ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.json
-    ${400 BadRequest Template}  ${max_smaller_min_replicas}; ${empty_image}
+    ${400 BadRequest Template}  ${FailedDeploy} ${max_smaller_min_replicas}; ${empty_image}; ${empty_predictor}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.json
-    ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
+    ${400 BadRequest Template}  ${FailedDeploy} ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
-    ${400 BadRequest Template}  ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
+    ${400 BadRequest Template}  ${FailedDeploy} ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
 
 Status Code 403 - Forbidden - Data Scientist
