@@ -1,7 +1,6 @@
 {
   "_comment": "empty image",
   "kind": "ModelDeployment",
-  "id": "deployment-empty-image",
   "spec": {
     "image": "",
     "minReplicas": 5,

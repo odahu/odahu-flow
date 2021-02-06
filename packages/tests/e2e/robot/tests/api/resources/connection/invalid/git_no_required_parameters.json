@@ -1,6 +1,5 @@
 {
   "kind": "Connection",
-  "id": "git-no-required-parameters",
   "spec": {
     "type": "git",
     "description": "Git repository with the Odahu-Flow examples",
