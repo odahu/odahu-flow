@@ -3,6 +3,7 @@ ${LOCAL_CONFIG}         odahuflow/api_status_codes_400-403
 ${RES_DIR}              ${CURDIR}/resources
 ${invalid_token}        not-valid-token
 ${NOT_EXIST_ENTITY}     not-exist
+${MODEL_DEPLOYMENT}     dep-status-code-400-403
 
 ${REQUEST}              SEPARATOR=
 ...                     { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
@@ -28,8 +29,13 @@ Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
-...                 reload config
-Suite Teardown      Remove File  ${LOCAL_CONFIG}
+...                 reload config  AND
+...                 Run API deploy from model packaging and check model started  simple-model  dep-status-code-400-403  ${RES_DIR}/deploy_route_model/valid/deployment.negative.403.yaml
+Suite Teardown      Run Keywords
+...                 Login to the api and edge  AND
+...                 reload config  AND
+...                 Run API undeploy model and check  ${MODEL_DEPLOYMENT}  AND
+...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  negative  status-code-400-403
 Test Timeout        1 minute
 
@@ -47,9 +53,7 @@ Try Call API - Forbidden
 
 Try Call API - Forbidden.Model
     [Arguments]  ${command}  &{kwargs}
-    ${type kwargs.get("url")}    Evaluate     type($kwargs.get("url"))
-    Log many   ${kwargs.get("url")}  ${type kwargs.get("url")}
-    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY}  url=${kwargs.get("url")}
+    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY}  url=${kwargs.get("url")}${kwargs.pop("path_suffix")}
     Call API and get Error  ${403 Forbidden}  ${command}  &{kwargs}
 
 *** Test Cases ***
@@ -70,9 +74,9 @@ Status Code 400 - Bad Request
     ...  connection post  ${RES_DIR}/connection/invalid/azureblob_no_required_parameters.json
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${azureblob_req_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/azureblob_no_required_parameters.json
-    ${400 BadRequest Template}  Error
+    ${400 BadRequest Template}  ${FailedConn} ${invalid_id}; ${empty_id}; ${empty_uri}
      ...  connection post  ${RES_DIR}/connection/invalid/git_no_required_parameters.json
-    ${400 BadRequest Template}  Error
+    ${400 BadRequest Template}  ${FailedConn} ${invalid_id}; ${empty_id}; ${empty_uri}
      ...  connection put   ${RES_DIR}/connection/invalid/git_no_required_parameters.json
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}
     ...  connection post  ${RES_DIR}/connection/invalid/docker_no_required_parameters.yaml
@@ -107,9 +111,9 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${FailedPack} ${empty_artifactName}; ${empty_integrationName}
     ...  packaging put  ${RES_DIR}/training_packaging/invalid/packaging_no_required_params.json
     # model deployment
-    ${400 BadRequest Template}  ${FailedDeploy} ${max_smaller_min_replicas}; ${empty_image}; ${empty_predictor}
+    ${400 BadRequest Template}  ${FailedDeploy} ${max_smaller_min_replicas}; ${invalid_id}; ${empty_id}; ${empty_image}; ${empty_predictor}
     ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.json
-    ${400 BadRequest Template}  ${FailedDeploy} ${max_smaller_min_replicas}; ${empty_image}; ${empty_predictor}
+    ${400 BadRequest Template}  ${FailedDeploy} ${max_smaller_min_replicas}; ${invalid_id}; ${empty_id}; ${empty_image}; ${empty_predictor}
     ...  deployment put  ${RES_DIR}/deploy_route_model/invalid/deployment_empty_required_params.json
     ${400 BadRequest Template}  ${FailedDeploy} ${positive_livenessProbe}; ${positive_readinessProbe}; ${max_smaller_min_replicas}; ${min_num_of_max_replicas}; ${min_num_of_min_replicas}
     ...  deployment post  ${RES_DIR}/deploy_route_model/invalid/deployment_validation_checks.yaml
@@ -181,8 +185,8 @@ Model. Status Code 403 - Forbidden - Viewer
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
 
-    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
-    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
+    model get   url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
+    model post  url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/invoke  json_input=${REQUEST}
 
 Status Code 403 - Forbidden - Custom Role
     [Template]  Try Call API - Forbidden
@@ -245,5 +249,5 @@ Model. Status Code 403 - Forbidden - Custom Role
     ...         reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
-    model get   url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}
-    model post  url=${EDGE_URL}/model/${NOT_EXIST_ENTITY}  json_input=${REQUEST}
+    model get   url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
+    model post  url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/invoke  json_input=${REQUEST}
