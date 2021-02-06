@@ -48,6 +48,8 @@ ${FailedPack}       Validation of model packaging is failed:
 ${FailedDeploy}     Validation of model deployment is failed:
 
 ${invalid_id}   ID is not valid
+${empty_id}     empty "ID"
+
 # ---------------------------------  connections  ---------------------------------
 @{connection types}             s3  gcs  azureblob  git  docker  ecr
 ${unknown type}                 unknown type: . Supported types: [s3 gcs azureblob git docker ecr]
