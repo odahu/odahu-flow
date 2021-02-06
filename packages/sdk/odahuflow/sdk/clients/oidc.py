@@ -67,16 +67,16 @@ class OpenIdProviderConfiguration:
         """
         try:
             response = requests.get(self.configuration_url)
-            if response.status_code == 200:
-                self._config_json = response.json()
-            elif 400 <= response.status_code < 600:
-                raise RuntimeError(f'Some error during attempt to fetch OpenID Provider configuration. '
-                                   f'Reason: {response.reason}')
-            else:
-                raise RuntimeError(f'Not expected status code: {response.reason} ({response.status_code})')
-
         except requests.RequestException as error:
             raise RuntimeError(f'Cannot fetch OpenID Provider configuration from uri: {self._issuer}') from error
+
+        if response.status_code == 200:
+            self._config_json = response.json()
+        elif 400 <= response.status_code < 600:
+            raise RuntimeError(f'Some error during attempt to fetch OpenID Provider configuration. '
+                               f'Reason: {response.reason}')
+        else:
+            raise RuntimeError(f'Not expected status code: {response.reason} ({response.status_code})')
 
     @property
     def configuration_url(self) -> str:
