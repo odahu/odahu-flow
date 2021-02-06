@@ -94,7 +94,7 @@ class IncorrectAuthorizationToken(APIConnectionException):
 
 class IncorrectClientCredentials(APIConnectionException):
     """
-    Exception that says that provided API authorization token is incorrect
+    Exception that says that provided API client credentials are incorrect
     """
 
     pass
@@ -223,14 +223,11 @@ class Authenticator:
                 'Please try to log in again'
             )
 
-        # use default value if self._issuer_url is empty
-        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
-
         LOGGER.debug('Redirect has been detected. Trying to refresh a token')
         if self._refresh_token_exists:
             LOGGER.debug('Refresh token for %s has been found, trying to use it', odahuflow.sdk.config.API_ISSUING_URL)
             self._login_with_refresh_token()
-        elif self._client_id and self._client_secret and fetch_openid_configuration(self._issuer_url):
+        elif self._client_id and self._client_secret and self._issuer_url:
             self._login_with_client_credentials()
         elif self._interactive_mode_enabled:
             # Start interactive flow
@@ -256,21 +253,24 @@ class Authenticator:
             self._update_config_with_new_oauth_config(login_result)
 
     def _login_with_client_credentials(self):
+        try:
+            login_result = do_client_cred_authentication(
+                issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
+                client_secret=self._client_secret
+                )
+            if not login_result:
+                raise IncorrectClientCredentials(
+                    'Client credentials are not correct.\n'
+                    'Please check credentials and try again'
+                )
+            else:
+                self._update_config_with_new_oauth_config(login_result)
 
-        # use default value if self._issuer_url is empty
-        self._issuer_url = self._issuer_url or odahuflow.sdk.config.API_ISSUING_URL
-
-        login_result = do_client_cred_authentication(
-            issue_token_url=fetch_openid_configuration(self._issuer_url), client_id=self._client_id,
-            client_secret=self._client_secret
-        )
-        if not login_result:
+        except RuntimeError as error:
             raise IncorrectClientCredentials(
                 'Client credentials are not correct.\n'
-                'Please login again'
-            )
-        else:
-            self._update_config_with_new_oauth_config(login_result)
+                'Please check credentials and try again'
+            ) from error
 
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()
@@ -346,14 +346,14 @@ class RemoteAPIClient:
     """
 
     def __init__(self,
-                 base_url: str = odahuflow.sdk.config.API_URL,
-                 token: Optional[str] = odahuflow.sdk.config.API_TOKEN,
+                 base_url: str = '',
+                 token: Optional[str] = '',
                  client_id: Optional[str] = '',
                  client_secret: Optional[str] = '',
-                 retries: Optional[int] = odahuflow.sdk.config.RETRY_ATTEMPTS,
+                 retries: Optional[int] = None,
                  timeout: Optional[Union[int, Tuple[int, int]]] = 10,
                  non_interactive: Optional[bool] = True,
-                 issuer_url: Optional[str] = odahuflow.sdk.config.ISSUER_URL):
+                 issuer_url: Optional[str] = ''):
         """
         Build client
 
@@ -365,6 +365,17 @@ class RemoteAPIClient:
         :param timeout: timeout for connection in seconds. 0 for disabling
         :param non_interactive: disable any interaction
         """
+
+        # set defaults
+        if not base_url:
+            base_url = odahuflow.sdk.config.API_URL
+        if not token:
+            token = odahuflow.sdk.config.API_TOKEN
+        if retries is None:
+            retries = odahuflow.sdk.config.RETRY_ATTEMPTS
+        if not issuer_url:
+            issuer_url = odahuflow.sdk.config.ISSUER_URL
+
         self._base_url = base_url
         self.url_builder = URLBuilder(base_url)
         self.authenticator = Authenticator(client_id, client_secret, non_interactive, base_url, token, issuer_url)

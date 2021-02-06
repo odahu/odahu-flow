@@ -1,0 +1,20 @@
+kind: ModelDeployment
+id: api-test-custom-role
+spec:
+  image:
+  predictor: odahu-ml-server
+  resources:
+    limits:
+      gpu: ''
+      cpu: '2'
+      memory: '2Gi'
+    requests:
+      gpu: ''
+      cpu: '1'
+      memory: '1Gi'
+  minReplicas: 1
+  maxReplicas: 1
+  livenessProbeInitialDelay: 10
+  readinessProbeInitialDelay: 10
+  roleName: odahu_custom_role
+  imagePullConnID: docker-ci
