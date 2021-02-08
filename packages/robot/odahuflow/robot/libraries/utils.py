@@ -369,6 +369,6 @@ class Utils:
     def get_local_model_host():
         docker_host = os.getenv(DOCKER_HOST_ENV)
         if docker_host:
-            return f"http://{urllib.parse.urlparse(docker_host).netloc.split(':')[0]}"
+            return f"http://{urllib.parse.urlparse(docker_host).hostname}"
         else:
             return "http://0"
