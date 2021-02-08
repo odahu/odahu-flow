@@ -44,7 +44,6 @@ const (
 		" of connections for data bindings: %v"
 	ToolchainEmptyErrorMessage = "empty toolchain parameter"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
-	defaultIDTemplate          = "%s-%s-%s"
 )
 
 var (

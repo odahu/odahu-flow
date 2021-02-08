@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
 	"net/http"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/gin-gonic/gin"
 )

@@ -24,8 +24,8 @@ class Login:
 class Configuration:
 
     @staticmethod
-    def config_get():
-        return ConfigurationClient().get()
+    def config_get(**kwargs):
+        return ConfigurationClient(**kwargs).get()
 
 
 class Connection:

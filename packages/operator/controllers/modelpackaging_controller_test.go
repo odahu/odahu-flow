@@ -347,9 +347,7 @@ func (s *ModelPackagingControllerSuite) TestPackagingTimeout() {
 	mpNamespacedName := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.g.Expect(s.k8sClient.Get(context.TODO(), mpNamespacedName, mp)).ToNot(HaveOccurred())
 
-	tr := &tektonv1beta1.TaskRun{}
-	trKey := types.NamespacedName{Name: mp.Name, Namespace: testNamespace}
-	s.g.Expect(s.k8sClient.Get(context.TODO(), trKey, tr)).ToNot(HaveOccurred())
+	tr := s.getTektonPackagingTask(mp)
 
 	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
 }
@@ -371,7 +369,8 @@ func (s *ModelPackagingControllerSuite) createPackaging(mp *odahuflowv1alpha1.Mo
 	return func() { s.k8sClient.Delete(context.TODO(), mp) }
 }
 
-func (s *ModelPackagingControllerSuite) getTektonPackagingTask(mp *odahuflowv1alpha1.ModelPackaging) *tektonv1beta1.TaskRun {
+func (s *ModelPackagingControllerSuite) getTektonPackagingTask(
+	mp *odahuflowv1alpha1.ModelPackaging) *tektonv1beta1.TaskRun {
 	tr := &tektonv1beta1.TaskRun{}
 	trKey := types.NamespacedName{Name: mp.Name, Namespace: mp.Namespace}
 	s.Assertions.Eventually(

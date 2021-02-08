@@ -28,6 +28,7 @@ RUN apt-get update -qq && \
     apt-get update -qq && \
     apt-get install -y git gcc make golang-1.14-go
 
+COPY packages/commons ../commons
 COPY packages/operator ./
 
 RUN GOOS=linux GOARCH=amd64 make build-all

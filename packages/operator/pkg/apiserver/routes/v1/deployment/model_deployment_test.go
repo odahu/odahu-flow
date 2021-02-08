@@ -29,7 +29,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment/mocks"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	dep_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
@@ -41,6 +40,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
+	"odahu-commons/predictors"
 	"strings"
 	"testing"
 	"time"
@@ -120,7 +120,7 @@ func newStubMd() *deployment.ModelDeployment {
 		ID: mdID,
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
 			Image:                      mdImage,
-			Predictor:                  odahuflow.OdahuMLServer.ID,
+			Predictor:                  predictors.OdahuMLServer.ID,
 			MinReplicas:                &mdMinReplicas,
 			MaxReplicas:                &mdMaxReplicas,
 			LivenessProbeInitialDelay:  &mdLivenessInitialDelay,

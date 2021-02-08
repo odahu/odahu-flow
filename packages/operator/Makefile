@@ -4,7 +4,7 @@ IMG ?= controller:latest
 CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 ODAHUFLOW_OPERATOR_GENERATED_ENTITIES = ../../helms/odahu-flow-core/templates/operator/generated
-LINTER_ADDITIONAL_ARGS="--verbose"
+LINTER_ADDITIONAL_ARGS=--verbose -j 10 --timeout=20m0s
 KUBEBUILDER_CONTROLPLANE_START_TIMEOUT=600s
 
 ODAHUFLOW_NAMESPACE=odahu-flow
@@ -132,6 +132,7 @@ generate-resources:
 	go-bindata -pkg postgres -prefix pkg/database/migrations/postgres/sources -o pkg/database/migrations/postgres/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/database/migrations/postgres/sources
 	git add pkg/database/migrations/postgres/bindata.go
 	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/deployment/assets -o pkg/deployment/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/deployment/assets pkg/deployment/assets/ml_servers
+	go-bindata -ignore .*_test.rego -pkg bindata -prefix pkg/servicecatalog/inspectors/spec_templates -o pkg/servicecatalog/inspectors/bindata/bindata.go ${GO_BIN_DATA_EXTRA_ARGS} pkg/servicecatalog/inspectors/spec_templates
 	git add pkg/deployment/bindata/bindata.go
 
 
@@ -147,7 +148,7 @@ recreate-crds: delete-crds apply-crds
 
 ## lint: Start golangci-lint linter
 lint:
-	golangci-lint run ${LINTER_ADDITIONAL_ARGS}
+	golangci-lint run  ${LINTER_ADDITIONAL_ARGS}
 
 ## static-content: Generate static content for API server. Read more about installation and usage: https://github.com/rakyll/statik
 static-content:

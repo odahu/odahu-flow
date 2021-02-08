@@ -1,0 +1,205 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "{{ .ModelName }}",
+    "version": " {{ .ModelVersion }}",
+    "title": "{{ .ModelName }}"
+  },
+  "paths": {
+    "/v2/models/{{ .ModelName }}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Get Model Configuration",
+            "schema": {
+              "$ref": "#/definitions/ModelConfiguration"
+            }
+          }
+        }
+      }
+    },
+    "/v2/models/{{ .ModelName }}/ready": {
+      "get": {
+        "produces": [
+          "text/plain"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Check if the model is ready to infer",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "/v2/models/{{ .ModelName }}/infer": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InferRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Definition generated from Swagger Inspector",
+            "schema": {
+              "$ref": "#/definitions/Result"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "InputTensor": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {}
+        }
+      }
+    },
+    "InferRequest": {
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InputTensor"
+          }
+        }
+      }
+    },
+    "InputSpec": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "OutputSpec": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "ModelConfiguration": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "versions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "platform": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InputSpec"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OutputSpec"
+          }
+        }
+      }
+    },
+    "OutputTensor": {
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "datatype": {
+          "type": "string"
+        },
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      }
+    },
+    "Result": {
+      "properties": {
+        "model_name": {
+          "type": "string"
+        },
+        "model_version": {
+          "type": "string"
+        },
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OutputTensor"
+          }
+        }
+      }
+    }
+  }
+}
