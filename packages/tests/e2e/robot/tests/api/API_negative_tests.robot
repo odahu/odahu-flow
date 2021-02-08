@@ -156,26 +156,10 @@ Status Code 403 - Forbidden - Viewer
     toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
     toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
     toolchain delete  ${NOT_EXIST_ENTITY}
-    # packagers
-    packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
-    packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
-    packager delete  ${NOT_EXIST_ENTITY}
-    # training
-    training post  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
-    training put  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
-    training delete  ${NOT_EXIST_ENTITY}
     # packaging
     packaging post  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
     packaging put  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
     packaging delete  ${NOT_EXIST_ENTITY}
-    # deployment
-    deployment post  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
-    deployment put  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
-    deployment delete  ${NOT_EXIST_ENTITY}
-    # route
-    route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
-    route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
-    route delete  ${NOT_EXIST_ENTITY}
 
 Model. Status Code 403 - Forbidden - Viewer
     [Template]  Try Call API - Forbidden.Model
@@ -203,12 +187,6 @@ Status Code 403 - Forbidden - Custom Role
     connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
     connection put  ${RES_DIR}/connection/valid/git_connection_update.yaml
     connection delete  ${NOT_EXIST_ENTITY}
-    # toolchains
-    toolchain get
-    toolchain get id  ${TOOLCHAIN_INTEGRATION}
-    toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
-    toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
-    toolchain delete  ${NOT_EXIST_ENTITY}
     # packagers
     packager get
     packager get id  ${PI_REST}
@@ -222,25 +200,12 @@ Status Code 403 - Forbidden - Custom Role
     training post  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
     training put  ${RES_DIR}/training_packaging/valid/training.mlflow.default.yaml
     training delete  ${NOT_EXIST_ENTITY}
-    # packaging
-    packaging get
-    packaging get id  ${NOT_EXIST_ENTITY}
-    packaging get log  ${NOT_EXIST_ENTITY}
-    packaging post  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
-    packaging put  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
-    packaging delete  ${NOT_EXIST_ENTITY}
     # deployment
     deployment get
     deployment get id  ${NOT_EXIST_ENTITY}
     deployment post  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
     deployment put  ${RES_DIR}/deploy_route_model/valid/deployment.create.yaml
     deployment delete  ${NOT_EXIST_ENTITY}
-    # route
-    route get
-    route get id  ${NOT_EXIST_ENTITY}
-    route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
-    route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
-    route delete  ${NOT_EXIST_ENTITY}
 
 Model. Status Code 403 - Forbidden - Custom Role
     [Template]  Try Call API - Forbidden.Model
