@@ -50,7 +50,7 @@ const (
 	knativeNamespaceHeader   = "knative-serving-namespace"
 	modelNameHeader          = "model-name"
 	modelVersionHeader       = "model-version"
-	defaultRetryAttempts     = 30
+	defaultRetryAttempts     = 60
 	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
 	routeForLabelPrefix      = "odahu-route-for-"
 	ModelRouteVersionKey     = "modelRouteVersion"
