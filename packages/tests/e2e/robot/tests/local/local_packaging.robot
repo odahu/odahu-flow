@@ -46,7 +46,8 @@ Run Local Packaging
 
         ${MODEL_HOST}    Get local model host
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5001 --json-file ${RES_DIR}/request.json
-        Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
+        ${expected response}          evaluate  ${WINE_MODEL_RESULT}
+        dictionaries should be equal  ${result_model.stdout}  ${expected response}
 
 Try Run Local Packaging
     [Arguments]  ${error}  ${options}

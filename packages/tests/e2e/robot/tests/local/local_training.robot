@@ -53,7 +53,8 @@ Run Local Packaging
 
         ${MODEL_HOST}    Get local model host
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:5000 --json-file ${RES_DIR}/request.json
-        Should be equal as Strings  ${result_model.stdout}  ${WINE_MODEL_RESULT}
+        ${expected response}          evaluate  ${WINE_MODEL_RESULT}
+        dictionaries should be equal  ${result_model.stdout}  ${expected response}
 
 *** Test Cases ***
 Try Run and Fail Training with invalid credentials
