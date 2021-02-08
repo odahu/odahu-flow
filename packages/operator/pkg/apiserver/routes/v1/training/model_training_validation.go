@@ -33,16 +33,16 @@ import (
 
 const (
 	MtVcsNotExistsErrorMessage       = "cannot find VCS Connection"
-	EmptyModelNameErrorMessage       = "model name must be non-empty"
-	EmptyModelVersionErrorMessage    = "model version must be non-empty"
-	EmptyVcsNameMessageError         = "VCS name is empty"
+	EmptyModelNameErrorMessage       = "empty model name"
+	EmptyModelVersionErrorMessage    = "empty model version"
+	EmptyVcsNameMessageError         = "empty VCS connection"
 	ValidationMtErrorMessage         = "Validation of model training is failed"
 	WrongVcsTypeErrorMessage         = "VCS connection must have the GIT type. You pass the connection of %s type"
 	EmptyDataBindingNameErrorMessage = "you should specify connection name for %d number of data binding"
 	EmptyDataBindingPathErrorMessage = "you should specify local path for %d number of data binding"
 	WrongDataBindingTypeErrorMessage = "%s data binding has wrong data type. Currently supported the following types" +
 		" of connections for data bindings: %v"
-	ToolchainEmptyErrorMessage = "toolchain parameter is empty"
+	ToolchainEmptyErrorMessage = "empty toolchain parameter"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
 	defaultIDTemplate          = "%s-%s-%s"
 )

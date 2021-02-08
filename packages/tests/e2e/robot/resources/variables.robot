@@ -47,14 +47,11 @@ ${FailedTrain}      Validation of model training is failed:
 ${FailedPack}       Validation of model packaging is failed:
 ${FailedDeploy}     Validation of model deployment is failed:
 
-${invalid_id}   ID is not valid
-${empty_id}     empty "ID"
+${invalid_id}       ID is not valid
+${empty_id}         empty ID
 
 # ---------------------------------  connections  ---------------------------------
-@{connection types}             s3  gcs  azureblob  git  docker  ecr
-${unknown type}                 unknown type: . Supported types: [s3 gcs azureblob git docker ecr]
-${empty_uri}                    the uri parameter is empty
-${ecr_invalid_uri}              not valid uri for ecr type: docker-credential-ecr-login can only be used with Amazon Elastic Container Registry.
+${empty_uri}                    empty uri
 ${s3_empty_keyID_keySecret}     s3 type requires that keyID and keySecret parameters must be non-empty
 ${gcs_empty_keySecret}          gcs type requires that keySecret parameter must be non-empty
 ${azureblob_req_keySecret}      azureblob type requires that keySecret parameter contains HTTP endpoint with SAS Token
@@ -66,17 +63,17 @@ ${TI_empty_defaultImage}        empty defaultImage
 ${PI_empty_entrypoint}          empty entrypoint
 ${PI_empty_defaultImage}        empty defaultImage
 # ---------------------------------  training  ---------------------------------
-${empty_model_name}             model name must be non-empty
-${empty_model_version}          model version must be non-empty
-${empty_VCS}                    VCS name is empty
-${empty_toolchain}              toolchain parameter is empty
+${empty_model_name}             empty model.name
+${empty_model_version}          empty model.version
+${empty_VCS}                    empty vcsName
+${empty_toolchain}              empty toolchain parameter
 # ---------------------------------  packaging  ---------------------------------
 ${empty_artifactName}           empty artifactName
 ${empty_integrationName}        empty integrationName
 # ---------------------------------  deployment  ---------------------------------
 ${max_smaller_min_replicas}     maximum number of replicas parameter must not be less than minimum number of replicas parameter
-${empty_image}                  the image parameter is empty
-${empty_predictor}              the predictor parameter is empty
+${empty_image}                  empty image parameter
+${empty_predictor}              empty predictor parameter
 ${positive_livenessProbe}       livenessProbeInitialDelay must be non-negative integer
 ${positive_readinessProbe}      readinessProbeInitialDelay must be non-negative integer
 ${min_num_of_max_replicas}      maximum number of replicas parameter must not be less than 1
