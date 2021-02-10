@@ -159,16 +159,16 @@ Validate model feedback
     Log                            Response ID is ${actual_request_id}
     Should Be Equal                ${actual_request_id}            ${request_id}
 
-    ${meta_log_locations}=       Get paths with lag  ${FEEDBACK_LOCATION_MODELS_META_LOG}  ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}  ${FEEDBACK_PARTITIONING_PATTERN}
+    ${meta_log_locations}=       Get paths with lag  ${FEEDBACK_LOCATION_MODELS_META_LOG}  ${MD_FEEDBACK_MODEL}  1   ${FEEDBACK_PARTITIONING_PATTERN}
 
     ${meta_log_entry}=           Find log lines with content   ${meta_log_locations}  ${request_id}  1  ${True}
     Validate model API meta log entry                   ${meta_log_entry}
     Validate model API meta log entry Request ID        ${meta_log_entry}   ${request_id}
     Validate model API meta log entry HTTP method       ${meta_log_entry}   POST
-    Validate model API meta ID and version              ${meta_log_entry}   ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}
+    Validate model API meta ID and version              ${meta_log_entry}   ${MD_FEEDBACK_MODEL}  1
     Validate model API meta log entry HTTP headers      ${meta_log_entry}
 
-    ${body_log_locations}=             Get paths with lag  ${FEEDBACK_LOCATION_MODELS_RESP_LOG}  ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}  ${FEEDBACK_PARTITIONING_PATTERN}
+    ${body_log_locations}=             Get paths with lag  ${FEEDBACK_LOCATION_MODELS_RESP_LOG}  ${MD_FEEDBACK_MODEL}  1  ${FEEDBACK_PARTITIONING_PATTERN}
     @{response_log_entries}=           Find log lines with content   ${body_log_locations}  ${request_id}  ${1}  ${False}
 
     Validate model API body log entry for all entries   ${response_log_entries}
