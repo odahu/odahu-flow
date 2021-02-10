@@ -39,6 +39,8 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		"env_auth":   true,
 		"location":   conn.Region,
 		"bucket_acl": "private",
+                "bucket_policy_only": true,
+                "predefinedAcl": "bucketLevel",
 	}
 
 	if len(conn.KeySecret) != 0 {
