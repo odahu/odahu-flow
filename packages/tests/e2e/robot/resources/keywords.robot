@@ -181,4 +181,5 @@ Run Packaging
         ${MODEL_HOST}    Get local model host
         ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:${MODEL PORT} --json-file ${RES_DIR}/request.json
         ${expected response}          evaluate  ${WINE_MODEL_RESULT}
-        dictionaries should be equal  ${result_model.stdout}  ${expected response}
+        ${actual response}            convert to dictionary  ${result_model.stdout}
+        dictionaries should be equal  ${actual response}  ${expected response}
