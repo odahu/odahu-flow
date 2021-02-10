@@ -57,7 +57,7 @@ const (
 )
 
 var (
-	defaultTimeoutPerTry = gogotypes.DurationProto(time.Second)
+	defaultTimeoutPerTry = gogotypes.DurationProto(time.Minute * 3)
 )
 
 func NewModelRouteReconciler(

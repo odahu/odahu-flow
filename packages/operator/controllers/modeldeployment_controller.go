@@ -141,6 +141,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 		affinity = utils.BuildNodeAffinity(r.deploymentConfig.NodePools)
 	}
 
+	var containerConcurrency int64 = 1
 	knativeConfiguration := &knservingv1.Configuration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      KnativeConfigurationName(modelDeploymentCR),
@@ -174,6 +175,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 					},
 				},
 				Spec: knservingv1.RevisionSpec{
+					ContainerConcurrency: &containerConcurrency,
 					TimeoutSeconds: &DefaultTerminationPeriod,
 					PodSpec: corev1.PodSpec{
 						ServiceAccountName: serviceAccountName,
