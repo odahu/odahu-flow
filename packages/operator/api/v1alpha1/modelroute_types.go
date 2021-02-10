@@ -40,6 +40,11 @@ type ModelRouteSpec struct {
 	Mirror *string `json:"mirror,omitempty"`
 	// A http rule can forward traffic to Model Deployments.
 	ModelDeploymentTargets []ModelDeploymentTarget `json:"modelDeployments"`
+	// Number of retries for a given request. The interval
+	// between retries will be determined automatically (25ms+).
+	Attempts *int32 `json:"attempts,omitempty"`
+	// Timeout per retry attempt for a given request. Integer in seconds
+	PerTryTimeout *int32 `json:"per_try_timeout,omitempty"`
 }
 
 type ModelRouteState string

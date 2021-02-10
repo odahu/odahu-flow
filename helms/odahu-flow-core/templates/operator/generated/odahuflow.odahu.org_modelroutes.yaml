@@ -46,6 +46,11 @@ spec:
           type: object
         spec:
           properties:
+            attempts:
+              description: Number of retries for a given request. The interval between
+                retries will be determined automatically (25ms+).
+              format: int32
+              type: integer
             mirror:
               description: Mirror HTTP traffic to a another Model deployment in addition
                 to forwarding the requests to the model deployments.
@@ -66,6 +71,11 @@ spec:
                 - mdName
                 type: object
               type: array
+            per_try_timeout:
+              description: Timeout per retry attempt for a given request. Integer
+                in seconds
+              format: int32
+              type: integer
             urlPrefix:
               description: 'URL prefix for model deployment. For example: /custom/test
                 Prefix must start with slash "/feedback" and "/model" are reserved

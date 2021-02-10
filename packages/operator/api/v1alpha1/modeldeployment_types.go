@@ -23,6 +23,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+
+type DefaultRouteTemplate struct {
+	// Number of retries for a given request. The interval
+	// between retries will be determined automatically (25ms+).
+	Attempts *int32 `json:"attempts,omitempty"`
+	// Timeout per retry attempt for a given request. Integer in seconds
+	PerTryTimeout *int32 `json:"per_try_timeout,omitempty"`
+}
+
 // ModelDeploymentSpec defines the desired state of ModelDeployment
 type ModelDeploymentSpec struct {
 	// Model Docker image
@@ -48,6 +57,15 @@ type ModelDeploymentSpec struct {
 	ImagePullConnectionID *string `json:"imagePullConnID,omitempty"`
 	// Node selector for specifying a node pool
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// ContainerConcurrency specifies the maximum allowed in-flight (concurrent)
+	// requests per model.  Defaults to `0` which means
+	// concurrency to the model is not limited, and the system decides the
+	// target concurrency for the autoscaler.
+	// +optional
+	ContainerConcurrency *int64 `json:"containerConcurrency,omitempty"`
+	// Parameters for default ModelRoute
+	DefaultRoute *DefaultRouteTemplate `json:"defaultRoute,omitempty"`
+
 }
 
 type ModelDeploymentState string

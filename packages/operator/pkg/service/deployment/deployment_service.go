@@ -233,21 +233,23 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 }
 
 
-func constructDefaultRoute(mdID string) deployment.ModelRoute {
+func constructDefaultRoute(modelDeployment *deployment.ModelDeployment) deployment.ModelRoute {
 	return deployment.ModelRoute{
-		ID:           mdID + "-" + uuid.New().String()[:5],
+		ID:           modelDeployment.ID + "-" + uuid.New().String()[:5],
 		Default:      true,
 		DeletionMark: false,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 		Spec:         v1alpha1.ModelRouteSpec{
-			URLPrefix:              fmt.Sprintf("/model/%s", mdID),
+			URLPrefix:              fmt.Sprintf("/model/%s", modelDeployment.ID),
 			ModelDeploymentTargets: []v1alpha1.ModelDeploymentTarget{
 				{
-					Name:   mdID,
+					Name:   modelDeployment.ID,
 					Weight: &defaultWeight,
 				},
 			},
+			PerTryTimeout: modelDeployment.Spec.DefaultRoute.PerTryTimeout,
+			Attempts: modelDeployment.Spec.DefaultRoute.Attempts,
 		},
 	}
 }
@@ -277,7 +279,7 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 		return err
 	}
 	// Every Model deployment must have a default HTTP route that sends 100% of traffic to the model
-	defRoute := constructDefaultRoute(md.ID)
+	defRoute := constructDefaultRoute(md)
 	err = s.mrRepo.CreateModelRoute(ctx, tx, &defRoute)
 	if err != nil {
 		return fmt.Errorf("unable to create default ModelRoute: %v", err)

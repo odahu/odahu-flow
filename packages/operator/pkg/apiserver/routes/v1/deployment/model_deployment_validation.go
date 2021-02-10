@@ -47,6 +47,8 @@ var (
 	MdDefaultMaximumReplicas            = int32(1)
 	MdDefaultLivenessProbeInitialDelay  = int32(2)
 	MdDefaultReadinessProbeInitialDelay = int32(2)
+	defaultTimeoutPerTry = int32(1)
+	defaultRetryAttempts     = int32(30)
 )
 
 type ModelDeploymentValidator struct {
@@ -149,6 +151,8 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 
 	err = multierr.Append(mdv.validateNodeSelector(md), err)
 
+	mdv.setDefaultRouteParameters(md)
+
 	err = multierr.Append(err, validation.ValidateResources(md.Spec.Resources, config.NvidiaResourceName))
 
 	if err != nil {
@@ -172,4 +176,23 @@ func (mdv *ModelDeploymentValidator) validateNodeSelector(md *deployment.ModelDe
 	}
 
 	return fmt.Errorf(UnknownNodeSelector, md.Spec.NodeSelector)
+}
+
+
+func (mdv *ModelDeploymentValidator) setDefaultRouteParameters(md *deployment.ModelDeployment) {
+	if md.Spec.DefaultRoute == nil {
+		md.Spec.DefaultRoute = &odahuflowv1alpha1.DefaultRouteTemplate{
+			Attempts:      &defaultRetryAttempts,
+			PerTryTimeout: &defaultTimeoutPerTry,
+		}
+	}
+
+	if md.Spec.DefaultRoute.Attempts == nil {
+		md.Spec.DefaultRoute.Attempts = &defaultRetryAttempts
+	}
+
+	if md.Spec.DefaultRoute.PerTryTimeout == nil {
+		md.Spec.DefaultRoute.PerTryTimeout =  &defaultTimeoutPerTry
+	}
+
 }

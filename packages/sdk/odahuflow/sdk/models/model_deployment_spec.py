@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.default_route_template import DefaultRouteTemplate  # noqa: F401,E501
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
@@ -16,11 +17,15 @@ class ModelDeploymentSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, annotations: Dict[str, str]=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, node_selector: Dict[str, str]=None, predictor: str=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
+    def __init__(self, annotations: Dict[str, str]=None, container_concurrency: int=None, default_route: DefaultRouteTemplate=None, image: str=None, image_pull_conn_id: str=None, liveness_probe_initial_delay: int=None, max_replicas: int=None, min_replicas: int=None, node_selector: Dict[str, str]=None, predictor: str=None, readiness_probe_initial_delay: int=None, resources: ResourceRequirements=None, role_name: str=None):  # noqa: E501
         """ModelDeploymentSpec - a model defined in Swagger
 
         :param annotations: The annotations of this ModelDeploymentSpec.  # noqa: E501
         :type annotations: Dict[str, str]
+        :param container_concurrency: The container_concurrency of this ModelDeploymentSpec.  # noqa: E501
+        :type container_concurrency: int
+        :param default_route: The default_route of this ModelDeploymentSpec.  # noqa: E501
+        :type default_route: DefaultRouteTemplate
         :param image: The image of this ModelDeploymentSpec.  # noqa: E501
         :type image: str
         :param image_pull_conn_id: The image_pull_conn_id of this ModelDeploymentSpec.  # noqa: E501
@@ -44,6 +49,8 @@ class ModelDeploymentSpec(Model):
         """
         self.swagger_types = {
             'annotations': Dict[str, str],
+            'container_concurrency': int,
+            'default_route': DefaultRouteTemplate,
             'image': str,
             'image_pull_conn_id': str,
             'liveness_probe_initial_delay': int,
@@ -58,6 +65,8 @@ class ModelDeploymentSpec(Model):
 
         self.attribute_map = {
             'annotations': 'annotations',
+            'container_concurrency': 'containerConcurrency',
+            'default_route': 'defaultRoute',
             'image': 'image',
             'image_pull_conn_id': 'imagePullConnID',
             'liveness_probe_initial_delay': 'livenessProbeInitialDelay',
@@ -71,6 +80,8 @@ class ModelDeploymentSpec(Model):
         }
 
         self._annotations = annotations
+        self._container_concurrency = container_concurrency
+        self._default_route = default_route
         self._image = image
         self._image_pull_conn_id = image_pull_conn_id
         self._liveness_probe_initial_delay = liveness_probe_initial_delay
@@ -115,6 +126,52 @@ class ModelDeploymentSpec(Model):
         """
 
         self._annotations = annotations
+
+    @property
+    def container_concurrency(self) -> int:
+        """Gets the container_concurrency of this ModelDeploymentSpec.
+
+        ContainerConcurrency specifies the maximum allowed in-flight (concurrent) requests per model.  Defaults to `0` which means concurrency to the model is not limited, and the system decides the target concurrency for the autoscaler. +optional  # noqa: E501
+
+        :return: The container_concurrency of this ModelDeploymentSpec.
+        :rtype: int
+        """
+        return self._container_concurrency
+
+    @container_concurrency.setter
+    def container_concurrency(self, container_concurrency: int):
+        """Sets the container_concurrency of this ModelDeploymentSpec.
+
+        ContainerConcurrency specifies the maximum allowed in-flight (concurrent) requests per model.  Defaults to `0` which means concurrency to the model is not limited, and the system decides the target concurrency for the autoscaler. +optional  # noqa: E501
+
+        :param container_concurrency: The container_concurrency of this ModelDeploymentSpec.
+        :type container_concurrency: int
+        """
+
+        self._container_concurrency = container_concurrency
+
+    @property
+    def default_route(self) -> DefaultRouteTemplate:
+        """Gets the default_route of this ModelDeploymentSpec.
+
+        Parameters for default ModelRoute  # noqa: E501
+
+        :return: The default_route of this ModelDeploymentSpec.
+        :rtype: DefaultRouteTemplate
+        """
+        return self._default_route
+
+    @default_route.setter
+    def default_route(self, default_route: DefaultRouteTemplate):
+        """Sets the default_route of this ModelDeploymentSpec.
+
+        Parameters for default ModelRoute  # noqa: E501
+
+        :param default_route: The default_route of this ModelDeploymentSpec.
+        :type default_route: DefaultRouteTemplate
+        """
+
+        self._default_route = default_route
 
     @property
     def image(self) -> str:
