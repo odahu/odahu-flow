@@ -178,6 +178,15 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		}
 	}
 
+	var perTryTimeout, attempts int32
+
+	if modelRouteCR.Spec.PerTryTimeout != nil {
+		perTryTimeout = *modelRouteCR.Spec.PerTryTimeout
+	}
+	if modelRouteCR.Spec.Attempts != nil {
+		attempts = *modelRouteCR.Spec.Attempts
+	}
+
 	vservice := &v1alpha3_istio_api.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      VirtualServiceName(modelRouteCR),
@@ -193,9 +202,9 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				Http: []*v1alpha3_istio.HTTPRoute{
 					{
 						Retries: &v1alpha3_istio.HTTPRetry{
-							Attempts:      *modelRouteCR.Spec.Attempts,
+							Attempts:      attempts,
 							PerTryTimeout: gogotypes.DurationProto(
-								time.Second * time.Duration(*modelRouteCR.Spec.PerTryTimeout),
+								time.Second * time.Duration(perTryTimeout),
 							),
 							RetryOn:       defaultListOfRetryCauses,
 						},

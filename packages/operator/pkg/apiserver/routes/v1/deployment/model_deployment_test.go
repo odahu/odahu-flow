@@ -116,6 +116,8 @@ func (s *ModelDeploymentRouteSuite) TearDownTest() {
 }
 
 func newStubMd() *deployment.ModelDeployment {
+	var cc int64 = 2
+	var att, ptt int32 = 2, 2
 	return &deployment.ModelDeployment{
 		ID: mdID,
 		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
@@ -129,6 +131,11 @@ func newStubMd() *deployment.ModelDeployment {
 			Resources:                  mdResources,
 			RoleName:                   &mdRoleName,
 			ImagePullConnectionID:      &mdImagePullConnID,
+			ContainerConcurrency: &cc,
+			DefaultRoute: &odahuflowv1alpha1.DefaultRouteTemplate{
+				Attempts:      &att,
+				PerTryTimeout: &ptt,
+			},
 		},
 	}
 }

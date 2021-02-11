@@ -234,6 +234,20 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 
 
 func constructDefaultRoute(modelDeployment *deployment.ModelDeployment) deployment.ModelRoute {
+
+	var attempts, perTryTimeout int32
+
+
+	df := modelDeployment.Spec.DefaultRoute
+	if df != nil {
+		if df.Attempts != nil {
+			attempts = *df.Attempts
+		}
+		if df.PerTryTimeout != nil {
+			perTryTimeout = *df.PerTryTimeout
+		}
+	}
+
 	return deployment.ModelRoute{
 		ID:           modelDeployment.ID + "-" + uuid.New().String()[:5],
 		Default:      true,
@@ -248,8 +262,8 @@ func constructDefaultRoute(modelDeployment *deployment.ModelDeployment) deployme
 					Weight: &defaultWeight,
 				},
 			},
-			PerTryTimeout: modelDeployment.Spec.DefaultRoute.PerTryTimeout,
-			Attempts: modelDeployment.Spec.DefaultRoute.Attempts,
+			PerTryTimeout: &attempts,
+			Attempts: &perTryTimeout,
 		},
 	}
 }
