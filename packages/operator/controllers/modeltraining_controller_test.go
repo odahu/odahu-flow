@@ -425,7 +425,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 
 	tr := s.getTektonTrainingTask(mt)
 
-	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 3))
+	s.g.Expect(tr.Spec.Timeout.Duration).Should(Equal(time.Hour * 4))
 }
 
 func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
