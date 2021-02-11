@@ -173,7 +173,7 @@ Run Packaging
         Remove File  ${RESULT_DIR}/pack_result.txt
 
         StrictShell  docker images --all
-        ${container_id}  StrictShell  docker run -d --rm -p 5001:5000 ${image_name.stdout}
+        ${container_id}  StrictShell  docker run -d --rm -p ${MODEL PORT}:5000 ${image_name.stdout}
 
         Sleep  5 sec
         StrictShell  docker container list -as -f id=${container_id.stdout}
