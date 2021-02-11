@@ -187,12 +187,6 @@ Status Code 403 - Forbidden - Custom Role
     connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
     connection put  ${RES_DIR}/connection/valid/git_connection_update.yaml
     connection delete  ${NOT_EXIST_ENTITY}
-    # packagers
-    packager get
-    packager get id  ${PI_REST}
-    packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
-    packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
-    packager delete  ${NOT_EXIST_ENTITY}
     # training
     training get
     training get id  ${NOT_EXIST_ENTITY}
