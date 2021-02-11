@@ -136,10 +136,6 @@ Status Code 403 - Forbidden - Data Scientist
     packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
     packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
     packager delete  ${NOT_EXIST_ENTITY}
-    # route
-    route post  ${RES_DIR}/deploy_route_model/valid/route.yaml
-    route put  ${RES_DIR}/deploy_route_model/valid/route.yaml
-    route delete  ${NOT_EXIST_ENTITY}
 
 Status Code 403 - Forbidden - Viewer
     [Template]  Try Call API - Forbidden
