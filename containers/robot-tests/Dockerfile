@@ -40,7 +40,7 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
     chmod a+x /usr/local/bin/rclone /usr/local/bin/kubectl && \
     rm -rf /tmp/rclone*
 
-RUN pip install --disable-pip-version-check --upgrade pip==18.1 pipenv==2018.10.13 awscli
+RUN pip install --disable-pip-version-check --upgrade pip==21.0.1 pipenv==2018.10.13 awscli
 
 ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86_64.sh
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
