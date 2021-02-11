@@ -13,6 +13,7 @@ Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.sdk_wrapper.Login
+Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
 Suite Setup         Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 Suite Teardown      Remove file  ${LOCAL_CONFIG}
 Force Tags          api  sdk  security  login
