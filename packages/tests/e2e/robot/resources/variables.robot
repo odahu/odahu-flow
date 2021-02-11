@@ -31,7 +31,7 @@ ${CONN_SECRET_MASK}                   *****
 ${400 BadRequest Template}          WrongHttpStatusCode: Got error from server: {} (status: 400)
 ${403 Forbidden Template}           WrongHttpStatusCode: Got error from server: {} (status: 403)
 ${404 NotFound Template}            WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
-${404 Model NotFoundTemplate}       Wrong status code returned: 404. Data: . URL: {}
+${404 Model NotFoundTemplate}       Wrong status code returned: 404. Data: "". URL: "{}"
 ${409 Conflict Template}            EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
 ${Model WrongStatusCode Template}   Wrong status code returned: {status code}. Data: "{data}". URL: "{url}"
 ${APIConnectionException}           APIConnectionException: Can not reach {base url}
@@ -48,7 +48,7 @@ ${FailedPack}       Validation of model packaging is failed:
 ${FailedDeploy}     Validation of model deployment is failed:
 
 ${invalid_id}       ID is not valid
-${empty_id}         empty ID
+${empty_id}         empty "ID"
 
 # ---------------------------------  connections  ---------------------------------
 ${empty_uri}                    empty uri
