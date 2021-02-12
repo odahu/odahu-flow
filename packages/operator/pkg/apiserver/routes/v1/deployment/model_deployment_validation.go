@@ -49,6 +49,7 @@ var (
 	MdDefaultReadinessProbeInitialDelay = int32(2)
 	defaultTimeoutPerTry = int32(1)
 	defaultRetryAttempts     = int32(30)
+	defaultContainerConcurrency= int64(0)
 )
 
 type ModelDeploymentValidator struct {
@@ -154,6 +155,10 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	mdv.setDefaultRouteParameters(md)
 
 	err = multierr.Append(err, validation.ValidateResources(md.Spec.Resources, config.NvidiaResourceName))
+
+	if md.Spec.ContainerConcurrency == nil {
+		md.Spec.ContainerConcurrency = &defaultContainerConcurrency
+	}
 
 	if err != nil {
 		return fmt.Errorf("%s: %s", ValidationMdErrorMessage, err.Error())
