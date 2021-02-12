@@ -35,9 +35,9 @@ ${404 Model NotFoundTemplate}       Wrong status code returned: 404. Data: "". U
 ${409 Conflict Template}            EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
 ${Model WrongStatusCode Template}   Wrong status code returned: {status code}. Data: "{data}". URL: "{url}"
 ${APIConnectionException}           APIConnectionException: Can not reach {base url}
-${IncorrectRefreshToken}            IncorrectAuthorizationToken: Refresh token is not correct.\nPlease login again
-${IncorrectCredentials}             IncorrectAuthorizationToken: Credentials are not correct.\nPlease provide correct temporary token or disable non interactive mode
-${IncorrectTemporaryToken}          IncorrectAuthorizationToken: Credentials are missed.\nPlease provide correct temporary token or disable non interactive mode
+${IncorrectCredentials}             IncorrectClientCredentials: Client credentials are not correct.\nPlease check credentials and try again
+${IncorrectToken}                   IncorrectAuthorizationToken: Credentials are not correct.\nPlease provide correct temporary token or disable non interactive mode
+${MissedToken}                      IncorrectAuthorizationToken: Credentials are missed.\nPlease provide correct temporary token or disable non interactive mode
 
 # ---------------------------------  Validation checks  ---------------------------------
 ${FailedConn}       Validation of connection is failed:
