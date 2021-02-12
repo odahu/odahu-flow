@@ -33,6 +33,7 @@ CLUSTER_PROFILE = 'CLUSTER_PROFILE'
 # Key in cluster_profile.json that contain creds for
 TEST_SA_ADMIN = 'test'
 TEST_SA_DS = 'test_data_scientist'
+TEST_SA_CUSTOM_ROLE = 'odahu_custom_role'
 
 
 class ServiceAccount:
@@ -40,6 +41,7 @@ class ServiceAccount:
     def __init__(self, profile_json, service_account_key):
         self._client_id = profile_json['service_accounts'][service_account_key]['client_id']
         self._client_secret = profile_json['service_accounts'][service_account_key]['client_secret']
+        self._roles = profile_json['service_accounts'][service_account_key].get('roles')
 
     @property
     def client_id(self):
@@ -48,6 +50,10 @@ class ServiceAccount:
     @property
     def client_secret(self):
         return self._client_secret
+
+    @property
+    def roles(self):
+        return self._roles
 
 
 def get_variables(profile=None) -> typing.Dict[str, str]:
@@ -75,6 +81,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
 
             test_sa_admin = ServiceAccount(data, TEST_SA_ADMIN)
             test_sa_ds = ServiceAccount(data, TEST_SA_DS)
+            test_sa_custom_role = ServiceAccount(data, TEST_SA_CUSTOM_ROLE)
 
             host_base_domain = data['dns']['domain']
             variables = {
@@ -97,6 +104,9 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'SA_CLIENT_SECRET': test_sa_admin.client_secret,
                 'SA_ADMIN': test_sa_admin,
                 'SA_DATA_SCIENTIST': test_sa_ds,
+                'SA_CUSTOM_USER': test_sa_custom_role,
+                'SA_CUSTOM_ROLE': test_sa_custom_role.roles,
+
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:

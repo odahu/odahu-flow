@@ -130,11 +130,8 @@ def _ask_token_endpoint(url: str, payload: typing.Any) -> typing.Optional[OAuthL
     try:
         res = requests.post(url, data=payload)
         data = res.json()
-    except requests.HTTPError as http_error:
-        LOGGER.warning('Failed to get ID token on %r - %s', url, http_error)
-        return None
-    except ValueError as value_error:
-        LOGGER.warning('Failed to get ID token on %r - %s', url, value_error)
+    except (ValueError, requests.HTTPError) as error:
+        LOGGER.warning('Failed to get ID token on %r - %s', url, error)
         return None
 
     access_token, refresh_token, id_token = data.get('access_token'), data.get('refresh_token'), data.get('id_token')

@@ -2,9 +2,12 @@
 ${LOCAL_CONFIG}                     odahuflow/api_deploy_route_model
 ${RES_DIR}                          ${CURDIR}/resources/deploy_route_model
 
+${PACKAGE_IMAGE_STUB}               packaging-image
 ${PACKAGING}                        simple-model
 ${DEPLOYMENT}                       wine-api-testing
 ${MODEL}                            ${DEPLOYMENT}
+${DEPLOY_CUSTOM_ROLE}               api-test-custom-role
+${MODEL_CUSTOM_ROLE}                ${DEPLOYMENT}
 ${REQUEST}                          SEPARATOR=
 ...                                 { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 ${REQUEST_RESPONSE}                 { "prediction": [ [ 42 ] ], "columns": [ "result" ] }
@@ -16,6 +19,7 @@ Documentation       API of deployment, route and model
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
+Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelPackaging
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
@@ -40,6 +44,12 @@ Get model Url
     ${model_url}      set variable  ${EDGE_URL}/model/${model_id}
     [return]          ${model_url}
 
+Custom Role Setup
+    ${image}     Pick packaging image  ${PACKAGING}
+    StrictShell  odahuflowctl dep create -f ${RES_DIR}/valid/deployment.custom_role.yaml --image ${image}
+    Login to the api and edge  ${SA_CUSTOM_USER}
+    reload config
+
 *** Test Cases ***
 Check deployment doesn't exist
     [Tags]                      deployment
@@ -47,16 +57,16 @@ Check deployment doesn't exist
 
 Create deployment
     [Tags]                      deployment
-    ${image}                    Pick packaging_image  ${PACKAGING}
+    ${image}                    Pick packaging image  ${PACKAGING}
     Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${image}
     ${exp_result}               create List   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
-    Check model started  ${DEPLOYMENT}
+    Check model started         ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
 
 Update deployment
     [Tags]                      deployment
-    ${image}                    Pick packaging_image  ${PACKAGING}
+    ${image}                    Pick packaging image  ${PACKAGING}
     Call API                    deployment put  ${RES_DIR}/valid/deployment.update.json  ${image}
     ${check_changes}            Call API  deployment get id  ${DEPLOYMENT}
     should be equal             ${check_changes.spec.role_name}  test_updated
@@ -86,15 +96,29 @@ Check by id that route exists
 Get info about model
     [Tags]                      model
     ${model_url}                Get model Url  ${MODEL}
-    ${result}                   Call API  model get  url=${model_url}
+    ${result}                   Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
     should be equal             ${result['info']['description']}  This is a EDI server.
 
 Invoke model
     [Tags]                        model
     ${model_url}                  Get model Url  ${MODEL}
-    ${result}                     Call API  model post  url=${model_url}  json_input=${REQUEST}
+    ${result}                     Call API  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
     ${expected response}          evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result}  ${expected response}
+
+Invoke model - Custom Role
+    [Tags]      deployment  model
+    [Setup]     Custom Role Setup
+    [Teardown]  run keywords
+    ...         Login to the api and edge  AND
+    ...         reload config  AND
+    ...         StrictShell  odahuflowctl dep delete --id ${DEPLOY_CUSTOM_ROLE}
+    ${model_url}            Get model Url  ${MODEL_CUSTOM_ROLE}
+    ${result_info}          Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
+    should be equal         ${result_info['info']['description']}  This is a EDI server.
+    ${result_invoke}        Call API  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
+    ${expected response}    evaluate  ${REQUEST_RESPONSE}
+    dictionaries should be equal  ${result_invoke}  ${expected response}
 
 Delete Model Deployment and Check that Model Deployment does not exist
     [Tags]                      deployment
@@ -117,19 +141,19 @@ Try Create Deployment that already exists
     [Tags]                      deployment  negative
     [Setup]                     Cleanup resource  deployment  ${DEPLOYMENT}
     [Teardown]                  Cleanup resource  deployment  ${DEPLOYMENT}
-    Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  packaging_image
+    Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  ${PACKAGE_IMAGE_STUB}
     ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${DEPLOYMENT}
-    Call API and get Error      ${EntityAlreadyExists}  deployment post  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
+    Call API and get Error      ${EntityAlreadyExists}  deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${PACKAGE_IMAGE_STUB}
 
 Try Update not existing Deployment
     [Tags]                      deployment  negative
     ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT_NOT_EXIST}
-    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  packaging_image
+    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  ${PACKAGE_IMAGE_STUB}
 
 Try Update deleted Deployment
     [Tags]                      deployment  negative
     ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
-    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  packaging_image
+    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  ${PACKAGE_IMAGE_STUB}
 
 Try Get id not existing Deployment
     [Tags]                      deployment  negative

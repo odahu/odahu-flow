@@ -14,15 +14,6 @@ func IsTemporary(err error) bool {
 	return ok && tErr.Temporary()
 }
 
-
-type temporaryErr struct {
-	error
-}
-
-func (t temporaryErr) Temporary() bool  {
-	return true
-}
-
 type Route struct {
 	ID     string
 	Prefix string

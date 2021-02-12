@@ -48,6 +48,8 @@ import (
 const (
 	knativeRevisionHeader    = "knative-serving-revision"
 	knativeNamespaceHeader   = "knative-serving-namespace"
+	modelNameHeader          = "model-name"
+	modelVersionHeader       = "model-version"
 	defaultRetryAttempts     = 30
 	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
 	routeForLabelPrefix      = "odahu-route-for-"
@@ -124,6 +126,13 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				knativeNamespaceHeader: r.deploymentConfig.Namespace,
 			},
 		}
+		// TODO: Deliver real model name/version to put in headers
+		responseHeaders := &v1alpha3_istio.Headers_HeaderOperations{
+			Set: map[string]string{
+				modelNameHeader:    modelDeployment.Name,
+				modelVersionHeader: "1",
+			},
+		}
 
 		httpTargets = append(httpTargets,
 			&v1alpha3_istio.HTTPRouteDestination{
@@ -135,7 +144,8 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				},
 				Weight: *md.Weight,
 				Headers: &v1alpha3_istio.Headers{
-					Request: requestHeaders,
+					Request:  requestHeaders,
+					Response: responseHeaders,
 				},
 			})
 	}

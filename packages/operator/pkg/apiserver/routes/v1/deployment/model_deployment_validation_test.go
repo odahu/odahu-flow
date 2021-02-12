@@ -21,10 +21,10 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	md_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/multierr"
+	"odahu-commons/predictors"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -37,7 +37,7 @@ var (
 		ID: "valid-id",
 		Spec: v1alpha1.ModelDeploymentSpec{
 			Image:        "image",
-			Predictor:    odahuflow.OdahuMLServer.ID,
+			Predictor:    predictors.OdahuMLServer.ID,
 			NodeSelector: validNodeSelector,
 		},
 	}

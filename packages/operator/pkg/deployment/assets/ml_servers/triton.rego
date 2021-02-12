@@ -30,21 +30,18 @@ allow {
   mapper.resource == "/v2/health/ready"
 }
 
+# Full access for Admin
+allow {
+  mapper.user_roles[_] == roles.admin
+}
+
 # Triton Model endpoints
 tritonPathRegex := `^/v2/models/[\w-]+(/versions/[\d]+)?(/infer|/ready)?/?$`
 
-# Raw role
+# Access to inference for data scientinsts and users with per-model role
 allow {
   mapper.action == ["GET", "POST"][_]
   re_match(tritonPathRegex, mapper.resource)
 
-  mapper.raw_roles[_] == "{{.Role}}"
-}
-
-# Fixed roles
-allow {
-  mapper.action == ["GET", "POST"][_]
-  re_match(tritonPathRegex, mapper.resource)
-
-  mapper.user_roles[_] == [roles.data_scientist, roles.admin][_]
+  mapper.raw_roles[_] == ["{{.Role}}", roles.data_scientist][_]
 }

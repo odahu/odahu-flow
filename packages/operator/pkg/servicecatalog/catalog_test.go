@@ -10,7 +10,6 @@ import (
 	"testing"
 )
 
-
 // Compares jsons after unmarshalling into empty interface{}
 // So ignores indents and whitespaces and compare only keys and values
 func assertJSONEqual(t *testing.T, rawExpected []byte, rawActual []byte) {
@@ -65,7 +64,6 @@ func TestProcessSwaggerJSON(t *testing.T) {
 	assert.NoError(t, err)
 	catalog := servicecatalog.NewModelRouteCatalog(log.Sugar())
 
-
 	assert.NoError(t, catalog.CreateOrUpdate(servicecatalog.Route{
 		ID:     "simple",
 		Prefix: "/model/simple",
@@ -73,7 +71,6 @@ func TestProcessSwaggerJSON(t *testing.T) {
 			DeploymentID: "simple",
 			ServedModel: model.ServedModel{
 				Metadata: model.Metadata{},
-				MLServer: "",
 				Swagger:  model.Swagger2{Raw: raw},
 			},
 		},

@@ -11,15 +11,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"odahu-commons/predictors"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
 
 const (
-	TapUrl                 = "/tap"
-	filterHeaderKey        = ":path"
-	filterRegexHeaderValue = ".*/api/model/invoke.*"
-	defaultBufferSize      = 1024 * 1024
+	TapUrl            = "/tap"
+	filterHeaderKey   = ":path"
+	defaultBufferSize = 1024 * 1024
 )
 
 var log = logf.Log.WithName("collector")
@@ -42,14 +42,19 @@ func NewRequestCollector(
 		ConfigID: configId,
 	}
 
-	feedbackRequest.TapConfig.MatchConfig.HttpRequestHeadersMatch.Headers =
-		append(
-			feedbackRequest.TapConfig.MatchConfig.HttpRequestHeadersMatch.Headers,
-			TapRequestHeader{
-				Name:       filterHeaderKey,
-				RegexMatch: filterRegexHeaderValue,
+	rules := make([]Rule, 0, len(predictors.Predictors))
+	for _, predictor := range predictors.Predictors {
+		rules = append(rules, Rule{
+			HttpRequestHeadersMatch: HttpRequestHeadersMatch{
+				Headers: []TapRequestHeader{{
+					Name:       filterHeaderKey,
+					RegexMatch: predictor.InferenceEndpointRegex,
+				}},
 			},
-		)
+		})
+	}
+	feedbackRequest.TapConfig.MatchConfig.OrMatch.Rules = rules
+
 	feedbackRequest.TapConfig.OutputConfig.Sinks = append(
 		feedbackRequest.TapConfig.OutputConfig.Sinks,
 		TapSink{StreamingAdmin: map[string]string{}},
@@ -62,6 +67,7 @@ func NewRequestCollector(
 
 		return nil, err
 	}
+	log.Info("generated tapping request", "request_yaml", string(feedbackRequestYaml))
 
 	prohibitedHeadersMap := make(map[string]string, len(prohibitedHeaders))
 	for _, header := range prohibitedHeaders {
