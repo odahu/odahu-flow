@@ -35,7 +35,7 @@ const (
 	MtVcsNotExistsErrorMessage       = "cannot find VCS Connection"
 	EmptyModelNameErrorMessage       = "empty model.name"
 	EmptyModelVersionErrorMessage    = "empty model.version"
-	EmptyVcsNameMessageError         = "empty VCS connection"
+	EmptyVcsNameMessageError         = "empty vcsName"
 	ValidationMtErrorMessage         = "Validation of model training is failed"
 	WrongVcsTypeErrorMessage         = "VCS connection must have the GIT type. You pass the connection of %s type"
 	EmptyDataBindingNameErrorMessage = "you should specify connection name for %d number of data binding"
