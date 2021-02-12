@@ -330,3 +330,25 @@ func (s *ModelDeploymentValidationSuite) TestValidateRoleName_Nil() {
 	s.Assertions.NoError(err)
 	s.Assertions.Equal(*mt.Spec.RoleName, md_routes.DefaultRolePrefix+mt.ID)
 }
+
+
+// Deployment has no containerConcurrency
+func (s *ModelDeploymentValidationSuite) TestContainerConcurrency() {
+	md := validDeployment
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&md)
+	s.Assertions.NoError(err)
+	s.Assertions.Equal(*md.Spec.ContainerConcurrency, md_routes.DefaultContainerConcurrency)
+}
+
+
+// Deployment has no defaultRoute
+func (s *ModelDeploymentValidationSuite) TestDefaultRoute() {
+	md := validDeployment
+	err := s.defaultModelValidator.ValidatesMDAndSetDefaults(&md)
+	s.Assertions.NoError(err)
+	s.Assertions.NotNil(*md.Spec.DefaultRoute)
+	s.Assertions.NotNil(*md.Spec.DefaultRoute.Attempts)
+	s.Assertions.Equal(*md.Spec.DefaultRoute.Attempts, md_routes.DefaultRetryAttempts)
+	s.Assertions.NotNil(*md.Spec.DefaultRoute.PerTryTimeout)
+	s.Assertions.Equal(*md.Spec.DefaultRoute.PerTryTimeout, md_routes.DefaultTimeoutPerTry)
+}

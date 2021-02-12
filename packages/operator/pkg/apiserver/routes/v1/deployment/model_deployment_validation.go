@@ -47,9 +47,9 @@ var (
 	MdDefaultMaximumReplicas            = int32(1)
 	MdDefaultLivenessProbeInitialDelay  = int32(2)
 	MdDefaultReadinessProbeInitialDelay = int32(2)
-	defaultTimeoutPerTry = int32(1)
-	defaultRetryAttempts     = int32(30)
-	defaultContainerConcurrency= int64(0)
+	DefaultTimeoutPerTry                = int32(1)
+	DefaultRetryAttempts                = int32(30)
+	DefaultContainerConcurrency         = int64(0)
 )
 
 type ModelDeploymentValidator struct {
@@ -157,7 +157,7 @@ func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.Mo
 	err = multierr.Append(err, validation.ValidateResources(md.Spec.Resources, config.NvidiaResourceName))
 
 	if md.Spec.ContainerConcurrency == nil {
-		md.Spec.ContainerConcurrency = &defaultContainerConcurrency
+		md.Spec.ContainerConcurrency = &DefaultContainerConcurrency
 	}
 
 	if err != nil {
@@ -187,17 +187,17 @@ func (mdv *ModelDeploymentValidator) validateNodeSelector(md *deployment.ModelDe
 func (mdv *ModelDeploymentValidator) setDefaultRouteParameters(md *deployment.ModelDeployment) {
 	if md.Spec.DefaultRoute == nil {
 		md.Spec.DefaultRoute = &odahuflowv1alpha1.DefaultRouteTemplate{
-			Attempts:      &defaultRetryAttempts,
-			PerTryTimeout: &defaultTimeoutPerTry,
+			Attempts:      &DefaultRetryAttempts,
+			PerTryTimeout: &DefaultTimeoutPerTry,
 		}
 	}
 
 	if md.Spec.DefaultRoute.Attempts == nil {
-		md.Spec.DefaultRoute.Attempts = &defaultRetryAttempts
+		md.Spec.DefaultRoute.Attempts = &DefaultRetryAttempts
 	}
 
 	if md.Spec.DefaultRoute.PerTryTimeout == nil {
-		md.Spec.DefaultRoute.PerTryTimeout =  &defaultTimeoutPerTry
+		md.Spec.DefaultRoute.PerTryTimeout =  &DefaultTimeoutPerTry
 	}
 
 }
