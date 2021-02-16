@@ -246,9 +246,9 @@ class Toolchain:
 class Model:
 
     @staticmethod
-    def model_get(url, token=config.API_TOKEN):
+    def model_get(url, **kwargs):
         return ModelClient(url, token=config.API_TOKEN).info()
 
     @staticmethod
-    def model_post(url, token=config.API_TOKEN, json_input=None):
+    def model_post(url, **kwargs):
         return ModelClient(url, token=config.API_TOKEN).invoke(**json.loads(json_input))
