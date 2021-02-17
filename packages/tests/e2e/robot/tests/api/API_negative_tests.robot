@@ -32,7 +32,7 @@ Suite Setup         Run Keywords
 ...                 AND  reload config
 ...                 AND  Run API deploy from model packaging and check model started  simple-model  dep-status-code-400-403  ${RES_DIR}/deploy_route_model/valid/deployment.negative.403.yaml
 Suite Teardown      Run Keywords
-...                 AND  Login to the api and edge
+...                 Login to the api and edge
 ...                 AND  reload config
 ...                 AND  Run API undeploy model and check  ${MODEL_DEPLOYMENT}
 ...                 AND  Remove File  ${LOCAL_CONFIG}
