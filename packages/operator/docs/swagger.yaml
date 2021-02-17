@@ -854,6 +854,17 @@ definitions:
         description: Overwrite remote data path in connection
         type: string
     type: object
+  DefaultRouteTemplate:
+    properties:
+      attempts:
+        description: |-
+          Number of retries for a given request. The interval
+          between retries will be determined automatically (25ms+).
+        type: integer
+      per_try_timeout:
+        description: Timeout per retry attempt for a given request. Integer in seconds
+        type: integer
+    type: object
   EnvironmentVariable:
     properties:
       name:
@@ -869,6 +880,18 @@ definitions:
         additionalProperties:
           type: string
         description: Annotations for model pods.
+        type: object
+      containerConcurrency:
+        description: |-
+          ContainerConcurrency specifies the maximum allowed in-flight (concurrent)
+          requests per model.  Defaults to `0` which means
+          concurrency to the model is not limited, and the system decides the
+          target concurrency for the autoscaler.
+          +optional
+        type: integer
+      defaultRoute:
+        $ref: '#/definitions/DefaultRouteTemplate'
+        description: Parameters for default ModelRoute
         type: object
       image:
         description: Model Docker image
@@ -1001,6 +1024,11 @@ definitions:
     type: object
   ModelRouteSpec:
     properties:
+      attempts:
+        description: |-
+          Number of retries for a given request. The interval
+          between retries will be determined automatically (25ms+).
+        type: integer
       mirror:
         description: |-
           Mirror HTTP traffic to a another Model deployment in addition to forwarding
@@ -1011,6 +1039,9 @@ definitions:
         items:
           $ref: '#/definitions/ModelDeploymentTarget'
         type: array
+      per_try_timeout:
+        description: Timeout per retry attempt for a given request. Integer in seconds
+        type: integer
       urlPrefix:
         description: |-
           URL prefix for model  For example: /custom/test

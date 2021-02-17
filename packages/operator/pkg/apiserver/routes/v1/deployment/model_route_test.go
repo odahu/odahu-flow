@@ -138,10 +138,13 @@ func (s *ModelRouteSuite) TearDownTest() {
 }
 
 func newStubMr() *deployment.ModelRoute {
+	var ptt, attempts int32 = 1, 30
 	return &deployment.ModelRoute{
 		ID: mrID,
 		Spec: odahuflowv1alpha1.ModelRouteSpec{
 			URLPrefix: mrURL,
+			PerTryTimeout: &ptt,
+			Attempts: &attempts,
 			ModelDeploymentTargets: []odahuflowv1alpha1.ModelDeploymentTarget{
 				{
 					Name:   mdID1,

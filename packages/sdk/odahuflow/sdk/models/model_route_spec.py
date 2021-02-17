@@ -16,30 +16,40 @@ class ModelRouteSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, mirror: str=None, model_deployments: List[ModelDeploymentTarget]=None, url_prefix: str=None):  # noqa: E501
+    def __init__(self, attempts: int=None, mirror: str=None, model_deployments: List[ModelDeploymentTarget]=None, per_try_timeout: int=None, url_prefix: str=None):  # noqa: E501
         """ModelRouteSpec - a model defined in Swagger
 
+        :param attempts: The attempts of this ModelRouteSpec.  # noqa: E501
+        :type attempts: int
         :param mirror: The mirror of this ModelRouteSpec.  # noqa: E501
         :type mirror: str
         :param model_deployments: The model_deployments of this ModelRouteSpec.  # noqa: E501
         :type model_deployments: List[ModelDeploymentTarget]
+        :param per_try_timeout: The per_try_timeout of this ModelRouteSpec.  # noqa: E501
+        :type per_try_timeout: int
         :param url_prefix: The url_prefix of this ModelRouteSpec.  # noqa: E501
         :type url_prefix: str
         """
         self.swagger_types = {
+            'attempts': int,
             'mirror': str,
             'model_deployments': List[ModelDeploymentTarget],
+            'per_try_timeout': int,
             'url_prefix': str
         }
 
         self.attribute_map = {
+            'attempts': 'attempts',
             'mirror': 'mirror',
             'model_deployments': 'modelDeployments',
+            'per_try_timeout': 'per_try_timeout',
             'url_prefix': 'urlPrefix'
         }
 
+        self._attempts = attempts
         self._mirror = mirror
         self._model_deployments = model_deployments
+        self._per_try_timeout = per_try_timeout
         self._url_prefix = url_prefix
 
     @classmethod
@@ -52,6 +62,29 @@ class ModelRouteSpec(Model):
         :rtype: ModelRouteSpec
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def attempts(self) -> int:
+        """Gets the attempts of this ModelRouteSpec.
+
+        Number of retries for a given request. The interval between retries will be determined automatically (25ms+).  # noqa: E501
+
+        :return: The attempts of this ModelRouteSpec.
+        :rtype: int
+        """
+        return self._attempts
+
+    @attempts.setter
+    def attempts(self, attempts: int):
+        """Sets the attempts of this ModelRouteSpec.
+
+        Number of retries for a given request. The interval between retries will be determined automatically (25ms+).  # noqa: E501
+
+        :param attempts: The attempts of this ModelRouteSpec.
+        :type attempts: int
+        """
+
+        self._attempts = attempts
 
     @property
     def mirror(self) -> str:
@@ -98,6 +131,29 @@ class ModelRouteSpec(Model):
         """
 
         self._model_deployments = model_deployments
+
+    @property
+    def per_try_timeout(self) -> int:
+        """Gets the per_try_timeout of this ModelRouteSpec.
+
+        Timeout per retry attempt for a given request. Integer in seconds  # noqa: E501
+
+        :return: The per_try_timeout of this ModelRouteSpec.
+        :rtype: int
+        """
+        return self._per_try_timeout
+
+    @per_try_timeout.setter
+    def per_try_timeout(self, per_try_timeout: int):
+        """Sets the per_try_timeout of this ModelRouteSpec.
+
+        Timeout per retry attempt for a given request. Integer in seconds  # noqa: E501
+
+        :param per_try_timeout: The per_try_timeout of this ModelRouteSpec.
+        :type per_try_timeout: int
+        """
+
+        self._per_try_timeout = per_try_timeout
 
     @property
     def url_prefix(self) -> str:

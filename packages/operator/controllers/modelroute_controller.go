@@ -50,14 +50,9 @@ const (
 	knativeNamespaceHeader   = "knative-serving-namespace"
 	modelNameHeader          = "model-name"
 	modelVersionHeader       = "model-version"
-	defaultRetryAttempts     = 30
 	defaultListOfRetryCauses = "5xx,connect-failure,refused-stream"
 	routeForLabelPrefix      = "odahu-route-for-"
 	ModelRouteVersionKey     = "modelRouteVersion"
-)
-
-var (
-	defaultTimeoutPerTry = gogotypes.DurationProto(time.Second)
 )
 
 func NewModelRouteReconciler(
@@ -183,6 +178,15 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		}
 	}
 
+	var perTryTimeout, attempts int32
+
+	if modelRouteCR.Spec.PerTryTimeout != nil {
+		perTryTimeout = *modelRouteCR.Spec.PerTryTimeout
+	}
+	if modelRouteCR.Spec.Attempts != nil {
+		attempts = *modelRouteCR.Spec.Attempts
+	}
+
 	vservice := &v1alpha3_istio_api.VirtualService{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      VirtualServiceName(modelRouteCR),
@@ -198,8 +202,10 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				Http: []*v1alpha3_istio.HTTPRoute{
 					{
 						Retries: &v1alpha3_istio.HTTPRetry{
-							Attempts:      defaultRetryAttempts,
-							PerTryTimeout: defaultTimeoutPerTry,
+							Attempts:      attempts,
+							PerTryTimeout: gogotypes.DurationProto(
+								time.Second * time.Duration(perTryTimeout),
+							),
 							RetryOn:       defaultListOfRetryCauses,
 						},
 						Match: []*v1alpha3_istio.HTTPMatchRequest{

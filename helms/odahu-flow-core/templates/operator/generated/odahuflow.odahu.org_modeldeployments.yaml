@@ -55,6 +55,27 @@ spec:
                 type: string
               description: Annotations for model pods.
               type: object
+            containerConcurrency:
+              description: ContainerConcurrency specifies the maximum allowed in-flight
+                (concurrent) requests per model.  Defaults to `0` which means concurrency
+                to the model is not limited, and the system decides the target concurrency
+                for the autoscaler.
+              format: int64
+              type: integer
+            defaultRoute:
+              description: Parameters for default ModelRoute
+              properties:
+                attempts:
+                  description: Number of retries for a given request. The interval
+                    between retries will be determined automatically (25ms+).
+                  format: int32
+                  type: integer
+                per_try_timeout:
+                  description: Timeout per retry attempt for a given request. Integer
+                    in seconds
+                  format: int32
+                  type: integer
+              type: object
             image:
               description: Model Docker image
               type: string

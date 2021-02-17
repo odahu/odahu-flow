@@ -57,6 +57,14 @@ func NewMrValidator(mdService md_service.Service) *MrValidator {
 }
 
 func (mrv *MrValidator) ValidatesAndSetDefaults(mr *deployment.ModelRoute) (err error) {
+
+	if mr.Spec.PerTryTimeout == nil {
+		mr.Spec.PerTryTimeout = &DefaultTimeoutPerTry
+	}
+	if mr.Spec.Attempts == nil {
+		mr.Spec.Attempts = &DefaultRetryAttempts
+	}
+
 	err = multierr.Append(err, validation.ValidateID(mr.ID))
 
 	err = multierr.Append(err, mrv.validateMainParameters(mr))

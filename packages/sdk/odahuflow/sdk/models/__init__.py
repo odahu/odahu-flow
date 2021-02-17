@@ -15,6 +15,7 @@ from odahuflow.sdk.models.connection_config import ConnectionConfig
 from odahuflow.sdk.models.connection_spec import ConnectionSpec
 from odahuflow.sdk.models.connection_status import ConnectionStatus
 from odahuflow.sdk.models.data_binding_dir import DataBindingDir
+from odahuflow.sdk.models.default_route_template import DefaultRouteTemplate
 from odahuflow.sdk.models.deployment_event import DeploymentEvent
 from odahuflow.sdk.models.edge_config import EdgeConfig
 from odahuflow.sdk.models.environment_variable import EnvironmentVariable

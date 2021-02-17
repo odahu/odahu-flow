@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
+	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/stretchr/testify/suite"
-	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -248,4 +248,25 @@ func (s *ModelRouteValidationSuite) TestValidateID() {
 	err := s.validator.ValidatesAndSetDefaults(mr)
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
+}
+
+// Route has no perTryTimeout
+func (s *ModelRouteValidationSuite) TestPerTryTimeout() {
+	mr := &deployment.ModelRoute{
+		Spec: v1alpha1.ModelRouteSpec{},
+	}
+	_ = s.validator.ValidatesAndSetDefaults(mr)
+
+	s.Assertions.NotNil(mr.Spec.PerTryTimeout)
+	s.Assertions.Equal(*mr.Spec.PerTryTimeout, dep_route.DefaultTimeoutPerTry)
+}
+// Route has no retry attempts
+func (s *ModelRouteValidationSuite) TestRetryAttempts() {
+	mr := &deployment.ModelRoute{
+		Spec: v1alpha1.ModelRouteSpec{},
+	}
+	_ = s.validator.ValidatesAndSetDefaults(mr)
+
+	s.Assertions.NotNil(mr.Spec.Attempts)
+	s.Assertions.Equal(*mr.Spec.Attempts, dep_route.DefaultRetryAttempts)
 }

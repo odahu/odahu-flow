@@ -3147,6 +3147,19 @@ var doc = `{
                 }
             }
         },
+        "DefaultRouteTemplate": {
+            "type": "object",
+            "properties": {
+                "attempts": {
+                    "description": "Number of retries for a given request. The interval\nbetween retries will be determined automatically (25ms+).",
+                    "type": "integer"
+                },
+                "per_try_timeout": {
+                    "description": "Timeout per retry attempt for a given request. Integer in seconds",
+                    "type": "integer"
+                }
+            }
+        },
         "EnvironmentVariable": {
             "type": "object",
             "properties": {
@@ -3169,6 +3182,15 @@ var doc = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "containerConcurrency": {
+                    "description": "ContainerConcurrency specifies the maximum allowed in-flight (concurrent)\nrequests per model.  Defaults to ` + "`" + `0` + "`" + ` which means\nconcurrency to the model is not limited, and the system decides the\ntarget concurrency for the autoscaler.\n+optional",
+                    "type": "integer"
+                },
+                "defaultRoute": {
+                    "description": "Parameters for default ModelRoute",
+                    "type": "object",
+                    "$ref": "#/definitions/DefaultRouteTemplate"
                 },
                 "image": {
                     "description": "Model Docker image",
@@ -3343,6 +3365,10 @@ var doc = `{
         "ModelRouteSpec": {
             "type": "object",
             "properties": {
+                "attempts": {
+                    "description": "Number of retries for a given request. The interval\nbetween retries will be determined automatically (25ms+).",
+                    "type": "integer"
+                },
                 "mirror": {
                     "description": "Mirror HTTP traffic to a another Model deployment in addition to forwarding\nthe requests to the model deployments.",
                     "type": "string"
@@ -3353,6 +3379,10 @@ var doc = `{
                     "items": {
                         "$ref": "#/definitions/ModelDeploymentTarget"
                     }
+                },
+                "per_try_timeout": {
+                    "description": "Timeout per retry attempt for a given request. Integer in seconds",
+                    "type": "integer"
                 },
                 "urlPrefix": {
                     "description": "URL prefix for model  For example: /custom/test\nPrefix must start with slash\n\"/feedback\" and \"/model\" are reserved for internal usage",
