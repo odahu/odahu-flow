@@ -250,5 +250,5 @@ class Model:
         return ModelClient(url, token=config.API_TOKEN).info()
 
     @staticmethod
-    def model_post(url, json_input={}, **kwargs):
+    def model_post(url, json_input=None, **kwargs):
         return ModelClient(url, token=config.API_TOKEN).invoke(**json.loads(json_input))
