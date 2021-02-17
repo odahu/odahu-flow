@@ -16,15 +16,17 @@
 """
 Robot test library - utils
 """
-
+import os
 import datetime
 import socket
 import time
 import json
+import urllib.parse
 import requests
 
 from odahuflow.robot.libraries.auth_client import get_authorization_headers
 
+DOCKER_HOST_ENV = "DOCKER_HOST"
 
 class Utils:
     """
@@ -362,3 +364,11 @@ class Utils:
         :return: str -- result string
         """
         return string * int(count)
+
+    @staticmethod
+    def get_local_model_host():
+        docker_host = os.getenv(DOCKER_HOST_ENV)
+        if docker_host:
+            return f"http://{urllib.parse.urlparse(docker_host).hostname}"
+        else:
+            return "http://0"

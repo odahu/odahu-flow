@@ -1,0 +1,36 @@
+[
+  {
+    "kind": "ToolchainIntegration",
+    "id": "mlflow",
+    "spec": {
+      "defaultImage": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:<tag>",
+      "entrypoint": "/opt/conda/bin/odahu-flow-mlflow-runner"
+    }
+  },
+  {
+    "kind": "ModelTraining",
+    "id": "local-host-default-template",
+    "spec": {
+      "entrypoint": "main",
+      "hyperParameters": {
+        "alpha": "1.0"
+      },
+      "model": {
+        "name": "wine-local",
+        "version": 1
+      },
+      "resources": {
+        "limits": {
+          "cpu": "1224m",
+          "memory": "1224Mi"
+        },
+        "requests": {
+          "cpu": "1024m",
+          "memory": "1024Mi"
+        }
+      },
+      "toolchain": "mlflow",
+      "workDir": "packages/tests/e2e/robot/tests/local/resources/artifacts"
+    }
+  }
+]

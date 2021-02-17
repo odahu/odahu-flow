@@ -1,0 +1,34 @@
+id: local-cluster
+kind: ModelPackaging
+spec:
+  artifactName: "<fill-in>"
+  integrationName: docker-rest
+  arguments:
+    imageName: "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi
+---
+id: local-cluster-spec-targets
+kind: ModelPackaging
+spec:
+  targets:
+    - name: docker-push
+      connectionName: docker-ci
+    - name: docker-pull
+      connectionName: odahuflow-docker-repository
+  artifactName: "simple-model.zip"
+  integrationName: docker-rest
+  arguments:
+    imageName: "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 1Gi

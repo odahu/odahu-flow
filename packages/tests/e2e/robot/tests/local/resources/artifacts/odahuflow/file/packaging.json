@@ -1,0 +1,209 @@
+[{
+  "id": "local-file-image-template",
+  "kind": "ModelPackaging",
+  "spec": {
+    "artifactName": "<fill-in>",
+    "integrationName": "docker-rest",
+    "arguments": {
+      "imageName": "{{ Name }}-{{ Version }}"
+    },
+    "resources": {
+      "limits": {
+        "cpu": 1,
+        "memory": "1Gi"
+      },
+      "requests": {
+        "cpu": 1,
+        "memory": "1Gi"
+      }
+    }
+  }
+},
+{
+  "kind": "PackagingIntegration",
+  "id": "docker-rest",
+  "spec": {
+    "entrypoint": "/usr/local/bin/odahu-flow-pack-to-flask",
+    "defaultImage": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers:<tag>",
+    "privileged": true,
+    "schema": {
+      "targets": [
+        {
+          "name": "docker-push",
+          "connectionTypes": [
+            "docker",
+            "ecr"
+          ],
+          "default": "docker-ci",
+          "required": true
+        },
+        {
+          "name": "docker-pull",
+          "connectionTypes": [
+            "docker",
+            "ecr"
+          ],
+          "default": "local-docker-repository",
+          "required": false
+        }
+      ],
+      "arguments": {
+        "properties": [
+          {
+            "name": "dockerfileAddCondaInstallation",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Add conda installation code to training.Dockerfile"
+              },
+              {
+                "name": "type",
+                "value": "boolean"
+              },
+              {
+                "name": "default",
+                "value": true
+              }
+            ]
+          },
+          {
+            "name": "dockerfileBaseImage",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Base image for training.Dockerfile."
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base:<tag>"
+              }
+            ]
+          },
+          {
+            "name": "dockerfileCondaEnvsLocation",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Conda env location in training.Dockerfile."
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "/opt/conda/envs/"
+              }
+            ]
+          },
+          {
+            "name": "host",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Host to bind."
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "0.0.0.0"
+              }
+            ]
+          },
+          {
+            "name": "port",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Port to bind."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 5000
+              }
+            ]
+          },
+          {
+            "name": "timeout",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Serving timeout in seconds."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 60
+              }
+            ]
+          },
+          {
+            "name": "workers",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Count of serving workers."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "name": "threads",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "Count of serving threads."
+              },
+              {
+                "name": "type",
+                "value": "integer"
+              },
+              {
+                "name": "default",
+                "value": 4
+              }
+            ]
+          },
+          {
+            "name": "imageName",
+            "parameters": [
+              {
+                "name": "description",
+                "value": "This option provides a way to specify the Docker image name. You can hardcode the full name or specify a template. Available template values:\n  - Name (Model Name)\n  - Version (Model Version)\n  - RandomUUID\nThe default value is '{{ Name }}/{{ Version }}:{{ RandomUUID }}'.\nImage name examples:\n  - myservice:123\n  - {{ Name }}:{{ Version }}\n"
+              },
+              {
+                "name": "type",
+                "value": "string"
+              },
+              {
+                "name": "default",
+                "value": "{{ Name }}-{{ Version }}:{{ RandomUUID }}"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}]

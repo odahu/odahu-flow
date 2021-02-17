@@ -9,7 +9,18 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TRAINED_ARTIFACTS_DIR="${DIR}/trained_artifacts"
 ODAHUFLOW_RESOURCES="${DIR}/odahuflow_resources"
 TEST_DATA="${DIR}/data"
+LOCAL_TEST_DATA="${DIR}/../e2e/robot/tests/local/resources/artifacts"
 COMMAND=setup
+
+# array of image repos for local tests (in removal order)
+IMAGE_REPO=(
+  odahu/odahu-flow-mlflow-toolchain
+  odahu/odahu-flow-packagers
+  odahu/odahu-flow-docker-packager-base
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base
+)
 
 # Test connection points to the valid gppi archive
 TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
@@ -17,7 +28,6 @@ TEST_VALID_GPPI_DIR_ID=test-valid-gppi-dir
 TEST_VALID_GPPI_ODAHU_FILE_ID=test-valid-gppi-odahu-file
 # Wine data connection
 TEST_WINE_CONN_ID=wine
-
 # Test connection to custom output model folder
 TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 
@@ -26,6 +36,7 @@ EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
 CLOUD_PROVIDER="$(jq '.cloud.type' -r "${CLUSTER_PROFILE}")"
 BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 
+GIT_REPO_DATA="https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}"
 RCLONE_PROFILE_NAME="robot-tests"
 
 # Cleanups test model packaging from API server, cloud bucket and local filesystem.
@@ -99,6 +110,9 @@ function configure_rclone() {
       access_key_id "${access_key_id}" \
       secret_access_key "${secret_access_key}" \
       1>/dev/null
+
+    aws_account_id=$(aws sts get-caller-identity | jq .Account | xargs)
+    aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${aws_account_id}.dkr.ecr.${region}.amazonaws.com
     ;;
   azure)
     local sas_url
@@ -107,6 +121,9 @@ function configure_rclone() {
     rclone config create "${RCLONE_PROFILE_NAME}" "azureblob" \
       sas_url "${sas_url}" \
       1>/dev/null
+
+    RESOURCE_GROUP="$(jq '.cloud.azure.resource_group' -r "${CLUSTER_PROFILE}")"
+    az acr login --name $(az acr list -g ${RESOURCE_GROUP} --query "[0].name" | xargs)
     ;;
   gcp)
     local service_account_credentials
@@ -164,7 +181,7 @@ function create_test_data_connection() {
   local conn_file="test-data-connection.yaml"
 
   # Replaced the uri with the test data directory and added the kind field
-  odahuflowctl conn get --id models-output --decrypted  -o json |
+  odahuflowctl conn get --id models-output --decrypted -o json |
     conn_uri="${conn_uri}" jq '.[0].spec.uri = env.conn_uri | .[] | .kind = "Connection"' \
       >"${conn_file}"
 
@@ -175,39 +192,116 @@ function create_test_data_connection() {
 
 # Upload test dags from odahu-examples repository to the cluster dags object storage bucket
 function upload_test_dags() {
-    git_url="https://github.com/odahu/odahu-examples.git"
-    dag_dirs=("mlflow/sklearn/wine/airflow")
-    tmp_odahu_example_dir=$(mktemp -d -t upload-test-dags-XXXXXXXXXX)
+  git_url="https://github.com/odahu/odahu-examples.git"
+  dag_dirs=("mlflow/sklearn/wine/airflow")
+  tmp_odahu_example_dir=$(mktemp -d -t upload-test-dags-XXXXXXXXXX)
 
-    git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
+  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
-    local dag_bucket dag_bucket_path
-    dag_bucket="$(jq -r ".airflow.dag_bucket |= if . == null or . == \"\" then \"$BUCKET_NAME\" else . end | .airflow.dag_bucket" "${CLUSTER_PROFILE}")"
-    dag_bucket_path="$(jq -r '.airflow.dag_bucket_path |= if . == null or . == "" then "/dags" else . end | .airflow.dag_bucket_path' "${CLUSTER_PROFILE}")"
+  local dag_bucket dag_bucket_path
+  dag_bucket="$(jq -r ".airflow.dag_bucket |= if . == null or . == \"\" then \"$BUCKET_NAME\" else . end | .airflow.dag_bucket" "${CLUSTER_PROFILE}")"
+  dag_bucket_path="$(jq -r '.airflow.dag_bucket_path |= if . == null or . == "" then "/dags" else . end | .airflow.dag_bucket_path' "${CLUSTER_PROFILE}")"
 
-    for dag_dir in "${dag_dirs[@]}" ;
-    do
-      copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "${dag_bucket}${dag_bucket_path}/${dag_dir}/"
+  for dag_dir in "${dag_dirs[@]}"; do
+    copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "${dag_bucket}${dag_bucket_path}/${dag_dir}/"
+  done
+
+  rm -rf "${tmp_odahu_example_dir}"
+}
+
+# updates tag for image in specifications for local tests
+function change_image_tag() {
+  local file_name=$1
+  local json_path=$2
+  local tag=$3
+
+  image=$(jq -r "${json_path}" "${file_name}" | cut -d ':' -f 1)
+  echo ${image}:${tag}
+}
+
+# Upload files for local training and packaging
+function local_setup() {
+  # download example files
+  wget -O "${LOCAL_TEST_DATA}/../request.json" "${GIT_REPO_DATA}/mlflow/sklearn/wine/odahuflow/request.json"
+  wget -O "${LOCAL_TEST_DATA}/MLproject" "${GIT_REPO_DATA}/mlflow/sklearn/wine/MLproject"
+  wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
+  wget -O "${LOCAL_TEST_DATA}/conda.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.yaml"
+  wget -O "${LOCAL_TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
+
+  # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
+  gcloud auth configure-docker
+
+  if [ ! -x "$(command -v sponge)" ]; then
+    printf "\nPlease install moreutils or sponge package to setup robot tests\n"
+    exit 1
+  fi
+
+  CMDbase64="base64 --wrap=0"
+  if [ -x "$(command -v brew)" ]; then
+    CMDbase64=base64
+  fi
+
+  echo ${CMDbase64}
+
+  # update specifications
+  ## docker-pull target
+  local docker_uri="$(jq -r .docker_repo "${CLUSTER_PROFILE}")"
+  local docker_username="$(jq -r .docker_username "${CLUSTER_PROFILE}")"
+  local docker_password="$(jq -r .docker_password "${CLUSTER_PROFILE}" | tr -d "\n" | $CMDbase64)"
+
+  jq --arg uri "${docker_uri}" --arg username "${docker_username}" --arg password "${docker_password}" \
+    '.spec.uri=$uri | .spec.username=$username | .spec.password=$password' "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json" | jq "." | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json"
+
+  ## docker image tags
+  local ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
+  local pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}")
+  jq --arg image "${image}" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}")
+  jq --arg image "$image" '.[0].spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/training.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/training.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}")
+  jq --arg image "$image" '.[0].spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/training.default.artifact.template.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/training.default.artifact.template.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.defaultImage" "${pi_version}")
+  jq --arg image "$image" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" ".spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
+  jq --arg image "$image" '.spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/packaging_integration.json"
+
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".[1].spec.defaultImage" "${pi_version}")
+  jq --arg image "$image" '.[1].spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" ".[1].spec.schema.arguments.properties[1].parameters[2].value" "${pi_version}")
+  jq --arg image "$image" '.[1].spec.schema.arguments.properties[1].parameters[2].value=$image' "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/packaging.json"
+}
+
+# remove packager images locally
+function local_cleanup() {
+  echo "IMAGE_REPOS: ${IMAGE_REPO[*]}"
+  for repo in ${IMAGE_REPO[@]}; do
+    list_images=$(docker images -aq ${repo})
+    for image in ${list_images}; do
+      bash ${DIR}/docker-remove-image.sh ${image}
     done
-
-    rm -rf "${tmp_odahu_example_dir}"
+  done
 }
 
 # Main entrypoint for setup command.
-# The function creates the model packaings and the toolchain integrations.
+# The function creates the model packagings and the toolchain integrations.
 function setup() {
   for mp_id in "${MODEL_NAMES[@]}"; do
     pack_model "${mp_id}" &
   done
 
   # Create training-data-helper toolchain integration
-  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" > "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
+  jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
   odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   rm "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
 
   # Download training data for the wine model
-  wget -O "${TEST_DATA}/wine-quality.csv" "https://raw.githubusercontent.com/odahu/odahu-examples/${EXAMPLES_VERSION}/mlflow/sklearn/wine/data/wine-quality.csv"
+  wget -O "${TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # Pushes a test data to the bucket and create a file with the connection
   copy_to_cluster_bucket "${TEST_DATA}/" "${BUCKET_NAME}/test-data/data/"
@@ -221,10 +315,12 @@ function setup() {
   upload_test_dags
 
   wait_all_background_task
+
+  local_setup
 }
 
 # Main entrypoint for cleanup command.
-# The function deletes the model packaings and the toolchain integrations.
+# The function deletes the model packagings and the toolchain integrations and the pulled locally packager image
 function cleanup() {
   for mp_id in "${MODEL_NAMES[@]}"; do
     cleanup_pack_model "${mp_id}" &
@@ -233,6 +329,8 @@ function cleanup() {
   odahuflowctl ti delete --id ${TEST_DATA_TI_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_DIR_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
+
+  local_cleanup
 }
 
 # Prints the help message
