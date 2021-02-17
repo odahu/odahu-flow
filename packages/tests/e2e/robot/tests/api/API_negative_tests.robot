@@ -27,15 +27,15 @@ Library             odahuflow.robot.libraries.sdk_wrapper.ModelDeployment
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelRoute
 Library             odahuflow.robot.libraries.sdk_wrapper.Model
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
-...                 reload config  AND
-...                 Run API deploy from model packaging and check model started  simple-model  dep-status-code-400-403  ${RES_DIR}/deploy_route_model/valid/deployment.negative.403.yaml
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  reload config
+...                 AND  Run API deploy from model packaging and check model started  simple-model  dep-status-code-400-403  ${RES_DIR}/deploy_route_model/valid/deployment.negative.403.yaml
 Suite Teardown      Run Keywords
-...                 Login to the api and edge  AND
-...                 reload config  AND
-...                 Run API undeploy model and check  ${MODEL_DEPLOYMENT}  AND
-...                 Remove File  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  reload config
+...                 AND  Run API undeploy model and check  ${MODEL_DEPLOYMENT}
+...                 AND  Remove File  ${LOCAL_CONFIG}
 Force Tags          api  sdk  negative  status-code-400-403
 Test Timeout        1 minute
 
@@ -123,8 +123,8 @@ Status Code 400 - Bad Request
 Status Code 403 - Forbidden - Data Scientist
     [Template]  Try Call API - Forbidden
     [Setup]     run keywords
-    ...         Login to the api and edge  ${SA_DATA_SCIENTIST}  AND
-    ...         reload config
+    ...         Login to the api and edge  ${SA_DATA_SCIENTIST}
+    ...         AND  reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # connection
     connection get id decrypted  ${VCS_CONNECTION}
@@ -140,8 +140,8 @@ Status Code 403 - Forbidden - Data Scientist
 Status Code 403 - Forbidden - Viewer
     [Template]  Try Call API - Forbidden
     [Setup]     run keywords
-    ...         Login to the api and edge  ${SA_VIEWER}  AND
-    ...         reload config
+    ...         Login to the api and edge  ${SA_VIEWER}
+    ...         AND  reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # connection
     connection get id decrypted  ${VCS_CONNECTION}
@@ -160,8 +160,8 @@ Status Code 403 - Forbidden - Viewer
 Model. Status Code 403 - Forbidden - Viewer
     [Template]  Try Call API - Forbidden.Model
     [Setup]     run keywords
-    ...         Login to the api and edge  ${SA_VIEWER}  AND
-    ...         reload config
+    ...         Login to the api and edge  ${SA_VIEWER}
+    ...         AND  reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
 
@@ -171,8 +171,8 @@ Model. Status Code 403 - Forbidden - Viewer
 Status Code 403 - Forbidden - Custom Role
     [Template]  Try Call API - Forbidden
     [Setup]     run keywords
-    ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
-    ...         reload config
+    ...         Login to the api and edge  ${SA_CUSTOM_USER}
+    ...         AND  reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # config
     config get
@@ -200,8 +200,8 @@ Status Code 403 - Forbidden - Custom Role
 Model. Status Code 403 - Forbidden - Custom Role
     [Template]  Try Call API - Forbidden.Model
     [Setup]     run keywords
-    ...         Login to the api and edge  ${SA_CUSTOM_USER}  AND
-    ...         reload config
+    ...         Login to the api and edge  ${SA_CUSTOM_USER}
+    ...         AND  reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
     model get   url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
