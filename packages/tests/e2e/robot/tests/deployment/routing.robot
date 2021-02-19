@@ -90,7 +90,7 @@ Invoke command without parameters
 
 Check model counter
     [Arguments]  ${md_name}
-        ${res}=  Wait Until Keyword Succeeds  2m  10 sec  Shell  odahuflowctl --verbose model invoke --md ${md_name} --json-file ${RES_DIR}/simple-model.request.json
+        ${res}=  Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --md ${md_name} --json-file ${RES_DIR}/simple-model.request.json
                  Should be equal  ${res.rc}  ${0}
                  ${RESPONSE}=  evaluate  json.loads('''${res.stdout}''')  json
                  should be true  ${RESPONSE["prediction"][0][0]} > 0
