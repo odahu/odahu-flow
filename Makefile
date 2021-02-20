@@ -85,6 +85,10 @@ docker-build-api:
 docker-build-controller:
 	docker build --target controller -t odahu/odahu-flow-controller:${BUILD_TAG} -f containers/operator/Dockerfile .
 
+## docker-build-tools: Build tools docker image
+docker-build-tools:
+	docker build --target tools -t odahu/odahu-flow-tools:${BUILD_TAG} -f containers/operator/Dockerfile .
+
 ## docker-build-model-trainer: Build model builder docker image
 docker-build-model-trainer:
 	docker build --target model-trainer -t odahu/odahu-flow-model-trainer:${BUILD_TAG} -f containers/operator/Dockerfile .
@@ -126,6 +130,11 @@ docker-push-api:  check-tag
 docker-push-controller:  check-tag
 	docker tag odahu/odahu-flow-controller:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-controller:${TAG}
 	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-controller:${TAG}
+
+## docker-push-tools: Push tools docker image
+docker-push-tools:  check-tag
+	docker tag odahu/odahu-flow-tools:${BUILD_TAG} ${DOCKER_REGISTRY}/odahu/odahu-flow-tools:${TAG}
+	docker push ${DOCKER_REGISTRY}/odahu/odahu-flow-tools:${TAG}
 
 ## docker-push-model-packager: Push model packager docker image
 docker-push-model-packager:  check-tag

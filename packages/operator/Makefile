@@ -42,6 +42,10 @@ build-operator: generate
 build-webserver:
 	go build -o webserver ./cmd/api
 
+## build-odahu-tools: Build odahu-tools executable binary
+build-tools:
+	go build -o odahu-tools ./cmd/tools
+
 ## build-controller: Build odahu system controller
 build-controller:
 	go build -o controller ./cmd/controller
@@ -59,7 +63,7 @@ build-service-catalog:
 	go build -o service-catalog ./cmd/service_catalog
 
 ## build-all: Build all executable binyries
-build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog
+build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog build-tools
 
 ## run-operator: Start operator
 run-operator:

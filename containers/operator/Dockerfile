@@ -70,6 +70,24 @@ CMD ["./webserver"]
 #########################################################
 #########################################################
 
+FROM ubuntu:18.04 as tools
+
+ENV ODAHUFLOW_DIR="/opt/odahu-flow"
+
+RUN apt-get -yq update && \
+    apt-get -yqq install openssh-client ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/odahu-tools "${ODAHUFLOW_DIR}/"
+
+WORKDIR "${ODAHUFLOW_DIR}"
+CMD ["./odahu-tools"]
+
+
+#########################################################
+#########################################################
+#########################################################
+
 FROM ubuntu:18.04 as controller
 
 ENV ODAHUFLOW_DIR="/opt/odahu-flow" \
