@@ -160,6 +160,10 @@ static-content:
 	statik -src static -dest pkg -p static
 	git add pkg/static
 
+## generate-predict-v2-types: Generate structures according to OpenAPI 3.0 Spec of Kubeflow predict v2 API
+generate-predict-v2-types:
+	oapi-codegen -generate types -package predict_v2 hack/kubeflow_prediction_v2/spec.yaml > pkg/apis/predict_v2/predict_v2.gen.go
+
 ## help: Show the help message
 help: Makefile
 	@echo "Choose a command run in "$(PROJECTNAME)":"
