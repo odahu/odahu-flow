@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	configureRCloneCommandUsage = `List of ODAHU Connection IDs that must exist in ODAHU Cluster 
+	configureRCloneCommandUsage = `
+List of ODAHU Connection IDs that must exist in ODAHU Cluster 
 Each connection ID can be suffixed by :<RClone Storage Name>. 
 If connection ID is not suffixed then RClone storage name is generated as "odahu-<Connection ID>".
 For example next flags:
