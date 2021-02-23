@@ -1,6 +1,7 @@
 package predict_v2
 
 import (
+	"encoding/json"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/predict_v2"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -39,7 +40,7 @@ func ValidateDir(source string, destination *string) ([]string, error) {
 				return passed, err
 			}
 			var request predict_v2.InferenceRequest
-			//parseErr := json.Unmarshal(data, &request)
+			parseErr := json.Unmarshal(data, &request)
 			if parseErr != nil {
 				zap.S().Warnw("Unable to Unmarshal file, validation is failed",
 					"filepath", fp, "unmarshal error", parseErr)
