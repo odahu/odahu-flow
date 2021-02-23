@@ -21,6 +21,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
 	"net/http"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	commons_feedback "odahu-commons/feedback"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +36,7 @@ func handleFeedbackEndpoint(c *gin.Context) {
 	modelName := c.GetHeader(feedback.ModelNameHeaderKey)
 	modelVersion := c.GetHeader(feedback.ModelVersionHeaderKey)
 
-	message := feedback.ModelFeedback{
+	message := commons_feedback.ModelFeedback{
 		ModelName:    modelName,
 		ModelVersion: modelVersion,
 	}

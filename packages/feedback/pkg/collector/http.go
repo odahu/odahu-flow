@@ -19,6 +19,7 @@ package collector
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
+	commons_feedback "odahu-commons/feedback"
 	"github.com/spf13/viper"
 	"github.com/zsais/go-gin-prometheus"
 	"log"
@@ -36,7 +37,7 @@ const (
 )
 
 type FeedbackResponse struct {
-	Message feedback.ModelFeedback `json:"message"`
+	Message commons_feedback.ModelFeedback `json:"message"`
 }
 
 func attachRoutes(router *gin.Engine) {
