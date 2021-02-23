@@ -14,6 +14,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.9.5+incompatible
 	github.com/fluent/fluent-logger-golang v1.4.0
+	github.com/tinylib/msgp v1.1.0  // indirect
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
