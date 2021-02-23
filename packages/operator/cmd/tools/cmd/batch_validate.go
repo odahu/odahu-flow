@@ -18,7 +18,6 @@ var (
 	source      string
 	destination string
 	cpuprofile string
-	model string
 )
 
 func init() {
