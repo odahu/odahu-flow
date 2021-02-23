@@ -18,22 +18,45 @@ var (
 	source      string
 	destination string
 	cpuprofile string
+	model string
 )
 
 func init() {
 	rootCmd.AddCommand(batchCommand)
-	batchCommand.AddCommand(validateInputCommand)
-	batchCommand.AddCommand(validateOutputCommand)
-	batchCommand.PersistentFlags().StringVarP(
+	batchCommand.AddCommand(validateCommand)
+	batchCommand.AddCommand(logCommand)
+
+
+	validateCommand.AddCommand(validateInputCommand)
+	validateCommand.AddCommand(validateOutputCommand)
+	validateCommand.AddCommand(validateModelCommand)
+	validateCommand.PersistentFlags().StringVarP(
 		&source, "source", "s", ".", inputCommandUsage,
 	)
-	batchCommand.PersistentFlags().StringVarP(
+	validateCommand.PersistentFlags().StringVarP(
 		&destination, "destination", "d", ".", outputCommandUsage,
 	)
+
+	logCommand.AddCommand(logModelInputCommand)
+	logCommand.AddCommand(logModelOutputCommand)
+	logCommand.PersistentFlags().StringVarP(
+		&model, "model", "m", ".", "directory with ML model files",
+	)
+	_ = logCommand.MarkFlagRequired("model")
 }
 
 var batchCommand = &cobra.Command{
 	Use:  "batch",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			_ = cmd.Help()
+			os.Exit(0)
+		}
+	},
+}
+
+var validateCommand = &cobra.Command{
+	Use:  "validate",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()
@@ -69,3 +92,12 @@ var validateOutputCommand = &cobra.Command{
 		}
 	},
 }
+
+var validateModelCommand = &cobra.Command{
+	Use:                        "validate-model",
+	Short: "validate model for batch inference",
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+
