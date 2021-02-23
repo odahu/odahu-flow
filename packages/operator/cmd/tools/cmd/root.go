@@ -8,11 +8,13 @@ import (
 	"log"
 	"os"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"runtime/pprof"
 )
 
 var (
 	cfgFile string
 	cfg config.ToolsConfig
+	profilingFile *os.File
 )
 
 var rootCmd = &cobra.Command{
@@ -20,7 +22,33 @@ var rootCmd = &cobra.Command{
 	Short: "odahu-tools is a simple command line tool that provides API to the set of ODAHU platform features",
 	Long: `odahu-tools provides API to execute the same logic that is used by the ODAHU platform in the cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
-		zap.S().Info("Root command executed")
+		if len(args) == 0 {
+			_ = cmd.Help()
+			os.Exit(0)
+		}
+	},
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if cpuprofile != "" {
+			var err error
+			profilingFile, err = os.Create(cpuprofile)
+			if err != nil {
+				zap.S().Fatal("could not create CPU profile: ", err)
+			}
+			if err := pprof.StartCPUProfile(profilingFile); err != nil {
+				zap.S().Fatal("could not start CPU profile: ", err)
+			}
+		}
+	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if cpuprofile != "" {
+			pprof.StopCPUProfile()
+			if profilingFile != nil {
+				if err := profilingFile.Close(); err != nil {
+					zap.S().Fatal(err)
+				}
+			}
+		}
+
 	},
 }
 
@@ -66,9 +94,10 @@ func initConfig() {
 }
 
 func init() {
+	initLogger()
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.odahu-tools.yaml)")
-	initLogger()
+	rootCmd.PersistentFlags().StringVar(&cpuprofile, "cpuprofile", "profile.pprof", "")
 }
 
 func Execute() {

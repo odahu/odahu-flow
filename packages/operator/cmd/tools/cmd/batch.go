@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	predict_v2_tools "github.com/odahu/odahu-flow/packages/operator/pkg/tools/predict_v2"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"os"
-	"runtime/pprof"
 )
 
 const inputCommandUsage = `
@@ -25,25 +24,21 @@ func init() {
 	rootCmd.AddCommand(batchCommand)
 	batchCommand.AddCommand(validateInputCommand)
 	batchCommand.AddCommand(validateOutputCommand)
-	validateInputCommand.Flags().StringVarP(
+	batchCommand.PersistentFlags().StringVarP(
 		&source, "source", "s", ".", inputCommandUsage,
 	)
-	validateInputCommand.Flags().StringVarP(
+	batchCommand.PersistentFlags().StringVarP(
 		&destination, "destination", "d", ".", outputCommandUsage,
 	)
-	validateOutputCommand.Flags().StringVarP(
-		&source, "source", "s", ".", inputCommandUsage,
-	)
-	validateOutputCommand.Flags().StringVarP(
-		&destination, "destination", "d", ".", outputCommandUsage,
-	)
-
-	rootCmd.PersistentFlags().StringVar(&cpuprofile, "cpuprofile", "profile.pprof", "")
 }
 
 var batchCommand = &cobra.Command{
 	Use:  "batch",
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			_ = cmd.Help()
+			os.Exit(0)
+		}
 	},
 }
 
@@ -53,20 +48,7 @@ var validateInputCommand = &cobra.Command{
 	Short: "validate input for user batch inference container",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		if cpuprofile != "" {
-			f, err := os.Create(cpuprofile)
-			if err != nil {
-				zap.S().Fatal("could not create CPU profile: ", err)
-			}
-			defer f.Close() // error handling omitted for example
-			if err := pprof.StartCPUProfile(f); err != nil {
-				zap.S().Fatal("could not start CPU profile: ", err)
-			}
-			defer pprof.StopCPUProfile()
-		}
-
-
-		_, err := predict_v2_tools.ValidateDir(source, &destination)
+		_, err := predict_v2_tools.ValidateDir(source, predict_v2_tools.ValidateInput, &destination)
 		if err != nil {
 			zap.S().Errorw("There are errors during validation", zap.Error(err))
 			os.Exit(1)
@@ -79,20 +61,8 @@ var validateOutputCommand = &cobra.Command{
 	Use:  "validate-output",
 	Short: "validate output of user batch inference container",
 	Run: func(cmd *cobra.Command, args []string) {
-		if cpuprofile != "" {
-			f, err := os.Create(cpuprofile)
-			if err != nil {
-				zap.S().Fatal("could not create CPU profile: ", err)
-			}
-			defer f.Close() // error handling omitted for example
-			if err := pprof.StartCPUProfile(f); err != nil {
-				zap.S().Fatal("could not start CPU profile: ", err)
-			}
-			defer pprof.StopCPUProfile()
-		}
 
-
-		_, err := predict_v2_tools.ValidateOutputDir(source, &destination)
+		_, err := predict_v2_tools.ValidateDir(source, predict_v2_tools.ValidateOutput, &destination)
 		if err != nil {
 			zap.S().Errorw("There are errors during validation", zap.Error(err))
 			os.Exit(1)
