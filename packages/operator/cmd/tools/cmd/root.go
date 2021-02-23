@@ -20,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Short: "odahu-tools is a simple command line tool that provides API to the set of ODAHU platform features",
 	Long: `odahu-tools provides API to execute the same logic that is used by the ODAHU platform in the cluster`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
+		zap.S().Info("Root command executed")
 	},
 }
 
