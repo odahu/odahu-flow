@@ -3,11 +3,26 @@ package cmd
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/predict_v2"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"os"
 )
 
 // Model log commands
+
+func init () {
+	batchCommand.AddCommand(logCommand)
+	logCommand.AddCommand(logModelInputCommand)
+	logCommand.AddCommand(logModelOutputCommand)
+	logCommand.PersistentFlags().StringVarP(
+		&model, "model", "m", ".", "directory with ML model files",
+	)
+	_ = logCommand.MarkFlagRequired("model")
+	logCommand.PersistentFlags().StringVar(
+		&apiURL, "fluentd", "", "fluentd base URL (schema://host:port)",
+	)
+	_ = viper.BindPFlag("feedback.fluentd.baseURL", rootCmd.PersistentFlags().Lookup("fluentd"))
+}
 
 type ModelOutputLogger interface {
 	Log(requestID string, request predict_v2.InferenceResponse) error
@@ -23,7 +38,6 @@ var logCommand = &cobra.Command{
 		}
 	},
 }
-
 
 type ModelInputLogger interface {
 	Log(requestID string, request predict_v2.InferenceRequest) error
@@ -41,6 +55,7 @@ var logModelInputCommand = &cobra.Command{
 		zap.S().Info(inputLocation)
 	},
 }
+
 var logModelOutputCommand = &cobra.Command{
 	Use:                        "output",
 	Short: "log model output to feedback storage",

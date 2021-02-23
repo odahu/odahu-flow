@@ -15,6 +15,7 @@ var (
 	cfgFile string
 	cfg config.ToolsConfig
 	profilingFile *os.File
+	apiURL string
 )
 
 var rootCmd = &cobra.Command{
@@ -103,6 +104,13 @@ func init() {
 		&cpuprofile, "cpuprofile", "",
 		"if specified as TARGET cpu profiling results will be saved to TARGET file",
 	)
+	rootCmd.PersistentFlags().StringVar(
+		&apiURL, "api", "", "API server base URL (schema://host:port)",
+	)
+	_ = viper.BindPFlag("auth.apiUrl", rootCmd.PersistentFlags().Lookup("api"))
+	// These env variables are compatible with odahu-flow-sdk package
+	_ = viper.BindEnv("auth.apiUrl", "API_URL")
+	_ = viper.BindEnv("auth.apiToken", "API_TOKEN")
 }
 
 func Execute() {

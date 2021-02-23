@@ -22,11 +22,7 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(batchCommand)
 	batchCommand.AddCommand(validateCommand)
-	batchCommand.AddCommand(logCommand)
-
-
 	validateCommand.AddCommand(validateInputCommand)
 	validateCommand.AddCommand(validateOutputCommand)
 	validateCommand.AddCommand(validateModelCommand)
@@ -36,25 +32,8 @@ func init() {
 	validateCommand.PersistentFlags().StringVarP(
 		&destination, "destination", "d", ".", outputCommandUsage,
 	)
-
-	logCommand.AddCommand(logModelInputCommand)
-	logCommand.AddCommand(logModelOutputCommand)
-	logCommand.PersistentFlags().StringVarP(
-		&model, "model", "m", ".", "directory with ML model files",
-	)
-	_ = logCommand.MarkFlagRequired("model")
 }
 
-var batchCommand = &cobra.Command{
-	Use:  "batch",
-	Short: "Support tools to prepare environment for batch inference",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			_ = cmd.Help()
-			os.Exit(0)
-		}
-	},
-}
 
 var validateCommand = &cobra.Command{
 	Use:  "validate",
@@ -66,7 +45,6 @@ var validateCommand = &cobra.Command{
 		}
 	},
 }
-
 
 var validateInputCommand = &cobra.Command{
 	Use:  "validate-input",
@@ -80,7 +58,6 @@ var validateInputCommand = &cobra.Command{
 		}
 	},
 }
-
 
 var validateOutputCommand = &cobra.Command{
 	Use:  "validate-output",
