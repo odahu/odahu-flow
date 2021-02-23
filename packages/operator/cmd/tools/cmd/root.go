@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -117,6 +118,7 @@ func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
 		zap.S().Errorw("Error during executing the root command", zap.Error(err))
+		fmt.Printf("Error: %s", err)
 		os.Exit(1)
 	}
 }

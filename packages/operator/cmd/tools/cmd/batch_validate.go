@@ -36,7 +36,7 @@ func init() {
 
 var validateCommand = &cobra.Command{
 	Use:  "validate",
-	Short: "Validate that input json files have expected format",
+	Short: "Validate that json files have expected format",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()

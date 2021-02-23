@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"encoding/json"
+	"gopkg.in/yaml.v2"
 	"fmt"
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/predict_v2"
@@ -44,7 +44,7 @@ func init () {
 	)
 	_ = logCommand.MarkFlagRequired("model")
 	logCommand.PersistentFlags().StringVarP(
-		&requestID, "request-id", "r", ".",
+		&requestID, "request-id", "r", "",
 		"request id for which this request/response data is logged",
 	)
 	_ = logCommand.MarkFlagRequired("request-id")
@@ -52,7 +52,7 @@ func init () {
 	logCommand.PersistentFlags().StringVar(
 		&apiURL, "fluentd", "", "fluentd base URL (schema://host:port)",
 	)
-	_ = viper.BindPFlag("feedback.fluentd.baseURL", rootCmd.PersistentFlags().Lookup("fluentd"))
+	_ = viper.BindPFlag("feedback.fluentd.baseurl", logCommand.PersistentFlags().Lookup("fluentd"))
 
 	logModelInputCommand.Flags().StringVar(&requestTag, "tag", defaultRequestTag, "tag model request")
 	logModelOutputCommand.Flags().StringVar(&responseTag, "tag", defaultResponseTag, "tag model response")
@@ -145,7 +145,7 @@ func getModelNameVersion() (string, string, error) {
 
 	modelFiles := []string{"odahuflow.project.yaml", "odahuflow.project.yml"}
 
-	items, err := ioutil.ReadDir(source)
+	items, err := ioutil.ReadDir(model)
 	if err != nil {
 		return "", "", err
 
@@ -162,7 +162,7 @@ func getModelNameVersion() (string, string, error) {
 					return "", "", err
 				}
 				mf := ModelFile{}
-				if err := json.Unmarshal(data, &mf); err != nil {
+				if err := yaml.Unmarshal(data, &mf); err != nil {
 					return "", "", err
 				}
 
@@ -182,6 +182,14 @@ var logModelInputCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer func() {
+			if err := logEngine.Close(); err != nil {
+				zap.S().Errorw("Error closing fluentd", zap.Error(err))
+			} else {
+				zap.S().Info("Fluentd logs are flushed")
+			}
+		}()
+
 		dataLogger := feedback.NewLogger(logEngine)
 
 		modelName, modelVer, err := getModelNameVersion()
@@ -211,6 +219,14 @@ var logModelOutputCommand = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer func() {
+			if err := logEngine.Close(); err != nil {
+				zap.S().Errorw("Error closing fluentd", zap.Error(err))
+			} else {
+				zap.S().Info("Fluentd logs are flushed")
+			}
+		}()
+
 		dataLogger := feedback.NewLogger(logEngine)
 
 		modelName, modelVer, err := getModelNameVersion()
