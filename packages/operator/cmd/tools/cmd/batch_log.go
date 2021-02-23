@@ -15,6 +15,7 @@ type ModelOutputLogger interface {
 
 var logCommand = &cobra.Command{
 	Use:  "log",
+	Short: "Catch model input or output from json files to fluentd service",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()

@@ -96,8 +96,13 @@ func initConfig() {
 func init() {
 	initLogger()
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.odahu-tools.yaml)")
-	rootCmd.PersistentFlags().StringVar(&cpuprofile, "cpuprofile", "profile.pprof", "")
+	rootCmd.PersistentFlags().StringVar(
+		&cfgFile, "config", "", "config file (default is $HOME/.odahu-tools.yaml)",
+	)
+	rootCmd.PersistentFlags().StringVar(
+		&cpuprofile, "cpuprofile", "",
+		"if specified as TARGET cpu profiling results will be saved to TARGET file",
+	)
 }
 
 func Execute() {

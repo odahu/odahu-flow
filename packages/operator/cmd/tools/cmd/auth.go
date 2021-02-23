@@ -36,6 +36,7 @@ func init() {
 
 var authCommand = &cobra.Command{
 	Use:  "auth",
+	Short: "Support tools to work with Connections",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()
@@ -46,7 +47,7 @@ var authCommand = &cobra.Command{
 
 var configureRCloneCommand = &cobra.Command{
 	Use:  "configure-rclone",
-	Long: `Generate rclone configuration based on ODAHU object storage connection`,
+	Short: `Generate rclone configuration based on ODAHU object storage connection`,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := connAPI.NewClient(cfg.Auth.APIURL, "",
 			cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.OAuthOIDCTokenEndpoint)

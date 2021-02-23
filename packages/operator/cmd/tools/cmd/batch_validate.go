@@ -47,6 +47,7 @@ func init() {
 
 var batchCommand = &cobra.Command{
 	Use:  "batch",
+	Short: "Support tools to prepare environment for batch inference",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()
@@ -57,6 +58,7 @@ var batchCommand = &cobra.Command{
 
 var validateCommand = &cobra.Command{
 	Use:  "validate",
+	Short: "Validate that input json files have expected format",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()
