@@ -24,7 +24,7 @@ const (
 	defaultFluentdHost = "localhost"
 	defaultFluentdPort = 24224
 	defaultResponseTag = "response_body"
-	maxRetryToDeliver = 5
+	maxRetryToDeliver = 100
 	maxRetryWait      = 1000
 )
 
@@ -99,6 +99,7 @@ func initFluentd() (*fluent.Fluent, error) {
 		}
 	}
 
+	zap.S().Infof("Connecting to fluentd using host %s and port %d", host, port)
 	f, err := fluent.New(fluent.Config{
 		FluentPort:   port,
 		FluentHost:   host,
