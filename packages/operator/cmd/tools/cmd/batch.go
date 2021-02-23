@@ -31,9 +31,14 @@ func init() {
 	validateInputCommand.Flags().StringVarP(
 		&destination, "destination", "d", ".", outputCommandUsage,
 	)
-	validateInputCommand.Flags().StringVar(
-		&cpuprofile, "cpuprofile", "profile.pprof", "",
+	validateOutputCommand.Flags().StringVarP(
+		&source, "source", "s", ".", inputCommandUsage,
 	)
+	validateOutputCommand.Flags().StringVarP(
+		&destination, "destination", "d", ".", outputCommandUsage,
+	)
+
+	rootCmd.PersistentFlags().StringVar(&cpuprofile, "cpuprofile", "profile.pprof", "")
 }
 
 var batchCommand = &cobra.Command{
@@ -74,6 +79,23 @@ var validateOutputCommand = &cobra.Command{
 	Use:  "validate-output",
 	Short: "validate output of user batch inference container",
 	Run: func(cmd *cobra.Command, args []string) {
+		if cpuprofile != "" {
+			f, err := os.Create(cpuprofile)
+			if err != nil {
+				zap.S().Fatal("could not create CPU profile: ", err)
+			}
+			defer f.Close() // error handling omitted for example
+			if err := pprof.StartCPUProfile(f); err != nil {
+				zap.S().Fatal("could not start CPU profile: ", err)
+			}
+			defer pprof.StopCPUProfile()
+		}
 
+
+		_, err := predict_v2_tools.ValidateOutputDir(source, &destination)
+		if err != nil {
+			zap.S().Errorw("There are errors during validation", zap.Error(err))
+			os.Exit(1)
+		}
 	},
 }
