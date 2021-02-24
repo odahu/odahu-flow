@@ -46,7 +46,7 @@ var validateCommand = &cobra.Command{
 }
 
 var validateInputCommand = &cobra.Command{
-	Use:  "validate-input",
+	Use:  "input",
 	Short: "validate input for user batch inference container",
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -59,7 +59,7 @@ var validateInputCommand = &cobra.Command{
 }
 
 var validateOutputCommand = &cobra.Command{
-	Use:  "validate-output",
+	Use:  "output",
 	Short: "validate output of user batch inference container",
 	Run: func(cmd *cobra.Command, args []string) {
 
