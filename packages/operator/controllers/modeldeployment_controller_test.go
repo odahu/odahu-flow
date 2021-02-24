@@ -287,7 +287,7 @@ func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.
 func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment,
 ) *knservingv1.Configuration {
 	configuration := &knservingv1.Configuration{}
-	configurationKey := types.NamespacedName{Name: KnativeConfigurationName(md), Namespace: md.Namespace}
+	configurationKey := types.NamespacedName{Name: KnativeServiceName(md), Namespace: md.Namespace}
 	s.Assertions.Eventually(
 		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
 		10*time.Second,
