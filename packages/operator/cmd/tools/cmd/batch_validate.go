@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	predict_v2_tools "github.com/odahu/odahu-flow/packages/operator/pkg/utils/predict_v2"
+	predict_v2_tools "github.com/odahu/odahu-flow/packages/operator/pkg/utils/predictv2"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"os"

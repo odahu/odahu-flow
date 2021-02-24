@@ -1,4 +1,4 @@
-package predict_v2
+package predictv2
 
 import (
 	"encoding/json"
@@ -38,9 +38,8 @@ func ValidateDir(source string, validate Validator, destination *string) ([]stri
 			zap.S().Infof("destination directory specified by -d %s does not exist", *destination)
 			if err := os.MkdirAll(*destination, os.ModePerm); err != nil {
 				return passed, fmt.Errorf("unable to create %s. error %+v", *destination, err)
-			} else {
-				zap.S().Infof("destination directory %s is created", *destination)
 			}
+			zap.S().Infof("destination directory %s is created", *destination)
 		}
 	}
 
