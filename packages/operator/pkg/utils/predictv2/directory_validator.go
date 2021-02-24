@@ -24,9 +24,8 @@ func ValidateOutput(content []byte) error {
 	return json.Unmarshal(content, &response)
 }
 
-// ValidateDir go through `source` directory files (not recursively) and tries to unmarshal each file
-// with .json extension to predict_v2.InferenceRequest
-// Error during unmarshal means validation fail
+// ValidateDir go through `source` directory files (not recursively) and tries to validate each file
+// with .json extension using Validator
 // If destination is not nil then files that passed validation will be copied to destination
 func ValidateDir(source string, validate Validator, destination *string) ([]string, error) {
 

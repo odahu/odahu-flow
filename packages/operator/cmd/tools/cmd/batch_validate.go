@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"os"
+	"runtime"
 )
 
 const inputCommandUsage = `
@@ -49,6 +50,9 @@ var validateInputCommand = &cobra.Command{
 	Use:  "input",
 	Short: "validate input for user batch inference container",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		numCPU := runtime.NumCPU()
+		zap.S().Infof("Number of CPUs: %d", numCPU)
 
 		_, err := predict_v2_tools.ValidateDir(source, predict_v2_tools.ValidateInput, &destination)
 		if err != nil {
