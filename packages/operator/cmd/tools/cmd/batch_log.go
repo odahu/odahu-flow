@@ -175,9 +175,10 @@ func getModelNameVersion() (string, string, error) {
 }
 
 var logModelInputCommand = &cobra.Command{
-	Use:                        "input",
+	Use:   "input",
 	Short: "log model input to feedback storage",
-	Args: cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(1),
+	Example: "odahu-tools batch log input <path-to-folder-with-json-files>",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		logEngine, err := initFluentd()
 		if err != nil {

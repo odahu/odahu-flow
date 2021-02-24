@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"log"
 	"os"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"runtime/pprof"
 )
 
@@ -23,6 +22,7 @@ var rootCmd = &cobra.Command{
 	Use:   "odahu-tools",
 	Short: "odahu-tools is a simple command line tool that provides API to the set of ODAHU platform features",
 	Long: `odahu-tools provides API to execute the same logic that is used by the ODAHU platform in the cluster`,
+	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			_ = cmd.Help()
@@ -117,8 +117,6 @@ func init() {
 func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
-		zap.S().Errorw("Error during executing the root command", zap.Error(err))
-		fmt.Printf("Error: %s", err)
 		os.Exit(1)
 	}
 }
