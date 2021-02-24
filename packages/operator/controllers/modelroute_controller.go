@@ -49,8 +49,6 @@ import (
 )
 
 const (
-	knativeRevisionHeader    = "knative-serving-revision"
-	knativeNamespaceHeader   = "knative-serving-namespace"
 	modelNameHeader          = "model-name"
 	modelVersionHeader       = "model-version"
 	defaultRetryAttempts     = 60
@@ -90,7 +88,7 @@ func VirtualServiceName(mr *odahuflowv1alpha1.ModelRoute) string {
 }
 
 func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1alpha1.ModelRoute) (bool, error) {
-	var httpTargets []*v1alpha3_istio.HTTPRouteDestination
+	httpTargets := make([]*v1alpha3_istio.HTTPRouteDestination, len(modelRouteCR.Spec.ModelDeploymentTargets))
 	reconcileAgain := false
 
 	for _, md := range modelRouteCR.Spec.ModelDeploymentTargets {

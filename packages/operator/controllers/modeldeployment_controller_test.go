@@ -142,32 +142,32 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 
 	cleanF := s.createDeployment(md)
 	defer cleanF()
-	knativeConfiguration := s.getKnativeConfiguration(md)
+	knativeService := s.getKnativeService(md)
 
-	configurationAnnotations := knativeConfiguration.Spec.Template.ObjectMeta.Annotations
-	s.Assertions.Len(configurationAnnotations, 6)
+	podAnnonations := knativeService.Spec.Template.ObjectMeta.Annotations
+	s.Assertions.Len(podAnnonations, 6)
 
-	s.Assertions.Contains(configurationAnnotations, KnativeMinReplicasKey)
-	s.Assertions.Equal(configurationAnnotations[KnativeMinReplicasKey], strconv.Itoa(int(mdMinReplicas)))
+	s.Assertions.Contains(podAnnonations, KnativeMinReplicasKey)
+	s.Assertions.Equal(podAnnonations[KnativeMinReplicasKey], strconv.Itoa(int(mdMinReplicas)))
 
-	s.Assertions.Contains(configurationAnnotations, KnativeMaxReplicasKey)
-	s.Assertions.Equal(configurationAnnotations[KnativeMaxReplicasKey], strconv.Itoa(int(mdMaxReplicas)))
+	s.Assertions.Contains(podAnnonations, KnativeMaxReplicasKey)
+	s.Assertions.Equal(podAnnonations[KnativeMaxReplicasKey], strconv.Itoa(int(mdMaxReplicas)))
 
-	s.Assertions.Contains(configurationAnnotations, KnativeAutoscalingTargetKey)
-	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingTargetKey], KnativeAutoscalingTargetDefaultValue)
+	s.Assertions.Contains(podAnnonations, KnativeAutoscalingTargetKey)
+	s.Assertions.Equal(podAnnonations[KnativeAutoscalingTargetKey], KnativeAutoscalingTargetDefaultValue)
 
-	s.Assertions.Contains(configurationAnnotations, KnativeAutoscalingClass)
-	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingClass], DefaultKnativeAutoscalingClass)
+	s.Assertions.Contains(podAnnonations, KnativeAutoscalingClass)
+	s.Assertions.Equal(podAnnonations[KnativeAutoscalingClass], DefaultKnativeAutoscalingClass)
 
-	s.Assertions.Contains(configurationAnnotations, KnativeAutoscalingMetric)
-	s.Assertions.Equal(configurationAnnotations[KnativeAutoscalingMetric], DefaultKnativeAutoscalingMetric)
+	s.Assertions.Contains(podAnnonations, KnativeAutoscalingMetric)
+	s.Assertions.Equal(podAnnonations[KnativeAutoscalingMetric], DefaultKnativeAutoscalingMetric)
 
-	configurationLabels := knativeConfiguration.Spec.Template.ObjectMeta.Labels
+	configurationLabels := knativeService.Spec.Template.ObjectMeta.Labels
 	s.Assertions.Len(configurationLabels, 5)
 	s.Assertions.Contains(configurationLabels, ModelNameAnnotationKey)
 	s.Assertions.Equal(md.Name, configurationLabels[ModelNameAnnotationKey])
 
-	podSpec := knativeConfiguration.Spec.Template.Spec
+	podSpec := knativeService.Spec.Template.Spec
 	s.Assertions.Len(podSpec.Containers, 1)
 	s.Assertions.Equal(DefaultTerminationPeriod, *podSpec.TimeoutSeconds)
 
@@ -198,7 +198,7 @@ func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolProvide
 
 	cleanF := s.createDeployment(md)
 	defer cleanF()
-	knativeConfiguration := s.getKnativeConfiguration(md)
+	knativeConfiguration := s.getKnativeService(md)
 
 	s.Assertions.Nil(knativeConfiguration.Spec.Template.Spec.Affinity)
 	s.Assertions.Equal(someNodeSelector, knativeConfiguration.Spec.Template.Spec.NodeSelector)
@@ -220,7 +220,7 @@ func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolNotProv
 	cleanF := s.createDeployment(md)
 	defer cleanF()
 
-	knativeConfiguration := s.getKnativeConfiguration(md)
+	knativeService := s.getKnativeService(md)
 
 	expectedNodeSelectorRequirement1 := []v1.NodeSelectorRequirement{{
 		Key:      "mode",
@@ -240,7 +240,7 @@ func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolNotProv
 		},
 	}
 
-	actualAffinity := knativeConfiguration.Spec.Template.Spec.Affinity
+	actualAffinity := knativeService.Spec.Template.Spec.Affinity
 	actualNodeSelectorTerms := actualAffinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms
 	s.Assertions.Len(actualNodeSelectorTerms, 2)
 
@@ -250,7 +250,7 @@ func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_NodePoolNotProv
 		s.Assertions.ElementsMatch(expectedNodeSelectorRequirement, actualNodeSelectorTerms[i].MatchExpressions)
 	}
 
-	s.Assertions.Nil(knativeConfiguration.Spec.Template.Spec.NodeSelector)
+	s.Assertions.Nil(knativeService.Spec.Template.Spec.NodeSelector)
 }
 
 func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_Tolerations() {
@@ -263,7 +263,7 @@ func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_Tolerations() {
 
 	cleanF := s.createDeployment(md)
 	defer cleanF()
-	knativeConfiguration := s.getKnativeConfiguration(md)
+	knativeConfiguration := s.getKnativeService(md)
 
 	s.Assertions.Equal(tolerations, knativeConfiguration.Spec.Template.Spec.Tolerations)
 }
@@ -284,16 +284,16 @@ func (s *ModelDeploymentControllerSuite) createDeployment(md *odahuflowv1alpha1.
 	return func() { s.k8sClient.Delete(context.TODO(), md) }
 }
 
-func (s *ModelDeploymentControllerSuite) getKnativeConfiguration(md *odahuflowv1alpha1.ModelDeployment,
-) *knservingv1.Configuration {
-	configuration := &knservingv1.Configuration{}
-	configurationKey := types.NamespacedName{Name: KnativeServiceName(md), Namespace: md.Namespace}
+func (s *ModelDeploymentControllerSuite) getKnativeService(md *odahuflowv1alpha1.ModelDeployment,
+) *knservingv1.Service {
+	service := &knservingv1.Service{}
+	serviceKey := types.NamespacedName{Name: KnativeServiceName(md), Namespace: md.Namespace}
 	s.Assertions.Eventually(
-		func() bool { return s.k8sClient.Get(context.TODO(), configurationKey, configuration) == nil },
+		func() bool { return s.k8sClient.Get(context.TODO(), serviceKey, service) == nil },
 		10*time.Second,
 		10*time.Millisecond,
-		"Knative configuration not found!")
-	return configuration
+		"Knative service not found!")
+	return service
 }
 
 // Returns validDeployment with random Name to avoid collisions when running in parallel
