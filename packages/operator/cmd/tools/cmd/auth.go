@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	connAPI "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
-	connTools "github.com/odahu/odahu-flow/packages/operator/pkg/tools/connections"
+	connTools "github.com/odahu/odahu-flow/packages/operator/pkg/utils/connections"
 )
 
 const (

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/predict_v2"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/tools/feedback"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/feedback"
 	"io/ioutil"
 	feedback_utils "odahu-commons/feedback"
 	"github.com/spf13/cobra"
