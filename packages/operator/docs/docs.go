@@ -2076,6 +2076,46 @@ var doc = `{
                 }
             }
         },
+        "BatchConfig": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable batch API/operator",
+                    "type": "boolean"
+                },
+                "namespace": {
+                    "description": "Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created",
+                    "type": "string"
+                },
+                "nodePools": {
+                    "description": "Node pools to run deployments",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NodePool"
+                    }
+                },
+                "rcloneImage": {
+                    "description": "RClone image that will be used to sync data with object storage",
+                    "type": "string"
+                },
+                "timeout": {
+                    "description": "Timeout for full training process",
+                    "type": "string"
+                },
+                "tolerations": {
+                    "description": "Kubernetes tolerations for batch jobs",
+                    "type": "string"
+                },
+                "toolsImage": {
+                    "description": "ODAHU tools image",
+                    "type": "string"
+                },
+                "toolsSecret": {
+                    "description": "ODAHU tools secret name with config",
+                    "type": "string"
+                }
+            }
+        },
         "Claims": {
             "type": "object",
             "properties": {
@@ -2129,6 +2169,10 @@ var doc = `{
                 "api": {
                     "type": "object",
                     "$ref": "#/definitions/APIConfig"
+                },
+                "batch": {
+                    "type": "object",
+                    "$ref": "#/definitions/BatchConfig"
                 },
                 "common": {
                     "type": "object",

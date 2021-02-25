@@ -45,6 +45,35 @@ definitions:
         description: OpenID token url
         type: string
     type: object
+  BatchConfig:
+    properties:
+      enabled:
+        description: Enable batch API/operator
+        type: boolean
+      namespace:
+        description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created
+        type: string
+      nodePools:
+        description: Node pools to run deployments
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
+      rcloneImage:
+        description: RClone image that will be used to sync data with object storage
+        type: string
+      timeout:
+        description: Timeout for full training process
+        type: string
+      tolerations:
+        description: Kubernetes tolerations for batch jobs
+        type: string
+      toolsImage:
+        description: ODAHU tools image
+        type: string
+      toolsSecret:
+        description: ODAHU tools secret name with config
+        type: string
+    type: object
   Claims:
     properties:
       email:
@@ -84,6 +113,9 @@ definitions:
     properties:
       api:
         $ref: '#/definitions/APIConfig'
+        type: object
+      batch:
+        $ref: '#/definitions/BatchConfig'
         type: object
       common:
         $ref: '#/definitions/CommonConfig'

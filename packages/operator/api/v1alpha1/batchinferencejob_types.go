@@ -20,6 +20,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// BatchJobState defines current state
+type BatchJobState string
+
+const (
+	BatchScheduling BatchJobState = "scheduling"
+	BatchRunning    BatchJobState = "running"
+	BatchSucceeded  BatchJobState = "succeeded"
+	BatchFailed     BatchJobState = "failed"
+	BatchUnknown    BatchJobState = "unknown"
+)
+
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
@@ -27,15 +38,49 @@ import (
 type BatchInferenceJobSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of BatchInferenceJob. Edit BatchInferenceJob_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	BatchInferenceServiceID string `json:"batchInferenceService"`
+	// Entrypoint array. Not executed within a shell.
+	// The docker image's ENTRYPOINT is used if this is not provided.
+	// Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
+	// cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax
+	// can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,
+	// regardless of whether the variable exists or not.
+	// Cannot be updated.
+	// More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+	Command []string `json:"command"`
+	// Arguments to the entrypoint.
+	// The docker image's CMD is used if this is not provided.
+	// Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
+	// cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax
+	// can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,
+	// regardless of whether the variable exists or not.
+	// Cannot be updated.
+	// More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+	Args []string `json:"args"`
+	// InputPath is a source directory for BatchInferenceJob input data
+	// relative to bucket root
+	InputPath string `json:"inputPath"`
+	// OutputPath is a destination directory for BatchInferenceJob results
+	// relative to bucket root
+	OutputPath string `json:"outputPath"`
+	// Node selector for specifying a node pool
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// Resources for model container
+	// The same format like k8s uses for pod resources.
+	Resources *ResourceRequirements `json:"resources,omitempty"`
+	// BatchRequestID is unique identifier for BatchInferenceJob that helps to correlate between
+	// Model input, model output and feedback
+	// Take into account that it is not the same as kubeflow InferenceRequest id
+	// Each BatchInferenceJob can process more than one InferenceRequest (delivered in separate input file)
+	// So each BatchRequestID has set of corresponding InferenceRequest and their IDs
+	BatchRequestID string `json:"requestId"`
 }
 
 // BatchInferenceJobStatus defines the observed state of BatchInferenceJob
 type BatchInferenceJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	State BatchJobState `json:"state"`
 }
 
 // +kubebuilder:object:root=true

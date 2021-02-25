@@ -34,13 +34,105 @@ spec:
         spec:
           description: BatchInferenceJobSpec defines the desired state of BatchInferenceJob
           properties:
-            foo:
-              description: Foo is an example field of BatchInferenceJob. Edit BatchInferenceJob_types.go
-                to remove/update
+            args:
+              description: 'Arguments to the entrypoint. The docker image''s CMD is
+                used if this is not provided. Variable references $(VAR_NAME) are
+                expanded using the container''s environment. If a variable cannot
+                be resolved, the reference in the input string will be unchanged.
+                The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME).
+                Escaped references will never be expanded, regardless of whether the
+                variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+              items:
+                type: string
+              type: array
+            batchInferenceService:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "make" to regenerate code after modifying this file'
               type: string
+            command:
+              description: 'Entrypoint array. Not executed within a shell. The docker
+                image''s ENTRYPOINT is used if this is not provided. Variable references
+                $(VAR_NAME) are expanded using the container''s environment. If a
+                variable cannot be resolved, the reference in the input string will
+                be unchanged. The $(VAR_NAME) syntax can be escaped with a double
+                $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless
+                of whether the variable exists or not. Cannot be updated. More info:
+                https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+              items:
+                type: string
+              type: array
+            inputPath:
+              description: InputPath is a source directory for BatchInferenceJob input
+                data relative to bucket root
+              type: string
+            nodeSelector:
+              additionalProperties:
+                type: string
+              description: Node selector for specifying a node pool
+              type: object
+            outputPath:
+              description: OutputPath is a destination directory for BatchInferenceJob
+                results relative to bucket root
+              type: string
+            requestId:
+              description: BatchRequestID is unique identifier for BatchInferenceJob
+                that helps to correlate between Model input, model output and feedback
+                Take into account that it is not the same as kubeflow InferenceRequest
+                id Each BatchInferenceJob can process more than one InferenceRequest
+                (delivered in separate input file) So each BatchRequestID has set
+                of corresponding InferenceRequest and their IDs
+              type: string
+            resources:
+              description: Resources for model container The same format like k8s
+                uses for pod resources.
+              properties:
+                limits:
+                  description: Limits describes the maximum amount of compute resources
+                    allowed.
+                  properties:
+                    cpu:
+                      description: Read more about CPU resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu
+                      type: string
+                    gpu:
+                      description: Read more about GPU resource here https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins
+                      type: string
+                    memory:
+                      description: Read more about memory resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory
+                      type: string
+                  type: object
+                requests:
+                  description: Requests describes the minimum amount of compute resources
+                    required.
+                  properties:
+                    cpu:
+                      description: Read more about CPU resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu
+                      type: string
+                    gpu:
+                      description: Read more about GPU resource here https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins
+                      type: string
+                    memory:
+                      description: Read more about memory resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory
+                      type: string
+                  type: object
+              type: object
+          required:
+          - args
+          - batchInferenceService
+          - command
+          - inputPath
+          - outputPath
+          - requestId
           type: object
         status:
           description: BatchInferenceJobStatus defines the observed state of BatchInferenceJob
+          properties:
+            state:
+              description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                of cluster Important: Run "make" to regenerate code after modifying
+                this file'
+              type: string
+          required:
+          - state
           type: object
       type: object
   version: v1alpha1
