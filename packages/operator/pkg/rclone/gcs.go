@@ -26,8 +26,6 @@ import (
 	"net/url"
 )
 
-const serviceAccountJSONPath = "gcs_service_account.json"
-
 func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDescription, error) {
 	_, err := fs.Find("googlecloudstorage")
 	if err != nil {
@@ -40,6 +38,8 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		"location":   conn.Region,
 		"bucket_acl": "private",
 	}
+
+	serviceAccountJSONPath := "gcs-key-" + configName + ".json"
 
 	if len(conn.KeySecret) != 0 {
 		if err = ioutil.WriteFile(serviceAccountJSONPath, []byte(conn.KeySecret), 0600); err != nil {

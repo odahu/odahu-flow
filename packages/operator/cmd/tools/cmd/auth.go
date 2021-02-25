@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"go.uber.org/zap"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -48,15 +48,13 @@ var authCommand = &cobra.Command{
 var configureRCloneCommand = &cobra.Command{
 	Use:  "configure-rclone",
 	Short: `Generate rclone configuration based on ODAHU object storage connection`,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		client := connAPI.NewClient(cfg.Auth.APIURL, "",
 			cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.OAuthOIDCTokenEndpoint)
 		err := connTools.GenerateRClone(clusterValues, fileValues, client)
 		if err != nil {
-			zap.S().Errorw("There are errors during generating RClone storages", zap.Error(err))
-			os.Exit(1)
+			return fmt.Errorf("unable to configure RClone: %s", err)
 		}
-		zap.S().Info("Completed")
-
+		return nil
 	},
 }
