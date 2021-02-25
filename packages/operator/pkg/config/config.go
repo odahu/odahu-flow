@@ -62,6 +62,7 @@ type Config struct {
 	Training       ModelTrainingConfig   `json:"training"`
 	Packaging      ModelPackagingConfig  `json:"packaging"`
 	Operator       OperatorConfig        `json:"operator"`
+	Batch          BatchConfig           `json:"batch"`
 }
 
 func LoadConfig() (*Config, error) {

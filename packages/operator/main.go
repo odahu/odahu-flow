@@ -164,6 +164,13 @@ func start(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	if odahuConfig.Batch.Enabled {
+		if err = controllers.NewBatchInferenceJobReconciler(mgr).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Batch")
+			os.Exit(1)
+		}
+	}
+
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("starting manager")

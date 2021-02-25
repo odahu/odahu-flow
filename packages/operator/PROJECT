@@ -22,4 +22,10 @@ resources:
 - group: odahuflow
   kind: ModelRoute
   version: v1alpha1
+- group: odahuflow
+  kind: BatchInferenceService
+  version: v1alpha1
+- group: odahuflow
+  kind: BatchInferenceJob
+  version: v1alpha1
 version: "2"
