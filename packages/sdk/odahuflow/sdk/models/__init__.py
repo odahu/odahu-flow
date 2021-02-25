@@ -12,6 +12,7 @@ from odahuflow.sdk.models.common_config import CommonConfig
 from odahuflow.sdk.models.config import Config
 from odahuflow.sdk.models.connection import Connection
 from odahuflow.sdk.models.connection_config import ConnectionConfig
+from odahuflow.sdk.models.connection_reference import ConnectionReference
 from odahuflow.sdk.models.connection_spec import ConnectionSpec
 from odahuflow.sdk.models.connection_status import ConnectionStatus
 from odahuflow.sdk.models.data_binding_dir import DataBindingDir
@@ -22,6 +23,13 @@ from odahuflow.sdk.models.external_url import ExternalUrl
 from odahuflow.sdk.models.feedback_model_feedback_request import FeedbackModelFeedbackRequest
 from odahuflow.sdk.models.feedback_model_feedback_response import FeedbackModelFeedbackResponse
 from odahuflow.sdk.models.http_result import HTTPResult
+from odahuflow.sdk.models.inference_job import InferenceJob
+from odahuflow.sdk.models.inference_job_spec import InferenceJobSpec
+from odahuflow.sdk.models.inference_job_status import InferenceJobStatus
+from odahuflow.sdk.models.inference_service import InferenceService
+from odahuflow.sdk.models.inference_service_spec import InferenceServiceSpec
+from odahuflow.sdk.models.inference_service_status import InferenceServiceStatus
+from odahuflow.sdk.models.inference_service_triggers import InferenceServiceTriggers
 from odahuflow.sdk.models.input_data_binding_dir import InputDataBindingDir
 from odahuflow.sdk.models.jwks import JWKS
 from odahuflow.sdk.models.json_schema import JsonSchema
@@ -58,6 +66,7 @@ from odahuflow.sdk.models.packaging_integration import PackagingIntegration
 from odahuflow.sdk.models.packaging_integration_spec import PackagingIntegrationSpec
 from odahuflow.sdk.models.packaging_integration_status import PackagingIntegrationStatus
 from odahuflow.sdk.models.parameter import Parameter
+from odahuflow.sdk.models.predictor_webhook_trigger import PredictorWebhookTrigger
 from odahuflow.sdk.models.resource_list import ResourceList
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements
 from odahuflow.sdk.models.route_event import RouteEvent

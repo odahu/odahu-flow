@@ -115,6 +115,7 @@ swag:
 	"${SED_BIN}" -i 's/deployment\.//g' docs/*
 	"${SED_BIN}" -i 's/training\.//g' docs/*
 	"${SED_BIN}" -i 's/packaging\.//g' docs/*
+	"${SED_BIN}" -i 's/batch\.//g' docs/*
 	"${SED_BIN}" -i 's/config\.//g' docs/*
 	"${SED_BIN}" -i 's/user\.//g' docs/*
 	"${SED_BIN}" -i 's/httputil\.//g' docs/*

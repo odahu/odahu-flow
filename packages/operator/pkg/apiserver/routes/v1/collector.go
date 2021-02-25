@@ -27,14 +27,18 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	userinfo "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/user"
+	service_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/batch/service"
+	job_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/batch/job"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/memory"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	batch_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/batch"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
@@ -45,6 +49,7 @@ import (
 	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	batch_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/batch/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 )
 
@@ -66,6 +71,8 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		if err != nil {
 			return err
 		}
+	case config.RepositoryMemoryType:
+		connRepository = memory.NewRepository()
 	default:
 		return errors.New("unexpect connection repository type")
 	}
@@ -77,6 +84,8 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	packRepo := pack_repo.PackagingRepo{DB: db}
 	deployRepo := deploy_repo.DeploymentRepo{DB: db}
 	routeRepo := route_repo.RouteRepo{DB: db}
+	batchServiceRepo := batch_repo.BISRepo{DB: db}
+	batchJobRepo := batch_repo.BIJRepo{DB: db}
 
 	trainKubeClient := train_kube_client.NewClient(
 		cfg.Training.Namespace,
@@ -96,6 +105,8 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	packService := mp_service.NewService(packRepo)
 	depService := md_service.NewService(deployRepo, routeRepo, outbox.EventPublisher{DB: db})
 	mrService := mr_service.NewService(routeRepo, outbox.EventPublisher{DB: db})
+	batchServiceService := batch_service.NewInferenceServiceService(batchServiceRepo)
+	batchJobService := batch_service.NewJobService(batchJobRepo, batchServiceRepo, connService)
 
 
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
@@ -126,6 +137,13 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 
 	configuration.ConfigureRoutes(routeGroup, cfg)
 	userinfo.ConfigureRoutes(routeGroup, cfg.Users.Claims)
+
+	// TODO: cfg.Deployment.Enabled -> cfg.Batch.Enabled
+	batchRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Deployment.Enabled))
+	service_routes.SetupRoutes(batchRouteGroup, batchServiceService)
+	// TODO: cfg.Deployment.Enabled -> cfg.Batch.Enabled
+	batchJobRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Deployment.Enabled))
+	job_routes.SetupRoutes(batchJobRouteGroup, batchJobService)
 
 	return err
 }
