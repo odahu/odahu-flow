@@ -14,7 +14,7 @@ import (
 
 // getBucketNames return bucket names for apitypes.InferenceService in next order:
 // inputConnection bucket, outputConnection bucket, modelConnection bucket
-func getBucketNames(s apitypes.InferenceService, connAPI ConnectionAPI) (
+func getBucketNames(s apitypes.InferenceService, connAPI ConnGetter) (
 	iBucket string, oBucket string, mBucket string, errs error,
 	) {
 
@@ -52,7 +52,7 @@ func getBucketNames(s apitypes.InferenceService, connAPI ConnectionAPI) (
 
 // BatchJobToTaskSpec generate tektoncd TaskSpec based on v1alpha1.BatchInferenceJob
 func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
-	connAPI ConnectionAPI,
+	connAPI ConnGetter,
 	serviceAPI BatchInferenceServiceAPI,
 	gpuResourceName string, rcloneImage string,
 	toolsSecret string,

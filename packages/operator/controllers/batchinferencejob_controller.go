@@ -30,10 +30,11 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -57,33 +58,74 @@ type BatchInferenceServiceAPI interface {
 	ReportJobRun(ID string, RunInfo apiservertypes.InferenceJobRun) error
 }
 
-type ConnectionAPI interface {
+type ConnGetter interface {
 	GetConnection(id string) (*connection.Connection, error)
+}
+
+type PodGetter interface {
+	GetPod(ctx context.Context, name string, namespace string) (corev1.Pod, error)
 }
 
 
 // BatchInferenceJobReconciler reconciles a BatchInferenceJob object
 type BatchInferenceJobReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log         logr.Logger
+	Scheme      *runtime.Scheme
 	batchInfAPI BatchInferenceServiceAPI
-	connAPI ConnectionAPI
-	cfg config.BatchConfig
-	gpuResName string
+	connAPI     ConnGetter
+	cfg         config.BatchConfig
+	gpuResName  string
+	podGetter   PodGetter
 }
 
-func NewBatchInferenceJobReconciler(
-	mgr manager.Manager,
-	batchInfAPI BatchInferenceServiceAPI, connAPI ConnectionAPI,
-	cfg config.Config) *BatchInferenceJobReconciler {
+type defaultPodGetter struct {
+	client.Client
+}
+
+func (p defaultPodGetter) GetPod(ctx context.Context, name string, namespace string) (corev1.Pod, error) {
+	trainerPod := &corev1.Pod{}
+	err := p.Get(
+		ctx,
+		types.NamespacedName{
+			Name:      name,
+			Namespace: namespace,
+		},
+		trainerPod,
+	)
+	return *trainerPod, err
+}
+
+
+func setDefaultOptions(options *BatchInferenceJobReconcilerOptions) {
+	if options.podGetter == nil {
+		options.podGetter = defaultPodGetter{options.Mgr.GetClient()}
+	}
+
+}
+
+type BatchInferenceJobReconcilerOptions struct {
+	Mgr               manager.Manager
+	BatchInferenceAPI BatchInferenceServiceAPI
+	ConnGetter        ConnGetter
+	podGetter         PodGetter
+	Cfg               config.Config
+}
+
+
+func NewBatchInferenceJobReconciler(opts BatchInferenceJobReconcilerOptions) *BatchInferenceJobReconciler {
+
+	setDefaultOptions(&opts)
+
 	return &BatchInferenceJobReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		batchInfAPI: batchInfAPI,
-		connAPI: connAPI,
-		cfg: cfg.Batch,
-		gpuResName: cfg.Common.ResourceGPUName,
+		Client: opts.Mgr.GetClient(),
+		Scheme: opts.Mgr.GetScheme(),
+		batchInfAPI: opts.BatchInferenceAPI,
+		podGetter: opts.podGetter,
+		connAPI: opts.ConnGetter,
+		cfg: opts.Cfg.Batch,
+		gpuResName: opts.Cfg.Common.ResourceGPUName,
+		Log: logf.Log.WithName("batch-inference-controller"),
 	}
 }
 
@@ -101,7 +143,7 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 	batchJob := &odahuflowv1alpha1.BatchInferenceJob{}
 
 	if err := r.Get(ctx, req.NamespacedName, batchJob); err != nil {
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
 		}
 		log.Error(err, "Unable to fetch BatchInferenceJob from Kube API")
@@ -130,8 +172,58 @@ func (r *BatchInferenceJobReconciler) generateTaskSpec(
 		batchJob, r.connAPI, r.batchInfAPI, r.gpuResName, r.cfg.RCloneImage, r.cfg.ToolsSecret, r.cfg.ToolsImage)
 }
 
+func (r *BatchInferenceJobReconciler) calculateStateByPod(
+	podName string, job *odahuflowv1alpha1.BatchInferenceJob) error {
+
+	pod, err := r.podGetter.GetPod(context.TODO(), podName, job.Namespace)
+	if err != nil {
+		return err
+	}
+
+	if pod.Status.Reason == evictedPodReason {
+		job.Status.State = odahuflowv1alpha1.BatchFailed
+		job.Status.Message = pod.Status.Message
+
+		return nil
+	}
+
+	switch pod.Status.Phase {
+	case corev1.PodPending:
+		job.Status.State = odahuflowv1alpha1.BatchScheduling
+	case corev1.PodUnknown:
+		job.Status.State = odahuflowv1alpha1.BatchScheduling
+	case corev1.PodRunning:
+		job.Status.State = odahuflowv1alpha1.BatchRunning
+	}
+
+	return nil
+}
+
 func (r *BatchInferenceJobReconciler) syncStatusFromTaskRun(
-	batchJob *odahuflowv1alpha1.BatchInferenceJob, tr *tektonv1beta1.TaskRun, log logr.Logger) error {
+	batchJob *odahuflowv1alpha1.BatchInferenceJob, taskRun *tektonv1beta1.TaskRun, log logr.Logger) error {
+	lastCondition := taskRun.Status.Conditions[len(taskRun.Status.Conditions)-1]
+
+	switch lastCondition.Status {
+	case corev1.ConditionUnknown:
+		if len(taskRun.Status.PodName) != 0 {
+			if err := r.calculateStateByPod(taskRun.Status.PodName, batchJob); err != nil {
+				return err
+			}
+		} else {
+			batchJob.Status.State = odahuflowv1alpha1.BatchScheduling
+		}
+	case corev1.ConditionTrue:
+		batchJob.Status.State = odahuflowv1alpha1.BatchSucceeded
+		batchJob.Status.Message = lastCondition.Message
+		batchJob.Status.Reason = lastCondition.Reason
+
+	case corev1.ConditionFalse:
+		batchJob.Status.State = odahuflowv1alpha1.BatchFailed
+		batchJob.Status.Message = lastCondition.Message
+		batchJob.Status.Reason = lastCondition.Reason
+	default:
+		batchJob.Status.State = odahuflowv1alpha1.BatchScheduling
+	}
 	return nil
 }
 
@@ -190,7 +282,7 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 	err = r.Get(context.TODO(), types.NamespacedName{
 		Name: taskRun.Name, Namespace: r.cfg.Namespace,
 	}, found)
-	if err != nil && errors.IsNotFound(err) {
+	if err != nil && k8serrors.IsNotFound(err) {
 		log.Info(fmt.Sprintf("Creating %s k8s task run", taskRun.ObjectMeta.Name))
 		return taskRun, r.Create(context.TODO(), taskRun)
 	} else if err != nil {

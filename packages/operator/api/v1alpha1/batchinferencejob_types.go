@@ -81,6 +81,8 @@ type BatchInferenceJobStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 	State BatchJobState `json:"state"`
+	Message string `json:"message"`
+	Reason string `json:"reason"`
 }
 
 // +kubebuilder:object:root=true
