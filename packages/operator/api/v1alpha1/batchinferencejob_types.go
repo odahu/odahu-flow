@@ -83,6 +83,7 @@ type BatchInferenceJobStatus struct {
 	State BatchJobState `json:"state"`
 	Message string `json:"message"`
 	Reason string `json:"reason"`
+	PodName string `json:"podName"`
 }
 
 // +kubebuilder:object:root=true

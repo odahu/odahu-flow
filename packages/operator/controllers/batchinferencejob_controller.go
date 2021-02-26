@@ -98,8 +98,8 @@ func (p defaultPodGetter) GetPod(ctx context.Context, name string, namespace str
 
 
 func setDefaultOptions(options *BatchInferenceJobReconcilerOptions) {
-	if options.podGetter == nil {
-		options.podGetter = defaultPodGetter{options.Mgr.GetClient()}
+	if options.PodGetter == nil {
+		options.PodGetter = defaultPodGetter{options.Mgr.GetClient()}
 	}
 
 }
@@ -108,7 +108,7 @@ type BatchInferenceJobReconcilerOptions struct {
 	Mgr               manager.Manager
 	BatchInferenceAPI BatchInferenceServiceAPI
 	ConnGetter        ConnGetter
-	podGetter         PodGetter
+	PodGetter         PodGetter
 	Cfg               config.Config
 }
 
@@ -121,7 +121,7 @@ func NewBatchInferenceJobReconciler(opts BatchInferenceJobReconcilerOptions) *Ba
 		Client: opts.Mgr.GetClient(),
 		Scheme: opts.Mgr.GetScheme(),
 		batchInfAPI: opts.BatchInferenceAPI,
-		podGetter: opts.podGetter,
+		podGetter: opts.PodGetter,
 		connAPI: opts.ConnGetter,
 		cfg: opts.Cfg.Batch,
 		gpuResName: opts.Cfg.Common.ResourceGPUName,
@@ -156,13 +156,26 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		return ctrl.Result{}, err
 	}
 
-	// Fill BatchInferenceJob
-	if err := r.syncStatusFromTaskRun(batchJob, tr, log); err != nil {
-		log.Error(err,"Unable to sync status for BatchInferenceJob from  TaskRun")
+	if len(tr.Status.Conditions) > 0 {
+		// Fill BatchInferenceJob
+		if err := r.syncStatusFromTaskRun(batchJob, tr, log); err != nil {
+			log.Error(err,"Unable to sync status for BatchInferenceJob from  TaskRun")
+			return ctrl.Result{}, err
+		}
+	} else {
+		batchJob.Status.State = odahuflowv1alpha1.BatchScheduling
+	}
+
+	log.Info("Setup batchJob state", "state", batchJob.Status.State)
+
+	batchJob.Status.PodName = tr.Status.PodName
+
+	if err := r.Update(ctx, batchJob); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
+
 }
 
 func (r *BatchInferenceJobReconciler) generateTaskSpec(
@@ -211,6 +224,8 @@ func (r *BatchInferenceJobReconciler) syncStatusFromTaskRun(
 			}
 		} else {
 			batchJob.Status.State = odahuflowv1alpha1.BatchScheduling
+			batchJob.Status.Message = ""
+			batchJob.Status.Reason = ""
 		}
 	case corev1.ConditionTrue:
 		batchJob.Status.State = odahuflowv1alpha1.BatchSucceeded

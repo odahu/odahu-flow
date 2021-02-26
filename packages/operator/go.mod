@@ -14,7 +14,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.9.5+incompatible
 	github.com/fluent/fluent-logger-golang v1.4.0
-	github.com/tinylib/msgp v1.1.0  // indirect
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
@@ -43,6 +42,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.5.0
 	github.com/tektoncd/pipeline v0.13.1-0.20200625065359-44f22a067b75
+	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0
@@ -57,6 +57,7 @@ require (
 	k8s.io/apimachinery v0.18.7-rc.0
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/kubernetes v1.14.7
+	knative.dev/pkg v0.0.0-20200812224206-44c860147a87
 	knative.dev/serving v0.17.0
 	odahu-commons v0.0.0
 	sigs.k8s.io/controller-runtime v0.6.1
