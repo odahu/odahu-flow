@@ -13,6 +13,8 @@ require (
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.9.5+incompatible
+	github.com/fluent/fluent-logger-golang v1.4.0
+	github.com/tinylib/msgp v1.1.0  // indirect
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
@@ -25,8 +27,8 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
 	github.com/keybase/go-crypto v0.0.0-20190828182435-a05457805304 // indirect
 	github.com/lib/pq v1.2.0
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure v1.0.0
-	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/onsi/gomega v1.10.1
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pborman/uuid v1.2.0
@@ -56,15 +58,15 @@ require (
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/kubernetes v1.14.7
 	knative.dev/serving v0.17.0
-	sigs.k8s.io/controller-runtime v0.6.1
 	odahu-commons v0.0.0
+	sigs.k8s.io/controller-runtime v0.6.1
 )
 
 replace (
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.6
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.6
 	k8s.io/client-go => k8s.io/client-go v0.17.6
-	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.9
 	// Use local commons package to release them at the same time
 	odahu-commons v0.0.0 => ../commons
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.5.9
 )

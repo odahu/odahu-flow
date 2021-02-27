@@ -138,6 +138,7 @@ pipeline {
                                 cicdLibrary.buildDockerImage('odahu-flow-model-trainer', ".", "containers/operator/Dockerfile", "--target model-trainer --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                                 cicdLibrary.buildDockerImage('odahu-flow-model-packager', ".", "containers/operator/Dockerfile", "--target model-packager --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                                 cicdLibrary.buildDockerImage('odahu-flow-controller', ".", "containers/operator/Dockerfile", "--target controller --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
+                                cicdLibrary.buildDockerImage('odahu-flow-tools', ".", "containers/operator/Dockerfile", "--target tools --cache-from odahu/odahu-flow-operator-dependencies:${Globals.buildVersion}")
                             }
                         }
                     }
@@ -263,6 +264,15 @@ pipeline {
                         timeout(time: param_upload_timeout, unit: 'MINUTES') {
                             script {
                                 cicdLibrary.uploadDockerImage('odahu-flow-controller', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
+                            }
+                        }
+                    }
+                }
+                stage('Upload ODAHU Tools image') {
+                    steps {
+                        timeout(time: param_upload_timeout, unit: 'MINUTES') {
+                            script {
+                                cicdLibrary.uploadDockerImage('odahu-flow-tools', env.param_stable_release.toBoolean() && env.param_dockerhub_publishing_enabled.toBoolean())
                             }
                         }
                     }
