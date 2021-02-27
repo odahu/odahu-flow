@@ -176,7 +176,8 @@ func start(cmd *cobra.Command, args []string) {
 	if odahuConfig.Batch.Enabled {
 
 		batchOpts := controllers.BatchInferenceJobReconcilerOptions{
-			Mgr:             mgr,
+			Client: mgr.GetClient(),
+			Schema: mgr.GetScheme(),
 			ConnGetter:      connAPI,
 			Cfg:             odahuConfig.Batch,
 			ResourceGPUName: odahuConfig.Common.ResourceGPUName,

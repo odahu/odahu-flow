@@ -39,7 +39,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -89,13 +88,14 @@ func (p defaultPodGetter) GetPod(ctx context.Context, name string, namespace str
 
 func setDefaultOptions(options *BatchInferenceJobReconcilerOptions) {
 	if options.PodGetter == nil {
-		options.PodGetter = defaultPodGetter{options.Mgr.GetClient()}
+		options.PodGetter = defaultPodGetter{options.Client}
 	}
 
 }
 
 type BatchInferenceJobReconcilerOptions struct {
-	Mgr               manager.Manager
+	Client client.Client
+	Schema *runtime.Scheme
 	ConnGetter        ConnGetter
 	PodGetter         PodGetter
 	Cfg               config.BatchConfig
@@ -108,8 +108,8 @@ func NewBatchInferenceJobReconciler(opts BatchInferenceJobReconcilerOptions) *Ba
 	setDefaultOptions(&opts)
 
 	return &BatchInferenceJobReconciler{
-		Client: opts.Mgr.GetClient(),
-		Scheme: opts.Mgr.GetScheme(),
+		Client: opts.Client,
+		Scheme: opts.Schema,
 		podGetter: opts.PodGetter,
 		connAPI: opts.ConnGetter,
 		cfg: opts.Cfg,
