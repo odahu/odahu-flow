@@ -181,10 +181,14 @@ func (r *BatchInferenceJobReconciler) calculateStateByPod(
 	if err != nil {
 		return err
 	}
+	job.Status.PodName = podName
+	job.Status.Message = ""
+	job.Status.Reason = ""
 
 	if pod.Status.Reason == evictedPodReason {
 		job.Status.State = odahuflowv1alpha1.BatchFailed
 		job.Status.Message = pod.Status.Message
+		job.Status.Reason = "Pod evicted"
 
 		return nil
 	}

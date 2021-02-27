@@ -24,6 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/controllers/mocks"
 	connapitypes "github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
@@ -85,31 +86,131 @@ var testCases = []struct{
 	expectJobStatus odahuflowv1alpha1.BatchInferenceJobStatus
 } {
 	{
-		trStatus:         tektonv1beta1.TaskRunStatus{Status: v1beta1.Status{
-			Conditions: v1beta1.Conditions{{
-				Status: corev1.ConditionUnknown,
-			}},
-		}},
+		trStatus: tektonv1beta1.TaskRunStatus{
+			Status: v1beta1.Status{
+				Conditions: v1beta1.Conditions{{
+					Status: corev1.ConditionTrue,
+					Reason: "exit code 0",
+					Message: "Emulated success",
+				}},
+			},
+		},
 		podStatus:        corev1.PodStatus{},
 		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
-			State:   odahuflowv1alpha1.BatchScheduling,
+			State:   odahuflowv1alpha1.BatchSucceeded,
+			Reason: "exit code 0",
+			Message: "Emulated success",
 		},
 	},
 	{
 		trStatus: tektonv1beta1.TaskRunStatus{
 			Status: v1beta1.Status{
 				Conditions: v1beta1.Conditions{{
-					Status: corev1.ConditionTrue,
+					Status: corev1.ConditionFalse,
+					Reason: "exit code 1",
+					Message: "Emulated fail",
 				}},
-			},
-			TaskRunStatusFields: tektonv1beta1.TaskRunStatusFields{
-				PodName: "podName",
 			},
 		},
 		podStatus:        corev1.PodStatus{},
 		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
-			State:   odahuflowv1alpha1.BatchSucceeded,
-			PodName: "podName",
+			State:   odahuflowv1alpha1.BatchFailed,
+			Reason: "exit code 1",
+			Message: "Emulated fail",
+		},
+	},
+	{
+		trStatus: tektonv1beta1.TaskRunStatus{
+			Status: v1beta1.Status{
+				Conditions: v1beta1.Conditions{{
+					Status: corev1.ConditionUnknown,
+				}},
+			},
+			TaskRunStatusFields: tektonv1beta1.TaskRunStatusFields{
+				PodName: "",
+			},
+		},
+		podStatus:        corev1.PodStatus{},
+		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
+			State:   odahuflowv1alpha1.BatchScheduling,
+		},
+	},
+	{
+		trStatus:         tektonv1beta1.TaskRunStatus{
+			Status: v1beta1.Status{
+				Conditions: v1beta1.Conditions{{
+					Status: corev1.ConditionUnknown,
+				}},
+			},
+			TaskRunStatusFields: tektonv1beta1.TaskRunStatusFields{
+				PodName: "pod",
+			},
+		},
+		podStatus:        corev1.PodStatus{
+			Reason: "Evicted", Message: "Pod was evicted",
+		},
+		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
+			State:   odahuflowv1alpha1.BatchFailed,
+			Reason: "Pod evicted",
+			Message: "Pod was evicted",
+			PodName: "pod",
+		},
+	},
+	{
+		trStatus:         tektonv1beta1.TaskRunStatus{
+			Status: v1beta1.Status{
+				Conditions: v1beta1.Conditions{{
+					Status: corev1.ConditionUnknown,
+				}},
+			},
+			TaskRunStatusFields: tektonv1beta1.TaskRunStatusFields{
+				PodName: "pod",
+			},
+		},
+		podStatus:        corev1.PodStatus{
+			Phase: corev1.PodPending,
+		},
+		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
+			State:   odahuflowv1alpha1.BatchScheduling,
+			PodName: "pod",
+		},
+	},
+	{
+		trStatus:         tektonv1beta1.TaskRunStatus{
+			Status: v1beta1.Status{
+				Conditions: v1beta1.Conditions{{
+					Status: corev1.ConditionUnknown,
+				}},
+			},
+			TaskRunStatusFields: tektonv1beta1.TaskRunStatusFields{
+				PodName: "pod",
+			},
+		},
+		podStatus:        corev1.PodStatus{
+			Phase: corev1.PodUnknown,
+		},
+		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
+			State:   odahuflowv1alpha1.BatchScheduling,
+			PodName: "pod",
+		},
+	},
+	{
+		trStatus:         tektonv1beta1.TaskRunStatus{
+			Status: v1beta1.Status{
+				Conditions: v1beta1.Conditions{{
+					Status: corev1.ConditionUnknown,
+				}},
+			},
+			TaskRunStatusFields: tektonv1beta1.TaskRunStatusFields{
+				PodName: "pod",
+			},
+		},
+		podStatus:        corev1.PodStatus{
+			Phase: corev1.PodRunning,
+		},
+		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
+			State:   odahuflowv1alpha1.BatchRunning,
+			PodName: "pod",
 		},
 	},
 }
@@ -126,7 +227,9 @@ func TestJobStatus(t *testing.T) {
 			connGetter := mocks.ConnGetter{}
 			connGetter.On("GetConnection", "connection").Return(&conn, nil)
 			podGetter := mocks.PodGetter{}
-			podGetter.On("GetPod").Return(corev1.Pod{Status: test.podStatus}, nil)
+			podGetter.On(
+				"GetPod", mock.Anything, "pod", testNamespace,
+				).Return(corev1.Pod{Status: test.podStatus}, nil)
 
 			// Create isolated controller to avoid conflicts with different mocks
 			// in parallel tests
