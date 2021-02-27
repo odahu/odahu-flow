@@ -45,7 +45,7 @@ func getBucketNames(job *v1alpha1.BatchInferenceJob, connAPI ConnGetter) (
 			errs = multierr.Append(errs, err)
 		}
 	}
-	return
+	return iBucket, oBucket, mBucket, errs
 }
 
 

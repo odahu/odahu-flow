@@ -147,7 +147,7 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 
 	if len(tr.Status.Conditions) > 0 {
 		// Fill BatchInferenceJob
-		if err := r.syncStatusFromTaskRun(batchJob, tr, log); err != nil {
+		if err := r.syncStatusFromTaskRun(batchJob, tr); err != nil {
 			log.Error(err,"Unable to sync status for BatchInferenceJob from  TaskRun")
 			return ctrl.Result{}, err
 		}
@@ -206,7 +206,7 @@ func (r *BatchInferenceJobReconciler) calculateStateByPod(
 }
 
 func (r *BatchInferenceJobReconciler) syncStatusFromTaskRun(
-	batchJob *odahuflowv1alpha1.BatchInferenceJob, taskRun *tektonv1beta1.TaskRun, log logr.Logger) error {
+	batchJob *odahuflowv1alpha1.BatchInferenceJob, taskRun *tektonv1beta1.TaskRun) error {
 	lastCondition := taskRun.Status.Conditions[len(taskRun.Status.Conditions)-1]
 
 	switch lastCondition.Status {

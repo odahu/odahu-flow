@@ -55,9 +55,9 @@ var conn = connapitypes.Connection{
 	Status: odahuflowv1alpha1.ConnectionStatus{},
 }
 
-func getJob(ID string) odahuflowv1alpha1.BatchInferenceJob{
+func getJob(id string) odahuflowv1alpha1.BatchInferenceJob{
 	return odahuflowv1alpha1.BatchInferenceJob{
-		ObjectMeta: metav1.ObjectMeta{Name: ID, Namespace: testNamespace},
+		ObjectMeta: metav1.ObjectMeta{Name: id, Namespace: testNamespace},
 		Spec:       odahuflowv1alpha1.BatchInferenceJobSpec{
 			Command:                 []string{"python"},
 			Args:                    []string{"/opt/app/src.py", "--forecast"},
@@ -220,6 +220,7 @@ func TestJobStatus(t *testing.T) {
 
 	for i, test := range testCases {
 		i := i
+		test := test
 		t.Run(fmt.Sprintf("jobStatus test#%d", i), func(t *testing.T) {
 			t.Parallel()
 			as := require.New(t)

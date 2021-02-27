@@ -78,3 +78,6 @@ issues:
         - golint
         - stylecheck
       text: "ExternalUrl"
+    - linters:
+        - gocritic
+      text: "ifElseChain"
