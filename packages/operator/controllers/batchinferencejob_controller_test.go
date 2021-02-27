@@ -118,7 +118,9 @@ var testCases = []struct{
 func TestJobStatus(t *testing.T) {
 
 	for i, test := range testCases {
+		i := i
 		t.Run(fmt.Sprintf("jobStatus test#%d", i), func(t *testing.T) {
+			t.Parallel()
 			as := require.New(t)
 
 			connGetter := mocks.ConnGetter{}
