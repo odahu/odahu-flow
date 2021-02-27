@@ -222,7 +222,6 @@ func TestJobStatus(t *testing.T) {
 		i := i
 		test := test
 		t.Run(fmt.Sprintf("jobStatus test#%d", i), func(t *testing.T) {
-			t.Parallel()
 			as := require.New(t)
 
 			connGetter := mocks.ConnGetter{}
