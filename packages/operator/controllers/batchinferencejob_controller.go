@@ -98,7 +98,8 @@ type BatchInferenceJobReconcilerOptions struct {
 	Mgr               manager.Manager
 	ConnGetter        ConnGetter
 	PodGetter         PodGetter
-	Cfg               config.Config
+	Cfg               config.BatchConfig
+	ResourceGPUName	  string
 }
 
 
@@ -111,8 +112,8 @@ func NewBatchInferenceJobReconciler(opts BatchInferenceJobReconcilerOptions) *Ba
 		Scheme: opts.Mgr.GetScheme(),
 		podGetter: opts.PodGetter,
 		connAPI: opts.ConnGetter,
-		cfg: opts.Cfg.Batch,
-		gpuResName: opts.Cfg.Common.ResourceGPUName,
+		cfg: opts.Cfg,
+		gpuResName: opts.ResourceGPUName,
 		Log: logf.Log.WithName("batch-inference-controller"),
 	}
 }
