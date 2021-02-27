@@ -24,6 +24,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"github.com/google/uuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
@@ -32,31 +33,21 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/runtime"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	apiservertypes "github.com/odahu/odahu-flow/packages/operator/pkg/apis/batch"
 )
 
 const (
 	batchIDLabel = "odahu.org/batchID"
 )
-
-// BatchInferenceServiceAPI provide interface to interact with API server
-// to get extra information about BatchInferenceService that owner of BatchInferenceJob
-type BatchInferenceServiceAPI interface {
-	Get(ID string) (apiservertypes.InferenceService, error)
-	ReportJobRun(ID string, RunInfo apiservertypes.InferenceJobRun) error
-}
 
 type ConnGetter interface {
 	GetConnection(id string) (*connection.Connection, error)
@@ -72,7 +63,6 @@ type BatchInferenceJobReconciler struct {
 	client.Client
 	Log         logr.Logger
 	Scheme      *runtime.Scheme
-	batchInfAPI BatchInferenceServiceAPI
 	connAPI     ConnGetter
 	cfg         config.BatchConfig
 	gpuResName  string
@@ -106,7 +96,6 @@ func setDefaultOptions(options *BatchInferenceJobReconcilerOptions) {
 
 type BatchInferenceJobReconcilerOptions struct {
 	Mgr               manager.Manager
-	BatchInferenceAPI BatchInferenceServiceAPI
 	ConnGetter        ConnGetter
 	PodGetter         PodGetter
 	Cfg               config.Config
@@ -120,7 +109,6 @@ func NewBatchInferenceJobReconciler(opts BatchInferenceJobReconcilerOptions) *Ba
 	return &BatchInferenceJobReconciler{
 		Client: opts.Mgr.GetClient(),
 		Scheme: opts.Mgr.GetScheme(),
-		batchInfAPI: opts.BatchInferenceAPI,
 		podGetter: opts.PodGetter,
 		connAPI: opts.ConnGetter,
 		cfg: opts.Cfg.Batch,
@@ -182,7 +170,7 @@ func (r *BatchInferenceJobReconciler) generateTaskSpec(
 	batchJob *odahuflowv1alpha1.BatchInferenceJob,
 	) (*tektonv1beta1.TaskSpec, error) {
 	return BatchJobToTaskSpec(
-		batchJob, r.connAPI, r.batchInfAPI, r.gpuResName, r.cfg.RCloneImage, r.cfg.ToolsSecret, r.cfg.ToolsImage)
+		batchJob, r.connAPI, r.gpuResName, r.cfg.RCloneImage, r.cfg.ToolsSecret, r.cfg.ToolsImage)
 }
 
 func (r *BatchInferenceJobReconciler) calculateStateByPod(

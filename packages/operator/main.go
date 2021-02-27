@@ -177,7 +177,6 @@ func start(cmd *cobra.Command, args []string) {
 
 		batchOpts := controllers.BatchInferenceJobReconcilerOptions{
 			Mgr:               mgr,
-			BatchInferenceAPI: nil,
 			ConnGetter:        connAPI,
 			Cfg:               *odahuConfig,
 		}

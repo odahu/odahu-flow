@@ -38,7 +38,8 @@ const (
 type BatchInferenceJobSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	BatchInferenceServiceID string `json:"batchInferenceService"`
+	// Docker image
+	Image string `json:"image"`
 	// Entrypoint array. Not executed within a shell.
 	// The docker image's ENTRYPOINT is used if this is not provided.
 	// Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
@@ -57,12 +58,21 @@ type BatchInferenceJobSpec struct {
 	// Cannot be updated.
 	// More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
 	Args []string `json:"args"`
+	// InputConnection is name of connection to object storage bucket where input data are expected
+	InputConnection string `json:"inputConnection"`
 	// InputPath is a source directory for BatchInferenceJob input data
-	// relative to bucket root
+	// relative to bucket root of InputConnection
 	InputPath string `json:"inputPath"`
+	// OutputConnection is name of connection to object storage bucket where results should be
+	// saved
+	OutputConnection string `json:"outputConnection"`
 	// OutputPath is a destination directory for BatchInferenceJob results
-	// relative to bucket root
+	// relative to bucket root of OutputConnection
 	OutputPath string `json:"outputPath"`
+	// ModelConnection is name of connection to object storage bucket where ML model files are expected
+	ModelConnection string `json:"modelConnection"`
+	// ModelPath is a directory inside ModelConnection where ML model files are located
+	ModelPath string `json:"modelPath"`
 	// Node selector for specifying a node pool
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 	// Resources for model container

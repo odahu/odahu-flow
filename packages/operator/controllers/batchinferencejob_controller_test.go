@@ -49,26 +49,18 @@ func getJob(ID string) odahuflowv1alpha1.BatchInferenceJob{
 	return odahuflowv1alpha1.BatchInferenceJob{
 		ObjectMeta: metav1.ObjectMeta{Name: ID, Namespace: testNamespace},
 		Spec:       odahuflowv1alpha1.BatchInferenceJobSpec{
-			BatchInferenceServiceID: serviceID,
 			Command:                 []string{"python"},
 			Args:                    []string{"/opt/app/src.py", "--forecast"},
 			InputPath:               "/input",
 			OutputPath:              "/output",
 			BatchRequestID:          requestID,
+			Image:            "odahu-tools:latest",
+			InputConnection:  "connection",
+			OutputConnection: "connection",
+			ModelConnection:  "connection",
 		},
 		Status:     odahuflowv1alpha1.BatchInferenceJobStatus{},
 	}
-}
-
-var serviceTpl = apitypes.InferenceService{
-	ID:     serviceID,
-	Spec:   apitypes.InferenceServiceSpec{
-		Image:            "odahu-tools:latest",
-		InputConnection:  "connection",
-		OutputConnection: "connection",
-		ModelConnection:  "connection",
-	},
-	Status: apitypes.InferenceServiceStatus{},
 }
 
 var conn = connapitypes.Connection{
@@ -116,7 +108,6 @@ var testCases = []struct{
 		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
 			State:   odahuflowv1alpha1.BatchScheduling,
 		},
-		expectLastSubmittedRun: apitypes.InferenceJobRun{},
 	},
 	{
 		trStatus: tektonv1beta1.TaskRunStatus{
@@ -134,7 +125,6 @@ var testCases = []struct{
 			State:   odahuflowv1alpha1.BatchSucceeded,
 			PodName: "podName",
 		},
-		expectLastSubmittedRun: apitypes.InferenceJobRun{},
 	},
 }
 
@@ -149,12 +139,9 @@ func (s *BatchInferenceSuite) TestJobStatus() {
 			connGetter.On("GetConnection", "connection").Return(&conn, nil)
 			podGetter := mocks.PodGetter{}
 			podGetter.On("GetPod").Return(corev1.Pod{Status: test.podStatus}, nil)
-			serviceAPI := mocks.BatchInferenceServiceAPI{}
-			serviceAPI.On("Get", serviceID).Return(serviceTpl, nil)
 
 			s.initReconciler(BatchInferenceJobReconcilerOptions{
 				Mgr:               s.k8sManager,
-				BatchInferenceAPI: &serviceAPI,
 				ConnGetter:        &connGetter,
 				PodGetter:         &podGetter,
 				Cfg:               config.Config{},

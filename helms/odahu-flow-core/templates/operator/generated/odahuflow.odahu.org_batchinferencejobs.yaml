@@ -45,10 +45,6 @@ spec:
               items:
                 type: string
               type: array
-            batchInferenceService:
-              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                Important: Run "make" to regenerate code after modifying this file'
-              type: string
             command:
               description: 'Entrypoint array. Not executed within a shell. The docker
                 image''s ENTRYPOINT is used if this is not provided. Variable references
@@ -61,18 +57,39 @@ spec:
               items:
                 type: string
               type: array
+            image:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "make" to regenerate code after modifying this file
+                Docker image'
+              type: string
+            inputConnection:
+              description: InputConnection is name of connection to object storage
+                bucket where input data are expected
+              type: string
             inputPath:
               description: InputPath is a source directory for BatchInferenceJob input
-                data relative to bucket root
+                data relative to bucket root of InputConnection
+              type: string
+            modelConnection:
+              description: ModelConnection is name of connection to object storage
+                bucket where ML model files are expected
+              type: string
+            modelPath:
+              description: ModelPath is a directory inside ModelConnection where ML
+                model files are located
               type: string
             nodeSelector:
               additionalProperties:
                 type: string
               description: Node selector for specifying a node pool
               type: object
+            outputConnection:
+              description: OutputConnection is name of connection to object storage
+                bucket where results should be saved
+              type: string
             outputPath:
               description: OutputPath is a destination directory for BatchInferenceJob
-                results relative to bucket root
+                results relative to bucket root of OutputConnection
               type: string
             requestId:
               description: BatchRequestID is unique identifier for BatchInferenceJob
@@ -117,9 +134,13 @@ spec:
               type: object
           required:
           - args
-          - batchInferenceService
           - command
+          - image
+          - inputConnection
           - inputPath
+          - modelConnection
+          - modelPath
+          - outputConnection
           - outputPath
           - requestId
           type: object
