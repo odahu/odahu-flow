@@ -25,17 +25,16 @@ import (
 	connapitypes "github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/stretchr/testify/require"
-	"github.com/stretchr/testify/suite"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/apis/duck/v1beta1"
+	"log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sync"
 	"testing"
 	"time"
-	"log"
 )
 
 const (
@@ -55,17 +54,6 @@ var conn = connapitypes.Connection{
 	Status: odahuflowv1alpha1.ConnectionStatus{},
 }
 
-
-
-type BatchInferenceSuite struct {
-	suite.Suite
-}
-
-func TestBatchInferenceSuite(t *testing.T) {
-	suite.Run(t, new(BatchInferenceSuite))
-}
-
-
 func getJob(ID string) odahuflowv1alpha1.BatchInferenceJob{
 	return odahuflowv1alpha1.BatchInferenceJob{
 		ObjectMeta: metav1.ObjectMeta{Name: ID, Namespace: testNamespace},
@@ -83,7 +71,6 @@ func getJob(ID string) odahuflowv1alpha1.BatchInferenceJob{
 		Status:     odahuflowv1alpha1.BatchInferenceJobStatus{},
 	}
 }
-
 
 // job from getJob(ID string) will be created for each subtest
 var testCases = []struct{
@@ -128,10 +115,10 @@ var testCases = []struct{
 }
 
 // Tests what job status will be generated depending on the TaskRun and Pod statuses
-func (s *BatchInferenceSuite) TestJobStatus() {
+func TestJobStatus(t *testing.T) {
 
 	for i, test := range testCases {
-		s.T().Run(fmt.Sprintf("jobStatus test#%d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("jobStatus test#%d", i), func(t *testing.T) {
 			as := require.New(t)
 
 			connGetter := mocks.ConnGetter{}
