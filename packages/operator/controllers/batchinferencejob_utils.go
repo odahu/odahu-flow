@@ -69,20 +69,28 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 		return ts, err
 	}
 
+	// TODO: Add model validation step
+	steps := []tektonv1beta1.Step{
+		GetConfigureRCloneStep(
+			toolsImage, job.Spec.InputConnection, job.Spec.OutputConnection, job.Spec.ModelConnection, helpContainerRes),
+		GetSyncDataStep(rcloneImage, iBucket, job.Spec.InputPath, helpContainerRes),
+	}
+
+
+	// TODO: Conditionally handle case when model is zipped file using GetCopyUnzipModelStep
+	steps = append(steps, GetSyncModelStep(rcloneImage, mBucket, job.Spec.ModelPath, helpContainerRes))
+
+	steps = append(steps, []tektonv1beta1.Step{
+		GetValidateInputStep(toolsImage, helpContainerRes),
+		GetLogInputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes),
+		GetUserContainer(job.Spec.Image, job.Spec.Command, job.Spec.Args, jobRes),
+		GetValidateOutputStep(toolsImage, helpContainerRes),
+		GetLogOutputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes),
+		GetSyncOutputStep(rcloneImage, oBucket, job.Spec.OutputPath, helpContainerRes),
+	}...)
 
 	ts = &tektonv1beta1.TaskSpec{
-		Steps:   []tektonv1beta1.Step{
-			GetConfigureRCloneStep(
-				toolsImage, job.Spec.InputConnection, job.Spec.OutputConnection, job.Spec.ModelConnection, helpContainerRes),
-			GetSyncDataStep(rcloneImage, iBucket, job.Spec.InputPath, helpContainerRes),
-			GetSyncModelStep(rcloneImage, mBucket, job.Spec.ModelPath, helpContainerRes),
-			GetValidateInputStep(toolsImage, helpContainerRes),
-			GetLogInputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes),
-			GetUserContainer(job.Spec.Image, job.Spec.Command, job.Spec.Args, jobRes),
-			GetValidateOutputStep(toolsImage, helpContainerRes),
-			GetLogOutputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes),
-			GetSyncOutputStep(rcloneImage, oBucket, job.Spec.OutputPath, helpContainerRes),
-		},
+		Steps:   steps,
 		Volumes: []corev1.Volume{
 			{
 				Name: toolsConfigVolume,

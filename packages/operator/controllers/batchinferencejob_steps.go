@@ -55,7 +55,7 @@ var (
 	}
 	OdahuModelPathEnv = corev1.EnvVar{
 		Name:  "ODAHU_MODEL_PATH",
-		Value: rawModelPath,
+		Value: odahuModelPath,
 	}
 	OdahuInputPathEnv = corev1.EnvVar{
 		Name:  "ODAHU_INPUT_PATH",
@@ -113,10 +113,38 @@ func GetSyncDataStep(
 	}
 }
 
+// GetCopyUnzipModelStep return step that
+// copy model zipped file to pre-stage directory inside Pod, unzip it and pass to user container
+func GetCopyUnzipModelStep(
+	rcloneImage string,
+	bucketName string,
+	modelPath string,
+	res corev1.ResourceRequirements,
+	) tektonv1beta1.Step {
+	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
+	source := path.Join(sourcePrefix, modelPath)
+
+	baseName := path.Base(modelPath)
+	localZippedPath := path.Join(rawModelPath, baseName)
+
+	cmdPipeline := fmt.Sprintf("rclone copy %s %s && mkdir -p %s && tar -xzvf %s -C %s",
+		source, rawModelPath, odahuModelPath, localZippedPath, odahuModelPath,
+	)
+
+	return tektonv1beta1.Step{
+		Container: corev1.Container{
+			Name:         "copy-unzip-model",
+			Image:        rcloneImage,
+			Command:      []string{"sh"},
+			Args:         []string{"-c", cmdPipeline},
+			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
+			Resources: res,
+		},
+	}
+}
 // GetSyncModelStep return step that
 // syncs model to pre-stage directory inside Pod
-// where model will be validated and unzipped (if modelPath is archive instead of directory inside bucket)
-// and then copied to user container's input directory
+// where model will be validated and copied to user container's input directory
 func GetSyncModelStep(
 	rcloneImage string,
 	bucketName string,
@@ -130,7 +158,7 @@ func GetSyncModelStep(
 			Name:         "sync-model",
 			Image:        rcloneImage,
 			Command:      []string{"rclone"},
-			Args:         []string{"sync", "-P", source, rawModelPath},
+			Args:         []string{"sync", "-P", source, odahuModelPath},
 			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
 			Resources: res,
 		},
@@ -162,7 +190,7 @@ func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirem
 			Name:         "log-input",
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "input", odahuInputPath, "-m", rawModelPath, "-r", requestID},
+			Args:         []string{"batch", "log", "input", odahuInputPath, "-m", odahuModelPath, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
@@ -213,7 +241,7 @@ func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequire
 			Name:         "log-output",
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "output", outputPath, "-m", rawModelPath, "-r", requestID},
+			Args:         []string{"batch", "log", "output", outputPath, "-m", odahuModelPath, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
