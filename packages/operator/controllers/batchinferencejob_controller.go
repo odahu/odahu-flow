@@ -187,14 +187,11 @@ func (r *BatchInferenceJobReconciler) calculateStateByPod(
 		return err
 	}
 	job.Status.PodName = podName
-	job.Status.Message = ""
-	job.Status.Reason = ""
+	job.Status.Message = pod.Status.Message
+	job.Status.Reason = pod.Status.Reason
 
 	if pod.Status.Reason == evictedPodReason {
 		job.Status.State = odahuflowv1alpha1.BatchFailed
-		job.Status.Message = pod.Status.Message
-		job.Status.Reason = "Pod evicted"
-
 		return nil
 	}
 
@@ -222,8 +219,8 @@ func (r *BatchInferenceJobReconciler) syncStatusFromTaskRun(
 			}
 		} else {
 			batchJob.Status.State = odahuflowv1alpha1.BatchScheduling
-			batchJob.Status.Message = ""
-			batchJob.Status.Reason = ""
+			batchJob.Status.Message = lastCondition.Message
+			batchJob.Status.Reason = lastCondition.Reason
 		}
 	case corev1.ConditionTrue:
 		batchJob.Status.State = odahuflowv1alpha1.BatchSucceeded
@@ -326,6 +323,7 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 		logYAML("Unable to create TaskRun", taskRun, log)
 		return nil, err
 	}
+	log.Info("TaskRun is created")
 	return taskRun, nil
 }
 

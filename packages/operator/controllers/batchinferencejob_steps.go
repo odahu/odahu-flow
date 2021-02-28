@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	pathToOdahuToolsBin = "opt/odahu-flow/odahu-tools"
+	pathToOdahuToolsBin = "/opt/odahu-flow/odahu-tools"
 	toolsConfigVolume = "config"
 
 	inputRCloneCfgName = "odahu-data-input"
@@ -69,7 +69,7 @@ var (
 func GetConfigureRCloneStep(image string, inpConn string,
 	outConn string, modelConn string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 
-	var args = []string{"auth", "--configure-rclone"}
+	var args = []string{"auth", "configure-rclone"}
 	args = append(args, "--conn", fmt.Sprintf("%s:%s", inpConn, inputRCloneCfgName))
 	args = append(args, "--conn", fmt.Sprintf("%s:%s", outConn, outputRCloneCfgName))
 	args = append(args, "--conn", fmt.Sprintf("%s:%s", modelConn, modelRCloneCfgName))
