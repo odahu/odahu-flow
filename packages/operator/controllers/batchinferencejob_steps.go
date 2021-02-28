@@ -21,7 +21,7 @@ var (
 	toolsConfigVM = corev1.VolumeMount{
 		Name: toolsConfigVolume,
 		ReadOnly:         true,
-		MountPath:        path.Join(XDGConfigHome, "odahu"),
+		MountPath:        path.Join(XDGConfigHome, "odahu", ".odahu-tools.yaml"),
 		SubPath:          ".odahu-tools.yaml",
 	}
 )
@@ -49,9 +49,13 @@ var (
 		Name:  "XDG_CONFIG_HOME",
 		Value: XDGConfigHome,
 	}
+	ToolsConfigPathEnv = corev1.EnvVar{
+		Name:  "ODAHU_TOOLS_CONFIG",
+		Value: toolsConfigVM.MountPath,
+	}
 	OdahuModelPathEnv = corev1.EnvVar{
 		Name:  "ODAHU_MODEL_PATH",
-		Value: odahuModelPath,
+		Value: rawModelPath,
 	}
 	OdahuInputPathEnv = corev1.EnvVar{
 		Name:  "ODAHU_INPUT_PATH",
@@ -79,7 +83,7 @@ func GetConfigureRCloneStep(image string, inpConn string,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         args,
-			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
+			Env:          []corev1.EnvVar{XDGConfigHomeEnv, ToolsConfigPathEnv},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Resources: res,
 		},
@@ -144,6 +148,7 @@ func GetValidateInputStep(image string, res corev1.ResourceRequirements) tektonv
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         []string{"batch", "validate", "input", "-s", rawInputPath, "-d", odahuInputPath},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
+			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
 		},
 	}
@@ -157,8 +162,9 @@ func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirem
 			Name:         "log-input",
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "input", "-s", odahuInputPath, "-m", odahuModelPath, "-r", requestID},
+			Args:         []string{"batch", "log", "input", odahuInputPath, "-m", rawModelPath, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
+			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
 		},
 	}
@@ -193,6 +199,7 @@ func GetValidateOutputStep(image string, res corev1.ResourceRequirements) tekton
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         []string{"batch", "validate", "output", "-s", odahuRawOutputPath, "-d", outputPath},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
+			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
 		},
 	}
@@ -206,8 +213,9 @@ func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequire
 			Name:         "log-output",
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "output", "-s", outputPath, "-m", odahuModelPath, "-r", requestID},
+			Args:         []string{"batch", "log", "output", outputPath, "-m", rawModelPath, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
+			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
 		},
 	}
