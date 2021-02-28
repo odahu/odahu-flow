@@ -23,7 +23,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-logr/logr"
 	"github.com/google/uuid"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
@@ -131,6 +130,7 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 
 	batchJob := &odahuflowv1alpha1.BatchInferenceJob{}
 
+	log.Info("Getting BatchInferenceJob")
 	if err := r.Get(ctx, req.NamespacedName, batchJob); err != nil {
 		if k8serrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
@@ -139,27 +139,29 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		return reconcile.Result{}, err
 	}
 
-	// Run new TaskRun or get already created
+	log.Info("Reconciling TaskRun")
 	tr, err := r.reconcileTaskRun(batchJob,  log)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if len(tr.Status.Conditions) > 0 {
-		// Fill BatchInferenceJob
 		if err := r.syncStatusFromTaskRun(batchJob, tr); err != nil {
-			log.Error(err,"Unable to sync status for BatchInferenceJob from  TaskRun")
+			log.Error(err,"Unable to infer BatchInferenceJob status from TaskRun")
 			return ctrl.Result{}, err
 		}
 	} else {
 		batchJob.Status.State = odahuflowv1alpha1.BatchScheduling
 	}
 
-	log.Info("Setup batchJob state", "state", batchJob.Status.State)
-
 	batchJob.Status.PodName = tr.Status.PodName
 
+	log.Info(
+		"Updating BatchInferenceJob status",
+		"Status", batchJob.Status,
+	)
 	if err := r.Update(ctx, batchJob); err != nil {
+		log.Error(err, "Unable to update BatchInferenceJob status")
 		return ctrl.Result{}, err
 	}
 
@@ -238,17 +240,17 @@ func (r *BatchInferenceJobReconciler) syncStatusFromTaskRun(
 func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 	job *odahuflowv1alpha1.BatchInferenceJob, log logr.Logger,
 ) (*tektonv1beta1.TaskRun, error) {
+
 	if job.Status.State != "" && job.Status.State != odahuflowv1alpha1.BatchUnknown {
 		taskRun := &tektonv1beta1.TaskRun{}
-		err := r.Get(context.TODO(), types.NamespacedName{
-			Name: job.Name, Namespace: r.cfg.Namespace,
-		}, taskRun)
-		if err != nil {
+		log.Info(
+			"Getting TaskRun that should exist because of BatchInferenceJob has not unknown status",
+			"Status", job.Status)
+		if err := r.Get(
+			context.TODO(), types.NamespacedName{Name: job.Name, Namespace: r.cfg.Namespace}, taskRun); err != nil {
+			log.Error(err, "Unable to get TaskRun that should exist")
 			return nil, err
 		}
-
-		log.Info("BatchInferenceJob is already finished or running, skip creating TaskRun",
-			"mt id", job.Name, "state", job.Status.State)
 		return taskRun, nil
 	}
 
@@ -291,16 +293,20 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 		Name: taskRun.Name, Namespace: r.cfg.Namespace,
 	}, found)
 	if err != nil && k8serrors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s task run", taskRun.ObjectMeta.Name))
+		log.Info("TaskRun does not exist. Creating")
 		return taskRun, r.Create(context.TODO(), taskRun)
 	} else if err != nil {
 		return nil, err
 	}
 
+	log.Info("TaskRun exists. Re-Creating")
+
+	log.Info("Deleting TaskRun")
 	if err := r.Delete(context.TODO(), found); err != nil {
 		return nil, err
 	}
 
+	log.Info("Creating TaskRun")
 	return taskRun, r.Create(context.TODO(), taskRun)
 }
 

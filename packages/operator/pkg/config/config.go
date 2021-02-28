@@ -91,6 +91,7 @@ func LoadConfig() (*Config, error) {
 		Training:       NewDefaultModelTrainingConfig(),
 		Packaging:      NewDefaultModelPackagingConfig(),
 		Operator:       NewDefaultOperatorConfig(),
+		Batch:          NewDefaultBatchConfig(),
 	}
 
 	err := viper.Unmarshal(config)

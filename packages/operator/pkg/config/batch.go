@@ -1,10 +1,15 @@
 package config
 
 import (
+	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
 	"os"
 	"time"
 )
+
+func init() {
+	_ = viper.BindEnv("batch.toolsImage", "ODAHU_FLOW_TOOLS_IMAGE")
+}
 
 type BatchConfig struct {
 	// Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created
