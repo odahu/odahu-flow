@@ -8,13 +8,26 @@ metadata:
   creationTimestamp: null
   name: batchinferencejobs.odahuflow.odahu.org
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.state
+    name: State
+    type: string
+  - JSONPath: .status.message
+    name: Message
+    type: string
+  - JSONPath: .status.reason
+    name: Reason
+    type: string
   group: odahuflow.odahu.org
   names:
     kind: BatchInferenceJob
     listKind: BatchInferenceJobList
     plural: batchinferencejobs
+    shortNames:
+    - bij
     singular: batchinferencejob
   scope: Namespaced
+  subresources: {}
   validation:
     openAPIV3Schema:
       description: BatchInferenceJob is the Schema for the batchinferencejobs API

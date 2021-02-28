@@ -225,7 +225,7 @@ func GetSyncOutputStep(
 	dest := path.Join(prefix, remoteOutputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "sync-data",
+			Name:         "sync-output",
 			Image:        rcloneImage,
 			Command:      []string{"rclone"},
 			Args:         []string{"sync", "-P", outputPath, dest},

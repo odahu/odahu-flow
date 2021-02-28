@@ -99,6 +99,10 @@ type BatchInferenceJobStatus struct {
 // +kubebuilder:object:root=true
 
 // BatchInferenceJob is the Schema for the batchinferencejobs API
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=".status.state"
+// +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.message"
+// +kubebuilder:printcolumn:name="Reason",type="string",JSONPath=".status.reason"
+// +kubebuilder:resource:shortName=bij
 type BatchInferenceJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

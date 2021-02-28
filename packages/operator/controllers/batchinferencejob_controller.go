@@ -146,6 +146,8 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 		return ctrl.Result{}, err
 	}
 
+
+	log.Info("Inferring BatchInferenceJob status")
 	if len(tr.Status.Conditions) > 0 {
 		if err := r.syncStatusFromTaskRun(batchJob, tr); err != nil {
 			log.Error(err,"Unable to infer BatchInferenceJob status from TaskRun")
@@ -305,6 +307,7 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 		log.Info("TaskRun does not exist. Creating")
 		if err := r.Create(context.TODO(), taskRun); err != nil {
 			logYAML("Unable to create TaskRun", taskRun, log)
+			return nil, err
 		}
 		return taskRun, nil
 	} else if err != nil {
