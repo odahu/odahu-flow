@@ -134,6 +134,7 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 	log.Info("Getting BatchInferenceJob")
 	if err := r.Get(ctx, req.NamespacedName, batchJob); err != nil {
 		if k8serrors.IsNotFound(err) {
+			log.Info("BatchInferenceJob is not found")
 			return reconcile.Result{}, nil
 		}
 		log.Error(err, "Unable to fetch BatchInferenceJob from Kube API")
