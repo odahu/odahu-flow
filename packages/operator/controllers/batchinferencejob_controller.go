@@ -29,6 +29,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -237,6 +238,14 @@ func (r *BatchInferenceJobReconciler) syncStatusFromTaskRun(
 	return nil
 }
 
+func logYAML(prefix string, obj interface{}, log logr.Logger) {
+	b, err := yaml.Marshal(obj)
+	if err != nil {
+		log.Error(err, "Unable to serialize to json for logging")
+	}
+	log.Info(prefix + ":\"" + string(b) + "\"")
+}
+
 func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 	job *odahuflowv1alpha1.BatchInferenceJob, log logr.Logger,
 ) (*tektonv1beta1.TaskRun, error) {
@@ -294,7 +303,10 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 	}, found)
 	if err != nil && k8serrors.IsNotFound(err) {
 		log.Info("TaskRun does not exist. Creating")
-		return taskRun, r.Create(context.TODO(), taskRun)
+		if err := r.Create(context.TODO(), taskRun); err != nil {
+			logYAML("Unable to create TaskRun", taskRun, log)
+		}
+		return taskRun, nil
 	} else if err != nil {
 		return nil, err
 	}
@@ -307,7 +319,11 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 	}
 
 	log.Info("Creating TaskRun")
-	return taskRun, r.Create(context.TODO(), taskRun)
+	if  err := r.Create(context.TODO(), taskRun); err != nil {
+		logYAML("Unable to create TaskRun", taskRun, log)
+		return nil, err
+	}
+	return taskRun, nil
 }
 
 

@@ -3,11 +3,11 @@ package config
 import (
 	"github.com/spf13/viper"
 	corev1 "k8s.io/api/core/v1"
-	"os"
 	"time"
 )
 
 func init() {
+	// workaround https://github.com/spf13/viper/issues/761
 	_ = viper.BindEnv("batch.toolsImage", "ODAHU_FLOW_TOOLS_IMAGE")
 }
 
@@ -37,8 +37,6 @@ func NewDefaultBatchConfig() BatchConfig {
 		Enabled:   true,
 		Timeout: 4 * time.Hour,
 		RCloneImage: "rclone/rclone",
-		// workaround https://github.com/spf13/viper/issues/761
-		ToolsImage: os.Getenv("ODAHU_TOOLS_IMAGE"),
 		ToolsSecret: "tools-config",
 	}
 }
