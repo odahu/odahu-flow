@@ -12,7 +12,7 @@ data:
 ---
 apiVersion: v1
 kind: Secret
-metadata:
+metadata:d
   name: "{{ .Release.Name }}-packaging-config"
   namespace: "{{ .Values.config.packaging.namespace }}"
   labels:

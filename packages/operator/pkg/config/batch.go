@@ -26,6 +26,8 @@ type BatchConfig struct {
 	RCloneImage string  `json:"rcloneImage"`
 	// ODAHU tools image
 	ToolsImage string  `json:"toolsImage"`
+	// ODAHU tools image
+	ToolsSecret string  `json:"toolsSecret"`
 }
 
 
@@ -35,5 +37,6 @@ func NewDefaultBatchConfig() BatchConfig {
 		Enabled:   true,
 		Timeout: 4 * time.Hour,
 		RCloneImage: "rclone/rclone",
+		ToolsSecret: "odahu-flow-tools-config",
 	}
 }
