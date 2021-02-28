@@ -20,3 +20,14 @@ metadata:
 data:
   "config.yaml": |
     {{ toYaml .Values.config | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ .Release.Name }}-tools-config"
+  namespace: "{{ .Values.config.batch.namespace }}"
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "api" "root" .) | nindent 4 }}
+data:
+  ".odahu-tools.yaml": |
+    {{ toYaml .Values.toolsConfig | b64enc }}

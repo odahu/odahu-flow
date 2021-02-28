@@ -9,8 +9,7 @@ import (
 
 const (
 	pathToOdahuToolsBin = "/opt/odahu-flow/odahu-tools"
-	toolsConfigVolume = "config"
-
+	toolsConfigVolume = "odahu-flow-tools-config"
 	inputRCloneCfgName = "odahu-data-input"
 	outputRCloneCfgName = "odahu-data-output"
 	modelRCloneCfgName = "odahu-data-model"

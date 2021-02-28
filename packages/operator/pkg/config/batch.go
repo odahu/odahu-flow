@@ -16,18 +16,16 @@ type BatchConfig struct {
 	Namespace string `json:"namespace"`
 	// Enable batch API/operator
 	Enabled  bool                          `json:"enabled"`
-	// Node pools to run deployments
+	// Node pools to run batch jobs
 	NodePools []NodePool `json:"nodePools"`
 	// Kubernetes tolerations for batch jobs
 	Tolerations []corev1.Toleration        `json:"tolerations,omitempty"`
-	// Timeout for full training process
+	// Timeout for full batch process
 	Timeout time.Duration `json:"timeout"`
 	// RClone image that will be used to sync data with object storage
 	RCloneImage string  `json:"rcloneImage"`
 	// ODAHU tools image
 	ToolsImage string  `json:"toolsImage"`
-	// ODAHU tools secret name with config
-	ToolsSecret string  `json:"toolsSecret"`
 }
 
 
@@ -37,6 +35,5 @@ func NewDefaultBatchConfig() BatchConfig {
 		Enabled:   true,
 		Timeout: 4 * time.Hour,
 		RCloneImage: "rclone/rclone",
-		ToolsSecret: "tools-config",
 	}
 }
