@@ -151,7 +151,7 @@ var testCases = []struct{
 		},
 		expectJobStatus:        odahuflowv1alpha1.BatchInferenceJobStatus{
 			State:   odahuflowv1alpha1.BatchFailed,
-			Reason: "Pod evicted",
+			Reason: "Evicted",
 			Message: "Pod was evicted",
 			PodName: "pod",
 		},
@@ -253,8 +253,8 @@ func TestJobStatus(t *testing.T) {
 					log.Print("TaskRun is detected")
 					return true
 				},
-				30*time.Second,
-				10*time.Millisecond)
+				time.Minute,
+				2*time.Second)
 
 			// Then modify status of TaskRun to emulate TektonCD controller
 			tr.Status = test.trStatus
@@ -277,8 +277,8 @@ func TestJobStatus(t *testing.T) {
 						updatedJob.Status, test.expectJobStatus)
 					return false
 				},
-				30*time.Second,
-				10*time.Millisecond)
+				time.Minute,
+				2*time.Second)
 
 		})
 
