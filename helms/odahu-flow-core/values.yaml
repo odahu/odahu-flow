@@ -592,7 +592,8 @@ toolsConfig:
     oauthOidcTokenEndpoint: ""
   feedback:
     # fluentd service to log model request/response
-    fluentd: http://fluentd.fluentd.svc.cluster.local
+    fluentd:
+      baseURL: http://fluentd.fluentd.svc.cluster.local
 
 # Service account used to upload odahu resources via odahuflowctl
 resource_uploader_sa: {}
