@@ -23,14 +23,12 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	v1alpha3_istio "istio.io/api/networking/v1alpha3"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
-	"knative.dev/pkg/apis"
-	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
+	"knative.dev/networking/pkg/apis/networking"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -88,7 +86,7 @@ func VirtualServiceName(mr *odahuflowv1alpha1.ModelRoute) string {
 }
 
 func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1alpha1.ModelRoute) (bool, error) {
-	httpTargets := make([]*v1alpha3_istio.HTTPRouteDestination, len(modelRouteCR.Spec.ModelDeploymentTargets))
+	httpTargets := make([]*v1alpha3_istio.HTTPRouteDestination, 0, len(modelRouteCR.Spec.ModelDeploymentTargets))
 	reconcileAgain := false
 
 	for _, md := range modelRouteCR.Spec.ModelDeploymentTargets {
@@ -114,29 +112,15 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 			return reconcileAgain, err
 		}
 
-		knService := &knservingv1.Service{}
-		if err := r.Get(context.TODO(), types.NamespacedName{
-			Name: KnativeServiceName(modelDeployment), Namespace: modelRouteCR.Namespace,
-		}, knService); errors.IsNotFound(err) {
-			log.Error(err, "Knative Service not found", "Model Deployment Name", md.Name,
-				"Model Route Name", modelRouteCR.Name)
-		} else if err != nil {
-			log.Error(
-				err, "Getting the Knative Service", "Model Deployment Name", md.Name,
-				"Model Route Name", modelRouteCR.Name)
-			return reconcileAgain, err
-		}
-
-		condition := knService.Status.GetCondition(apis.ConditionReady)
-		if condition == nil || condition.Status != v1.ConditionTrue {
-			log.Info("Knative Service is not ready, re-schedule...", "Model Deployment Name", md.Name,
+		if modelDeployment.Status.State != odahuflowv1alpha1.ModelDeploymentStateReady {
+			log.Info("Model Deployment is not ready, re-schedule...", "Model Deployment Name", md.Name,
 				"Model Route Name", modelRouteCR.Name)
 			return true, nil
 		}
 
 		requestHeaders := &v1alpha3_istio.Headers_HeaderOperations{
 			Set: map[string]string{
-				"Host": knService.Status.URL.Host,
+				"Host": modelDeployment.Status.HostHeader,
 			},
 		}
 		// TODO: Deliver real model name/version to put in headers
@@ -188,7 +172,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 			reconcileAgain = true
 		} else {
 			mirror = &v1alpha3_istio.Destination{
-				Host: modelDeployment.Status.ServiceURL,
+				Host: modelDeployment.Name,
 			}
 		}
 	}
@@ -204,7 +188,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		Spec: v1alpha3_istio_api.VirtualServiceSpec{
 			VirtualService: v1alpha3_istio.VirtualService{
 				Hosts:    []string{"*"},
-				Gateways: []string{"edge"},
+				Gateways: []string{fmt.Sprintf("knative-serving/%s", networking.KnativeIngressGateway)},
 				Http: []*v1alpha3_istio.HTTPRoute{
 					{
 						Retries: &v1alpha3_istio.HTTPRetry{

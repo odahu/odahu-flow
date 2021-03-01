@@ -36,7 +36,7 @@ import (
 const (
 	mrName  = "test-mr"
 	mrURL   = "/test/url"
-	timeout = time.Second * 5
+	timeout = time.Second * 300
 )
 
 var (
@@ -158,7 +158,7 @@ func TestBasicReconcile(t *testing.T) {
 	g.Eventually(requests, timeout).Should(Receive(Equal(routeExpectedRequest)))
 
 	g.Expect(c.Get(context.TODO(), mrKey, mr)).ToNot(HaveOccurred())
-	g.Expect(mr.Status.State).To(Equal(odahuflowv1alpha1.ModelRouteStateReady))
+	g.Eventually(mr.Status.State, timeout).Should(Equal(odahuflowv1alpha1.ModelRouteStateReady))
 
 	vs := &v1alpha3_istio_api.VirtualService{}
 	vsKey := types.NamespacedName{Name: VirtualServiceName(mr), Namespace: testNamespace}

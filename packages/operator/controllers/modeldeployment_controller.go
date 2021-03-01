@@ -220,7 +220,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 	}
 
 	log.Info(fmt.Sprintf(
-		"Knative Configuration bases on version %s, update to reflect version %s",
+		"Knative Service bases on version %s, update to reflect version %s",
 		modelDeploymentVersion, modelDeploymentCR.ResourceVersion,
 	))
 
@@ -274,16 +274,16 @@ func (r *ModelDeploymentReconciler) getKnativeService(
 
 func (r *ModelDeploymentReconciler) reconcileStatus(
 	log logr.Logger, modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-	state odahuflowv1alpha1.ModelDeploymentState, latestReadyRevision string) error {
+	state odahuflowv1alpha1.ModelDeploymentState, _ string) error {
 
 	modelDeploymentCR.Status.State = state
 
-	if len(latestReadyRevision) != 0 {
-		modelDeploymentCR.Status.ServiceURL = fmt.Sprintf(
-			"%s.%s.svc.cluster.local", modelDeploymentCR.Name, modelDeploymentCR.Namespace,
-		)
-		modelDeploymentCR.Status.LastRevisionName = latestReadyRevision
-	}
+	//if len(latestReadyRevision) != 0 {
+	//	modelDeploymentCR.Status.ServiceURL = fmt.Sprintf(
+	//		"%s.%s.svc.cluster.local", modelDeploymentCR.Name, modelDeploymentCR.Namespace,
+	//	)
+	//	modelDeploymentCR.Status.LastRevisionName = latestReadyRevision
+	//}
 
 	if err := r.Update(context.TODO(), modelDeploymentCR); err != nil {
 		log.Error(err, fmt.Sprintf(
@@ -455,6 +455,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	modelDeploymentCR.Status.Replicas = modelDeployment.Status.Replicas
 	modelDeploymentCR.Status.AvailableReplicas = modelDeployment.Status.AvailableReplicas
 	modelDeploymentCR.Status.Deployment = modelDeployment.Name
+	modelDeploymentCR.Status.HostHeader = knService.Status.URL.Host
 
 	if modelDeploymentCR.Status.Replicas != modelDeploymentCR.Status.AvailableReplicas {
 		log.Info(fmt.Sprintf("Not enough replicas running. Requeue after %s", DefaultRequeueDelay))

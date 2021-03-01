@@ -163,7 +163,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	s.Assertions.Equal(podAnnonations[KnativeAutoscalingMetric], DefaultKnativeAutoscalingMetric)
 
 	configurationLabels := knativeService.Spec.Template.ObjectMeta.Labels
-	s.Assertions.Len(configurationLabels, 5)
+	s.Assertions.Len(configurationLabels, 4)
 	s.Assertions.Contains(configurationLabels, ModelNameAnnotationKey)
 	s.Assertions.Equal(md.Name, configurationLabels[ModelNameAnnotationKey])
 
@@ -293,6 +293,8 @@ func (s *ModelDeploymentControllerSuite) getKnativeService(md *odahuflowv1alpha1
 		10*time.Second,
 		10*time.Millisecond,
 		"Knative service not found!")
+	err := s.k8sClient.Get(context.TODO(), serviceKey, service)
+	fmt.Println(err)
 	return service
 }
 

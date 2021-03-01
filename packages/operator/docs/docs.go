@@ -3230,8 +3230,8 @@ var doc = `{
                     "description": "The model k8s deployment name",
                     "type": "string"
                 },
-                "lastRevisionName": {
-                    "description": "Last applied ready knative revision",
+                "hostHeader": {
+                    "description": "Host header value is a routing key for Istio Ingress\nto forward a request to appropriate Knative Service",
                     "type": "string"
                 },
                 "lastUpdatedTime": {
@@ -3241,14 +3241,6 @@ var doc = `{
                 "replicas": {
                     "description": "Expected number of pods under current load",
                     "type": "integer"
-                },
-                "service": {
-                    "description": "The model k8s service name",
-                    "type": "string"
-                },
-                "serviceURL": {
-                    "description": "The model k8s service name",
-                    "type": "string"
                 },
                 "state": {
                     "description": "The state of a model \n  \"Processing\" - A model was not deployed. Because some parameters of the\n                 custom resource are wrong. For example, there is not a model\n                 image in a Docker registry.\n  \"Ready\" - A model was deployed successfully.",

@@ -1,40 +1,4 @@
 {{ if .Values.config.deployment.enabled }}
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: "edge"
-  namespace: {{ .Values.edge.knative_namespace }}
-  labels:
-    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - port:
-        number: 80
-        name: http
-        protocol: HTTP
-      hosts:
-        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") }}
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: "edge"
-  namespace: {{ .Values.config.deployment.namespace | quote }}
-  labels:
-    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - port:
-        number: 80
-        name: http
-        protocol: HTTP
-      hosts:
-        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "%s") }}
----
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
