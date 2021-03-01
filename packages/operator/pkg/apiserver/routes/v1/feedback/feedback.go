@@ -19,19 +19,18 @@ package feedback
 // Currently we can not aggregate swagger documentation from multiply services
 // TODO: need to implement it
 
-type ModelFeedbackRequest struct{}
-type ModelFeedbackResponse struct{}
+type ModelFeedback struct{}
 
 // @Summary Send feedback about previously made prediction
 // @Description Send feedback about previously made prediction
 // @Tags Feedback
-// @Param feedback body feedback.ModelFeedbackRequest true "Feedback Request"
+// @Param feedback body json true "Feedback Request"
 // @Accept  json
 // @Produce  json
 // @Param model-name header string true "Model name"
 // @Param model-version header string true "Model version"
 // @Param request-id header string true "Request ID"
-// @Success 200 {object} feedback.ModelFeedbackResponse
+// @Success 200 {object} feedback.ModelFeedback
 // @Router /api/v1/feedback [post]
 func stubFeedback() { //nolint
 	panic("must be never invoked!")
