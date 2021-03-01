@@ -266,12 +266,15 @@ func TestJobStatus(t *testing.T) {
 				func() bool {
 					updatedJob := &odahuflowv1alpha1.BatchInferenceJob{}
 					if err := kubeClient.Get(context.TODO(), jobKey, updatedJob); err != nil {
+						log.Printf("BatchInferenceJob getting error %+v", err)
 						return false
 					}
 					if updatedJob.Status == test.expectJobStatus{
 						log.Print("BatchInferenceJob expected status is detected")
 						return true
 					}
+					log.Printf("BatchInferenceJob actual status %+v, but expected %+v",
+						updatedJob.Status, test.expectJobStatus)
 					return false
 				},
 				30*time.Second,
