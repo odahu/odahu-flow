@@ -253,7 +253,7 @@ func TestJobStatus(t *testing.T) {
 					log.Print("TaskRun is detected")
 					return true
 				},
-				10*time.Second,
+				30*time.Second,
 				10*time.Millisecond)
 
 			// Then modify status of TaskRun to emulate TektonCD controller
@@ -274,7 +274,7 @@ func TestJobStatus(t *testing.T) {
 					}
 					return false
 				},
-				10*time.Second,
+				30*time.Second,
 				10*time.Millisecond)
 
 		})
