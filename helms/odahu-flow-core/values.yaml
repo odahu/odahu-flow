@@ -572,7 +572,7 @@ config:
     # Node pools to run batch jobs
     nodePools: []
     # RClone image that will be used to sync data with object storage
-    rcloneImage: ""rclone/rclone
+    rcloneImage: rclone/rclone
     # Tools image
     toolsImage:
 
