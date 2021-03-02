@@ -177,10 +177,8 @@ func (s *ModelDeploymentRouteSuite) TestGetMD() {
 	s.g.Expect(result.Status.AvailableReplicas).Should(Equal(md.Status.AvailableReplicas))
 	s.g.Expect(result.Status.Deployment).Should(Equal(md.Status.Deployment))
 	s.g.Expect(result.Status.LastCredsUpdatedTime).Should(Equal(md.Status.LastCredsUpdatedTime))
-	s.g.Expect(result.Status.LastRevisionName).Should(Equal(md.Status.LastRevisionName))
 	s.g.Expect(result.Status.Replicas).Should(Equal(md.Status.Replicas))
-	s.g.Expect(result.Status.Service).Should(Equal(md.Status.Service))
-	s.g.Expect(result.Status.ServiceURL).Should(Equal(md.Status.ServiceURL))
+	s.g.Expect(result.Status.HostHeader).Should(Equal(md.Status.HostHeader))
 	s.g.Expect(result.Status.State).Should(Equal(md.Status.State))
 }
 
@@ -570,10 +568,8 @@ func (s *ModelDeploymentRouteSuite) TestDisabledAPIGetMD() {
 	s.g.Expect(result.Status.AvailableReplicas).Should(Equal(md.Status.AvailableReplicas))
 	s.g.Expect(result.Status.Deployment).Should(Equal(md.Status.Deployment))
 	s.g.Expect(result.Status.LastCredsUpdatedTime).Should(Equal(md.Status.LastCredsUpdatedTime))
-	s.g.Expect(result.Status.LastRevisionName).Should(Equal(md.Status.LastRevisionName))
 	s.g.Expect(result.Status.Replicas).Should(Equal(md.Status.Replicas))
-	s.g.Expect(result.Status.Service).Should(Equal(md.Status.Service))
-	s.g.Expect(result.Status.ServiceURL).Should(Equal(md.Status.ServiceURL))
+	s.g.Expect(result.Status.HostHeader).Should(Equal(md.Status.HostHeader))
 	s.g.Expect(result.Status.State).Should(Equal(md.Status.State))
 }
 
