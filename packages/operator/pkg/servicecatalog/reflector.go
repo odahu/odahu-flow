@@ -198,8 +198,10 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 				continue
 			}
 
+			oldCursor := cursor
 			cursor = lastEvents.Cursor
-			r.log.Info("New events found. Move cursor further")
+			r.log.Infow(
+				"New events found. Move cursor further", "oldCursor", oldCursor, "cursor", cursor)
 
 			for _, event := range lastEvents.Events {
 				r.queue.Add(event.EntityID)
