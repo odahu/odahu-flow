@@ -153,8 +153,6 @@ spec:
               description: Expected number of pods under current load
               format: int32
               type: integer
-            serviceURL:
-              type: string
             state:
               description: The state of a model deployment.   "Processing" - A model
                 was not deployed. Because some parameters of the                  custom
