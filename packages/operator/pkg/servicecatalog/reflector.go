@@ -152,7 +152,7 @@ func (r Reflector) runProcessor(log *zap.SugaredLogger) {
 
 		EntityID, shutdown := r.queue.Get()
 		processingJobID := uuid.New().String()
-		log := log.With("EntityID", EntityID, "ProcessingJobID", processingJobID)
+		log := log.With("EntityID", EntityID, "ProcessingJobID", processingJobID, "Component", "runProcessor")
 		if shutdown {
 			return
 		}
