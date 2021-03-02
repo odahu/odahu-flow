@@ -182,34 +182,38 @@ func (r Reflector) runFetcher(ctx context.Context) error {
 		case  <-ctx.Done():
 			return nil
 		case  <-t.C:
+			fetchingJobID := uuid.New().String()
+			log := r.log.With("FetchingJobID", fetchingJobID, "Component", "runFetcher")
 			lastEvents, err := r.fetcher.GetLastEvents(cursor)
 			if err != nil {
-				r.log.Errorw("Unable to get last events", zap.Error(err))
+				log.Errorw("Unable to get last events", zap.Error(err))
 
 				if !IsTemporary(err) {
 					return err
 				}
 
-				r.log.Warnw("Temporary error during event fetching.", zap.Error(err))
+				log.Warnw("Temporary error during event fetching.", zap.Error(err))
 				continue
 			}
 			if lastEvents.Cursor <= cursor {
-				r.log.Debug("There are no new events")
+				log.Debug("There are no new events")
 				continue
 			}
 
-			oldCursor := cursor
-			cursor = lastEvents.Cursor
-			r.log.Infow(
-				"New events found. Move cursor further", "oldCursor", oldCursor, "cursor", cursor)
-
 			for _, event := range lastEvents.Events {
+				log := log.With("EntityID", event.EntityID)
 				r.queue.Add(event.EntityID)
+				log.Info("Event's EntityID is added to queue")
 				r.eventCache.put(event.EntityID, versionedEvent{
 					event:   event.Event,
 					version: cursor,
 				})
+				log.Info("Event added to event cache", "GenericEvent", event)
 			}
+
+			oldCursor := cursor
+			cursor = lastEvents.Cursor
+			log.Infow("Move cursor further", "oldCursor", oldCursor, "cursor", cursor)
 		}
 
 	}
