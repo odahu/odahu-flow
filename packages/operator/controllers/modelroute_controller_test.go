@@ -36,7 +36,7 @@ import (
 const (
 	mrName          = "test-mr"
 	mrURL           = "/test/url"
-	timeout         = time.Second * 300
+	timeout         = time.Second * 5
 	istioIngressSvc = "istio-ingressgateway.istio-system.svc.cluster.local"
 )
 
