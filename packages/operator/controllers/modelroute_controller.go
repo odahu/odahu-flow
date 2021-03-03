@@ -130,18 +130,16 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				modelVersionHeader: "1",
 			},
 		}
-		httpTargets = append(httpTargets,
-			&v1alpha3_istio.HTTPRouteDestination{
-				Destination: &v1alpha3_istio.Destination{
-					Host: fmt.Sprintf("%s.%s.svc.cluster.local",
-						r.deploymentConfig.Istio.ServiceName, r.deploymentConfig.Istio.Namespace),
-				},
-				Weight: *md.Weight,
-				Headers: &v1alpha3_istio.Headers{
-					Request:  requestHeaders,
-					Response: responseHeaders,
-				},
-			})
+		httpTargets = append(httpTargets, &v1alpha3_istio.HTTPRouteDestination{
+			Destination: &v1alpha3_istio.Destination{
+				Host: r.deploymentConfig.Istio.ServiceName + "." + r.deploymentConfig.Istio.Namespace,
+			},
+			Weight: *md.Weight,
+			Headers: &v1alpha3_istio.Headers{
+				Request:  requestHeaders,
+				Response: responseHeaders,
+			},
+		})
 	}
 
 	if len(httpTargets) == 0 {
