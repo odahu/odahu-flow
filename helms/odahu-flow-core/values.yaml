@@ -30,10 +30,6 @@ logLevel: info
 # It handles all income traffic for model invocation
 #  and it does JWT validation of requests if it is enabled
 edge:
-  # Knative namespace name
-  # Type: str
-  knative_namespace: knative
-
   # Ingress object configuration
   ingress:
     # Custom enabling/disabling of Ingress resource for EDGE
