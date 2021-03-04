@@ -132,7 +132,8 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		}
 		httpTargets = append(httpTargets, &v1alpha3_istio.HTTPRouteDestination{
 			Destination: &v1alpha3_istio.Destination{
-				Host: r.deploymentConfig.Istio.ServiceName + "." + r.deploymentConfig.Istio.Namespace,
+				Host: fmt.Sprintf("%s.%s.svc.cluster.local",
+					r.deploymentConfig.Istio.ServiceName, r.deploymentConfig.Istio.Namespace),
 			},
 			Weight: *md.Weight,
 			Headers: &v1alpha3_istio.Headers{
