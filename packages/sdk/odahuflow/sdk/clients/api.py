@@ -364,6 +364,7 @@ class RemoteAPIClient:
         :param retries: command retries or less then 2 if disabled
         :param timeout: timeout for connection in seconds. 0 for disabling
         :param non_interactive: disable any interaction
+        :param issuer_url: url for credential login
         """
 
         # set defaults
