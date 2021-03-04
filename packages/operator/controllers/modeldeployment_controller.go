@@ -484,12 +484,10 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 func (r *ModelDeploymentReconciler) SetupBuilder(mgr ctrl.Manager) *ctrl.Builder {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&odahuflowv1alpha1.ModelDeployment{}).
-		Owns(&knservingv1.Configuration{}).
+		Owns(&knservingv1.Service{}).
 		Owns(&odahuflowv1alpha1.ModelRoute{}).
 		Owns(&corev1.ConfigMap{}).
 		Watches(&source.Kind{Type: &appsv1.Deployment{}}, &EnqueueRequestForImplicitOwner{}).
-		Watches(&source.Kind{Type: &knservingv1.Revision{}}, &EnqueueRequestForImplicitOwner{}).
-		Watches(&source.Kind{Type: &corev1.Endpoints{}}, &EnqueueRequestForImplicitOwner{}).
 		Watches(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &odahuflowv1alpha1.Connection{},
