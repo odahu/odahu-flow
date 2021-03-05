@@ -35,7 +35,7 @@ type Predictor struct {
 
 var (
 	OdahuMLServer = Predictor{
-		ID:                "odahu-ml-server",
+		ID:                "odahu",
 		OpaPolicyFilename: "odahu_ml_server.rego",
 		Ports: []corev1.ContainerPort{{
 			Name:          "http1",
