@@ -100,9 +100,6 @@ func setupServer(cfg *config.Config, kubeMgr manager.Manager) (*Server, error) {
 }
 
 func NewAPIServer(cfg *config.Config) (ServerI, error) {
-
-
-
 	// LocalBackendType means setup test Kubernetes Control Plane
 	if cfg.API.Backend.Type == config.LocalBackendType {
 		log.Info("Setting local Kubernetes Control Plane for API Server")
