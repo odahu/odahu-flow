@@ -2072,7 +2072,7 @@
                     "type": "string"
                 },
                 "nodePools": {
-                    "description": "Node pools to run deployments",
+                    "description": "Node pools to run batch jobs",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/NodePool"
