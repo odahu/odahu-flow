@@ -40,9 +40,9 @@ def predict():
     output_path = pathlib.Path(os.environ.get("ODAHU_OUTPUT_PATH"))
 
     full_model_path = model_path / "multiplier.txt"
-    with open(model_path / "multiplier.txt", "r") as f:
+    with open(full_model_path, "r") as f:
         try:
-            multiplier = int(f.read(full_model_path))
+            multiplier = int(f.read())
         except FileNotFoundError:
             raise BadConfigurationError(f"Unable to find model at {full_model_path}")
         except ValueError:
