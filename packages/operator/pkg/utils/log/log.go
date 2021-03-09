@@ -57,7 +57,7 @@ func SetupLogBindingMiddleware(r gin.IRoutes) {
 	})
 }
 
-// If logr.Logger stored at loggerContextKey in context.Context then
+// If logr.Logger stored at loggerKey in context.Context then
 // returns logger with appropriate bound `values`.
 // Otherwise returns logr.Logger without Request specific bound values
 func FromContext(ctx context.Context) logr.Logger {
