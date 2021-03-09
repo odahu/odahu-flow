@@ -113,7 +113,7 @@ spec:
                 of corresponding InferenceRequest and their IDs
               type: string
             resources:
-              description: Resources for model container The same format as k8s
+              description: Resources for model container The same format like k8s
                 uses for pod resources.
               properties:
                 limits:
@@ -168,7 +168,7 @@ spec:
               type: string
             state:
               description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                of cluster. Important: Run "make" to regenerate code after modifying
+                of cluster Important: Run "make" to regenerate code after modifying
                 this file'
               type: string
           required:

@@ -2088,18 +2088,18 @@ var doc = `{
                     "type": "string"
                 },
                 "nodePools": {
-                    "description": "Node pools to run deployments",
+                    "description": "Node pools to run batch jobs",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/NodePool"
                     }
                 },
                 "rcloneImage": {
-                    "description": "Rclone image that will be used to sync data with object storage",
+                    "description": "RClone image that will be used to sync data with object storage",
                     "type": "string"
                 },
                 "timeout": {
-                    "description": "Timeout for full training process",
+                    "description": "Timeout for full batch process",
                     "type": "string"
                 },
                 "tolerations": {
@@ -2111,7 +2111,7 @@ var doc = `{
                     "type": "string"
                 },
                 "toolsSecret": {
-                    "description": "ODAHU tools secret name with config",
+                    "description": "ODAHU tools image",
                     "type": "string"
                 }
             }

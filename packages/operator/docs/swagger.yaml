@@ -54,7 +54,7 @@ definitions:
         description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created
         type: string
       nodePools:
-        description: Node pools to run deployments
+        description: Node pools to run batch jobs
         items:
           $ref: '#/definitions/NodePool'
         type: array
@@ -62,7 +62,7 @@ definitions:
         description: RClone image that will be used to sync data with object storage
         type: string
       timeout:
-        description: Timeout for full training process
+        description: Timeout for full batch process
         type: string
       tolerations:
         description: Kubernetes tolerations for batch jobs
@@ -71,7 +71,7 @@ definitions:
         description: ODAHU tools image
         type: string
       toolsSecret:
-        description: ODAHU tools secret name with config
+        description: ODAHU tools image
         type: string
     type: object
   Claims:
