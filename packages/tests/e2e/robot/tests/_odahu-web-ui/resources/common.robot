@@ -1,37 +1,34 @@
-*** Variables ***
-${PAGE_OBJECTS}  ${CURDIR}/PO
-
-# should be customisable
-${BROWSER}          chrome
-${CLUSTER_URL}      https://cluster.odahu.org
-${UI_USERNAME}      username
-${UI_PASSWORD}      password
-${DASHBOARD.USER_INFO.USERNAME.TEXT}    dashboard_user
-${DASHBOARD.USER_INFO.EMAIL.TEXT}       dashboard_user@email.org
-
 *** Settings ***
 Library     SeleniumLibrary  timeout=10s
 Resource    ${PAGE_OBJECTS}/keycloak.robot
 Resource    ${PAGE_OBJECTS}/dashboard.robot
+Variables   ../../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 
+*** Variables ***
+${PAGE_OBJECTS}  ${CURDIR}/PO
+
+# SHOULD BE CUSTOMISABLE
+${BROWSER}          chrome
+${DASHBOARD.USER_INFO.USERNAME.TEXT}    anonymous
+${DASHBOARD.USER_INFO.EMAIL.TEXT}       anonymous@email.org
 
 *** Keywords ***
 #       --------- COMMON -----------
 Begin Web Test
-    open browser  ${CLUSTER_URL}  ${BROWSER}
+    open browser  ${EDGE_URL}  ${BROWSER}
     maximize browser window
 
 End Web Test
-    close all browsers
+    close browser
 
 Setup
     Begin Web Test
-    Login to ODAHU WebUI  ${UI_USERNAME}  ${UI_PASSWORD}
+    Login to ODAHU WebUI  ${ODAHU_WEB_UI_USERNAME}  ${ODAHU_WEB_UI_PASSWORD}
 
 Teardown
     End Web Test
 
-Test Setup
+Test Teardown
     reload page
 
 #       --------- LOGIN -----------
@@ -65,3 +62,30 @@ Validate "User Info" button and text fields match
     dashboard.Validate "Dashboard" page loaded
     dashboard.Open User info Tab
     dashboard.Validate "Username" and "Email"
+
+Open and Validate links
+    [Arguments]  ${link_locator}  ${page_url}
+    [Teardown]   run keywords
+    ...          close window
+    ...          AND  switch window  ${handle}
+    dashboard.Validate "Dashboard" page loaded
+    click link   ${link_locator}
+    ${handle}    switch window  locator=NEW
+    location should be  ${page_url}
+
+Open Menu with ODAHU Components
+    dashboard.Validate "Dashboard" page loaded
+    dashboard.Open Bento Menu (ODAHU Components)
+    dashboard.Validate Bento Menu
+
+Close Menu with ODAHU Components
+    dashboard.Validate "Dashboard" page loaded
+    dashboard.Click on Empty field on "Dashboard" page
+    dashboard.Validate Bento Menu closed
+
+Validate ODAHU Components are visible
+    [Arguments]  ${button_locator}  ${button_description}  ${validation_url}=${EMPTY}
+    Open Menu with ODAHU Components  # Setup for test
+    dashboard.Validate ODAHU components visible and description present  ${button_locator}  ${button_description}
+    run keyword if  '${validation_url}' != '${EMPTY}'
+    ...     dashboard.Validate ODAHU components links  ${button_locator}  ${validation_url}

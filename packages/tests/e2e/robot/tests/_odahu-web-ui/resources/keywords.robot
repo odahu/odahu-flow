@@ -10,9 +10,3 @@ Validate visible element and text
     page should contain element  ${element}
     element should be visible  ${element}
     element text should be  ${element}  ${element_text}
-
-Validate button and click
-    [Arguments]  ${button}
-    page should contain button  ${button}
-    mouse over  ${button}
-    click button  ${button}
