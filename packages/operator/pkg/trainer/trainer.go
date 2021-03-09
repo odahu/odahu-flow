@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"github.com/go-logr/logr"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
-	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -40,7 +40,7 @@ import (
 
 const (
 	modelTrainingFile                     = "mt.json"
-	unsupportedConnectionTypeErrorMessage = "unexpected connection type: %s. Supported types: git"
+	unsupportedConnectionTypeErrorMessage = "unexpected connection type: %s. Supported types: git, s3, gcs, azure blob"
 	odahuflowProjectFile                  = "odahuflow.project.yaml"
 )
 
@@ -87,38 +87,6 @@ func (mt *ModelTrainer) Setup() (err error) {
 
 	commitID := ""
 
-	// Downloads a source code
-	switch k8sTraining.VCS.Spec.Type {
-	case connection.GITType:
-		commitID, err = mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
-		if err != nil {
-			mt.log.Error(err, "Error occurs during cloning project")
-
-			return err
-		}
-	default:
-		return errors.New(unsupportedConnectionTypeErrorMessage)
-	}
-
-	mt.log.Info(
-		"The model source code was downloaded",
-		"dir", mt.trainerConfig.OutputDir,
-	)
-
-	// Saves some data before starting a training
-	if err := mt.trainClient.SaveModelTrainingResult(
-		k8sTraining.ModelTraining.ID,
-		&odahuflowv1alpha1.TrainingResult{
-			CommitID: commitID,
-		},
-	); err != nil {
-		mt.log.Error(err, "Cannot save the commit id")
-
-		return err
-	}
-
-	mt.log.Info("The commit ID was saved", "commit_id", commitID)
-
 	workDir := mt.trainerConfig.OutputDir
 	if len(workDir) != 0 {
 		mt.log.Info("Change current working dir", "new worker dir", workDir)
@@ -131,6 +99,44 @@ func (mt *ModelTrainer) Setup() (err error) {
 			return err
 		}
 	}
+
+	// Downloads a source code
+	switch k8sTraining.AlgorithmSource.Conn.Spec.Type {
+	case connection.GITType:
+		commitID, err = mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
+		if err != nil {
+			mt.log.Error(err, "Error occurs during cloning project")
+
+			return err
+		}
+
+		// Saves some data before starting a training
+		if err := mt.trainClient.SaveModelTrainingResult(
+			k8sTraining.ModelTraining.ID,
+			&odahuflowv1alpha1.TrainingResult{
+				CommitID: commitID,
+			},
+		); err != nil {
+			mt.log.Error(err, "Cannot save the commit id")
+
+			return err
+		}
+
+		mt.log.Info("The commit ID was saved", "commit_id", commitID)
+	case connection.S3Type, connection.GcsType, connection.AzureBlobType:
+		if err := mt.downloadAlgorithm(k8sTraining); err != nil {
+			mt.log.Error(err, "Downloading algorithm failed")
+
+			return err
+		}
+	default:
+		return errors.New(fmt.Sprintf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSource.Conn.Spec.Type))
+	}
+
+	mt.log.Info(
+		"The model source code was downloaded",
+		"dir", workDir,
+	)
 
 	if err := mt.downloadData(k8sTraining); err != nil {
 		mt.log.Error(err, "Downloading training data failed")
@@ -254,6 +260,25 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 		if err := storage.Download(mtData.LocalPath, mtData.RemotePath); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (mt *ModelTrainer) downloadAlgorithm(k8sTraining *training.K8sTrainer) error {
+	mt.log.Info("Run download k8sTraining algorithm",
+		"remote_path", k8sTraining.AlgorithmSource.Path,
+		"connection_type", k8sTraining.AlgorithmSource.Conn.Spec.Type,
+		"connection_uri", k8sTraining.AlgorithmSource.Conn.Spec.URI,
+	)
+
+	storage, err := rclone.NewObjectStorage(&k8sTraining.AlgorithmSource.Conn.Spec)
+	if err != nil {
+		return err
+	}
+
+	if err := storage.Download("", k8sTraining.AlgorithmSource.Path); err != nil {
+		return err
 	}
 
 	return nil

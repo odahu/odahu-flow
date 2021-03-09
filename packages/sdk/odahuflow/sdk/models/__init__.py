@@ -6,6 +6,7 @@ from __future__ import absolute_import
 from odahuflow.sdk.models.api_backend_config import APIBackendConfig
 from odahuflow.sdk.models.api_config import APIConfig
 from odahuflow.sdk.models.api_local_backend_config import APILocalBackendConfig
+from odahuflow.sdk.models.algorithm_source import AlgorithmSource
 from odahuflow.sdk.models.auth_config import AuthConfig
 from odahuflow.sdk.models.batch_config import BatchConfig
 from odahuflow.sdk.models.claims import Claims
@@ -63,6 +64,7 @@ from odahuflow.sdk.models.model_training_config import ModelTrainingConfig
 from odahuflow.sdk.models.model_training_spec import ModelTrainingSpec
 from odahuflow.sdk.models.model_training_status import ModelTrainingStatus
 from odahuflow.sdk.models.node_pool import NodePool
+from odahuflow.sdk.models.object_storage import ObjectStorage
 from odahuflow.sdk.models.operator_config import OperatorConfig
 from odahuflow.sdk.models.packager_config import PackagerConfig
 from odahuflow.sdk.models.packager_target import PackagerTarget
@@ -86,4 +88,5 @@ from odahuflow.sdk.models.trainer_config import TrainerConfig
 from odahuflow.sdk.models.training_result import TrainingResult
 from odahuflow.sdk.models.user_config import UserConfig
 from odahuflow.sdk.models.user_info import UserInfo
+from odahuflow.sdk.models.vcs import VCS
 from odahuflow.sdk.models.vault import Vault

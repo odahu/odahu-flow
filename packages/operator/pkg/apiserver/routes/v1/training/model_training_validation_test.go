@@ -55,8 +55,13 @@ var (
 			},
 			OutputConnection: mtvOutputConnection,
 			Toolchain:        testToolchainIntegrationID,
-			VCSName:          testMtVCSID,
-			NodeSelector:     cpuNodeSelector,
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName:  testMtVCSID,
+					Reference: testVcsReference,
+				},
+			},
+			NodeSelector: cpuNodeSelector,
 		},
 	}
 )
@@ -154,12 +159,16 @@ func (s *ModelTrainingValidationSuite) TestMtDefaultResource() {
 func (s *ModelTrainingValidationSuite) TestMtVcsReference() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			VCSName: testMtVCSID,
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName: testMtVCSID,
+				},
+			},
 		},
 	}
 
 	_ = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(mt.Spec.Reference).To(Equal(testVcsReference))
+	s.g.Expect(mt.Spec.AlgorithmSource.VCS.Reference).To(Equal(testVcsReference))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtMtImage() {
@@ -190,13 +199,17 @@ func (s *ModelTrainingValidationSuite) TestMtExplicitMTReference() {
 	mtExplicitReference := "test-ref"
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			VCSName:   testMtVCSID,
-			Reference: mtExplicitReference,
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName:  testMtVCSID,
+					Reference: mtExplicitReference,
+				},
+			},
 		},
 	}
 
 	_ = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(mt.Spec.Reference).To(Equal(mtExplicitReference))
+	s.g.Expect(mt.Spec.AlgorithmSource.VCS.Reference).To(Equal(mtExplicitReference))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtNotExplicitMTReference() {
@@ -213,20 +226,20 @@ func (s *ModelTrainingValidationSuite) TestMtNotExplicitMTReference() {
 	defer s.connRepository.DeleteConnection(conn.ID)
 
 	mt := validTraining
-	mt.Spec.Reference = ""
+	mt.Spec.AlgorithmSource.VCS.Reference = ""
 
 	err = s.validator.ValidatesAndSetDefaults(&mt)
 	s.Assertions.NoError(err)
 }
 
-func (s *ModelTrainingValidationSuite) TestMtEmptyVcsName() {
+func (s *ModelTrainingValidationSuite) TestMtEmptyAlgorithmSourceName() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{},
 	}
 
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).ShouldNot(BeNil())
-	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyVcsNameMessageError))
+	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyAlgorithmSourceNameMessageError))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtWrongVcsConnectionType() {
@@ -243,13 +256,44 @@ func (s *ModelTrainingValidationSuite) TestMtWrongVcsConnectionType() {
 
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			VCSName: conn.ID,
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName: conn.ID,
+				},
+			},
 		},
 	}
 
 	err = s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).ShouldNot(BeNil())
 	s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(train_route.WrongVcsTypeErrorMessage, conn.Spec.Type)))
+}
+
+func (s *ModelTrainingValidationSuite) TestMtWrongObjectStorageConnectionType() {
+	conn := &connection.Connection{
+		ID: "wrong-type",
+		Spec: v1alpha1.ConnectionSpec{
+			Type: connection.GITType,
+		},
+	}
+
+	err := s.connRepository.CreateConnection(conn)
+	s.g.Expect(err).Should(BeNil())
+	defer s.connRepository.DeleteConnection(conn.ID)
+
+	mt := &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				ObjectStorage: v1alpha1.ObjectStorage{
+					ConnName: conn.ID,
+				},
+			},
+		},
+	}
+
+	err = s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).ShouldNot(BeNil())
+	s.g.Expect(err.Error()).To(ContainSubstring("data binding has wrong data type"))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtToolchainType() {
@@ -268,7 +312,11 @@ func (s *ModelTrainingValidationSuite) TestMtToolchainType() {
 func (s *ModelTrainingValidationSuite) TestMtVcsNotExists() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			VCSName: "not-exists",
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName: "not-exists",
+				},
+			},
 		},
 	}
 
@@ -278,16 +326,56 @@ func (s *ModelTrainingValidationSuite) TestMtVcsNotExists() {
 		"entity \"not-exists\" is not found"))
 }
 
-func (s *ModelTrainingValidationSuite) TestMtVcsEmptyName() {
+func (s *ModelTrainingValidationSuite) TestMtObjectStorageNotExists() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			VCSName: "",
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				ObjectStorage: v1alpha1.ObjectStorage{
+					ConnName: "not-exists",
+				},
+			},
 		},
 	}
 
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyVcsNameMessageError))
+	s.g.Expect(err.Error()).To(ContainSubstring(
+		"entity \"not-exists\" is not found"))
+}
+
+func (s *ModelTrainingValidationSuite) TestMtAlgorithmSourceName() {
+	mt := &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName: "",
+				},
+			},
+		},
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyAlgorithmSourceNameMessageError))
+}
+
+func (s *ModelTrainingValidationSuite) TestMtMultipleAlgorithmSourceName() {
+	mt := &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{
+			AlgorithmSource: v1alpha1.AlgorithmSource{
+				VCS: v1alpha1.VCS{
+					ConnName: "not-empty",
+				},
+				ObjectStorage: v1alpha1.ObjectStorage{
+					ConnName: "not-empty",
+				},
+			},
+		},
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring(train_route.MultipleAlgorithmSourceMessageError))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtToolchainEmptyName() {

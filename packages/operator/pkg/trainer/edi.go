@@ -29,13 +29,21 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
-	vcs, err := mt.connClient.GetConnection(modelTraining.Spec.VCSName)
+	var connName string
+
+	if len(modelTraining.Spec.AlgorithmSource.VCS.ConnName) != 0 {
+		connName = modelTraining.Spec.AlgorithmSource.VCS.ConnName
+	} else {
+		connName = modelTraining.Spec.AlgorithmSource.ObjectStorage.ConnName
+	}
+
+	conn, err := mt.connClient.GetConnection(connName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Since connRepo here is actually an HTTP client, it returns connection with base64-encoded secrets
-	if err := vcs.DecodeBase64Fields(); err != nil {
+	if err := conn.DecodeBase64Fields(); err != nil {
 		return nil, err
 	}
 
@@ -78,7 +86,10 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	}
 
 	return &training.K8sTrainer{
-		VCS:        vcs,
+		AlgorithmSource: &training.AlgorithmSource{
+			Conn: conn,
+			Path: modelTraining.Spec.AlgorithmSource.ObjectStorage.Path,
+		},
 		InputData:  inputData,
 		OutputConn: outputConn,
 		ModelTraining: &training.ModelTraining{

@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.algorithm_source import AlgorithmSource  # noqa: F401,E501
 from odahuflow.sdk.models.data_binding_dir import DataBindingDir  # noqa: F401,E501
 from odahuflow.sdk.models.environment_variable import EnvironmentVariable  # noqa: F401,E501
 from odahuflow.sdk.models.model_identity import ModelIdentity  # noqa: F401,E501
@@ -19,9 +20,11 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, reference: str=None, resources: ResourceRequirements=None, toolchain: str=None, vcs_name: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(self, algorithm_source: AlgorithmSource=None, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, toolchain: str=None, work_dir: str=None):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
+        :param algorithm_source: The algorithm_source of this ModelTrainingSpec.  # noqa: E501
+        :type algorithm_source: AlgorithmSource
         :param args: The args of this ModelTrainingSpec.  # noqa: E501
         :type args: List[str]
         :param data: The data of this ModelTrainingSpec.  # noqa: E501
@@ -40,18 +43,15 @@ class ModelTrainingSpec(Model):
         :type node_selector: Dict[str, str]
         :param output_connection: The output_connection of this ModelTrainingSpec.  # noqa: E501
         :type output_connection: str
-        :param reference: The reference of this ModelTrainingSpec.  # noqa: E501
-        :type reference: str
         :param resources: The resources of this ModelTrainingSpec.  # noqa: E501
         :type resources: ResourceRequirements
         :param toolchain: The toolchain of this ModelTrainingSpec.  # noqa: E501
         :type toolchain: str
-        :param vcs_name: The vcs_name of this ModelTrainingSpec.  # noqa: E501
-        :type vcs_name: str
         :param work_dir: The work_dir of this ModelTrainingSpec.  # noqa: E501
         :type work_dir: str
         """
         self.swagger_types = {
+            'algorithm_source': AlgorithmSource,
             'args': List[str],
             'data': List[DataBindingDir],
             'entrypoint': str,
@@ -61,14 +61,13 @@ class ModelTrainingSpec(Model):
             'model': ModelIdentity,
             'node_selector': Dict[str, str],
             'output_connection': str,
-            'reference': str,
             'resources': ResourceRequirements,
             'toolchain': str,
-            'vcs_name': str,
             'work_dir': str
         }
 
         self.attribute_map = {
+            'algorithm_source': 'algorithmSource',
             'args': 'args',
             'data': 'data',
             'entrypoint': 'entrypoint',
@@ -78,13 +77,12 @@ class ModelTrainingSpec(Model):
             'model': 'model',
             'node_selector': 'nodeSelector',
             'output_connection': 'outputConnection',
-            'reference': 'reference',
             'resources': 'resources',
             'toolchain': 'toolchain',
-            'vcs_name': 'vcsName',
             'work_dir': 'workDir'
         }
 
+        self._algorithm_source = algorithm_source
         self._args = args
         self._data = data
         self._entrypoint = entrypoint
@@ -94,10 +92,8 @@ class ModelTrainingSpec(Model):
         self._model = model
         self._node_selector = node_selector
         self._output_connection = output_connection
-        self._reference = reference
         self._resources = resources
         self._toolchain = toolchain
-        self._vcs_name = vcs_name
         self._work_dir = work_dir
 
     @classmethod
@@ -110,6 +106,29 @@ class ModelTrainingSpec(Model):
         :rtype: ModelTrainingSpec
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def algorithm_source(self) -> AlgorithmSource:
+        """Gets the algorithm_source of this ModelTrainingSpec.
+
+        AlgorithmSource for training  # noqa: E501
+
+        :return: The algorithm_source of this ModelTrainingSpec.
+        :rtype: AlgorithmSource
+        """
+        return self._algorithm_source
+
+    @algorithm_source.setter
+    def algorithm_source(self, algorithm_source: AlgorithmSource):
+        """Sets the algorithm_source of this ModelTrainingSpec.
+
+        AlgorithmSource for training  # noqa: E501
+
+        :param algorithm_source: The algorithm_source of this ModelTrainingSpec.
+        :type algorithm_source: AlgorithmSource
+        """
+
+        self._algorithm_source = algorithm_source
 
     @property
     def args(self) -> List[str]:
@@ -317,29 +336,6 @@ class ModelTrainingSpec(Model):
         self._output_connection = output_connection
 
     @property
-    def reference(self) -> str:
-        """Gets the reference of this ModelTrainingSpec.
-
-        VCS Reference  # noqa: E501
-
-        :return: The reference of this ModelTrainingSpec.
-        :rtype: str
-        """
-        return self._reference
-
-    @reference.setter
-    def reference(self, reference: str):
-        """Sets the reference of this ModelTrainingSpec.
-
-        VCS Reference  # noqa: E501
-
-        :param reference: The reference of this ModelTrainingSpec.
-        :type reference: str
-        """
-
-        self._reference = reference
-
-    @property
     def resources(self) -> ResourceRequirements:
         """Gets the resources of this ModelTrainingSpec.
 
@@ -384,29 +380,6 @@ class ModelTrainingSpec(Model):
         """
 
         self._toolchain = toolchain
-
-    @property
-    def vcs_name(self) -> str:
-        """Gets the vcs_name of this ModelTrainingSpec.
-
-        Name of Connection resource. Must exists  # noqa: E501
-
-        :return: The vcs_name of this ModelTrainingSpec.
-        :rtype: str
-        """
-        return self._vcs_name
-
-    @vcs_name.setter
-    def vcs_name(self, vcs_name: str):
-        """Sets the vcs_name of this ModelTrainingSpec.
-
-        Name of Connection resource. Must exists  # noqa: E501
-
-        :param vcs_name: The vcs_name of this ModelTrainingSpec.
-        :type vcs_name: str
-        """
-
-        self._vcs_name = vcs_name
 
     @property
     def work_dir(self) -> str:

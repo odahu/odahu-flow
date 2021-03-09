@@ -56,15 +56,13 @@ type ModelTrainingSpec struct {
 	// Model training file. It can be python\bash script or jupiter notebook
 	Entrypoint          string   `json:"entrypoint"`
 	EntrypointArguments []string `json:"args,omitempty"`
-	// Name of Connection resource. Must exists
-	VCSName string `json:"vcsName"`
+	// AlgorithmSource for training
+	AlgorithmSource AlgorithmSource `json:"algorithmSource"`
 	// Name of Connection to storage where training output artifact will be stored.
 	// Permitted connection types are defined by specific toolchain
 	OutputConnection string `json:"outputConnection,omitempty"`
 	// Train image
 	Image string `json:"image,omitempty"`
-	// VCS Reference
-	Reference string `json:"reference,omitempty"`
 	// Resources for model container
 	// The same format like k8s uses for pod resources.
 	Resources *ResourceRequirements `json:"resources,omitempty"`

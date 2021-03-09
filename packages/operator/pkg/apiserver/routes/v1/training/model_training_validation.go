@@ -79,7 +79,7 @@ func NewMtValidator(
 func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err error) {
 	err = multierr.Append(err, mtv.validateMainParams(mt))
 
-	err = multierr.Append(err, mtv.validateVCS(mt))
+	err = multierr.Append(err, mtv.validateAlgorithmSource(mt))
 
 	err = multierr.Append(err, mtv.validateMtData(mt))
 
@@ -168,27 +168,60 @@ func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error
 	return
 }
 
-func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
-	if len(mt.Spec.VCSName) == 0 {
-		err = multierr.Append(err, errors.New(EmptyVcsNameMessageError))
+func (mtv *MtValidator) validateAlgorithmSource(mt *training.ModelTraining) (err error) {
+	if len(mt.Spec.AlgorithmSource.VCS.ConnName) != 0 && len(mt.Spec.AlgorithmSource.ObjectStorage.ConnName) != 0 {
+		err = multierr.Append(err, errors.New(MultipleAlgorithmSourceMessageError))
 
 		return
 	}
 
-	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.VCSName); odahuErr != nil {
+	switch {
+	case len(mt.Spec.AlgorithmSource.VCS.ConnName) != 0:
+		err = multierr.Append(err, mtv.validateVCS(mt))
+	case len(mt.Spec.AlgorithmSource.ObjectStorage.ConnName) != 0:
+		err = multierr.Append(err, mtv.validateObjectStorage(mt))
+	default:
+		err = multierr.Append(err, errors.New(EmptyAlgorithmSourceNameMessageError))
+	}
+
+	return
+}
+
+func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
+	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.VCS.ConnName); odahuErr != nil {
 		logMT.Error(err, MtVcsNotExistsErrorMessage)
 
 		err = multierr.Append(err, odahuErr)
-	} else if len(mt.Spec.Reference) == 0 {
+	} else if len(mt.Spec.AlgorithmSource.VCS.Reference) == 0 {
 		switch {
 		case vcs.Spec.Type != connection.GITType:
 			err = multierr.Append(err, fmt.Errorf(WrongVcsTypeErrorMessage, vcs.Spec.Type))
 		case len(vcs.Spec.Reference) != 0:
 			logMT.Info("VCS reference parameter is nil. Take the value from connection specification",
 				"name", mt.ID, "reference", vcs.Spec.Reference)
-			mt.Spec.Reference = vcs.Spec.Reference
+			mt.Spec.AlgorithmSource.VCS.Reference = vcs.Spec.Reference
 		default:
 			logMT.Info("Neither VCS connection or Training has reference specified, using VCS default branch")
+		}
+	}
+
+	return
+}
+
+func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err error) {
+	objStorage, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.ObjectStorage.ConnName)
+	if odahuErr != nil {
+		logMT.Error(err, MtObjectStorageNotExistsErrorMessage)
+
+		err = multierr.Append(err, odahuErr)
+	} else if len(mt.Spec.AlgorithmSource.ObjectStorage.Path) == 0 {
+		if _, ok := expectedConnectionDataTypes[objStorage.Spec.Type]; !ok {
+			err = multierr.Append(err, fmt.Errorf(
+				WrongDataBindingTypeErrorMessage,
+				objStorage.ID, reflect.ValueOf(expectedConnectionDataTypes).MapKeys(),
+			))
+		} else {
+			logMT.Info("Training path is not specified, using ObjectStorage root path")
 		}
 	}
 

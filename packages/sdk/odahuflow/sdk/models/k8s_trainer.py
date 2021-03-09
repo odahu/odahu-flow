@@ -6,6 +6,7 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
+from odahuflow.sdk.models.algorithm_source import AlgorithmSource  # noqa: F401,E501
 from odahuflow.sdk.models.connection import Connection  # noqa: F401,E501
 from odahuflow.sdk.models.input_data_binding_dir import InputDataBindingDir  # noqa: F401,E501
 from odahuflow.sdk.models.model_training import ModelTraining  # noqa: F401,E501
@@ -19,9 +20,11 @@ class K8sTrainer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, toolchain_integration: ToolchainIntegration=None, vcs: Connection=None):  # noqa: E501
+    def __init__(self, algorithm_source: AlgorithmSource=None, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, toolchain_integration: ToolchainIntegration=None):  # noqa: E501
         """K8sTrainer - a model defined in Swagger
 
+        :param algorithm_source: The algorithm_source of this K8sTrainer.  # noqa: E501
+        :type algorithm_source: AlgorithmSource
         :param input_data: The input_data of this K8sTrainer.  # noqa: E501
         :type input_data: List[InputDataBindingDir]
         :param model_training: The model_training of this K8sTrainer.  # noqa: E501
@@ -30,30 +33,28 @@ class K8sTrainer(Model):
         :type output_conn: Connection
         :param toolchain_integration: The toolchain_integration of this K8sTrainer.  # noqa: E501
         :type toolchain_integration: ToolchainIntegration
-        :param vcs: The vcs of this K8sTrainer.  # noqa: E501
-        :type vcs: Connection
         """
         self.swagger_types = {
+            'algorithm_source': AlgorithmSource,
             'input_data': List[InputDataBindingDir],
             'model_training': ModelTraining,
             'output_conn': Connection,
-            'toolchain_integration': ToolchainIntegration,
-            'vcs': Connection
+            'toolchain_integration': ToolchainIntegration
         }
 
         self.attribute_map = {
+            'algorithm_source': 'algorithmSource',
             'input_data': 'inputData',
             'model_training': 'modelTraining',
             'output_conn': 'outputConn',
-            'toolchain_integration': 'toolchainIntegration',
-            'vcs': 'vcs'
+            'toolchain_integration': 'toolchainIntegration'
         }
 
+        self._algorithm_source = algorithm_source
         self._input_data = input_data
         self._model_training = model_training
         self._output_conn = output_conn
         self._toolchain_integration = toolchain_integration
-        self._vcs = vcs
 
     @classmethod
     def from_dict(cls, dikt) -> 'K8sTrainer':
@@ -65,6 +66,29 @@ class K8sTrainer(Model):
         :rtype: K8sTrainer
         """
         return util.deserialize_model(dikt, cls)
+
+    @property
+    def algorithm_source(self) -> AlgorithmSource:
+        """Gets the algorithm_source of this K8sTrainer.
+
+        Connection for source code  # noqa: E501
+
+        :return: The algorithm_source of this K8sTrainer.
+        :rtype: AlgorithmSource
+        """
+        return self._algorithm_source
+
+    @algorithm_source.setter
+    def algorithm_source(self, algorithm_source: AlgorithmSource):
+        """Sets the algorithm_source of this K8sTrainer.
+
+        Connection for source code  # noqa: E501
+
+        :param algorithm_source: The algorithm_source of this K8sTrainer.
+        :type algorithm_source: AlgorithmSource
+        """
+
+        self._algorithm_source = algorithm_source
 
     @property
     def input_data(self) -> List[InputDataBindingDir]:
@@ -157,26 +181,3 @@ class K8sTrainer(Model):
         """
 
         self._toolchain_integration = toolchain_integration
-
-    @property
-    def vcs(self) -> Connection:
-        """Gets the vcs of this K8sTrainer.
-
-        Connection for source code  # noqa: E501
-
-        :return: The vcs of this K8sTrainer.
-        :rtype: Connection
-        """
-        return self._vcs
-
-    @vcs.setter
-    def vcs(self, vcs: Connection):
-        """Sets the vcs of this K8sTrainer.
-
-        Connection for source code  # noqa: E501
-
-        :param vcs: The vcs of this K8sTrainer.
-        :type vcs: Connection
-        """
-
-        self._vcs = vcs

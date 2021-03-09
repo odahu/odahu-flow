@@ -56,6 +56,24 @@ spec:
         spec:
           description: ModelTrainingSpec defines the desired state of ModelTraining
           properties:
+            algorithmSource:
+              description: AlgorithmSource for training
+              properties:
+                objectStorage:
+                  properties:
+                    connName:
+                      type: string
+                    path:
+                      type: string
+                  type: object
+                vcs:
+                  properties:
+                    connName:
+                      type: string
+                    reference:
+                      type: string
+                  type: object
+              type: object
             args:
               items:
                 type: string
@@ -132,9 +150,6 @@ spec:
                 will be stored. Permitted connection types are defined by specific
                 toolchain
               type: string
-            reference:
-              description: VCS Reference
-              type: string
             resources:
               description: Resources for model container The same format like k8s
                 uses for pod resources.
@@ -171,17 +186,14 @@ spec:
             toolchain:
               description: IntegrationName of toolchain
               type: string
-            vcsName:
-              description: Name of Connection resource. Must exists
-              type: string
             workDir:
               description: Directory with model scripts/files in a git repository
               type: string
           required:
+          - algorithmSource
           - entrypoint
           - model
           - toolchain
-          - vcsName
           type: object
         status:
           description: ModelTrainingStatus defines the observed state of ModelTraining
