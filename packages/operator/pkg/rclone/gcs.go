@@ -23,7 +23,6 @@ import (
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"io/ioutil"
-	"net/url"
 )
 
 func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDescription, error) {
@@ -55,15 +54,14 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		return nil, err
 	}
 
-	parsedURI, err := url.Parse(conn.URI)
+	bucketName, pathInsideBucket, err := GetBucketAndPath(conn)
 	if err != nil {
 		log.Error(err, "Parsing data binding URI", "connection uri", conn.URI)
-
 		return nil, err
 	}
 
 	return &FileDescription{
-		FsName: fmt.Sprintf("%s:%s", configName, parsedURI.Host),
-		Path:   parsedURI.Path,
+		FsName: fmt.Sprintf("%s:%s", configName, bucketName),
+		Path:   pathInsideBucket,
 	}, nil
 }

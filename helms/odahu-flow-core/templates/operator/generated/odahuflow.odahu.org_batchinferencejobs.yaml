@@ -1,0 +1,191 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.5
+  creationTimestamp: null
+  name: batchinferencejobs.odahuflow.odahu.org
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.state
+    name: State
+    type: string
+  - JSONPath: .status.message
+    name: Message
+    type: string
+  - JSONPath: .status.reason
+    name: Reason
+    type: string
+  group: odahuflow.odahu.org
+  names:
+    kind: BatchInferenceJob
+    listKind: BatchInferenceJobList
+    plural: batchinferencejobs
+    shortNames:
+    - bij
+    singular: batchinferencejob
+  scope: Namespaced
+  subresources: {}
+  validation:
+    openAPIV3Schema:
+      description: BatchInferenceJob is the Schema for the batchinferencejobs API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: BatchInferenceJobSpec defines the desired state of BatchInferenceJob
+          properties:
+            args:
+              description: 'Arguments to the entrypoint. The docker image''s CMD is
+                used if this is not provided. Variable references $(VAR_NAME) are
+                expanded using the container''s environment. If a variable cannot
+                be resolved, the reference in the input string will be unchanged.
+                The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME).
+                Escaped references will never be expanded, regardless of whether the
+                variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+              items:
+                type: string
+              type: array
+            command:
+              description: 'Entrypoint array. Not executed within a shell. The docker
+                image''s ENTRYPOINT is used if this is not provided. Variable references
+                $(VAR_NAME) are expanded using the container''s environment. If a
+                variable cannot be resolved, the reference in the input string will
+                be unchanged. The $(VAR_NAME) syntax can be escaped with a double
+                $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless
+                of whether the variable exists or not. Cannot be updated. More info:
+                https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell'
+              items:
+                type: string
+              type: array
+            image:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "make" to regenerate code after modifying this file
+                Docker image'
+              type: string
+            inputConnection:
+              description: InputConnection is name of connection to object storage
+                bucket where input data are expected
+              type: string
+            inputPath:
+              description: InputPath is a source directory for BatchInferenceJob input
+                data relative to bucket root of InputConnection
+              type: string
+            modelConnection:
+              description: ModelConnection is name of connection to object storage
+                bucket where ML model files are expected
+              type: string
+            modelPath:
+              description: ModelPath is a directory inside ModelConnection where ML
+                model files are located
+              type: string
+            nodeSelector:
+              additionalProperties:
+                type: string
+              description: Node selector for specifying a node pool
+              type: object
+            outputConnection:
+              description: OutputConnection is name of connection to object storage
+                bucket where results should be saved
+              type: string
+            outputPath:
+              description: OutputPath is a destination directory for BatchInferenceJob
+                results relative to bucket root of OutputConnection
+              type: string
+            requestId:
+              description: BatchRequestID is unique identifier for BatchInferenceJob
+                that helps to correlate between Model input, model output and feedback
+                Take into account that it is not the same as kubeflow InferenceRequest
+                id Each BatchInferenceJob can process more than one InferenceRequest
+                (delivered in separate input file) So each BatchRequestID has set
+                of corresponding InferenceRequest and their IDs
+              type: string
+            resources:
+              description: Resources for model container The same format like k8s
+                uses for pod resources.
+              properties:
+                limits:
+                  description: Limits describes the maximum amount of compute resources
+                    allowed.
+                  properties:
+                    cpu:
+                      description: Read more about CPU resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu
+                      type: string
+                    gpu:
+                      description: Read more about GPU resource here https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins
+                      type: string
+                    memory:
+                      description: Read more about memory resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory
+                      type: string
+                  type: object
+                requests:
+                  description: Requests describes the minimum amount of compute resources
+                    required.
+                  properties:
+                    cpu:
+                      description: Read more about CPU resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu
+                      type: string
+                    gpu:
+                      description: Read more about GPU resource here https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/#using-device-plugins
+                      type: string
+                    memory:
+                      description: Read more about memory resource here https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory
+                      type: string
+                  type: object
+              type: object
+          required:
+          - args
+          - command
+          - image
+          - inputConnection
+          - inputPath
+          - modelConnection
+          - modelPath
+          - outputConnection
+          - outputPath
+          - requestId
+          type: object
+        status:
+          description: BatchInferenceJobStatus defines the observed state of BatchInferenceJob
+          properties:
+            message:
+              type: string
+            podName:
+              type: string
+            reason:
+              type: string
+            state:
+              description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                of cluster Important: Run "make" to regenerate code after modifying
+                this file'
+              type: string
+          required:
+          - message
+          - podName
+          - reason
+          - state
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

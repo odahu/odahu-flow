@@ -68,11 +68,16 @@ func initLogger() {
 
 func initConfig() {
 	// Don't forget to read config either from cfgFile or from home directory!
+	if cfgFile == "" {
+		cfgFile = os.Getenv("ODAHU_TOOLS_CONFIG")
+	}
 	if cfgFile != "" {
 		// Use config file from the flag.
+		zap.S().Infof("Config path: %s", cfgFile)
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.
+		zap.S().Info("Config path is not configured explicitly. Looking for a config in home directory")
 		home, err := homedir.Dir()
 		if err != nil {
 			zap.S().Errorw("Unable to get home directory", zap.Error(err))

@@ -62,15 +62,25 @@ type Config struct {
 	Training       ModelTrainingConfig   `json:"training"`
 	Packaging      ModelPackagingConfig  `json:"packaging"`
 	Operator       OperatorConfig        `json:"operator"`
+	Batch          BatchConfig           `json:"batch"`
 }
 
 func LoadConfig() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
+	if CfgFile == "" {
+		CfgFile = os.Getenv("ODAHU_OPERATOR_CONFIG")
+	}
+
 	if CfgFile != "" {
+		logC.Info(fmt.Sprintf("Config path: %s", CfgFile))
 		viper.SetConfigFile(CfgFile)
 	} else {
+		logC.Info(
+			fmt.Sprintf(
+				"Config path is not configured explicitly. Looking for a config in %s", defaultConfigPathForDev,
+			))
 		viper.AddConfigPath(defaultConfigPathForDev)
 	}
 
@@ -90,6 +100,7 @@ func LoadConfig() (*Config, error) {
 		Training:       NewDefaultModelTrainingConfig(),
 		Packaging:      NewDefaultModelPackagingConfig(),
 		Operator:       NewDefaultOperatorConfig(),
+		Batch:          NewDefaultBatchConfig(),
 	}
 
 	err := viper.Unmarshal(config)
