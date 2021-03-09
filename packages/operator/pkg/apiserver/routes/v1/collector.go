@@ -138,11 +138,9 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	configuration.ConfigureRoutes(routeGroup, cfg)
 	userinfo.ConfigureRoutes(routeGroup, cfg.Users.Claims)
 
-	// TODO: cfg.Deployment.Enabled -> cfg.Batch.Enabled
-	batchRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Deployment.Enabled))
+	batchRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Batch.Enabled))
 	service_routes.SetupRoutes(batchRouteGroup, batchServiceService)
-	// TODO: cfg.Deployment.Enabled -> cfg.Batch.Enabled
-	batchJobRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Deployment.Enabled))
+	batchJobRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Batch.Enabled))
 	job_routes.SetupRoutes(batchJobRouteGroup, batchJobService)
 
 	return err
