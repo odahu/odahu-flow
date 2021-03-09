@@ -234,6 +234,13 @@ type Adapter struct {
 	apiServerServiceAPI apiServerServiceAPI
 }
 
+func NewAdapter(mgr ctrl.Manager,
+	kubeClient kubeClient,
+	apiServer apiServer,
+	apiServerServiceAPI apiServerServiceAPI) *Adapter {
+	return &Adapter{mgr: mgr, kubeClient: kubeClient, apiServer: apiServer, apiServerServiceAPI: apiServerServiceAPI}
+}
+
 func (a Adapter) ListStorage() ([]types.StorageEntity, error) {
 	result := make([]types.StorageEntity, 0)
 	enList, err := a.apiServer.List(context.TODO())

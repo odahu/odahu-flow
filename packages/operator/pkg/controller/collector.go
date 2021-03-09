@@ -6,19 +6,28 @@ import (
 	deploy_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
+	batch_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/batchclient"
+	conn_repo_type "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/memory"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
 	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	batch_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/batch/postgres"
 	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	dep_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	batch_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/batch"
 	route_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/route"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/batch"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -79,6 +88,41 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 		)
 		runMgr.AddRunnable(&routeWorker)
 
+	}
+
+	if cfg.Batch.Enabled {
+
+		var connRepository conn_repo_type.Repository
+		switch cfg.Connection.RepositoryType {
+		case config.RepositoryKubernetesType:
+			connRepository = kubernetes.NewRepository(
+				cfg.Connection.Namespace,
+				kClient,
+			)
+		case config.RepositoryVaultType:
+			var err error
+			connRepository, err = vault.NewRepositoryFromConfig(cfg.Connection.Vault)
+			if err != nil {
+				panic("unable to create vault connection repository")
+			}
+		case config.RepositoryMemoryType:
+			connRepository = memory.NewRepository()
+		default:
+			panic("unexpect connection repository type")
+		}
+
+		connService := conn_service.NewService(connRepository)
+
+		batchJobService := batch_service.NewJobService(
+			batch_repo.BIJRepo{DB: db}, batch_repo.BISRepo{DB: db}, connService)
+		batchServiceService := batch_service.NewInferenceServiceService(batch_repo.BISRepo{DB: db})
+		batchKubeClient := batch_kube_client.NewClient(kClient, cfg.Batch.Namespace, kConfig)
+
+		batchWorker := NewGenericWorker(
+			"batch", cfg.Common.LaunchPeriod,
+			batch.NewAdapter(kubeMgr, batchKubeClient, batchJobService, batchServiceService),
+		)
+		runMgr.AddRunnable(&batchWorker)
 	}
 
 }
