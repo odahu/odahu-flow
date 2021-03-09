@@ -1490,7 +1490,7 @@ paths:
       - application/json
       description: Delete an InferenceJob
       parameters:
-      - description: Model Training id
+      - description: InferenceJob id
         in: path
         name: id
         required: true
