@@ -182,7 +182,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Model Training id",
+                        "description": "InferenceJob id",
                         "name": "id",
                         "in": "path",
                         "required": true
