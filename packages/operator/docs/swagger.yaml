@@ -1545,7 +1545,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: List an InferenceService
+      description: List InferenceService entities
       parameters:
       - description: Number of entities in a response
         in: query
