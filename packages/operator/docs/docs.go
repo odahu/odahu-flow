@@ -2587,7 +2587,7 @@ var doc = `{
                     "$ref": "#/definitions/ConnectionReference"
                 },
                 "resources": {
-                    "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
+                    "description": "Resources for model container\nThe same format as k8s uses for pod resources.",
                     "type": "object",
                     "$ref": "#/definitions/ResourceRequirements"
                 },
