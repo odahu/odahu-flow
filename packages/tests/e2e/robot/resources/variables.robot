@@ -26,6 +26,12 @@ ${TOOLCHAIN_INTEGRATION}              mlflow
 ${PI_REST}                            docker-rest
 ${PI_CLI}                             docker-cli
 ${CONN_SECRET_MASK}                   *****
+${WINE_MODEL_RESULT}                  {"prediction": [6.3881577909662886], "columns": ["quality"]}
+
+# Errors
+${INVALID_URL_ERROR}                  Error: Can not reach
+${INVALID_CREDENTIALS_ERROR}          Error: Credentials are not correct.
+${MISSED_CREDENTIALS_ERROR}           Error: Credentials are missed.
 
 # ---------------------------------  Error Templates  ---------------------------------
 ${400 BadRequest Template}          WrongHttpStatusCode: Got error from server: {} (status: 400)

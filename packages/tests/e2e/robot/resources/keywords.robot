@@ -157,3 +157,29 @@ Run example model
 
     ${res}=  Shell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
     should not be equal  ${res.rc}  0
+
+    # --------- LOCAL COMMAND SECTION -----------
+Run Local Training
+    [Arguments]  ${train options}
+        ${result}  StrictShell  odahuflowctl --verbose local train ${train options}
+
+Run Packaging
+    [Teardown]  Shell  docker rm -f ${container_id.stdout}
+    [Arguments]  ${MODEL PORT}  ${options}
+        ${pack_result}  StrictShell  odahuflowctl --verbose local packaging ${options}
+
+        Create File  ${RESULT_DIR}/pack_result.txt  ${pack_result.stdout}
+        ${image_name}    StrictShell  tail -n 1 ${RESULT_DIR}/pack_result.txt | awk '{ print $4 }'
+        Remove File  ${RESULT_DIR}/pack_result.txt
+
+        StrictShell  docker images --all
+        ${container_id}  StrictShell  docker run -d --rm -p ${MODEL PORT}:5000 ${image_name.stdout}
+
+        Sleep  5 sec
+        StrictShell  docker container list -as -f id=${container_id.stdout}
+
+        ${MODEL_HOST}    Get local model host
+        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:${MODEL PORT} --json-file ${RES_DIR}/request.json
+        ${expected response}          evaluate  json.loads('''${WINE_MODEL_RESULT}''')    json
+        ${actual response}            evaluate  json.loads('''${result_model.stdout}''')    json
+        dictionaries should be equal  ${actual response}  ${expected response}

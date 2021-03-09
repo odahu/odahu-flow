@@ -1,0 +1,15 @@
+id: local-dir-spec-targets
+kind: ModelPackaging
+spec:
+  targets:
+    - name: docker-pull
+      connectionName: local-docker-repository
+  artifactName: "simple-model.zip"
+  integrationName: docker-rest
+  resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 1
+    memory: 1Gi

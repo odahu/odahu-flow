@@ -1,0 +1,11 @@
+{
+  "kind": "Connection",
+  "id": "local-docker-repository",
+  "spec": {
+    "type": "docker",
+    "uri": "<uri>",
+    "username": "<username>",
+    "password": "<password>",
+    "description": "Docker repository for ODAHU services"
+  }
+}
