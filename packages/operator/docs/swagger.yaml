@@ -1572,7 +1572,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: List an InferenceService
+      summary: List InferenceService entities
       tags:
       - Batch
     post:
