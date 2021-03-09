@@ -113,7 +113,7 @@ spec:
                 of corresponding InferenceRequest and their IDs
               type: string
             resources:
-              description: Resources for model container The same format like k8s
+              description: Resources for model container The same format as k8s
                 uses for pod resources.
               properties:
                 limits:
