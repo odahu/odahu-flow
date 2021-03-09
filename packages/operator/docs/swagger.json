@@ -2095,7 +2095,7 @@
                     "type": "string"
                 },
                 "toolsSecret": {
-                    "description": "ODAHU tools secret name with config",
+                    "description": "Name of the secret that contains ODAHU tools config",
                     "type": "string"
                 }
             }
