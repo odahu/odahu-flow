@@ -2095,7 +2095,7 @@ var doc = `{
                     }
                 },
                 "rcloneImage": {
-                    "description": "RClone image that will be used to sync data with object storage",
+                    "description": "Rclone image that will be used to sync data with object storage",
                     "type": "string"
                 },
                 "timeout": {
