@@ -107,6 +107,9 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'SA_CUSTOM_USER': test_sa_custom_role,
                 'SA_CUSTOM_ROLE': test_sa_custom_role.roles,
 
+                'ODAHU_WEB_UI_USERNAME': data.get('test_user_email'),
+                'ODAHU_WEB_UI_PASSWORD': data.get('test_user_password'),
+
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:
