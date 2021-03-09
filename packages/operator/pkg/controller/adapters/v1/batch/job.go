@@ -85,7 +85,7 @@ type kubeClient interface {
 	DeleteInferenceJob(name string) error
 	GetInferenceJob(name string) (*kube_types.BatchInferenceJob, error)
 	CreateInferenceJob(name string, spec *kube_types.BatchInferenceJobSpec) error
-	ListInferenceJob() ([]kube_types.BatchInferenceJob, error)
+	ListInferenceJob() (kube_types.BatchInferenceJobList, error)
 }
 
 type apiServer interface {
@@ -269,9 +269,9 @@ func (a Adapter) ListRuntime() ([]types.RuntimeEntity, error) {
 		return result, err
 	}
 
-	for i := range enList {
+	for i := range enList.Items {
 		result = append(result, &KubeEntity{
-			obj:        &enList[i],
+			obj:        &enList.Items[i],
 			apiServer:    a.apiServer,
 			kubeClient: a.kubeClient,
 		})
