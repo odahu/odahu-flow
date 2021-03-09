@@ -14,7 +14,7 @@
     "paths": {
         "/api/v1/batch/job": {
             "get": {
-                "description": "List an InferenceJob",
+                "description": "List InferenceJob entities",
                 "consumes": [
                     "application/json"
                 ],
