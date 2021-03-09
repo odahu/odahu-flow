@@ -144,7 +144,7 @@ func (cr *controller) Post(c *gin.Context) {
 // @Tags Batch
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Model Training id"
+// @Param id path string true "InferenceJob id"
 // @Success 200 {object} httputil.HTTPResult
 // @Failure 404 {object} httputil.HTTPResult
 // @Failure 400 {object} httputil.HTTPResult
@@ -207,4 +207,3 @@ func (cr *controller) List(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
-
