@@ -1,0 +1,16 @@
+{
+  "id": "custom",
+  "outputs": [
+    {
+      "name": "tensor__1",
+      "datatype": "INT32",
+      "shape": [
+        2
+      ],
+      "data": [
+        20,
+        40
+      ]
+    }
+  ]
+}
