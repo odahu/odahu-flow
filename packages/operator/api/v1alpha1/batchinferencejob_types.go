@@ -78,11 +78,11 @@ type BatchInferenceJobSpec struct {
 	// Resources for model container
 	// The same format like k8s uses for pod resources.
 	Resources *ResourceRequirements `json:"resources,omitempty"`
-	// BatchRequestID is unique identifier for BatchInferenceJob that helps to correlate between
-	// Model input, model output and feedback
-	// Take into account that it is not the same as kubeflow InferenceRequest id
-	// Each BatchInferenceJob can process more than one InferenceRequest (delivered in separate input file)
-	// So each BatchRequestID has set of corresponding InferenceRequest and their IDs
+	// requestId is unique identifier for InferenceJob that helps to correlate between
+	// Model input, model output and feedback.
+	// Take into account that it is not the same as kubeflow InferenceRequest id.
+	// Each BatchInferenceJob can process more than one InferenceRequest (delivered in separate input file).
+	// So each RequestID has set of corresponding InferenceRequest and their IDs.
 	BatchRequestID string `json:"requestId"`
 }
 
