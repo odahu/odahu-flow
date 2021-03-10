@@ -1,5 +1,6 @@
 *** Settings ***
-Library  SeleniumLibrary  timeout=10s
+Documentation   Page Object for KEYCLOAK page
+Library         SeleniumLibrary  timeout=10s
 
 *** Variables ***
 ${KEYCLOAK.LOG_IN_TITLE}          Log in to ODAHU Cluster
@@ -12,8 +13,8 @@ ${KEYCLOAK.USERNAME_TEXTAREA}  id=username
 ${KEYCLOAK.PASSWORD_TEXTAREA}  id=password
 ${KEYCLOAK.LOG_IN_BUTTON}      name=login
 
-${ALERT_ERROR}       xpath://*[@id="kc-content-wrapper"]/div[1]
-${INVALID_LOGIN_ERROR_TEXT}  Invalid username or password.
+${KEYCLOAK.ALERT_ERROR}                 xpath://*[@id="kc-content-wrapper"]/div[1]
+${KEYCLOAK.INVALID_LOGIN_ERROR_TEXT}    Invalid username or password.
 
 *** Keywords ***
 Fill "Username or email"
@@ -48,9 +49,9 @@ Validate "Log In" page
     wait until page contains        ${KEYCLOAK.LOG_IN_HEADING_TEXT}
 
 Validate "Invalid username or password" alert shows up
-    page should contain element  ${ALERT_ERROR}
-    element should be visible  ${ALERT_ERROR}
-    element text should be  ${ALERT_ERROR}  ${INVALID_LOGIN_ERROR_TEXT}
+    page should contain element  ${KEYCLOAK.ALERT_ERROR}
+    element should be visible  ${KEYCLOAK.ALERT_ERROR}
+    element text should be  ${KEYCLOAK.ALERT_ERROR}  ${KEYCLOAK.INVALID_LOGIN_ERROR_TEXT}
 
 Validate "Log In" page after trying to login
     wait until location contains    ${KEYCLOAK.LOGIN_ACTIONS}
