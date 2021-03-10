@@ -141,7 +141,7 @@ func (cr *controller) Post(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, service)
+	c.JSON(http.StatusCreated, service)
 }
 
 // @Summary Update an InferenceService
