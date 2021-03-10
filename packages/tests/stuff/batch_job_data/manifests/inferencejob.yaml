@@ -1,0 +1,8 @@
+spec:
+  inferenceServiceId: test-batch-service
+  dataSource:
+    connection: models-output
+    path: test-data/batch_job_data/input
+  outputDestination:
+    connection: models-output
+    path: test-data/output

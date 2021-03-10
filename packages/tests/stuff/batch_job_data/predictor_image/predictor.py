@@ -18,6 +18,9 @@ import os
 import sys
 import pathlib
 import json
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class BadConfigurationError(Exception):
@@ -58,6 +61,7 @@ def predict():
     i = 0
     for f_path in files:
         if f_path.endswith(".json"):
+            logging.info(f"processing {f_path}")
             with open(data_path / f_path, "r") as f:
                 data = json.load(f)
 
@@ -70,20 +74,20 @@ def predict():
                 raise BadConfigurationError("input json files must follow kfserving prediction specification (v2)")
 
             pathlib.Path(output_path).mkdir(exist_ok=True, parents=True)
-            with open(output_path / f"response{i}.json", "w") as f:
+            full_o = output_path / f"response{i}.json"
+            with open(full_o, "w") as f:
                 json.dump({
                     "id": "custom",
                     "outputs": [
                         {
                             "name": tensor_name,
                             "datatype": "INT32",
-                            "shape": [
-                                tensor_shape
-                            ],
+                            "shape": tensor_shape,
                             "data": [v*multiplier for v in tensor_data]
                         }
                     ]
                 }, f)
+                logging.info(f"output: {full_o}")
                 i += 1
 
 
