@@ -65,7 +65,14 @@ func ValidateJobInput(job api_types.InferenceJob) (errs []error) {
 
 
 // ValidateJob validates a job after it was defaulted by BatchInferenceService values
-func ValidateJob(job api_types.InferenceJob, connGetter ConnectionGetter) (valErrs []error, err error) {
+func ValidateJob(
+	job api_types.InferenceJob,
+	connGetter ConnectionGetter,
+	service api_types.InferenceService) (valErrs []error, err error) {
+
+	if service.Spec.Triggers.Webhook == nil || !service.Spec.Triggers.Webhook.Enabled {
+		valErrs = append(valErrs, fmt.Errorf("InferenceService: %s webhook trigger is disabled", service.ID))
+	}
 
 	// Validate empty values
 	if len(job.Spec.BatchRequestID) == 0 {
