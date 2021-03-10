@@ -77,7 +77,7 @@ var testValidateCreateCases = []struct {
 
 	},
 }
-func TestValidateCreate(t *testing.T) {
+func TestValidateCreateUpdate(t *testing.T) {
 	req := require.New(t)
 	for _, test := range testValidateCreateCases {
 		test := test
@@ -86,7 +86,7 @@ func TestValidateCreate(t *testing.T) {
 				ID:   "bis",
 				Spec: test.spec,
 			}
-			errs := batch.ValidateCreate(bis)
+			errs := batch.ValidateCreateUpdate(bis)
 			if len(test.expectedErrString) > 0 {
 				for _, err := range errs {
 					if err.Error() == test.expectedErrString {
@@ -104,82 +104,6 @@ func TestValidateCreate(t *testing.T) {
 }
 
 
-var testValidateUpdateCases = []struct {
-	testName string
-	spec api_types.InferenceServiceSpec
-	expectedErrString string
-}{
-	{
-		testName: "ok",
-		spec: api_types.InferenceServiceSpec{
-			Image:       "image",
-			Command:     []string{"python"},
-			ModelSource: api_types.ConnectionReference{
-				Connection: "gcs-conn",
-				Path: "path",
-			},
-		},
-	},
-	{
-		testName: "empty image",
-		spec: api_types.InferenceServiceSpec{
-			Command:     []string{"python"},
-			ModelSource: api_types.ConnectionReference{
-				Connection: "gcs-conn",
-				Path: "path",
-			},
-		},
-		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "image"),
-	},
-	{
-		testName: "empty command",
-		spec: api_types.InferenceServiceSpec{
-			Image:       "image",
-			ModelSource: api_types.ConnectionReference{
-				Connection: "gcs-conn",
-				Path: "path",
-			},
-		},
-		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "command"),
-	},
-	{
-		testName: "empty modelSource.connection",
-		spec: api_types.InferenceServiceSpec{
-			Image:       "image",
-			Command:     []string{"python"},
-			ModelSource: api_types.ConnectionReference{
-				Path: "path",
-			},
-		},
-		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "modelSource.connection"),
-
-	},
-}
-func TestValidateUpdate(t *testing.T) {
-	req := require.New(t)
-	for _, test := range testValidateUpdateCases {
-		test := test
-		t.Run(test.testName, func(t *testing.T) {
-			bis := api_types.InferenceService{
-				ID:   "bis",
-				Spec: test.spec,
-			}
-			errs := batch.ValidateUpdate(bis)
-			if len(test.expectedErrString) > 0 {
-				for _, err := range errs {
-					if err.Error() == test.expectedErrString {
-						return
-					}
-				}
-				req.FailNow(fmt.Sprintf("Expected error not found: %s", test.expectedErrString))
-			} else {
-				req.Empty(errs)
-			}
-
-		})
-
-	}
-}
 
 func TestDefaultCreate(t *testing.T) {
 	req := require.New(t)

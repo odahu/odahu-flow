@@ -54,15 +54,16 @@ func (s *InferenceServiceService) Create(
 	bis.UpdatedAt = time.Now().UTC()
 	bis.Status = api_types.InferenceServiceStatus{}
 
+	// Defaulting
+	DefaultCreate(bis)
+
 	// Validation
-	if errs := ValidateCreate(*bis); len(errs) > 0 {
+	if errs := ValidateCreateUpdate(*bis); len(errs) > 0 {
 		return odahuErrs.InvalidEntityError{
 			Entity:           bis.ID,
 			ValidationErrors: errs,
 		}
 	}
-
-	DefaultCreate(bis)
 
 	err = s.repo.Create(ctx, nil, *bis)
 	return err
@@ -79,7 +80,7 @@ func (s *InferenceServiceService) Update(
 
 
 	// Validation
-	if errs := ValidateUpdate(bis); len(errs) > 0 {
+	if errs := ValidateCreateUpdate(bis); len(errs) > 0 {
 		return odahuErrs.InvalidEntityError{
 			Entity:           bis.ID,
 			ValidationErrors: errs,

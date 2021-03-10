@@ -60,7 +60,7 @@ func validateRequiredFields(bis api_types.InferenceService) (err error) {
 }
 
 
-func ValidateCreate(bis api_types.InferenceService) (errs []error) {
+func ValidateCreateUpdate(bis api_types.InferenceService) (errs []error) {
 
 	var err error
 
@@ -78,16 +78,4 @@ func DefaultCreate(bis *api_types.InferenceService) {
 	if bis.Spec.Triggers.Webhook == nil {
 		bis.Spec.Triggers.Webhook = &api_types.PredictorWebhookTrigger{Enabled: true}
 	}
-}
-
-func ValidateUpdate(bis api_types.InferenceService) (errs []error) {
-
-	var err error
-
-	err = multierr.Append(err, validateRequiredFields(bis))
-
-	if err != nil {
-		return multierr.Errors(err)
-	}
-	return nil
 }
