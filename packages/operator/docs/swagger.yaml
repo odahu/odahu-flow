@@ -36,6 +36,9 @@ definitions:
           DataSource defines location input data files
           If nil then will be filled from BatchInferenceService
         type: object
+      inferenceServiceId:
+        description: InferenceServiceID refers to BatchInferenceService
+        type: string
       nodeSelector:
         additionalProperties:
           type: string
@@ -61,9 +64,6 @@ definitions:
           Resources for model container
           The same format like k8s uses for pod resources.
         type: object
-      service:
-        description: Service refers to BatchInferenceService
-        type: string
     type: object
   InferenceJobStatus:
     properties:
@@ -1545,7 +1545,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: List InferenceService entities
+      description: List an InferenceService
       parameters:
       - description: Number of entities in a response
         in: query
@@ -1572,7 +1572,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: List InferenceService entities
+      summary: List an InferenceService
       tags:
       - Batch
     post:
@@ -1639,7 +1639,7 @@ paths:
       - application/json
       description: Delete an InferenceService
       parameters:
-      - description: InferenceService id
+      - description: Model Training id
         in: path
         name: id
         required: true

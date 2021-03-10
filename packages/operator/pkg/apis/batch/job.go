@@ -36,8 +36,8 @@ const (
 )
 
 type InferenceJobSpec struct {
-	// Service refers to BatchInferenceService
-	Service string `json:"service"`
+	// InferenceServiceID refers to BatchInferenceService
+	InferenceServiceID string `json:"inferenceServiceId"`
 	// DataSource defines location input data files
 	// If nil then will be filled from BatchInferenceService
 	DataSource *ConnectionReference `json:"dataSource"`

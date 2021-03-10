@@ -14,7 +14,7 @@
     "paths": {
         "/api/v1/batch/job": {
             "get": {
-                "description": "List InferenceJob entities",
+                "description": "List an InferenceJob",
                 "consumes": [
                     "application/json"
                 ],
@@ -166,7 +166,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Model Training id",
+                        "description": "InferenceJob id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2455,6 +2455,10 @@
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },
+                "inferenceServiceId": {
+                    "description": "InferenceServiceID refers to BatchInferenceService",
+                    "type": "string"
+                },
                 "nodeSelector": {
                     "description": "Node selector for specifying a node pool",
                     "type": "object",
@@ -2475,10 +2479,6 @@
                     "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
                     "type": "object",
                     "$ref": "#/definitions/ResourceRequirements"
-                },
-                "service": {
-                    "description": "Service refers to BatchInferenceService",
-                    "type": "string"
                 }
             }
         },

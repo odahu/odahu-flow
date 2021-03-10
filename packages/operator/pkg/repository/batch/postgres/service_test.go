@@ -173,7 +173,7 @@ var testDeleteServiceCases = []struct {
 		id:       "entity",
 		fixtures: []api_types.InferenceService{{ID: "entity"}},
 		jobFixtures: []api_types.InferenceJob{{ID: "job", Spec: api_types.InferenceJobSpec{
-			Service: "entity",
+			InferenceServiceID: "entity",
 		}}},
 		expectedErrString: `Unable to delete service: "entity". Cause: there are child jobs`,
 	},

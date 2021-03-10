@@ -56,7 +56,7 @@ func DefaultJob(job *api_types.InferenceJob, service api_types.InferenceService)
 // ValidateJobInput validates a job before it was defaulted by BatchInferenceService values
 func ValidateJobInput(job api_types.InferenceJob) (errs []error) {
 
-	if len(job.Spec.Service) == 0 {
+	if len(job.Spec.InferenceServiceID) == 0 {
 		errs = append(errs, fmt.Errorf(EmptySpecFieldErrorMessage, "service"))
 	}
 

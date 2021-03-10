@@ -38,8 +38,8 @@ var testDefaultJobCases = []struct {
 		testName: "empty job, filled service",
 		job: api_types.InferenceJob{
 			Spec: api_types.InferenceJobSpec{
-				Service: "service",
-				BatchRequestID: "unique-req-id",
+				InferenceServiceID: "service",
+				BatchRequestID:     "unique-req-id",
 			},
 		},
 		service: api_types.InferenceService{
@@ -77,8 +77,8 @@ var testDefaultJobCases = []struct {
 		},
 		expected: api_types.InferenceJob{
 			Spec: api_types.InferenceJobSpec{
-				Service: "service",
-				BatchRequestID: "unique-req-id",
+				InferenceServiceID: "service",
+				BatchRequestID:     "unique-req-id",
 				DataSource: &api_types.ConnectionReference{
 					Connection: "conn",
 					Path:       "path",
@@ -106,8 +106,8 @@ var testDefaultJobCases = []struct {
 	{
 		testName: "filled job values have a priority",
 		job: api_types.InferenceJob{Spec: api_types.InferenceJobSpec{
-			Service: "service",
-			BatchRequestID: "unique-req-id",
+			InferenceServiceID: "service",
+			BatchRequestID:     "unique-req-id",
 			DataSource: &api_types.ConnectionReference{
 				Connection: "conn-defined-in-job",
 				Path:       "path-defined-in-job",
@@ -185,8 +185,8 @@ var testDefaultJobCases = []struct {
 					Memory: &resDefInJobString,
 				},
 			},
-			Service: "service",
-			BatchRequestID: "unique-req-id",
+			InferenceServiceID: "service",
+			BatchRequestID:     "unique-req-id",
 		}},
 	},
 }

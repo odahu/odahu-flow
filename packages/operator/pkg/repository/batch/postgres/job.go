@@ -58,7 +58,7 @@ func (r BIJRepo) Create(ctx context.Context, tx *sql.Tx, bij api_types.Inference
 	stmt, args, err := sq.
 		Insert(BatchInferenceJobTable).
 		Columns("id", "spec", "status", "created", "updated", "service").
-		Values(bij.ID, bij.Spec, bij.Status, bij.CreatedAt, bij.UpdatedAt, bij.Spec.Service).
+		Values(bij.ID, bij.Spec, bij.Status, bij.CreatedAt, bij.UpdatedAt, bij.Spec.InferenceServiceID).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -80,7 +80,7 @@ func (r BIJRepo) Create(ctx context.Context, tx *sql.Tx, bij api_types.Inference
 			case pqError.Code == foreignKeyViolationCode && pqError.Constraint == odahuJobServiceFKConstraint:
 				return odahuErrors.CreatingJobServiceNotFound{
 					Entity:  bij.ID,
-					Service: bij.Spec.Service,
+					Service: bij.Spec.InferenceServiceID,
 				}
 			default:
 				return err

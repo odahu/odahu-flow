@@ -105,12 +105,12 @@ spec:
                 results relative to bucket root of OutputConnection
               type: string
             requestId:
-              description: BatchRequestID is unique identifier for BatchInferenceJob
-                that helps to correlate between Model input, model output and feedback
-                Take into account that it is not the same as kubeflow InferenceRequest
-                id Each BatchInferenceJob can process more than one InferenceRequest
-                (delivered in separate input file) So each BatchRequestID has set
-                of corresponding InferenceRequest and their IDs
+              description: requestId is unique identifier for InferenceJob that helps
+                to correlate between Model input, model output and feedback. Take
+                into account that it is not the same as kubeflow InferenceRequest
+                id. Each BatchInferenceJob can process more than one InferenceRequest
+                (delivered in separate input file). So each RequestID has set of corresponding
+                InferenceRequest and their IDs.
               type: string
             resources:
               description: Resources for model container The same format like k8s

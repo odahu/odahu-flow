@@ -17,11 +17,13 @@ class InferenceJobSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, data_source: ConnectionReference=None, node_selector: Dict[str, str]=None, output_destination: ConnectionReference=None, request_id: str=None, resources: ResourceRequirements=None, service: str=None):  # noqa: E501
+    def __init__(self, data_source: ConnectionReference=None, inference_service_id: str=None, node_selector: Dict[str, str]=None, output_destination: ConnectionReference=None, request_id: str=None, resources: ResourceRequirements=None):  # noqa: E501
         """InferenceJobSpec - a model defined in Swagger
 
         :param data_source: The data_source of this InferenceJobSpec.  # noqa: E501
         :type data_source: ConnectionReference
+        :param inference_service_id: The inference_service_id of this InferenceJobSpec.  # noqa: E501
+        :type inference_service_id: str
         :param node_selector: The node_selector of this InferenceJobSpec.  # noqa: E501
         :type node_selector: Dict[str, str]
         :param output_destination: The output_destination of this InferenceJobSpec.  # noqa: E501
@@ -30,33 +32,31 @@ class InferenceJobSpec(Model):
         :type request_id: str
         :param resources: The resources of this InferenceJobSpec.  # noqa: E501
         :type resources: ResourceRequirements
-        :param service: The service of this InferenceJobSpec.  # noqa: E501
-        :type service: str
         """
         self.swagger_types = {
             'data_source': ConnectionReference,
+            'inference_service_id': str,
             'node_selector': Dict[str, str],
             'output_destination': ConnectionReference,
             'request_id': str,
-            'resources': ResourceRequirements,
-            'service': str
+            'resources': ResourceRequirements
         }
 
         self.attribute_map = {
             'data_source': 'dataSource',
+            'inference_service_id': 'inferenceServiceId',
             'node_selector': 'nodeSelector',
             'output_destination': 'outputDestination',
             'request_id': 'requestId',
-            'resources': 'resources',
-            'service': 'service'
+            'resources': 'resources'
         }
 
         self._data_source = data_source
+        self._inference_service_id = inference_service_id
         self._node_selector = node_selector
         self._output_destination = output_destination
         self._request_id = request_id
         self._resources = resources
-        self._service = service
 
     @classmethod
     def from_dict(cls, dikt) -> 'InferenceJobSpec':
@@ -91,6 +91,29 @@ class InferenceJobSpec(Model):
         """
 
         self._data_source = data_source
+
+    @property
+    def inference_service_id(self) -> str:
+        """Gets the inference_service_id of this InferenceJobSpec.
+
+        InferenceServiceID refers to BatchInferenceService  # noqa: E501
+
+        :return: The inference_service_id of this InferenceJobSpec.
+        :rtype: str
+        """
+        return self._inference_service_id
+
+    @inference_service_id.setter
+    def inference_service_id(self, inference_service_id: str):
+        """Sets the inference_service_id of this InferenceJobSpec.
+
+        InferenceServiceID refers to BatchInferenceService  # noqa: E501
+
+        :param inference_service_id: The inference_service_id of this InferenceJobSpec.
+        :type inference_service_id: str
+        """
+
+        self._inference_service_id = inference_service_id
 
     @property
     def node_selector(self) -> Dict[str, str]:
@@ -183,26 +206,3 @@ class InferenceJobSpec(Model):
         """
 
         self._resources = resources
-
-    @property
-    def service(self) -> str:
-        """Gets the service of this InferenceJobSpec.
-
-        Service refers to BatchInferenceService  # noqa: E501
-
-        :return: The service of this InferenceJobSpec.
-        :rtype: str
-        """
-        return self._service
-
-    @service.setter
-    def service(self, service: str):
-        """Sets the service of this InferenceJobSpec.
-
-        Service refers to BatchInferenceService  # noqa: E501
-
-        :param service: The service of this InferenceJobSpec.
-        :type service: str
-        """
-
-        self._service = service

@@ -74,7 +74,7 @@ func (s *JobService) Create(ctx context.Context, bij *api_types.InferenceJob) (e
 		}
 	}
 
-	service, err := s.sRepo.Get(ctx, nil, bij.Spec.Service)
+	service, err := s.sRepo.Get(ctx, nil, bij.Spec.InferenceServiceID)
 	if err != nil {
 		if odahuErrors.IsNotFoundError(err) {
 			return odahuErrors.InvalidEntityError{

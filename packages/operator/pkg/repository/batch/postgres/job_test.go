@@ -44,8 +44,8 @@ var testCreateCases = []struct {
 			CreatedAt:    time.Now().UTC(),
 			UpdatedAt:    time.Now().UTC(),
 			Spec:         api_types.InferenceJobSpec{
-				Service: "service",
-				BatchRequestID: "some-id",
+				InferenceServiceID: "service",
+				BatchRequestID:     "some-id",
 			},
 			Status:       api_types.InferenceJobStatus{
 				State: "Creating with prefilled reason",
@@ -63,8 +63,8 @@ var testCreateCases = []struct {
 			CreatedAt:    time.Now().UTC(),
 			UpdatedAt:    time.Now().UTC(),
 			Spec:         api_types.InferenceJobSpec{
-				Service: "service",
-				BatchRequestID: "some-id",
+				InferenceServiceID: "service",
+				BatchRequestID:     "some-id",
 			},
 			Status:       api_types.InferenceJobStatus{
 				State: "Creating with prefilled reason",
@@ -137,7 +137,7 @@ var testUpdateStatusCases = []struct {
 			State: "New state",
 		},
 		fixtures:         []api_types.InferenceJob{{ID: "job", Spec: api_types.InferenceJobSpec{
-			Service: "service",
+			InferenceServiceID: "service",
 		}}},
 		bisFixtures: []api_types.InferenceService{{
 			ID: "service",
@@ -204,7 +204,7 @@ var testDeleteCases = []struct {
 		testName: "ok",
 		bijID: "job",
 		fixtures:         []api_types.InferenceJob{{ID: "job", Spec: api_types.InferenceJobSpec{
-			Service: "service",
+			InferenceServiceID: "service",
 		}}},
 		bisFixtures: []api_types.InferenceService{{
 			ID: "service",
@@ -254,7 +254,7 @@ func job(jobID string) api_types.InferenceJob {
 	return api_types.InferenceJob{
 		ID:   jobID,
 		Spec: api_types.InferenceJobSpec{
-			Service: "service",
+			InferenceServiceID: "service",
 		},
 	}
 }
@@ -357,7 +357,7 @@ var testGetCases = []struct {
 		testName: "ok",
 		bijID: "job",
 		fixtures:         []api_types.InferenceJob{{ID: "job", Spec: api_types.InferenceJobSpec{
-			Service: "service",
+			InferenceServiceID: "service",
 		}}},
 		bisFixtures: []api_types.InferenceService{{ID: "service"}},
 	},
@@ -419,7 +419,7 @@ var testSetDeletionMarkCases = []struct {
 		bijID: "job",
 		deletionMark: true,
 		fixtures:         []api_types.InferenceJob{{ID: "job", DeletionMark: false, Spec: api_types.InferenceJobSpec{
-			Service: "service",
+			InferenceServiceID: "service",
 		}}},
 		bisFixtures: []api_types.InferenceService{{ID: "service"}},
 	},
@@ -428,7 +428,7 @@ var testSetDeletionMarkCases = []struct {
 		bijID: "job",
 		deletionMark: false,
 		fixtures:         []api_types.InferenceJob{{ID: "job", DeletionMark: true, Spec: api_types.InferenceJobSpec{
-			Service: "service",
+			InferenceServiceID: "service",
 		}}},
 		bisFixtures: []api_types.InferenceService{{ID: "service"}},
 	},

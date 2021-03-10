@@ -408,7 +408,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "InferenceService id",
+                        "description": "Model Training id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2471,6 +2471,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },
+                "inferenceServiceId": {
+                    "description": "InferenceServiceID refers to BatchInferenceService",
+                    "type": "string"
+                },
                 "nodeSelector": {
                     "description": "Node selector for specifying a node pool",
                     "type": "object",
@@ -2488,13 +2492,9 @@ var doc = `{
                     "type": "string"
                 },
                 "resources": {
-                    "description": "Resources for model container\nThe same format as k8s uses for pod resources.",
+                    "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
                     "type": "object",
                     "$ref": "#/definitions/ResourceRequirements"
-                },
-                "service": {
-                    "description": "Service refers to BatchInferenceService",
-                    "type": "string"
                 }
             }
         },
@@ -2587,7 +2587,7 @@ var doc = `{
                     "$ref": "#/definitions/ConnectionReference"
                 },
                 "resources": {
-                    "description": "Resources for model container\nThe same format as k8s uses for pod resources.",
+                    "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
                     "type": "object",
                     "$ref": "#/definitions/ResourceRequirements"
                 },
