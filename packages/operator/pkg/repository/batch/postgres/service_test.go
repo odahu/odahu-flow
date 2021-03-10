@@ -55,7 +55,6 @@ func TestCreateService(t *testing.T) {
 	r := postgres.BISRepo{DB: db}
 	for i, test := range testCreateServiceCases {
 		i := i
-		test := test
 		t.Run(fmt.Sprintf("TestCreateService#%s", test.testName), func(t *testing.T) {
 
 			req := require.New(t)
@@ -118,7 +117,6 @@ func TestUpdateService(t *testing.T) {
 
 	r := postgres.BISRepo{DB: db}
 	for _, test := range testUpdateServiceCases {
-		test := test
 		t.Run(fmt.Sprintf("TestUpdateService#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {
@@ -184,7 +182,6 @@ func TestDeleteService(t *testing.T) {
 	r := postgres.BISRepo{DB: db}
 	jR := postgres.BIJRepo{DB: db}
 	for _, test := range testDeleteServiceCases {
-		test := test
 		t.Run(fmt.Sprintf("TestDelete#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {
@@ -264,7 +261,6 @@ func TestListService(t *testing.T) {
 
 	r := postgres.BISRepo{DB: db}
 	for _, test := range testListServiceCases {
-		test := test
 		t.Run(fmt.Sprintf("TestListService#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {

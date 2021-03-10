@@ -79,7 +79,6 @@ func TestCreate(t *testing.T) {
 	r := postgres.BIJRepo{DB: db}
 	rs := postgres.BISRepo{DB: db}
 	for _, test := range testCreateCases {
-		test := test
 		t.Run(fmt.Sprintf("TestCreate#%s", test.testName), func(t *testing.T) {
 
 			req := require.New(t)
@@ -150,7 +149,6 @@ func TestUpdateStatus(t *testing.T) {
 	r := postgres.BIJRepo{DB: db}
 	rs := postgres.BISRepo{DB: db}
 	for _, test := range testUpdateStatusCases {
-		test := test
 		t.Run(fmt.Sprintf("TestUpdateStatus#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {
@@ -217,7 +215,6 @@ func TestDelete(t *testing.T) {
 	r := postgres.BIJRepo{DB: db}
 	rs := postgres.BISRepo{DB: db}
 	for _, test := range testDeleteCases {
-		test := test
 		t.Run(fmt.Sprintf("TestDelete#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {
@@ -312,7 +309,6 @@ func TestList(t *testing.T) {
 	r := postgres.BIJRepo{DB: db}
 	rs := postgres.BISRepo{DB: db}
 	for _, test := range testListCases {
-		test := test
 		t.Run(fmt.Sprintf("TestList#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {
@@ -368,7 +364,6 @@ func TestGet(t *testing.T) {
 	r := postgres.BIJRepo{DB: db}
 	rs := postgres.BISRepo{DB: db}
 	for _, test := range testGetCases {
-		test := test
 		t.Run(fmt.Sprintf("TestGet#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {
@@ -439,7 +434,6 @@ func TestSetDeletionMark(t *testing.T) {
 	r := postgres.BIJRepo{DB: db}
 	rs := postgres.BISRepo{DB: db}
 	for _, test := range testSetDeletionMarkCases {
-		test := test
 		t.Run(fmt.Sprintf("TestSetDeletionMark#%s", test.testName), func(t *testing.T) {
 			req := require.New(t)
 			defer func() {

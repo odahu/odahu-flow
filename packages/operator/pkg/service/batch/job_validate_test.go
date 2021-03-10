@@ -193,7 +193,6 @@ var testDefaultJobCases = []struct {
 
 func TestDefaultJob(t *testing.T) {
 	for _, test := range testDefaultJobCases {
-		test := test
 		t.Run(test.testName, func(t *testing.T) {
 			req := require.New(t)
 			batch.DefaultJob(&test.job, test.service)
