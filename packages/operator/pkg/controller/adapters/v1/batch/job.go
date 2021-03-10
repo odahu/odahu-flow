@@ -110,7 +110,8 @@ func (k KubeEntity) GetID() string {
 }
 
 func (k KubeEntity) GetSpecHash() (uint64, error) {
-	return hashutil.Hash(k.obj.Spec)
+	// Job is immutable
+	return 0, nil
 }
 
 func (k KubeEntity) GetStatusHash() (uint64, error) {
@@ -146,8 +147,8 @@ func (s StorageEntity) GetID() string {
 }
 
 func (s StorageEntity) GetSpecHash() (uint64, error) {
-	runtimeSpec := appSpecToKubeSpec(&s.obj.Spec, &s.service.Spec)
-	return hashutil.Hash(runtimeSpec)
+	// Job is immutable
+	return 0, nil
 }
 
 func (s StorageEntity) GetStatusHash() (uint64, error) {
@@ -259,6 +260,8 @@ func (a Adapter) ListStorage() ([]types.StorageEntity, error) {
 
 
 	for _, e := range enList {
+
+		e := e
 
 		s, err := a.apiServerServiceAPI.Get(context.TODO(), e.Spec.InferenceServiceID)
 		if err != nil {

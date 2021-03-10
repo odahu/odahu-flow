@@ -1,10 +1,10 @@
 id: test-batch-service
 spec:
   args:
-    - predictor.py
+    - /opt/app/predictor.py
   command:
     - python
-  image: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/batch_job:test
+  image: <past-image>
   modelSource:
     connection: models-output
     path: test-data/batch_job_data/model
