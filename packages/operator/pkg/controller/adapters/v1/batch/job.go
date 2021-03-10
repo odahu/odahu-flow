@@ -253,7 +253,7 @@ func (a Adapter) ListStorage() ([]types.StorageEntity, error) {
 
 		s, err := a.apiServerServiceAPI.Get(context.TODO(), e.ID)
 		if err != nil {
-			log.Error(fmt.Errorf("unable to fetch service %s for job %s", e.Spec.Service, e.ID),
+			log.Error(fmt.Errorf("unable to fetch service %s for job %s", e.Spec.InferenceServiceID, e.ID),
 				"unable to fetch job's service")
 			continue
 		}
