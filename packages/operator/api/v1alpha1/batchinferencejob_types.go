@@ -31,13 +31,10 @@ const (
 	BatchUnknown    BatchJobState = "unknown"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // BatchInferenceJobSpec defines the desired state of BatchInferenceJob
 type BatchInferenceJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 	// Docker image
 	Image string `json:"image"`
 	// Entrypoint array. Not executed within a shell.
