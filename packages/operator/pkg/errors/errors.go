@@ -18,7 +18,6 @@ package errors
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 )
 
@@ -119,10 +118,6 @@ func (e DeletingServiceHasJobs) Error() string {
 	return fmt.Sprintf(`Unable to delete service: "%s". Cause: there are child jobs`, e.Entity)
 }
 
-func (e DeletingServiceHasJobs) HTTPCode() int {
-	return http.StatusBadRequest
-}
-
 type CreatingJobServiceNotFound struct {
 	Entity string
 	Service string
@@ -131,8 +126,3 @@ type CreatingJobServiceNotFound struct {
 func (e CreatingJobServiceNotFound) Error() string {
 	return fmt.Sprintf(`Unable to create job: "%s". There is no service with ID: %s`, e.Entity, e.Service)
 }
-
-func (e CreatingJobServiceNotFound) HTTPCode() int {
-	return http.StatusNotFound
-}
-
