@@ -109,6 +109,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
 
                 'ODAHU_WEB_UI_USERNAME': data.get('test_user_email'),
                 'ODAHU_WEB_UI_PASSWORD': data.get('test_user_password'),
+                'ODAHU_WEB_UI_VERSION': data.get('odahu_ui_version'),
 
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
