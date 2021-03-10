@@ -87,7 +87,7 @@ func (s *JobService) Create(ctx context.Context, bij *api_types.InferenceJob) (e
 
 	DefaultJob(bij, service)
 
-	errs, err := ValidateJob(*bij, s.connGetter)
+	errs, err := ValidateJob(*bij, s.connGetter, service)
 	if err != nil {
 		return err
 	}
