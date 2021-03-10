@@ -52,7 +52,7 @@ Fail Login with invalid credentials
     Keycloak.Validate "Invalid username or password" alert shows up
     Keycloak.Validate "Log In" page after trying to login
 
-#       --------- DASHBOARD -----------
+#       --------- DASHBOARD AND MENUS -----------
 Validate "Info" button present and ODAHU UI Version match
     [Arguments]  ${odahu_ui_version}
     Dashboard.Validate "Dashboard" page loaded
@@ -90,3 +90,8 @@ Validate ODAHU Components are visible
     Header.Validate ODAHU components visible and description present  ${button_locator}  ${button_description}
     run keyword if  '${validation_url}' != '${EMPTY}'
     ...     Header.Validate ODAHU components links  ${button_locator}  ${validation_url}
+
+Validate that chart is visible
+    [Arguments]  ${chart_locator}  ${chart_description}
+    Dashboard.Validate "Dashboard" page loaded
+    Dashboard.Validate that chart is visible  ${chart_locator}  ${chart_description}
