@@ -78,7 +78,6 @@ func (s *InferenceServiceService) Update(
 	bis.DeletionMark = false
 	bis.UpdatedAt = time.Now().UTC()
 
-
 	// Validation
 	if errs := ValidateCreateUpdate(bis); len(errs) > 0 {
 		return odahuErrs.InvalidEntityError{
@@ -86,6 +85,12 @@ func (s *InferenceServiceService) Update(
 			ValidationErrors: errs,
 		}
 	}
+
+	old, err := s.repo.Get(ctx, nil, id)
+	if err != nil {
+		return err
+	}
+	bis.CreatedAt = old.CreatedAt
 
 	return s.repo.Update(ctx, nil, id, bis)
 }

@@ -187,7 +187,7 @@ func (cr *controller) Put(c *gin.Context) {
 // @Tags Batch
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Model Training id"
+// @Param id path string true "InferenceService id"
 // @Success 200 {object} httputil.HTTPResult
 // @Failure 404 {object} httputil.HTTPResult
 // @Failure 400 {object} httputil.HTTPResult

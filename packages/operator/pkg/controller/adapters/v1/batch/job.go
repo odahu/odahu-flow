@@ -183,6 +183,7 @@ type statusReconciler struct {
 	syncHook   types.StatusPollingHookFunc
 	kubeClient kubeClient
 	apiServer  apiServer
+	apiServerServiceAPI  apiServerServiceAPI
 }
 
 func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
@@ -211,9 +212,17 @@ func (r *statusReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 	} else if err != nil && odahu_errors.IsNotFoundError(err) {
 		return ctrl.Result{}, nil
 	}
+	servObj, err := r.apiServerServiceAPI.Get(context.TODO(), seObj.Spec.InferenceServiceID)
+	if err != nil && !odahu_errors.IsNotFoundError(err) {
+		eLog.Error(err, "Unable to get service from storage")
+		return result, err
+	} else if err != nil && odahu_errors.IsNotFoundError(err) {
+		return ctrl.Result{}, nil
+	}
 
 	se := &StorageEntity{
 		obj:        &seObj,
+		service: &servObj,
 		kubeClient: r.kubeClient,
 		apiServer:  r.apiServer,
 	}
@@ -251,10 +260,10 @@ func (a Adapter) ListStorage() ([]types.StorageEntity, error) {
 
 	for _, e := range enList {
 
-		s, err := a.apiServerServiceAPI.Get(context.TODO(), e.ID)
+		s, err := a.apiServerServiceAPI.Get(context.TODO(), e.Spec.InferenceServiceID)
 		if err != nil {
 			log.Error(fmt.Errorf("unable to fetch service %s for job %s", e.Spec.InferenceServiceID, e.ID),
-				"unable to fetch job's service")
+				"unable to fetch job's service", "originalErr", err)
 			continue
 		}
 
@@ -311,7 +320,8 @@ func (a Adapter) GetFromRuntime(id string) (types.RuntimeEntity, error) {
 }
 
 func (a Adapter) SubscribeRuntimeUpdates(hook types.StatusPollingHookFunc) error {
-	sr := &statusReconciler{apiServer: a.apiServer, kubeClient: a.kubeClient, syncHook: hook}
+	sr := &statusReconciler{apiServer: a.apiServer, kubeClient: a.kubeClient, syncHook: hook,
+		apiServerServiceAPI: a.apiServerServiceAPI}
 
 	return ctrl.NewControllerManagedBy(a.mgr).
 		For(&kube_types.BatchInferenceJob{}).
