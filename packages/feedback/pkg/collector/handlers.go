@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
 	"net/http"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	commons_feedback "odahu-commons/feedback"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,13 +42,6 @@ func handleFeedbackEndpoint(c *gin.Context) {
 	}
 
 	message.RequestID = c.GetHeader(feedback.OdahuFlowRequestIdHeaderKey)
-	if len(message.RequestID) == 0 {
-		message.RequestID = c.GetHeader(feedback.RequestIdHeaderKey)
-		if len(message.RequestID) == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("%s header is missed", feedback.RequestIdHeaderKey)})
-			return
-		}
-	}
 
 	if len(modelName) == 0 || len(modelVersion) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
