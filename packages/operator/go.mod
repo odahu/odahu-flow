@@ -13,6 +13,7 @@ require (
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.9.5+incompatible
+	github.com/fluent/fluent-logger-golang v1.4.0
 	github.com/gin-gonic/gin v1.6.2
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
@@ -25,8 +26,8 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
 	github.com/keybase/go-crypto v0.0.0-20190828182435-a05457805304 // indirect
 	github.com/lib/pq v1.2.0
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure v1.0.0
-	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/onsi/gomega v1.10.1
 	github.com/ory/dockertest v3.3.5+incompatible
 	github.com/pborman/uuid v1.2.0
@@ -41,6 +42,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/swaggo/swag v1.5.0
 	github.com/tektoncd/pipeline v0.13.1-0.20200625065359-44f22a067b75
+	github.com/tinylib/msgp v1.1.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0

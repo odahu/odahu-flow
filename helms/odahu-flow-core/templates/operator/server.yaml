@@ -34,6 +34,8 @@ spec:
             value: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.config.packaging.modelPackager "tpl" "%sodahu-flow-model-packager:%s") }}"
           - name: TRAINING_MODEL_TRAINER_IMAGE
             value: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.config.training.modelTrainer "tpl" "%sodahu-flow-model-trainer:%s") }}"
+          - name: ODAHU_FLOW_TOOLS_IMAGE
+            value: "{{ include "odahuflow.image-name" (dict "root" . "service" .Values.config.batch.toolsImage "tpl" "%sodahu-flow-tools:%s") }}"
         resources:
           {{- toYaml .Values.operator.server.resources | nindent 10 }}
         command:

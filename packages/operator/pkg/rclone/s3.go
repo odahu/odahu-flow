@@ -22,7 +22,6 @@ import (
 	_ "github.com/rclone/rclone/backend/s3" // s3 specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
-	"net/url"
 )
 
 func createS3config(configName string, conn *v1alpha1.ConnectionSpec) (*FileDescription, error) {
@@ -47,15 +46,14 @@ func createS3config(configName string, conn *v1alpha1.ConnectionSpec) (*FileDesc
 		return nil, err
 	}
 
-	parsedURI, err := url.Parse(conn.URI)
+	bucketName, pathInsideBucket, err := GetBucketAndPath(conn)
 	if err != nil {
 		log.Error(err, "Parsing data binding URI", "connection uri", conn.URI)
-
 		return nil, err
 	}
 
 	return &FileDescription{
-		FsName: fmt.Sprintf("%s:%s", configName, parsedURI.Host),
-		Path:   parsedURI.Path,
+		FsName: fmt.Sprintf("%s:%s", configName, bucketName),
+		Path:   pathInsideBucket,
 	}, nil
 }

@@ -42,6 +42,10 @@ build-operator: generate
 build-webserver:
 	go build -o webserver ./cmd/api
 
+## build-odahu-tools: Build odahu-tools executable binary
+build-tools:
+	go build -o odahu-tools ./cmd/tools
+
 ## build-controller: Build odahu system controller
 build-controller:
 	go build -o controller ./cmd/controller
@@ -59,7 +63,7 @@ build-service-catalog:
 	go build -o service-catalog ./cmd/service_catalog
 
 ## build-all: Build all executable binyries
-build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog
+build-all: build-webserver build-controller build-model-trainer build-model-packager build-operator build-service-catalog build-tools
 
 ## run-operator: Start operator
 run-operator:
@@ -155,6 +159,10 @@ static-content:
 	rm -rf pkg/static
 	statik -src static -dest pkg -p static
 	git add pkg/static
+
+## generate-predict-v2-types: Generate structures according to OpenAPI 3.0 Spec of Kubeflow predict v2 API
+generate-predict-v2-types:
+	oapi-codegen -generate types -package predict_v2 hack/kubeflow_prediction_v2/spec.yaml > pkg/apis/predict_v2/predict_v2.gen.go
 
 ## help: Show the help message
 help: Makefile

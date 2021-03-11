@@ -554,6 +554,42 @@ config:
     # Type: bool
     debug:
 
+  # Batch configuration
+  batch:
+    # Enable batch API/operator
+    # Type: boolean
+    enabled: true
+    # Batch namespace
+    # Required value
+    # Type: string
+    namespace: odahu-flow-batch
+    # tolerations for batch inference pod
+    tolerations: []
+    # Node pools to run batch jobs
+    nodePools: []
+    # RClone image that will be used to sync data with object storage
+    rcloneImage: rclone/rclone
+    # Tools image
+    toolsImage:
+
+toolsConfig:
+  # Auth configures connection parameters to ODAHU API Server
+  auth:
+    # ODAHU API URL
+    # Required
+    apiUrl: http://odahu-flow-api.odahu-flow.svc.cluster.local
+    # It is a mock for the future. Currently, it is always empty.
+    apiToken: ""
+    # OpenID client_id credential for service account
+    clientId: ""
+    # OpenID client_secret credential for service account
+    clientSecret: ""
+    # OpenID token url. Example: https://keycloak.cicd.odahu.org/auth/realms/legion/protocol/openid-connect/token
+    oauthOidcTokenEndpoint: ""
+  feedback:
+    # fluentd service to log model request/response
+    fluentd:
+      baseURL: http://fluentd.fluentd.svc.cluster.local
 
 # Service account used to upload odahu resources via odahuflowctl
 resource_uploader_sa: {}

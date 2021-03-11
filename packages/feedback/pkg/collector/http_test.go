@@ -19,6 +19,7 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
+	feedback_commons "odahu-commons/feedback"
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
 	"net/http"
 	"net/http/httptest"
@@ -71,8 +72,8 @@ func TestSendFeedbackWithoutHeader(t *testing.T) {
 	assert.Equal(t, "{\"error\":\"x-request-id header is missed\"}", w.Body.String())
 }
 
-func buildMessage(modelName, modelVersion, requestID string, payload map[string]interface{}) feedback.ModelFeedback {
-	return feedback.ModelFeedback{
+func buildMessage(modelName, modelVersion, requestID string, payload map[string]interface{}) feedback_commons.ModelFeedback {
+	return feedback_commons.ModelFeedback{
 		ModelName:    modelName,
 		ModelVersion: modelVersion,
 		Payload:      payload,

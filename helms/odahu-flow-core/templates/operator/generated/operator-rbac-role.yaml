@@ -285,6 +285,26 @@ rules:
 - apiGroups:
   - odahuflow.odahu.org
   resources:
+  - batchinferencejobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - odahuflow.odahu.org
+  resources:
+  - batchinferencejobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - odahuflow.odahu.org
+  resources:
   - connecitons
   verbs:
   - get

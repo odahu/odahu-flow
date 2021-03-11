@@ -23,10 +23,7 @@ import (
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"io/ioutil"
-	"net/url"
 )
-
-const serviceAccountJSONPath = "gcs_service_account.json"
 
 func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDescription, error) {
 	_, err := fs.Find("googlecloudstorage")
@@ -43,6 +40,8 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
                 "predefinedAcl": "bucketLevel",
 	}
 
+	serviceAccountJSONPath := "gcs-key-" + configName + ".json"
+
 	if len(conn.KeySecret) != 0 {
 		if err = ioutil.WriteFile(serviceAccountJSONPath, []byte(conn.KeySecret), 0600); err != nil {
 			log.Error(err, "Failed to write service account JSON-file")
@@ -55,15 +54,14 @@ func createGcsConfig(configName string, conn *v1alpha1.ConnectionSpec) (*FileDes
 		return nil, err
 	}
 
-	parsedURI, err := url.Parse(conn.URI)
+	bucketName, pathInsideBucket, err := GetBucketAndPath(conn)
 	if err != nil {
 		log.Error(err, "Parsing data binding URI", "connection uri", conn.URI)
-
 		return nil, err
 	}
 
 	return &FileDescription{
-		FsName: fmt.Sprintf("%s:%s", configName, parsedURI.Host),
-		Path:   parsedURI.Path,
+		FsName: fmt.Sprintf("%s:%s", configName, bucketName),
+		Path:   pathInsideBucket,
 	}, nil
 }
