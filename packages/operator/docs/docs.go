@@ -408,7 +408,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Model Training id",
+                        "description": "InferenceService id",
                         "name": "id",
                         "in": "path",
                         "required": true

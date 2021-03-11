@@ -1639,7 +1639,7 @@ paths:
       - application/json
       description: Delete an InferenceService
       parameters:
-      - description: Model Training id
+      - description: InferenceService id
         in: path
         name: id
         required: true
