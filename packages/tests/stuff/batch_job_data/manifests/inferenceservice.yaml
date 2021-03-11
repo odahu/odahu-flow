@@ -1,4 +1,5 @@
 id: test-batch-service
+kind: InferenceService
 spec:
   args:
     - /opt/app/predictor.py
