@@ -57,6 +57,7 @@ require (
 	k8s.io/apimachinery v0.18.7-rc.0
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/kubernetes v1.14.7
+	knative.dev/networking v0.0.0-20200812200006-4d518e76538a
 	knative.dev/pkg v0.0.0-20200812224206-44c860147a87
 	knative.dev/serving v0.17.0
 	odahu-commons v0.0.0

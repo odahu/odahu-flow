@@ -1,40 +1,4 @@
 {{ if .Values.config.deployment.enabled }}
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: "edge"
-  namespace: {{ .Values.edge.knative_namespace }}
-  labels:
-    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - port:
-        number: 80
-        name: http
-        protocol: HTTP
-      hosts:
-        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") }}
----
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: "edge"
-  namespace: {{ .Values.config.deployment.namespace | quote }}
-  labels:
-    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
-spec:
-  selector:
-    istio: ingressgateway
-  servers:
-    - port:
-        number: 80
-        name: http
-        protocol: HTTP
-      hosts:
-        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "%s") }}
----
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -76,3 +40,31 @@ spec:
       secretName: {{ include "odahuflow.ingress-tls-secret-name" (dict "local" .Values.edge.ingress "root" . ) | quote }}
       {{- end }}
 {{ end }}
+---
+# This filter is to preserve a request ID of incoming external request on Ingress.
+# The motivation is that to adopt Knative routing mechanism we use "double" routing
+# on istio ingress. The first routing (that we provide) bases on the request path and
+# forwards the request to the same ingress, but rewrites Host header for the second routing.
+# The second one (automatically added by Knative Service) bases on the Host header and forwards
+# the request to the corresponding service. Without preserve_external_request_id these 2 phases of routing
+# both override the X-Request-ID header, while we want it to stay the same. Otherwise feedback mechanism breaks.
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: preserve-request-id-filter
+  namespace: {{ .Values.feedback.istio_namespace }}
+spec:
+  configPatches:
+    - applyTo: NETWORK_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.http_connection_manager
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            '@type': type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
+            preserve_external_request_id: true
