@@ -71,7 +71,7 @@ type InferenceJobStatus struct {
 
 type InferenceJob struct {
 	// Resource ID
-	ID string
+	ID string `json:"id"`
 	// Deletion mark
 	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
 	// CreatedAt describes when InferenceJob was launched
