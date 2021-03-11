@@ -23,6 +23,10 @@ from odahuflow.sdk.models import InferenceJob
 LOGGER = logging.getLogger(__name__)
 
 
+SUCCESS_STATE = "succeeded"
+FAILED_STATE = "failed"
+
+
 class BatchInferenceJobClient(RemoteAPIClient):
     """
     HTTP InferenceJob client
