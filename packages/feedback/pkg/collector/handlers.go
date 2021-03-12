@@ -42,6 +42,11 @@ func handleFeedbackEndpoint(c *gin.Context) {
 	}
 
 	message.RequestID = c.GetHeader(feedback.OdahuFlowRequestIdHeaderKey)
+	if len(message.RequestID) == 0 {
+		c.JSON(http.StatusBadRequest,
+			gin.H{"error": fmt.Sprintf("%s header is missed", feedback.OdahuFlowRequestIdHeaderKey)})
+		return
+	}
 
 	if len(modelName) == 0 || len(modelVersion) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{
