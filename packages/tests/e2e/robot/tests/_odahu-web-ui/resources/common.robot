@@ -3,6 +3,7 @@ Library     SeleniumLibrary  timeout=10s
 Resource    ${PAGE_OBJECTS}/keycloak.robot
 Resource    ${PAGE_OBJECTS}/dashboard.robot
 Resource    ${PAGE_OBJECTS}/header.robot
+Resource    ${PAGE_OBJECTS}/sidebar.robot
 Variables   ../../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 
 *** Variables ***
@@ -12,6 +13,8 @@ ${PAGE_OBJECTS}  ${CURDIR}/PO
 ${BROWSER}          chrome
 ${COMMON.USER_INFO.USERNAME.TEXT}    anonymous
 ${COMMON.USER_INFO.EMAIL.TEXT}       anonymous@email.org
+${COMMON.TESTING_ICON_CONN_ENTITY}   ${EDGE_URL}/connections/item/docker-ci/
+${COMMON.TESTING_ICON_TI_ENTITY}     ${EDGE_URL}/toolchains/item/mlflow/
 
 *** Keywords ***
 #       --------- COMMON -----------
@@ -28,6 +31,9 @@ Setup
 
 Teardown
     End Web Test
+
+Test Setup
+    Header.Validate Header Loaded
 
 Test Teardown
     reload page
@@ -81,10 +87,10 @@ Open Menu with ODAHU Components
 
 Close Menu with ODAHU Components
     Dashboard.Validate "Dashboard" page loaded
-    Header.Click on Empty field on "Dashboard" page
+    Header.Click on Empty field on "Dashboard" page when Bento Menu open
     Header.Validate Bento Menu closed
 
-Validate ODAHU Components are visible
+Validate ODAHU Components are visible and lead to the right link
     [Arguments]  ${button_locator}  ${button_description}  ${validation_url}=${EMPTY}
     Open Menu with ODAHU Components  # Setup for test
     Header.Validate ODAHU components visible and description present  ${button_locator}  ${button_description}
@@ -95,3 +101,29 @@ Validate that chart is visible
     [Arguments]  ${chart_locator}  ${chart_description}
     Dashboard.Validate "Dashboard" page loaded
     Dashboard.Validate that chart is visible  ${chart_locator}  ${chart_description}
+
+#       --------- SIDEBAR -----------
+Extend "SideBar" and validate
+    Sidebar.Click "Sandwich Menu" button
+    Sidebar.Validate that "SideBar" is extended
+    Sidebar.Validate that "ODAHU tab" links are visible on "SideBar"
+
+Shrink "SideBar" and validate
+    Sidebar.Click "Sandwich Menu" button
+    Sidebar.Validate that "SideBar" is shrinked
+
+Go to ODAHU page and validate icons
+    [Arguments]  ${active page locator}
+    Sidebar.Open ODAHU page  ${active page locator}
+    Sidebar.Validate that the active page icon has one color and the others different  ${active page locator}
+
+Go to entity and validate ODAHU page icons
+    [Arguments]  ${entity_url}  ${expected page locator}
+    go to  ${entity_url}
+    Header.Validate Header Loaded
+    Sidebar.Validate that the active page icon has one color and the others different  ${expected page locator}
+
+Check ODAHU page Icons changes the color when selected
+    FOR  ${page}  IN  @{SIDEBAR.LINKS_LIST}
+        Go to ODAHU page and validate icons  ${page}
+    END
