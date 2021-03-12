@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/go-logr/logr"
 	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
@@ -34,6 +35,7 @@ import (
 	"knative.dev/pkg/apis"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"odahu-commons/predictors"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -64,7 +66,7 @@ const (
 	DefaultKnativeAutoscalingMetric      = "concurrency"
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	ModelNameAnnotationKey               = "modelName"
-	ModelDeploymentVersionKey            = "modelDeploymentVersion"
+	AppliedModelDeploymentSpecKey        = "odahu.org/applied-model-deployment-spec"
 
 	IstioRewriteHTTPProbesAnnotation = "sidecar.istio.io/rewriteAppHTTPProbers"
 	OdahuAuthorizationLabel          = "odahu-flow-authorization"
@@ -137,14 +139,14 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		affinity = utils.BuildNodeAffinity(r.deploymentConfig.NodePools)
 	}
 
-	fulfilKnativeService := func(kService *knservingv1.Service) {
-		labelsToAdd := map[string]string{
+	fulfilKnativeService := func(kService *knservingv1.Service) error {
+		templateLabelsToAdd := map[string]string{
 			ModelNameAnnotationKey:  modelDeploymentCR.Name,
 			deploymentIDLabel:       modelDeploymentCR.Name,
 			OdahuAuthorizationLabel: "enabled",
 			podPolicyLabel:          getCMPolicyName(modelDeploymentCR),
 		}
-		annotationsToAdd := map[string]string{
+		templateAnnotationsToAdd := map[string]string{
 			KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
 			KnativeAutoscalingMetric:         DefaultKnativeAutoscalingMetric,
 			KnativeMinReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MinReplicas)),
@@ -165,24 +167,41 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			},
 		}
 
+		appliedMDSpecJSON, err := json.Marshal(modelDeploymentCR.Spec)
+		if err != nil {
+			return err
+		}
+		serviceAnnotationsToAdd := map[string]string{
+			// Annotation to detect changes in MD
+			AppliedModelDeploymentSpecKey: string(appliedMDSpecJSON),
+		}
+
 		revisionTemplate := kService.Spec.ConfigurationSpec.Template
 
 		if revisionTemplate.Labels == nil {
-			revisionTemplate.Labels = make(map[string]string, len(labelsToAdd))
+			revisionTemplate.Labels = make(map[string]string, len(templateLabelsToAdd))
 		}
-		for k, v := range labelsToAdd {
+		for k, v := range templateLabelsToAdd {
 			revisionTemplate.Labels[k] = v
 		}
 
 		if revisionTemplate.Annotations == nil {
-			revisionTemplate.Annotations = make(map[string]string, len(annotationsToAdd))
+			revisionTemplate.Annotations = make(map[string]string, len(templateAnnotationsToAdd))
 		}
-		for k, v := range annotationsToAdd {
+		for k, v := range templateAnnotationsToAdd {
 			revisionTemplate.Annotations[k] = v
 		}
 		revisionTemplate.Spec = revisionSpec
-
 		kService.Spec.ConfigurationSpec.Template = revisionTemplate
+
+		if kService.Annotations == nil {
+			kService.Annotations = make(map[string]string, len(serviceAnnotationsToAdd))
+		}
+		for k, v := range serviceAnnotationsToAdd {
+			kService.Annotations[k] = v
+		}
+
+		return nil
 	}
 
 	knativeServiceName := KnativeServiceName(modelDeploymentCR)
@@ -196,36 +215,45 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      knativeServiceName,
 				Namespace: modelDeploymentCR.Namespace,
-				// Annotation to detect changes in MD
-				Annotations: map[string]string{ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion},
 			},
 		}
-		fulfilKnativeService(newKService)
+		err = fulfilKnativeService(newKService)
+		if err != nil {
+			return err
+		}
 
 		if err := controllerutil.SetControllerReference(modelDeploymentCR, newKService, r.scheme); err != nil {
 			return err
 		}
 
-		log.Info(fmt.Sprintf("Creating %s k8s Knative Service", newKService.ObjectMeta.Name))
+		log.Info(fmt.Sprintf("Creating %s k8s Knative Service, applied MD spec: %s",
+			newKService.ObjectMeta.Name, newKService.Annotations[AppliedModelDeploymentSpecKey]))
 		err = r.Create(context.TODO(), newKService)
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
-	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
+	lastAppliedMDSpec := &odahuflowv1alpha1.ModelDeploymentSpec{}
+	err = json.Unmarshal([]byte(found.Annotations[AppliedModelDeploymentSpecKey]), lastAppliedMDSpec)
+	if err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec) {
 		log.Info("Model Deployment version is up to date, skipping")
 		return nil
 	}
 
-	log.Info(fmt.Sprintf(
-		"Knative Service bases on version %s, update to reflect version %s",
-		modelDeploymentVersion, modelDeploymentCR.ResourceVersion,
-	))
+	log.Info("Knative Service bases on old MD spec", "old", lastAppliedMDSpec,
+		"new", modelDeploymentCR.Spec)
 
-	fulfilKnativeService(found)
-	log.Info(fmt.Sprintf("Updating %s Knative Service", knativeServiceName))
+	err = fulfilKnativeService(found)
+	if err != nil {
+		return err
+	}
+	log.Info(fmt.Sprintf("Updating %s Knative Service, new MD generation: %d",
+		knativeServiceName, modelDeploymentCR.Generation))
 	err = r.Update(context.TODO(), found)
 	if err != nil {
 		return err
