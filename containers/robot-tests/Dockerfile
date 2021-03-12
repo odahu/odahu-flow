@@ -56,6 +56,10 @@ RUN wget --quiet ${MINICONDA_URL} -O ~/miniconda.sh && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     conda create --name ${ODAHU_CONDA_ENV_NAME} python --no-default-packages
 
+# Install yq
+RUN wget https://github.com/mikefarah/yq/releases/download/3.3.0/yq_linux_amd64 -O /usr/bin/yq &&\
+        chmod +x /usr/bin/yq
+
 # Install python dependecies
 COPY packages/sdk/Pipfile packages/sdk/Pipfile.lock /opt/odahu-flow/packages/sdk/
 RUN  cd /opt/odahu-flow/packages/sdk && pipenv install --system --three --dev

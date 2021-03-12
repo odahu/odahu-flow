@@ -10,6 +10,7 @@ TRAINED_ARTIFACTS_DIR="${DIR}/trained_artifacts"
 ODAHUFLOW_RESOURCES="${DIR}/odahuflow_resources"
 TEST_DATA="${DIR}/data"
 LOCAL_TEST_DATA="${DIR}/../e2e/robot/tests/local/resources/artifacts"
+BATCH_TEST_DATA="${DIR}/../e2e/robot/tests/api/resources/batch"
 COMMAND=setup
 
 # array of image repos for local tests (in removal order)
@@ -209,6 +210,30 @@ function upload_test_dags() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
+# Prepare for batch e2e test
+function setup_batch_examples() {
+  local git_url="https://github.com/odahu/odahu-examples.git"
+  local dir="batch-inference"
+  local tmp_odahu_example_dir=$(mktemp -d -t examples-XXXXXXXXXX)
+
+  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
+
+  # Build and predictor image
+  docker build ${tmp_odahu_example_dir}/batch-inference/predictor -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
+  docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
+
+  # Prepare test data by replacing image in spec of service and copying job manifest
+  yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice.yaml \
+    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice.yaml"
+  cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob.yaml "${DIR}/../e2e/robot/tests/api/resources/batch/inferencejob.yaml"
+  cp -r ${tmp_odahu_example_dir}/batch-inference/output "${DIR}/../e2e/robot/tests/api/resources/batch/output/"
+  # Upload model and input data to object storage
+  copy_to_cluster_bucket examples/batch-inference/input "${BUCKET_NAME}/test-data/batch_job_data/input"
+  copy_to_cluster_bucket examples/batch-inference/model "${BUCKET_NAME}/test-data/batch_job_data/model"
+  # Clean tmp dir
+  rm -rf "${tmp_odahu_example_dir}"
+}
+
 # updates tag for image in specifications for local tests
 function change_image_tag() {
   local file_name=$1
@@ -350,6 +375,10 @@ while [ "${1}" != "" ]; do
     shift
     COMMAND=cleanup
     ;;
+  setup_batch_examples)
+    shift
+    COMMAND=setup_batch_examples
+    ;;
   --models)
     mapfile -t MODEL_NAMES <<<"${2}"
     shift 2
@@ -378,6 +407,9 @@ setup)
   ;;
 cleanup)
   cleanup
+  ;;
+setup_batch_examples)
+  setup_batch_examples
   ;;
 *)
   echo "Unexpected command: ${COMMAND}"
