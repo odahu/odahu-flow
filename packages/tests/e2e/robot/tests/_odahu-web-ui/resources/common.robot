@@ -33,10 +33,14 @@ Teardown
     End Web Test
 
 Test Setup
-    Header.Validate Header Loaded
+    Validate ODAHU page loaded
 
 Test Teardown
     reload page
+
+Validate ODAHU page loaded
+    Header.Validate Header Loaded
+    Sidebar.Validate SideBar exists and visible
 
 #       --------- LOGIN -----------
 Login to ODAHU WebUI
@@ -120,7 +124,7 @@ Go to ODAHU page and validate icons
 Go to entity and validate ODAHU page icons
     [Arguments]  ${entity_url}  ${expected page locator}
     go to  ${entity_url}
-    Header.Validate Header Loaded
+    Validate ODAHU page loaded
     Sidebar.Validate that the active page icon has one color and the others different  ${expected page locator}
 
 Check ODAHU page Icons changes the color when selected

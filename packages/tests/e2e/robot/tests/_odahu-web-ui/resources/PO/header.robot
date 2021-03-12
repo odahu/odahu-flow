@@ -43,7 +43,7 @@ ${HEADER.INFO_BUTTON}            xpath://*[@id="root"]/div/header/div/div[4]/but
 ${HEADER.LOG_OUT_BUTTON}         xpath:/html/body/div[3]/div[3]/div/button
 
 # ODAHU Components button locators
-#                             button description:/html/body/div[2]/div[3]/div[2]/div[1]/div/button/div/p
+#                    button description xpath:/html/body/div[2]/div[3]/div[2]/div[1]/div/button/div/p
 ${HEADER.BENTO_MENU.DOCS}               xpath:/html/body/div[2]/div[3]/div[2]/div[1]/div/button
 ${HEADER.BENTO_MENU.API_GATEWAY}        xpath:/html/body/div[2]/div[3]/div[2]/div[2]/div/button
 ${HEADER.BENTO_MENU.MLFLOW}             xpath:/html/body/div[2]/div[3]/div[2]/div[3]/div/button

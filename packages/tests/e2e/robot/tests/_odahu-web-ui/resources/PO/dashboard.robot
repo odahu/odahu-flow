@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation   Page Object for main part of "Dashboard" page
 Library         SeleniumLibrary  timeout=10s
-Resource        ${RES_DIR}/keywords.robot
+Resource        ${PAGE_OBJECTS}/keywords.robot
 
 *** Variables ***
 # Text values

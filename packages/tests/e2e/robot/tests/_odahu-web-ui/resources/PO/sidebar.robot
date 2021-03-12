@@ -2,7 +2,7 @@
 Documentation   Page Object for "sidebar" part of UI
 Library         SeleniumLibrary  timeout=10s
 Library         Collections
-Resource        ${RES_DIR}/keywords.robot
+Resource        ${PAGE_OBJECTS}/keywords.robot
 
 *** Variables ***
 ${SIDEBAR.SANDWICH_BUTTON}  xpath://*[@id="root"]/div/header/div/button
@@ -76,18 +76,3 @@ Validate that "ODAHU tab" links are visible on "SideBar"
     FOR  ${link}  IN  @{links list}
         element should be visible  ${link}
     END
-
-# unused
-# Validate that "ODAHU tab" link descriptions are not present on "SideBar"
-#     # links should not be present to the ODAHU UI pages, except one on which it opened
-#     [Arguments]  ${open page link}
-#     @{links list}=  create list  @{SIDEBAR.LINKS_LIST}
-#
-#     # remove values from list  ${links list}  ${open page link}
-#
-#     # page should contain link  ${open page link}
-#     # element should not be visible  ${open page link}
-#
-#     FOR  ${link}  IN  @{links list}
-#         page should not contain link  ${link}
-#     END
