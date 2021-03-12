@@ -31,7 +31,7 @@ ${DASHBOARD.CHART.DEPLOYMENT}   xpath://*[@id="root"]/div/main/div[2]/div/div[5]
 
 *** Keywords ***
 Validate "Dashboard" page loaded
-    Validate page  ${DASHBOARD.URL}  ${HEADER.ODAHU_TITLE}  ${DASHBOARD.HEADING}
+    Validate page  ${DASHBOARD.URL}  ${DASHBOARD.HEADING}
 
 Validate that chart is visible
     # chart frame:       //*[@id="root"]/div/main/div[2]/div/div[4]/div

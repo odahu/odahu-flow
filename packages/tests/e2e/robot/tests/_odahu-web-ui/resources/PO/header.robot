@@ -5,8 +5,15 @@ Documentation    Page object for header of ODAHU Web UI
 ${HEADER.ODAHU_TITLE}            ODAHU
 ${HEADER.BENTO_HEADING}          ODAHU Components
 
-${HEADER.EMPTY_SPACE}            xpath:/html/body/div[2]/div[1]
+${HEADER.CLOSE_BENTO_LOCATOR}    xpath:/html/body/div[2]/div[1]  # when bento menu open. it's another object on the page
 ${HEADER.BENTO_MENU.TAB}         xpath:/html/body/div[2]/div[3]
+
+# Text locators
+${HEADER.ODAHU_COMPONENTS.BENTO_TEXT}  xpath:/html/body/div[2]/div[3]/div[1]/h2
+${HEADER.ODAHU_TITLE.TEXT}      xpath://*[@id="root"]/div/header/div/h6
+${HEADER.ODAHU_UI_VERSION}      xpath:/html/body/div[4]/div[3]/div/h6
+${HEADER.USER_INFO.USERNAME}    xpath:/html/body/div[3]/div[3]/div/h4
+${HEADER.USER_INFO.EMAIL}       xpath:/html/body/div[3]/div[3]/div/h6
 
 # ODAHU Components
 ${HEADER.BENTO_MENU.DOCS.TEXT}              Docs
@@ -47,15 +54,12 @@ ${HEADER.BENTO_MENU.AIRFLOW}            xpath:/html/body/div[2]/div[3]/div[2]/di
 ${HEADER.BENTO_MENU.KIBANA}             xpath:/html/body/div[2]/div[3]/div[2]/div[8]/div/button
 ${HEADER.BENTO_MENU.FEEDBACK_STORAGE}   xpath:/html/body/div[2]/div[3]/div[2]/div[9]/div/button
 
-# Text locators
-${HEADER.ODAHU_COMPONENTS.BENTO_TEXT}  xpath:/html/body/div[2]/div[3]/div[1]/h2
-${HEADER.ODAHU_UI_TEXT}          xpath:/html/body/div[4]/div[3]/div/h6
-${HEADER.USER_INFO.USERNAME}     xpath:/html/body/div[3]/div[3]/div/h4
-${HEADER.USER_INFO.EMAIL}        xpath:/html/body/div[3]/div[3]/div/h6
-
 *** Keywords ***
-Click on Empty field on "Dashboard" page
-    click element  ${HEADER.EMPTY_SPACE}
+Validate Header Loaded
+    Validate ODAHU Web UI page loaded  ${HEADER.ODAHU_TITLE.TEXT}  ${HEADER.ODAHU_COMPONENTS.BENTO_BUTTON}
+
+Click on Empty field on "Dashboard" page when Bento Menu open
+    click element  ${HEADER.CLOSE_BENTO_LOCATOR}
 
 Open User info Tab
     click button  ${HEADER.USER_INFO_BUTTON}
@@ -72,7 +76,7 @@ Click "Info" button
 
 Validate text of "Info" pop-up
     [Arguments]  ${odahu_ui_version}
-    Validate visible element and text  ${HEADER.ODAHU_UI_TEXT}  ${odahu_ui_version}
+    Validate visible element and text  ${HEADER.ODAHU_UI_VERSION}  ${odahu_ui_version}
 
 Open Bento Menu (ODAHU Components)
     click button  ${HEADER.ODAHU_COMPONENTS.BENTO_BUTTON}

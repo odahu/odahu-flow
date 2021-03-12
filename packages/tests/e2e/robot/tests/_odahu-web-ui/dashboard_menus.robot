@@ -65,7 +65,6 @@ Check "Sidebar" extends and shrinks
     Shrink "SideBar" and validate
 
 Check "Sidebar" links change color when user switch between them
-    [Tags]  test
     Extend "SideBar" and validate
     # switch to ODAHU page through link
     Check ODAHU page Icons changes the color when selected
