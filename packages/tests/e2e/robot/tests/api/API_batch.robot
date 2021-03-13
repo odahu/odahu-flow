@@ -13,8 +13,6 @@ Library             odahuflow.robot.libraries.sdk_wrapper.InferenceJob
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge
-Suite Teardown      Run Keywords
-...                 Remove File  ${LOCAL_CONFIG}
 Force Tags          api  batch
 Test Timeout        15 minutes
 
@@ -31,5 +29,5 @@ Create Batch Job
     [Documentation]             launch batch job
     ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob.yaml
     @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  job  entity=${job_id} exp_result=@{exp_result}
+    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
