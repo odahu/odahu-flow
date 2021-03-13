@@ -264,10 +264,9 @@ class InferenceService:
     def service_post(payload_file):
         api_object = parse_resources_file_with_one_item(payload_file).resource
         try:
-            s = BatchInferenceServiceClient().create(api_object)
+            BatchInferenceServiceClient().create(api_object)
         except EntityAlreadyExists:
             pass
-        return s
 
 
 class InferenceJob:
