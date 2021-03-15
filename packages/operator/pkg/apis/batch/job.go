@@ -38,11 +38,15 @@ const (
 type InferenceJobSpec struct {
 	// InferenceServiceID refers to BatchInferenceService
 	InferenceServiceID string `json:"inferenceServiceId"`
-	// DataSource defines location input data files
-	// If nil then will be filled from BatchInferenceService
+	// DataSource defines location input data files.
+	// Input data files must have .json extension and be valid JSON files that follows
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
+	// If nil then will be filled from BatchInferenceService.
 	DataSource *ConnectionReference `json:"dataSource"`
-	// OutputDestination defines location of directory with output files
-	// If nil then will be filled from BatchInferenceService
+	// OutputDestination defines location of directory with output files.
+	// Output data files must have .json extension and be valid JSON files that follows
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
+	// If nil then will be filled from BatchInferenceService.
 	OutputDestination *ConnectionReference `json:"outputDestination"`
 	// Node selector for specifying a node pool
 	NodeSelector map[string]string `json:"nodeSelector"`
@@ -74,13 +78,13 @@ type InferenceJob struct {
 	ID string `json:"id"`
 	// Deletion mark
 	DeletionMark bool `json:"deletionMark,omitempty" swaggerignore:"true"`
-	// CreatedAt describes when InferenceJob was launched
+	// CreatedAt describes when InferenceJob was launched (readonly)
 	CreatedAt time.Time `json:"createdAt,omitempty"`
-	// CreatedAt describes when InferenceJob was updated (status was changed)
+	// UpdatedAt describes when InferenceJob was updated (readonly)
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Spec describes parameters of InferenceJob
 	Spec InferenceJobSpec `json:"spec,omitempty"`
-	// Spec describes execution status of InferenceJob
+	// Spec describes execution status of InferenceJob (readonly)
 	Status InferenceJobStatus `json:"status,omitempty"`
 }
 

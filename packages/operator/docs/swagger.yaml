@@ -2,16 +2,26 @@ definitions:
   ConnectionReference:
     properties:
       connection:
-        description: Next connection types are supported
+        description: ODAHU Connection
         type: string
       path:
-        description: User can override path otherwise Connection path will be used
+        description: |-
+          User can override path otherwise Connection path will be used.
+          #### For dataSource
+          Input data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
+          #### For outputDestination
+          Output data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
+          #### For modelSource
+          If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container
+          Otherwise its considered and a directory and will be delivered to user predictor container AS-IS
         type: string
     type: object
   InferenceJob:
     properties:
       createdAt:
-        description: CreatedAt describes when InferenceJob was launched
+        description: CreatedAt describes when InferenceJob was launched (readonly)
         type: string
       id:
         description: Resource ID
@@ -22,10 +32,10 @@ definitions:
         type: object
       status:
         $ref: '#/definitions/InferenceJobStatus'
-        description: Spec describes execution status of InferenceJob
+        description: Spec describes execution status of InferenceJob (readonly)
         type: object
       updatedAt:
-        description: CreatedAt describes when InferenceJob was updated (status was changed)
+        description: UpdatedAt describes when InferenceJob was updated (readonly)
         type: string
     type: object
   InferenceJobSpec:
@@ -33,8 +43,10 @@ definitions:
       dataSource:
         $ref: '#/definitions/ConnectionReference'
         description: |-
-          DataSource defines location input data files
-          If nil then will be filled from BatchInferenceService
+          DataSource defines location input data files.
+          Input data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
+          If nil then will be filled from BatchInferenceService.
         type: object
       inferenceServiceId:
         description: InferenceServiceID refers to BatchInferenceService
@@ -47,8 +59,10 @@ definitions:
       outputDestination:
         $ref: '#/definitions/ConnectionReference'
         description: |-
-          OutputDestination defines location of directory with output files
-          If nil then will be filled from BatchInferenceService
+          OutputDestination defines location of directory with output files.
+          Output data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
+          If nil then will be filled from BatchInferenceService.
         type: object
       requestId:
         description: |-
@@ -130,7 +144,9 @@ definitions:
       dataSource:
         $ref: '#/definitions/ConnectionReference'
         description: |-
-          DataSource defines location input data files
+          DataSource defines location input data files.
+          Input data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
           Can be overridden in BatchInferenceJob definition
         type: object
       image:
@@ -148,7 +164,9 @@ definitions:
       outputDestination:
         $ref: '#/definitions/ConnectionReference'
         description: |-
-          OutputDestination defines location of directory with output files
+          OutputDestination defines location of directory with output files.
+          Output data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
           Can be overridden in BatchInferenceJob definition
         type: object
       resources:
@@ -238,6 +256,9 @@ definitions:
         type: array
       rcloneImage:
         description: RClone image that will be used to sync data with object storage
+        type: string
+      serviceAccountName:
+        description: Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun
         type: string
       timeout:
         description: Timeout for full batch process
