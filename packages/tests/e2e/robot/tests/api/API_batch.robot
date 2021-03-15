@@ -20,20 +20,20 @@ Test Timeout        15 minutes
 
 
 *** Test cases ***
-Create Batch Service
-    [Tags]                      batch
-    [Documentation]             create batch service
-    Call API  service post  ${RES_DIR}/inferenceservice.yaml
-
-Create Batch Job
-    [Tags]                      batch
-    [Documentation]             launch batch job
-    ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob.yaml
-    @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=@{exp_result}
-    Status State Should Be      ${result}  succeeded
-    ${result}                   check batch job response  ${RES_DIR}/inferencejob.yaml  ${RES_DIR}/output/response0.json
-    Should Be True              ${result}
+#Create Batch Service
+#    [Tags]                      batch
+#    [Documentation]             create batch service
+#    Call API  service post  ${RES_DIR}/inferenceservice.yaml
+#
+#Create Batch Job
+#    [Tags]                      batch
+#    [Documentation]             launch batch job
+#    ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob.yaml
+#    @{exp_result}               create list  succeeded  failed
+#    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=@{exp_result}
+#    Status State Should Be      ${result}  succeeded
+#    ${result}                   check batch job response  ${RES_DIR}/inferencejob.yaml  ${RES_DIR}/output/response0.json
+#    Should Be True              ${result}
 
 
 Create Batch Service Packed Model

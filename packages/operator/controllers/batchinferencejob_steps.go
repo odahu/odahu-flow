@@ -187,12 +187,16 @@ func GetSyncPackedModelStep(
 	) tektonv1beta1.Step {
 	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
 	source := path.Join(sourcePrefix, modelPath)
+
+	baseName := path.Base(modelPath)
+	archiveName := path.Join(odahuModelPath, baseName)
+
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:      StepSyncModel,
 			Image:     rcloneImage,
 			Command:   []string{"sh", "-c"},
-			Args:      []string{"sync", "-P", source, odahuModelPath, "&&", "tar", "-xzvf", "-C", odahuModelPath},
+			Args:      []string{"sync", "-P", source, odahuModelPath, "&&", "tar", "-xzvf", archiveName, "-C", odahuModelPath},
 			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
 			Resources: res,
 		},
