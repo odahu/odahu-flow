@@ -42,8 +42,6 @@ var (
 	XDGConfigHome   = path.Join(workspacePath, "config")
 	// Dir where raw data should be synced
 	rawInputPath    = path.Join(workspacePath, "odahu-ws-raw-input")
-	// Dir where raw model should be copied after validation and unzip
-	rawModelPath    = path.Join(workspacePath, "odahu-ws-raw-model")
 	// Dir where raw data should be copied after validation
 	odahuInputPath       = path.Join(workspacePath, "odahu-ws-input")
 	// Dir where raw model should be copied after validation and unzip
