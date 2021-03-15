@@ -9,6 +9,7 @@ import (
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"go.uber.org/multierr"
 	corev1 "k8s.io/api/core/v1"
+	"strings"
 )
 
 // getBucketNames return bucket names for apitypes.InferenceService in next order:
@@ -69,16 +70,17 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 		return ts, err
 	}
 
-	// TODO: Add model validation step
 	steps := []tektonv1beta1.Step{
 		GetConfigureRCloneStep(
 			toolsImage, job.Spec.InputConnection, job.Spec.OutputConnection, job.Spec.ModelConnection, helpContainerRes),
 		GetSyncDataStep(rcloneImage, iBucket, job.Spec.InputPath, helpContainerRes),
 	}
 
-
-	// TODO: Conditionally handle case when model is zipped file using GetCopyUnzipModelStep
-	steps = append(steps, GetSyncModelStep(rcloneImage, mBucket, job.Spec.ModelPath, helpContainerRes))
+	if strings.HasSuffix(job.Spec.ModelPath, ".tar.gz") || strings.HasSuffix(job.Spec.ModelPath, ".zip") {
+		steps = append(steps, GetSyncPackedModelStep(rcloneImage, mBucket, job.Spec.ModelPath, helpContainerRes))
+	} else{
+		steps = append(steps, GetSyncModelStep(rcloneImage, mBucket, job.Spec.ModelPath, helpContainerRes))
+	}
 
 	steps = append(steps, []tektonv1beta1.Step{
 		GetValidateInputStep(toolsImage, helpContainerRes),

@@ -34,3 +34,19 @@ Create Batch Job
     Status State Should Be      ${result}  succeeded
     ${result}                   check batch job response  ${RES_DIR}/inferencejob.yaml  ${RES_DIR}/output/response0.json
     Should Be True              ${result}
+
+
+Create Batch Service Packed Model
+    [Tags]                      batch
+    [Documentation]             create batch service
+    Call API  service post  ${RES_DIR}/inferenceservice-packed.yaml
+
+Create Batch Job Packed
+    [Tags]                      batch
+    [Documentation]             launch batch job
+    ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob-packed.yaml
+    @{exp_result}               create list  succeeded  failed
+    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=@{exp_result}
+    Status State Should Be      ${result}  succeeded
+    ${result}                   check batch job response  ${RES_DIR}/inferencejob-packed.yaml  ${RES_DIR}/output/response0.json
+    Should Be True              ${result}

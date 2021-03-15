@@ -175,6 +175,29 @@ func GetSyncModelStep(
 		},
 	}
 }
+// GetSyncPackedModelStep return step that
+// syncs model to pre-stage directory inside Pod
+// where model will be validated and copied to user container's input directory
+// and unpacks it by handling as tar.gz file.
+func GetSyncPackedModelStep(
+	rcloneImage string,
+	bucketName string,
+	modelPath string,
+	res corev1.ResourceRequirements,
+	) tektonv1beta1.Step {
+	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
+	source := path.Join(sourcePrefix, modelPath)
+	return tektonv1beta1.Step{
+		Container: corev1.Container{
+			Name:      StepSyncModel,
+			Image:     rcloneImage,
+			Command:   []string{"sh", "-c"},
+			Args:      []string{"sync", "-P", source, odahuModelPath, "&&", "tar", "-xzvf", "-C", odahuModelPath},
+			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
+			Resources: res,
+		},
+	}
+}
 
 // GetValidateInputStep return step that
 // validates raw input according kubeflow prediction api (version 2) InferenceRequest object.
