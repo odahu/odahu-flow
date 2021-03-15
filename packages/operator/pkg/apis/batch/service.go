@@ -30,14 +30,14 @@ type ConnectionReference struct {
 	// ODAHU Connection
 	Connection string `json:"connection"`
 	// User can override path otherwise Connection path will be used.
-	// \nFor dataSource
+	// For dataSource:
 	// Input data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
-	// \nFor outputDestination
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object).
+	// For outputDestination:
 	// Output data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
-	// \nFor modelSource
-	// If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object).
+	// nFor modelSource:
+	// If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container.
 	// Otherwise its considered and a directory and will be delivered to user predictor container AS-IS
 	Path string `json:"path"`
 }
