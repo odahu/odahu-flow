@@ -40,12 +40,12 @@ type InferenceJobSpec struct {
 	InferenceServiceID string `json:"inferenceServiceId"`
 	// DataSource defines location input data files.
 	// Input data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)
 	// If nil then will be filled from BatchInferenceService.
 	DataSource *ConnectionReference `json:"dataSource"`
 	// OutputDestination defines location of directory with output files.
 	// Output data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object)
 	// If nil then will be filled from BatchInferenceService.
 	OutputDestination *ConnectionReference `json:"outputDestination"`
 	// Node selector for specifying a node pool

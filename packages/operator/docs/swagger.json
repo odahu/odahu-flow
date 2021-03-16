@@ -2415,7 +2415,7 @@
                     "type": "string"
                 },
                 "path": {
-                    "description": "User can override path otherwise Connection path will be used.\nFor dataSource:\nInput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object).\nFor outputDestination:\nOutput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object).\nnFor modelSource:\nIf path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container.\nOtherwise its considered and a directory and will be delivered to user predictor container AS-IS",
+                    "description": "User can override path otherwise Connection path will be used.\nFor dataSource:\nInput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object).\nFor outputDestination:\nOutput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object).\nnFor modelSource:\nIf path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container.\nOtherwise its considered and a directory and will be delivered to user predictor container AS-IS",
                     "type": "string"
                 }
             }
@@ -2451,7 +2451,7 @@
             "type": "object",
             "properties": {
                 "dataSource": {
-                    "description": "DataSource defines location input data files.\nInput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)\nIf nil then will be filled from BatchInferenceService.",
+                    "description": "DataSource defines location input data files.\nInput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)\nIf nil then will be filled from BatchInferenceService.",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },
@@ -2467,7 +2467,7 @@
                     }
                 },
                 "outputDestination": {
-                    "description": "OutputDestination defines location of directory with output files.\nOutput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)\nIf nil then will be filled from BatchInferenceService.",
+                    "description": "OutputDestination defines location of directory with output files.\nOutput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object)\nIf nil then will be filled from BatchInferenceService.",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },
@@ -2545,7 +2545,7 @@
                     }
                 },
                 "dataSource": {
-                    "description": "DataSource defines location input data files.\nInput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)\nCan be overridden in BatchInferenceJob definition",
+                    "description": "DataSource defines location input data files.\nInput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)\nCan be overridden in BatchInferenceJob definition",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },
@@ -2566,7 +2566,7 @@
                     }
                 },
                 "outputDestination": {
-                    "description": "OutputDestination defines location of directory with output files.\nOutput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)\nCan be overridden in BatchInferenceJob definition",
+                    "description": "OutputDestination defines location of directory with output files.\nOutput data files must have .json extension and be valid JSON files that follows\n[Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object)\nCan be overridden in BatchInferenceJob definition",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },

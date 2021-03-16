@@ -32,10 +32,10 @@ type ConnectionReference struct {
 	// User can override path otherwise Connection path will be used.
 	// For dataSource:
 	// Input data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object).
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object).
 	// For outputDestination:
 	// Output data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object).
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object).
 	// nFor modelSource:
 	// If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container.
 	// Otherwise its considered and a directory and will be delivered to user predictor container AS-IS
@@ -77,12 +77,12 @@ type InferenceServiceSpec struct {
 	ModelSource ConnectionReference `json:"modelSource"`
 	// DataSource defines location input data files.
 	// Input data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-request-json-object)
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)
 	// Can be overridden in BatchInferenceJob definition
 	DataSource *ConnectionReference `json:"dataSource,omitempty"`
 	// OutputDestination defines location of directory with output files.
 	// Output data files must have .json extension and be valid JSON files that follows
-	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/master/docs/predict-api/v2/required_api.md#inference-response-json-object)
+	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object)
 	// Can be overridden in BatchInferenceJob definition
 	OutputDestination *ConnectionReference `json:"outputDestination,omitempty"`
 	// Triggers are describe how to run InferenceService
