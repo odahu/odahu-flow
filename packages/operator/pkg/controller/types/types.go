@@ -3,6 +3,10 @@ package types
 // Entity that represent state of runtime process in persistent storage
 type StorageEntity interface {
 	GetID() string
+	// If RuntimeEntity And StorageEntity have different structures that describe specification
+	// then GetSpecHash MUST return hash of RuntimeEntity specification that correspond this StorageEntity
+	// specification
+	// to have an ability to compare and detect changes
 	GetSpecHash() (uint64, error)
 	GetStatusHash() (uint64, error)
 
@@ -19,6 +23,9 @@ type StorageEntity interface {
 type RuntimeEntity interface {
 	GetID() string
 	GetSpecHash() (uint64, error)
+	// If RuntimeEntity And StorageEntity have different structures that describe status
+	// then GetSpecHash MUST return hash of StorageEntity status that correspond this RuntimeEntity status
+	// to have an ability to compare and detect changes
 	GetStatusHash() (uint64, error)
 	IsDeleting() bool
 	Delete() error

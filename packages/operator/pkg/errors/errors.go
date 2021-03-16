@@ -107,3 +107,22 @@ func IsSpecWasTouchedError(err error) bool {
 	_, ok := err.(SpecWasTouched)
 	return ok
 }
+
+
+type DeletingServiceHasJobs struct {
+	// ID of BatchInferenceService
+	Entity string
+}
+
+func (e DeletingServiceHasJobs) Error() string {
+	return fmt.Sprintf(`Unable to delete service: "%s". Cause: there are child jobs`, e.Entity)
+}
+
+type CreatingJobServiceNotFound struct {
+	Entity string
+	Service string
+}
+
+func (e CreatingJobServiceNotFound) Error() string {
+	return fmt.Sprintf(`Unable to create job: "%s". There is no service with ID: %s`, e.Entity, e.Service)
+}

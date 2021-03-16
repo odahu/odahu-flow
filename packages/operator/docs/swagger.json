@@ -12,6 +12,414 @@
         "version": "1.0"
     },
     "paths": {
+        "/api/v1/batch/job": {
+            "get": {
+                "description": "List an InferenceJob",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "List an InferenceJob",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InferenceJob"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create an InferenceJob",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create an InferenceJob",
+                "parameters": [
+                    {
+                        "description": "InferenceJob",
+                        "name": "service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InferenceJob"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/InferenceJob"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/batch/job/{id}": {
+            "get": {
+                "description": "Get an InferenceJob by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Get an InferenceJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "InferenceJob id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InferenceJob"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an InferenceJob",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Delete an InferenceJob",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "InferenceJob id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/batch/service": {
+            "get": {
+                "description": "List an InferenceService",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "List an InferenceService",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of entities in a response",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of a page",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InferenceService"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an InferenceService",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Update an InferenceService",
+                "parameters": [
+                    {
+                        "description": "InferenceService",
+                        "name": "service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InferenceService"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InferenceService"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create an InferenceService",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create an InferenceService",
+                "parameters": [
+                    {
+                        "description": "InferenceService",
+                        "name": "service",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InferenceService"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/InferenceService"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/batch/service/{id}": {
+            "get": {
+                "description": "Get an InferenceService by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Get an InferenceService",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "InferenceService id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InferenceService"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an InferenceService",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Delete an InferenceService",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "InferenceService id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/HTTPResult"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/configuration": {
             "get": {
                 "description": "Get the Odahuflow service configuration",
@@ -1999,6 +2407,203 @@
         }
     },
     "definitions": {
+        "ConnectionReference": {
+            "type": "object",
+            "properties": {
+                "connection": {
+                    "description": "Next connection types are supported",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "User can override path otherwise Connection path will be used",
+                    "type": "string"
+                }
+            }
+        },
+        "InferenceJob": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "CreatedAt describes when InferenceJob was launched",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Resource ID",
+                    "type": "string"
+                },
+                "spec": {
+                    "description": "Spec describes parameters of InferenceJob",
+                    "type": "object",
+                    "$ref": "#/definitions/InferenceJobSpec"
+                },
+                "status": {
+                    "description": "Spec describes execution status of InferenceJob",
+                    "type": "object",
+                    "$ref": "#/definitions/InferenceJobStatus"
+                },
+                "updatedAt": {
+                    "description": "CreatedAt describes when InferenceJob was updated (status was changed)",
+                    "type": "string"
+                }
+            }
+        },
+        "InferenceJobSpec": {
+            "type": "object",
+            "properties": {
+                "dataSource": {
+                    "description": "DataSource defines location input data files\nIf nil then will be filled from BatchInferenceService",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionReference"
+                },
+                "inferenceServiceId": {
+                    "description": "InferenceServiceID refers to BatchInferenceService",
+                    "type": "string"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for specifying a node pool",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "outputDestination": {
+                    "description": "OutputDestination defines location of directory with output files\nIf nil then will be filled from BatchInferenceService",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionReference"
+                },
+                "requestId": {
+                    "description": "BatchRequestID is unique identifier for InferenceJob that helps to correlate between\nModel input, model output and feedback\nTake into account that it is not the same as kubeflow InferenceRequest id\nEach InferenceJob can process more than one InferenceRequest (delivered in separate input file)\nSo each BatchRequestID has set of corresponding InferenceRequest and their IDs",
+                    "type": "string"
+                },
+                "resources": {
+                    "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                }
+            }
+        },
+        "InferenceJobStatus": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Message is any message from runtime service about status of InferenceJob",
+                    "type": "string"
+                },
+                "podName": {
+                    "description": "PodName is a name of Pod in Kubernetes that is running under the hood of InferenceJob",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "Reason is a reason of some InferenceJob state that was retrieved from runtime service.\nfor example reason of failure",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "State describes current state of InferenceJob",
+                    "type": "string"
+                }
+            }
+        },
+        "InferenceService": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "When resource was created. Managed by system. Cannot be overridden by User",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "spec": {
+                    "type": "object",
+                    "$ref": "#/definitions/InferenceServiceSpec"
+                },
+                "status": {
+                    "type": "object",
+                    "$ref": "#/definitions/InferenceServiceStatus"
+                },
+                "updatedAt": {
+                    "description": "When resource was updated. Managed by system. Cannot be overridden by User",
+                    "type": "string"
+                }
+            }
+        },
+        "InferenceServiceSpec": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "description": "Arguments to the entrypoint.\nThe docker image's CMD is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax\ncan be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,\nregardless of whether the variable exists or not.\nCannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "command": {
+                    "description": "Entrypoint array. Not executed within a shell.\nThe docker image's ENTRYPOINT is used if this is not provided.\nVariable references $(VAR_NAME) are expanded using the container's environment. If a variable\ncannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax\ncan be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,\nregardless of whether the variable exists or not.\nCannot be updated.\nMore info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "dataSource": {
+                    "description": "DataSource defines location input data files\nCan be overridden in BatchInferenceJob definition",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionReference"
+                },
+                "image": {
+                    "description": "Image is OCI image that contains user defined prediction code",
+                    "type": "string"
+                },
+                "modelSource": {
+                    "description": "ModelSource defines location of ML model files",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionReference"
+                },
+                "nodeSelector": {
+                    "description": "Node selector for specifying a node pool",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "outputDestination": {
+                    "description": "OutputDestination defines location of directory with output files\nCan be overridden in BatchInferenceJob definition",
+                    "type": "object",
+                    "$ref": "#/definitions/ConnectionReference"
+                },
+                "resources": {
+                    "description": "Resources for model container\nThe same format like k8s uses for pod resources.",
+                    "type": "object",
+                    "$ref": "#/definitions/ResourceRequirements"
+                },
+                "triggers": {
+                    "description": "Triggers are describe how to run InferenceService",
+                    "type": "object",
+                    "$ref": "#/definitions/InferenceServiceTriggers"
+                }
+            }
+        },
+        "InferenceServiceStatus": {
+            "type": "object"
+        },
+        "InferenceServiceTriggers": {
+            "type": "object",
+            "properties": {
+                "webhook": {
+                    "description": "Webhook provides a REST API to execute InferenceJob that correspond to this service",
+                    "type": "object",
+                    "$ref": "#/definitions/PredictorWebhookTrigger"
+                }
+            }
+        },
+        "PredictorWebhookTrigger": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enabled. If True then it possible to run InferenceJob by creating it using REST API",
+                    "type": "boolean"
+                }
+            }
+        },
         "APIBackendConfig": {
             "type": "object",
             "properties": {

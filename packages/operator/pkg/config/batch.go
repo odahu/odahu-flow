@@ -28,6 +28,8 @@ type BatchConfig struct {
 	ToolsImage string  `json:"toolsImage"`
 	// ODAHU tools image
 	ToolsSecret string  `json:"toolsSecret"`
+	// Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun
+	ServiceAccountName string  `json:"serviceAccountName"`
 }
 
 

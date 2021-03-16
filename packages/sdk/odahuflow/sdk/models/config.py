@@ -7,6 +7,7 @@ from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.api_config import APIConfig  # noqa: F401,E501
+from odahuflow.sdk.models.batch_config import BatchConfig  # noqa: F401,E501
 from odahuflow.sdk.models.common_config import CommonConfig  # noqa: F401,E501
 from odahuflow.sdk.models.connection_config import ConnectionConfig  # noqa: F401,E501
 from odahuflow.sdk.models.model_deployment_config import ModelDeploymentConfig  # noqa: F401,E501
@@ -26,11 +27,13 @@ class Config(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, api: APIConfig=None, common: CommonConfig=None, connection: ConnectionConfig=None, deployment: ModelDeploymentConfig=None, operator: OperatorConfig=None, packager: PackagerConfig=None, packaging: ModelPackagingConfig=None, service_catalog: ServiceCatalog=None, trainer: TrainerConfig=None, training: ModelTrainingConfig=None, users: UserConfig=None):  # noqa: E501
+    def __init__(self, api: APIConfig=None, batch: BatchConfig=None, common: CommonConfig=None, connection: ConnectionConfig=None, deployment: ModelDeploymentConfig=None, operator: OperatorConfig=None, packager: PackagerConfig=None, packaging: ModelPackagingConfig=None, service_catalog: ServiceCatalog=None, trainer: TrainerConfig=None, training: ModelTrainingConfig=None, users: UserConfig=None):  # noqa: E501
         """Config - a model defined in Swagger
 
         :param api: The api of this Config.  # noqa: E501
         :type api: APIConfig
+        :param batch: The batch of this Config.  # noqa: E501
+        :type batch: BatchConfig
         :param common: The common of this Config.  # noqa: E501
         :type common: CommonConfig
         :param connection: The connection of this Config.  # noqa: E501
@@ -54,6 +57,7 @@ class Config(Model):
         """
         self.swagger_types = {
             'api': APIConfig,
+            'batch': BatchConfig,
             'common': CommonConfig,
             'connection': ConnectionConfig,
             'deployment': ModelDeploymentConfig,
@@ -68,6 +72,7 @@ class Config(Model):
 
         self.attribute_map = {
             'api': 'api',
+            'batch': 'batch',
             'common': 'common',
             'connection': 'connection',
             'deployment': 'deployment',
@@ -81,6 +86,7 @@ class Config(Model):
         }
 
         self._api = api
+        self._batch = batch
         self._common = common
         self._connection = connection
         self._deployment = deployment
@@ -123,6 +129,27 @@ class Config(Model):
         """
 
         self._api = api
+
+    @property
+    def batch(self) -> BatchConfig:
+        """Gets the batch of this Config.
+
+
+        :return: The batch of this Config.
+        :rtype: BatchConfig
+        """
+        return self._batch
+
+    @batch.setter
+    def batch(self, batch: BatchConfig):
+        """Sets the batch of this Config.
+
+
+        :param batch: The batch of this Config.
+        :type batch: BatchConfig
+        """
+
+        self._batch = batch
 
     @property
     def common(self) -> CommonConfig:

@@ -284,6 +284,7 @@ func (r *BatchInferenceJobReconciler) reconcileTaskRun(
 		},
 		Spec: tektonv1beta1.TaskRunSpec{
 			TaskSpec: taskSpec,
+			ServiceAccountName: r.cfg.ServiceAccountName,
 			Timeout:  &metav1.Duration{Duration: r.cfg.Timeout},
 			PodTemplate: &tektonv1beta1.PodTemplate{
 				Tolerations:  r.cfg.Tolerations,

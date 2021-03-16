@@ -22,6 +22,7 @@ const (
 	NvidiaResourceName                      = "nvidia.com/gpu"
 	RepositoryKubernetesType RepositoryType = "kubernetes"
 	RepositoryVaultType      RepositoryType = "vault"
+	RepositoryMemoryType     RepositoryType = "memory"
 	RepositoryPostgresType   RepositoryType = "postgres"
 
 	StoragePostgres StorageType = "postgres"

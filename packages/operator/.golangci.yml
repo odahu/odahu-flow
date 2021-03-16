@@ -29,6 +29,7 @@ linters:
     - exhaustive
     - gofumpt
     - interfacer
+    - scopelint # OBSOLETED
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.

@@ -15,6 +15,18 @@ const (
 	modelRCloneCfgName = "odahu-data-model"
 )
 
+// Step names
+const (
+	StepSyncData       = "sync-data"
+	StepSyncModel      = "sync-model"
+	StepCopyUnzipModel = "copy-unzip-model"
+	StepValidateInput  = "validate-input"
+	StepLogInput       = "log-input"
+	StepUserContainer  = "user-container"
+	StepValidateOutput = "validate-output"
+	StepLogOutput      = "log-output"
+	StepSyncOutput     = "sync-output"
+)
 
 var (
 	toolsConfigVM = corev1.VolumeMount{
@@ -102,11 +114,11 @@ func GetSyncDataStep(
 	source := path.Join(sourcePrefix, inputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "sync-data",
-			Image:        rcloneImage,
-			Command:      []string{"rclone"},
-			Args:         []string{"sync", "-P", source, rawInputPath},
-			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
+			Name:      StepSyncData,
+			Image:     rcloneImage,
+			Command:   []string{"rclone"},
+			Args:      []string{"sync", "-P", source, rawInputPath},
+			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
 			Resources: res,
 		},
 	}
@@ -132,7 +144,7 @@ func GetCopyUnzipModelStep(
 
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "copy-unzip-model",
+			Name:         StepCopyUnzipModel,
 			Image:        rcloneImage,
 			Command:      []string{"sh"},
 			Args:         []string{"-c", cmdPipeline},
@@ -154,11 +166,11 @@ func GetSyncModelStep(
 	source := path.Join(sourcePrefix, modelPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "sync-model",
-			Image:        rcloneImage,
-			Command:      []string{"rclone"},
-			Args:         []string{"sync", "-P", source, odahuModelPath},
-			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
+			Name:      StepSyncModel,
+			Image:     rcloneImage,
+			Command:   []string{"rclone"},
+			Args:      []string{"sync", "-P", source, odahuModelPath},
+			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
 			Resources: res,
 		},
 	}
@@ -170,13 +182,13 @@ func GetSyncModelStep(
 func GetValidateInputStep(image string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "validate-input",
+			Name:         StepValidateInput,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         []string{"batch", "validate", "input", "-s", rawInputPath, "-d", odahuInputPath},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
-			Resources: res,
+			Resources:    res,
 		},
 	}
 }
@@ -186,13 +198,13 @@ func GetValidateInputStep(image string, res corev1.ResourceRequirements) tektonv
 func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "log-input",
+			Name:         StepLogInput,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         []string{"batch", "log", "input", odahuInputPath, "-m", odahuModelPath, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
-			Resources: res,
+			Resources:    res,
 		},
 	}
 }
@@ -203,7 +215,7 @@ func GetUserContainer(
 	image string, command []string, args []string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "user-container",
+			Name:         StepUserContainer,
 			Image:        image,
 			Command:      command,
 			Args:         args,
@@ -221,7 +233,7 @@ func GetUserContainer(
 func GetValidateOutputStep(image string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "validate-output",
+			Name:         StepValidateOutput,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         []string{"batch", "validate", "output", "-s", odahuRawOutputPath, "-d", outputPath},
@@ -237,7 +249,7 @@ func GetValidateOutputStep(image string, res corev1.ResourceRequirements) tekton
 func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "log-output",
+			Name:         StepLogOutput,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
 			Args:         []string{"batch", "log", "output", outputPath, "-m", odahuModelPath, "-r", requestID},
@@ -260,7 +272,7 @@ func GetSyncOutputStep(
 	dest := path.Join(prefix, remoteOutputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         "sync-output",
+			Name:         StepSyncOutput,
 			Image:        rcloneImage,
 			Command:      []string{"rclone"},
 			Args:         []string{"sync", "-P", outputPath, dest},

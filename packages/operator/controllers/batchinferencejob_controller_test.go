@@ -220,7 +220,6 @@ func TestJobStatus(t *testing.T) {
 
 	for i, test := range testCases {
 		i := i
-		test := test
 		t.Run(fmt.Sprintf("jobStatus test#%d", i), func(t *testing.T) {
 			as := require.New(t)
 
