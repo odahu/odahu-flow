@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-FROM python:3.6.8
+FROM python:3.6.13-stretch
 # Install python package dependencies and cloud CLI tools
 RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common \
     make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 ca-certificates gnupg-agent && \
