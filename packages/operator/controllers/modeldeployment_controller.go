@@ -27,6 +27,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -67,6 +68,7 @@ const (
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	ModelNameAnnotationKey               = "modelName"
 	AppliedModelDeploymentSpecKey        = "odahu.org/applied-model-deployment-spec"
+	AppliedPolicyHashKey                 = "odahu.org/applied-policy-hash"
 
 	IstioRewriteHTTPProbesAnnotation = "sidecar.istio.io/rewriteAppHTTPProbers"
 	OdahuAuthorizationLabel          = "odahu-flow-authorization"
@@ -174,6 +176,8 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		serviceAnnotationsToAdd := map[string]string{
 			// Annotation to detect changes in MD
 			AppliedModelDeploymentSpecKey: string(appliedMDSpecJSON),
+			// Annotation to detect changes in Policy ConfigMap
+			AppliedPolicyHashKey: modelDeploymentCR.Annotations[AppliedPolicyHashKey],
 		}
 
 		revisionTemplate := kService.Spec.ConfigurationSpec.Template
@@ -240,8 +244,12 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		return err
 	}
 
-	if reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec) {
-		log.Info("Model Deployment version is up to date, skipping")
+	depSpecIsNotChanged := reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec)
+	policyIsNotChanged := modelDeploymentCR.Annotations[AppliedPolicyHashKey] == found.Annotations[AppliedPolicyHashKey]
+
+
+	if depSpecIsNotChanged && policyIsNotChanged {
+		log.Info("ModelDeployment Spec is not changed. Policy is not changed. Skipping.")
 		return nil
 	}
 
@@ -331,10 +339,38 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment, predictor predictors.Predictor) error {
 
 	rn := modelDeploymentCR.Spec.RoleName
-	if rn == nil {
-		log.Info(".Spec.RoleName is nil. Skip creating custom policies for model")
+
+	roleNameIsNotSet := rn == nil
+
+	if roleNameIsNotSet {
+		log.Info(".Spec.RoleName is nil")
+		// We should delete custom policy if roleName is not set
+		cm := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:     GetCMPolicyName(modelDeploymentCR),
+				Namespace: r.deploymentConfig.Namespace,
+			},
+		}
+		err := r.Delete(context.TODO(), cm)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+
+		log.Info("ConfigMap with polices was maybe deleted")
+
+		// Set special hash value to trigger Pod recreation
+		noCustomPolicyHash, err := hash.Hash("Role name is not set")
+		if err != nil {
+			log.Error(err, "Unable to produce configmap hash using policy configmap data")
+			return err
+		}
+		log.Info("Setting no custom policy hash to ModelDeployment Annotation")
+		modelDeploymentCR.Annotations[AppliedPolicyHashKey] = strconv.FormatUint(noCustomPolicyHash, 10)
+
 		return nil
 	}
+
+	// Handle case when roleName is set
 
 	policies, err := deployment.ReadDefaultPoliciesAndRender(*rn, predictor.OpaPolicyFilename)
 	if err != nil {
@@ -344,6 +380,14 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 	cm := deployment.BuildDefaultPolicyConfigMap(
 		GetCMPolicyName(modelDeploymentCR), r.deploymentConfig.Namespace, policies,
 	)
+
+	policyHash, err := hash.Hash(cm.Data)
+	if err != nil {
+		log.Error(err, "Unable to produce configmap hash using policy configmap data")
+		return err
+	}
+	log.Info("Setting policy hash to ModelDeployment Annotation")
+	modelDeploymentCR.Annotations[AppliedPolicyHashKey] = strconv.FormatUint(policyHash, 10)
 
 	if err := controllerutil.SetControllerReference(modelDeploymentCR, cm, r.scheme); err != nil {
 		return err
@@ -426,6 +470,9 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	}
 
 	log.Info("Run reconciling of model deployment")
+	if modelDeploymentCR.Annotations == nil {
+		modelDeploymentCR.Annotations = make(map[string]string)
+	}
 
 	predictor, ok := predictors.Predictors[modelDeploymentCR.Spec.Predictor]
 	if !ok {
