@@ -42,8 +42,6 @@ var (
 	XDGConfigHome   = path.Join(workspacePath, "config")
 	// Dir where raw data should be synced
 	rawInputPath    = path.Join(workspacePath, "odahu-ws-raw-input")
-	// Dir where raw model should be copied after validation and unzip
-	rawModelPath    = path.Join(workspacePath, "odahu-ws-raw-model")
 	// Dir where raw data should be copied after validation
 	odahuInputPath       = path.Join(workspacePath, "odahu-ws-input")
 	// Dir where raw model should be copied after validation and unzip
@@ -124,35 +122,6 @@ func GetSyncDataStep(
 	}
 }
 
-// GetCopyUnzipModelStep return step that
-// copy model zipped file to pre-stage directory inside Pod, unzip it and pass to user container
-func GetCopyUnzipModelStep(
-	rcloneImage string,
-	bucketName string,
-	modelPath string,
-	res corev1.ResourceRequirements,
-	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
-	source := path.Join(sourcePrefix, modelPath)
-
-	baseName := path.Base(modelPath)
-	localZippedPath := path.Join(rawModelPath, baseName)
-
-	cmdPipeline := fmt.Sprintf("rclone copy %s %s && mkdir -p %s && tar -xzvf %s -C %s",
-		source, rawModelPath, odahuModelPath, localZippedPath, odahuModelPath,
-	)
-
-	return tektonv1beta1.Step{
-		Container: corev1.Container{
-			Name:         StepCopyUnzipModel,
-			Image:        rcloneImage,
-			Command:      []string{"sh"},
-			Args:         []string{"-c", cmdPipeline},
-			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
-			Resources: res,
-		},
-	}
-}
 // GetSyncModelStep return step that
 // syncs model to pre-stage directory inside Pod
 // where model will be validated and copied to user container's input directory
@@ -170,6 +139,38 @@ func GetSyncModelStep(
 			Image:     rcloneImage,
 			Command:   []string{"rclone"},
 			Args:      []string{"sync", "-P", source, odahuModelPath},
+			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
+			Resources: res,
+		},
+	}
+}
+// GetSyncPackedModelStep return step that
+// syncs model to pre-stage directory inside Pod
+// where model will be validated and copied to user container's input directory
+// and unpacks it by handling as tar.gz file.
+func GetSyncPackedModelStep(
+	rcloneImage string,
+	bucketName string,
+	modelPath string,
+	res corev1.ResourceRequirements,
+	) tektonv1beta1.Step {
+	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
+	source := path.Join(sourcePrefix, modelPath)
+
+	baseName := path.Base(modelPath)
+	archiveName := path.Join(odahuModelPath, baseName)
+
+
+	cmdPipeline := fmt.Sprintf("rclone -P sync %s %s && tar -xzvf %s -C %s",
+		source, odahuModelPath, archiveName, odahuModelPath,
+	)
+
+	return tektonv1beta1.Step{
+		Container: corev1.Container{
+			Name:      StepSyncModel,
+			Image:     rcloneImage,
+			Command:   []string{"sh", "-c"},
+			Args:      []string{cmdPipeline},
 			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
 			Resources: res,
 		},
