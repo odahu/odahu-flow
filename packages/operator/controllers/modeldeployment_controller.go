@@ -27,6 +27,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -144,7 +145,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			ModelNameAnnotationKey:  modelDeploymentCR.Name,
 			deploymentIDLabel:       modelDeploymentCR.Name,
 			OdahuAuthorizationLabel: "enabled",
-			podPolicyLabel:          getCMPolicyName(modelDeploymentCR),
+			podPolicyLabel:          GetCMPolicyName(modelDeploymentCR),
 		}
 		templateAnnotationsToAdd := map[string]string{
 			KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
@@ -323,7 +324,7 @@ func (r *ModelDeploymentReconciler) reconcileStatus(
 	return nil
 }
 
-func getCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) string {
+func GetCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) string {
 	return modelDeploymentCR.Name + "-" + cmPolicySuffix
 }
 
@@ -342,7 +343,7 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 	}
 
 	cm := deployment.BuildDefaultPolicyConfigMap(
-		getCMPolicyName(modelDeploymentCR), r.deploymentConfig.Namespace, policies,
+		GetCMPolicyName(modelDeploymentCR), r.deploymentConfig.Namespace, policies,
 	)
 
 	if err := controllerutil.SetControllerReference(modelDeploymentCR, cm, r.scheme); err != nil {
@@ -357,6 +358,11 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 	if err != nil && errors.IsNotFound(err) {
 		log.Info("Creating config map", "ID", cm.Name)
 		return r.Create(context.TODO(), cm)
+	}
+
+	if !reflect.DeepEqual(foundCM.Data, cm.Data) {
+		log.Info("Policy was changed. Updating config map")
+		return r.Update(context.TODO(), cm)
 	}
 
 	if err != nil {
