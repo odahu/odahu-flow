@@ -147,7 +147,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	knativeService := s.getKnativeService(md)
 
 	podAnnonations := knativeService.Spec.Template.ObjectMeta.Annotations
-	s.Assertions.Len(podAnnonations, 6)
+	s.Assertions.Len(podAnnonations, 7)
 
 	s.Assertions.Contains(podAnnonations, KnativeMinReplicasKey)
 	s.Assertions.Equal(podAnnonations[KnativeMinReplicasKey], strconv.Itoa(int(mdMinReplicas)))

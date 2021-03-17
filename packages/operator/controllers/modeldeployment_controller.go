@@ -155,6 +155,8 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			KnativeMaxReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
 			KnativeAutoscalingTargetKey:      KnativeAutoscalingTargetDefaultValue,
 			IstioRewriteHTTPProbesAnnotation: "true",
+			// Annotation to trigger pod restart if policy is changed
+			AppliedPolicyHashKey: modelDeploymentCR.Annotations[AppliedPolicyHashKey],
 		}
 		revisionSpec := knservingv1.RevisionSpec{
 			TimeoutSeconds: &DefaultTerminationPeriod,
@@ -176,8 +178,6 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		serviceAnnotationsToAdd := map[string]string{
 			// Annotation to detect changes in MD
 			AppliedModelDeploymentSpecKey: string(appliedMDSpecJSON),
-			// Annotation to detect changes in Policy ConfigMap
-			AppliedPolicyHashKey: modelDeploymentCR.Annotations[AppliedPolicyHashKey],
 		}
 
 		revisionTemplate := kService.Spec.ConfigurationSpec.Template
@@ -244,30 +244,41 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		return err
 	}
 
-	depSpecIsNotChanged := reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec)
-	policyIsNotChanged := modelDeploymentCR.Annotations[AppliedPolicyHashKey] == found.Annotations[AppliedPolicyHashKey]
+	depSpecChanged := !reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec)
+
+	oldPolicyHash := found.Spec.ConfigurationSpec.Template.Annotations[AppliedPolicyHashKey]
+	newPolicyHash := modelDeploymentCR.Annotations[AppliedPolicyHashKey]
+	policyIsChanged := newPolicyHash != oldPolicyHash
 
 
-	if depSpecIsNotChanged && policyIsNotChanged {
-		log.Info("ModelDeployment Spec is not changed. Policy is not changed. Skipping.")
+	if depSpecChanged || policyIsChanged {
+		if policyIsChanged {
+			log.Info("Policy hash was changed",
+				"old", oldPolicyHash,
+				"new", newPolicyHash,
+			)
+		}
+		if depSpecChanged {
+			log.Info("ModelDeployment spec was changed","old", lastAppliedMDSpec,
+				"new", modelDeploymentCR.Spec)
+		}
+
+		err = fulfilKnativeService(found)
+		if err != nil {
+			return err
+		}
+		log.Info(fmt.Sprintf("Updating %s Knative Service, new MD generation: %d",
+			knativeServiceName, modelDeploymentCR.Generation))
+		err = r.Update(context.TODO(), found)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
-
-	log.Info("Knative Service bases on old MD spec", "old", lastAppliedMDSpec,
-		"new", modelDeploymentCR.Spec)
-
-	err = fulfilKnativeService(found)
-	if err != nil {
-		return err
-	}
-	log.Info(fmt.Sprintf("Updating %s Knative Service, new MD generation: %d",
-		knativeServiceName, modelDeploymentCR.Generation))
-	err = r.Update(context.TODO(), found)
-	if err != nil {
-		return err
-	}
-
+	log.Info("ModelDeployment Spec is not changed. Policy is not changed. Skipping.")
 	return nil
+
 }
 
 func (r *ModelDeploymentReconciler) createModelContainer(
