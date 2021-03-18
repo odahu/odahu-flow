@@ -15,7 +15,7 @@ class ModelDeploymentStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, available_replicas: int=None, created_at: str=None, deployment: str=None, host_header: str=None, last_updated_time: str=None, replicas: int=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(self, available_replicas: int=None, created_at: str=None, deployment: str=None, host_header: str=None, last_updated_time: str=None, model_name: str=None, model_version: str=None, replicas: int=None, state: str=None, updated_at: str=None):  # noqa: E501
         """ModelDeploymentStatus - a model defined in Swagger
 
         :param available_replicas: The available_replicas of this ModelDeploymentStatus.  # noqa: E501
@@ -28,6 +28,10 @@ class ModelDeploymentStatus(Model):
         :type host_header: str
         :param last_updated_time: The last_updated_time of this ModelDeploymentStatus.  # noqa: E501
         :type last_updated_time: str
+        :param model_name: The model_name of this ModelDeploymentStatus.  # noqa: E501
+        :type model_name: str
+        :param model_version: The model_version of this ModelDeploymentStatus.  # noqa: E501
+        :type model_version: str
         :param replicas: The replicas of this ModelDeploymentStatus.  # noqa: E501
         :type replicas: int
         :param state: The state of this ModelDeploymentStatus.  # noqa: E501
@@ -41,6 +45,8 @@ class ModelDeploymentStatus(Model):
             'deployment': str,
             'host_header': str,
             'last_updated_time': str,
+            'model_name': str,
+            'model_version': str,
             'replicas': int,
             'state': str,
             'updated_at': str
@@ -52,6 +58,8 @@ class ModelDeploymentStatus(Model):
             'deployment': 'deployment',
             'host_header': 'hostHeader',
             'last_updated_time': 'lastUpdatedTime',
+            'model_name': 'modelName',
+            'model_version': 'modelVersion',
             'replicas': 'replicas',
             'state': 'state',
             'updated_at': 'updatedAt'
@@ -62,6 +70,8 @@ class ModelDeploymentStatus(Model):
         self._deployment = deployment
         self._host_header = host_header
         self._last_updated_time = last_updated_time
+        self._model_name = model_name
+        self._model_version = model_version
         self._replicas = replicas
         self._state = state
         self._updated_at = updated_at
@@ -189,6 +199,52 @@ class ModelDeploymentStatus(Model):
         """
 
         self._last_updated_time = last_updated_time
+
+    @property
+    def model_name(self) -> str:
+        """Gets the model_name of this ModelDeploymentStatus.
+
+        Model name discovered in ModelDeployment  # noqa: E501
+
+        :return: The model_name of this ModelDeploymentStatus.
+        :rtype: str
+        """
+        return self._model_name
+
+    @model_name.setter
+    def model_name(self, model_name: str):
+        """Sets the model_name of this ModelDeploymentStatus.
+
+        Model name discovered in ModelDeployment  # noqa: E501
+
+        :param model_name: The model_name of this ModelDeploymentStatus.
+        :type model_name: str
+        """
+
+        self._model_name = model_name
+
+    @property
+    def model_version(self) -> str:
+        """Gets the model_version of this ModelDeploymentStatus.
+
+        Model version discovered in ModelDeployment  # noqa: E501
+
+        :return: The model_version of this ModelDeploymentStatus.
+        :rtype: str
+        """
+        return self._model_version
+
+    @model_version.setter
+    def model_version(self, model_version: str):
+        """Sets the model_version of this ModelDeploymentStatus.
+
+        Model version discovered in ModelDeployment  # noqa: E501
+
+        :param model_version: The model_version of this ModelDeploymentStatus.
+        :type model_version: str
+        """
+
+        self._model_version = model_version
 
     @property
     def replicas(self) -> int:

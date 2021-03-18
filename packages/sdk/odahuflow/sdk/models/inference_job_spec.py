@@ -73,7 +73,7 @@ class InferenceJobSpec(Model):
     def data_source(self) -> ConnectionReference:
         """Gets the data_source of this InferenceJobSpec.
 
-        DataSource defines location input data files If nil then will be filled from BatchInferenceService  # noqa: E501
+        DataSource defines location input data files. Input data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object) If nil then will be filled from BatchInferenceService.  # noqa: E501
 
         :return: The data_source of this InferenceJobSpec.
         :rtype: ConnectionReference
@@ -84,7 +84,7 @@ class InferenceJobSpec(Model):
     def data_source(self, data_source: ConnectionReference):
         """Sets the data_source of this InferenceJobSpec.
 
-        DataSource defines location input data files If nil then will be filled from BatchInferenceService  # noqa: E501
+        DataSource defines location input data files. Input data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object) If nil then will be filled from BatchInferenceService.  # noqa: E501
 
         :param data_source: The data_source of this InferenceJobSpec.
         :type data_source: ConnectionReference
@@ -142,7 +142,7 @@ class InferenceJobSpec(Model):
     def output_destination(self) -> ConnectionReference:
         """Gets the output_destination of this InferenceJobSpec.
 
-        OutputDestination defines location of directory with output files If nil then will be filled from BatchInferenceService  # noqa: E501
+        OutputDestination defines location of directory with output files. Output data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object) If nil then will be filled from BatchInferenceService.  # noqa: E501
 
         :return: The output_destination of this InferenceJobSpec.
         :rtype: ConnectionReference
@@ -153,7 +153,7 @@ class InferenceJobSpec(Model):
     def output_destination(self, output_destination: ConnectionReference):
         """Sets the output_destination of this InferenceJobSpec.
 
-        OutputDestination defines location of directory with output files If nil then will be filled from BatchInferenceService  # noqa: E501
+        OutputDestination defines location of directory with output files. Output data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object) If nil then will be filled from BatchInferenceService.  # noqa: E501
 
         :param output_destination: The output_destination of this InferenceJobSpec.
         :type output_destination: ConnectionReference
