@@ -97,6 +97,12 @@ var doc = `{
         "Metadata": {
             "type": "object",
             "properties": {
+                "modelName": {
+                    "type": "string"
+                },
+                "modelVersion": {
+                    "type": "string"
+                },
                 "others": {
                     "description": "Optional metadata key, value",
                     "type": "object",

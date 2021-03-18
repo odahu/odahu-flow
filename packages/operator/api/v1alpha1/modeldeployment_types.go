@@ -78,6 +78,10 @@ type ModelDeploymentStatus struct {
 	Replicas int32 `json:"replicas"`
 	// Time when credentials was updated
 	LastCredsUpdatedTime *metav1.Time `json:"lastUpdatedTime,omitempty"`
+	// Model name discovered in ModelDeployment
+	ModelName string `json:"modelName,omitempty"`
+	// Model version discovered in ModelDeployment
+	ModelVersion string `json:"modelVersion,omitempty"`
 	// DEPRECATED Info about create and update
 	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
 	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`

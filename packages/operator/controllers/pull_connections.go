@@ -20,11 +20,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-logr/logr"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/aws"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,7 +52,7 @@ type DockerSecret struct {
 // Read more about it:
 // https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 func (r *ModelDeploymentReconciler) reconcileDeploymentPullConnection(
-	log logr.Logger,
+	log *zap.SugaredLogger,
 	md *odahuflowv1alpha1.ModelDeployment,
 ) error {
 	mdConnID := *md.Spec.ImagePullConnectionID
@@ -62,7 +62,7 @@ func (r *ModelDeploymentReconciler) reconcileDeploymentPullConnection(
 		return nil
 	}
 
-	log = log.WithValues(odahuflow.ConnectionIDLogPrefix, mdConnID)
+	log = log.With(odahuflow.ConnectionIDLogPrefix, mdConnID)
 
 	mdConn, err := r.connAPIClient.GetConnection(mdConnID)
 	if err != nil {
@@ -123,7 +123,7 @@ func (r *ModelDeploymentReconciler) reconcileDeploymentPullConnection(
 }
 
 func (r *ModelDeploymentReconciler) reconcileDockerDeploymentSecret(
-	log logr.Logger,
+	log *zap.SugaredLogger,
 	md *odahuflowv1alpha1.ModelDeployment,
 	conn *connection.Connection,
 	dockerSecret DockerSecret,
@@ -195,7 +195,7 @@ func (r *ModelDeploymentReconciler) reconcileDockerDeploymentSecret(
 }
 
 func (r *ModelDeploymentReconciler) reconcileDockerServiceAccount(
-	log logr.Logger,
+	log *zap.SugaredLogger,
 	md *odahuflowv1alpha1.ModelDeployment,
 ) error {
 	depSecretName := odahuflow.GenerateDeploymentConnectionSecretName(md.Name)

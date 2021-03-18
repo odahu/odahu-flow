@@ -8,7 +8,7 @@ import (
 	deployment_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
 	event_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/event"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/inspectors"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/inspectors"
 	"go.uber.org/zap"
 )
 
@@ -37,7 +37,7 @@ func (r UpdateHandler) inspectModel(
 		return model, errors.New(errorStr)
 	}
 
-	return inspector.Inspect(prefix, log)
+	return inspector.Inspect(prefix, "", log)
 }
 
 func (r UpdateHandler) Handle(object interface{}, log *zap.SugaredLogger) (err error) {

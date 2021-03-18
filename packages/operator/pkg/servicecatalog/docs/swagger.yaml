@@ -16,6 +16,10 @@ definitions:
     type: object
   Metadata:
     properties:
+      modelName:
+        type: string
+      modelVersion:
+        type: string
       others:
         additionalProperties:
           type: string

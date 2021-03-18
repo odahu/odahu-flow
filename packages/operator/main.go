@@ -18,6 +18,7 @@ package main
 
 import (
 	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	"go.uber.org/zap"
 	"os"
 
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
@@ -29,14 +30,14 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	ctrl_zap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
-	mp_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/controllers"
+	mp_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
+	train_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -107,7 +108,11 @@ func start(cmd *cobra.Command, args []string) {
 
 	odahuConfig := config.MustLoadConfig()
 
-	ctrl.SetLogger(zap.New(zap.UseDevMode(true)))
+	// TODO: remove controller-runtime logging and fully replace it with zap
+	ctrl.SetLogger(ctrl_zap.New(ctrl_zap.UseDevMode(true)))
+
+	rootLogger, _ := zap.NewProduction()
+	defer rootLogger.Sync()
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
@@ -163,7 +168,8 @@ func start(cmd *cobra.Command, args []string) {
 	}
 
 	if odahuConfig.Deployment.Enabled {
-		if err = controllers.NewModelDeploymentReconciler(mgr, *odahuConfig).SetupWithManager(mgr); err != nil {
+		err = controllers.NewModelDeploymentReconciler(mgr, *odahuConfig, rootLogger).SetupWithManager(mgr)
+		if err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ModelDeployment")
 			os.Exit(1)
 		}
@@ -176,8 +182,8 @@ func start(cmd *cobra.Command, args []string) {
 	if odahuConfig.Batch.Enabled {
 
 		batchOpts := controllers.BatchInferenceJobReconcilerOptions{
-			Client: mgr.GetClient(),
-			Schema: mgr.GetScheme(),
+			Client:          mgr.GetClient(),
+			Schema:          mgr.GetScheme(),
 			ConnGetter:      connAPI,
 			Cfg:             odahuConfig.Batch,
 			ResourceGPUName: odahuConfig.Common.ResourceGPUName,

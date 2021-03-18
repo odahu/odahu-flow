@@ -22,16 +22,14 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/event"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/inspectors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/inspectors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"log"
 	nethttp "net/http"
-	"net/url"
-	"odahu-commons/predictors"
 	"os"
 	"os/signal"
 	"sync"
@@ -46,7 +44,7 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 		aCfg.APIURL, aCfg.APIToken, aCfg.ClientID, aCfg.ClientSecret, aCfg.OAuthOIDCTokenEndpoint, "api/v1",
 	)
 
-	edgeURL, err := url.Parse(cfg.EdgeURL)
+	inspectorsMap, err := inspectors.NewInspectorsMap(cfg.EdgeURL, &httpClient)
 	if err != nil {
 		return servicecatalog.Reflector{}, err
 	}
@@ -54,18 +52,7 @@ func initReflector(cfg config.ServiceCatalog, logger *zap.SugaredLogger,
 	deploymentClient := deployment.NewClient(aCfg)
 
 	return servicecatalog.NewReflector(logger, servicecatalog.UpdateHandler{
-		Inspectors: map[string]inspectors.ModelServerInspector{
-			predictors.OdahuMLServer.ID: inspectors.OdahuMLServerInspector{
-				EdgeURL:    *edgeURL,
-				EdgeHost:   cfg.EdgeHost,
-				HTTPClient: &httpClient,
-			},
-			predictors.Triton.ID: inspectors.TritonInspector{
-				EdgeURL:    *edgeURL,
-				EdgeHost:   cfg.EdgeHost,
-				HTTPClient: &httpClient,
-			},
-		},
+		Inspectors:       inspectorsMap,
 		Catalog:          catalog,
 		DeploymentClient: deploymentClient,
 	}, servicecatalog.RouteEventFetcher{

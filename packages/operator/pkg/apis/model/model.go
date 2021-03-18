@@ -2,6 +2,8 @@ package model
 
 // Metadata of a model
 type Metadata struct {
+	ModelName    string `json:"modelName"`
+	ModelVersion string `json:"modelVersion"`
 	// Optional metadata key, value
 	Others map[string]string `json:"others"`
 }
@@ -11,13 +13,6 @@ type Swagger2 struct {
 	// Base64 encoded OpenAPI 2.0 definition of MLServer API
 	Raw []byte `json:"raw" swaggertype:"string" format:"base64"`
 }
-
-type MLServerName string
-
-const (
-	MLServerODAHU  MLServerName = "ODAHU"
-	MLServerTriton MLServerName = "Triton"
-)
 
 // ServedModel contains information about served model
 type ServedModel struct {
