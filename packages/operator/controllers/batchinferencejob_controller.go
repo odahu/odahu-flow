@@ -25,7 +25,6 @@ import (
 	"context"
 	"github.com/go-logr/logr"
 	"github.com/google/uuid"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -40,6 +39,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"github.com/odahu/odahu-flow/packages/operator/controllers/utils/batchinferenceutils"
+	. "github.com/odahu/odahu-flow/packages/operator/controllers/types"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 )
@@ -48,9 +49,7 @@ const (
 	batchIDLabel = "odahu.org/batchID"
 )
 
-type ConnGetter interface {
-	GetConnection(id string) (*connection.Connection, error)
-}
+
 
 type PodGetter interface {
 	GetPod(ctx context.Context, name string, namespace string) (corev1.Pod, error)
@@ -176,7 +175,7 @@ func (r *BatchInferenceJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, 
 func (r *BatchInferenceJobReconciler) generateTaskSpec(
 	batchJob *odahuflowv1alpha1.BatchInferenceJob,
 	) (*tektonv1beta1.TaskSpec, error) {
-	return BatchJobToTaskSpec(
+	return batchinferenceutils.BatchJobToTaskSpec(
 		batchJob, r.connAPI, r.gpuResName, r.cfg.RCloneImage, r.cfg.ToolsSecret, r.cfg.ToolsImage)
 }
 

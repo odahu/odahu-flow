@@ -1,4 +1,21 @@
-package controllers
+/*
+ *
+ *     Copyright 2021 EPAM Systems
+ *
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an "AS IS" BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
+ */
+
+package batchinferenceutils
 
 import (
 	"fmt"
@@ -10,9 +27,7 @@ import (
 const (
 	pathToOdahuToolsBin = "/opt/odahu-flow/odahu-tools"
 	toolsConfigVolume = "config"
-	inputRCloneCfgName = "odahu-data-input"
-	outputRCloneCfgName = "odahu-data-output"
-	modelRCloneCfgName = "odahu-data-model"
+	workspacePath     = "/workspace"
 )
 
 // Step names
@@ -79,13 +94,12 @@ var (
 // GetConfigureRCloneStep return step that
 // configures environment (rclone config) for syncing data and model
 // using ODAHU connections
-func GetConfigureRCloneStep(image string, inpConn string,
-	outConn string, modelConn string, res corev1.ResourceRequirements) tektonv1beta1.Step {
+func GetConfigureRCloneStep(image string, res corev1.ResourceRequirements, conns ...string) tektonv1beta1.Step {
 
 	var args = []string{"auth", "configure-rclone"}
-	args = append(args, "--conn", fmt.Sprintf("%s:%s", inpConn, inputRCloneCfgName))
-	args = append(args, "--conn", fmt.Sprintf("%s:%s", outConn, outputRCloneCfgName))
-	args = append(args, "--conn", fmt.Sprintf("%s:%s", modelConn, modelRCloneCfgName))
+	for _, c := range conns {
+		args = append(args, "--conn", fmt.Sprintf("%s:%s", c, c))
+	}
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:         "configure-rclone",
@@ -104,11 +118,12 @@ func GetConfigureRCloneStep(image string, inpConn string,
 // where input will be validated and copied to user container's input directory
 func GetSyncDataStep(
 	rcloneImage string,
+	rcloneConfigName string,
 	bucketName string,
 	inputPath string,
 	res corev1.ResourceRequirements,
 	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", inputRCloneCfgName, bucketName)
+	sourcePrefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	source := path.Join(sourcePrefix, inputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
@@ -127,11 +142,12 @@ func GetSyncDataStep(
 // where model will be validated and copied to user container's input directory
 func GetSyncModelStep(
 	rcloneImage string,
+	rcloneConfigName string,
 	bucketName string,
 	modelPath string,
 	res corev1.ResourceRequirements,
 	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
+	sourcePrefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	source := path.Join(sourcePrefix, modelPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
@@ -150,11 +166,12 @@ func GetSyncModelStep(
 // and unpacks it by handling as tar.gz file.
 func GetSyncPackedModelStep(
 	rcloneImage string,
+	rcloneConfigName string,
 	bucketName string,
 	modelPath string,
 	res corev1.ResourceRequirements,
 	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
+	sourcePrefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	source := path.Join(sourcePrefix, modelPath)
 
 	baseName := path.Base(modelPath)
@@ -265,11 +282,12 @@ func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequire
 // syncs output data to bucket
 func GetSyncOutputStep(
 	rcloneImage string,
+	rcloneConfigName string,
 	bucketName string,
 	remoteOutputPath string,
 	res corev1.ResourceRequirements,
 ) tektonv1beta1.Step {
-	prefix := fmt.Sprintf("%s:%s", outputRCloneCfgName, bucketName)
+	prefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	dest := path.Join(prefix, remoteOutputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
