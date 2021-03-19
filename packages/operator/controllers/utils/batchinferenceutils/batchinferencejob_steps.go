@@ -138,8 +138,7 @@ func GetSyncDataStep(
 }
 
 // GetSyncModelStep return step that
-// syncs model to pre-stage directory inside Pod
-// where model will be validated and copied to user container's input directory
+// syncs model from s3/gcs/azureblob bucket to workspace
 func GetSyncModelStep(
 	rcloneImage string,
 	rcloneConfigName string,
@@ -160,10 +159,9 @@ func GetSyncModelStep(
 		},
 	}
 }
+
 // GetSyncPackedModelStep return step that
-// syncs model to pre-stage directory inside Pod
-// where model will be validated and copied to user container's input directory
-// and unpacks it by handling as tar.gz file.
+// syncs model from s3/gcs/azureblob bucket to workspace and unpack it
 func GetSyncPackedModelStep(
 	rcloneImage string,
 	rcloneConfigName string,
