@@ -19,10 +19,10 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
-	feedback_commons "odahu-commons/feedback"
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
 	"net/http"
 	"net/http/httptest"
+	feedback_commons "odahu-commons/feedback"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -69,7 +69,7 @@ func TestSendFeedbackWithoutHeader(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 400, w.Code)
-	assert.Equal(t, "{\"error\":\"x-request-id header is missed\"}", w.Body.String())
+	assert.Equal(t, "{\"error\":\"request-id header is missed\"}", w.Body.String())
 }
 
 func buildMessage(modelName, modelVersion, requestID string, payload map[string]interface{}) feedback_commons.ModelFeedback {
@@ -102,7 +102,7 @@ func TestSendFeedbackWithOnlyHeader(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", testFeedbackUrl, nil)
-	req.Header.Set(feedback.RequestIdHeaderKey, requestID)
+	req.Header.Set(feedback.OdahuFlowRequestIdHeaderKey, requestID)
 	req.Header.Set(feedback.ModelNameHeaderKey, modelName)
 	req.Header.Set(feedback.ModelVersionHeaderKey, modelVersion)
 	router.ServeHTTP(w, req)
