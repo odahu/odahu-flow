@@ -41,30 +41,47 @@ spec:
       {{- end }}
 {{ end }}
 ---
-# This filter is to preserve a request ID of incoming external request on Ingress.
-# The motivation is that to adopt Knative routing mechanism we use "double" routing
-# on istio ingress. The first routing (that we provide) bases on the request path and
-# forwards the request to the same ingress, but rewrites Host header for the second routing.
-# The second one (automatically added by Knative Service) bases on the Host header and forwards
-# the request to the corresponding service. Without preserve_external_request_id these 2 phases of routing
-# both override the X-Request-ID header, while we want it to stay the same. Otherwise feedback mechanism breaks.
+# This filter saves a request ID (taken from "request-id" or "x-request-id" header) to a Dynamic Metadata,
+# a shared cache for all the filters of current HTTP stream. On forwarding response it retrieves the request-id value
+# and sets the corresponding header. This ensures that client always receives a request ID in response headers,
+# no matter what inference server is used in Model Deployment. The request ID can then be used to provide a feedback
+# for a corresponding prediction.
+# TODO: used syntax is for Istio 1.4 and is deprecated. Don't forget to update it after upgrading Istio
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
-  name: preserve-request-id-filter
+  name: request-id-filter
   namespace: {{ .Values.feedback.istio_namespace }}
 spec:
-  configPatches:
-    - applyTo: NETWORK_FILTER
-      match:
-        context: GATEWAY
-        listener:
-          filterChain:
-            filter:
-              name: envoy.http_connection_manager
-      patch:
-        operation: MERGE
-        value:
-          typed_config:
-            '@type': type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
-            preserve_external_request_id: true
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  filters:
+    - filterName: envoy.lua
+      filterType: HTTP
+      listenerMatch:
+        listenerType: GATEWAY
+        listenerProtocol: HTTP
+      filterConfig:
+        inlineCode: |
+          function envoy_on_request(request_handle)
+            local headers = request_handle:headers()
+            local x_request_id = headers:get("x-request-id")
+            local request_id = headers:get("request-id")
+
+            if request_id == nil then
+              request_id = x_request_id
+              request_handle:logInfo("request-id header is nil, using x-request-id")
+              headers:add("request-id", request_id)
+            end
+
+            request_handle:logInfo("request-id from headers: "..request_id)
+            request_handle:streamInfo():dynamicMetadata():set("odahu", "request-id", request_id)
+          end
+          function envoy_on_response(response_handle)
+            local headers = response_handle:headers()
+            local request_id = response_handle:streamInfo():dynamicMetadata():get("odahu")["request-id"]
+            headers:replace("request-id", request_id)
+
+            response_handle:logInfo("request-id from dynamic metadata: "..request_id)
+          end

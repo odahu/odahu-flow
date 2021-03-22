@@ -3,7 +3,6 @@ package feedback
 const (
 	ModelNameHeaderKey               = "model-name"
 	ModelVersionHeaderKey            = "model-version"
-	RequestIdHeaderKey               = "x-request-id"
 	OdahuFlowRequestIdHeaderKey      = "request-id"
 	HttpMethodHeaderKey              = ":method"
 	OriginalUriHeaderKey             = "x-original-uri"

@@ -133,12 +133,6 @@ func (rc *RequestCollector) convertToFeedback(message *Message) (*commons_feedba
 		case feedback.ForwardedHostHeaderKey:
 			requestResponse.RequestHost = header.Value
 
-		case feedback.RequestIdHeaderKey:
-			if len(responseBody.RequestID) == 0 || len(requestResponse.RequestID) == 0 {
-				responseBody.RequestID = header.Value
-				requestResponse.RequestID = header.Value
-			}
-
 		case feedback.OdahuFlowRequestIdHeaderKey:
 			responseBody.RequestID = header.Value
 			requestResponse.RequestID = header.Value
