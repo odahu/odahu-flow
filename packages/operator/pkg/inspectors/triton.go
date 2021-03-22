@@ -38,7 +38,9 @@ type TritonInspector struct {
 	HTTPClient httpClient
 }
 
-func (t TritonInspector) Inspect(prefix string, hostHeader string, log *zap.SugaredLogger) (model_types.ServedModel, error) {
+func (t TritonInspector) Inspect(prefix string, hostHeader string, log *zap.SugaredLogger) (
+	model_types.ServedModel, error,
+) {
 	log.Info("getting a list of served models")
 	listModelsRequest := t.generateListModelsRequest(prefix, hostHeader)
 	response, err := t.HTTPClient.Do(listModelsRequest)
