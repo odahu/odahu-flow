@@ -24,6 +24,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -75,6 +76,7 @@ var (
 			Memory: &reqMem,
 		},
 	}
+	logger, err = zap.NewDevelopment()
 )
 
 type ModelDeploymentControllerSuite struct {
@@ -112,7 +114,7 @@ func (s *ModelDeploymentControllerSuite) initReconciler(deploymentConfig config.
 	cfg := config.NewDefaultConfig()
 	cfg.Deployment = deploymentConfig
 
-	reconciler := NewModelDeploymentReconciler(s.k8sManager, *cfg)
+	reconciler := NewModelDeploymentReconciler(s.k8sManager, *cfg, logger)
 	rw := NewReconcilerWrapper(reconciler, s.requests)
 	s.Assertions.NoError(rw.SetupWithManager(s.k8sManager))
 }
