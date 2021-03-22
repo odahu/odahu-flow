@@ -76,7 +76,7 @@ var (
 			Memory: &reqMem,
 		},
 	}
-	logger, err = zap.NewDevelopment()
+	logger, _ = zap.NewDevelopment()
 )
 
 type ModelDeploymentControllerSuite struct {

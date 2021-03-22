@@ -112,7 +112,7 @@ func start(cmd *cobra.Command, args []string) {
 	ctrl.SetLogger(ctrl_zap.New(ctrl_zap.UseDevMode(true)))
 
 	rootLogger, _ := zap.NewProduction()
-	defer rootLogger.Sync()
+	defer rootLogger.Sync() //nolint:errcheck
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
