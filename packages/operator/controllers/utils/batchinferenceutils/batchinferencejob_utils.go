@@ -25,11 +25,56 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
+	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	. "github.com/odahu/odahu-flow/packages/operator/controllers/types"
+	"path/filepath"
 	"strings"
 )
 
+
+func getModelNameVersion(modelDir string) (string, string, error) {
+
+	type Model struct {
+		Name string `json:"name"`
+		Version string `json:"version"`
+	}
+
+	type ModelFile struct {
+		Model Model `json:"model"`
+	}
+
+	modelFiles := []string{"odahuflow.project.yaml", "odahuflow.project.yml"}
+
+	items, err := ioutil.ReadDir(modelDir)
+	if err != nil {
+		return "", "", err
+
+	}
+	for _, item := range items {
+		file := item.Name()
+		for _, mFile := range modelFiles {
+			if mFile == file {
+
+				fp := filepath.Join(modelDir, file)
+				zap.S().Infof("Model metadata file is found %s", fp)
+				data, err := ioutil.ReadFile(fp)
+				if err != nil {
+					return "", "", err
+				}
+				mf := ModelFile{}
+				if err := yaml.Unmarshal(data, &mf); err != nil {
+					return "", "", err
+				}
+
+				return mf.Model.Name, mf.Model.Version, nil
+			}
+		}
+	}
+	return "", "", fmt.Errorf("unable to find model metadata file")
+}
 
 func GetBucketNamePath(connName string, path string, connAPI ConnGetter) (
 	bucketName string, actualPath string, err error) {
