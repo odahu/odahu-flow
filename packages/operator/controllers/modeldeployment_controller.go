@@ -267,7 +267,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		if err != nil {
 			return err
 		}
-		log.Info(fmt.Sprintf("Updating %s Knative Service, new MD generation: %d",
+		log.Info(fmt.Sprintf("Updating '%s' Knative Service, new MD generation: %d",
 			knativeServiceName, modelDeploymentCR.Generation))
 		err = r.Update(context.TODO(), found)
 		if err != nil {
