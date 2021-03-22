@@ -8,7 +8,6 @@ type RequestResponse struct {
 	ResponseStatus      string            `msg:"response_status"`
 	ResponseHttpHeaders map[string]string `msg:"response_http_headers"`
 	RequestHost         string            `msg:"request_host"`
-	ModelEndpoint       string            `msg:"model_endpoint"`
 	ModelVersion        string            `msg:"model_version"`
 	ModelName           string            `msg:"model_name"`
 	RequestHttpMethod   string            `msg:"request_http_method"`
@@ -16,7 +15,6 @@ type RequestResponse struct {
 
 type ResponseBody struct {
 	RequestID       string `msg:"request_id"`
-	ModelEndpoint   string `msg:"model_endpoint"`
 	ModelVersion    string `msg:"model_version"`
 	ModelName       string `msg:"model_name"`
 	ResponseContent string `msg:"response_content"`

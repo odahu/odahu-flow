@@ -43,18 +43,48 @@ func NewRequestCollector(
 		ConfigID: configId,
 	}
 
-	rules := make([]Rule, 0, len(predictors.Predictors))
+	predictorRules := make([]MatchPredicate, 0, len(predictors.Predictors))
 	for _, predictor := range predictors.Predictors {
-		rules = append(rules, Rule{
-			HttpRequestHeadersMatch: HttpRequestHeadersMatch{
-				Headers: []TapRequestHeader{{
+		predictorRules = append(predictorRules, MatchPredicate{
+			HttpRequestHeadersMatch: HttpHeadersMatch{
+				Headers: []HeaderMatcher{{
 					Name:       filterHeaderKey,
 					RegexMatch: predictor.InferenceEndpointRegex,
 				}},
 			},
 		})
 	}
-	feedbackRequest.TapConfig.MatchConfig.OrMatch.Rules = rules
+
+	feedbackRequest.TapConfig.MatchConfig = MatchPredicate{
+		AndMatch: MatchSet{Rules: []MatchPredicate{
+			{
+				OrMatch: MatchSet{Rules: predictorRules},
+			},
+			{
+				// This rule is necessary because every inference request goes through 2 VirtualServices:
+				// ODAHU's one and Knative's one. So the request goes through the Istio Ingress twice.
+				// The second iteration is internal and should be filtered out.
+				// The transparent way to do that is to filter it basing on Knative-specific headers, which
+				// appear in only the second iteration, but for some reason Envoy is unable to work with them.
+				// Seems like a bug in Envoy. Example of more self-explaining rule:
+				//HttpRequestHeadersMatch: HttpHeadersMatch{Headers: []HeaderMatcher{
+				//	{
+				//		Name: "knative-serving-revision",
+				//		PresentMatch: true,
+				//		InvertMatch: true,
+				//	},
+				//}},
+				// During experiments with different rules this one was discovered as a working one
+				HttpRequestHeadersMatch: HttpHeadersMatch{Headers: []HeaderMatcher{
+					{
+						Name:        feedback.EnvoyInternalRoutingHeader,
+						PrefixMatch: feedback.EnvoyInternalRoutingHeaderPrefix,
+						InvertMatch: true,
+					},
+				}},
+			},
+		}},
+	}
 
 	feedbackRequest.TapConfig.OutputConfig.Sinks = append(
 		feedbackRequest.TapConfig.OutputConfig.Sinks,
@@ -132,10 +162,6 @@ func (rc *RequestCollector) convertToFeedback(message *Message) (*commons_feedba
 			responseBody.ModelVersion = header.Value
 			requestResponse.ModelVersion = header.Value
 
-		case feedback.ModelEndpointHeaderKey:
-			responseBody.ModelEndpoint = header.Value
-			requestResponse.ModelEndpoint = header.Value
-
 		case feedback.StatusHeaderKey:
 			requestResponse.ResponseStatus = header.Value
 		}
@@ -191,6 +217,8 @@ func (rc *RequestCollector) tapTraffic() error {
 		Timeout:   0,
 	}
 
+	log.Info("tap request dump", "yaml", string(rc.feedbackRequestYaml))
+
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -211,6 +239,10 @@ func (rc *RequestCollector) tapTraffic() error {
 		if err != nil {
 			return err
 		}
+
+		log.Info("logged request", "modelName", requestResponse.ModelName,
+			"modelVersion", requestResponse.ModelVersion,
+			"request_id", responseBody.RequestID)
 
 		err = rc.logger.Post(viper.GetString(feedback.CfgRequestResponseTag), *requestResponse)
 		if err != nil {
