@@ -27,18 +27,80 @@
 //   name: wine
 //	 version: 1.2
 // --
+
+
 package object_storage
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/objectstorage"
-	"go.uber.org/zap"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
+"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
+"os"
+"path"
 	"path/filepath"
+	"strings"
+
 )
+
+// SyncArchiveOrDir sync object storage directory or archive
+// If localPath ends with "/" slash then we assume that it's a directory otherwise file
+// If (conn.URI + relPath) ends with .tar.gz or .zip then we assume that it's compressed tarball (.zip is legacy).
+// If local path is directory but remote path is archive then we not only fetch archive but unzip it to local path
+// Please take a look at ObjectStorage.Download
+func SyncArchiveOrDir(conn v1alpha1.ConnectionSpec, relPath string, localPath string) error {
+
+	log := zap.S()
+
+
+	storage, err := rclone.NewObjectStorage(&conn)
+	if err != nil {
+		log.Error(err, "repository creation")
+		return err
+	}
+
+	fullModelPath := path.Join(storage.RemoteConfig.Path, relPath)
+
+	remoteFileIsArchive := strings.HasSuffix(relPath,".zip") || strings.HasSuffix(relPath,".tar.gz")
+
+	// Automatically unzip archive to target location directory
+	if remoteFileIsArchive {
+
+		file, err := ioutil.TempFile("", relPath)
+		if err != nil {
+			log.Error(err, "Unable to create temp model archive file to fetch into")
+			return err
+		}
+		tempZip := file.Name()
+		if err := storage.Download(tempZip, fullModelPath); err != nil {
+			return err
+		}
+
+		// Ensure that target directory for utils.Unzip destination exists
+		if err = os.MkdirAll(localPath, 0777); err != nil {
+			log.Error(err, "output dir creation")
+			return err
+		}
+		// Unzip archive
+		if err := utils.Unzip(tempZip, localPath); err != nil {
+			log.Error(err, "unzip training data")
+
+			return err
+		}
+
+	} else {
+		if err := storage.Download(localPath, fullModelPath); err != nil {
+			return err
+		}
+	}
+
+	return nil
+
+}
 
 type ConnGetter interface {
 	GetConnection(id string) (*connection.Connection, error)
@@ -48,29 +110,45 @@ type ModelRegistry struct {
 	connGetter ConnGetter
 }
 
+
 func NewModelRegistry(cg ConnGetter) *ModelRegistry {
 	return &ModelRegistry{connGetter: cg}
 }
 
-
 // SyncModel fetch model files from registry to localPath. If localPath is nil
 // then SyncModel set localPath to temp directory and fetch model files there
-func (mr ModelRegistry) SyncModel(connName string, path string, localPath *string) error {
+// Model can be whether directory or .tar.gz / .zip archive
+// If localPath == "" then temp directory will be created and returned in newLocalPath
+// otherwise newLocalPath == localPath
+func (mr ModelRegistry) SyncModel(connName string, relPath string, localPath string) (newLocalPath string, err error) {
+
+	newLocalPath = localPath
 
 	conn, err := mr.connGetter.GetConnection(connName)
 	if err != nil {
-		return err
+		return newLocalPath, err
 	}
 
-	if localPath == nil {
+	if err = conn.DecodeBase64Fields(); err != nil {
+		return newLocalPath, err
+	}
+
+	if localPath == "" {
 		tempDir, err := ioutil.TempDir("", "model-files")
 		if err != nil {
-			return err
+			return newLocalPath, err
 		}
-		localPath = &tempDir
-		defer func() {_ = os.Remove(*localPath)}()
+		newLocalPath = tempDir
+		defer func() {_ = os.Remove(tempDir)}()
 	}
-	return objectstorage.SyncArchiveOrDir(conn.Spec, path, *localPath)
+
+	if !strings.HasSuffix(newLocalPath, "/") {
+		zap.S().Infof("Adding suffix '/' to %s to mark it as directory " +
+			"(model can be synced only to directory)", newLocalPath)
+		newLocalPath = newLocalPath + "/"
+	}
+
+	return newLocalPath, SyncArchiveOrDir(conn.Spec, relPath, newLocalPath)
 }
 
 func getModelNameVersion(modelDir string) (string, string, error) {
@@ -116,9 +194,9 @@ func getModelNameVersion(modelDir string) (string, string, error) {
 
 // Meta fetch model name and version using model path
 func (mr ModelRegistry) Meta(connName string, path string) (name string, version string, err error) {
-	var localPath string
-	if err = mr.SyncModel(connName, path, &localPath); err != nil {
-		return
+	localPath, err := mr.SyncModel(connName, path, "")
+	if err != nil {
+		return "", "", err
 	}
 
 	return getModelNameVersion(localPath)

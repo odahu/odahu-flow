@@ -19,7 +19,7 @@ package cmd
 
 import (
 	connAPI "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
-	object_storage "github.com/odahu/odahu-flow/packages/operator/pkg/utils/models/registry/object-storage"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/model_registry/object_storage"
 	"github.com/spf13/cobra"
 	"fmt"
 	"os"
@@ -27,25 +27,28 @@ import (
 
 // flag values
 var (
-	connName string
-	relPath string
-	localPath string
+	connName   string
+	remotePath string
+	localPath  string
 )
 
 func init() {
 	rootCmd.AddCommand(registryCommand)
 	registryCommand.AddCommand(objectStorageRegistryCommand)
-	objectStorageRegistryCommand.AddCommand(syncModelCommand)
-	objectStorageRegistryCommand.Flags().StringVar(
+	objectStorageRegistryCommand.PersistentFlags().StringVar(
 		&connName, "conn", "", "connection: s3, gcs, azureblob types are supported",
 	)
-	_ = objectStorageRegistryCommand.MarkFlagRequired("conn")
-	objectStorageRegistryCommand.Flags().StringVar(
-		&relPath, "path", "", "path that will be appended to conn.URI",
+	_ = objectStorageRegistryCommand.MarkPersistentFlagRequired("conn")
+	objectStorageRegistryCommand.PersistentFlags().StringVar(
+		&remotePath, "remotePath", "", "remote path that will be appended to conn.URI",
 	)
-	objectStorageRegistryCommand.Flags().StringVar(
+
+	objectStorageRegistryCommand.AddCommand(syncModelCommand)
+	syncModelCommand.PersistentFlags().StringVar(
 		&localPath, "localPath", "", "Where sync model locally",
 	)
+
+	objectStorageRegistryCommand.AddCommand(modelInfoCommand)
 }
 
 var registryCommand = &cobra.Command{
@@ -79,10 +82,29 @@ var syncModelCommand = &cobra.Command{
 		client := connAPI.NewClient(cfg.Auth.APIURL, "",
 			cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.OAuthOIDCTokenEndpoint)
 		registry := object_storage.NewModelRegistry(client)
-		if err := registry.SyncModel(connName, relPath, &localPath); err != nil {
+
+		if _, err := registry.SyncModel(connName, remotePath, localPath); err != nil {
 			return err
 		}
 		fmt.Printf("Model files were successfully synced to %s\n", localPath)
+		return nil
+	},
+}
+
+
+var modelInfoCommand = &cobra.Command{
+	Use:  "info",
+	Short: "Show model name and version",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		client := connAPI.NewClient(cfg.Auth.APIURL, "",
+			cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.OAuthOIDCTokenEndpoint)
+		registry := object_storage.NewModelRegistry(client)
+
+		name, ver, err := registry.Meta(connName, remotePath)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Model name: %s\nModel version: 	%s\n", name, ver)
 		return nil
 	},
 }

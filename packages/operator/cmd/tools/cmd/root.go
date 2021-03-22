@@ -123,7 +123,7 @@ func init() {
 func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Printf("Exit code 1: %s", err)
+		fmt.Printf("Exit code 1: %s\n", err)
 		os.Exit(1)
 	}
 }
