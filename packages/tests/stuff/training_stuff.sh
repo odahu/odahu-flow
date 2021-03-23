@@ -234,8 +234,8 @@ function setup_batch_examples() {
   cp -r ${tmp_odahu_example_dir}/batch-inference/output "${DIR}/../e2e/robot/tests/api/resources/batch/output/"
   # Upload model and input data to object storage
   copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/input "${BUCKET_NAME}/test-data/batch_job_data/input"
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model "${BUCKET_NAME}/test-data/batch_job_data/model"
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model.tar.gz "${BUCKET_NAME}/test-data/batch_job_data/"
+  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model "${BUCKET_NAME}/output/test-data/batch_job_data/model"
+  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model.tar.gz "${BUCKET_NAME}/output/test-data/batch_job_data/"
   # Clean tmp dir
   rm -rf "${tmp_odahu_example_dir}"
 }
