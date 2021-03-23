@@ -61,8 +61,8 @@ func validateRequiredFields(bis api_types.InferenceService) (err error) {
 			fmt.Errorf("whether modelRegistry.local.meta.name " +
 				"or modelRegistry.local.meta.version must be defined for embedded models"))
 	}
-	if bis.Spec.ModelRegistry.Remote == nil || bis.Spec.ModelRegistry.Local == nil {
-		err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelRegistry.connection"))
+	if bis.Spec.ModelRegistry.Remote == nil && bis.Spec.ModelRegistry.Local == nil {
+		err = multierr.Append(err, fmt.Errorf("whether modelRegistry.local or modelRegistry.remote must be defined"))
 	}
 
 

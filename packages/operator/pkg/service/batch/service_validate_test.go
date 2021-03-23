@@ -87,9 +87,9 @@ var testValidateCreateCases = []struct {
 	},
 }
 func TestValidateCreateUpdate(t *testing.T) {
-	req := require.New(t)
 	for _, test := range testValidateCreateCases {
 		t.Run(test.testName, func(t *testing.T) {
+			req := require.New(t)
 			bis := api_types.InferenceService{
 				ID:   "bis",
 				Spec: test.spec,
