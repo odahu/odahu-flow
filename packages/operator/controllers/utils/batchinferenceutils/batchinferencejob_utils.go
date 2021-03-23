@@ -18,6 +18,7 @@
 package batchinferenceutils
 
 import (
+	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	. "github.com/odahu/odahu-flow/packages/operator/controllers/types"
@@ -25,9 +26,9 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/model_registry/object_storage"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	"strings"
 )
 
 
@@ -61,25 +62,32 @@ func GetBucketNamePath(connName string, path string, connAPI ConnGetter) (
 // depending on v1alpha1.ModelSource (remote or local) and connection type
 func GetModelSyncSteps(
 	job *v1alpha1.BatchInferenceJob,
-	rcloneImage string,
 	res corev1.ResourceRequirements,
+	odahuToolsImage string,
 	connAPI ConnGetter,
 ) (steps []tektonv1beta1.Step, err error) {
-	switch {
-	case job.Spec.ModelSource.Remote != nil:
-		source := job.Spec.ModelSource.Remote
-		bucket, path, err := GetBucketNamePath(source.ModelConnection, source.ModelPath, connAPI)
-		if err != nil {
-			return steps, err
-		}
-		if strings.HasSuffix(path, ".tar.gz") || strings.HasSuffix(path, ".zip"){
-			steps = append(steps, GetSyncPackedModelStep(
-				rcloneImage, source.ModelConnection, bucket, path, res))
-		} else{
-			steps = append(steps, GetSyncModelStep(rcloneImage, source.ModelConnection, bucket, path, res))
-		}
-	case job.Spec.ModelSource.Local != nil:}  // Local model source does not require to sync model
+
+	if job.Spec.ModelSource.Remote == nil {
+		return steps, err
+	}
+	connName := job.Spec.ModelSource.Remote.ModelConnection
+	modelPath := job.Spec.ModelSource.Remote.ModelPath
+	conn, err := connAPI.GetConnection(connName)
+	if err != nil {
+		return steps, err
+	}
+	connType := conn.Spec.Type
+
+	// Select Model sync algorithm according to connection type
+	// Different connection type usually mean different model registries
+	switch  {
+	case connType == connection.GcsType || connType == connection.S3Type || connType == connection.AzureBlobType:
+		steps = append(steps, GetObjectStorageModelSyncStep(odahuToolsImage, connName, modelPath, res))
+	default:
+		return steps, fmt.Errorf(`connection type "%s" is not supported to model sync`, connType)
+	}
 	return steps, nil
+
 }
 
 // BatchJobToTaskSpec generate tektoncd TaskSpec based on v1alpha1.BatchInferenceJob
@@ -102,24 +110,46 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 		return ts, err
 	}
 
-	connsForRClone := []string{job.Spec.InputConnection, job.Spec.OutputConnection}
-	if job.Spec.ModelSource.Remote != nil {
-		connsForRClone = append(connsForRClone, job.Spec.ModelSource.Remote.ModelConnection)
-	}
 
 	steps := []tektonv1beta1.Step{
 		GetConfigureRCloneStep(
 			toolsImage,
 			helpContainerRes,
-			connsForRClone...),
+			[]string{job.Spec.InputConnection, job.Spec.OutputConnection}...),
 		GetSyncDataStep(rcloneImage, job.Spec.InputConnection, bucket, path, helpContainerRes),
 	}
 
-	modelSyncSteps, err := GetModelSyncSteps(job, rcloneImage, helpContainerRes, connAPI)
+	modelSyncSteps, err := GetModelSyncSteps(job, helpContainerRes, toolsImage, connAPI)
 	if err != nil {
 		return ts, err
 	}
-	steps = append(steps, modelSyncSteps...)
+
+	// If modelSource is remote than add step that fetch model from model registry to workspace
+	// And we need to discover model name and version from this model registry
+	var modelName, modelVersion string
+	var modelPathEnv corev1.EnvVar
+	switch {
+	case job.Spec.ModelSource.Remote != nil:
+		steps = append(steps, modelSyncSteps...)
+		mr := object_storage.NewModelRegistry(connAPI)
+		modelName, modelVersion, err = mr.Meta(
+			job.Spec.ModelSource.Remote.ModelConnection,job.Spec.ModelSource.Remote.ModelPath)
+		if err != nil {
+			return ts, err
+		}
+		modelPathEnv = DefaultOdahuModelPathEnv
+	case job.Spec.ModelSource.Local != nil:
+		modelName = job.Spec.ModelSource.Local.ModelMeta.Name
+		modelVersion = job.Spec.ModelSource.Local.ModelMeta.Version
+		modelPathEnv = corev1.EnvVar{
+			Name:      odahuModelPathEnvName,
+			Value:     job.Spec.ModelSource.Local.ModelPath,
+		}
+	default:
+		return ts, errors.New("whether .Spec.ModelSource.Remote or .Spec.ModelSource.Local should be defined")
+	}
+
+
 
 	bucket, path, err = GetBucketNamePath(job.Spec.OutputConnection, job.Spec.OutputPath, connAPI)
 	if err != nil {
@@ -128,10 +158,10 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 
 	steps = append(steps, []tektonv1beta1.Step{
 		GetValidateInputStep(toolsImage, helpContainerRes),
-		GetLogInputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes),
-		GetUserContainer(job.Spec.Image, job.Spec.Command, job.Spec.Args, jobRes),
+		GetLogInputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes, modelName, modelVersion),
+		GetUserContainer(job.Spec.Image, job.Spec.Command, job.Spec.Args, jobRes, modelPathEnv),
 		GetValidateOutputStep(toolsImage, helpContainerRes),
-		GetLogOutputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes),
+		GetLogOutputStep(toolsImage, job.Spec.BatchRequestID, helpContainerRes, modelName, modelVersion),
 		GetSyncOutputStep(rcloneImage, job.Spec.OutputConnection, bucket, path, helpContainerRes),
 	}...)
 
