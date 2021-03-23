@@ -69,8 +69,12 @@ func getJob(id string) odahuflowv1alpha1.BatchInferenceJob{
 			InputConnection:  "connection",
 			OutputConnection: "connection",
 			ModelSource: odahuflowv1alpha1.ModelSource{
-				Remote: &odahuflowv1alpha1.RemoteModelSource{
-					ModelConnection: "connection",
+				Local: &odahuflowv1alpha1.LocalModelSource{
+					ModelPath: "/some/path",
+					ModelMeta: odahuflowv1alpha1.ModelMeta{
+						Name:    "wine",
+						Version: "1",
+					},
 				},
 			},
 		},
