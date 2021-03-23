@@ -40,7 +40,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"github.com/odahu/odahu-flow/packages/operator/controllers/utils/batchinferenceutils"
-	. "github.com/odahu/odahu-flow/packages/operator/controllers/types"
+	controller_types "github.com/odahu/odahu-flow/packages/operator/controllers/types"
 
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 )
@@ -61,7 +61,7 @@ type BatchInferenceJobReconciler struct {
 	client.Client
 	Log         logr.Logger
 	Scheme      *runtime.Scheme
-	connAPI     ConnGetter
+	connAPI     controller_types.ConnGetter
 	cfg         config.BatchConfig
 	gpuResName  string
 	podGetter   PodGetter
@@ -95,7 +95,7 @@ func setDefaultOptions(options *BatchInferenceJobReconcilerOptions) {
 type BatchInferenceJobReconcilerOptions struct {
 	Client client.Client
 	Schema *runtime.Scheme
-	ConnGetter        ConnGetter
+	ConnGetter        controller_types.ConnGetter
 	PodGetter         PodGetter
 	Cfg               config.BatchConfig
 	ResourceGPUName	  string

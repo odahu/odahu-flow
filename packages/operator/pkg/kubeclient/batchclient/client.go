@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	"github.com/odahu/odahu-flow/packages/operator/controllers"
+	"github.com/odahu/odahu-flow/packages/operator/controllers/utils/batchinferenceutils"
 	kube_utils "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,14 +35,14 @@ var log  = logf.Log.WithName("batch-job-kube-client")
 
 var (
 	jobContainerNames = []string{
-		utils.TektonContainerName(controllers.StepSyncData),
-		utils.TektonContainerName(controllers.StepSyncModel),
-		utils.TektonContainerName(controllers.StepValidateInput),
-		utils.TektonContainerName(controllers.StepLogInput),
-		utils.TektonContainerName(controllers.StepUserContainer),
-		utils.TektonContainerName(controllers.StepValidateOutput),
-		utils.TektonContainerName(controllers.StepLogOutput),
-		utils.TektonContainerName(controllers.StepSyncOutput),
+		utils.TektonContainerName(batchinferenceutils.StepSyncData),
+		utils.TektonContainerName(batchinferenceutils.StepSyncModel),
+		utils.TektonContainerName(batchinferenceutils.StepValidateInput),
+		utils.TektonContainerName(batchinferenceutils.StepLogInput),
+		utils.TektonContainerName(batchinferenceutils.StepUserContainer),
+		utils.TektonContainerName(batchinferenceutils.StepValidateOutput),
+		utils.TektonContainerName(batchinferenceutils.StepLogOutput),
+		utils.TektonContainerName(batchinferenceutils.StepSyncOutput),
 	}
 )
 

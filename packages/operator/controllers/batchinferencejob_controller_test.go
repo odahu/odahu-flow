@@ -23,6 +23,7 @@ import (
 	. "github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/controllers/mocks"
 	connapitypes "github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	. "github.com/odahu/odahu-flow/packages/operator/controllers/types"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -67,7 +68,11 @@ func getJob(id string) odahuflowv1alpha1.BatchInferenceJob{
 			Image:            "odahu-tools:latest",
 			InputConnection:  "connection",
 			OutputConnection: "connection",
-			ModelConnection:  "connection",
+			ModelSource: odahuflowv1alpha1.ModelSource{
+				Remote: &odahuflowv1alpha1.RemoteModelSource{
+					ModelConnection: "connection",
+				},
+			},
 		},
 		Status:     odahuflowv1alpha1.BatchInferenceJobStatus{},
 	}

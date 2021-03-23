@@ -27,9 +27,7 @@
 //   name: wine
 //	 version: 1.2
 // --
-
-
-package object_storage
+package objectstorage
 
 import (
 	"fmt"
@@ -92,10 +90,8 @@ func SyncArchiveOrDir(conn v1alpha1.ConnectionSpec, relPath string, localPath st
 			return err
 		}
 
-	} else {
-		if err := storage.Download(localPath, fullModelPath); err != nil {
-			return err
-		}
+	} else if err := storage.Download(localPath, fullModelPath); err != nil {
+		return err
 	}
 
 	return nil
@@ -145,7 +141,7 @@ func (mr ModelRegistry) SyncModel(connName string, relPath string, localPath str
 	if !strings.HasSuffix(newLocalPath, "/") {
 		zap.S().Infof("Adding suffix '/' to %s to mark it as directory " +
 			"(model can be synced only to directory)", newLocalPath)
-		newLocalPath = newLocalPath + "/"
+		newLocalPath += "/"
 	}
 
 	return newLocalPath, SyncArchiveOrDir(conn.Spec, relPath, newLocalPath)

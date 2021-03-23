@@ -19,7 +19,7 @@ package cmd
 
 import (
 	connAPI "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/model_registry/object_storage"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/model_registry/objectstorage"
 	"github.com/spf13/cobra"
 	"fmt"
 	"os"
@@ -81,7 +81,7 @@ var syncModelCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := connAPI.NewClient(cfg.Auth.APIURL, "",
 			cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.OAuthOIDCTokenEndpoint)
-		registry := object_storage.NewModelRegistry(client)
+		registry := objectstorage.NewModelRegistry(client)
 
 		if _, err := registry.SyncModel(connName, remotePath, localPath); err != nil {
 			return err
@@ -98,7 +98,7 @@ var modelInfoCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := connAPI.NewClient(cfg.Auth.APIURL, "",
 			cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.OAuthOIDCTokenEndpoint)
-		registry := object_storage.NewModelRegistry(client)
+		registry := objectstorage.NewModelRegistry(client)
 
 		name, ver, err := registry.Meta(connName, remotePath)
 		if err != nil {

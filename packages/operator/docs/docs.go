@@ -2570,7 +2570,7 @@ var doc = `{
                     "type": "string"
                 },
                 "modelSource": {
-                    "description": "ModelSource defines location of ML model files",
+                    "description": "ModelRegistry defines location of ML model files",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionReference"
                 },

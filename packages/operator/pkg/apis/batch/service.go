@@ -73,8 +73,8 @@ type InferenceServiceSpec struct {
 	// Cannot be updated.
 	// More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
 	Args []string `json:"args"`
-	// ModelSource defines location of ML model files
-	ModelSource ConnectionReference `json:"modelSource"`
+	// ModelRegistry defines location of ML model files
+	ModelRegistry v1alpha1.ModelSource `json:"modelRegistry"`
 	// DataSource defines location input data files.
 	// Input data files must have .json extension and be valid JSON files that follows
 	// [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)

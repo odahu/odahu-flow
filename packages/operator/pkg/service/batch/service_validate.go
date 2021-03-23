@@ -43,8 +43,26 @@ func validateRequiredFields(bis api_types.InferenceService) (err error) {
 	if len(bis.Spec.Command) == 0 {
 		err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "command"))
 	}
-	if len(bis.Spec.ModelSource.Connection) == 0 {
-		err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelSource.connection"))
+	registry := bis.Spec.ModelRegistry
+	switch  {
+	case registry.Remote != nil:
+		if len(registry.Remote.ModelConnection) == 0 {
+			err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelRegistry.remote.modelConnection"))
+		}
+	case registry.Local != nil:
+		if len(registry.Local.ModelMeta.Name) == 0 {
+			err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelRegistry.local.meta.name"))
+		}
+		if len(registry.Local.ModelMeta.Version) == 0 {
+			err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelRegistry.local.meta.version"))
+		}
+	default:
+		err = multierr.Append(err,
+			fmt.Errorf("whether modelRegistry.local.meta.name " +
+				"or modelRegistry.local.meta.version must be defined for embedded models"))
+	}
+	if bis.Spec.ModelRegistry.Remote == nil || bis.Spec.ModelRegistry.Local == nil {
+		err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelRegistry.connection"))
 	}
 
 

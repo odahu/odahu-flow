@@ -21,18 +21,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	. "github.com/odahu/odahu-flow/packages/operator/controllers/types"
+	controller_types "github.com/odahu/odahu-flow/packages/operator/controllers/types"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/model_registry/object_storage"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/model_registry/objectstorage"
 	tektonv1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 )
 
 
-func GetBucketNamePath(connName string, path string, connAPI ConnGetter) (
+func GetBucketNamePath(connName string, path string, connAPI controller_types.ConnGetter) (
 	bucketName string, actualPath string, err error) {
 
 	var conn *connection.Connection
@@ -60,11 +60,11 @@ func GetBucketNamePath(connName string, path string, connAPI ConnGetter) (
 
 func DiscoverNameVersion(
 	connName string, modelPath string,
-	connType v1alpha1.ConnectionType, connAPI ConnGetter) (name string, version string, err error) {
+	connType v1alpha1.ConnectionType, connAPI controller_types.ConnGetter) (name string, version string, err error) {
 
 	switch {
 	case connType == connection.GcsType || connType == connection.S3Type || connType == connection.AzureBlobType:
-		mr := object_storage.NewModelRegistry(connAPI)
+		mr := objectstorage.NewModelRegistry(connAPI)
 		return mr.Meta(connName, modelPath)
 	default:
 		return "", "", fmt.Errorf(
@@ -102,7 +102,7 @@ func GetModelSyncSteps(
 
 // BatchJobToTaskSpec generate tektoncd TaskSpec based on v1alpha1.BatchInferenceJob
 func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
-	connAPI ConnGetter,
+	connAPI controller_types.ConnGetter,
 	gpuResourceName string, rcloneImage string,
 	toolsSecret string,
 	toolsImage string,
@@ -168,7 +168,7 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 			Value:     job.Spec.ModelSource.Local.ModelPath,
 		}
 	default:
-		return ts, errors.New("whether .Spec.ModelSource.Remote or .Spec.ModelSource.Local should be defined")
+		return ts, errors.New("whether .Spec.ModelRegistry.Remote or .Spec.ModelRegistry.Local should be defined")
 	}
 
 
