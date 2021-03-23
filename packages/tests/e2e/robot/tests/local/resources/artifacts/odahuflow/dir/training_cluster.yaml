@@ -17,7 +17,9 @@ spec:
       memory: 1024Mi
   toolchain: mlflow
   workDir: packages/tests/e2e/robot/tests/local/resources/artifacts
-  vcsName: odahu-flow-examples
+  algorithmSource:
+    vcs:
+      connName: odahu-flow-examples
 ---
 kind: ModelTraining
 id: local-dir-cluster-artifact-hardcoded
@@ -38,4 +40,6 @@ spec:
   workDir: packages/tests/e2e/robot/tests/local/resources/artifacts
   hyperParameters:
     alpha: '1.0'
-  vcsName: odahu-flow-examples
+  algorithmSource:
+    vcs:
+      connName: odahu-flow-examples

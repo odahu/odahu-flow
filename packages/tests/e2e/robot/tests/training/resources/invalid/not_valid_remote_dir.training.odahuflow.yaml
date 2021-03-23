@@ -18,7 +18,9 @@ spec:
     - connName: test-valid-gppi-odahu-file
       localPath: local/
       remotePath: /test
-  vcsName: odahu-flow-examples
+  algorithmSource:
+    vcs:
+      connName: odahu-flow-examples
   resources:
     limits:
       memory: 1024Mi

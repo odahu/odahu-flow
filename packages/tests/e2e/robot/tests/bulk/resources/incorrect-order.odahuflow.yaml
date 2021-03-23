@@ -8,7 +8,9 @@ spec:
     name: test
     version: '1.0'
   toolchain: mlflow
-  vcsName: bulk-test-conn-1
+  algorithmSource:
+    vcs:
+      connName: bulk-test-conn-1
   workDir: test/dir
 ---
 kind: Connection

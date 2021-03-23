@@ -23,4 +23,6 @@ spec:
       cpu: 3
       memory: 2Gi
       gpu: 1
-  vcsName: odahu-flow-examples
+  algorithmSource:
+    vcs:
+      connName: odahu-flow-examples
