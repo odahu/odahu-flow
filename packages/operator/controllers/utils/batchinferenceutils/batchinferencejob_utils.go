@@ -58,13 +58,27 @@ func GetBucketNamePath(connName string, path string, connAPI ConnGetter) (
 
 }
 
+func DiscoverNameVersion(
+	connName string, modelPath string,
+	connType v1alpha1.ConnectionType, connAPI ConnGetter) (name string, version string, err error) {
+
+	switch {
+	case connType == connection.GcsType || connType == connection.S3Type || connType == connection.AzureBlobType:
+		mr := object_storage.NewModelRegistry(connAPI)
+		return mr.Meta(connName, modelPath)
+	default:
+		return "", "", fmt.Errorf(
+			`connection type "%s" is not supported to discover model meta`, connType)
+	}
+}
+
 // GetModelSyncSteps return steps that a specific for certain model synchronization case
 // depending on v1alpha1.ModelSource (remote or local) and connection type
 func GetModelSyncSteps(
 	job *v1alpha1.BatchInferenceJob,
 	res corev1.ResourceRequirements,
 	odahuToolsImage string,
-	connAPI ConnGetter,
+	connType v1alpha1.ConnectionType,
 ) (steps []tektonv1beta1.Step, err error) {
 
 	if job.Spec.ModelSource.Remote == nil {
@@ -72,11 +86,6 @@ func GetModelSyncSteps(
 	}
 	connName := job.Spec.ModelSource.Remote.ModelConnection
 	modelPath := job.Spec.ModelSource.Remote.ModelPath
-	conn, err := connAPI.GetConnection(connName)
-	if err != nil {
-		return steps, err
-	}
-	connType := conn.Spec.Type
 
 	// Select Model sync algorithm according to connection type
 	// Different connection type usually mean different model registries
@@ -89,6 +98,7 @@ func GetModelSyncSteps(
 	return steps, nil
 
 }
+
 
 // BatchJobToTaskSpec generate tektoncd TaskSpec based on v1alpha1.BatchInferenceJob
 func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
@@ -119,10 +129,6 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 		GetSyncDataStep(rcloneImage, job.Spec.InputConnection, bucket, path, helpContainerRes),
 	}
 
-	modelSyncSteps, err := GetModelSyncSteps(job, helpContainerRes, toolsImage, connAPI)
-	if err != nil {
-		return ts, err
-	}
 
 	// If modelSource is remote than add step that fetch model from model registry to workspace
 	// And we need to discover model name and version from this model registry
@@ -130,13 +136,29 @@ func BatchJobToTaskSpec(job *v1alpha1.BatchInferenceJob,
 	var modelPathEnv corev1.EnvVar
 	switch {
 	case job.Spec.ModelSource.Remote != nil:
-		steps = append(steps, modelSyncSteps...)
-		mr := object_storage.NewModelRegistry(connAPI)
-		modelName, modelVersion, err = mr.Meta(
-			job.Spec.ModelSource.Remote.ModelConnection,job.Spec.ModelSource.Remote.ModelPath)
+
+		connName := job.Spec.ModelSource.Remote.ModelConnection
+		remoteModelPath := job.Spec.ModelSource.Remote.ModelPath
+
+		conn, err := connAPI.GetConnection(connName)
 		if err != nil {
 			return ts, err
 		}
+		connType := conn.Spec.Type
+
+		// Add model sync step to pipeline
+		modelSyncSteps, err := GetModelSyncSteps(job, helpContainerRes, toolsImage, connType)
+		if err != nil {
+			return ts, err
+		}
+		steps = append(steps, modelSyncSteps...)
+
+		// Discover Model name and version from registry
+		modelName, modelVersion, err = DiscoverNameVersion(connName, remoteModelPath, connType, connAPI)
+		if err != nil {
+			return ts, err
+		}
+		// Set modelPathEnv to default location (because model from registry always synced to pre-defined folder)
 		modelPathEnv = DefaultOdahuModelPathEnv
 	case job.Spec.ModelSource.Local != nil:
 		modelName = job.Spec.ModelSource.Local.ModelMeta.Name
