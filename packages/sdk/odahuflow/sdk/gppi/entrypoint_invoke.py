@@ -33,6 +33,8 @@ import sys
 from contextlib import contextmanager
 from typing import Any, List, Union, Dict
 
+import numpy
+
 _logger = logging.getLogger(__name__)
 
 ODAHUFLOW_MODEL_LOCATION_ENV_VAR = 'MODEL_LOCATION'
@@ -130,18 +132,19 @@ def handle_prediction_on_matrix(parsed_data):
 
     entrypoint = get_entrypoint()
 
+    prediction: numpy.ndarray
     try:
         prediction, columns = entrypoint.predict_on_matrix(matrix, provided_columns_names=columns)
     except Exception as predict_exception:
         return build_error_response(f'Exception during prediction: {predict_exception}')
 
     response = {
-        'prediction': prediction,
+        'prediction': prediction.tolist(),
         'columns': columns
     }
 
     return response
-
+0
 
 _entrypoint_module = None
 

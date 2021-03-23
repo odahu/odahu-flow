@@ -8,3 +8,4 @@ dataclasses>=0.6
 typing-extensions>=3.6.5
 idna-ssl>=1.1.0
 docker>=4.2.0
+numpy==1.19.2
