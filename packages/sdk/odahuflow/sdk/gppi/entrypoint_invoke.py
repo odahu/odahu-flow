@@ -144,7 +144,7 @@ def handle_prediction_on_matrix(parsed_data):
     }
 
     return response
-0
+
 
 _entrypoint_module = None
 
