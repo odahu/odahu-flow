@@ -15,7 +15,7 @@
     "entrypoint": "main",
     "algorithmSource": {
       "vcs": {
-        "connName": "odahu-flow-examples",
+        "connection": "odahu-flow-examples",
         "reference": "develop"
       }
     },

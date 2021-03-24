@@ -10,7 +10,7 @@ spec:
   toolchain: mlflow
   algorithmSource:
     vcs:
-      connName: bulk-test-conn-1
+      connection: bulk-test-conn-1
   workDir: test/dir
 ---
 kind: Connection

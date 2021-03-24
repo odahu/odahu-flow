@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: wine-mlflow-default
+id: test-algorithm-source-non-exist-vcs
 spec:
   model:
     name: wine-mlflow-default
@@ -11,7 +11,7 @@ spec:
   entrypoint: main
   algorithmSource:
     vcs:
-      connection: odahu-flow-examples
+      connection: non-exist
   outputConnection: models-output
   data:
     - connName: wine

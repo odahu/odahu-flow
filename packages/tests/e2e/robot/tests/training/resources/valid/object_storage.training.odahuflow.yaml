@@ -1,26 +1,19 @@
 kind: ModelTraining
-id: wine-mlflow-default
+id: test-algorithm-source-object-storage
 spec:
   model:
-    name: wine-mlflow-default-updated
-    version: '1.1'
-    artifactNameTemplate: '{{.Name}}-{{.Version}}.zip'
+    name: wine-mlflow-default
+    version: '1.0'
   toolchain: mlflow
   hyperParameters:
     alpha: '1.0'
   workDir: mlflow/sklearn/wine
   entrypoint: main
   algorithmSource:
-    vcs:
+    objectStorage:
       connection: odahu-flow-examples
+      path: mlflow/algorithm_source
   outputConnection: models-output
-  resources:
-    limits:
-      cpu: 3024m
-      memory: 4024Mi
-    requests:
-      cpu: 3024m
-      memory: 3024Mi
   data:
     - connName: wine
       localPath: mlflow/sklearn/wine/

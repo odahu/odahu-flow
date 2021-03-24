@@ -19,7 +19,7 @@ spec:
       localPath: local/
   algorithmSource:
     vcs:
-      connName: odahu-flow-examples
+      connection: odahu-flow-examples
   outputConnection: test-custom-output-folder
   resources:
     limits:

@@ -41,6 +41,25 @@ type ModelIdentity struct {
 	ArtifactNameTemplate string `json:"artifactNameTemplate,omitempty"`
 }
 
+type VCS struct {
+	// Connection name for training model source
+	Connection string `json:"connection,omitempty"`
+	// VCS Reference
+	Reference string `json:"reference,omitempty"`
+}
+
+type ObjectStorage struct {
+	// Connection name for training model source
+	Connection string `json:"connection,omitempty"`
+	// Remote path in ObjectStorage
+	Path string `json:"path,omitempty"`
+}
+
+type AlgorithmSource struct {
+	VCS           VCS           `json:"vcs,omitempty"`
+	ObjectStorage ObjectStorage `json:"objectStorage,omitempty"`
+}
+
 // ModelTrainingSpec defines the desired state of ModelTraining
 type ModelTrainingSpec struct {
 	// Model Identity

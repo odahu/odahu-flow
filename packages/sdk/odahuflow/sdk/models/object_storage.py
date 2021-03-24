@@ -15,25 +15,25 @@ class ObjectStorage(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, conn_name: str=None, path: str=None):  # noqa: E501
+    def __init__(self, connection: str=None, path: str=None):  # noqa: E501
         """ObjectStorage - a model defined in Swagger
 
-        :param conn_name: The conn_name of this ObjectStorage.  # noqa: E501
-        :type conn_name: str
+        :param connection: The connection of this ObjectStorage.  # noqa: E501
+        :type connection: str
         :param path: The path of this ObjectStorage.  # noqa: E501
         :type path: str
         """
         self.swagger_types = {
-            'conn_name': str,
+            'connection': str,
             'path': str
         }
 
         self.attribute_map = {
-            'conn_name': 'connName',
+            'connection': 'connection',
             'path': 'path'
         }
 
-        self._conn_name = conn_name
+        self._connection = connection
         self._path = path
 
     @classmethod
@@ -48,30 +48,33 @@ class ObjectStorage(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def conn_name(self) -> str:
-        """Gets the conn_name of this ObjectStorage.
+    def connection(self) -> str:
+        """Gets the connection of this ObjectStorage.
 
+        Connection name for training model source  # noqa: E501
 
-        :return: The conn_name of this ObjectStorage.
+        :return: The connection of this ObjectStorage.
         :rtype: str
         """
-        return self._conn_name
+        return self._connection
 
-    @conn_name.setter
-    def conn_name(self, conn_name: str):
-        """Sets the conn_name of this ObjectStorage.
+    @connection.setter
+    def connection(self, connection: str):
+        """Sets the connection of this ObjectStorage.
 
+        Connection name for training model source  # noqa: E501
 
-        :param conn_name: The conn_name of this ObjectStorage.
-        :type conn_name: str
+        :param connection: The connection of this ObjectStorage.
+        :type connection: str
         """
 
-        self._conn_name = conn_name
+        self._connection = connection
 
     @property
     def path(self) -> str:
         """Gets the path of this ObjectStorage.
 
+        Remote path in ObjectStorage  # noqa: E501
 
         :return: The path of this ObjectStorage.
         :rtype: str
@@ -82,6 +85,7 @@ class ObjectStorage(Model):
     def path(self, path: str):
         """Sets the path of this ObjectStorage.
 
+        Remote path in ObjectStorage  # noqa: E501
 
         :param path: The path of this ObjectStorage.
         :type path: str

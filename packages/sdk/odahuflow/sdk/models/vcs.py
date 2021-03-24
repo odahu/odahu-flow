@@ -15,25 +15,25 @@ class VCS(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, conn_name: str=None, reference: str=None):  # noqa: E501
+    def __init__(self, connection: str=None, reference: str=None):  # noqa: E501
         """VCS - a model defined in Swagger
 
-        :param conn_name: The conn_name of this VCS.  # noqa: E501
-        :type conn_name: str
+        :param connection: The connection of this VCS.  # noqa: E501
+        :type connection: str
         :param reference: The reference of this VCS.  # noqa: E501
         :type reference: str
         """
         self.swagger_types = {
-            'conn_name': str,
+            'connection': str,
             'reference': str
         }
 
         self.attribute_map = {
-            'conn_name': 'connName',
+            'connection': 'connection',
             'reference': 'reference'
         }
 
-        self._conn_name = conn_name
+        self._connection = connection
         self._reference = reference
 
     @classmethod
@@ -48,30 +48,33 @@ class VCS(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def conn_name(self) -> str:
-        """Gets the conn_name of this VCS.
+    def connection(self) -> str:
+        """Gets the connection of this VCS.
 
+        Connection name for training model source  # noqa: E501
 
-        :return: The conn_name of this VCS.
+        :return: The connection of this VCS.
         :rtype: str
         """
-        return self._conn_name
+        return self._connection
 
-    @conn_name.setter
-    def conn_name(self, conn_name: str):
-        """Sets the conn_name of this VCS.
+    @connection.setter
+    def connection(self, connection: str):
+        """Sets the connection of this VCS.
 
+        Connection name for training model source  # noqa: E501
 
-        :param conn_name: The conn_name of this VCS.
-        :type conn_name: str
+        :param connection: The connection of this VCS.
+        :type connection: str
         """
 
-        self._conn_name = conn_name
+        self._connection = connection
 
     @property
     def reference(self) -> str:
         """Gets the reference of this VCS.
 
+        VCS Reference  # noqa: E501
 
         :return: The reference of this VCS.
         :rtype: str
@@ -82,6 +85,7 @@ class VCS(Model):
     def reference(self, reference: str):
         """Sets the reference of this VCS.
 
+        VCS Reference  # noqa: E501
 
         :param reference: The reference of this VCS.
         :type reference: str

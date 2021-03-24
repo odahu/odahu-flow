@@ -1,5 +1,5 @@
 kind: ModelTraining
-id: wine-mlflow-default
+id: test-algorithm-source-non-exist-storage
 spec:
   model:
     name: wine-mlflow-default
@@ -10,9 +10,10 @@ spec:
   workDir: mlflow/sklearn/wine
   entrypoint: main
   algorithmSource:
-    vcs:
-      connection: odahu-flow-examples
+    objectStorage:
+      connection: non-exist
+      path: mlflow/algorithm_source
   outputConnection: models-output
   data:
-    - connName: wine
+    - connection: wine
       localPath: mlflow/sklearn/wine/

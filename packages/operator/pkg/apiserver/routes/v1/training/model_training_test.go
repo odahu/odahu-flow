@@ -193,8 +193,8 @@ func newMtStub() *training.ModelTraining {
 			Entrypoint: testMtEntrypoint,
 			AlgorithmSource: odahuflowv1alpha1.AlgorithmSource{
 				VCS: odahuflowv1alpha1.VCS{
-					ConnName:  testMtVCSID,
-					Reference: testMtReference,
+					Connection: testMtVCSID,
+					Reference:  testMtReference,
 				},
 			},
 			Image:            testMtImage,

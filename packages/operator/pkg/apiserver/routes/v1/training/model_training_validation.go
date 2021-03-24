@@ -169,16 +169,16 @@ func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error
 }
 
 func (mtv *MtValidator) validateAlgorithmSource(mt *training.ModelTraining) (err error) {
-	if len(mt.Spec.AlgorithmSource.VCS.ConnName) != 0 && len(mt.Spec.AlgorithmSource.ObjectStorage.ConnName) != 0 {
+	if len(mt.Spec.AlgorithmSource.VCS.Connection) != 0 && len(mt.Spec.AlgorithmSource.ObjectStorage.Connection) != 0 {
 		err = multierr.Append(err, errors.New(MultipleAlgorithmSourceMessageError))
 
 		return
 	}
 
 	switch {
-	case len(mt.Spec.AlgorithmSource.VCS.ConnName) != 0:
+	case len(mt.Spec.AlgorithmSource.VCS.Connection) != 0:
 		err = multierr.Append(err, mtv.validateVCS(mt))
-	case len(mt.Spec.AlgorithmSource.ObjectStorage.ConnName) != 0:
+	case len(mt.Spec.AlgorithmSource.ObjectStorage.Connection) != 0:
 		err = multierr.Append(err, mtv.validateObjectStorage(mt))
 	default:
 		err = multierr.Append(err, errors.New(EmptyAlgorithmSourceNameMessageError))
@@ -188,7 +188,7 @@ func (mtv *MtValidator) validateAlgorithmSource(mt *training.ModelTraining) (err
 }
 
 func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
-	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.VCS.ConnName); odahuErr != nil {
+	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.VCS.Connection); odahuErr != nil {
 		logMT.Error(err, MtVcsNotExistsErrorMessage)
 
 		err = multierr.Append(err, odahuErr)
@@ -209,20 +209,24 @@ func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
 }
 
 func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err error) {
-	objStorage, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.ObjectStorage.ConnName)
+	objStorage, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.ObjectStorage.Connection)
 	if odahuErr != nil {
 		logMT.Error(err, MtObjectStorageNotExistsErrorMessage)
 
 		err = multierr.Append(err, odahuErr)
-	} else if len(mt.Spec.AlgorithmSource.ObjectStorage.Path) == 0 {
-		if _, ok := expectedConnectionDataTypes[objStorage.Spec.Type]; !ok {
-			err = multierr.Append(err, fmt.Errorf(
-				WrongDataBindingTypeErrorMessage,
-				objStorage.ID, reflect.ValueOf(expectedConnectionDataTypes).MapKeys(),
-			))
-		} else {
-			logMT.Info("Training path is not specified, using ObjectStorage root path")
-		}
+		return
+	}
+
+	if _, ok := expectedConnectionDataTypes[objStorage.Spec.Type]; !ok {
+		err = multierr.Append(err, fmt.Errorf(
+			WrongDataBindingTypeErrorMessage,
+			objStorage.ID, reflect.ValueOf(expectedConnectionDataTypes).MapKeys(),
+		))
+		return
+	}
+
+	if len(mt.Spec.AlgorithmSource.ObjectStorage.Path) == 0 {
+		logMT.Info("Training path is not specified, using ObjectStorage root path")
 	}
 
 	return

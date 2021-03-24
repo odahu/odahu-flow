@@ -420,6 +420,9 @@ setup)
 cleanup)
   cleanup
   ;;
+bucket-copy)
+  copy_to_cluster_bucket
+  ;;
 *)
   echo "Unexpected command: ${COMMAND}"
   usage

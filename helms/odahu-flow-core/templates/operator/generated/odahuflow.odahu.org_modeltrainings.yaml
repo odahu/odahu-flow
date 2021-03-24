@@ -61,16 +61,20 @@ spec:
               properties:
                 objectStorage:
                   properties:
-                    connName:
+                    connection:
+                      description: Connection name for training model source
                       type: string
                     path:
+                      description: Remote path in ObjectStorage
                       type: string
                   type: object
                 vcs:
                   properties:
-                    connName:
+                    connection:
+                      description: Connection name for training model source
                       type: string
                     reference:
+                      description: VCS Reference
                       type: string
                   type: object
               type: object

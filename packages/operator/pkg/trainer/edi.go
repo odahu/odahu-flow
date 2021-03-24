@@ -31,10 +31,10 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 
 	var connName string
 
-	if len(modelTraining.Spec.AlgorithmSource.VCS.ConnName) != 0 {
-		connName = modelTraining.Spec.AlgorithmSource.VCS.ConnName
+	if len(modelTraining.Spec.AlgorithmSource.VCS.Connection) != 0 {
+		connName = modelTraining.Spec.AlgorithmSource.VCS.Connection
 	} else {
-		connName = modelTraining.Spec.AlgorithmSource.ObjectStorage.ConnName
+		connName = modelTraining.Spec.AlgorithmSource.ObjectStorage.Connection
 	}
 
 	conn, err := mt.connClient.GetConnection(connName)
@@ -86,7 +86,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	}
 
 	return &training.K8sTrainer{
-		AlgorithmSource: &training.AlgorithmSource{
+		AlgorithmSourceConnection: &training.AlgorithmSourceConnection{
 			Conn: conn,
 			Path: modelTraining.Spec.AlgorithmSource.ObjectStorage.Path,
 		},

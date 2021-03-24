@@ -57,8 +57,8 @@ var (
 			Toolchain:        testToolchainIntegrationID,
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName:  testMtVCSID,
-					Reference: testVcsReference,
+					Connection: testMtVCSID,
+					Reference:  testVcsReference,
 				},
 			},
 			NodeSelector: cpuNodeSelector,
@@ -161,7 +161,7 @@ func (s *ModelTrainingValidationSuite) TestMtVcsReference() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName: testMtVCSID,
+					Connection: testMtVCSID,
 				},
 			},
 		},
@@ -201,8 +201,8 @@ func (s *ModelTrainingValidationSuite) TestMtExplicitMTReference() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName:  testMtVCSID,
-					Reference: mtExplicitReference,
+					Connection: testMtVCSID,
+					Reference:  mtExplicitReference,
 				},
 			},
 		},
@@ -258,7 +258,7 @@ func (s *ModelTrainingValidationSuite) TestMtWrongVcsConnectionType() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName: conn.ID,
+					Connection: conn.ID,
 				},
 			},
 		},
@@ -285,7 +285,7 @@ func (s *ModelTrainingValidationSuite) TestMtWrongObjectStorageConnectionType() 
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				ObjectStorage: v1alpha1.ObjectStorage{
-					ConnName: conn.ID,
+					Connection: conn.ID,
 				},
 			},
 		},
@@ -314,7 +314,7 @@ func (s *ModelTrainingValidationSuite) TestMtVcsNotExists() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName: "not-exists",
+					Connection: "not-exists",
 				},
 			},
 		},
@@ -331,7 +331,7 @@ func (s *ModelTrainingValidationSuite) TestMtObjectStorageNotExists() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				ObjectStorage: v1alpha1.ObjectStorage{
-					ConnName: "not-exists",
+					Connection: "not-exists",
 				},
 			},
 		},
@@ -348,7 +348,7 @@ func (s *ModelTrainingValidationSuite) TestMtAlgorithmSourceName() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName: "",
+					Connection: "",
 				},
 			},
 		},
@@ -364,10 +364,10 @@ func (s *ModelTrainingValidationSuite) TestMtMultipleAlgorithmSourceName() {
 		Spec: v1alpha1.ModelTrainingSpec{
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
-					ConnName: "not-empty",
+					Connection: "not-empty",
 				},
 				ObjectStorage: v1alpha1.ObjectStorage{
-					ConnName: "not-empty",
+					Connection: "not-empty",
 				},
 			},
 		},

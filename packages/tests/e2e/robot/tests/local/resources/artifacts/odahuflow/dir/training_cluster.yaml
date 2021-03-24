@@ -19,7 +19,7 @@ spec:
   workDir: packages/tests/e2e/robot/tests/local/resources/artifacts
   algorithmSource:
     vcs:
-      connName: odahu-flow-examples
+      connection: odahu-flow-examples
 ---
 kind: ModelTraining
 id: local-dir-cluster-artifact-hardcoded
@@ -42,4 +42,4 @@ spec:
     alpha: '1.0'
   algorithmSource:
     vcs:
-      connName: odahu-flow-examples
+      connection: odahu-flow-examples

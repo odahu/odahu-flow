@@ -3604,7 +3604,7 @@ var doc = `{
                 }
             }
         },
-        "AlgorithmSource": {
+        "AlgorithmSourceConnection": {
             "type": "object",
             "properties": {
                 "conn": {
@@ -3639,10 +3639,10 @@ var doc = `{
         "K8sTrainer": {
             "type": "object",
             "properties": {
-                "algorithmSource": {
+                "algorithmSourceConnection": {
                     "description": "Connection for source code",
                     "type": "object",
-                    "$ref": "#/definitions/AlgorithmSource"
+                    "$ref": "#/definitions/AlgorithmSourceConnection"
                 },
                 "inputData": {
                     "description": "Connection for training data",
@@ -4213,10 +4213,12 @@ var doc = `{
         "ObjectStorage": {
             "type": "object",
             "properties": {
-                "connName": {
+                "connection": {
+                    "description": "Connection name for training model source",
                     "type": "string"
                 },
                 "path": {
+                    "description": "Remote path in ObjectStorage",
                     "type": "string"
                 }
             }
@@ -4359,10 +4361,12 @@ var doc = `{
         "VCS": {
             "type": "object",
             "properties": {
-                "connName": {
+                "connection": {
+                    "description": "Connection name for training model source",
                     "type": "string"
                 },
                 "reference": {
+                    "description": "VCS Reference",
                     "type": "string"
                 }
             }

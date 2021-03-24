@@ -101,7 +101,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 	}
 
 	// Downloads a source code
-	switch k8sTraining.AlgorithmSource.Conn.Spec.Type {
+	switch k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type {
 	case connection.GITType:
 		commitID, err = mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
 		if err != nil {
@@ -130,13 +130,10 @@ func (mt *ModelTrainer) Setup() (err error) {
 			return err
 		}
 	default:
-		return errors.New(fmt.Sprintf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSource.Conn.Spec.Type))
+		return errors.New(fmt.Sprintf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type))
 	}
 
-	mt.log.Info(
-		"The model source code was downloaded",
-		"dir", workDir,
-	)
+	mt.log.Info("The model source code was downloaded", "dir", workDir)
 
 	if err := mt.downloadData(k8sTraining); err != nil {
 		mt.log.Error(err, "Downloading training data failed")
@@ -267,17 +264,17 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 
 func (mt *ModelTrainer) downloadAlgorithm(k8sTraining *training.K8sTrainer) error {
 	mt.log.Info("Run download k8sTraining algorithm",
-		"remote_path", k8sTraining.AlgorithmSource.Path,
-		"connection_type", k8sTraining.AlgorithmSource.Conn.Spec.Type,
-		"connection_uri", k8sTraining.AlgorithmSource.Conn.Spec.URI,
+		"remote_path", k8sTraining.AlgorithmSourceConnection.Path,
+		"connection_type", k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type,
+		"connection_uri", k8sTraining.AlgorithmSourceConnection.Conn.Spec.URI,
 	)
 
-	storage, err := rclone.NewObjectStorage(&k8sTraining.AlgorithmSource.Conn.Spec)
+	storage, err := rclone.NewObjectStorage(&k8sTraining.AlgorithmSourceConnection.Conn.Spec)
 	if err != nil {
 		return err
 	}
 
-	if err := storage.Download("", k8sTraining.AlgorithmSource.Path); err != nil {
+	if err := storage.Download("", k8sTraining.AlgorithmSourceConnection.Path); err != nil {
 		return err
 	}
 

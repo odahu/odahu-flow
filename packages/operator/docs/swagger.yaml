@@ -949,7 +949,7 @@ definitions:
           $ref: '#/definitions/TargetSchema'
         type: array
     type: object
-  AlgorithmSource:
+  AlgorithmSourceConnection:
     properties:
       conn:
         $ref: '#/definitions/Connection'
@@ -974,8 +974,8 @@ definitions:
     type: object
   K8sTrainer:
     properties:
-      algorithmSource:
-        $ref: '#/definitions/AlgorithmSource'
+      algorithmSourceConnection:
+        $ref: '#/definitions/AlgorithmSourceConnection'
         description: Connection for source code
         type: object
       inputData:
@@ -1415,9 +1415,11 @@ definitions:
     type: object
   ObjectStorage:
     properties:
-      connName:
+      connection:
+        description: Connection name for training model source
         type: string
       path:
+        description: Remote path in ObjectStorage
         type: string
     type: object
   PackagingIntegrationStatus:
@@ -1514,9 +1516,11 @@ definitions:
     type: object
   VCS:
     properties:
-      connName:
+      connection:
+        description: Connection name for training model source
         type: string
       reference:
+        description: VCS Reference
         type: string
     type: object
 info:

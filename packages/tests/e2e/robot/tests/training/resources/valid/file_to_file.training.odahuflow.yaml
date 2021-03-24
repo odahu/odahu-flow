@@ -23,7 +23,7 @@ spec:
       remotePath: /test-data/data/valid_gppi/odahuflow_model/
   algorithmSource:
     vcs:
-      connName: odahu-flow-examples
+      connection: odahu-flow-examples
   resources:
     limits:
       memory: 1024Mi
