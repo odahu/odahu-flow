@@ -37,6 +37,8 @@ class Model(object):
 
         for attr, _ in six.iteritems(self.swagger_types):
             value = getattr(self, attr)
+            # DO NOT REMOVE!
+            attr = self.attribute_map.get(attr, attr)
             if isinstance(value, list):
                 result[attr] = list(map(
                     lambda x: x.to_dict() if hasattr(x, "to_dict") else x,
