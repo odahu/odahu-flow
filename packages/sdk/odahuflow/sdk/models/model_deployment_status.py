@@ -15,7 +15,7 @@ class ModelDeploymentStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, available_replicas: int=None, created_at: str=None, deployment: str=None, last_revision_name: str=None, last_updated_time: str=None, replicas: int=None, service: str=None, service_url: str=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(self, available_replicas: int=None, created_at: str=None, deployment: str=None, host_header: str=None, last_updated_time: str=None, replicas: int=None, state: str=None, updated_at: str=None):  # noqa: E501
         """ModelDeploymentStatus - a model defined in Swagger
 
         :param available_replicas: The available_replicas of this ModelDeploymentStatus.  # noqa: E501
@@ -24,16 +24,12 @@ class ModelDeploymentStatus(Model):
         :type created_at: str
         :param deployment: The deployment of this ModelDeploymentStatus.  # noqa: E501
         :type deployment: str
-        :param last_revision_name: The last_revision_name of this ModelDeploymentStatus.  # noqa: E501
-        :type last_revision_name: str
+        :param host_header: The host_header of this ModelDeploymentStatus.  # noqa: E501
+        :type host_header: str
         :param last_updated_time: The last_updated_time of this ModelDeploymentStatus.  # noqa: E501
         :type last_updated_time: str
         :param replicas: The replicas of this ModelDeploymentStatus.  # noqa: E501
         :type replicas: int
-        :param service: The service of this ModelDeploymentStatus.  # noqa: E501
-        :type service: str
-        :param service_url: The service_url of this ModelDeploymentStatus.  # noqa: E501
-        :type service_url: str
         :param state: The state of this ModelDeploymentStatus.  # noqa: E501
         :type state: str
         :param updated_at: The updated_at of this ModelDeploymentStatus.  # noqa: E501
@@ -43,11 +39,9 @@ class ModelDeploymentStatus(Model):
             'available_replicas': int,
             'created_at': str,
             'deployment': str,
-            'last_revision_name': str,
+            'host_header': str,
             'last_updated_time': str,
             'replicas': int,
-            'service': str,
-            'service_url': str,
             'state': str,
             'updated_at': str
         }
@@ -56,11 +50,9 @@ class ModelDeploymentStatus(Model):
             'available_replicas': 'availableReplicas',
             'created_at': 'createdAt',
             'deployment': 'deployment',
-            'last_revision_name': 'lastRevisionName',
+            'host_header': 'hostHeader',
             'last_updated_time': 'lastUpdatedTime',
             'replicas': 'replicas',
-            'service': 'service',
-            'service_url': 'serviceURL',
             'state': 'state',
             'updated_at': 'updatedAt'
         }
@@ -68,11 +60,9 @@ class ModelDeploymentStatus(Model):
         self._available_replicas = available_replicas
         self._created_at = created_at
         self._deployment = deployment
-        self._last_revision_name = last_revision_name
+        self._host_header = host_header
         self._last_updated_time = last_updated_time
         self._replicas = replicas
-        self._service = service
-        self._service_url = service_url
         self._state = state
         self._updated_at = updated_at
 
@@ -155,27 +145,27 @@ class ModelDeploymentStatus(Model):
         self._deployment = deployment
 
     @property
-    def last_revision_name(self) -> str:
-        """Gets the last_revision_name of this ModelDeploymentStatus.
+    def host_header(self) -> str:
+        """Gets the host_header of this ModelDeploymentStatus.
 
-        Last applied ready knative revision  # noqa: E501
+        Host header value is a routing key for Istio Ingress to forward a request to appropriate Knative Service  # noqa: E501
 
-        :return: The last_revision_name of this ModelDeploymentStatus.
+        :return: The host_header of this ModelDeploymentStatus.
         :rtype: str
         """
-        return self._last_revision_name
+        return self._host_header
 
-    @last_revision_name.setter
-    def last_revision_name(self, last_revision_name: str):
-        """Sets the last_revision_name of this ModelDeploymentStatus.
+    @host_header.setter
+    def host_header(self, host_header: str):
+        """Sets the host_header of this ModelDeploymentStatus.
 
-        Last applied ready knative revision  # noqa: E501
+        Host header value is a routing key for Istio Ingress to forward a request to appropriate Knative Service  # noqa: E501
 
-        :param last_revision_name: The last_revision_name of this ModelDeploymentStatus.
-        :type last_revision_name: str
+        :param host_header: The host_header of this ModelDeploymentStatus.
+        :type host_header: str
         """
 
-        self._last_revision_name = last_revision_name
+        self._host_header = host_header
 
     @property
     def last_updated_time(self) -> str:
@@ -222,52 +212,6 @@ class ModelDeploymentStatus(Model):
         """
 
         self._replicas = replicas
-
-    @property
-    def service(self) -> str:
-        """Gets the service of this ModelDeploymentStatus.
-
-        The model k8s service name  # noqa: E501
-
-        :return: The service of this ModelDeploymentStatus.
-        :rtype: str
-        """
-        return self._service
-
-    @service.setter
-    def service(self, service: str):
-        """Sets the service of this ModelDeploymentStatus.
-
-        The model k8s service name  # noqa: E501
-
-        :param service: The service of this ModelDeploymentStatus.
-        :type service: str
-        """
-
-        self._service = service
-
-    @property
-    def service_url(self) -> str:
-        """Gets the service_url of this ModelDeploymentStatus.
-
-        The model k8s service name  # noqa: E501
-
-        :return: The service_url of this ModelDeploymentStatus.
-        :rtype: str
-        """
-        return self._service_url
-
-    @service_url.setter
-    def service_url(self, service_url: str):
-        """Sets the service_url of this ModelDeploymentStatus.
-
-        The model k8s service name  # noqa: E501
-
-        :param service_url: The service_url of this ModelDeploymentStatus.
-        :type service_url: str
-        """
-
-        self._service_url = service_url
 
     @property
     def state(self) -> str:

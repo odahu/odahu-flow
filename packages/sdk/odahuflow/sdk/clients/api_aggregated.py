@@ -33,6 +33,9 @@ from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClie
 from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, AsyncModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient, AsyncToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient, ModelTraining, AsyncModelTrainingClient
+from odahuflow.sdk.clients.batch_service import InferenceService, BatchInferenceServiceClient, \
+    AsyncBatchInferenceServiceClient
+from odahuflow.sdk.clients.batch_job import InferenceJob, BatchInferenceJobClient, AsyncBatchInferenceJobClient
 from odahuflow.sdk.models import Connection, ToolchainIntegration, ModelPackaging, PackagingIntegration
 
 TARGET_CLASSES = {
@@ -43,6 +46,9 @@ TARGET_CLASSES = {
     'Connection': Connection,
     'ModelPackaging': ModelPackaging,
     'PackagingIntegration': PackagingIntegration,
+    'BatchInference': PackagingIntegration,
+    'InferenceService': InferenceService,
+    'InferenceJob': InferenceJob,
 }
 
 LOGGER = logging.getLogger(__name__)
@@ -107,6 +113,10 @@ def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteA
         return ModelPackagingClient.construct_from_other(api_client)
     elif isinstance(resource.resource, PackagingIntegration):
         return PackagingIntegrationClient.construct_from_other(api_client)
+    elif isinstance(resource.resource, InferenceJob):
+        return BatchInferenceJobClient.construct_from_other(api_client)
+    elif isinstance(resource.resource, InferenceService):
+        return BatchInferenceServiceClient.construct_from_other(api_client)
     else:
         raise InvalidResourceType('{!r} is invalid resource '.format(resource.resource))
 
@@ -136,6 +146,10 @@ def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
         return AsyncModelPackagingClient.construct_from_other(async_api_client)
     elif isinstance(resource.resource, PackagingIntegration):
         return AsyncPackagingIntegrationClient.construct_from_other(async_api_client)
+    elif isinstance(resource.resource, InferenceJob):
+        return AsyncBatchInferenceJobClient.construct_from_other(async_api_client)
+    elif isinstance(resource.resource, InferenceService):
+        return AsyncBatchInferenceServiceClient.construct_from_other(async_api_client)
     else:
         raise InvalidResourceType('{!r} is invalid resource '.format(resource.resource))
 

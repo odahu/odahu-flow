@@ -48,16 +48,21 @@ type FileDescription struct {
 }
 
 func NewObjectStorage(conn *odahuflowv1alpha1.ConnectionSpec) (obj *ObjectStorage, err error) {
-	var config *FileDescription
 	name := uuid.NewV4()
+
+	return NewObjectStorageWithName(name.String(), conn)
+}
+
+func NewObjectStorageWithName(name string, conn *odahuflowv1alpha1.ConnectionSpec) (obj *ObjectStorage, err error) {
+	var config *FileDescription
 
 	switch conn.Type {
 	case connection.S3Type:
-		config, err = createS3config(name.String(), conn)
+		config, err = createS3config(name, conn)
 	case connection.GcsType:
-		config, err = createGcsConfig(name.String(), conn)
+		config, err = createGcsConfig(name, conn)
 	case connection.AzureBlobType:
-		config, err = createAzureBlobConfig(name.String(), conn)
+		config, err = createAzureBlobConfig(name, conn)
 	default:
 		return nil, errors.New(fmt.Sprintf("Unexpected connection type: %s", conn.Type))
 	}

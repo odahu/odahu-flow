@@ -17,15 +17,12 @@
 package rclone
 
 import (
-	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	_ "github.com/rclone/rclone/backend/azureblob" // s3 specific handlers
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/rc"
-	"net/url"
-	"strings"
 )
 
 
@@ -42,23 +39,11 @@ func createAzureBlobConfig(configName string, conn *v1alpha1.ConnectionSpec) (*F
 		return nil, err
 	}
 
-	parsedURI, err := url.Parse(conn.URI)
+	bucketName, pathInsideBucket, err := GetBucketAndPath(conn)
 	if err != nil {
 		log.Error(err, "Parsing data binding URI", "connection uri", conn.URI)
 		return nil, err
 	}
-
-	uriPath := parsedURI.Path
-	uriPath= strings.TrimPrefix(uriPath, "/")
-
-	pathParts := strings.Split(uriPath, "/")
-	if len(pathParts) == 0 {
-		err = errors.New("azure URI must contain at least a bucket name")
-		log.Error(err, "azure URI is empty", "uri", conn.URI, "splitPath", pathParts)
-		return nil, err
-	}
-	bucketName := pathParts[0]
-	pathInsideBucket := "/" + strings.Join(pathParts[1:], "/")
 	return &FileDescription{
 		FsName: fmt.Sprintf("%s:%s", configName, bucketName),
 		Path:   pathInsideBucket,

@@ -1,4 +1,200 @@
 definitions:
+  ConnectionReference:
+    properties:
+      connection:
+        description: ODAHU Connection
+        type: string
+      path:
+        description: |-
+          User can override path otherwise Connection path will be used.
+          For dataSource:
+          Input data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object).
+          For outputDestination:
+          Output data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object).
+          For modelSource:
+          If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container.
+          Otherwise its considered and a directory and will be delivered to user predictor container AS-IS
+        type: string
+    type: object
+  InferenceJob:
+    properties:
+      createdAt:
+        description: CreatedAt describes when InferenceJob was launched (readonly)
+        type: string
+      id:
+        description: Resource ID
+        type: string
+      spec:
+        $ref: '#/definitions/InferenceJobSpec'
+        description: Spec describes parameters of InferenceJob
+        type: object
+      status:
+        $ref: '#/definitions/InferenceJobStatus'
+        description: Spec describes execution status of InferenceJob (readonly)
+        type: object
+      updatedAt:
+        description: UpdatedAt describes when InferenceJob was updated (readonly)
+        type: string
+    type: object
+  InferenceJobSpec:
+    properties:
+      dataSource:
+        $ref: '#/definitions/ConnectionReference'
+        description: |-
+          DataSource defines location input data files.
+          Input data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)
+          If nil then will be filled from BatchInferenceService.
+        type: object
+      inferenceServiceId:
+        description: InferenceServiceID refers to BatchInferenceService
+        type: string
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
+        type: object
+      outputDestination:
+        $ref: '#/definitions/ConnectionReference'
+        description: |-
+          OutputDestination defines location of directory with output files.
+          Output data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object)
+          If nil then will be filled from BatchInferenceService.
+        type: object
+      requestId:
+        description: |-
+          BatchRequestID is unique identifier for InferenceJob that helps to correlate between
+          Model input, model output and feedback
+          Take into account that it is not the same as kubeflow InferenceRequest id
+          Each InferenceJob can process more than one InferenceRequest (delivered in separate input file)
+          So each BatchRequestID has set of corresponding InferenceRequest and their IDs
+        type: string
+      resources:
+        $ref: '#/definitions/ResourceRequirements'
+        description: |-
+          Resources for model container
+          The same format like k8s uses for pod resources.
+        type: object
+    type: object
+  InferenceJobStatus:
+    properties:
+      message:
+        description: Message is any message from runtime service about status of InferenceJob
+        type: string
+      podName:
+        description: PodName is a name of Pod in Kubernetes that is running under the hood of InferenceJob
+        type: string
+      reason:
+        description: |-
+          Reason is a reason of some InferenceJob state that was retrieved from runtime service.
+          for example reason of failure
+        type: string
+      state:
+        description: State describes current state of InferenceJob
+        type: string
+    type: object
+  InferenceService:
+    properties:
+      createdAt:
+        description: When resource was created. Managed by system. Cannot be overridden by User
+        type: string
+      id:
+        type: string
+      spec:
+        $ref: '#/definitions/InferenceServiceSpec'
+        type: object
+      status:
+        $ref: '#/definitions/InferenceServiceStatus'
+        type: object
+      updatedAt:
+        description: When resource was updated. Managed by system. Cannot be overridden by User
+        type: string
+    type: object
+  InferenceServiceSpec:
+    properties:
+      args:
+        description: |-
+          Arguments to the entrypoint.
+          The docker image's CMD is used if this is not provided.
+          Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
+          cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax
+          can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,
+          regardless of whether the variable exists or not.
+          Cannot be updated.
+          More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+        items:
+          type: string
+        type: array
+      command:
+        description: |-
+          Entrypoint array. Not executed within a shell.
+          The docker image's ENTRYPOINT is used if this is not provided.
+          Variable references $(VAR_NAME) are expanded using the container's environment. If a variable
+          cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax
+          can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded,
+          regardless of whether the variable exists or not.
+          Cannot be updated.
+          More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell
+        items:
+          type: string
+        type: array
+      dataSource:
+        $ref: '#/definitions/ConnectionReference'
+        description: |-
+          DataSource defines location input data files.
+          Input data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object)
+          Can be overridden in BatchInferenceJob definition
+        type: object
+      image:
+        description: Image is OCI image that contains user defined prediction code
+        type: string
+      modelSource:
+        $ref: '#/definitions/ConnectionReference'
+        description: ModelSource defines location of ML model files
+        type: object
+      nodeSelector:
+        additionalProperties:
+          type: string
+        description: Node selector for specifying a node pool
+        type: object
+      outputDestination:
+        $ref: '#/definitions/ConnectionReference'
+        description: |-
+          OutputDestination defines location of directory with output files.
+          Output data files must have .json extension and be valid JSON files that follows
+          [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object)
+          Can be overridden in BatchInferenceJob definition
+        type: object
+      resources:
+        $ref: '#/definitions/ResourceRequirements'
+        description: |-
+          Resources for model container
+          The same format like k8s uses for pod resources.
+        type: object
+      triggers:
+        $ref: '#/definitions/InferenceServiceTriggers'
+        description: Triggers are describe how to run InferenceService
+        type: object
+    type: object
+  InferenceServiceStatus:
+    type: object
+  InferenceServiceTriggers:
+    properties:
+      webhook:
+        $ref: '#/definitions/PredictorWebhookTrigger'
+        description: Webhook provides a REST API to execute InferenceJob that correspond to this service
+        type: object
+    type: object
+  PredictorWebhookTrigger:
+    properties:
+      enabled:
+        description: Enabled. If True then it possible to run InferenceJob by creating it using REST API
+        type: boolean
+    type: object
   APIBackendConfig:
     properties:
       local:
@@ -45,6 +241,38 @@ definitions:
         description: OpenID token url
         type: string
     type: object
+  BatchConfig:
+    properties:
+      enabled:
+        description: Enable batch API/operator
+        type: boolean
+      namespace:
+        description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created
+        type: string
+      nodePools:
+        description: Node pools to run batch jobs
+        items:
+          $ref: '#/definitions/NodePool'
+        type: array
+      rcloneImage:
+        description: RClone image that will be used to sync data with object storage
+        type: string
+      serviceAccountName:
+        description: Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun
+        type: string
+      timeout:
+        description: Timeout for full batch process
+        type: string
+      tolerations:
+        description: Kubernetes tolerations for batch jobs
+        type: string
+      toolsImage:
+        description: ODAHU tools image
+        type: string
+      toolsSecret:
+        description: ODAHU tools image
+        type: string
+    type: object
   Claims:
     properties:
       email:
@@ -84,6 +312,9 @@ definitions:
     properties:
       api:
         $ref: '#/definitions/APIConfig'
+        type: object
+      batch:
+        $ref: '#/definitions/BatchConfig'
         type: object
       common:
         $ref: '#/definitions/CommonConfig'
@@ -916,8 +1147,10 @@ definitions:
       deployment:
         description: The model k8s deployment name
         type: string
-      lastRevisionName:
-        description: Last applied ready knative revision
+      hostHeader:
+        description: |-
+          Host header value is a routing key for Istio Ingress
+          to forward a request to appropriate Knative Service
         type: string
       lastUpdatedTime:
         description: Time when credentials was updated
@@ -925,12 +1158,6 @@ definitions:
       replicas:
         description: Expected number of pods under current load
         type: integer
-      service:
-        description: The model k8s service name
-        type: string
-      serviceURL:
-        description: The model k8s service name
-        type: string
       state:
         description: |-
           The state of a model 
@@ -1211,6 +1438,275 @@ info:
   title: API Gateway
   version: "1.0"
 paths:
+  /api/v1/batch/job:
+    get:
+      consumes:
+      - application/json
+      description: List an InferenceJob
+      parameters:
+      - description: Number of entities in a response
+        in: query
+        name: size
+        type: integer
+      - description: Number of a page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/InferenceJob'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: List an InferenceJob
+      tags:
+      - Batch
+    post:
+      consumes:
+      - application/json
+      description: Create an InferenceJob
+      parameters:
+      - description: InferenceJob
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/InferenceJob'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/InferenceJob'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Create an InferenceJob
+      tags:
+      - Batch
+  /api/v1/batch/job/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an InferenceJob
+      parameters:
+      - description: InferenceJob id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Delete an InferenceJob
+      tags:
+      - Batch
+    get:
+      consumes:
+      - application/json
+      description: Get an InferenceJob by id
+      parameters:
+      - description: InferenceJob id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InferenceJob'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get an InferenceJob
+      tags:
+      - Batch
+  /api/v1/batch/service:
+    get:
+      consumes:
+      - application/json
+      description: List an InferenceService
+      parameters:
+      - description: Number of entities in a response
+        in: query
+        name: size
+        type: integer
+      - description: Number of a page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/InferenceService'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: List an InferenceService
+      tags:
+      - Batch
+    post:
+      consumes:
+      - application/json
+      description: Create an InferenceService
+      parameters:
+      - description: InferenceService
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/InferenceService'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/InferenceService'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Create an InferenceService
+      tags:
+      - Batch
+    put:
+      consumes:
+      - application/json
+      description: Update an InferenceService
+      parameters:
+      - description: InferenceService
+        in: body
+        name: service
+        required: true
+        schema:
+          $ref: '#/definitions/InferenceService'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InferenceService'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Update an InferenceService
+      tags:
+      - Batch
+  /api/v1/batch/service/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an InferenceService
+      parameters:
+      - description: InferenceService id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Delete an InferenceService
+      tags:
+      - Batch
+    get:
+      consumes:
+      - application/json
+      description: Get an InferenceService by id
+      parameters:
+      - description: InferenceService id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/InferenceService'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/HTTPResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/HTTPResult'
+      summary: Get an InferenceService
+      tags:
+      - Batch
   /api/v1/configuration:
     get:
       consumes:

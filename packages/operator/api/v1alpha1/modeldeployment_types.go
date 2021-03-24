@@ -69,16 +69,13 @@ type ModelDeploymentStatus struct {
 	State ModelDeploymentState `json:"state,omitempty"`
 	// The model k8s deployment name
 	Deployment string `json:"deployment,omitempty"`
-	// The model k8s service name
-	Service string `json:"service,omitempty"`
-	// The model k8s service name
-	ServiceURL string `json:"serviceURL,omitempty"`
+	// Host header value is a routing key for Istio Ingress
+	// to forward a request to appropriate Knative Service
+	HostHeader string `json:"hostHeader,omitempty"`
 	// Number of available pods
 	AvailableReplicas int32 `json:"availableReplicas"`
 	// Expected number of pods under current load
 	Replicas int32 `json:"replicas"`
-	// Last applied ready knative revision
-	LastRevisionName string `json:"lastRevisionName,omitempty"`
 	// Time when credentials was updated
 	LastCredsUpdatedTime *metav1.Time `json:"lastUpdatedTime,omitempty"`
 	// DEPRECATED Info about create and update

@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
+	"knative.dev/networking/pkg/apis/networking"
 	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -46,8 +47,6 @@ import (
 )
 
 const (
-	knativeRevisionHeader    = "knative-serving-revision"
-	knativeNamespaceHeader   = "knative-serving-namespace"
 	modelNameHeader          = "model-name"
 	modelVersionHeader       = "model-version"
 	defaultRetryAttempts     = 60
@@ -87,8 +86,8 @@ func VirtualServiceName(mr *odahuflowv1alpha1.ModelRoute) string {
 }
 
 func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1alpha1.ModelRoute) (bool, error) {
-	httpTargets := []*v1alpha3_istio.HTTPRouteDestination{}
-	reconileAgain := false
+	httpTargets := make([]*v1alpha3_istio.HTTPRouteDestination, 0, len(modelRouteCR.Spec.ModelDeploymentTargets))
+	reconcileAgain := false
 
 	for _, md := range modelRouteCR.Spec.ModelDeploymentTargets {
 		modelDeployment := &odahuflowv1alpha1.ModelDeployment{}
@@ -101,7 +100,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				"Model Route Name", modelRouteCR.Name,
 			)
 
-			reconileAgain = true
+			reconcileAgain = true
 			continue
 		} else if err != nil {
 			log.Error(
@@ -110,20 +109,18 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				"Model Route Name", modelRouteCR.Name,
 			)
 
-			return reconileAgain, err
+			return reconcileAgain, err
 		}
 
 		if modelDeployment.Status.State != odahuflowv1alpha1.ModelDeploymentStateReady {
-			log.Info("Model deployment is not ready", "Model Deployment Name", md.Name, "Model Route Name", modelRouteCR.Name)
-			reconileAgain = true
-
-			continue
+			log.Info("Model Deployment is not ready, re-schedule...", "Model Deployment Name", md.Name,
+				"Model Route Name", modelRouteCR.Name)
+			return true, nil
 		}
 
 		requestHeaders := &v1alpha3_istio.Headers_HeaderOperations{
-			Add: map[string]string{
-				knativeRevisionHeader:  modelDeployment.Status.LastRevisionName,
-				knativeNamespaceHeader: r.deploymentConfig.Namespace,
+			Set: map[string]string{
+				"Host": modelDeployment.Status.HostHeader,
 			},
 		}
 		// TODO: Deliver real model name/version to put in headers
@@ -133,26 +130,22 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				modelVersionHeader: "1",
 			},
 		}
-
-		httpTargets = append(httpTargets,
-			&v1alpha3_istio.HTTPRouteDestination{
-				Destination: &v1alpha3_istio.Destination{
-					Host: modelDeployment.Status.ServiceURL,
-					Port: &v1alpha3_istio.PortSelector{
-						Number: uint32(80),
-					},
-				},
-				Weight: *md.Weight,
-				Headers: &v1alpha3_istio.Headers{
-					Request:  requestHeaders,
-					Response: responseHeaders,
-				},
-			})
+		httpTargets = append(httpTargets, &v1alpha3_istio.HTTPRouteDestination{
+			Destination: &v1alpha3_istio.Destination{
+				Host: fmt.Sprintf("%s.%s.svc.cluster.local",
+					r.deploymentConfig.Istio.ServiceName, r.deploymentConfig.Istio.Namespace),
+			},
+			Weight: *md.Weight,
+			Headers: &v1alpha3_istio.Headers{
+				Request:  requestHeaders,
+				Response: responseHeaders,
+			},
+		})
 	}
 
 	if len(httpTargets) == 0 {
 		log.Info("Number of http targets is zero", "Model Route Name", modelRouteCR.Name)
-		return reconileAgain, nil
+		return reconcileAgain, nil
 	}
 
 	var mirror *v1alpha3_istio.Destination
@@ -165,7 +158,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		} else if err != nil {
 			log.Error(err, fmt.Sprintf("Getting of %s Model Deployment mirror", *modelRouteCR.Spec.Mirror))
 
-			return reconileAgain, err
+			return reconcileAgain, err
 		}
 
 		if modelDeployment.Status.State != odahuflowv1alpha1.ModelDeploymentStateReady {
@@ -175,10 +168,10 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				"Model Route Name", modelRouteCR.Name,
 			)
 
-			reconileAgain = true
+			reconcileAgain = true
 		} else {
 			mirror = &v1alpha3_istio.Destination{
-				Host: modelDeployment.Status.ServiceURL,
+				Host: modelDeployment.Name,
 			}
 		}
 	}
@@ -194,7 +187,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 		Spec: v1alpha3_istio_api.VirtualServiceSpec{
 			VirtualService: v1alpha3_istio.VirtualService{
 				Hosts:    []string{"*"},
-				Gateways: []string{"edge"},
+				Gateways: []string{fmt.Sprintf("knative-serving/%s", networking.KnativeIngressGateway)},
 				Http: []*v1alpha3_istio.HTTPRoute{
 					{
 						Retries: &v1alpha3_istio.HTTPRetry{
@@ -202,15 +195,13 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 							PerTryTimeout: defaultTimeoutPerTry,
 							RetryOn:       defaultListOfRetryCauses,
 						},
-						Match: []*v1alpha3_istio.HTTPMatchRequest{
-							{
-								Uri: &v1alpha3_istio.StringMatch{
-									MatchType: &v1alpha3_istio.StringMatch_Prefix{
-										Prefix: modelRouteCR.Spec.URLPrefix + "/",
-									},
+						Match: []*v1alpha3_istio.HTTPMatchRequest{{
+							Uri: &v1alpha3_istio.StringMatch{
+								MatchType: &v1alpha3_istio.StringMatch_Prefix{
+									Prefix: modelRouteCR.Spec.URLPrefix + "/",
 								},
 							},
-						},
+						}},
 						Rewrite: &v1alpha3_istio.HTTPRewrite{
 							Uri: "/",
 						},
@@ -223,7 +214,7 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 	}
 
 	if err := controllerutil.SetControllerReference(modelRouteCR, vservice, r.scheme); err != nil {
-		return reconileAgain, err
+		return reconcileAgain, err
 	}
 
 	found := &v1alpha3_istio_api.VirtualService{}
@@ -233,15 +224,15 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 	if err != nil && errors.IsNotFound(err) {
 		log.Info(fmt.Sprintf("Creating %s k8s Istio Virtual Service", vservice.ObjectMeta.Name))
 		err = r.Create(context.TODO(), vservice)
-		return reconileAgain, err
+		return reconcileAgain, err
 	} else if err != nil {
-		return reconileAgain, err
+		return reconcileAgain, err
 	}
 
 	modelDeploymentVersion := found.Annotations[ModelRouteVersionKey]
 	if modelDeploymentVersion == modelRouteCR.ResourceVersion {
 		log.Info("Istio VService is associated with up-to-date Model Route version, skipping")
-		return reconileAgain, err
+		return reconcileAgain, err
 	}
 
 	log.Info(fmt.Sprintf("Istio Virtual Service hashes don't equal. Update the %s Model route", vservice.Name))
@@ -257,10 +248,10 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 	log.Info(fmt.Sprintf("Updating %s k8s Istio Virtual Service", vservice.ObjectMeta.Name))
 	err = r.Update(context.TODO(), found)
 	if err != nil {
-		return reconileAgain, err
+		return reconcileAgain, err
 	}
 
-	return reconileAgain, err
+	return reconcileAgain, err
 }
 
 func (r *ModelRouteReconciler) reconcileStatus(modelRouteCR *odahuflowv1alpha1.ModelRoute,
@@ -319,6 +310,7 @@ func routeForLabelKey(mdName string) string {
 	return routeForLabelPrefix + mdName
 }
 
+// Sets labels that associate route and Model Deployment to Watch changes in matching MDs
 func (r *ModelRouteReconciler) reconcileRouteForLabels(route *odahuflowv1alpha1.ModelRoute) error {
 
 	var oldRouteForLabels []string

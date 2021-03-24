@@ -5,10 +5,9 @@ import (
 	"net/http"
 )
 
-// We should develop a custom exception on the repository layer.
-// But we rely on kubernetes exceptions for now.
-// TODO: implement Odahuflow exceptions
 func CalculateHTTPStatusCode(err error) int {
+
+	// TODO: Remove StatusError because after ensure that we wrap all kubernetes errors by odahu errors
 	errStatus, ok := err.(*errors.StatusError)
 	if ok {
 		return int(errStatus.ErrStatus.Code)
@@ -28,6 +27,14 @@ func CalculateHTTPStatusCode(err error) int {
 
 	if _, ok = err.(InvalidEntityError); ok {
 		return http.StatusBadRequest
+	}
+
+	if _, ok = err.(DeletingServiceHasJobs); ok {
+		return http.StatusBadRequest
+	}
+
+	if _, ok = err.(CreatingJobServiceNotFound); ok {
+		return http.StatusNotFound
 	}
 
 	return http.StatusInternalServerError

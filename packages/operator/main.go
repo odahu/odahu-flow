@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"os"
 
 	istioschema "github.com/aspenmesh/istio-client-go/pkg/client/clientset/versioned/scheme"
@@ -123,6 +124,14 @@ func start(cmd *cobra.Command, args []string) {
 	// Setup the training toolchain repository
 	authCfg := odahuConfig.Operator.Auth
 
+	connAPI := conn_api_client.NewClient(
+		authCfg.APIURL,
+		authCfg.APIToken,
+		authCfg.ClientID,
+		authCfg.ClientSecret,
+		authCfg.OAuthOIDCTokenEndpoint,
+	)
+
 	if odahuConfig.Training.Enabled {
 		trainAPIClient := train_api_client.NewClient(
 			authCfg.APIURL, authCfg.APIToken, authCfg.ClientID, authCfg.ClientSecret, authCfg.OAuthOIDCTokenEndpoint,
@@ -160,6 +169,22 @@ func start(cmd *cobra.Command, args []string) {
 		}
 		if err = controllers.NewModelRouteReconciler(mgr, *odahuConfig).SetupWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create controller", "controller", "ModelRoute")
+			os.Exit(1)
+		}
+	}
+
+	if odahuConfig.Batch.Enabled {
+
+		batchOpts := controllers.BatchInferenceJobReconcilerOptions{
+			Client: mgr.GetClient(),
+			Schema: mgr.GetScheme(),
+			ConnGetter:      connAPI,
+			Cfg:             odahuConfig.Batch,
+			ResourceGPUName: odahuConfig.Common.ResourceGPUName,
+		}
+
+		if err = controllers.NewBatchInferenceJobReconciler(batchOpts).SetupWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "Batch")
 			os.Exit(1)
 		}
 	}

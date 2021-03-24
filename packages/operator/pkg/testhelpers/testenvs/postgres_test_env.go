@@ -81,5 +81,11 @@ func SetupTestDB() (db *sql.DB, connString string, close func() error, err error
 		return db, connString, close, err
 	}
 
+	// If user provided its own database for tests then let's
+	// down all migrations to cleanup tests run
+	if connString != "" {
+		close = migrator.DownAllMigrations
+	}
+
 	return db, connString, close, err
 }

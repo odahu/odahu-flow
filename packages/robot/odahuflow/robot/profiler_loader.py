@@ -91,6 +91,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'CLUSTER_NAME': data.get('cluster_name'),
                 'CLUSTER_CONTEXT': data.get('cluster_context'),
                 'FEEDBACK_BUCKET': data.get('data_bucket'),
+                'TEST_BUCKET': data.get('data_bucket'),
                 'EXAMPLES_VERSION': data.get('examples_version'),
                 'CLOUD_TYPE': data['cloud']['type'],
                 'EDGE_URL': os.getenv('EDGE_URL', f'https://{host_base_domain}'),

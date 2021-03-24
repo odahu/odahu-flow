@@ -2,25 +2,41 @@ package controller
 
 import (
 	"database/sql"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/batch"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/route"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
+	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	batch_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/batchclient"
 	deploy_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/deploymentclient"
 	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
+	batch_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/batch/postgres"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
-	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
+	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
 	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
-	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	batch_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/batch"
 	dep_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
+	pack_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	route_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/route"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/deployment"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/controller/adapters/v1/training"
+	train_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
+
+
+// Controller does not create InferenceJobs from API Server (only fetches them)
+// Thus connectionGetter is not used. We build dummy connectionGetter to init InferenceJobService
+type dummyConnGetter struct {
+}
+
+func (dc *dummyConnGetter) GetConnection(id string, encrypted bool) (*connection.Connection, error) {
+	return nil, odahu_errors.NotFoundError{Entity: id}
+}
 
 func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, cfg config.Config) {
 
@@ -79,6 +95,22 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 		)
 		runMgr.AddRunnable(&routeWorker)
 
+	}
+
+	if cfg.Batch.Enabled {
+
+		connService := dummyConnGetter{}
+
+		batchJobService := batch_service.NewJobService(
+			batch_repo.BIJRepo{DB: db}, batch_repo.BISRepo{DB: db}, &connService)
+		batchServiceService := batch_service.NewInferenceServiceService(batch_repo.BISRepo{DB: db})
+		batchKubeClient := batch_kube_client.NewClient(kClient, cfg.Batch.Namespace, kConfig)
+
+		batchWorker := NewGenericWorker(
+			"batch", cfg.Common.LaunchPeriod,
+			batch.NewAdapter(kubeMgr, batchKubeClient, batchJobService, batchServiceService),
+		)
+		runMgr.AddRunnable(&batchWorker)
 	}
 
 }

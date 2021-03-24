@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	commons_feedback "odahu-commons/feedback"
 	"odahu-commons/predictors"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
@@ -82,9 +83,9 @@ func NewRequestCollector(
 	}, nil
 }
 
-func (rc *RequestCollector) convertToFeedback(message *Message) (*feedback.RequestResponse, *feedback.ResponseBody, error) {
-	responseBody := &feedback.ResponseBody{}
-	requestResponse := &feedback.RequestResponse{}
+func (rc *RequestCollector) convertToFeedback(message *Message) (*commons_feedback.RequestResponse, *commons_feedback.ResponseBody, error) {
+	responseBody := &commons_feedback.ResponseBody{}
+	requestResponse := &commons_feedback.RequestResponse{}
 
 	requestHeaders := make(map[string]string, len(message.HttpBufferedTrace.Request.Headers))
 	for _, header := range message.HttpBufferedTrace.Request.Headers {
@@ -101,12 +102,6 @@ func (rc *RequestCollector) convertToFeedback(message *Message) (*feedback.Reque
 
 		case feedback.ForwardedHostHeaderKey:
 			requestResponse.RequestHost = header.Value
-
-		case feedback.RequestIdHeaderKey:
-			if len(responseBody.RequestID) == 0 || len(requestResponse.RequestID) == 0 {
-				responseBody.RequestID = header.Value
-				requestResponse.RequestID = header.Value
-			}
 
 		case feedback.OdahuFlowRequestIdHeaderKey:
 			responseBody.RequestID = header.Value

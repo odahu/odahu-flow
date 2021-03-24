@@ -1,3 +1,4 @@
+# for class Model
 import json
 from odahuflow.sdk import config
 
@@ -11,6 +12,9 @@ from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClie
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
+from odahuflow.sdk.clients.batch_service import BatchInferenceServiceClient
+from odahuflow.sdk.clients.batch_job import BatchInferenceJobClient
+from odahuflow.sdk.clients.api import EntityAlreadyExists
 
 
 class Login:
@@ -246,9 +250,33 @@ class Toolchain:
 class Model:
 
     @staticmethod
-    def model_get(url, **kwargs):
-        return ModelClient(url, token=config.API_TOKEN).info()
+    def model_get(url=None, token=config.API_TOKEN, **kwargs):
+        return ModelClient(url, token, **kwargs).info()
 
     @staticmethod
-    def model_post(url, json_input=None, **kwargs):
-        return ModelClient(url, token=config.API_TOKEN).invoke(**json.loads(json_input))
+    def model_post(url=None, token=config.API_TOKEN, json_input=None, **kwargs):
+        return ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
+
+
+class InferenceService:
+
+    @staticmethod
+    def service_post(payload_file):
+        api_object = parse_resources_file_with_one_item(payload_file).resource
+        try:
+            BatchInferenceServiceClient().create(api_object)
+        except EntityAlreadyExists:
+            pass
+
+
+class InferenceJob:
+
+    @staticmethod
+    def job_post(payload_file):
+        api_object = parse_resources_file_with_one_item(payload_file).resource
+        en = BatchInferenceJobClient().create(api_object)
+        return en.id
+
+    @staticmethod
+    def job_get_id(id_: str):
+        return BatchInferenceJobClient().get(id_)

@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/go-logr/logr"
 	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
@@ -30,11 +31,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
-	"knative.dev/serving/pkg/apis/serving"
+	"knative.dev/pkg/apis"
 	knservingv1 "knative.dev/serving/pkg/apis/serving/v1"
 	"odahu-commons/predictors"
 	"reflect"
@@ -68,7 +66,7 @@ const (
 	DefaultKnativeAutoscalingMetric      = "concurrency"
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	ModelNameAnnotationKey               = "modelName"
-	ModelDeploymentVersionKey            = "modelDeploymentVersion"
+	AppliedModelDeploymentSpecKey        = "odahu.org/applied-model-deployment-spec"
 
 	IstioRewriteHTTPProbesAnnotation = "sidecar.istio.io/rewriteAppHTTPProbers"
 	OdahuAuthorizationLabel          = "odahu-flow-authorization"
@@ -112,7 +110,7 @@ type ModelDeploymentReconciler struct {
 	gpuResourceName  string
 }
 
-func KnativeConfigurationName(md *odahuflowv1alpha1.ModelDeployment) string {
+func KnativeServiceName(md *odahuflowv1alpha1.ModelDeployment) string {
 	return md.Name
 }
 
@@ -120,7 +118,7 @@ func knativeDeploymentName(revisionName string) string {
 	return fmt.Sprintf("%s-deployment", revisionName)
 }
 
-func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
+func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 	log logr.Logger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
 	predictor predictors.Predictor,
@@ -141,90 +139,121 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeConfiguration(
 		affinity = utils.BuildNodeAffinity(r.deploymentConfig.NodePools)
 	}
 
-	knativeConfiguration := &knservingv1.Configuration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      KnativeConfigurationName(modelDeploymentCR),
-			Namespace: modelDeploymentCR.Namespace,
-			Annotations: map[string]string{
-				ModelDeploymentVersionKey: modelDeploymentCR.ResourceVersion,
-			},
-		},
-		Spec: knservingv1.ConfigurationSpec{
-			Template: knservingv1.RevisionTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						ModelNameAnnotationKey: modelDeploymentCR.Name,
-						deploymentIDLabel:      modelDeploymentCR.Name,
-						// We must provide it because we don't use knative built-in routing
-						// And w/o this label revision is considered as "Unreachable" so then minScale is ignored and
-						// replicas are scaled to 0 even if user set minScale > 0
-						// TODO in future: move from creating knservingv1.Configuration -> knservingv1.Service
-						// https://github.com/knative/serving/blob/a333742324081d769d1b234622f3fc4cfd181ca4/pkg/apis/autoscaling/v1alpha1/pa_lifecycle.go#L85
-						serving.RouteLabelKey:   modelDeploymentCR.Name,
-						OdahuAuthorizationLabel: "enabled",
-						podPolicyLabel:          getCMPolicyName(modelDeploymentCR),
-					},
-					Annotations: map[string]string{
-						KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
-						KnativeAutoscalingMetric:         DefaultKnativeAutoscalingMetric,
-						KnativeMinReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MinReplicas)),
-						KnativeMaxReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
-						KnativeAutoscalingTargetKey:      KnativeAutoscalingTargetDefaultValue,
-						IstioRewriteHTTPProbesAnnotation: "true",
-					},
+	fulfilKnativeService := func(kService *knservingv1.Service) error {
+		templateLabelsToAdd := map[string]string{
+			ModelNameAnnotationKey:  modelDeploymentCR.Name,
+			deploymentIDLabel:       modelDeploymentCR.Name,
+			OdahuAuthorizationLabel: "enabled",
+			podPolicyLabel:          getCMPolicyName(modelDeploymentCR),
+		}
+		templateAnnotationsToAdd := map[string]string{
+			KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
+			KnativeAutoscalingMetric:         DefaultKnativeAutoscalingMetric,
+			KnativeMinReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MinReplicas)),
+			KnativeMaxReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
+			KnativeAutoscalingTargetKey:      KnativeAutoscalingTargetDefaultValue,
+			IstioRewriteHTTPProbesAnnotation: "true",
+		}
+		revisionSpec := knservingv1.RevisionSpec{
+			TimeoutSeconds: &DefaultTerminationPeriod,
+			PodSpec: corev1.PodSpec{
+				ServiceAccountName: serviceAccountName,
+				Containers: []corev1.Container{
+					*container,
 				},
-				Spec: knservingv1.RevisionSpec{
-					TimeoutSeconds: &DefaultTerminationPeriod,
-					PodSpec: corev1.PodSpec{
-						ServiceAccountName: serviceAccountName,
-						Containers: []corev1.Container{
-							*container,
-						},
-						NodeSelector: modelDeploymentCR.Spec.NodeSelector,
-						Tolerations:  r.deploymentConfig.Tolerations,
-						Affinity:     affinity,
-					},
-				},
+				NodeSelector: modelDeploymentCR.Spec.NodeSelector,
+				Tolerations:  r.deploymentConfig.Tolerations,
+				Affinity:     affinity,
 			},
-		},
+		}
+
+		appliedMDSpecJSON, err := json.Marshal(modelDeploymentCR.Spec)
+		if err != nil {
+			return err
+		}
+		serviceAnnotationsToAdd := map[string]string{
+			// Annotation to detect changes in MD
+			AppliedModelDeploymentSpecKey: string(appliedMDSpecJSON),
+		}
+
+		revisionTemplate := kService.Spec.ConfigurationSpec.Template
+
+		if revisionTemplate.Labels == nil {
+			revisionTemplate.Labels = make(map[string]string, len(templateLabelsToAdd))
+		}
+		for k, v := range templateLabelsToAdd {
+			revisionTemplate.Labels[k] = v
+		}
+
+		if revisionTemplate.Annotations == nil {
+			revisionTemplate.Annotations = make(map[string]string, len(templateAnnotationsToAdd))
+		}
+		for k, v := range templateAnnotationsToAdd {
+			revisionTemplate.Annotations[k] = v
+		}
+		revisionTemplate.Spec = revisionSpec
+		kService.Spec.ConfigurationSpec.Template = revisionTemplate
+
+		if kService.Annotations == nil {
+			kService.Annotations = make(map[string]string, len(serviceAnnotationsToAdd))
+		}
+		for k, v := range serviceAnnotationsToAdd {
+			kService.Annotations[k] = v
+		}
+
+		return nil
 	}
 
-	if err := controllerutil.SetControllerReference(modelDeploymentCR, knativeConfiguration, r.scheme); err != nil {
-		return err
-	}
+	knativeServiceName := KnativeServiceName(modelDeploymentCR)
 
-	found := &knservingv1.Configuration{}
+	found := &knservingv1.Service{}
 	err = r.Get(context.TODO(), types.NamespacedName{
-		Name: knativeConfiguration.Name, Namespace: knativeConfiguration.Namespace,
+		Name: knativeServiceName, Namespace: modelDeploymentCR.Namespace,
 	}, found)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s Knative Configuration", knativeConfiguration.ObjectMeta.Name))
-		err = r.Create(context.TODO(), knativeConfiguration)
+		newKService := &knservingv1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      knativeServiceName,
+				Namespace: modelDeploymentCR.Namespace,
+			},
+		}
+		err = fulfilKnativeService(newKService)
+		if err != nil {
+			return err
+		}
+
+		if err := controllerutil.SetControllerReference(modelDeploymentCR, newKService, r.scheme); err != nil {
+			return err
+		}
+
+		log.Info(fmt.Sprintf("Creating %s k8s Knative Service, applied MD spec: %s",
+			newKService.ObjectMeta.Name, newKService.Annotations[AppliedModelDeploymentSpecKey]))
+		err = r.Create(context.TODO(), newKService)
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	modelDeploymentVersion := found.Annotations[ModelDeploymentVersionKey]
-	if modelDeploymentVersion == modelDeploymentCR.ResourceVersion {
+	lastAppliedMDSpec := &odahuflowv1alpha1.ModelDeploymentSpec{}
+	err = json.Unmarshal([]byte(found.Annotations[AppliedModelDeploymentSpecKey]), lastAppliedMDSpec)
+	if err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec) {
 		log.Info("Model Deployment version is up to date, skipping")
 		return nil
 	}
 
-	log.Info(fmt.Sprintf(
-		"Knative Configuration bases on version %s, update to reflect version %s",
-		modelDeploymentVersion, modelDeploymentCR.ResourceVersion,
-	))
+	log.Info("Knative Service bases on old MD spec", "old", lastAppliedMDSpec,
+		"new", modelDeploymentCR.Spec)
 
-	found.Spec = knativeConfiguration.Spec
-	for k, v := range knativeConfiguration.Labels {
-		found.Labels[k] = v
+	err = fulfilKnativeService(found)
+	if err != nil {
+		return err
 	}
-	for k, v := range knativeConfiguration.Annotations {
-		found.Annotations[k] = v
-	}
-
-	log.Info(fmt.Sprintf("Updating %s Knative Configuration", knativeConfiguration.ObjectMeta.Name))
+	log.Info(fmt.Sprintf("Updating %s Knative Service, new MD generation: %d",
+		knativeServiceName, modelDeploymentCR.Generation))
 	err = r.Update(context.TODO(), found)
 	if err != nil {
 		return err
@@ -258,298 +287,37 @@ func (r *ModelDeploymentReconciler) createModelContainer(
 	}, nil
 }
 
-// Retrieve current configuration and return last revision name.
-// If the latest revision name equals the latest created revision, then last deployment changes were applied.
-func (r *ModelDeploymentReconciler) getLatestReadyRevision(
-	log logr.Logger,
+// Shortcut to get corresponding Knative Service
+func (r *ModelDeploymentReconciler) getKnativeService(
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-) (string, bool, error) {
-	knativeConfiguration := &knservingv1.Configuration{}
-	if err := r.Get(context.TODO(), types.NamespacedName{
-		Name: KnativeConfigurationName(modelDeploymentCR), Namespace: modelDeploymentCR.Namespace,
-	}, knativeConfiguration); errors.IsNotFound(err) {
-		return "", false, nil
-	} else if err != nil {
-		log.Error(err, "Getting Knative Configuration")
-		return "", false, err
-	}
+) (*knservingv1.Service, error) {
+	knativeService := &knservingv1.Service{}
 
-	latestReadyRevisionName := knativeConfiguration.Status.LatestReadyRevisionName
-	configurationReady := len(latestReadyRevisionName) != 0 &&
-		latestReadyRevisionName == knativeConfiguration.Status.LatestCreatedRevisionName
+	err := r.Get(context.TODO(), types.NamespacedName{
+		Name: KnativeServiceName(modelDeploymentCR), Namespace: modelDeploymentCR.Namespace,
+	}, knativeService)
 
-	return latestReadyRevisionName,
-		configurationReady,
-		nil
+	return knativeService, err
 }
 
 func (r *ModelDeploymentReconciler) reconcileStatus(
 	log logr.Logger, modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-	state odahuflowv1alpha1.ModelDeploymentState, latestReadyRevision string) error {
+	state odahuflowv1alpha1.ModelDeploymentState, _ string) error {
 
 	modelDeploymentCR.Status.State = state
 
-	if len(latestReadyRevision) != 0 {
-		modelDeploymentCR.Status.ServiceURL = fmt.Sprintf(
-			"%s.%s.svc.cluster.local", modelDeploymentCR.Name, modelDeploymentCR.Namespace,
-		)
-		modelDeploymentCR.Status.LastRevisionName = latestReadyRevision
-	}
+	//if len(latestReadyRevision) != 0 {
+	//	modelDeploymentCR.Status.ServiceURL = fmt.Sprintf(
+	//		"%s.%s.svc.cluster.local", modelDeploymentCR.Name, modelDeploymentCR.Namespace,
+	//	)
+	//	modelDeploymentCR.Status.LastRevisionName = latestReadyRevision
+	//}
 
 	if err := r.Update(context.TODO(), modelDeploymentCR); err != nil {
 		log.Error(err, fmt.Sprintf(
 			"Update status of %s model deployment custom resource", modelDeploymentCR.Name,
 		))
 		return err
-	}
-
-	return nil
-}
-
-// Reconciles a separate kubernetes service for a model deployment with stable name
-func (r *ModelDeploymentReconciler) reconcileService(
-	log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-) error {
-
-	// Ensures that Service has a required port
-	fulfilServiceObject := func(service *corev1.Service) (updated bool) {
-		requiredPort := corev1.ServicePort{
-			Name:       "http",
-			Protocol:   corev1.ProtocolTCP,
-			Port:       80,
-			TargetPort: intstr.FromInt(8012),
-		}
-
-		found := false
-		for i, port := range service.Spec.Ports {
-			if port.Name != requiredPort.Name {
-				continue
-			}
-			found = true
-			if port != requiredPort {
-				service.Spec.Ports[i] = requiredPort
-				updated = true
-			}
-		}
-
-		if !found {
-			service.Spec.Ports = append(service.Spec.Ports, requiredPort)
-			updated = true
-		}
-
-		return updated
-	}
-
-	serviceNamespacedName := types.NamespacedName{
-		Name: modelDeploymentCR.Name, Namespace: modelDeploymentCR.Namespace,
-	}
-
-	foundService := &corev1.Service{}
-	err := r.Get(context.TODO(), serviceNamespacedName, foundService)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s service", serviceNamespacedName.Name))
-
-		newService := &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      serviceNamespacedName.Name,
-				Namespace: serviceNamespacedName.Namespace,
-			},
-			Spec: corev1.ServiceSpec{
-				Type: corev1.ServiceTypeClusterIP,
-			},
-		}
-		fulfilServiceObject(newService)
-
-		if err := controllerutil.SetControllerReference(modelDeploymentCR, newService, r.scheme); err != nil {
-			return err
-		}
-
-		err = r.Create(context.TODO(), newService)
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	needToUpdate := fulfilServiceObject(foundService)
-
-	if !needToUpdate {
-		log.Info("K8s Service already has required port, skipping")
-		return nil
-	}
-
-	log.Info(fmt.Sprintf("Update ports of %s K8s Service...", foundService.Name))
-
-	err = r.Update(context.TODO(), foundService)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Syncs subsets endpoints of a model deployment service with subsets endpoints of the latest model knative revision
-func (r *ModelDeploymentReconciler) reconcileEndpoints(
-	log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-) error {
-	lastRevisionName := modelDeploymentCR.Status.LastRevisionName
-	if len(lastRevisionName) == 0 {
-		log.Info("Last revision name is empty")
-		return nil
-	}
-
-	knativeEndpoints := &corev1.Endpoints{}
-	if err := r.Get(context.TODO(), types.NamespacedName{
-		Namespace: modelDeploymentCR.Namespace,
-		Name:      lastRevisionName,
-	}, knativeEndpoints); err != nil {
-		log.Error(err, "Cannot get the knative endpoints endpoints",
-			"last revision name", lastRevisionName)
-		return err
-	}
-
-	endpointsNamespacedName := types.NamespacedName{
-		Name:      modelDeploymentCR.Name,
-		Namespace: modelDeploymentCR.Namespace,
-	}
-
-	found := &corev1.Endpoints{}
-	err := r.Get(context.TODO(), endpointsNamespacedName, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info(fmt.Sprintf("Creating %s k8s endpoints", endpointsNamespacedName.Name))
-
-		endpoints := &corev1.Endpoints{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      endpointsNamespacedName.Name,
-				Namespace: endpointsNamespacedName.Namespace,
-			},
-			Subsets: knativeEndpoints.Subsets,
-		}
-
-		if err := controllerutil.SetControllerReference(modelDeploymentCR, endpoints, r.scheme); err != nil {
-			return err
-		}
-
-		err = r.Create(context.TODO(), endpoints)
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if reflect.DeepEqual(found.Subsets, knativeEndpoints.Subsets) {
-		log.Info("Endpoints are associated with up-to-date Model Deployment version, skipping")
-		return nil
-	}
-
-	log.Info(fmt.Sprintf("Endpoints are not up-to-date with latest Knative revision."+
-		"Update the %s endpoints", found.Name))
-
-	found.Subsets = knativeEndpoints.Subsets
-
-	err = r.Update(context.TODO(), found)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Cleanup old Knative revisions
-// Workaround for https://knative.dev/serving/issues/2720
-// TODO: need to upgrade knative
-func (r *ModelDeploymentReconciler) cleanupOldRevisions(
-	log logr.Logger,
-	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-) error {
-	lastRevisionName := modelDeploymentCR.Status.LastRevisionName
-	if len(lastRevisionName) == 0 {
-		log.Info("Last revision name is empty")
-
-		return nil
-	}
-
-	lastKnativeRevision := &knservingv1.Revision{}
-	if err := r.Get(context.TODO(), types.NamespacedName{
-		Name: lastRevisionName, Namespace: modelDeploymentCR.Namespace,
-	}, lastKnativeRevision); err != nil {
-		log.Error(err, "Getting Knative Revision")
-
-		return err
-	}
-
-	lastKnativeRevisionGenerationStr, ok := lastKnativeRevision.Labels[serving.ConfigurationGenerationLabelKey]
-	if !ok {
-		return fmt.Errorf(
-			"cannot get the latest knative revision generation: %s",
-			lastKnativeRevisionGenerationStr,
-		)
-	}
-
-	lastKnativeRevisionGeneration, err := strconv.Atoi(lastKnativeRevisionGenerationStr)
-	if err != nil {
-		return err
-	}
-
-	knativeRevisions := &knservingv1.RevisionList{}
-
-	labelSelectorReq, err := labels.NewRequirement(
-		ModelNameAnnotationKey,
-		selection.DoubleEquals,
-		[]string{modelDeploymentCR.Name},
-	)
-	if err != nil {
-		log.Error(
-			err,
-			"Creation of the label selector requirement",
-		)
-		return err
-	}
-
-	labelSelector := labels.NewSelector()
-	labelSelector.Add(*labelSelectorReq)
-
-	if err := r.List(context.TODO(), knativeRevisions, &client.ListOptions{
-		LabelSelector: labelSelector,
-		Namespace:     modelDeploymentCR.Namespace,
-	}); err != nil {
-		log.Error(err, "Get the list of knative revisions")
-
-		return err
-	}
-
-	for _, kr := range knativeRevisions.Items {
-		// pin variable
-		kr := kr
-
-		modelDeploymentName, ok := kr.Labels[ModelNameAnnotationKey]
-		if !ok || modelDeploymentName != modelDeploymentCR.Name {
-			continue
-		}
-
-		krGenerationStr, ok := kr.Labels[serving.ConfigurationGenerationLabelKey]
-		if !ok {
-			return fmt.Errorf("cannot get the latest knative revision generation: %s", kr.Name)
-		}
-
-		krGeneration, err := strconv.Atoi(krGenerationStr)
-		if err != nil {
-			return err
-		}
-
-		if krGeneration < lastKnativeRevisionGeneration {
-			if err := r.Delete(context.TODO(), &kr); err != nil {
-				log.Error(err, "Delete old knative revision",
-					"knative revision name", kr.Name,
-					"knative revision generation", krGeneration)
-				return err
-			}
-
-			log.Info("Delete old knative revision",
-				"model deployment id", modelDeploymentCR.Name,
-				"knative revision name", kr.Name,
-				"knative revision generation", krGeneration)
-		}
 	}
 
 	return nil
@@ -670,37 +438,31 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		return reconcile.Result{}, nil
 	}
 
-	if err := r.ReconcileKnativeConfiguration(log, modelDeploymentCR, predictor); err != nil {
-		log.Error(err, "Reconcile Knative Configuration")
+	if err := r.ReconcileKnativeService(log, modelDeploymentCR, predictor); err != nil {
+		log.Error(err, "Reconcile Knative Service")
 		return reconcile.Result{}, err
 	}
 
-	latestReadyRevision, configurationReady, err := r.getLatestReadyRevision(log, modelDeploymentCR)
+	knService, err := r.getKnativeService(modelDeploymentCR)
 	if err != nil {
 		log.Error(err, "Getting latest revision")
 		return reconcile.Result{}, err
 	}
 
-	if !configurationReady {
-		log.Info("Configuration was not updated yet. Update Status and Put the Model Deployment back in the queue")
+	condition := knService.Status.GetCondition(apis.ConditionReady)
+	if condition == nil || condition.Status != corev1.ConditionTrue {
+		log.Info("Knative Service is not ready, re-schedule...",
+			"Model Deployment Name", modelDeploymentCR.Name)
 
-		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, "")
+		err := r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, "")
+		if err != nil {
+			log.Error(err, "failed to update MD status")
+		}
 
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
 	}
 
-	log.Info("Reconcile K8s Service")
-
-	if err := r.reconcileService(log, modelDeploymentCR); err != nil {
-		log.Error(err, "Reconcile the k8s service")
-		return reconcile.Result{}, err
-	}
-
-	if err := r.reconcileEndpoints(log, modelDeploymentCR); err != nil {
-		log.Error(err, "Can not reconcile endpoints")
-		return reconcile.Result{}, err
-	}
-
+	latestReadyRevision := knService.Status.LatestReadyRevisionName
 	modelDeployment := &appsv1.Deployment{}
 	modelDeploymentKey := types.NamespacedName{
 		Name:      knativeDeploymentName(latestReadyRevision),
@@ -721,6 +483,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	modelDeploymentCR.Status.Replicas = modelDeployment.Status.Replicas
 	modelDeploymentCR.Status.AvailableReplicas = modelDeployment.Status.AvailableReplicas
 	modelDeploymentCR.Status.Deployment = modelDeployment.Name
+	modelDeploymentCR.Status.HostHeader = knService.Status.URL.Host
 
 	if modelDeploymentCR.Status.Replicas != modelDeploymentCR.Status.AvailableReplicas {
 		log.Info(fmt.Sprintf("Not enough replicas running. Requeue after %s", DefaultRequeueDelay))
@@ -740,11 +503,6 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		return reconcile.Result{}, err
 	}
 
-	if err := r.cleanupOldRevisions(log, modelDeploymentCR); err != nil {
-		log.Error(err, "Cleanup old revisions")
-		return reconcile.Result{}, err
-	}
-
 	return reconcile.Result{
 		Requeue:      true,
 		RequeueAfter: PeriodVerifyingDockerConnectionToken,
@@ -754,12 +512,10 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 func (r *ModelDeploymentReconciler) SetupBuilder(mgr ctrl.Manager) *ctrl.Builder {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&odahuflowv1alpha1.ModelDeployment{}).
-		Owns(&knservingv1.Configuration{}).
+		Owns(&knservingv1.Service{}).
 		Owns(&odahuflowv1alpha1.ModelRoute{}).
 		Owns(&corev1.ConfigMap{}).
 		Watches(&source.Kind{Type: &appsv1.Deployment{}}, &EnqueueRequestForImplicitOwner{}).
-		Watches(&source.Kind{Type: &knservingv1.Revision{}}, &EnqueueRequestForImplicitOwner{}).
-		Watches(&source.Kind{Type: &corev1.Endpoints{}}, &EnqueueRequestForImplicitOwner{}).
 		Watches(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &odahuflowv1alpha1.Connection{},

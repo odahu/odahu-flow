@@ -29,6 +29,7 @@ linters:
     - exhaustive
     - gofumpt
     - interfacer
+    - scopelint # OBSOLETED
 issues:
   exclude-rules:
     # Exclude some linters from running on tests files.
@@ -78,3 +79,6 @@ issues:
         - golint
         - stylecheck
       text: "ExternalUrl"
+    - linters:
+        - gocritic
+      text: "ifElseChain"

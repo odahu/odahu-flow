@@ -1,0 +1,87 @@
+{{ if .Values.config.deployment.enabled }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{- include "odahuflow.ingress-default-root-annotations" . | nindent 4 }}
+    {{- range $key, $value := .Values.edge.ingress.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- include "odahuflow.ingress-auth-token-annotations" . | nindent 4 }}
+  labels:
+    {{- include "odahuflow.helm-labels" (dict "component" "edge" "root" .) | nindent 4 }}
+  name: "{{ .Release.Name }}-edge"
+  namespace: {{ .Values.feedback.istio_namespace }}
+spec:
+  rules:
+    - host: {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "%s") }}
+      http:
+        paths:
+          - path: "/model"
+            backend:
+              serviceName: "istio-ingressgateway"
+              servicePort: 80
+          - path: "/custom"
+            backend:
+              serviceName: "istio-ingressgateway"
+              servicePort: 80
+          - path: "/feedback"
+            backend:
+              serviceName: "istio-ingressgateway"
+              servicePort: 80
+          - path: "/service-catalog"
+            backend:
+              serviceName: "istio-ingressgateway"
+              servicePort: 80
+    {{- if (ternary $.Values.edge.ingress.tlsEnabled $.Values.ingress.tlsEnabled (hasKey $.Values.edge.ingress "tlsEnabled")) }}
+  tls:
+    - hosts:
+        - {{ include "odahuflow.ingress-domain-name" (dict "local" .Values.edge.ingress "root" . "tpl" "edge.%s") | quote }}
+      secretName: {{ include "odahuflow.ingress-tls-secret-name" (dict "local" .Values.edge.ingress "root" . ) | quote }}
+      {{- end }}
+{{ end }}
+---
+# This filter saves a request ID (taken from "request-id" or "x-request-id" header) to a Dynamic Metadata,
+# a shared cache for all the filters of current HTTP stream. On forwarding response it retrieves the request-id value
+# and sets the corresponding header. This ensures that client always receives a request ID in response headers,
+# no matter what inference server is used in Model Deployment. The request ID can then be used to provide a feedback
+# for a corresponding prediction.
+# TODO: used syntax is for Istio 1.4 and is deprecated. Don't forget to update it after upgrading Istio
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: request-id-filter
+  namespace: {{ .Values.feedback.istio_namespace }}
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  filters:
+    - filterName: envoy.lua
+      filterType: HTTP
+      listenerMatch:
+        listenerType: GATEWAY
+        listenerProtocol: HTTP
+      filterConfig:
+        inlineCode: |
+          function envoy_on_request(request_handle)
+            local headers = request_handle:headers()
+            local x_request_id = headers:get("x-request-id")
+            local request_id = headers:get("request-id")
+
+            if request_id == nil then
+              request_id = x_request_id
+              request_handle:logInfo("request-id header is nil, using x-request-id")
+              headers:add("request-id", request_id)
+            end
+
+            request_handle:logInfo("request-id from headers: "..request_id)
+            request_handle:streamInfo():dynamicMetadata():set("odahu", "request-id", request_id)
+          end
+          function envoy_on_response(response_handle)
+            local headers = response_handle:headers()
+            local request_id = response_handle:streamInfo():dynamicMetadata():get("odahu")["request-id"]
+            headers:replace("request-id", request_id)
+
+            response_handle:logInfo("request-id from dynamic metadata: "..request_id)
+          end

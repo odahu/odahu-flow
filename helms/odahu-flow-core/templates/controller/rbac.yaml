@@ -252,6 +252,26 @@ rules:
     verbs:
       - create
       - patch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - batchinferencejobs
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - odahuflow.odahu.org
+    resources:
+      - batchinferencejobs/status
+    verbs:
+      - get
+      - patch
+      - update
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

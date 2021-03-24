@@ -34,9 +34,10 @@ import (
 )
 
 const (
-	mrName  = "test-mr"
-	mrURL   = "/test/url"
-	timeout = time.Second * 5
+	mrName          = "test-mr"
+	mrURL           = "/test/url"
+	timeout         = time.Second * 5
+	istioIngressSvc = "istio-ingressgateway.istio-system.svc.cluster.local"
 )
 
 var (
@@ -50,9 +51,8 @@ var (
 			Image: "test/image:1",
 		},
 		Status: odahuflowv1alpha1.ModelDeploymentStatus{
-			ServiceURL:       "md-1-for-tests.default.svc",
-			LastRevisionName: "md-1-for-tests-rev",
-			State:            odahuflowv1alpha1.ModelDeploymentStateReady,
+			HostHeader: "md-1-for-tests.default.svc",
+			State:      odahuflowv1alpha1.ModelDeploymentStateReady,
 		},
 	}
 	md2 = &odahuflowv1alpha1.ModelDeployment{
@@ -64,9 +64,8 @@ var (
 			Image: "test/image:1",
 		},
 		Status: odahuflowv1alpha1.ModelDeploymentStatus{
-			ServiceURL:       "md-2-for-tests.default.svc",
-			LastRevisionName: "md-2-for-tests-rev",
-			State:            odahuflowv1alpha1.ModelDeploymentStateReady,
+			HostHeader: "md-2-for-tests.default.svc",
+			State:      odahuflowv1alpha1.ModelDeploymentStateReady,
 		},
 	}
 	mdNotReady = &odahuflowv1alpha1.ModelDeployment{
@@ -78,8 +77,7 @@ var (
 			Image: "test/image:1",
 		},
 		Status: odahuflowv1alpha1.ModelDeploymentStatus{
-			ServiceURL:       "",
-			LastRevisionName: "",
+			HostHeader: "",
 		},
 	}
 	c                    client.Client
@@ -158,7 +156,7 @@ func TestBasicReconcile(t *testing.T) {
 	g.Eventually(requests, timeout).Should(Receive(Equal(routeExpectedRequest)))
 
 	g.Expect(c.Get(context.TODO(), mrKey, mr)).ToNot(HaveOccurred())
-	g.Expect(mr.Status.State).To(Equal(odahuflowv1alpha1.ModelRouteStateReady))
+	g.Eventually(mr.Status.State, timeout).Should(Equal(odahuflowv1alpha1.ModelRouteStateReady))
 
 	vs := &v1alpha3_istio_api.VirtualService{}
 	vsKey := types.NamespacedName{Name: VirtualServiceName(mr), Namespace: testNamespace}
@@ -168,11 +166,12 @@ func TestBasicReconcile(t *testing.T) {
 
 	for _, host := range vs.Spec.Http {
 		g.Expect(host.Mirror).ToNot(BeNil())
-		g.Expect(host.Mirror.Host).To(Equal(md1.Status.ServiceURL))
+		g.Expect(host.Mirror.Host).To(Equal(md1.Name))
 
 		g.Expect(host.Route).To(HaveLen(1))
-		g.Expect(host.Route[0].Destination.Host).To(Equal(md2.Status.ServiceURL))
+		g.Expect(host.Route[0].Destination.Host).To(Equal(istioIngressSvc))
 		g.Expect(host.Route[0].Weight).To(Equal(weight))
+		g.Expect(host.Route[0].Headers.Request.Set["Host"]).To(Equal(md2.Status.HostHeader))
 	}
 }
 
@@ -308,10 +307,12 @@ func TestMultipleTargets(t *testing.T) {
 	for _, host := range vs.Spec.Http {
 		g.Expect(host.Route).To(HaveLen(2))
 
-		g.Expect(host.Route[0].Destination.Host).To(Equal(md1.Status.ServiceURL))
+		g.Expect(host.Route[0].Destination.Host).To(Equal(istioIngressSvc))
 		g.Expect(host.Route[0].Weight).To(Equal(weight))
+		g.Expect(host.Route[0].Headers.Request.Set["Host"]).To(Equal(md1.Status.HostHeader))
 
-		g.Expect(host.Route[1].Destination.Host).To(Equal(md2.Status.ServiceURL))
+		g.Expect(host.Route[1].Destination.Host).To(Equal(istioIngressSvc))
 		g.Expect(host.Route[1].Weight).To(Equal(weight))
+		g.Expect(host.Route[1].Headers.Request.Set["Host"]).To(Equal(md2.Status.HostHeader))
 	}
 }
