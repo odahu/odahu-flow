@@ -148,43 +148,12 @@ func GetObjectStorageModelSyncStep(image string, connName string,
 			Image:     image,
 			Command:   []string{pathToOdahuToolsBin},
 			Args:      []string{
-				"registry", "object-storage",
+				"registry", "object-storage", "sync",
 				"--conn", connName,
 				"--remotePath", modelPath,
 				"--localPath", odahuModelPath},
-			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
-			Resources: res,
-		},
-	}
-}
-
-// GetSyncPackedModelStep return step that
-// syncs model from s3/gcs/azureblob bucket to workspace and unpack it
-func GetSyncPackedModelStep(
-	rcloneImage string,
-	rcloneConfigName string,
-	bucketName string,
-	modelPath string,
-	res corev1.ResourceRequirements,
-	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
-	source := path.Join(sourcePrefix, modelPath)
-
-	baseName := path.Base(modelPath)
-	archiveName := path.Join(odahuModelPath, baseName)
-
-
-	cmdPipeline := fmt.Sprintf("rclone -P sync %s %s && tar -xzvf %s -C %s",
-		source, odahuModelPath, archiveName, odahuModelPath,
-	)
-
-	return tektonv1beta1.Step{
-		Container: corev1.Container{
-			Name:      StepSyncModel,
-			Image:     rcloneImage,
-			Command:   []string{"sh", "-c"},
-			Args:      []string{cmdPipeline},
-			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
+			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
+			Env:       []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
 		},
 	}
