@@ -14,5 +14,5 @@ spec:
       connection: odahu-flow-examples
   outputConnection: models-output
   data:
-    - connName: wine
+    - connection: wine
       localPath: mlflow/sklearn/wine/

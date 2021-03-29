@@ -23,7 +23,7 @@ spec:
   # The training data for a ML script.
   data:
       # You can specify a connection name
-      - connName: wine
+      - connection: wine
         # Local path with file or dir
         localPath: mlflow/wine-quality/
         # Path to the dir or file in a bucket

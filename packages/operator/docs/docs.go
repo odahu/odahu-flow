@@ -3813,7 +3813,7 @@ var doc = `{
         "DataBindingDir": {
             "type": "object",
             "properties": {
-                "connName": {
+                "connection": {
                     "description": "Connection name for data",
                     "type": "string"
                 },

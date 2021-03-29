@@ -11,7 +11,7 @@ spec:
   hyperParameters:
     maxwords: "999"
   data:
-    - connName: models-output
+    - connection: models-output
       localPath: mlflow/tensorflow/reuters_classifier/data/
       remotePath: /reuters/
   resources:

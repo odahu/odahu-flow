@@ -2,7 +2,7 @@ kind: ModelTraining
 id: test-algorithm-source-non-exist-storage
 spec:
   model:
-    name: wine-mlflow-default
+    name: test-algorithm-source
     version: '1.0'
   toolchain: mlflow
   hyperParameters:

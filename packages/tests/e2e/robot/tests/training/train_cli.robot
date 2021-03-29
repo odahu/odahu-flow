@@ -47,7 +47,7 @@ Train valid model from VCS
 Train invalid model from VCS
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
-    ${res}= StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
+    ${res}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
     report training pods  ${training id}
     should not be equal ${res.rc}  ${0}
 
@@ -65,7 +65,7 @@ Train invalid model from object storage
     [Teardown]  Cleanup resources  ${training id}
     Download file  mlflow/sklearn/wine/MLproject  ${RES_DIR}/algorithm_source/MLproject
     StrictShell  ${TRAIN_STUFF_DIR}/training_stuff.sh bucket-copy "${RES_DIR}/algorithm_source" "/algorithm_source"
-    ${res}= StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
+    ${res}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/invalid/${training_file} --id ${training id}
     report training pods  ${training id}
     should not be equal ${res.rc}  ${0}
 

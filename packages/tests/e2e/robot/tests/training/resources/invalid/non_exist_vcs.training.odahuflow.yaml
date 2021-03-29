@@ -2,7 +2,7 @@ kind: ModelTraining
 id: test-algorithm-source-non-exist-vcs
 spec:
   model:
-    name: wine-mlflow-default
+    name: test-algorithm-source
     version: '1.0'
   toolchain: mlflow
   hyperParameters:
@@ -14,5 +14,5 @@ spec:
       connection: non-exist
   outputConnection: models-output
   data:
-    - connName: wine
+    - connection: wine
       localPath: mlflow/sklearn/wine/

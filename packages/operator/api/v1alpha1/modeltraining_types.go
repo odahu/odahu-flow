@@ -25,7 +25,7 @@ import (
 
 type DataBindingDir struct {
 	// Connection name for data
-	Connection string `json:"connName"`
+	Connection string `json:"connection"`
 	// Local training path
 	LocalPath string `json:"localPath"`
 	// Overwrite remote data path in connection

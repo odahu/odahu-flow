@@ -86,7 +86,7 @@ spec:
               description: Input data for a training
               items:
                 properties:
-                  connName:
+                  connection:
                     description: Connection name for data
                     type: string
                   localPath:
@@ -96,7 +96,7 @@ spec:
                     description: Overwrite remote data path in connection
                     type: string
                 required:
-                - connName
+                - connection
                 - localPath
                 type: object
               type: array

@@ -22,6 +22,6 @@ spec:
       cpu: 2024m
       memory: 2024Mi
   data:
-    - connName: wine
+    - connection: wine
       localPath: mlflow/sklearn/wine/
       remotePath: /test-data/data/wine-quality.csv
