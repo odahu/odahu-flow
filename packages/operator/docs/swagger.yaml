@@ -152,9 +152,9 @@ definitions:
       image:
         description: Image is OCI image that contains user defined prediction code
         type: string
-      modelSource:
-        $ref: '#/definitions/ConnectionReference'
-        description: ModelSource defines location of ML model files
+      modelRegistry:
+        $ref: '#/definitions/ModelSource'
+        description: ModelRegistry defines location of ML model files
         type: object
       nodeSelector:
         additionalProperties:
@@ -1094,6 +1094,15 @@ definitions:
         description: Value of an environment variable
         type: string
     type: object
+  LocalModelSource:
+    properties:
+      meta:
+        $ref: '#/definitions/ModelMeta'
+        type: object
+      modelPath:
+        description: ModelPath is a directory inside container where ML model files are located
+        type: string
+    type: object
   ModelDeploymentSpec:
     properties:
       annotations:
@@ -1190,6 +1199,13 @@ definitions:
         description: Model version
         type: string
     type: object
+  ModelMeta:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    type: object
   ModelPackagingResult:
     properties:
       name:
@@ -1257,6 +1273,17 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  ModelSource:
+    properties:
+      local:
+        $ref: '#/definitions/LocalModelSource'
+        description: Local does not fetch model and assume that model is embedded into container
+        type: object
+      remote:
+        $ref: '#/definitions/RemoteModelSource'
+        description: Remote fetch model from remote model registry using ODAHU connections mechanism
+        type: object
     type: object
   ModelTrainingSpec:
     properties:
@@ -1350,6 +1377,15 @@ definitions:
       createdAt:
         type: string
       updatedAt:
+        type: string
+    type: object
+  RemoteModelSource:
+    properties:
+      modelConnection:
+        description: ModelConnection is name of connection to object storage bucket where ML model files are expected
+        type: string
+      modelPath:
+        description: ModelPath is a directory inside ModelConnection where ML model files are located
         type: string
     type: object
   ResourceList:
