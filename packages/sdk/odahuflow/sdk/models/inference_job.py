@@ -68,7 +68,7 @@ class InferenceJob(Model):
     def created_at(self) -> str:
         """Gets the created_at of this InferenceJob.
 
-        CreatedAt describes when InferenceJob was launched  # noqa: E501
+        CreatedAt describes when InferenceJob was launched (readonly)  # noqa: E501
 
         :return: The created_at of this InferenceJob.
         :rtype: str
@@ -79,7 +79,7 @@ class InferenceJob(Model):
     def created_at(self, created_at: str):
         """Sets the created_at of this InferenceJob.
 
-        CreatedAt describes when InferenceJob was launched  # noqa: E501
+        CreatedAt describes when InferenceJob was launched (readonly)  # noqa: E501
 
         :param created_at: The created_at of this InferenceJob.
         :type created_at: str
@@ -137,7 +137,7 @@ class InferenceJob(Model):
     def status(self) -> InferenceJobStatus:
         """Gets the status of this InferenceJob.
 
-        Spec describes execution status of InferenceJob  # noqa: E501
+        Spec describes execution status of InferenceJob (readonly)  # noqa: E501
 
         :return: The status of this InferenceJob.
         :rtype: InferenceJobStatus
@@ -148,7 +148,7 @@ class InferenceJob(Model):
     def status(self, status: InferenceJobStatus):
         """Sets the status of this InferenceJob.
 
-        Spec describes execution status of InferenceJob  # noqa: E501
+        Spec describes execution status of InferenceJob (readonly)  # noqa: E501
 
         :param status: The status of this InferenceJob.
         :type status: InferenceJobStatus
@@ -160,7 +160,7 @@ class InferenceJob(Model):
     def updated_at(self) -> str:
         """Gets the updated_at of this InferenceJob.
 
-        CreatedAt describes when InferenceJob was updated (status was changed)  # noqa: E501
+        UpdatedAt describes when InferenceJob was updated (readonly)  # noqa: E501
 
         :return: The updated_at of this InferenceJob.
         :rtype: str
@@ -171,7 +171,7 @@ class InferenceJob(Model):
     def updated_at(self, updated_at: str):
         """Sets the updated_at of this InferenceJob.
 
-        CreatedAt describes when InferenceJob was updated (status was changed)  # noqa: E501
+        UpdatedAt describes when InferenceJob was updated (readonly)  # noqa: E501
 
         :param updated_at: The updated_at of this InferenceJob.
         :type updated_at: str
