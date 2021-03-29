@@ -22,7 +22,9 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	. "github.com/odahu/odahu-flow/packages/operator/controllers"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -145,7 +147,7 @@ func (s *ModelDeploymentControllerSuite) TestReconcile() {
 	knativeService := s.getKnativeService(md)
 
 	podAnnonations := knativeService.Spec.Template.ObjectMeta.Annotations
-	s.Assertions.Len(podAnnonations, 6)
+	s.Assertions.Len(podAnnonations, 7)
 
 	s.Assertions.Contains(podAnnonations, KnativeMinReplicasKey)
 	s.Assertions.Equal(podAnnonations[KnativeMinReplicasKey], strconv.Itoa(int(mdMinReplicas)))
@@ -266,6 +268,68 @@ func (s *ModelDeploymentControllerSuite) TestDeploymentReconcile_Tolerations() {
 	knativeConfiguration := s.getKnativeService(md)
 
 	s.Assertions.Equal(tolerations, knativeConfiguration.Spec.Template.Spec.Tolerations)
+}
+
+func (s *ModelDeploymentControllerSuite) TestPolicyCM() {
+	conf := config.NewDefaultModelDeploymentConfig()
+	conf.Namespace = mdNamespace
+	s.initReconciler(conf)
+
+	firstRole := "first-role"
+
+	md := &odahuflowv1alpha1.ModelDeployment{
+		ObjectMeta: metav1.ObjectMeta{Name: mdName, Namespace: mdNamespace},
+		Spec: odahuflowv1alpha1.ModelDeploymentSpec{
+			RoleName: &firstRole,
+			Image:                      image,
+			Predictor:                  predictors.OdahuMLServer.ID,
+			MinReplicas:                &mdMinReplicas,
+			MaxReplicas:                &mdMaxReplicas,
+			ReadinessProbeInitialDelay: &mdReadinessDelay,
+			LivenessProbeInitialDelay:  &mdLivenessDelay,
+			Resources:                  mdResources,
+			ImagePullConnectionID:      &mdImagePullConnectionID,
+		},
+	}
+
+	cleanF := s.createDeployment(md)
+	defer cleanF()
+
+	cm := v1.ConfigMap{}
+
+	cmName := GetCMPolicyName(md)
+
+	predictor, ok := predictors.Predictors[md.Spec.Predictor]
+	s.Require().True(ok)
+	expectedCMData, err := deployment.ReadDefaultPoliciesAndRender(firstRole, predictor.OpaPolicyFilename)
+	s.Require().NoError(err)
+
+	s.Assertions.Eventually(func() bool {
+		if err := s.k8sClient.Get(
+			context.TODO(), types.NamespacedName{Name: cmName, Namespace: mdNamespace}, &cm); err != nil {
+			return false
+		}
+		return assert.ObjectsAreEqual(expectedCMData, cm.Data)
+	}, 10*time.Second, time.Second)
+
+	// Let's update deployment by changing roleName. We should expect new ConfigMap
+	secondRole := "second-role"
+	md.Spec.RoleName = &secondRole
+	err = s.k8sClient.Update(context.TODO(), md)
+	s.Require().NoError(err)
+
+	expectedCMData, err = deployment.ReadDefaultPoliciesAndRender(secondRole, predictor.OpaPolicyFilename)
+	s.Require().NoError(err)
+
+	s.Assertions.Eventually(func() bool {
+		if err := s.k8sClient.Get(
+			context.TODO(), types.NamespacedName{Name: cmName, Namespace: mdNamespace}, &cm); err != nil {
+			return false
+		}
+		return assert.ObjectsAreEqual(expectedCMData, cm.Data)
+	}, 10*time.Second, time.Second, "ConfigMap should be changed after roleName modification")
+
+
 }
 
 // Test utilities
