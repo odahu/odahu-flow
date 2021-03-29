@@ -146,7 +146,9 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			ModelNameAnnotationKey:  modelDeploymentCR.Name,
 			deploymentIDLabel:       modelDeploymentCR.Name,
 			OdahuAuthorizationLabel: "enabled",
-			podPolicyLabel:          GetCMPolicyName(modelDeploymentCR),
+		}
+		if modelDeploymentCR.Spec.RoleName != nil {  // Otherwise default ConfigMap will be mounted to container
+			templateLabelsToAdd[podPolicyLabel] = GetCMPolicyName(modelDeploymentCR)
 		}
 		templateAnnotationsToAdd := map[string]string{
 			KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
