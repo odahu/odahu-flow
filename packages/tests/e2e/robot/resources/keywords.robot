@@ -66,9 +66,9 @@ Run API deploy from model packaging and check model started
     # --------- UNDEPLOY COMMAND SECTION -----------
 Run API undeploy model and check
     [Arguments]           ${md_name}
-    ${edi_state}=                Shell  odahuflowctl --verbose md delete ${md_name} --ignore-not-found
+    ${edi_state}=                Shell  odahuflowctl --verbose dep delete --id ${md_name} --ignore-not-found
     Should Be Equal As Integers  ${edi_state.rc}        0
-    ${edi_state} =               Shell  odahuflowctl --verbose md get
+    ${edi_state} =               Shell  odahuflowctl --verbose dep get
     Should Be Equal As Integers  ${edi_state.rc}        0
     Should not contain           ${edi_state.stdout}    ${md_name}
 

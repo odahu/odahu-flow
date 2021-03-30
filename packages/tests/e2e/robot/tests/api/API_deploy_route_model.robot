@@ -7,7 +7,7 @@ ${PACKAGING}                        simple-model
 ${DEPLOYMENT}                       wine-api-testing
 ${MODEL}                            ${DEPLOYMENT}
 ${DEPLOY_CUSTOM_ROLE}               api-test-custom-role
-${MODEL_CUSTOM_ROLE}                ${DEPLOYMENT}
+${MODEL_CUSTOM_ROLE}                ${DEPLOY_CUSTOM_ROLE}
 ${REQUEST}                          SEPARATOR=
 ...                                 { "columns": [ "a", "b" ], "data": [ [ 1.0, 2.0 ] ] }
 ${REQUEST_RESPONSE}                 { "prediction": [ [ 42 ] ], "columns": [ "result" ] }
@@ -110,9 +110,9 @@ Invoke model - Custom Role
     [Tags]      deployment  model
     [Setup]     Custom Role Setup
     [Teardown]  run keywords
-    ...         Login to the api and edge  AND
-    ...         reload config  AND
-    ...         StrictShell  odahuflowctl dep delete --id ${DEPLOY_CUSTOM_ROLE}
+    ...         Login to the api and edge
+    ...         AND  reload config
+    ...         AND  StrictShell  odahuflowctl dep delete --id ${DEPLOY_CUSTOM_ROLE}
     ${model_url}            Get model Url  ${MODEL_CUSTOM_ROLE}
     ${result_info}          Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
     should be equal         ${result_info['info']['description']}  This is a EDI server.

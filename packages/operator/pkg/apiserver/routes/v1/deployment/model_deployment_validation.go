@@ -29,9 +29,9 @@ import (
 )
 
 const (
-	ValidationMdErrorMessage             = "Validation of model deployment is failed"
-	EmptyImageErrorMessage             = "the image parameter is empty"
-	EmptyPredictorErrorMessage         = "the predictor parameter is empty"
+	ValidationMdErrorMessage           = "Validation of model deployment is failed"
+	EmptyImageErrorMessage             = "empty image parameter"
+	EmptyPredictorErrorMessage         = "empty predictor parameter"
 	NegativeMinReplicasErrorMessage    = "minimum number of replicas parameter must not be less than 0"
 	NegativeMaxReplicasErrorMessage    = "maximum number of replicas parameter must not be less than 1"
 	MaxMoreThanMinReplicasErrorMessage = "maximum number of replicas parameter must not be less than minimum number " +

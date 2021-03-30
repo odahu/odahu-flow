@@ -1,12 +1,12 @@
 kind: ModelDeployment
-id: wine-api-testing
+id: dep-status-code-400-403
 spec:
   image:
   predictor: odahu-ml-server
   resources:
     limits:
       gpu: ''
-      cpu: '2'
+      cpu: '1'
       memory: '2Gi'
     requests:
       gpu: ''
@@ -16,5 +16,4 @@ spec:
   maxReplicas: 1
   livenessProbeInitialDelay: 10
   readinessProbeInitialDelay: 10
-  roleName: odahu_custom_role
   imagePullConnID: docker-ci

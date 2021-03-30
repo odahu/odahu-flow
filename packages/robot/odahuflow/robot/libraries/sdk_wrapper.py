@@ -250,12 +250,12 @@ class Toolchain:
 class Model:
 
     @staticmethod
-    def model_get(url=None, token=config.API_TOKEN, **kwargs):
-        return ModelClient(url, token, **kwargs).info()
+    def model_get(url, **kwargs):
+        return ModelClient(url, token=config.API_TOKEN).info()
 
     @staticmethod
-    def model_post(url=None, token=config.API_TOKEN, json_input=None, **kwargs):
-        return ModelClient(url, token, **kwargs).invoke(**json.loads(json_input))
+    def model_post(url, json_input=None, **kwargs):
+        return ModelClient(url, token=config.API_TOKEN).invoke(**json.loads(json_input))
 
 
 class InferenceService:

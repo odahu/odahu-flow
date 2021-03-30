@@ -1,0 +1,8 @@
+{
+  "_comment": "no keyID, keySecret, uri and region",
+  "kind": "Connection",
+  "id": "ecr-no-required-parameters",
+  "spec": {
+    "type": "ecr"
+  }
+}
