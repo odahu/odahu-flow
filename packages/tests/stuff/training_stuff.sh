@@ -376,8 +376,8 @@ function cleanup() {
 
 # Prints the help message
 function usage() {
-  echo "Setup or cleanup training stuff for robot tests."
-  echo "usage: ${0} [[setup|cleanup][--models][--help][--verbose]"
+  echo "Setup or cleanup training stuff for robot tests. Also can be used to copy files into bucket"
+  echo "usage: ${0} [[setup|cleanup|bucket-copy][--models][--help][--verbose]"
 }
 
 # The command line arguments parsing
@@ -390,6 +390,10 @@ while [ "${1}" != "" ]; do
   cleanup)
     shift
     COMMAND=cleanup
+    ;;
+  bucket-copy)
+    shift
+    COMMAND=bucket-copy
     ;;
   --models)
     mapfile -t MODEL_NAMES <<<"${2}"
