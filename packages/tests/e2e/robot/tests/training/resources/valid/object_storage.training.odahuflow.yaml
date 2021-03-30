@@ -3,10 +3,10 @@ id: test-algorithm-source-object-storage
 spec:
   model:
     name: test-algorithm-source
-    version: '1.0'
+    version: "1.0"
   toolchain: mlflow
   hyperParameters:
-    alpha: '1.0'
+    alpha: "1.0"
   workDir: mlflow/sklearn/wine
   entrypoint: main
   algorithmSource:
@@ -17,3 +17,10 @@ spec:
   data:
     - connection: wine
       localPath: mlflow/sklearn/wine/
+  resources:
+    limits:
+      cpu: 4
+      memory: 4Gi
+    requests:
+      cpu: 2
+      memory: 2Gi

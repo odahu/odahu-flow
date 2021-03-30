@@ -19,7 +19,6 @@ package training
 import (
 	"errors"
 	"fmt"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
@@ -48,11 +47,6 @@ const (
 
 var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
-	expectedConnectionDataTypes   = map[odahuflowv1alpha1.ConnectionType]bool{
-		connection.GcsType:       true,
-		connection.S3Type:        true,
-		connection.AzureBlobType: true,
-	}
 )
 
 type MtValidator struct {
@@ -217,10 +211,10 @@ func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err e
 		return
 	}
 
-	if _, ok := expectedConnectionDataTypes[objStorage.Spec.Type]; !ok {
+	if _, ok := connection.ObjectStorageTypesSet[objStorage.Spec.Type]; !ok {
 		err = multierr.Append(err, fmt.Errorf(
 			WrongDataBindingTypeErrorMessage,
-			objStorage.ID, reflect.ValueOf(expectedConnectionDataTypes).MapKeys(),
+			objStorage.ID, reflect.ValueOf(connection.ObjectStorageTypesSet).MapKeys(),
 		))
 		return
 	}
@@ -251,10 +245,10 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 			continue
 		}
 
-		if _, ok := expectedConnectionDataTypes[conn.Spec.Type]; !ok {
+		if _, ok := connection.ObjectStorageTypesSet[conn.Spec.Type]; !ok {
 			err = multierr.Append(err, fmt.Errorf(
 				WrongDataBindingTypeErrorMessage,
-				conn.ID, reflect.ValueOf(expectedConnectionDataTypes).MapKeys(),
+				conn.ID, reflect.ValueOf(connection.ObjectStorageTypesSet).MapKeys(),
 			))
 		}
 

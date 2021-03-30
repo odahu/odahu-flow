@@ -100,9 +100,11 @@ func (mt *ModelTrainer) Setup() (err error) {
 		}
 	}
 
+	connType := k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type
+
 	// Downloads a source code
-	switch k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type {
-	case connection.GITType:
+	switch {
+	case connType == connection.GITType:
 		commitID, err = mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
 		if err != nil {
 			mt.log.Error(err, "Error occurs during cloning project")
@@ -123,7 +125,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 		}
 
 		mt.log.Info("The commit ID was saved", "commit_id", commitID)
-	case connection.S3Type, connection.GcsType, connection.AzureBlobType:
+	case connection.ObjectStorageTypesSet[connType]:
 		if err := mt.downloadAlgorithm(k8sTraining); err != nil {
 			mt.log.Error(err, "Downloading algorithm failed")
 
