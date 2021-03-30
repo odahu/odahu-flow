@@ -392,7 +392,9 @@ while [ "${1}" != "" ]; do
     COMMAND=cleanup
     ;;
   bucket-copy)
-    shift
+    local_path="${2}"
+    remote_path="${3}"
+    shift 3
     COMMAND=bucket-copy
     ;;
   --models)
@@ -425,7 +427,7 @@ cleanup)
   cleanup
   ;;
 bucket-copy)
-  copy_to_cluster_bucket
+  copy_to_cluster_bucket $local_path $remote_path
   ;;
 *)
   echo "Unexpected command: ${COMMAND}"
