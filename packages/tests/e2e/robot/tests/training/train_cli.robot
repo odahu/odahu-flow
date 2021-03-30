@@ -23,7 +23,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup all resources  AND
 ...                 Remove file  ${LOCAL_CONFIG}
-Force Tags          training  algorithm-source cli
+Force Tags          training  algorithm-source  cli
 
 *** Keywords ***
 Cleanup all resources
@@ -45,8 +45,8 @@ Train valid model from VCS
 Train valid model from object storage
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
-    Download file  mlflow/sklearn/wine/MLproject  ${RES_DIR}/algorithm_source/MLproject
-    StrictShell  ${TRAIN_STUFF_DIR}/training_stuff.sh bucket-copy "${RES_DIR}/algorithm_source" "/algorithm_source"
+    Download file  mlflow/sklearn/wine/MLproject  ${RES_DIR}/MLproject
+    StrictShell  ${TRAIN_STUFF_DIR}/training_stuff.sh bucket-copy "${RES_DIR}/MLproject" "${TEST_BUCKET}/algorithm_source/"
     ${res}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
     report training pods  ${training id}
     should be equal  ${res.rc}  ${0}
