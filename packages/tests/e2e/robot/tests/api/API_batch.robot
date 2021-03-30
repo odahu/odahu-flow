@@ -49,7 +49,7 @@ Create Batch Job Packed
     ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=@{exp_result}
     Status State Should Be      ${result}  succeeded
     ${result}                   check batch job response  ${RES_DIR}/inferencejob-packed.yaml  ${RES_DIR}/output/response0.json
-    Should Be True
+    Should Be True              ${result}
 
 
 Create Batch Service Embedded Model

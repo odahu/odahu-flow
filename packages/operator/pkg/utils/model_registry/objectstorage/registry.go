@@ -68,7 +68,7 @@ func SyncArchiveOrDir(conn v1alpha1.ConnectionSpec, relPath string, localPath st
 	// Automatically unzip archive to target location directory
 	if remoteFileIsArchive {
 
-		file, err := ioutil.TempFile("", relPath)
+		file, err := ioutil.TempFile("", "*-" + path.Base(relPath))
 		if err != nil {
 			log.Error(err, "Unable to create temp model archive file to fetch into")
 			return err
