@@ -83,6 +83,8 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
             test_sa_ds = ServiceAccount(data, TEST_SA_DS)
             test_sa_custom_role = ServiceAccount(data, TEST_SA_CUSTOM_ROLE)
 
+            git_connection = data['odahuflow_connections'][0]
+
             host_base_domain = data['dns']['domain']
             variables = {
                 'HOST_BASE_DOMAIN': host_base_domain,
@@ -107,11 +109,18 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'SA_CUSTOM_USER': test_sa_custom_role,
                 'SA_CUSTOM_ROLE': test_sa_custom_role.roles,
 
+                'ISSUER': data.get('oauth_oidc_issuer_url'),
+
+                # for ODAHU WEB UI tests
                 'ODAHU_WEB_UI_USERNAME': data.get('test_user_email'),
                 'ODAHU_WEB_UI_PASSWORD': data.get('test_user_password'),
                 'ODAHU_WEB_UI_VERSION': data.get('odahu_ui_version'),
 
-                'ISSUER': data.get('oauth_oidc_issuer_url')
+                'ODAHU_UI_GIT_WEB_LINK': git_connection['spec']['webUILink'],
+                'ODAHU_UI_GIT_URI': git_connection['spec']['uri'],
+                'ODAHU_UI_GIT_REFERENCE': git_connection['spec']['reference'],
+                'ODAHU_UI_GIT_KEYSECRET': git_connection['spec']['keySecret']
+
             }
         except Exception as err:
             raise Exception("Can\'t get variable from cluster profile: {}".format(err)) from err
