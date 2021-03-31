@@ -12,7 +12,7 @@ spec:
   algorithmSource:
     objectStorage:
       connection: odahu-flow-examples
-      path: mlflow/algorithm_source
+      path: test_algorithm/
   outputConnection: models-output
   data:
     - connection: wine

@@ -35,29 +35,16 @@ Cleanup resources
     [Arguments]  ${training id}
     StrictShell  odahuflowctl --verbose train delete --id ${training id} --ignore-not-found
 
-Train valid model from VCS
+Train valid model
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
-    ${res}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
-    report training pods  ${training id}
-    should be equal  ${res.rc}  ${0}
-
-Train valid model from object storage
-    [Arguments]  ${training id}  ${training_file}
-    [Teardown]  Cleanup resources  ${training id}
-    Download file  mlflow/sklearn/wine/MLproject  ${RES_DIR}/MLproject
-    StrictShell  ${TRAIN_STUFF_DIR}/training_stuff.sh bucket-copy "${RES_DIR}/MLproject" "${TEST_BUCKET}/algorithm_source/"
     ${res}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
     report training pods  ${training id}
     should be equal  ${res.rc}  ${0}
 
 *** Test Cases ***
-Vaild VCS downloading parameters
-    [Documentation]  Verify valid VCS sourcses
-    [Template]  Train valid model from VCS
+Vaild downloading parameters
+    [Documentation]  Verify valid algorithm sourcses
+    [Template]  Train valid model
     ${TRAIN_ID}-vcs                   vcs.training.odahuflow.yaml
-
-Vaild object storage downloading parameters
-    [Documentation]  Verify valid object storage sourcses
-    [Template]  Train valid model from object storage
     ${TRAIN_ID}-object-storage        object_storage.training.odahuflow.yaml

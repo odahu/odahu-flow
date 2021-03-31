@@ -210,6 +210,18 @@ function upload_test_dags() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
+function upload_test_algorithm() {
+  git_url="https://github.com/odahu/odahu-examples.git"
+  algorithm_code_path=("mlflow/sklearn/wine/MLproject")
+  tmp_odahu_example_dir=$(mktemp -d -t upload-test-algorithm-XXXXXXXXXX)
+
+  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
+
+  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}/" "${BUCKET_NAME}/test_algorithm/"
+
+  rm -rf "${tmp_odahu_example_dir}"
+}
+
 # Prepare for batch e2e test
 function setup_batch_examples() {
   local git_url="https://github.com/odahu/odahu-examples.git"
@@ -358,6 +370,7 @@ function setup() {
 
   local_setup
   setup_batch_examples
+  upload_test_algorithm
 }
 
 # Main entrypoint for cleanup command.
@@ -376,8 +389,8 @@ function cleanup() {
 
 # Prints the help message
 function usage() {
-  echo "Setup or cleanup training stuff for robot tests. Also can be used to copy files into bucket"
-  echo "usage: ${0} [[setup|cleanup|bucket-copy][--models][--help][--verbose]"
+  echo "Setup or cleanup training stuff for robot tests."
+  echo "usage: ${0} [[setup|cleanup][--models][--help][--verbose]"
 }
 
 # The command line arguments parsing
@@ -390,12 +403,6 @@ while [ "${1}" != "" ]; do
   cleanup)
     shift
     COMMAND=cleanup
-    ;;
-  bucket-copy)
-    local_path="${2}"
-    remote_path="${3}"
-    shift 3
-    COMMAND=bucket-copy
     ;;
   --models)
     mapfile -t MODEL_NAMES <<<"${2}"
@@ -425,9 +432,6 @@ setup)
   ;;
 cleanup)
   cleanup
-  ;;
-bucket-copy)
-  copy_to_cluster_bucket $local_path $remote_path
   ;;
 *)
   echo "Unexpected command: ${COMMAND}"
