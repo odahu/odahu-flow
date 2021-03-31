@@ -4,6 +4,8 @@ Resource    ${PAGE_OBJECTS}/keycloak.robot
 Resource    ${PAGE_OBJECTS}/dashboard.robot
 Resource    ${PAGE_OBJECTS}/header.robot
 Resource    ${PAGE_OBJECTS}/sidebar.robot
+Resource    ${PAGE_OBJECTS}/entities.robot
+Resource    ${PAGE_OBJECTS}/connections.robot
 Variables   ../../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 
 *** Variables ***
@@ -131,3 +133,18 @@ Check ODAHU page Icons changes the color when selected
     FOR  ${page}  IN  @{SIDEBAR.LINKS_LIST}
         Go to ODAHU page and validate icons  ${page}
     END
+
+#       --------- CONNECTION -----------
+Go to "Connections" page
+   Go to ODAHU page and validate icons  ${SIDEBAR.LINK.CONNECTIONS.ICON}
+   Connections.Validate "Connections" page loaded
+   # Connections.Validate "Connections" page table loaded
+
+Create "Git" Connection
+    [Arguments]  ${id}  ${type}  ${git_ssh_url}  ${ssh_private_key}
+    ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}  ${reference}=${EMPTY}
+    Entities.Click "+New" Button
+    Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
+    Connections.Fill "Git" Specification during Connection creation  git_ssh_url=${git_ssh_url}  reference=${reference}  ssh_private_key=${ssh_private_key}
+    Connections.Review Step during "Git" Connection creation
+    Connections.Validate Alert pops up and says connection created
