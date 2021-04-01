@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   Page Object for KEYCLOAK page
+Documentation   Page Object for "KEYCLOAK" page
 Library         SeleniumLibrary  timeout=10s
 
 *** Variables ***

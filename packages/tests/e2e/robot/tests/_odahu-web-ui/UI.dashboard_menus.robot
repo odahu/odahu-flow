@@ -66,8 +66,8 @@ Check "Sidebar" extends and shrinks
 
 Check "Sidebar" links change color when user switch between them
     Extend "SideBar" and validate
-    # switch to ODAHU page through link
+    # switch to ODAHU page through buttons/links
     Check ODAHU page Icons changes the color when selected
     # switch to ODAHU page through entities
-    Go to entity and validate ODAHU page icons  ${COMMON.TESTING_ICON_CONN_ENTITY}  ${SIDEBAR.LINK.CONNECTIONS.ICON}
-    Go to entity and validate ODAHU page icons  ${COMMON.TESTING_ICON_TI_ENTITY}  ${SIDEBAR.LINK.TOOLCHAINS.ICON}
+    Go to entity page and validate ODAHU page icons  ${COMMON.TESTING_ICON_CONN_ENTITY}  ${SIDEBAR.LINK.CONNECTIONS.ICON}
+    Go to entity page and validate ODAHU page icons  ${COMMON.TESTING_ICON_TI_ENTITY}  ${SIDEBAR.LINK.TOOLCHAINS.ICON}

@@ -4,12 +4,13 @@ Resource    ${PAGE_OBJECTS}/keycloak.robot
 Resource    ${PAGE_OBJECTS}/dashboard.robot
 Resource    ${PAGE_OBJECTS}/header.robot
 Resource    ${PAGE_OBJECTS}/sidebar.robot
-Resource    ${PAGE_OBJECTS}/entities.robot
 Resource    ${PAGE_OBJECTS}/connections.robot
+
 Variables   ../../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 
 *** Variables ***
-${PAGE_OBJECTS}  ${CURDIR}/PO
+${PAGE_OBJECTS}         ${CURDIR}/PO
+${PAGE_OBJECTS_RES}     ${PAGE_OBJECTS}/PO_resources
 
 # SHOULD BE CUSTOMISABLE
 ${BROWSER}          chrome
@@ -123,7 +124,7 @@ Go to ODAHU page and validate icons
     Sidebar.Open ODAHU page  ${active page locator}
     Sidebar.Validate that the active page icon has one color and the others different  ${active page locator}
 
-Go to entity and validate ODAHU page icons
+Go to entity page and validate ODAHU page icons
     [Arguments]  ${entity_url}  ${expected page locator}
     go to  ${entity_url}
     Validate ODAHU page loaded

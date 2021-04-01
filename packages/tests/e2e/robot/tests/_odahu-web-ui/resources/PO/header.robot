@@ -1,5 +1,7 @@
 *** Settings ***
-Documentation    Page object for header of ODAHU Web UI
+Documentation   Page object for header of ODAHU Web UI
+Library         SeleniumLibrary  timeout=10s
+Resource        ${PAGE_OBJECTS_RES}/keywords.robot
 
 *** Variables ***
 ${HEADER.ODAHU_TITLE}            ODAHU

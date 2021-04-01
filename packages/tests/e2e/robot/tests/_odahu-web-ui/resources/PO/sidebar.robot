@@ -1,8 +1,8 @@
 *** Settings ***
-Documentation   Page Object for "sidebar" part of UI
+Documentation   Page Object for "Sidebar" part of UI
 Library         SeleniumLibrary  timeout=10s
 Library         Collections
-Resource        ${PAGE_OBJECTS}/keywords.robot
+Resource        ${PAGE_OBJECTS_RES}/keywords.robot
 
 *** Variables ***
 ${SIDEBAR.SANDWICH_BUTTON}  xpath://*[@id="root"]/div/header/div/button
