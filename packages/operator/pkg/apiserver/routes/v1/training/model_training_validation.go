@@ -42,6 +42,8 @@ const (
 	WrongDataBindingTypeErrorMessage = "%s data binding has wrong data type. Currently supported the following types" +
 		" of connections for data bindings: %v"
 	ToolchainEmptyErrorMessage = "empty toolchain parameter"
+	WrongObjectStorageTypeErrorMessage = "%s object storage has wrong data type. Currently supported the following types" +
+		" of connections for object storage: %v"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
 )
 
@@ -213,7 +215,7 @@ func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err e
 
 	if _, ok := connection.ObjectStorageTypesSet[objStorage.Spec.Type]; !ok {
 		err = multierr.Append(err, fmt.Errorf(
-			WrongDataBindingTypeErrorMessage,
+			WrongObjectStorageTypeErrorMessage,
 			objStorage.ID, reflect.ValueOf(connection.ObjectStorageTypesSet).MapKeys(),
 		))
 		return

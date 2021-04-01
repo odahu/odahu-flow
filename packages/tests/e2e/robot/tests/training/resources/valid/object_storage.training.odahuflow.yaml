@@ -11,7 +11,7 @@ spec:
   entrypoint: main
   algorithmSource:
     objectStorage:
-      connection: odahu-flow-examples
+      connection: models-output
       path: test_algorithm/
   outputConnection: models-output
   data:
