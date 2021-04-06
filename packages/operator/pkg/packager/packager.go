@@ -20,12 +20,12 @@ import (
 	"encoding/json"
 	"github.com/go-logr/logr"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
+	pack_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
-	pack_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"io/ioutil"
 	"os"
@@ -39,11 +39,11 @@ const (
 )
 
 type Packager struct {
-	packagingClient       pack_api_client.Client
-	connClient            conn_api_client.Client
-	log                   logr.Logger
-	modelPackagingID      string
-	packagerConfig        config.PackagerConfig
+	packagingClient  pack_api_client.Client
+	connClient       conn_api_client.Client
+	log              logr.Logger
+	modelPackagingID string
+	packagerConfig   config.PackagerConfig
 }
 
 func NewPackager(
@@ -53,7 +53,7 @@ func NewPackager(
 ) *Packager {
 	return &Packager{
 		packagingClient: packagingClient,
-		connClient: connClient,
+		connClient:      connClient,
 		log: logf.Log.WithName("packager").WithValues(
 			odahuflow.ModelPackagingIDLogPrefix, config.ModelPackagingID,
 		),
@@ -154,6 +154,7 @@ func (p *Packager) downloadData(packaging *packaging.K8sPackager) (err error) {
 	if err := storage.Download(
 		packaging.TrainingZipName,
 		path.Join(storage.RemoteConfig.Path, packaging.TrainingZipName),
+		false,
 	); err != nil {
 		p.log.Error(err, "download training zip")
 

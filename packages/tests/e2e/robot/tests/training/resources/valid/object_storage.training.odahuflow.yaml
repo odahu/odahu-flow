@@ -7,12 +7,12 @@ spec:
   toolchain: mlflow
   hyperParameters:
     alpha: "1.0"
-  workDir: mlflow/sklearn/wine
+  workDir: wine
   entrypoint: main
   algorithmSource:
     objectStorage:
       connection: models-output
-      path: test_algorithm/
+      path: /test_algorithm/
   outputConnection: models-output
   data:
     - connection: wine

@@ -49,5 +49,8 @@ spec:
     - name: TEST_ENV_KEY
       # The value of variable
       value: TEST_ENV_VALUE
-  # You can find list of all available connections on the left sidebar. You should specify one with git type
-  vcsName: <git-connection>
+  # You can find list of all available connections on the left sidebar. You should specify only one: with git type or
+  # with storage type
+  algorithmSource:
+    vcs: <git-connection>
+    objectStorage: <storage-connection>

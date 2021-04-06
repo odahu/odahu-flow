@@ -15,8 +15,8 @@ spec:
   - JSONPath: .spec.toolchain
     name: Toolchain
     type: string
-  - JSONPath: .spec.vcsName
-    name: VCS name
+  - JSONPath: .spec.algorithmSource
+    name: Algorithm source
     type: string
   - JSONPath: .spec.model.name
     name: Model name

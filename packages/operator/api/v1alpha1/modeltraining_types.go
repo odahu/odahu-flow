@@ -170,7 +170,7 @@ func (in *ModelTrainingStatus) Scan(value interface{}) error {
 // ModelTraining is the Schema for the modeltrainings API
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="Toolchain",type="string",JSONPath=".spec.toolchain"
-// +kubebuilder:printcolumn:name="VCS name",type="string",JSONPath=".spec.vcsName"
+// +kubebuilder:printcolumn:name="Algorithm source",type="string",JSONPath=".spec.algorithmSource"
 // +kubebuilder:printcolumn:name="Model name",type="string",JSONPath=".spec.model.name"
 // +kubebuilder:printcolumn:name="Model version",type="string",JSONPath=".spec.model.version"
 // +kubebuilder:printcolumn:name="Model image",type="string",JSONPath=".spec.image"

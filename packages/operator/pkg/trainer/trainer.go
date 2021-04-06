@@ -36,6 +36,7 @@ import (
 	"path"
 	"path/filepath"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
+	"strings"
 )
 
 const (
@@ -256,7 +257,7 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 			return err
 		}
 
-		if err := storage.Download(mtData.LocalPath, mtData.RemotePath); err != nil {
+		if err := storage.Download(mtData.LocalPath, mtData.RemotePath, false); err != nil {
 			return err
 		}
 	}
@@ -276,7 +277,13 @@ func (mt *ModelTrainer) downloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 		return err
 	}
 
-	if err := storage.Download("", k8sTraining.AlgorithmSourceConnection.Path); err != nil {
+	localDir := mt.trainerConfig.OutputDir
+
+	if !strings.HasSuffix(localDir, "/") {
+		localDir += "/"
+	}
+
+	if err := storage.Download(localDir, k8sTraining.AlgorithmSourceConnection.Path, true); err != nil {
 		return err
 	}
 

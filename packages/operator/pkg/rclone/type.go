@@ -121,7 +121,7 @@ func newFsFile(remote string) (fs.Fs, string, error) {
 // localPath="data/sync_dir/renamed-text.txt" remotePath="/data/text.txt" downloads
 // file to the "data/sync_dir/text.txt" location.
 // If remotePath point to a directory then localPath must point to a directory too.
-func (os *ObjectStorage) Download(localPath, remotePath string) error {
+func (os *ObjectStorage) Download(localPath, remotePath string, recurse bool) error {
 	if len(localPath) == 0 {
 		return errors.New("local path is empty")
 	}
@@ -156,6 +156,9 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 		log.Info("Download directory from the remote bucket",
 			"local_dir", localDir, "remote_dir", remotePath,
 		)
+		if recurse {
+			return sync.Sync(context.Background(), localFs, remoteFs, copyEmptySrcDirs)
+		}
 		return sync.CopyDir(context.Background(), localFs, remoteFs, copyEmptySrcDirs)
 	}
 
