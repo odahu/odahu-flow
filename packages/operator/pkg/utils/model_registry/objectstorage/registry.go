@@ -34,15 +34,14 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/rclone"
-"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-"go.uber.org/zap"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-"os"
-"path"
+	"os"
+	"path"
 	"path/filepath"
 	"strings"
-
 )
 
 // SyncArchiveOrDir sync object storage directory or archive
@@ -168,21 +167,21 @@ func getModelNameVersion(modelDir string) (string, string, error) {
 	for _, item := range items {
 		file := item.Name()
 		for _, mFile := range modelFiles {
-			if mFile == file {
-
-				fp := filepath.Join(modelDir, file)
-				zap.S().Infof("Model metadata file is found %s", fp)
-				data, err := ioutil.ReadFile(fp)
-				if err != nil {
-					return "", "", err
-				}
-				mf := ModelFile{}
-				if err := yaml.Unmarshal(data, &mf); err != nil {
-					return "", "", err
-				}
-
-				return mf.Model.Name, mf.Model.Version, nil
+			if mFile != file {
+				continue
 			}
+			fp := filepath.Join(modelDir, file)
+			zap.S().Infof("Model metadata file is found %s", fp)
+			data, err := ioutil.ReadFile(fp)
+			if err != nil {
+				return "", "", err
+			}
+			mf := ModelFile{}
+			if err := yaml.Unmarshal(data, &mf); err != nil {
+				return "", "", err
+			}
+
+			return mf.Model.Name, mf.Model.Version, nil
 		}
 	}
 	return "", "", fmt.Errorf("unable to find model metadata file")
