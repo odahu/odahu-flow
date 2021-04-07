@@ -212,12 +212,12 @@ function upload_test_dags() {
 
 function upload_test_algorithm() {
   git_url="https://github.com/odahu/odahu-examples.git"
-  algorithm_code_path=("mlflow/sklearn/wine/MLproject")
+  algorithm_code_path=("mlflow/sklearn/wine/")
   tmp_odahu_example_dir=$(mktemp -d -t upload-test-algorithm-XXXXXXXXXX)
 
   git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
-  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/test_algorithm/wine/"
+  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/test_algorithm/"
 
   rm -rf "${tmp_odahu_example_dir}"
 }
