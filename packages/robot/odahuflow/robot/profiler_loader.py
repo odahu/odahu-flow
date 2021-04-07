@@ -84,6 +84,8 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
             test_sa_custom_role = ServiceAccount(data, TEST_SA_CUSTOM_ROLE)
 
             git_connection = data['odahuflow_connections'][0]
+            gcs_connection = data['dns']
+            aws_connections = data.get('cloud').get('aws')
 
             host_base_domain = data['dns']['domain']
             variables = {
@@ -116,12 +118,30 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'ODAHU_WEB_UI_PASSWORD': data.get('test_user_password'),
                 'ODAHU_WEB_UI_VERSION': data.get('odahu_ui_version'),
 
+                # Connections
+                # git
                 'ODAHU_UI_GIT_WEB_LINK': git_connection['spec']['webUILink'],
                 'ODAHU_UI_GIT_URI': git_connection['spec']['uri'],
                 'ODAHU_UI_GIT_REFERENCE': git_connection['spec']['reference'],
-                'ODAHU_UI_GIT_KEYSECRET': git_connection['spec']['keySecret']
+                'ODAHU_UI_GIT_KEYSECRET': git_connection['spec']['keySecret'],
 
+                # gcs
+                'ODAHU_UI_GCS_PROJECT': gcs_connection['gcp_project_id'],
+                'ODAHU_UI_GCS_SA_SECRET': gcs_connection['gcp_credentials'],
+
+                # docker
+                'ODAHU_UI_DOCKER_REPO': data.get('docker_repo'),
+                'ODAHU_UI_DOCKER_USERNAME': data.get('docker_username'),
+                'ODAHU_UI_DOCKER_PASSWORD': data.get('docker_password'),
             }
+            if aws_connections:
+                aws_variables = {
+                    # s3 and ecr
+                    'ODAHU_UI_AWS_REGION': aws_connections.get('region'),
+                    'ODAHU_UI_AWS_ACCESS_KEY_ID': aws_connections.get('credentials').get('AWS_ACCESS_KEY_ID'),
+                    'ODAHU_UI_AWS_ACCESS_KEY_SECRET': aws_connections.get('credentials').get('AWS_SECRET_ACCESS_KEY')
+                }
+                variables.update(aws_variables)
         except Exception as err:
             raise Exception("Can\'t get variable from cluster profile: {}".format(err)) from err
 
