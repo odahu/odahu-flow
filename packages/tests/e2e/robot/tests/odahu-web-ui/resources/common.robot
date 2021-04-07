@@ -147,5 +147,59 @@ Create "Git" Connection
     Entities.Click "+New" Button
     Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
     Connections.Fill "Git" Specification during Connection creation  git_ssh_url=${git_ssh_url}  reference=${reference}  ssh_private_key=${ssh_private_key}
-    Connections.Review Step during "Git" Connection creation
+    Connections.Review Step during Connection creation
     Connections.Validate Alert pops up and says connection created
+    # Connections.Validate that connection created with specified values
+
+Create "Docker" Connection
+    [Arguments]  ${id}  ${type}  ${uri}  ${username}  ${password}
+    ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}
+    Entities.Click "+New" Button
+    Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
+    Connections.Fill "Docker" Specification during Connection creation  uri=${uri}  username=${username}  password=${password}
+    Connections.Review Step during Connection creation
+    Connections.Validate Alert pops up and says connection created
+    # Connections.Validate that connection created with specified values
+
+Create "GCS" Connection
+    [Arguments]  ${id}  ${type}  ${project}  ${uri}  ${SA_secret}
+    ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}
+    Entities.Click "+New" Button
+    Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
+    Connections.Fill "GCS" Specification during Connection creation  project=${project}  uri=${uri}  SA_secret=${SA_secret}
+    Connections.Review Step during Connection creation
+    Connections.Validate Alert pops up and says connection created
+    # Connections.Validate that connection created with specified values
+
+Create "Azureblob" Connection
+    [Arguments]  ${id}  ${type}  ${uri}  ${SAS_Token}
+    ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}
+    Entities.Click "+New" Button
+    log many  ${id}  ${type}  ${uri}  ${SAS_Token}  ${web_ui_link}  ${description}
+    Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
+    Connections.Fill "Azureblob" Specification during Connection creation  uri=${uri}  SAS_Token=${SAS_Token}
+    Connections.Review Step during Connection creation
+    Connections.Validate Alert pops up and says connection created
+    # Connections.Validate that connection created with specified values
+
+Create "S3" Connection
+    [Arguments]  ${id}  ${type}  ${uri}  ${region}  ${access_key_id}  ${access_key_secret}
+    ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}
+    Entities.Click "+New" Button
+    Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
+    Connections.Fill "S3" Specification during Connection creation
+    ...  uri=${uri}  region=${region}  access_key_id=${access_key_id}  access_key_secret=${access_key_secret}
+    Connections.Review Step during Connection creation
+    Connections.Validate Alert pops up and says connection created
+    # Connections.Validate that connection created with specified values
+
+Create "ECR" Connection
+    [Arguments]  ${id}  ${type}  ${uri}  ${region}  ${access_key_id}  ${access_key_secret}
+    ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}
+    Entities.Click "+New" Button
+    Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
+    Connections.Fill "ECR" Specification during Connection creation
+    ...  uri=${uri}  region=${region}  access_key_id=${access_key_id}  access_key_secret=${access_key_secret}
+    Connections.Review Step during Connection creation
+    Connections.Validate Alert pops up and says connection created
+    # Connections.Validate that connection created with specified values

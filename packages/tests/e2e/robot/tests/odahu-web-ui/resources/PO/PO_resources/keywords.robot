@@ -1,3 +1,7 @@
+*** Settings ***
+Documentation   keywords for Page Objects
+Library         SeleniumLibrary  timeout=10s
+
 *** Keywords ***
 Validate ODAHU Web UI page loaded
     [Arguments]  @{elements}
@@ -11,10 +15,14 @@ Validate page
     wait until location is  ${page_location}
     wait until page contains  ${page_heading}
 
+Validate visible element
+    [Arguments]  ${element}
+    wait until page contains element  ${element}
+    element should be visible  ${element}
+
 Validate visible element and text
     [Arguments]  ${element}  ${element_text}
-    page should contain element  ${element}
-    element should be visible  ${element}
+    Validate visible element  ${element}
     element text should be  ${element}  ${element_text}
 
 Element should have class
@@ -29,5 +37,6 @@ Element should not have class
 
 Validate page contains the "Element" of the "Class"
     [Arguments]  ${element locator}  ${class}
+    wait until page contains element  ${element locator}
     element should be visible  ${element locator}
     Element Should Have Class  ${element locator}  ${class}
