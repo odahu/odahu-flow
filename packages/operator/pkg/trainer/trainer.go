@@ -86,8 +86,6 @@ func (mt *ModelTrainer) Setup() (err error) {
 
 	mt.log.Info("The training entity was constructed successfully")
 
-	commitID := ""
-
 	workDir := mt.trainerConfig.OutputDir
 	if len(workDir) != 0 {
 		mt.log.Info("Change current working dir", "new worker dir", workDir)
@@ -101,42 +99,11 @@ func (mt *ModelTrainer) Setup() (err error) {
 		}
 	}
 
-	connType := k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type
+	if err := mt.DownloadAlgorithm(k8sTraining); err != nil {
+		mt.log.Error(err, "Downloading algorithm source code failed")
 
-	// Downloads a source code
-	switch {
-	case connType == connection.GITType:
-		commitID, err = mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
-		if err != nil {
-			mt.log.Error(err, "Error occurs during cloning project")
-
-			return err
-		}
-
-		// Saves some data before starting a training
-		if err := mt.trainClient.SaveModelTrainingResult(
-			k8sTraining.ModelTraining.ID,
-			&odahuflowv1alpha1.TrainingResult{
-				CommitID: commitID,
-			},
-		); err != nil {
-			mt.log.Error(err, "Cannot save the commit id")
-
-			return err
-		}
-
-		mt.log.Info("The commit ID was saved", "commit_id", commitID)
-	case connection.ObjectStorageTypesSet[connType]:
-		if err := mt.downloadAlgorithm(k8sTraining); err != nil {
-			mt.log.Error(err, "Downloading algorithm failed")
-
-			return err
-		}
-	default:
-		return errors.New(fmt.Sprintf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type))
+		return err
 	}
-
-	mt.log.Info("The model source code was downloaded", "dir", workDir)
 
 	if err := mt.downloadData(k8sTraining); err != nil {
 		mt.log.Error(err, "Downloading training data failed")
@@ -265,7 +232,46 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 	return nil
 }
 
-func (mt *ModelTrainer) downloadAlgorithm(k8sTraining *training.K8sTrainer) error {
+func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) error {
+	connType := k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type
+
+	switch {
+	case connType == connection.GITType:
+		commitID, err := mt.cloneUserRepo(k8sTraining, mt.trainerConfig.OutputDir)
+		if err != nil {
+			mt.log.Error(err, "Error occurs during cloning project")
+
+			return err
+		}
+
+		// Saves some data before starting a training
+		if err := mt.trainClient.SaveModelTrainingResult(
+			k8sTraining.ModelTraining.ID,
+			&odahuflowv1alpha1.TrainingResult{
+				CommitID: commitID,
+			},
+		); err != nil {
+			mt.log.Error(err, "Cannot save the commit id")
+
+			return err
+		}
+
+		mt.log.Info("The commit ID was saved", "commit_id", commitID)
+	case connection.ObjectStorageTypesSet[connType]:
+		if err := mt.downloadAlgorithmFromStorage(k8sTraining); err != nil {
+			mt.log.Error(err, "Downloading algorithm from storage failed")
+
+			return err
+		}
+	default:
+		return errors.New(fmt.Sprintf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type))
+	}
+
+	mt.log.Info("The model source code was downloaded", "dir", mt.trainerConfig.OutputDir)
+	return nil
+}
+
+func (mt *ModelTrainer) downloadAlgorithmFromStorage(k8sTraining *training.K8sTrainer) error {
 	mt.log.Info("Run download k8sTraining algorithm",
 		"remote_path", k8sTraining.AlgorithmSourceConnection.Path,
 		"connection_type", k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type,
