@@ -257,7 +257,7 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 			return err
 		}
 
-		if err := storage.Download(mtData.LocalPath, mtData.RemotePath, false); err != nil {
+		if err := storage.Download(mtData.LocalPath, mtData.RemotePath); err != nil {
 			return err
 		}
 	}
@@ -283,7 +283,7 @@ func (mt *ModelTrainer) downloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 		localDir += "/"
 	}
 
-	if err := storage.Download(localDir, k8sTraining.AlgorithmSourceConnection.Path, true); err != nil {
+	if err := storage.Download(localDir, k8sTraining.AlgorithmSourceConnection.Path); err != nil {
 		return err
 	}
 

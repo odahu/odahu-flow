@@ -154,7 +154,6 @@ func (p *Packager) downloadData(packaging *packaging.K8sPackager) (err error) {
 	if err := storage.Download(
 		packaging.TrainingZipName,
 		path.Join(storage.RemoteConfig.Path, packaging.TrainingZipName),
-		false,
 	); err != nil {
 		p.log.Error(err, "download training zip")
 

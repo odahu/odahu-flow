@@ -217,7 +217,7 @@ function upload_test_algorithm() {
 
   git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
-  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/output/test_algorithm/wine/"
+  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/test_algorithm/wine/"
 
   rm -rf "${tmp_odahu_example_dir}"
 }
