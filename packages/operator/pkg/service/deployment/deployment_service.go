@@ -35,8 +35,8 @@ import (
 )
 
 var (
-	log = logf.Log.WithName("model-deployment--service")
-	defaultWeight            = int32(100)
+	log           = logf.Log.WithName("model-deployment--service")
+	defaultWeight = int32(100)
 )
 
 type Service interface {
@@ -58,8 +58,8 @@ type EventPublisher interface {
 
 type serviceImpl struct {
 	// Repository that has "database/sql" underlying storage
-	repo repo.Repository
-	mrRepo mrRepo.Repository
+	repo     repo.Repository
+	mrRepo   mrRepo.Repository
 	eventPub EventPublisher
 }
 
@@ -73,12 +73,11 @@ func (s serviceImpl) GetModelDeploymentList(
 	return s.repo.GetModelDeploymentList(ctx, nil, options...)
 }
 
-
 func GetDefaultModelRoute(ctx context.Context, tx *sql.Tx, mdID string, repository mrRepo.Repository) (string, error) {
 
 	mrs, err := repository.GetModelRouteList(ctx, tx, filter.ListFilter(&mrRepo.Filter{
 		Default: []bool{true},
-		MdID: []string{mdID},
+		MdID:    []string{mdID},
 	}))
 	if err != nil {
 		return "", err
@@ -112,7 +111,7 @@ func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err 
 	if err != nil {
 		return err
 	}
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	mrDefaultID, err := GetDefaultModelRoute(ctx, tx, id, s.mrRepo)
 	if err != nil {
@@ -124,7 +123,7 @@ func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err 
 			return
 		}
 		e := event.Event{EntityID: mrDefaultID, EventType: event.ModelRouteDeletedEventType,
-			EventGroup: event.ModelRouteEventGroup, Payload:    nil}
+			EventGroup: event.ModelRouteEventGroup, Payload: nil}
 		if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 			return
 		}
@@ -132,7 +131,7 @@ func (s serviceImpl) DeleteModelDeployment(ctx context.Context, id string) (err 
 
 	err = s.repo.DeleteModelDeployment(ctx, tx, id)
 	e := event.Event{EntityID: id, EventType: event.ModelDeploymentDeletedEventType,
-		EventGroup: event.ModelDeploymentEventGroup, Payload:    nil}
+		EventGroup: event.ModelDeploymentEventGroup, Payload: nil}
 	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return
 	}
@@ -145,7 +144,7 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	if err != nil {
 		return err
 	}
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	e := event.Event{
 		EntityID:   id,
@@ -165,7 +164,7 @@ func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.M
 	if err != nil {
 		return err
 	}
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
@@ -193,13 +192,12 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 		return err
 	}
 
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	oldDeploy, err := s.repo.GetModelDeployment(ctx, tx, id)
 	if err != nil {
 		return err
 	}
-
 
 	if !hashutil.Equal(oldDeploy.Spec, spec) {
 		err = odahu_errors.SpecWasTouched{Entity: id}
@@ -222,16 +220,14 @@ func (s serviceImpl) UpdateModelDeploymentStatus(
 		EntityID:   id,
 		EventType:  event.ModelDeploymentStatusUpdatedEventType,
 		EventGroup: event.ModelDeploymentEventGroup,
-		Payload: updatedDeploy,
+		Payload:    updatedDeploy,
 	}
 	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return err
 	}
 
-
 	return err
 }
-
 
 func constructDefaultRoute(mdID string) deployment.ModelRoute {
 	return deployment.ModelRoute{
@@ -240,8 +236,8 @@ func constructDefaultRoute(mdID string) deployment.ModelRoute {
 		DeletionMark: false,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
-		Spec:         v1alpha1.ModelRouteSpec{
-			URLPrefix:              fmt.Sprintf("/model/%s", mdID),
+		Spec: v1alpha1.ModelRouteSpec{
+			URLPrefix: fmt.Sprintf("/model/%s", mdID),
 			ModelDeploymentTargets: []v1alpha1.ModelDeploymentTarget{
 				{
 					Name:   mdID,
@@ -260,7 +256,7 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 	if err != nil {
 		return err
 	}
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = time.Now()
@@ -270,7 +266,6 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 	if err != nil {
 		return
 	}
-
 
 	exists, err := s.mrRepo.DefaultExists(ctx, md.ID, tx)
 	if err != nil || exists {
@@ -309,4 +304,3 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 func NewService(repo repo.Repository, mrRepo mrRepo.Repository, eventPub EventPublisher) Service {
 	return &serviceImpl{repo: repo, mrRepo: mrRepo, eventPub: eventPub}
 }
-

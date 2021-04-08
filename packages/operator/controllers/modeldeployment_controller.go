@@ -20,13 +20,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-logr/logr"
 	conn_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/inspectors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"go.uber.org/zap"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -41,7 +43,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"strconv"
 	"time"
@@ -85,10 +86,24 @@ var (
 func NewModelDeploymentReconciler(
 	mgr manager.Manager,
 	cfg config.Config,
+	rootLogger *zap.Logger,
 ) *ModelDeploymentReconciler {
+	authCfg := cfg.Operator.Auth
+
+	noPrefixHTTPClient := http.NewBaseAPIClient(
+		cfg.ServiceCatalog.EdgeURL, authCfg.APIToken, authCfg.ClientID,
+		authCfg.ClientSecret, authCfg.OAuthOIDCTokenEndpoint, "",
+	)
+
+	inspectorsMap, err := inspectors.NewInspectorsMap(cfg.ServiceCatalog.EdgeURL, &noPrefixHTTPClient)
+	if err != nil {
+		panic(err)
+	}
+
 	return &ModelDeploymentReconciler{
 		Client: mgr.GetClient(),
 		scheme: mgr.GetScheme(),
+		log:    rootLogger.Sugar().Named(deploymentControllerName),
 		connAPIClient: conn_api_client.NewClient(
 			cfg.Operator.Auth.APIURL,
 			cfg.Operator.Auth.APIToken,
@@ -99,6 +114,7 @@ func NewModelDeploymentReconciler(
 		deploymentConfig: cfg.Deployment,
 		operatorConfig:   cfg.Operator,
 		gpuResourceName:  cfg.Common.ResourceGPUName,
+		inspectors:       inspectorsMap,
 	}
 }
 
@@ -106,10 +122,12 @@ func NewModelDeploymentReconciler(
 type ModelDeploymentReconciler struct {
 	client.Client
 	scheme           *runtime.Scheme
+	log              *zap.SugaredLogger
 	connAPIClient    conn_api_client.Client
 	deploymentConfig config.ModelDeploymentConfig
 	operatorConfig   config.OperatorConfig
 	gpuResourceName  string
+	inspectors       map[string]inspectors.ModelServerInspector
 }
 
 func KnativeServiceName(md *odahuflowv1alpha1.ModelDeployment) string {
@@ -121,7 +139,7 @@ func knativeDeploymentName(revisionName string) string {
 }
 
 func (r *ModelDeploymentReconciler) ReconcileKnativeService(
-	log logr.Logger,
+	log *zap.SugaredLogger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
 	predictor predictors.Predictor,
 ) error {
@@ -322,8 +340,8 @@ func (r *ModelDeploymentReconciler) getKnativeService(
 }
 
 func (r *ModelDeploymentReconciler) reconcileStatus(
-	log logr.Logger, modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
-	state odahuflowv1alpha1.ModelDeploymentState, _ string) error {
+	log *zap.SugaredLogger, modelDeploymentCR *odahuflowv1alpha1.ModelDeployment,
+	state odahuflowv1alpha1.ModelDeploymentState) error {
 
 	modelDeploymentCR.Status.State = state
 
@@ -348,7 +366,7 @@ func GetCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) strin
 	return modelDeploymentCR.Name + "-" + cmPolicySuffix
 }
 
-func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
+func (r *ModelDeploymentReconciler) reconcilePolicyCM(log *zap.SugaredLogger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment, predictor predictors.Predictor) error {
 
 	rn := modelDeploymentCR.Spec.RoleName
@@ -427,6 +445,20 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 	return nil
 }
 
+func (r *ModelDeploymentReconciler) reconcileModelMeta(log *zap.SugaredLogger,
+	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) error {
+
+	inspector := r.inspectors[modelDeploymentCR.Spec.Predictor]
+	servedModel, err := inspector.Inspect("", modelDeploymentCR.Status.HostHeader, log)
+	if err != nil {
+		return err
+	}
+
+	modelDeploymentCR.Status.ModelName = servedModel.Metadata.ModelName
+	modelDeploymentCR.Status.ModelVersion = servedModel.Metadata.ModelVersion
+	return nil
+}
+
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
@@ -456,7 +488,7 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log logr.Logger,
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=connections/status,verbs=get;update;patch
 
 func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
-	log := logf.Log.WithName(deploymentControllerName).WithValues(odahuflow.ModelDeploymentIDLogPrefix, request.Name)
+	log := r.log.With(odahuflow.ModelDeploymentIDLogPrefix, request.Name)
 
 	// Fetch the ModelDeployment modelDeploymentCR
 	modelDeploymentCR := &odahuflowv1alpha1.ModelDeployment{}
@@ -473,7 +505,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		if finalizer == metav1.FinalizerDeleteDependents {
 			log.Info(fmt.Sprintf("Found %s finalizer. Skip reconciling", metav1.FinalizerDeleteDependents))
 
-			if err := r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateDeleting, ""); err != nil {
+			if err := r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateDeleting); err != nil {
 				log.Error(err, "Set deleting deployment state")
 				return reconcile.Result{}, err
 			}
@@ -519,7 +551,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		log.Info("Knative Service is not ready, re-schedule...",
 			"Model Deployment Name", modelDeploymentCR.Name)
 
-		err := r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, "")
+		err := r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing)
 		if err != nil {
 			log.Error(err, "failed to update MD status")
 		}
@@ -536,7 +568,7 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	if err := r.Client.Get(context.TODO(), modelDeploymentKey, modelDeployment); errors.IsNotFound(err) {
 		log.Info("Knative Revision Deployment not found. Re-queueing...")
-		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, latestReadyRevision)
+		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing)
 
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
 	} else if err != nil {
@@ -552,16 +584,25 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 
 	if modelDeploymentCR.Status.Replicas != modelDeploymentCR.Status.AvailableReplicas {
 		log.Info(fmt.Sprintf("Not enough replicas running. Requeue after %s", DefaultRequeueDelay))
-		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing, latestReadyRevision)
+		_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing)
 
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
+	}
+
+	log.Info("Inspecting model metadata...")
+	if modelDeploymentCR.Status.AvailableReplicas > 0 {
+		err = r.reconcileModelMeta(log, modelDeploymentCR)
+		if err != nil {
+			log.Errorw("failed to inspect model", "error", err)
+			_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing)
+			return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
+		}
 	}
 
 	if err := r.reconcileStatus(
 		log,
 		modelDeploymentCR,
 		odahuflowv1alpha1.ModelDeploymentStateReady,
-		latestReadyRevision,
 	); err != nil {
 		log.Error(err, "Reconcile Model Deployment Status")
 

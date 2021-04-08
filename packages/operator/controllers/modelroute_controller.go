@@ -123,11 +123,10 @@ func (r *ModelRouteReconciler) reconcileVirtualService(modelRouteCR *odahuflowv1
 				"Host": modelDeployment.Status.HostHeader,
 			},
 		}
-		// TODO: Deliver real model name/version to put in headers
 		responseHeaders := &v1alpha3_istio.Headers_HeaderOperations{
 			Set: map[string]string{
-				modelNameHeader:    modelDeployment.Name,
-				modelVersionHeader: "1",
+				modelNameHeader:    modelDeployment.Status.ModelName,
+				modelVersionHeader: modelDeployment.Status.ModelVersion,
 			},
 		}
 		httpTargets = append(httpTargets, &v1alpha3_istio.HTTPRouteDestination{

@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/inspectors/bindata"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/inspectors/bindata"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
@@ -34,14 +34,15 @@ const (
 )
 
 type TritonInspector struct {
-	EdgeHost   string
 	EdgeURL    url.URL
 	HTTPClient httpClient
 }
 
-func (t TritonInspector) Inspect(prefix string, log *zap.SugaredLogger) (model_types.ServedModel, error) {
+func (t TritonInspector) Inspect(prefix string, hostHeader string, log *zap.SugaredLogger) (
+	model_types.ServedModel, error,
+) {
 	log.Info("getting a list of served models")
-	listModelsRequest := t.generateListModelsRequest(prefix)
+	listModelsRequest := t.generateListModelsRequest(prefix, hostHeader)
 	response, err := t.HTTPClient.Do(listModelsRequest)
 	if err != nil {
 		log.Errorw("failed to fetch model repository", "prefix", prefix)
@@ -92,22 +93,25 @@ func (t TritonInspector) Inspect(prefix string, log *zap.SugaredLogger) (model_t
 
 	specBytes := b.Bytes()
 	return model_types.ServedModel{
-		Swagger:  model_types.Swagger2{Raw: specBytes},
-		Metadata: model_types.Metadata{},
+		Swagger: model_types.Swagger2{Raw: specBytes},
+		Metadata: model_types.Metadata{
+			ModelName:    model.Name,
+			ModelVersion: model.Version,
+		},
 	}, nil
 }
 
-func (t *TritonInspector) generateListModelsRequest(prefix string) *http.Request {
+func (t *TritonInspector) generateListModelsRequest(prefix string, hostHeader string) *http.Request {
 	serverURL := url.URL{
 		Scheme: t.EdgeURL.Scheme,
 		Host:   t.EdgeURL.Host,
-		Path:   path.Join(t.EdgeURL.Path, prefix, "v2/repository/index"),
+		Path:   path.Join(t.EdgeURL.Path, prefix, "/v2/repository/index"),
 	}
 
 	return &http.Request{
 		Method: http.MethodPost,
 		URL:    &serverURL,
-		Host:   t.EdgeHost,
+		Host:   hostHeader,
 	}
 }
 

@@ -16,7 +16,7 @@ class BatchConfig(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, enabled: bool=None, namespace: str=None, node_pools: List[NodePool]=None, rclone_image: str=None, timeout: str=None, tolerations: str=None, tools_image: str=None, tools_secret: str=None):  # noqa: E501
+    def __init__(self, enabled: bool=None, namespace: str=None, node_pools: List[NodePool]=None, rclone_image: str=None, service_account_name: str=None, timeout: str=None, tolerations: str=None, tools_image: str=None, tools_secret: str=None):  # noqa: E501
         """BatchConfig - a model defined in Swagger
 
         :param enabled: The enabled of this BatchConfig.  # noqa: E501
@@ -27,6 +27,8 @@ class BatchConfig(Model):
         :type node_pools: List[NodePool]
         :param rclone_image: The rclone_image of this BatchConfig.  # noqa: E501
         :type rclone_image: str
+        :param service_account_name: The service_account_name of this BatchConfig.  # noqa: E501
+        :type service_account_name: str
         :param timeout: The timeout of this BatchConfig.  # noqa: E501
         :type timeout: str
         :param tolerations: The tolerations of this BatchConfig.  # noqa: E501
@@ -41,6 +43,7 @@ class BatchConfig(Model):
             'namespace': str,
             'node_pools': List[NodePool],
             'rclone_image': str,
+            'service_account_name': str,
             'timeout': str,
             'tolerations': str,
             'tools_image': str,
@@ -52,6 +55,7 @@ class BatchConfig(Model):
             'namespace': 'namespace',
             'node_pools': 'nodePools',
             'rclone_image': 'rcloneImage',
+            'service_account_name': 'serviceAccountName',
             'timeout': 'timeout',
             'tolerations': 'tolerations',
             'tools_image': 'toolsImage',
@@ -62,6 +66,7 @@ class BatchConfig(Model):
         self._namespace = namespace
         self._node_pools = node_pools
         self._rclone_image = rclone_image
+        self._service_account_name = service_account_name
         self._timeout = timeout
         self._tolerations = tolerations
         self._tools_image = tools_image
@@ -169,6 +174,29 @@ class BatchConfig(Model):
         """
 
         self._rclone_image = rclone_image
+
+    @property
+    def service_account_name(self) -> str:
+        """Gets the service_account_name of this BatchConfig.
+
+        Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun  # noqa: E501
+
+        :return: The service_account_name of this BatchConfig.
+        :rtype: str
+        """
+        return self._service_account_name
+
+    @service_account_name.setter
+    def service_account_name(self, service_account_name: str):
+        """Sets the service_account_name of this BatchConfig.
+
+        Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun  # noqa: E501
+
+        :param service_account_name: The service_account_name of this BatchConfig.
+        :type service_account_name: str
+        """
+
+        self._service_account_name = service_account_name
 
     @property
     def timeout(self) -> str:

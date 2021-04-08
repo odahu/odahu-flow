@@ -51,7 +51,7 @@ class ConnectionReference(Model):
     def connection(self) -> str:
         """Gets the connection of this ConnectionReference.
 
-        Next connection types are supported  # noqa: E501
+        ODAHU Connection  # noqa: E501
 
         :return: The connection of this ConnectionReference.
         :rtype: str
@@ -62,7 +62,7 @@ class ConnectionReference(Model):
     def connection(self, connection: str):
         """Sets the connection of this ConnectionReference.
 
-        Next connection types are supported  # noqa: E501
+        ODAHU Connection  # noqa: E501
 
         :param connection: The connection of this ConnectionReference.
         :type connection: str
@@ -74,7 +74,7 @@ class ConnectionReference(Model):
     def path(self) -> str:
         """Gets the path of this ConnectionReference.
 
-        User can override path otherwise Connection path will be used  # noqa: E501
+        User can override path otherwise Connection path will be used. For dataSource: Input data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object). For outputDestination: Output data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object). nFor modelSource: If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container. Otherwise its considered and a directory and will be delivered to user predictor container AS-IS  # noqa: E501
 
         :return: The path of this ConnectionReference.
         :rtype: str
@@ -85,7 +85,7 @@ class ConnectionReference(Model):
     def path(self, path: str):
         """Sets the path of this ConnectionReference.
 
-        User can override path otherwise Connection path will be used  # noqa: E501
+        User can override path otherwise Connection path will be used. For dataSource: Input data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-request-json-object). For outputDestination: Output data files must have .json extension and be valid JSON files that follows [Predict Protocol - Version 2](https://github.com/kubeflow/kfserving/blob/v0.5.1/docs/predict-api/v2/required_api.md#inference-response-json-object). nFor modelSource: If path has .zip / .tar.gz suffix then it will be unpacked before delivering to user predictor container. Otherwise its considered and a directory and will be delivered to user predictor container AS-IS  # noqa: E501
 
         :param path: The path of this ConnectionReference.
         :type path: str

@@ -19,7 +19,7 @@ package inspectors_test
 import (
 	"encoding/json"
 	"errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/servicecatalog/inspectors"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/inspectors"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -56,8 +56,7 @@ func TestSuite(t *testing.T) {
 
 func (s *tritonInspectorSuite) SetupSuite() {
 	s.inspector = inspectors.TritonInspector{
-		EdgeHost: "host",
-		EdgeURL:  url.URL{},
+		EdgeURL: url.URL{},
 	}
 }
 
@@ -73,7 +72,7 @@ func (s *tritonInspectorSuite) TestInspect() {
 		},
 	}
 
-	model, err := s.inspector.Inspect(someURLPrefix, logger.Sugar())
+	model, err := s.inspector.Inspect(someURLPrefix, "", logger.Sugar())
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +101,7 @@ func (s *tritonInspectorSuite) TestInspect_NoModels() {
 		},
 	}
 
-	_, err := s.inspector.Inspect(someURLPrefix, logger.Sugar())
+	_, err := s.inspector.Inspect(someURLPrefix, "", logger.Sugar())
 
 	s.Assertions.Error(err)
 	s.Assertions.Contains(err.Error(), "server serves 0 models")
@@ -121,7 +120,7 @@ func (s *tritonInspectorSuite) TestInspect_MoreThanOneModel() {
 		},
 	}
 
-	model, err := s.inspector.Inspect(someURLPrefix, logger.Sugar())
+	model, err := s.inspector.Inspect(someURLPrefix, "", logger.Sugar())
 	if err != nil {
 		panic(err)
 	}
@@ -146,7 +145,7 @@ func (s *tritonInspectorSuite) TestInspect_NoResponse() {
 		},
 	}
 
-	_, err := s.inspector.Inspect(someURLPrefix, logger.Sugar())
+	_, err := s.inspector.Inspect(someURLPrefix, "", logger.Sugar())
 
 	s.Assertions.Error(err)
 	s.Assertions.Contains(err.Error(), "failed to fetch model repository")

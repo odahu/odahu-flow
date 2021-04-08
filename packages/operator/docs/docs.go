@@ -3891,6 +3891,14 @@ var doc = `{
                     "description": "Time when credentials was updated",
                     "type": "string"
                 },
+                "modelName": {
+                    "description": "Model name discovered in ModelDeployment",
+                    "type": "string"
+                },
+                "modelVersion": {
+                    "description": "Model version discovered in ModelDeployment",
+                    "type": "string"
+                },
                 "replicas": {
                     "description": "Expected number of pods under current load",
                     "type": "integer"

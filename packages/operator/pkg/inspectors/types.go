@@ -19,6 +19,7 @@ package inspectors
 import (
 	model_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/model"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 // ModelServerInspector gets URL prefix for a deployed model
@@ -30,7 +31,7 @@ type ModelServerInspector interface {
 	// and return model Metadata and Swagger if it is possible
 	// return error if Web API behind prefix is not compatible with
 	// MLServer
-	Inspect(prefix string, log *zap.SugaredLogger) (model_types.ServedModel, error)
+	Inspect(prefix string, hostHeader string, log *zap.SugaredLogger) (model_types.ServedModel, error)
 }
 
 type temporaryErr struct {
@@ -39,4 +40,8 @@ type temporaryErr struct {
 
 func (t temporaryErr) Temporary() bool {
 	return true
+}
+
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
 }
