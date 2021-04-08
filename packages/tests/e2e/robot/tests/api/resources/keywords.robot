@@ -23,6 +23,12 @@ Call API
 Call API and get Error
     [Arguments]                  ${expected_error}  ${keyword}  @{arguments}  &{named arguments}
     ${result}                    run keyword and expect error  ${expected_error}  ${keyword}  @{arguments}  &{named arguments}
+    Log many                     ${result}
+    [Return]                     ${result}
+
+Call API and continue on Failure
+    [Arguments]                  ${keyword}  @{arguments}  &{named arguments}
+    ${result}                    run keyword and continue on failure  ${keyword}  @{arguments}  &{named arguments}
     Log                          ${result}
     [Return]                     ${result}
 

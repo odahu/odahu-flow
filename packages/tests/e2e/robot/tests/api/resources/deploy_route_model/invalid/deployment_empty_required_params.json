@@ -1,0 +1,11 @@
+{
+  "_comment": "empty image",
+  "kind": "ModelDeployment",
+  "spec": {
+    "image": "",
+    "minReplicas": 5,
+    "maxReplicas": 3,
+    "livenessProbeInitialDelay": 5,
+    "readinessProbeInitialDelay": 5
+  }
+}

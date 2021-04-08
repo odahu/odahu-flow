@@ -29,6 +29,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"go.uber.org/zap"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -68,6 +69,7 @@ const (
 	DefaultKnativeAutoscalingClass       = "kpa.autoscaling.knative.dev"
 	ModelNameAnnotationKey               = "modelName"
 	AppliedModelDeploymentSpecKey        = "odahu.org/applied-model-deployment-spec"
+	AppliedPolicyHashKey                 = "odahu.org/applied-policy-hash"
 
 	IstioRewriteHTTPProbesAnnotation = "sidecar.istio.io/rewriteAppHTTPProbers"
 	OdahuAuthorizationLabel          = "odahu-flow-authorization"
@@ -162,7 +164,9 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			ModelNameAnnotationKey:  modelDeploymentCR.Name,
 			deploymentIDLabel:       modelDeploymentCR.Name,
 			OdahuAuthorizationLabel: "enabled",
-			podPolicyLabel:          getCMPolicyName(modelDeploymentCR),
+		}
+		if modelDeploymentCR.Spec.RoleName != nil {  // Otherwise default ConfigMap will be mounted to container
+			templateLabelsToAdd[podPolicyLabel] = GetCMPolicyName(modelDeploymentCR)
 		}
 		templateAnnotationsToAdd := map[string]string{
 			KnativeAutoscalingClass:          DefaultKnativeAutoscalingClass,
@@ -171,6 +175,8 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			KnativeMaxReplicasKey:            strconv.Itoa(int(*modelDeploymentCR.Spec.MaxReplicas)),
 			KnativeAutoscalingTargetKey:      KnativeAutoscalingTargetDefaultValue,
 			IstioRewriteHTTPProbesAnnotation: "true",
+			// Annotation to trigger pod restart if policy is changed
+			AppliedPolicyHashKey: modelDeploymentCR.Annotations[AppliedPolicyHashKey],
 		}
 		revisionSpec := knservingv1.RevisionSpec{
 			TimeoutSeconds: &DefaultTerminationPeriod,
@@ -258,26 +264,41 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 		return err
 	}
 
-	if reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec) {
-		log.Info("Model Deployment version is up to date, skipping")
+	depSpecChanged := !reflect.DeepEqual(*lastAppliedMDSpec, modelDeploymentCR.Spec)
+
+	oldPolicyHash := found.Spec.ConfigurationSpec.Template.Annotations[AppliedPolicyHashKey]
+	newPolicyHash := modelDeploymentCR.Annotations[AppliedPolicyHashKey]
+	policyIsChanged := newPolicyHash != oldPolicyHash
+
+
+	if depSpecChanged || policyIsChanged {
+		if policyIsChanged {
+			log.Info("Policy hash was changed",
+				"old", oldPolicyHash,
+				"new", newPolicyHash,
+			)
+		}
+		if depSpecChanged {
+			log.Info("ModelDeployment spec was changed","old", lastAppliedMDSpec,
+				"new", modelDeploymentCR.Spec)
+		}
+
+		err = fulfilKnativeService(found)
+		if err != nil {
+			return err
+		}
+		log.Info(fmt.Sprintf("Updating '%s' Knative Service, new MD generation: %d",
+			knativeServiceName, modelDeploymentCR.Generation))
+		err = r.Update(context.TODO(), found)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	}
-
-	log.Info("Knative Service bases on old MD spec", "old", lastAppliedMDSpec,
-		"new", modelDeploymentCR.Spec)
-
-	err = fulfilKnativeService(found)
-	if err != nil {
-		return err
-	}
-	log.Info(fmt.Sprintf("Updating %s Knative Service, new MD generation: %d",
-		knativeServiceName, modelDeploymentCR.Generation))
-	err = r.Update(context.TODO(), found)
-	if err != nil {
-		return err
-	}
-
+	log.Info("ModelDeployment Spec is not changed. Policy is not changed. Skipping.")
 	return nil
+
 }
 
 func (r *ModelDeploymentReconciler) createModelContainer(
@@ -341,7 +362,7 @@ func (r *ModelDeploymentReconciler) reconcileStatus(
 	return nil
 }
 
-func getCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) string {
+func GetCMPolicyName(modelDeploymentCR *odahuflowv1alpha1.ModelDeployment) string {
 	return modelDeploymentCR.Name + "-" + cmPolicySuffix
 }
 
@@ -349,10 +370,38 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log *zap.SugaredLogger,
 	modelDeploymentCR *odahuflowv1alpha1.ModelDeployment, predictor predictors.Predictor) error {
 
 	rn := modelDeploymentCR.Spec.RoleName
-	if rn == nil {
-		log.Info(".Spec.RoleName is nil. Skip creating custom policies for model")
+
+	roleNameIsNotSet := rn == nil
+
+	if roleNameIsNotSet {
+		log.Info(".Spec.RoleName is nil")
+		// We should delete custom policy if roleName is not set
+		cm := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:     GetCMPolicyName(modelDeploymentCR),
+				Namespace: r.deploymentConfig.Namespace,
+			},
+		}
+		err := r.Delete(context.TODO(), cm)
+		if err != nil && !errors.IsNotFound(err) {
+			return err
+		}
+
+		log.Info("ConfigMap with polices was maybe deleted")
+
+		// Set special hash value to trigger Pod recreation
+		noCustomPolicyHash, err := hash.Hash("Role name is not set")
+		if err != nil {
+			log.Error(err, "Unable to produce configmap hash using policy configmap data")
+			return err
+		}
+		log.Info("Setting no custom policy hash to ModelDeployment Annotation")
+		modelDeploymentCR.Annotations[AppliedPolicyHashKey] = strconv.FormatUint(noCustomPolicyHash, 10)
+
 		return nil
 	}
+
+	// Handle case when roleName is set
 
 	policies, err := deployment.ReadDefaultPoliciesAndRender(*rn, predictor.OpaPolicyFilename)
 	if err != nil {
@@ -360,8 +409,16 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log *zap.SugaredLogger,
 	}
 
 	cm := deployment.BuildDefaultPolicyConfigMap(
-		getCMPolicyName(modelDeploymentCR), r.deploymentConfig.Namespace, policies,
+		GetCMPolicyName(modelDeploymentCR), r.deploymentConfig.Namespace, policies,
 	)
+
+	policyHash, err := hash.Hash(cm.Data)
+	if err != nil {
+		log.Error(err, "Unable to produce configmap hash using policy configmap data")
+		return err
+	}
+	log.Info("Setting policy hash to ModelDeployment Annotation")
+	modelDeploymentCR.Annotations[AppliedPolicyHashKey] = strconv.FormatUint(policyHash, 10)
 
 	if err := controllerutil.SetControllerReference(modelDeploymentCR, cm, r.scheme); err != nil {
 		return err
@@ -375,6 +432,11 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log *zap.SugaredLogger,
 	if err != nil && errors.IsNotFound(err) {
 		log.Info("Creating config map", "ID", cm.Name)
 		return r.Create(context.TODO(), cm)
+	}
+
+	if !reflect.DeepEqual(foundCM.Data, cm.Data) {
+		log.Info("Policy was changed. Updating config map")
+		return r.Update(context.TODO(), cm)
 	}
 
 	if err != nil {
@@ -453,6 +515,9 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 	}
 
 	log.Info("Run reconciling of model deployment")
+	if modelDeploymentCR.Annotations == nil {
+		modelDeploymentCR.Annotations = make(map[string]string)
+	}
 
 	predictor, ok := predictors.Predictors[modelDeploymentCR.Spec.Predictor]
 	if !ok {

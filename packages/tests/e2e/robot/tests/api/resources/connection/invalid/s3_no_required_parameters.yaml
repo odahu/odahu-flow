@@ -1,0 +1,8 @@
+# no keySecret
+kind: Connection
+id: "s3-no-required-parameters"
+spec:
+    type: s3
+    keyID: AKIAIOSFODNN7EXAMPLE
+    uri: s3://eks-legion-test-data-store/test-data/data/wine-quality.csv
+    region: eu-central-1

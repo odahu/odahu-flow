@@ -1,0 +1,9 @@
+kind: ModelDeployment
+id: deployment-validation-checks
+spec:
+  image: gcr.io/or2-msq-epmd-legn-t1iylu/
+  predictor: odahu-ml-server
+  minReplicas: -1
+  maxReplicas: -2
+  livenessProbeInitialDelay: -1
+  readinessProbeInitialDelay: -2

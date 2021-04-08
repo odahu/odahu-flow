@@ -28,7 +28,7 @@ import (
 
 const (
 	ErrorMessageTemplate                   = "%s: %s"
-	EmptyURIErrorMessage                   = "the uri parameter is empty"
+	EmptyURIErrorMessage                   = "empty uri"
 	ValidationConnErrorMessage             = "Validation of connection is failed"
 	UnknownTypeErrorMessage                = "unknown type: %s. Supported types: %s"
 	PasswordDecodeErrorMessage             = "password must be base64-encoded, error: %s"
