@@ -30,7 +30,7 @@ ${CONNECTIONS.REVIEW.SUBMIT_BUTTON}         xpath://*[@id="root"]/div/main/div[2
 # -- Metadata --
 ${CONNECTIONS.ID}               name=id
 ${CONNECTIONS.TYPE.LISTBOX}     id=mui-component-select-spec.type
-${CONNECTIONS.TYPE.LIST}        xpath://*[@id="menu-spec.type"]/div[3]/ul
+${CONNECTIONS.TYPE.LIST}        xpath://*[@id="menu-spec.type"]/div[3]/ul/li
 ${CONNECTIONS.TYPE}             name=spec.type
 ${CONNECTIONS.WEBLINK}          name=spec.webUILink
 ${CONNECTIONS.DESCRIPTION}      name=spec.description
@@ -53,6 +53,9 @@ ${CONNECTIONS.REVIEW.STEP_CONTENT}  xpath://*[@id="root"]/div/main/div[2]/div/di
 # ${CONNECTIONS.REVIEW.GIT.REFERRENCE}        xpath://*[@id="root"]/div/main/div[2]/div/div/form/div/div[5]/div/div/div/div/ul/li[5]
 # ${CONNECTIONS.REVIEW.GIT.SSH_PRIVATE_KEY}   xpath://*[@id="root"]/div/main/div[2]/div/div/form/div/div[5]/div/div/div/div/ul/li[6]
 
+# Connection tabs
+${CONNECTIONS.ENTITY.LINK}      /connections/item/
+
 *** Keywords ***
 Validate "Connections" page loaded
     Entities.Validate page with entities    ${CONNECTIONS.URL}  ${CONNECTIONS.HEADING}
@@ -62,18 +65,8 @@ Validate "Connections" page table loaded
 
 Fill "ID" field with value
     [Arguments]  ${id}
-    ${random}   String.Generate Random String  33  [LOWER][NUMBERS]
-    input text  ${CONNECTIONS.ID}  ${id}-${random}
-
-Select Type from the list
-    [Arguments]  ${type}
-    ${get_items}    get webelements  ${CONNECTIONS.TYPE.LIST}/li
-    FOR  ${element}  IN  @{get_items}
-        ${text}  get text  ${element}
-        log  ${text}
-        Exit For Loop IF    "${text}" == "${type}"
-    END
-    click element  ${element}
+    # ${random}   String.Generate Random String  33  [LOWER][NUMBERS]
+    input text  ${CONNECTIONS.ID}  ${id}
 
 Wait until "Type" list is visible
     wait until element is visible  ${CONNECTIONS.TYPE.LIST}
@@ -82,7 +75,7 @@ Select Type
     [Arguments]  ${type}
     click element  ${CONNECTIONS.TYPE.LISTBOX}
     Wait until "Type" list is visible
-    Select Type from the list  ${type}
+    Keywords.Select Item from the list  ${CONNECTIONS.TYPE.LIST}  ${type}
     capture page screenshot
 
 Fill Web UI link field
@@ -98,6 +91,7 @@ Click "Next" button on "Metadata" Step
 
 Validate "Specification" Step Content loaded
     element should be visible  ${CONNECTIONS.SPECIFICATION.STEP_CONTENT}
+
 
 ### --  Connections' Specifications  -- ###
 Insert URI
@@ -249,3 +243,7 @@ Review Step during Connection creation
     Validate "Review" Step Content loaded
     capture page screenshot
     Click "Submit" button
+
+Change number of Connection per page
+    [Arguments]  ${rows_per_page}=25
+    Entities.Change number of entities per page  ${rows_per_page}

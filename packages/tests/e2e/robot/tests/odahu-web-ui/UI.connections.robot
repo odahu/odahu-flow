@@ -29,7 +29,6 @@ ${AZUREBLOB_TYPE}  azureblob
 ${S3_TYPE}      s3
 ${ECR_TYPE}     ecr
 
-
 *** Test Cases ***
 Create "Git" Connection and validate that one exists
     Create "Git" Connection  id=${COMMON_CONNECTION_NAME}-${GIT_TYPE}  type=${GIT_TYPE}  web_ui_link=${ODAHU_UI_GIT_WEB_LINK}
@@ -61,3 +60,12 @@ Create "ECR" Connection and validate that one exists
     ...  description=Tests ECR docker repository for model packaging
     ...  uri=${UI.CONNECTIONS.ECR.URI.MOCK}  region=${UI.CONNECTIONS.AWS.REGION.MOCK}
     ...  access_key_id=${UI.CONNECTIONS.AWS.KEYID.MOCK}  access_key_secret=${UI.CONNECTIONS.AWS.KEYSECRET.MOCK}
+
+Open View of connections and validate values
+    [Template]  Open View of the connection
+    ${COMMON_CONNECTION_NAME}-${GIT_TYPE}
+    ${COMMON_CONNECTION_NAME}-${GCS_TYPE}
+    ${COMMON_CONNECTION_NAME}-${DOCKER_TYPE}
+    ${COMMON_CONNECTION_NAME}-${AZUREBLOB_TYPE}
+    ${COMMON_CONNECTION_NAME}-${S3_TYPE}
+    ${COMMON_CONNECTION_NAME}-${ECR_TYPE}

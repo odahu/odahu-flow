@@ -175,7 +175,6 @@ Create "Azureblob" Connection
     [Arguments]  ${id}  ${type}  ${uri}  ${SAS_Token}
     ...          ${web_ui_link}=${EMPTY}  ${description}=${EMPTY}
     Entities.Click "+New" Button
-    log many  ${id}  ${type}  ${uri}  ${SAS_Token}  ${web_ui_link}  ${description}
     Connections.Fill Metadata during Connection creation  ${id}  ${type}  ${web_ui_link}  ${description}
     Connections.Fill "Azureblob" Specification during Connection creation  uri=${uri}  SAS_Token=${SAS_Token}
     Connections.Review Step during Connection creation
@@ -203,3 +202,14 @@ Create "ECR" Connection
     Connections.Review Step during Connection creation
     Connections.Validate Alert pops up and says connection created
     # Connections.Validate that connection created with specified values
+
+Open View of the connection
+    [Arguments]  ${id}
+    Test Setup
+    Go to "Connections" page
+    Connections.Change number of Connection per page
+    log  ${CONNECTIONS.ENTITY.LINK}${id}
+    # click element  ${id}
+    mouse down on link  ${id}
+    click link  ${id}
+    [Teardown]  Test Teardown
