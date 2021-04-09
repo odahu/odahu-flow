@@ -22,6 +22,7 @@ import logging
 import requests
 from urllib3.exceptions import HTTPError
 
+import odahuflow.sdk.config
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
 from odahuflow.sdk.clients.route import ModelRouteClient
 from odahuflow.sdk.clients.api import Authenticator, IncorrectAuthorizationToken
@@ -111,7 +112,14 @@ class ModelClient:
         token = token if token else odahuflow.sdk.config.API_TOKEN
         issuer_url = issuer_url if issuer_url else odahuflow.sdk.config.ISSUER_URL
 
-        self._authenticator = Authenticator(client_id, client_secret, True, url, token, issuer_url)
+        self._authenticator = Authenticator(
+            client_id=client_id,
+            client_secret=client_secret,
+            non_interactive=True,
+            base_url=url,
+            token=token,
+            issuer_url=issuer_url
+        )
 
         LOGGER.debug('Model client params: %s, %s, %s, %s, %s', url, token, http_client, http_exception, timeout)
 
@@ -224,8 +232,8 @@ class ModelClient:
                 sleep=sleep,
                 **self._additional_kwargs
             )
-        else:
-            return self._parse_response(response)
+
+        return self._parse_response(response)
 
     def invoke(self, **parameters):
         """
