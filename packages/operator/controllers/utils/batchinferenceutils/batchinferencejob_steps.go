@@ -1,4 +1,21 @@
-package controllers
+/*
+ *
+ *     Copyright 2021 EPAM Systems
+ *
+ *     Licensed under the Apache License, Version 2.0 (the "License");
+ *     you may not use this file except in compliance with the License.
+ *     You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *     Unless required by applicable law or agreed to in writing, software
+ *     distributed under the License is distributed on an "AS IS" BASIS,
+ *     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *     See the License for the specific language governing permissions and
+ *     limitations under the License.
+ */
+
+package batchinferenceutils
 
 import (
 	"fmt"
@@ -10,16 +27,14 @@ import (
 const (
 	pathToOdahuToolsBin = "/opt/odahu-flow/odahu-tools"
 	toolsConfigVolume = "config"
-	inputRCloneCfgName = "odahu-data-input"
-	outputRCloneCfgName = "odahu-data-output"
-	modelRCloneCfgName = "odahu-data-model"
+	workspacePath     = "/workspace"
+	odahuModelPathEnvName = "ODAHU_MODEL_PATH"
 )
 
 // Step names
 const (
 	StepSyncData       = "sync-data"
 	StepSyncModel      = "sync-model"
-	StepCopyUnzipModel = "copy-unzip-model"
 	StepValidateInput  = "validate-input"
 	StepLogInput       = "log-input"
 	StepUserContainer  = "user-container"
@@ -62,8 +77,9 @@ var (
 		Name:  "ODAHU_TOOLS_CONFIG",
 		Value: toolsConfigVM.MountPath,
 	}
-	OdahuModelPathEnv = corev1.EnvVar{
-		Name:  "ODAHU_MODEL_PATH",
+	// Where we copy model in case of remote model registry (if embedded then path is provided by user)
+	DefaultOdahuModelPathEnv = corev1.EnvVar{
+		Name:  odahuModelPathEnvName,
 		Value: odahuModelPath,
 	}
 	OdahuInputPathEnv = corev1.EnvVar{
@@ -79,13 +95,12 @@ var (
 // GetConfigureRCloneStep return step that
 // configures environment (rclone config) for syncing data and model
 // using ODAHU connections
-func GetConfigureRCloneStep(image string, inpConn string,
-	outConn string, modelConn string, res corev1.ResourceRequirements) tektonv1beta1.Step {
+func GetConfigureRCloneStep(image string, res corev1.ResourceRequirements, conns ...string) tektonv1beta1.Step {
 
 	var args = []string{"auth", "configure-rclone"}
-	args = append(args, "--conn", fmt.Sprintf("%s:%s", inpConn, inputRCloneCfgName))
-	args = append(args, "--conn", fmt.Sprintf("%s:%s", outConn, outputRCloneCfgName))
-	args = append(args, "--conn", fmt.Sprintf("%s:%s", modelConn, modelRCloneCfgName))
+	for _, c := range conns {
+		args = append(args, "--conn", fmt.Sprintf("%s:%s", c, c))
+	}
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:         "configure-rclone",
@@ -104,11 +119,12 @@ func GetConfigureRCloneStep(image string, inpConn string,
 // where input will be validated and copied to user container's input directory
 func GetSyncDataStep(
 	rcloneImage string,
+	rcloneConfigName string,
 	bucketName string,
 	inputPath string,
 	res corev1.ResourceRequirements,
 	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", inputRCloneCfgName, bucketName)
+	sourcePrefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	source := path.Join(sourcePrefix, inputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
@@ -123,55 +139,21 @@ func GetSyncDataStep(
 }
 
 // GetSyncModelStep return step that
-// syncs model to pre-stage directory inside Pod
-// where model will be validated and copied to user container's input directory
-func GetSyncModelStep(
-	rcloneImage string,
-	bucketName string,
-	modelPath string,
-	res corev1.ResourceRequirements,
-	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
-	source := path.Join(sourcePrefix, modelPath)
+// syncs model from s3/gcs/azureblob bucket to workspace
+func GetObjectStorageModelSyncStep(image string, connName string,
+	modelPath string, res corev1.ResourceRequirements, ) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:      StepSyncModel,
-			Image:     rcloneImage,
-			Command:   []string{"rclone"},
-			Args:      []string{"sync", "-P", source, odahuModelPath},
-			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
-			Resources: res,
-		},
-	}
-}
-// GetSyncPackedModelStep return step that
-// syncs model to pre-stage directory inside Pod
-// where model will be validated and copied to user container's input directory
-// and unpacks it by handling as tar.gz file.
-func GetSyncPackedModelStep(
-	rcloneImage string,
-	bucketName string,
-	modelPath string,
-	res corev1.ResourceRequirements,
-	) tektonv1beta1.Step {
-	sourcePrefix := fmt.Sprintf("%s:%s", modelRCloneCfgName, bucketName)
-	source := path.Join(sourcePrefix, modelPath)
-
-	baseName := path.Base(modelPath)
-	archiveName := path.Join(odahuModelPath, baseName)
-
-
-	cmdPipeline := fmt.Sprintf("rclone -P sync %s %s && tar -xzvf %s -C %s",
-		source, odahuModelPath, archiveName, odahuModelPath,
-	)
-
-	return tektonv1beta1.Step{
-		Container: corev1.Container{
-			Name:      StepSyncModel,
-			Image:     rcloneImage,
-			Command:   []string{"sh", "-c"},
-			Args:      []string{cmdPipeline},
-			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
+			Image:     image,
+			Command:   []string{pathToOdahuToolsBin},
+			Args:      []string{
+				"registry", "object-storage", "sync",
+				"--conn", connName,
+				"--remotePath", modelPath,
+				"--localPath", odahuModelPath},
+			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
+			Env:       []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
 		},
 	}
@@ -196,13 +178,15 @@ func GetValidateInputStep(image string, res corev1.ResourceRequirements) tektonv
 
 // GetLogInputStep return step that
 // logs model input to feedback storage (catch requests)
-func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirements) tektonv1beta1.Step {
+func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirements,
+	modelName string, modelVersion string) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:         StepLogInput,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "input", odahuInputPath, "-m", odahuModelPath, "-r", requestID},
+			Args:         []string{"batch", "log", "input", odahuInputPath,
+				"-m", modelName, "--version", modelVersion, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources:    res,
@@ -213,7 +197,8 @@ func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirem
 // GetUserContainer return step that
 // execute user defined container for inference
 func GetUserContainer(
-	image string, command []string, args []string, res corev1.ResourceRequirements) tektonv1beta1.Step {
+	image string, command []string, args []string,
+	res corev1.ResourceRequirements, odahuModelPathEnv corev1.EnvVar) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:         StepUserContainer,
@@ -221,7 +206,7 @@ func GetUserContainer(
 			Command:      command,
 			Args:         args,
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
-			Env: []corev1.EnvVar{OdahuInputPathEnv, OdahuOutputPathEnv, OdahuModelPathEnv},
+			Env: []corev1.EnvVar{OdahuInputPathEnv, OdahuOutputPathEnv, odahuModelPathEnv},
 			Resources: res,
 		},
 	}
@@ -247,13 +232,15 @@ func GetValidateOutputStep(image string, res corev1.ResourceRequirements) tekton
 
 // GetLogOutputStep return step that
 // logs model output to feedback storage (catch responses)
-func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequirements) tektonv1beta1.Step {
+func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequirements,
+	modelName string, modelVersion string) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
 			Name:         StepLogOutput,
 			Image:        image,
 			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "output", outputPath, "-m", odahuModelPath, "-r", requestID},
+			Args:         []string{"batch", "log", "output", outputPath,
+				"-m", modelName, "--version", modelVersion, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
 			Resources: res,
@@ -265,11 +252,12 @@ func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequire
 // syncs output data to bucket
 func GetSyncOutputStep(
 	rcloneImage string,
+	rcloneConfigName string,
 	bucketName string,
 	remoteOutputPath string,
 	res corev1.ResourceRequirements,
 ) tektonv1beta1.Step {
-	prefix := fmt.Sprintf("%s:%s", outputRCloneCfgName, bucketName)
+	prefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	dest := path.Join(prefix, remoteOutputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{

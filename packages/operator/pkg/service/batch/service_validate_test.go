@@ -19,6 +19,7 @@ package batch_test
 
 import (
 	"fmt"
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	api_types "github.com/odahu/odahu-flow/packages/operator/pkg/apis/batch"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/service/batch"
 	"github.com/stretchr/testify/require"
@@ -36,9 +37,11 @@ var testValidateCreateCases = []struct {
 		spec: api_types.InferenceServiceSpec{
 			Image:       "image",
 			Command:     []string{"python"},
-			ModelSource: api_types.ConnectionReference{
-				Connection: "gcs-conn",
-				Path: "path",
+			ModelRegistry: v1alpha1.ModelSource{
+				Remote: &v1alpha1.RemoteModelSource{
+					ModelConnection: "gcs-conn",
+					ModelPath:       "path",
+				},
 			},
 		},
 	},
@@ -46,9 +49,11 @@ var testValidateCreateCases = []struct {
 		testName: "empty image",
 		spec: api_types.InferenceServiceSpec{
 			Command:     []string{"python"},
-			ModelSource: api_types.ConnectionReference{
-				Connection: "gcs-conn",
-				Path: "path",
+			ModelRegistry: v1alpha1.ModelSource{
+				Remote: &v1alpha1.RemoteModelSource{
+					ModelConnection: "gcs-conn",
+					ModelPath:       "path",
+				},
 			},
 		},
 		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "image"),
@@ -57,9 +62,11 @@ var testValidateCreateCases = []struct {
 		testName: "empty command",
 		spec: api_types.InferenceServiceSpec{
 			Image:       "image",
-			ModelSource: api_types.ConnectionReference{
-				Connection: "gcs-conn",
-				Path: "path",
+			ModelRegistry: v1alpha1.ModelSource{
+				Remote: &v1alpha1.RemoteModelSource{
+					ModelConnection: "gcs-conn",
+					ModelPath:       "path",
+				},
 			},
 		},
 		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "command"),
@@ -69,18 +76,20 @@ var testValidateCreateCases = []struct {
 		spec: api_types.InferenceServiceSpec{
 			Image:       "image",
 			Command:     []string{"python"},
-			ModelSource: api_types.ConnectionReference{
-				Path: "path",
+			ModelRegistry: v1alpha1.ModelSource{
+				Remote: &v1alpha1.RemoteModelSource{
+					ModelPath:       "path",
+				},
 			},
 		},
-		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "modelSource.connection"),
+		expectedErrString: fmt.Sprintf(batch.EmptySpecFieldErrorMessage, "modelRegistry.remote.modelConnection"),
 
 	},
 }
 func TestValidateCreateUpdate(t *testing.T) {
-	req := require.New(t)
 	for _, test := range testValidateCreateCases {
 		t.Run(test.testName, func(t *testing.T) {
+			req := require.New(t)
 			bis := api_types.InferenceService{
 				ID:   "bis",
 				Spec: test.spec,

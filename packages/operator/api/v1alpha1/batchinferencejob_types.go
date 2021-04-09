@@ -33,6 +33,32 @@ const (
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+
+type RemoteModelSource struct {
+	// ModelConnection is name of connection to object storage bucket where ML model files are expected
+	ModelConnection string `json:"modelConnection"`
+	// ModelPath is a directory inside ModelConnection where ML model files are located
+	ModelPath string `json:"modelPath"`
+}
+
+type ModelMeta struct {
+	Name string `json:"name"`
+	Version string `json:"version"`
+}
+
+type LocalModelSource struct {
+	ModelMeta ModelMeta `json:"meta"`
+	// ModelPath is a directory inside container where ML model files are located
+	ModelPath string `json:"modelPath"`
+}
+
+type ModelSource struct {
+	// Remote fetch model from remote model registry using ODAHU connections mechanism
+	Remote *RemoteModelSource `json:"remote,omitempty"`
+	// Local does not fetch model and assume that model is embedded into container
+	Local *LocalModelSource `json:"local,omitempty"`
+}
+
 // BatchInferenceJobSpec defines the desired state of BatchInferenceJob
 type BatchInferenceJobSpec struct {
 	// Docker image
@@ -66,10 +92,7 @@ type BatchInferenceJobSpec struct {
 	// OutputPath is a destination directory for BatchInferenceJob results
 	// relative to bucket root of OutputConnection
 	OutputPath string `json:"outputPath"`
-	// ModelConnection is name of connection to object storage bucket where ML model files are expected
-	ModelConnection string `json:"modelConnection"`
-	// ModelPath is a directory inside ModelConnection where ML model files are located
-	ModelPath string `json:"modelPath"`
+	ModelSource ModelSource `json:"modelSource"`
 	// Node selector for specifying a node pool
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 	// Resources for model container

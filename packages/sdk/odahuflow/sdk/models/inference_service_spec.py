@@ -8,6 +8,7 @@ from typing import List, Dict  # noqa: F401
 from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.connection_reference import ConnectionReference  # noqa: F401,E501
 from odahuflow.sdk.models.inference_service_triggers import InferenceServiceTriggers  # noqa: F401,E501
+from odahuflow.sdk.models.model_source import ModelSource  # noqa: F401,E501
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
@@ -18,7 +19,7 @@ class InferenceServiceSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, args: List[str]=None, command: List[str]=None, data_source: ConnectionReference=None, image: str=None, model_source: ConnectionReference=None, node_selector: Dict[str, str]=None, output_destination: ConnectionReference=None, resources: ResourceRequirements=None, triggers: InferenceServiceTriggers=None):  # noqa: E501
+    def __init__(self, args: List[str]=None, command: List[str]=None, data_source: ConnectionReference=None, image: str=None, model_registry: ModelSource=None, node_selector: Dict[str, str]=None, output_destination: ConnectionReference=None, resources: ResourceRequirements=None, triggers: InferenceServiceTriggers=None):  # noqa: E501
         """InferenceServiceSpec - a model defined in Swagger
 
         :param args: The args of this InferenceServiceSpec.  # noqa: E501
@@ -29,8 +30,8 @@ class InferenceServiceSpec(Model):
         :type data_source: ConnectionReference
         :param image: The image of this InferenceServiceSpec.  # noqa: E501
         :type image: str
-        :param model_source: The model_source of this InferenceServiceSpec.  # noqa: E501
-        :type model_source: ConnectionReference
+        :param model_registry: The model_registry of this InferenceServiceSpec.  # noqa: E501
+        :type model_registry: ModelSource
         :param node_selector: The node_selector of this InferenceServiceSpec.  # noqa: E501
         :type node_selector: Dict[str, str]
         :param output_destination: The output_destination of this InferenceServiceSpec.  # noqa: E501
@@ -45,7 +46,7 @@ class InferenceServiceSpec(Model):
             'command': List[str],
             'data_source': ConnectionReference,
             'image': str,
-            'model_source': ConnectionReference,
+            'model_registry': ModelSource,
             'node_selector': Dict[str, str],
             'output_destination': ConnectionReference,
             'resources': ResourceRequirements,
@@ -57,7 +58,7 @@ class InferenceServiceSpec(Model):
             'command': 'command',
             'data_source': 'dataSource',
             'image': 'image',
-            'model_source': 'modelSource',
+            'model_registry': 'modelRegistry',
             'node_selector': 'nodeSelector',
             'output_destination': 'outputDestination',
             'resources': 'resources',
@@ -68,7 +69,7 @@ class InferenceServiceSpec(Model):
         self._command = command
         self._data_source = data_source
         self._image = image
-        self._model_source = model_source
+        self._model_registry = model_registry
         self._node_selector = node_selector
         self._output_destination = output_destination
         self._resources = resources
@@ -178,27 +179,27 @@ class InferenceServiceSpec(Model):
         self._image = image
 
     @property
-    def model_source(self) -> ConnectionReference:
-        """Gets the model_source of this InferenceServiceSpec.
+    def model_registry(self) -> ModelSource:
+        """Gets the model_registry of this InferenceServiceSpec.
 
-        ModelSource defines location of ML model files  # noqa: E501
+        ModelRegistry defines location of ML model files  # noqa: E501
 
-        :return: The model_source of this InferenceServiceSpec.
-        :rtype: ConnectionReference
+        :return: The model_registry of this InferenceServiceSpec.
+        :rtype: ModelSource
         """
-        return self._model_source
+        return self._model_registry
 
-    @model_source.setter
-    def model_source(self, model_source: ConnectionReference):
-        """Sets the model_source of this InferenceServiceSpec.
+    @model_registry.setter
+    def model_registry(self, model_registry: ModelSource):
+        """Sets the model_registry of this InferenceServiceSpec.
 
-        ModelSource defines location of ML model files  # noqa: E501
+        ModelRegistry defines location of ML model files  # noqa: E501
 
-        :param model_source: The model_source of this InferenceServiceSpec.
-        :type model_source: ConnectionReference
+        :param model_registry: The model_registry of this InferenceServiceSpec.
+        :type model_registry: ModelSource
         """
 
-        self._model_source = model_source
+        self._model_registry = model_registry
 
     @property
     def node_selector(self) -> Dict[str, str]:

@@ -1,19 +1,16 @@
 package cmd
 
 import (
-	"gopkg.in/yaml.v2"
 	"fmt"
 	"github.com/fluent/fluent-logger-golang/fluent"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/predict_v2"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/feedback"
-	"io/ioutil"
-	feedback_utils "odahu-commons/feedback"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"net/url"
+	feedback_utils "odahu-commons/feedback"
 	"os"
-	"path/filepath"
 	"strconv"
 )
 
@@ -32,6 +29,7 @@ var (
 	requestTag string
 	responseTag string
 	model string
+	version string
 	requestID string
 )
 
@@ -40,9 +38,16 @@ func init () {
 	logCommand.AddCommand(logModelInputCommand)
 	logCommand.AddCommand(logModelOutputCommand)
 	logCommand.PersistentFlags().StringVarP(
-		&model, "model", "m", ".", "directory with ML model files",
+		&model, "model", "m", "", "ML Model name",
 	)
-	_ = logCommand.MarkFlagRequired("model")
+	_ = logCommand.MarkPersistentFlagRequired("model")
+
+	logCommand.PersistentFlags().StringVar(
+		&version, "version",  "", "ML Model version",
+	)
+	_ = logCommand.MarkPersistentFlagRequired("version")
+
+
 	logCommand.PersistentFlags().StringVarP(
 		&requestID, "request-id", "r", "",
 		"request id for which this request/response data is logged",
@@ -122,6 +127,7 @@ func getRequestWrapper(modelName string, modelVersion string) func(content strin
 		}
 	}
 }
+
 func getResponseWrapper(modelName string, modelVersion string) func(content string)interface{}{
 	return func(content string) interface{} {
 		return feedback_utils.ResponseBody{
@@ -131,47 +137,6 @@ func getResponseWrapper(modelName string, modelVersion string) func(content stri
 			ResponseContent: content,
 		}
 	}
-}
-
-func getModelNameVersion() (string, string, error) {
-
-	type Model struct {
-		Name string `json:"name"`
-		Version string `json:"version"`
-	}
-
-	type ModelFile struct {
-		Model Model `json:"model"`
-	}
-
-	modelFiles := []string{"odahuflow.project.yaml", "odahuflow.project.yml"}
-
-	items, err := ioutil.ReadDir(model)
-	if err != nil {
-		return "", "", err
-
-	}
-	for _, item := range items {
-		file := item.Name()
-		for _, mFile := range modelFiles {
-			if mFile == file {
-
-				fp := filepath.Join(model, file)
-				zap.S().Infof("Model metadata file is found %s", fp)
-				data, err := ioutil.ReadFile(fp)
-				if err != nil {
-					return "", "", err
-				}
-				mf := ModelFile{}
-				if err := yaml.Unmarshal(data, &mf); err != nil {
-					return "", "", err
-				}
-
-				return mf.Model.Name, mf.Model.Version, nil
-			}
-		}
-	}
-	return "", "", fmt.Errorf("unable to find model metadata file")
 }
 
 var logModelInputCommand = &cobra.Command{
@@ -194,10 +159,7 @@ var logModelInputCommand = &cobra.Command{
 
 		dataLogger := feedback.NewLogger(logEngine)
 
-		modelName, modelVer, err := getModelNameVersion()
-		if err != nil {
-			return err
-		}
+		modelName, modelVer := model, version
 
 		wrap := getRequestWrapper(modelName, modelVer)
 
@@ -231,10 +193,7 @@ var logModelOutputCommand = &cobra.Command{
 
 		dataLogger := feedback.NewLogger(logEngine)
 
-		modelName, modelVer, err := getModelNameVersion()
-		if err != nil {
-			return err
-		}
+		modelName, modelVer := model, version
 
 		wrap := getResponseWrapper(modelName, modelVer)
 

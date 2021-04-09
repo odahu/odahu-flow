@@ -2553,10 +2553,10 @@
                     "description": "Image is OCI image that contains user defined prediction code",
                     "type": "string"
                 },
-                "modelSource": {
-                    "description": "ModelSource defines location of ML model files",
+                "modelRegistry": {
+                    "description": "ModelRegistry defines location of ML model files",
                     "type": "object",
-                    "$ref": "#/definitions/ConnectionReference"
+                    "$ref": "#/definitions/ModelSource"
                 },
                 "nodeSelector": {
                     "description": "Node selector for specifying a node pool",
@@ -3797,6 +3797,19 @@
                 }
             }
         },
+        "LocalModelSource": {
+            "type": "object",
+            "properties": {
+                "meta": {
+                    "type": "object",
+                    "$ref": "#/definitions/ModelMeta"
+                },
+                "modelPath": {
+                    "description": "ModelPath is a directory inside container where ML model files are located",
+                    "type": "string"
+                }
+            }
+        },
         "ModelDeploymentSpec": {
             "type": "object",
             "properties": {
@@ -3926,6 +3939,17 @@
                 }
             }
         },
+        "ModelMeta": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "ModelPackagingResult": {
             "type": "object",
             "properties": {
@@ -4013,6 +4037,21 @@
                 },
                 "updatedAt": {
                     "type": "string"
+                }
+            }
+        },
+        "ModelSource": {
+            "type": "object",
+            "properties": {
+                "local": {
+                    "description": "Local does not fetch model and assume that model is embedded into container",
+                    "type": "object",
+                    "$ref": "#/definitions/LocalModelSource"
+                },
+                "remote": {
+                    "description": "Remote fetch model from remote model registry using ODAHU connections mechanism",
+                    "type": "object",
+                    "$ref": "#/definitions/RemoteModelSource"
                 }
             }
         },
@@ -4138,6 +4177,19 @@
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "RemoteModelSource": {
+            "type": "object",
+            "properties": {
+                "modelConnection": {
+                    "description": "ModelConnection is name of connection to object storage bucket where ML model files are expected",
+                    "type": "string"
+                },
+                "modelPath": {
+                    "description": "ModelPath is a directory inside ModelConnection where ML model files are located",
                     "type": "string"
                 }
             }

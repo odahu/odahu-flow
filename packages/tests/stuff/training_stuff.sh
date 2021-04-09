@@ -222,6 +222,10 @@ function setup_batch_examples() {
   docker build ${tmp_odahu_example_dir}/batch-inference/predictor -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
   docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
 
+  # Build and predictor image with embedded model
+  docker build ${tmp_odahu_example_dir}/batch-inference/predictor_embedded -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
+  docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
+
   # Prepare test data by replacing image in spec of service and copying job manifest
   yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice.yaml \
     'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice.yaml"
@@ -231,11 +235,16 @@ function setup_batch_examples() {
     'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice-packed.yaml"
   cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob-packed.yaml "${DIR}/../e2e/robot/tests/api/resources/batch/inferencejob-packed.yaml"
 
+  # embedded
+  yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice-embedded.yaml \
+    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice-embedded.yaml"
+  cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob-embedded.yaml "${DIR}/../e2e/robot/tests/api/resources/batch/inferencejob-embedded.yaml"
+
   cp -r ${tmp_odahu_example_dir}/batch-inference/output "${DIR}/../e2e/robot/tests/api/resources/batch/output/"
   # Upload model and input data to object storage
   copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/input "${BUCKET_NAME}/test-data/batch_job_data/input"
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model "${BUCKET_NAME}/test-data/batch_job_data/model"
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model.tar.gz "${BUCKET_NAME}/test-data/batch_job_data/"
+  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model "${BUCKET_NAME}/output/test-data/batch_job_data/model"
+  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model.tar.gz "${BUCKET_NAME}/output/test-data/batch_job_data/"
   # Clean tmp dir
   rm -rf "${tmp_odahu_example_dir}"
 }

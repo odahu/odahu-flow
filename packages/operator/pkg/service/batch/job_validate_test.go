@@ -47,9 +47,11 @@ var testDefaultJobCases = []struct {
 				Image:   "image",
 				Command: []string{"python"},
 				Args:    []string{"--verbose"},
-				ModelSource: api_types.ConnectionReference{
-					Connection: "conn",
-					Path:       "path",
+				ModelRegistry: v1alpha1.ModelSource{
+					Remote: &v1alpha1.RemoteModelSource{
+						ModelConnection: "conn",
+						ModelPath:       "path",
+					},
 				},
 				DataSource: &api_types.ConnectionReference{
 					Connection: "conn",
@@ -135,9 +137,11 @@ var testDefaultJobCases = []struct {
 				Image:   "image",
 				Command: []string{"python"},
 				Args:    []string{"--verbose"},
-				ModelSource: api_types.ConnectionReference{
-					Connection: "conn",
-					Path:       "path",
+				ModelRegistry: v1alpha1.ModelSource{
+					Remote: &v1alpha1.RemoteModelSource{
+						ModelConnection: "conn",
+						ModelPath:       "path",
+					},
 				},
 				DataSource: &api_types.ConnectionReference{
 					Connection: "conn",

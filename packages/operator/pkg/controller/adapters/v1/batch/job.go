@@ -66,8 +66,7 @@ func appSpecToKubeSpec(appJob *api_types.InferenceJobSpec,
 	runtime.Image = appService.Image
 	runtime.Command = appService.Command
 	runtime.Args = appService.Args
-	runtime.ModelConnection = appService.ModelSource.Connection
-	runtime.ModelPath = appService.ModelSource.Path
+	runtime.ModelSource = appService.ModelRegistry
 
 	// Fill parameters from job
 	runtime.InputConnection = appJob.DataSource.Connection

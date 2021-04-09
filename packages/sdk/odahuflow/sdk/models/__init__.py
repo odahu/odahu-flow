@@ -38,6 +38,7 @@ from odahuflow.sdk.models.k8s_packager import K8sPackager
 from odahuflow.sdk.models.k8s_trainer import K8sTrainer
 from odahuflow.sdk.models.latest_deployment_events import LatestDeploymentEvents
 from odahuflow.sdk.models.latest_route_events import LatestRouteEvents
+from odahuflow.sdk.models.local_model_source import LocalModelSource
 from odahuflow.sdk.models.model_deployment import ModelDeployment
 from odahuflow.sdk.models.model_deployment_config import ModelDeploymentConfig
 from odahuflow.sdk.models.model_deployment_istio_config import ModelDeploymentIstioConfig
@@ -46,6 +47,7 @@ from odahuflow.sdk.models.model_deployment_spec import ModelDeploymentSpec
 from odahuflow.sdk.models.model_deployment_status import ModelDeploymentStatus
 from odahuflow.sdk.models.model_deployment_target import ModelDeploymentTarget
 from odahuflow.sdk.models.model_identity import ModelIdentity
+from odahuflow.sdk.models.model_meta import ModelMeta
 from odahuflow.sdk.models.model_packaging import ModelPackaging
 from odahuflow.sdk.models.model_packaging_config import ModelPackagingConfig
 from odahuflow.sdk.models.model_packaging_result import ModelPackagingResult
@@ -55,6 +57,7 @@ from odahuflow.sdk.models.model_property import ModelProperty
 from odahuflow.sdk.models.model_route import ModelRoute
 from odahuflow.sdk.models.model_route_spec import ModelRouteSpec
 from odahuflow.sdk.models.model_route_status import ModelRouteStatus
+from odahuflow.sdk.models.model_source import ModelSource
 from odahuflow.sdk.models.model_training import ModelTraining
 from odahuflow.sdk.models.model_training_config import ModelTrainingConfig
 from odahuflow.sdk.models.model_training_spec import ModelTrainingSpec
@@ -68,6 +71,7 @@ from odahuflow.sdk.models.packaging_integration_spec import PackagingIntegration
 from odahuflow.sdk.models.packaging_integration_status import PackagingIntegrationStatus
 from odahuflow.sdk.models.parameter import Parameter
 from odahuflow.sdk.models.predictor_webhook_trigger import PredictorWebhookTrigger
+from odahuflow.sdk.models.remote_model_source import RemoteModelSource
 from odahuflow.sdk.models.resource_list import ResourceList
 from odahuflow.sdk.models.resource_requirements import ResourceRequirements
 from odahuflow.sdk.models.route_event import RouteEvent

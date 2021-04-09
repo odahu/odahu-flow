@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/spf13/cobra"
@@ -122,6 +123,7 @@ func init() {
 func Execute() {
 
 	if err := rootCmd.Execute(); err != nil {
+		fmt.Printf("Exit code 1: %s\n", err)
 		os.Exit(1)
 	}
 }

@@ -50,6 +50,7 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
+	golang.org/x/tools v0.0.0-20200820180210-c8f393745106
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0
 	istio.io/api v0.0.0-20200512234804-e5412c253ffe
