@@ -293,7 +293,7 @@ func (s *ModelTrainingValidationSuite) TestMtWrongObjectStorageConnectionType() 
 
 	err = s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).ShouldNot(BeNil())
-	s.g.Expect(err.Error()).To(ContainSubstring("data binding has wrong data type"))
+	s.g.Expect(err.Error()).To(ContainSubstring("object storage has wrong data type"))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtToolchainType() {

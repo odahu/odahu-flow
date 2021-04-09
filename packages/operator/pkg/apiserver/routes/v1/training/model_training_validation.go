@@ -31,20 +31,23 @@ import (
 )
 
 const (
-	MtVcsNotExistsErrorMessage       = "cannot find VCS Connection"
-	EmptyModelNameErrorMessage       = "empty model.name"
-	EmptyModelVersionErrorMessage    = "empty model.version"
-	EmptyVcsNameMessageError         = "empty vcsName"
-	ValidationMtErrorMessage         = "Validation of model training is failed"
-	WrongVcsTypeErrorMessage         = "VCS connection must have the GIT type. You pass the connection of %s type"
-	EmptyDataBindingNameErrorMessage = "you should specify connection name for %d number of data binding"
-	EmptyDataBindingPathErrorMessage = "you should specify local path for %d number of data binding"
-	WrongDataBindingTypeErrorMessage = "%s data binding has wrong data type. Currently supported the following types" +
+	MtVcsNotExistsErrorMessage           = "cannot find VCS Connection"
+	MtObjectStorageNotExistsErrorMessage = "cannot find ObjectStorage Connection"
+	EmptyModelNameErrorMessage           = "empty model.name"
+	EmptyModelVersionErrorMessage        = "empty model.version"
+	EmptyVcsNameMessageError             = "empty vcsName"
+	ValidationMtErrorMessage             = "Validation of model training is failed"
+	WrongVcsTypeErrorMessage             = "VCS connection must have the GIT type. You pass the connection of %s type"
+	EmptyAlgorithmSourceNameMessageError = "both VCS and ObjectStorage names are empty"
+	MultipleAlgorithmSourceMessageError  = "both VCS and ObjectStorage names are specified, must be only one"
+	EmptyDataBindingNameErrorMessage     = "you should specify connection name for %d number of data binding"
+	EmptyDataBindingPathErrorMessage     = "you should specify local path for %d number of data binding"
+	WrongDataBindingTypeErrorMessage     = "%s data binding has wrong data type. Currently supported the following types" +
 		" of connections for data bindings: %v"
-	ToolchainEmptyErrorMessage = "empty toolchain parameter"
+	ToolchainEmptyErrorMessage         = "empty toolchain parameter"
 	WrongObjectStorageTypeErrorMessage = "%s object storage has wrong data type. Currently supported the following types" +
 		" of connections for object storage: %v"
-	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
+	UnknownNodeSelector = "node selector %v is not presented in ODAHU config"
 )
 
 var (
