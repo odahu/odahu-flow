@@ -18,7 +18,6 @@ package trainer
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/go-logr/logr"
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -264,7 +263,7 @@ func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 			return err
 		}
 	default:
-		return errors.New(fmt.Sprintf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type))
+		return fmt.Errorf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type)
 	}
 
 	mt.log.Info("The model source code was downloaded", "dir", mt.trainerConfig.OutputDir)
