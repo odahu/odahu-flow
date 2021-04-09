@@ -22,8 +22,10 @@ import logging
 import requests
 from urllib3.exceptions import HTTPError
 
+import odahuflow.sdk.config
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
 from odahuflow.sdk.clients.route import ModelRouteClient
+from odahuflow.sdk.clients.api import Authenticator, IncorrectAuthorizationToken
 from odahuflow.sdk.utils import ensure_function_succeed
 
 
@@ -73,12 +75,20 @@ class ModelClient:
     Model HTTP client
     """
 
-    def __init__(self, url=None, token=None, http_client=requests,
+    def __init__(self,
+                 url=None,
+                 token=None,
+                 http_client=requests,
                  http_exception=requests.exceptions.RequestException,
-                 timeout=None):
+                 timeout=None,
+                 client_id='',
+                 client_secret='',
+                 issuer_url=''):
         """
         Build client
 
+        :param url: base url
+        :type url: str
         :param token: API token value to use (default: None)
         :type token: str
         :param http_client: HTTP client (default: requests)
@@ -87,12 +97,29 @@ class ModelClient:
         :type http_exception: python class that implements Exception class interface
         :param timeout: timeout for connections
         :type timeout: int
+        :param client_id: client_id for Client Credentials OAuth2 flow
+        :type client_id: str
+        :param client_secret: client_secret for Client Credentials OAuth2 flow
+        :type client_secret: str
+        :param issuer_url: url for credential login
+        :type issuer_url: str
         """
         self._url = url
-        self._token = token
         self._http_client = http_client
         self._http_exception = http_exception
         self._timeout = timeout
+
+        token = token if token else odahuflow.sdk.config.API_TOKEN
+        issuer_url = issuer_url if issuer_url else odahuflow.sdk.config.ISSUER_URL
+
+        self._authenticator = Authenticator(
+            client_id=client_id,
+            client_secret=client_secret,
+            non_interactive=True,
+            base_url=url,
+            token=token,
+            issuer_url=issuer_url
+        )
 
         LOGGER.debug('Model client params: %s, %s, %s, %s, %s', url, token, http_client, http_exception, timeout)
 
@@ -149,8 +176,8 @@ class ModelClient:
         :return: dict -- additional kwargs
         """
         kwargs = {}
-        if self._token:
-            kwargs['headers'] = {'Authorization': 'Bearer {token}'.format(token=self._token)}
+        if self._authenticator.token:
+            kwargs['headers'] = {'Authorization': f'Bearer {self._authenticator.token}'}
         if self._timeout is not None:
             kwargs['timeout'] = self._timeout
         return kwargs
@@ -190,6 +217,22 @@ class ModelClient:
         response = ensure_function_succeed(check_function, retries, sleep)
         if response is None:
             raise self._http_exception('HTTP request failed')
+
+        if self._authenticator.login_required(response):
+            try:
+                self._authenticator.login(str(response.url), limit_stack=False)
+            except IncorrectAuthorizationToken as login_exc:
+                raise login_exc
+            return self._request(
+                http_method,
+                url,
+                data=data,
+                files=files,
+                retries=retries,
+                sleep=sleep,
+                **self._additional_kwargs
+            )
+
         return self._parse_response(response)
 
     def invoke(self, **parameters):
