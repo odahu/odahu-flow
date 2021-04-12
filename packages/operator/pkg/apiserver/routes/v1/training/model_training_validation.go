@@ -212,16 +212,14 @@ func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err e
 	if odahuErr != nil {
 		logMT.Error(err, MtObjectStorageNotExistsErrorMessage)
 
-		err = multierr.Append(err, odahuErr)
-		return
+		return odahuErr
 	}
 
 	if _, ok := connection.ObjectStorageTypesSet[objStorage.Spec.Type]; !ok {
-		err = multierr.Append(err, fmt.Errorf(
+		return fmt.Errorf(
 			WrongObjectStorageTypeErrorMessage,
 			objStorage.ID, reflect.ValueOf(connection.ObjectStorageTypesSet).MapKeys(),
-		))
-		return
+		)
 	}
 
 	if len(mt.Spec.AlgorithmSource.ObjectStorage.Path) == 0 {
