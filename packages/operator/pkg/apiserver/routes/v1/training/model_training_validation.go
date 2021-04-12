@@ -35,7 +35,6 @@ const (
 	MtObjectStorageNotExistsErrorMessage = "cannot find ObjectStorage Connection"
 	EmptyModelNameErrorMessage           = "empty model.name"
 	EmptyModelVersionErrorMessage        = "empty model.version"
-	EmptyVcsNameMessageError             = "empty vcsName"
 	ValidationMtErrorMessage             = "Validation of model training is failed"
 	WrongVcsTypeErrorMessage             = "VCS connection must have the GIT type. You pass the connection of %s type"
 	EmptyAlgorithmSourceNameMessageError = "both VCS and ObjectStorage names are empty"
