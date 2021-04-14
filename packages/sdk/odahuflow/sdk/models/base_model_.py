@@ -29,6 +29,12 @@ class Model(object):
         """
         result = {}
 
+        # DO NOT REMOVE: adding kind field to root API objects for polymorphism
+        from odahuflow.sdk.root_models import ROOT_MODELS
+        model_name = type(self).__name__
+        if model_name in ROOT_MODELS:
+            result['kind'] = model_name
+
         for attr, _ in six.iteritems(self.swagger_types):
             value = getattr(self, attr)
             # DO NOT REMOVE!

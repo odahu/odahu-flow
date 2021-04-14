@@ -37,19 +37,7 @@ from odahuflow.sdk.clients.batch_service import InferenceService, BatchInference
     AsyncBatchInferenceServiceClient
 from odahuflow.sdk.clients.batch_job import InferenceJob, BatchInferenceJobClient, AsyncBatchInferenceJobClient
 from odahuflow.sdk.models import Connection, ToolchainIntegration, ModelPackaging, PackagingIntegration
-
-TARGET_CLASSES = {
-    'ModelTraining': ModelTraining,
-    'ToolchainIntegration': ToolchainIntegration,
-    'ModelDeployment': ModelDeployment,
-    'ModelRoute': ModelRoute,
-    'Connection': Connection,
-    'ModelPackaging': ModelPackaging,
-    'PackagingIntegration': PackagingIntegration,
-    'BatchInference': PackagingIntegration,
-    'InferenceService': InferenceService,
-    'InferenceJob': InferenceJob,
-}
+from odahuflow.sdk.root_models import ROOT_MODELS
 
 LOGGER = logging.getLogger(__name__)
 
@@ -168,10 +156,10 @@ def build_resource(declaration: dict) -> OdahuflowCloudResourceUpdatePair:
     if not isinstance(resource_type, str):
         raise Exception(f'Kind of object {declaration} should be string')
 
-    if resource_type not in TARGET_CLASSES:
+    if resource_type not in ROOT_MODELS:
         raise Exception(f'Unknown kind of object: \'{resource_type}\'')
 
-    resource = TARGET_CLASSES[resource_type].from_dict(declaration)
+    resource = ROOT_MODELS[resource_type].from_dict(declaration)
 
     return OdahuflowCloudResourceUpdatePair(
         resource_id=resource.id,

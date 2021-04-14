@@ -1,0 +1,48 @@
+Index: packages/sdk/odahuflow/sdk/models/base_model_.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/sdk/odahuflow/sdk/models/base_model_.py b/packages/sdk/odahuflow/sdk/models/base_model_.py
+--- a/packages/sdk/odahuflow/sdk/models/base_model_.py	(revision 4188bcf9eb506e4f725978b1de3a8d10f1a32cc9)
++++ b/packages/sdk/odahuflow/sdk/models/base_model_.py	(date 1617725196036)
+@@ -29,8 +29,16 @@
+         """
+         result = {}
+ 
++        # DO NOT REMOVE: adding kind field to root API objects for polymorphism
++        from odahuflow.sdk.root_models import ROOT_MODELS
++        model_name = type(self).__name__
++        if model_name in ROOT_MODELS:
++            result['kind'] = model_name
++
+         for attr, _ in six.iteritems(self.swagger_types):
+             value = getattr(self, attr)
++            # DO NOT REMOVE!
++            attr = self.attribute_map.get(attr, attr)
+             if isinstance(value, list):
+                 result[attr] = list(map(
+                     lambda x: x.to_dict() if hasattr(x, "to_dict") else x,
+Index: packages/sdk/odahuflow/sdk/models/util.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/packages/sdk/odahuflow/sdk/models/util.py b/packages/sdk/odahuflow/sdk/models/util.py
+--- a/packages/sdk/odahuflow/sdk/models/util.py	(revision 4188bcf9eb506e4f725978b1de3a8d10f1a32cc9)
++++ b/packages/sdk/odahuflow/sdk/models/util.py	(date 1617724926702)
+@@ -23,10 +23,11 @@
+         return deserialize_date(data)
+     elif klass == datetime.datetime:
+         return deserialize_datetime(data)
+-    elif type(klass) == typing.GenericMeta:
+-        if klass.__extra__ == list:
++    # DO NOT REMOVE!
++    elif hasattr(klass, '__origin__'):
++        if klass.__origin__ == list or klass.__origin__ == typing.List:
+             return _deserialize_list(data, klass.__args__[0])
+-        if klass.__extra__ == dict:
++        if klass.__origin__ == dict or klass.__origin__ == typing.Dict:
+             return _deserialize_dict(data, klass.__args__[1])
+     else:
+         return deserialize_model(data, klass)

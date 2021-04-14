@@ -205,6 +205,9 @@ generate-python-client:
 	rm -rf ${PYTHON_MODEL_DIR}
 	mkdir -p ${PYTHON_MODEL_DIR}
 	cp -r ${MOCKS_DIR}/python/odahuflow/sdk/models/* ${PYTHON_MODEL_DIR}
+
+	git apply scripts/python_models_customization.patch
+
 	git add ${PYTHON_MODEL_DIR}
 
 ## install-python-tests: Install python test dependencies
