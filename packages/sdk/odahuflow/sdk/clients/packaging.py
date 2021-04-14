@@ -147,7 +147,7 @@ class AsyncModelPackagingClient(AsyncRemoteAPIClient):
         :param name: Name of a Model Packaging
         :return Message from API server
         """
-        return await self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE')['message']
+        return (await self.query(f'{MODEL_PACKING_URL}/{name}', action='DELETE'))['message']
 
     async def log(self, name: str, follow: bool = False) -> AsyncIterable:
         """
