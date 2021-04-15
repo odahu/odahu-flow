@@ -232,7 +232,7 @@ func (mt *ModelTrainer) downloadData(k8sTraining *training.K8sTrainer) error {
 }
 
 func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) error {
-	connType := k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type
+	connType := k8sTraining.AlgorithmSourceConnection.Spec.Type
 
 	switch {
 	case connType == connection.GITType:
@@ -263,7 +263,7 @@ func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 			return err
 		}
 	default:
-		return fmt.Errorf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type)
+		return fmt.Errorf(unsupportedConnectionTypeErrorMessage, k8sTraining.AlgorithmSourceConnection.Spec.Type)
 	}
 
 	mt.log.Info("The model source code was downloaded", "dir", mt.trainerConfig.OutputDir)
@@ -272,12 +272,12 @@ func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 
 func (mt *ModelTrainer) downloadAlgorithmFromStorage(k8sTraining *training.K8sTrainer) error {
 	mt.log.Info("Run download k8sTraining algorithm",
-		"remote_path", k8sTraining.AlgorithmSourceConnection.Path,
-		"connection_type", k8sTraining.AlgorithmSourceConnection.Conn.Spec.Type,
-		"connection_uri", k8sTraining.AlgorithmSourceConnection.Conn.Spec.URI,
+		"remote_path", k8sTraining.ModelTraining.Spec.AlgorithmSource.ObjectStorage.Path,
+		"connection_type", k8sTraining.AlgorithmSourceConnection.Spec.Type,
+		"connection_uri", k8sTraining.AlgorithmSourceConnection.Spec.URI,
 	)
 
-	storage, err := rclone.NewObjectStorage(&k8sTraining.AlgorithmSourceConnection.Conn.Spec)
+	storage, err := rclone.NewObjectStorage(&k8sTraining.AlgorithmSourceConnection.Spec)
 	if err != nil {
 		return err
 	}
@@ -288,7 +288,7 @@ func (mt *ModelTrainer) downloadAlgorithmFromStorage(k8sTraining *training.K8sTr
 		localDir += "/"
 	}
 
-	if err := storage.Download(localDir, k8sTraining.AlgorithmSourceConnection.Path); err != nil {
+	if err := storage.Download(localDir, k8sTraining.ModelTraining.Spec.AlgorithmSource.ObjectStorage.Path); err != nil {
 		return err
 	}
 

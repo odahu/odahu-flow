@@ -3604,20 +3604,6 @@ var doc = `{
                 }
             }
         },
-        "AlgorithmSourceConnection": {
-            "type": "object",
-            "properties": {
-                "conn": {
-                    "description": "Connection specific for Algorithm",
-                    "type": "object",
-                    "$ref": "#/definitions/Connection"
-                },
-                "path": {
-                    "description": "Remote path for object storage",
-                    "type": "string"
-                }
-            }
-        },
         "InputDataBindingDir": {
             "type": "object",
             "properties": {
@@ -3642,7 +3628,7 @@ var doc = `{
                 "algorithmSourceConnection": {
                     "description": "Connection for source code",
                     "type": "object",
-                    "$ref": "#/definitions/AlgorithmSourceConnection"
+                    "$ref": "#/definitions/Connection"
                 },
                 "inputData": {
                     "description": "Connection for training data",

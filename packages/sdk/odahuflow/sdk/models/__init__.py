@@ -7,7 +7,6 @@ from odahuflow.sdk.models.api_backend_config import APIBackendConfig
 from odahuflow.sdk.models.api_config import APIConfig
 from odahuflow.sdk.models.api_local_backend_config import APILocalBackendConfig
 from odahuflow.sdk.models.algorithm_source import AlgorithmSource
-from odahuflow.sdk.models.algorithm_source_connection import AlgorithmSourceConnection
 from odahuflow.sdk.models.auth_config import AuthConfig
 from odahuflow.sdk.models.batch_config import BatchConfig
 from odahuflow.sdk.models.claims import Claims

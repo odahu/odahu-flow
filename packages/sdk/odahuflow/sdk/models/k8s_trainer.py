@@ -6,7 +6,6 @@ from datetime import date, datetime  # noqa: F401
 from typing import List, Dict  # noqa: F401
 
 from odahuflow.sdk.models.base_model_ import Model
-from odahuflow.sdk.models.algorithm_source_connection import AlgorithmSourceConnection  # noqa: F401,E501
 from odahuflow.sdk.models.connection import Connection  # noqa: F401,E501
 from odahuflow.sdk.models.input_data_binding_dir import InputDataBindingDir  # noqa: F401,E501
 from odahuflow.sdk.models.model_training import ModelTraining  # noqa: F401,E501
@@ -20,11 +19,11 @@ class K8sTrainer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, algorithm_source_connection: AlgorithmSourceConnection=None, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, toolchain_integration: ToolchainIntegration=None):  # noqa: E501
+    def __init__(self, algorithm_source_connection: Connection=None, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, toolchain_integration: ToolchainIntegration=None):  # noqa: E501
         """K8sTrainer - a model defined in Swagger
 
         :param algorithm_source_connection: The algorithm_source_connection of this K8sTrainer.  # noqa: E501
-        :type algorithm_source_connection: AlgorithmSourceConnection
+        :type algorithm_source_connection: Connection
         :param input_data: The input_data of this K8sTrainer.  # noqa: E501
         :type input_data: List[InputDataBindingDir]
         :param model_training: The model_training of this K8sTrainer.  # noqa: E501
@@ -35,7 +34,7 @@ class K8sTrainer(Model):
         :type toolchain_integration: ToolchainIntegration
         """
         self.swagger_types = {
-            'algorithm_source_connection': AlgorithmSourceConnection,
+            'algorithm_source_connection': Connection,
             'input_data': List[InputDataBindingDir],
             'model_training': ModelTraining,
             'output_conn': Connection,
@@ -68,24 +67,24 @@ class K8sTrainer(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def algorithm_source_connection(self) -> AlgorithmSourceConnection:
+    def algorithm_source_connection(self) -> Connection:
         """Gets the algorithm_source_connection of this K8sTrainer.
 
         Connection for source code  # noqa: E501
 
         :return: The algorithm_source_connection of this K8sTrainer.
-        :rtype: AlgorithmSourceConnection
+        :rtype: Connection
         """
         return self._algorithm_source_connection
 
     @algorithm_source_connection.setter
-    def algorithm_source_connection(self, algorithm_source_connection: AlgorithmSourceConnection):
+    def algorithm_source_connection(self, algorithm_source_connection: Connection):
         """Sets the algorithm_source_connection of this K8sTrainer.
 
         Connection for source code  # noqa: E501
 
         :param algorithm_source_connection: The algorithm_source_connection of this K8sTrainer.
-        :type algorithm_source_connection: AlgorithmSourceConnection
+        :type algorithm_source_connection: Connection
         """
 
         self._algorithm_source_connection = algorithm_source_connection

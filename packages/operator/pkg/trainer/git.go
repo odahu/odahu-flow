@@ -46,7 +46,7 @@ var (
 // Return commit id
 func (mt *ModelTrainer) cloneUserRepo(
 	k8sTraining *training.K8sTrainer, cloneDir string) (string, error) {
-	vcsConn := k8sTraining.AlgorithmSourceConnection.Conn
+	vcsConn := k8sTraining.AlgorithmSourceConnection
 
 	err := ioutil.WriteFile(publicHostKeyFile, []byte(vcsConn.Spec.PublicKey), 0600)
 	if err != nil {

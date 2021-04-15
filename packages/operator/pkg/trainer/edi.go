@@ -86,12 +86,9 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 	}
 
 	return &training.K8sTrainer{
-		AlgorithmSourceConnection: &training.AlgorithmSourceConnection{
-			Conn: conn,
-			Path: modelTraining.Spec.AlgorithmSource.ObjectStorage.Path,
-		},
-		InputData:  inputData,
-		OutputConn: outputConn,
+		AlgorithmSourceConnection: conn,
+		InputData:                 inputData,
+		OutputConn:                outputConn,
 		ModelTraining: &training.ModelTraining{
 			ID:   modelTraining.ID,
 			Spec: modelTraining.Spec,

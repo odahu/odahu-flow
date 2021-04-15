@@ -30,16 +30,9 @@ type InputDataBindingDir struct {
 	DataBinding v1alpha1.ConnectionSpec `json:"dataBinding"`
 }
 
-type AlgorithmSourceConnection struct {
-	//Connection specific for Algorithm
-	Conn *connection.Connection `json:"conn"`
-	// Remote path for object storage
-	Path string `json:"path"`
-}
-
 type K8sTrainer struct {
 	// Connection for source code
-	AlgorithmSourceConnection *AlgorithmSourceConnection `json:"algorithmSourceConnection"`
+	AlgorithmSourceConnection *connection.Connection `json:"algorithmSourceConnection"`
 	// Connection for training data
 	InputData []InputDataBindingDir `json:"inputData"`
 	// Connection for trained model artifact
