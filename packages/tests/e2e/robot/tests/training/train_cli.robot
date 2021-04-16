@@ -1,13 +1,13 @@
 *** Variables ***
 ${RES_DIR}              ${CURDIR}/resources
-${LOCAL_CONFIG}         odahuflow/config_training_training_data
+${LOCAL_CONFIG}         odahuflow/config_training_training_cli
 ${TRAIN_ID}             test-algorithm-source
 ${TRAIN_STUFF_DIR}      ${CURDIR}/../../../../stuff
 
 
 *** Settings ***
 Documentation       Check training model via cli with various algorithm sources
-Test Timeout        20 minutes
+Test Timeout        60 minutes
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Variables           ../../variables.py
 Resource            ../../resources/keywords.robot
