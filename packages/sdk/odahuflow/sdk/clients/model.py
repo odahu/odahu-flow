@@ -21,6 +21,7 @@ import logging
 
 import requests
 from urllib3.exceptions import HTTPError
+from urllib.parse import urlparse
 
 import odahuflow.sdk.config
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
@@ -87,7 +88,7 @@ class ModelClient:
         """
         Build client
 
-        :param url: base url
+        :param url: model url
         :type url: str
         :param token: API token value to use (default: None)
         :type token: str
@@ -116,7 +117,7 @@ class ModelClient:
             client_id=client_id,
             client_secret=client_secret,
             non_interactive=True,
-            base_url=url,
+            base_url=self.base_url,
             token=token,
             issuer_url=issuer_url
         )
@@ -132,6 +133,15 @@ class ModelClient:
         """
         return '{host}/api/model'.format(host=self._url)
 
+    @property
+    def base_url(self):
+        """
+        Build API base URL
+
+        :return: str -- api base url
+        """
+        parsed_url = urlparse(self._url)
+        return f'{parsed_url.scheme}://{parsed_url.hostname}' if parsed_url else odahuflow.sdk.config.API_URL
 
     @property
     def info_url(self):
