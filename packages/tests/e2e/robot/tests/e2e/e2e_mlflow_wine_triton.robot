@@ -16,12 +16,13 @@ Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.model.Model
 Library             odahuflow.robot.libraries.examples_loader.ExamplesLoader  https://raw.githubusercontent.com/odahu/odahu-examples  ${EXAMPLES_VERSION}
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
-...                 Cleanup example resources  ${EXAMPLE_ID}
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  Cleanup example resources  ${EXAMPLE_ID}
 Suite Teardown      Run Keywords
-...                 Cleanup example resources  ${EXAMPLE_ID}  AND
-...                 Remove file  ${LOCAL_CONFIG}
+...                 Pass Execution If  '${NO_CLEAN_UP}' == '${True}'  Suite Teardown is not executed
+...                 AND  Cleanup example resources  ${EXAMPLE_ID}
+...                 AND  Remove file  ${LOCAL_CONFIG}
 Force Tags          e2e  wine  cli  triton
 
 *** Test Cases ***
