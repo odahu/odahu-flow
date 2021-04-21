@@ -68,8 +68,7 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
 @click.option('--base-url', type=str, help='Base model server url. Mandatory option')
 @click.option('--url-prefix', type=str, help='Url prefix of model server')
 @click.option('--jwt', type=str, default=config.API_TOKEN, help='Model jwt token')
-def info(model_route: str, model_deployment: str, url: str, url_prefix: str,
-         base_url: str, jwt: str):
+def info(model_route: str, model_deployment: str, url_prefix: str, base_url: str, jwt: str):
     """
     Get model information.
     \f
