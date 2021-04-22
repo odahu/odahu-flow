@@ -33,16 +33,16 @@ Refresh security tokens
              Should be equal  ${res.rc}  ${0}
 
 *** Test Cases ***
-Invoke. Empty jwt
-    [Documentation]  Fails if jwt is empty
+Invoke. No base url
+    [Documentation]  Fails if base url is not specified
     [Teardown]  Login to the api and edge
     # Ensure that next command will not use the config file
     Remove File  ${LOCAL_CONFIG}
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --base-url ${EDGE_URL} --jwt ""
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json
              Should not be equal  ${res.rc}  ${0}
-             Should contain       ${res.stderr}  401
+             Should contain       ${res.stderr}  Base url is required
 
 Invoke. Empty model service url
     [Documentation]  Fails if model service url is empty
