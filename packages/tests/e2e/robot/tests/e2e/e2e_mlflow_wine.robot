@@ -17,7 +17,7 @@ Suite Setup         Run Keywords
 ...                 AND  Login to the api and edge
 ...                 AND  Cleanup example resources  ${WINE_ID}
 Suite Teardown      Run Keywords
-...                 Pass Execution If  '${NO_CLEAN_UP}' == '${True}'  Suite Teardown is not executed
+...                 Pass Execution If  '${NO_CLEAN_UP}' != '${False}'  Suite Teardown is not executed
 ...                 AND  Cleanup example resources  ${WINE_ID}
 ...                 AND  Remove file  ${LOCAL_CONFIG}
 Force Tags          e2e  wine  cli
