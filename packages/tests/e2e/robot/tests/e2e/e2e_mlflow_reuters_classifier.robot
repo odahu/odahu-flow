@@ -12,14 +12,8 @@ Library             Collections
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.model.Model
 Library             odahuflow.robot.libraries.examples_loader.ExamplesLoader  https://raw.githubusercontent.com/odahu/odahu-examples  ${EXAMPLES_VERSION}
-Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
-...                 AND  Login to the api and edge
-...                 AND  Cleanup example resources  ${REUTERS_CLASSIFIER}
-Suite Teardown      Run Keywords
-...                 Pass Execution If  '${NO_CLEAN_UP}' != '${False}'  Suite Teardown is not executed
-...                 AND  Cleanup example resources  ${REUTERS_CLASSIFIER}
-...                 AND  Remove file  ${LOCAL_CONFIG}
+Suite Setup         E2E test setup  ${REUTERS_CLASSIFIER}
+Suite Teardown      E2E test teardown  ${REUTERS_CLASSIFIER}
 Force Tags          e2e  reuters-classifier  cli
 
 *** Test Cases ***
