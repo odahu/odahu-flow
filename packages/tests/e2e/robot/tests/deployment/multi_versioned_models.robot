@@ -45,14 +45,14 @@ Check default model urls
     Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL_1}  ${RES_DIR}/simple-model-1.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL_1}
 
-    StrictShell  odahuflowctl --verbose model info --base-url ${API_URL} --md ${MD_SIMPLE_MODEL_1} --jwt ${AUTH_TOKEN}
+    StrictShell  odahuflowctl --verbose model info --md ${MD_SIMPLE_MODEL_1} --jwt ${AUTH_TOKEN}
 
     Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL_2}  ${RES_DIR}/simple-model-2.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL_2}
 
-    ${res}=  StrictShell  odahuflowctl --verbose model info --base-url ${API_URL} --md ${MD_SIMPLE_MODEL_2} --jwt ${AUTH_TOKEN}
+    ${res}=  StrictShell  odahuflowctl --verbose model info --md ${MD_SIMPLE_MODEL_2} --jwt ${AUTH_TOKEN}
 
-    Shell  odahuflowctl --verbose model info --base-url ${API_URL} --md ${MD_SIMPLE_MODEL_1} --jwt ${AUTH_TOKEN}
+    Shell  odahuflowctl --verbose model info --md ${MD_SIMPLE_MODEL_1} --jwt ${AUTH_TOKEN}
 
 Invoke two models
     [Documentation]  Check that config holds model jwts separately

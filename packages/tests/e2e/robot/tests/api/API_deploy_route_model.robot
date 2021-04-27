@@ -95,14 +95,12 @@ Check by id that route exists
 
 Get info about model
     [Tags]                      model
-    ${model_url}                Get model Url  ${MODEL}
-    ${result}                   Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
+    ${result}                   Call API  model get  base_url=${EDGE_URL}  url_prefix=/model/${MODEL}  token=${AUTH_TOKEN}
     should be equal             ${result['info']['description']}  This is a EDI server.
 
 Invoke model
     [Tags]                        model
-    ${model_url}                  Get model Url  ${MODEL}
-    ${result}                     Call API  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
+    ${result}                     Call API  base_url=${EDGE_URL}  url_prefix=/model/${model_id}  token=${AUTH_TOKEN}  json_input=${REQUEST}
     ${expected response}          evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result}  ${expected response}
 
@@ -113,10 +111,9 @@ Invoke model - Custom Role
     ...         Login to the api and edge
     ...         AND  reload config
     ...         AND  StrictShell  odahuflowctl dep delete --id ${DEPLOY_CUSTOM_ROLE}
-    ${model_url}            Get model Url  ${MODEL_CUSTOM_ROLE}
-    ${result_info}          Call API  model get  url=${model_url}  token=${AUTH_TOKEN}
+    ${result_info}          Call API  model get  base_url=${EDGE_URL}  url_prefix=/model/${MODEL_CUSTOM_ROLE}  token=${AUTH_TOKEN}
     should be equal         ${result_info['info']['description']}  This is a EDI server.
-    ${result_invoke}        Call API  model post  url=${model_url}  token=${AUTH_TOKEN}  json_input=${REQUEST}
+    ${result_invoke}        Call API  model post  base_url=${EDGE_URL}  url_prefix=/model/${MODEL_CUSTOM_ROLE}  token=${AUTH_TOKEN}  json_input=${REQUEST}
     ${expected response}    evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result_invoke}  ${expected response}
 
@@ -179,24 +176,23 @@ Try Delete deleted Deployment
 #############
 Try Get info not existing Model
     [Tags]                      model  negative
-    ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
-    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}
+    Call API and get Error      ${404ModelNotFound}  model get  base_url=${EDGE_URL}  url_prefix=/model/${DEPLOYMENT_NOT_EXIST}
 
 Try Get info deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
-    Call API and get Error      ${404ModelNotFound}  model get  url=${model_url}
+    Call API and get Error      ${404ModelNotFound}  model get  base_url=${EDGE_URL}  url_prefix=/model/${DEPLOYMENT}
 
 Try Invoke not existing and deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke
-    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  json_input=${REQUEST}
+    Call API and get Error      ${404ModelNotFound}  model post  base_url=${EDGE_URL}  url_prefix=/model/${DEPLOYMENT_NOT_EXIST}  json_input=${REQUEST}
 
 Try Invoke deleted Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke
-    Call API and get Error      ${404ModelNotFound}  model post  url=${model_url}  json_input=${REQUEST}
+    Call API and get Error      ${404ModelNotFound}  model post  base_url=${EDGE_URL}  url_prefix=/model/${DEPLOYMENT}  json_input=${REQUEST}

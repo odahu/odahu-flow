@@ -165,8 +165,8 @@ Model. Status Code 403 - Forbidden - Viewer
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
 
-    model get   url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
-    model post  url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/invoke  json_input=${REQUEST}
+    model get   base_url=${EDGE_URL}  url_prefix=/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
+    model post  base_url=${EDGE_URL}  url_prefix=/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/invoke  json_input=${REQUEST}
 
 Status Code 403 - Forbidden - Custom Role
     [Template]  Try Call API - Forbidden
@@ -204,5 +204,5 @@ Model. Status Code 403 - Forbidden - Custom Role
     ...         AND  reload config
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # model
-    model get   url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
-    model post  url=${EDGE_URL}/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/invoke  json_input=${REQUEST}
+    model get   base_url=${EDGE_URL}  url_prefix=/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/info
+    model post  base_url=${EDGE_URL}  url_prefix=/model/${MODEL_DEPLOYMENT}  path_suffix=/api/model/invoke  json_input=${REQUEST}

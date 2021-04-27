@@ -74,8 +74,10 @@ class ModelClient:
     """
 
     def __init__(self,
-                 url=None,
-                 base_url=None,
+                 base_url,
+                 model_route=None,
+                 model_deployment=None,
+                 url_prefix=None,
                  token=None,
                  http_client=requests,
                  http_exception=requests.exceptions.RequestException,
@@ -86,10 +88,14 @@ class ModelClient:
         """
         Build client
 
-        :param url: model url
-        :type url: str
-        :param url: model base url
-        :type url: str
+        :param base_url: model base url
+        :type base_url: str
+        :param model_route: model route name
+        :type model_route: str
+        :param model_deployment: model deployment name
+        :type model_deployment: str
+        :param url_prefix: model url prefix
+        :type url_prefix: str
         :param token: API token value to use (default: None)
         :type token: str
         :param http_client: HTTP client (default: requests)
@@ -105,7 +111,7 @@ class ModelClient:
         :param issuer_url: url for credential login
         :type issuer_url: str
         """
-        self._url = url
+        self._url = calculate_url(base_url, model_route, model_deployment, url_prefix)
         self._base_url = base_url
         self._http_client = http_client
         self._http_exception = http_exception
@@ -123,7 +129,7 @@ class ModelClient:
             issuer_url=issuer_url
         )
 
-        LOGGER.debug('Model client params: %s, %s, %s, %s, %s', url, token, http_client, http_exception, timeout)
+        LOGGER.debug('Model client params: %s, %s, %s, %s, %s', self._url, token, http_client, http_exception, timeout)
 
     @property
     def api_url(self):

@@ -44,7 +44,7 @@ Update model deployment
     Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL}
 
-    ${res}=  StrictShell  odahuflowctl --verbose model invoke --base-url ${API_URL} --md ${MD_SIMPLE_MODEL} --json '{"columns": ["a","b"],"data": [[1.0,2.0]]}'
+    ${res}=  StrictShell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json '{"columns": ["a","b"],"data": [[1.0,2.0]]}'
     ${actual_response}=    Evaluate     json.loads("""${res.stdout}""")    json
     ${expected_response}=   evaluate  {'prediction': [[42]], 'columns': ['result']}
     Dictionaries Should Be Equal    ${actual_response}    ${expected_response}
@@ -53,7 +53,7 @@ Update model deployment
     Check model started  ${MD_SIMPLE_MODEL}
 
     # Check new REST API
-    ${res}=  StrictShell  odahuflowctl --verbose model invoke --base-url ${API_URL} --md ${MD_SIMPLE_MODEL} --json '{"columns": ["a","b"],"data": [[1.0,2.0]]}'
+    ${res}=  StrictShell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json '{"columns": ["a","b"],"data": [[1.0,2.0]]}'
     ${actual_response}=    Evaluate     json.loads("""${res.stdout}""")    json
     ${expected_response}=   evaluate  {'prediction': [[1]], 'columns': ['result']}
     Dictionaries Should Be Equal    ${actual_response}    ${expected_response}

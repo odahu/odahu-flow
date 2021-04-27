@@ -22,7 +22,7 @@ import click
 
 from odahuflow.cli.utils import click_utils
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.model import ModelClient, calculate_url
+from odahuflow.sdk.clients.model import ModelClient
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
@@ -34,9 +34,10 @@ def model():
 
 
 @model.command()
-@click.option('--model-route', '--mr', type=str, help='Name of Model Route')
-@click.option('--model-deployment', '--md', type=str, help='Name of Model Deployment')
-@click.option('--base-url', type=str, help='Base model server url. Mandatory option')
+@click.option('--model-route', '--mr', default=config.MODEL_ROUTE_NAME, type=str, help='Name of Model Route')
+@click.option('--model-deployment', '--md', default=config.MODEL_DEPLOYMENT_NAME, type=str,
+              help='Name of Model Deployment')
+@click.option('--base-url', default=config.API_URL, type=str, help='Base model server url')
 @click.option('--url-prefix', type=str, help='Url prefix of model server')
 @click.option('--jwt', type=str, default=config.API_TOKEN, help='Model jwt token')
 @click.option('--json', 'json_input', type=str, help='Json parameter. For example: --json {"x": 2}')
@@ -54,7 +55,7 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
         with open(json_file) as f:
             json_input = f.read()
 
-    client = ModelClient(calculate_url(base_url, model_route, model_deployment, url_prefix), base_url, jwt)
+    client = ModelClient(base_url, model_route, model_deployment, url_prefix, jwt)
 
     result = client.invoke(**json.loads(json_input))
 
@@ -65,7 +66,7 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
 @click.option('--model-route', '--mr', default=config.MODEL_ROUTE_NAME, type=str, help='Name of Model Route')
 @click.option('--model-deployment', '--md', default=config.MODEL_DEPLOYMENT_NAME, type=str,
               help='Name of Model Deployment')
-@click.option('--base-url', type=str, help='Base model server url. Mandatory option')
+@click.option('--base-url', default=config.API_URL, type=str, help='Base model server url')
 @click.option('--url-prefix', type=str, help='Url prefix of model server')
 @click.option('--jwt', type=str, default=config.API_TOKEN, help='Model jwt token')
 def info(model_route: str, model_deployment: str, url_prefix: str, base_url: str, jwt: str):
@@ -74,7 +75,7 @@ def info(model_route: str, model_deployment: str, url_prefix: str, base_url: str
     \f
     :param client: Model HTTP Client
     """
-    client = ModelClient(calculate_url(base_url, model_route, model_deployment, url_prefix), base_url, jwt)
+    client = ModelClient(base_url, model_route, model_deployment, url_prefix, jwt)
 
     result = client.info()
 

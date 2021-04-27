@@ -65,7 +65,7 @@ Run API undeploy model and check
 Check model started
     [Documentation]  check if model run in container by http request
     [Arguments]           ${md_name}
-    ${resp}=              Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl --verbose model info --base-url ${API_URL} --md ${md_name}
+    ${resp}=              Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl --verbose model info --md ${md_name}
     Log                   ${resp.stdout}
 
 Verify model info from api
@@ -141,10 +141,10 @@ Run example model
     StrictShell  odahuflowctl --verbose dep create -f ${manifests_dir}/deployment.odahuflow.yaml --image ${res.stdout} --id ${example_id}
     report model deployment pods  ${example_id}
 
-    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --base-url ${API_URL} --md ${example_id}
-    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --base-url ${API_URL} --md ${example_id} --json-file ${manifests_dir}/request.json
+    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --md ${example_id}
+    Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json
 
-    ${res}=  Shell  odahuflowctl model invoke --base-url ${API_URL} --md ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
+    ${res}=  Shell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
     should not be equal  ${res.rc}  0
 
     # --------- LOCAL COMMAND SECTION -----------
