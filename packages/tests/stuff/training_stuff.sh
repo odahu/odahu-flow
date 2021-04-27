@@ -210,6 +210,18 @@ function upload_test_dags() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
+function upload_test_algorithm() {
+  git_url="https://github.com/odahu/odahu-examples.git"
+  algorithm_code_path=("mlflow/sklearn/wine/")
+  tmp_odahu_example_dir=$(mktemp -d -t upload-test-algorithm-XXXXXXXXXX)
+
+  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
+
+  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/test_algorithm/wine/"
+
+  rm -rf "${tmp_odahu_example_dir}"
+}
+
 # Prepare for batch e2e test
 function setup_batch_examples() {
   local git_url="https://github.com/odahu/odahu-examples.git"
@@ -358,6 +370,7 @@ function setup() {
 
   local_setup
   setup_batch_examples
+  upload_test_algorithm
 }
 
 # Main entrypoint for cleanup command.

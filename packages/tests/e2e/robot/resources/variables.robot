@@ -71,7 +71,7 @@ ${PI_empty_defaultImage}        empty defaultImage
 # ---------------------------------  training  ---------------------------------
 ${empty_model_name}             empty model.name
 ${empty_model_version}          empty model.version
-${empty_VCS}                    empty vcsName
+${empty_VCS_and_sorage}         both VCS and ObjectStorage names are empty
 ${empty_toolchain}              empty toolchain parameter
 # ---------------------------------  packaging  ---------------------------------
 ${empty_artifactName}           empty artifactName

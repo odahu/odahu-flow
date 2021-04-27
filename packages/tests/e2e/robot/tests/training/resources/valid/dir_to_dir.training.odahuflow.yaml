@@ -15,9 +15,11 @@ spec:
     target-model-location: "odahuflow_model"
   data:
     # Connection name from TEST_DATA_DIR_CONNECTION_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
-    - connName: test-valid-gppi-dir
+    - connection: test-valid-gppi-dir
       localPath: local/
-  vcsName: odahu-flow-examples
+  algorithmSource:
+    vcs:
+      connection: odahu-flow-examples
   resources:
     limits:
       memory: 1024Mi

@@ -31,17 +31,6 @@ FailedShell
               Should Not Be Equal  ${res.rc}  ${0}
     [Return]  ${res}
 
-Build model
-    [Arguments]  ${mt_name}  ${model_name}  ${model_version}  ${model_image_key_name}=\${TEST_MODEL_IMAGE}  ${entrypoint}=simple.py  ${kwargs}=&{EMPTY}
-
-    ${args}=  prepare stub args  ${kwargs}
-    StrictShell  odahuflowctl --verbose mt delete ${mt_name} --ignore-not-found
-    StrictShell  odahuflowctl --verbose mt create ${mt_name} --toolchain-type python --vcs ${TEST_VCS} --workdir odahuflow/tests/e2e/models --entrypoint=${entrypoint} -a '--name ${model_name} --version ${model_version} ${args}'
-
-    ${mt}=  get model training  ${mt_name}
-
-    Set Suite Variable  ${model_image_key_name}  ${mt.trained_image}
-
     # --------- DEPLOY COMMAND SECTION -----------
 
 Run API deploy from model packaging

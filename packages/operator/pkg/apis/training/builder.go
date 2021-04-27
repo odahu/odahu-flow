@@ -32,7 +32,7 @@ type InputDataBindingDir struct {
 
 type K8sTrainer struct {
 	// Connection for source code
-	VCS *connection.Connection `json:"vcs"`
+	AlgorithmSourceConnection *connection.Connection `json:"algorithmSourceConnection"`
 	// Connection for training data
 	InputData []InputDataBindingDir `json:"inputData"`
 	// Connection for trained model artifact

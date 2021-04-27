@@ -85,7 +85,8 @@ definitions:
         description: Message is any message from runtime service about status of InferenceJob
         type: string
       podName:
-        description: PodName is a name of Pod in Kubernetes that is running under the hood of InferenceJob
+        description: PodName is a name of Pod in Kubernetes that is running under
+          the hood of InferenceJob
         type: string
       reason:
         description: |-
@@ -99,7 +100,8 @@ definitions:
   InferenceService:
     properties:
       createdAt:
-        description: When resource was created. Managed by system. Cannot be overridden by User
+        description: When resource was created. Managed by system. Cannot be overridden
+          by User
         type: string
       id:
         type: string
@@ -110,7 +112,8 @@ definitions:
         $ref: '#/definitions/InferenceServiceStatus'
         type: object
       updatedAt:
-        description: When resource was updated. Managed by system. Cannot be overridden by User
+        description: When resource was updated. Managed by system. Cannot be overridden
+          by User
         type: string
     type: object
   InferenceServiceSpec:
@@ -186,13 +189,15 @@ definitions:
     properties:
       webhook:
         $ref: '#/definitions/PredictorWebhookTrigger'
-        description: Webhook provides a REST API to execute InferenceJob that correspond to this service
+        description: Webhook provides a REST API to execute InferenceJob that correspond
+          to this service
         type: object
     type: object
   PredictorWebhookTrigger:
     properties:
       enabled:
-        description: Enabled. If True then it possible to run InferenceJob by creating it using REST API
+        description: Enabled. If True then it possible to run InferenceJob by creating
+          it using REST API
         type: boolean
     type: object
   APIBackendConfig:
@@ -247,7 +252,8 @@ definitions:
         description: Enable batch API/operator
         type: boolean
       namespace:
-        description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created
+        description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob
+          will be created
         type: string
       nodePools:
         description: Node pools to run batch jobs
@@ -258,7 +264,8 @@ definitions:
         description: RClone image that will be used to sync data with object storage
         type: string
       serviceAccountName:
-        description: Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun
+        description: Specifies a ServiceAccount object that provides custom credentials
+          for executing the TaskRun
         type: string
       timeout:
         description: Timeout for full batch process
@@ -286,7 +293,8 @@ definitions:
         description: Database connection string
         type: string
       externalUrls:
-        description: 'The collection of external urls, for example: metrics, edge, service catalog and so on'
+        description: 'The collection of external urls, for example: metrics, edge,
+          service catalog and so on'
         items:
           $ref: '#/definitions/ExternalUrl'
         type: array
@@ -375,7 +383,8 @@ definitions:
   ExternalUrl:
     properties:
       imageUrl:
-        description: Optional link to an image which represents a type of the resource, for example the logo of Grafana
+        description: Optional link to an image which represents a type of the resource,
+          for example the logo of Grafana
         type: string
       name:
         description: Human-readable name
@@ -399,7 +408,8 @@ definitions:
   ModelDeploymentConfig:
     properties:
       defaultDockerPullConnName:
-        description: Default connection ID which will be used if a user doesn't specify it in a model deployment
+        description: Default connection ID which will be used if a user doesn't specify
+          it in a model deployment
         type: string
       defaultResources:
         $ref: '#/definitions/ResourceRequirements'
@@ -578,19 +588,24 @@ definitions:
         description: BaseURL is a prefix to service catalog web server endpoints
         type: string
       debug:
-        description: 'enabled Debug increase logger verbosity and format. Default: false'
+        description: 'enabled Debug increase logger verbosity and format. Default:
+          false'
         type: boolean
       edgeHost:
-        description: ServiceCatalog set EdgeHost as Host header in requests to ML servers
+        description: ServiceCatalog set EdgeHost as Host header in requests to ML
+          servers
         type: string
       edgeURL:
-        description: ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
+        description: ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute
+          prefix to EdgeURL path
         type: string
       fetchTimeout:
-        description: FetchTimeout configures how often new events will be fetched. Default 5 seconds.
+        description: FetchTimeout configures how often new events will be fetched.
+          Default 5 seconds.
         type: integer
       workersCount:
-        description: 'WorkersCount configures how many workers will process events. Default: 4'
+        description: 'WorkersCount configures how many workers will process events.
+          Default: 4'
         type: integer
     type: object
   TrainerConfig:
@@ -832,13 +847,15 @@ definitions:
     properties:
       arguments:
         additionalProperties: true
-        description: List of arguments. This parameter depends on the specific packaging integration
+        description: List of arguments. This parameter depends on the specific packaging
+          integration
         type: object
       artifactName:
         description: Training output artifact name
         type: string
       image:
-        description: Image name. Packaging integration image will be used if this parameters is missed
+        description: Image name. Packaging integration image will be used if this
+          parameters is missed
         type: string
       integrationName:
         description: Packaging integration ID
@@ -860,7 +877,8 @@ definitions:
           The same format like k8s uses for pod resources.
         type: object
       targets:
-        description: List of targets. This parameter depends on the specific packaging integration
+        description: List of targets. This parameter depends on the specific packaging
+          integration
         items:
           $ref: '#/definitions/Target'
         type: array
@@ -902,7 +920,8 @@ definitions:
         type: boolean
       schema:
         $ref: '#/definitions/Schema'
-        description: Schema which describes targets and arguments for specific packaging integration
+        description: Schema which describes targets and arguments for specific packaging
+          integration
         type: object
     type: object
   Parameter:
@@ -952,6 +971,10 @@ definitions:
     type: object
   K8sTrainer:
     properties:
+      algorithmSourceConnection:
+        $ref: '#/definitions/Connection'
+        description: Connection for source code
+        type: object
       inputData:
         description: Connection for training data
         items:
@@ -968,10 +991,6 @@ definitions:
       toolchainIntegration:
         $ref: '#/definitions/ToolchainIntegration'
         description: Toolchain integration
-        type: object
-      vcs:
-        $ref: '#/definitions/Connection'
-        description: Connection for source code
         type: object
     type: object
   ModelTraining:
@@ -1014,6 +1033,15 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  AlgorithmSource:
+    properties:
+      objectStorage:
+        $ref: '#/definitions/ObjectStorage'
+        type: object
+      vcs:
+        $ref: '#/definitions/VCS'
+        type: object
     type: object
   ConnectionSpec:
     properties:
@@ -1075,7 +1103,7 @@ definitions:
     type: object
   DataBindingDir:
     properties:
-      connName:
+      connection:
         description: Connection name for data
         type: string
       localPath:
@@ -1114,16 +1142,19 @@ definitions:
         description: Model Docker image
         type: string
       imagePullConnID:
-        description: If pulling of your image requires authorization, then you should specify the connection id
+        description: If pulling of your image requires authorization, then you should
+          specify the connection id
         type: string
       livenessProbeInitialDelay:
         description: Initial delay for liveness probe of model pod
         type: integer
       maxReplicas:
-        description: Maximum number of pods for model. By default the max replicas parameter equals 1.
+        description: Maximum number of pods for model. By default the max replicas
+          parameter equals 1.
         type: integer
       minReplicas:
-        description: Minimum number of pods for model. By default the min replicas parameter equals 0.
+        description: Minimum number of pods for model. By default the min replicas
+          parameter equals 0.
         type: integer
       nodeSelector:
         additionalProperties:
@@ -1215,7 +1246,8 @@ definitions:
   ModelPackagingResult:
     properties:
       name:
-        description: Name of a result. It can be docker image, path to s3 artifact and so on
+        description: Name of a result. It can be docker image, path to s3 artifact
+          and so on
         type: string
       value:
         description: Specific value
@@ -1293,6 +1325,10 @@ definitions:
     type: object
   ModelTrainingSpec:
     properties:
+      algorithmSource:
+        $ref: '#/definitions/AlgorithmSource'
+        description: AlgorithmSource for training
+        type: object
       args:
         items:
           type: string
@@ -1303,10 +1339,12 @@ definitions:
           $ref: '#/definitions/DataBindingDir'
         type: array
       entrypoint:
-        description: Model training file. It can be python\bash script or jupiter notebook
+        description: Model training file. It can be python\bash script or jupiter
+          notebook
         type: string
       envs:
-        description: Custom environment variables that should be set before entrypoint invocation.
+        description: Custom environment variables that should be set before entrypoint
+          invocation.
         items:
           $ref: '#/definitions/EnvironmentVariable'
         type: array
@@ -1332,9 +1370,6 @@ definitions:
           Name of Connection to storage where training output artifact will be stored.
           Permitted connection types are defined by specific toolchain
         type: string
-      reference:
-        description: VCS Reference
-        type: string
       resources:
         $ref: '#/definitions/ResourceRequirements'
         description: |-
@@ -1343,9 +1378,6 @@ definitions:
         type: object
       toolchain:
         description: IntegrationName of toolchain
-        type: string
-      vcsName:
-        description: Name of Connection resource. Must exists
         type: string
       workDir:
         description: Directory with model scripts/files in a git repository
@@ -1376,6 +1408,15 @@ definitions:
         description: Model Packaging State
         type: string
       updatedAt:
+        type: string
+    type: object
+  ObjectStorage:
+    properties:
+      connection:
+        description: Connection name for training model source
+        type: string
+      path:
+        description: Remote path in ObjectStorage
         type: string
     type: object
   PackagingIntegrationStatus:
@@ -1468,6 +1509,15 @@ definitions:
         type: string
       runId:
         description: Mlflow run ID
+        type: string
+    type: object
+  VCS:
+    properties:
+      connection:
+        description: Connection name for training model source
+        type: string
+      reference:
+        description: VCS Reference
         type: string
     type: object
 info:
