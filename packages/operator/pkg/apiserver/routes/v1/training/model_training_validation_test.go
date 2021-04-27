@@ -447,6 +447,16 @@ func (s *ModelTrainingValidationSuite) TestMtGenerationOutputArtifactName() {
 	s.g.Expect(mt.Spec.Model.ArtifactNameTemplate).ShouldNot(BeEmpty())
 }
 
+func (s *ModelTrainingValidationSuite) TestMtEmptyData() {
+	mt := &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{},
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring(train_route.EmptyDataErrorMessage))
+}
+
 func (s *ModelTrainingValidationSuite) TestMtWrongDataType() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{

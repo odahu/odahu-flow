@@ -72,6 +72,7 @@ ${PI_empty_defaultImage}        empty defaultImage
 ${empty_model_name}             empty model.name
 ${empty_model_version}          empty model.version
 ${empty_VCS_and_sorage}         both VCS and ObjectStorage names are empty
+${empty_data_bindings}          you should specify at least one data binding
 ${empty_toolchain}              empty toolchain parameter
 # ---------------------------------  packaging  ---------------------------------
 ${empty_artifactName}           empty artifactName
