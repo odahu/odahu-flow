@@ -37,18 +37,16 @@ def run(*args: str, cwd=None, stream_output: bool = True):
 
     cmd_env = os.environ.copy()
     if stream_output:
-        child = subprocess.Popen(args, env=cmd_env, cwd=cwd, universal_newlines=True,
-                                 stdin=subprocess.PIPE)
-        exit_code = child.wait()
+        with subprocess.Popen(args, env=cmd_env, cwd=cwd, universal_newlines=True, stdin=subprocess.PIPE) as child:
+            exit_code = child.wait()
         if exit_code != 0:
             raise Exception("Non-zero exitcode: %s" % exit_code)
         return exit_code
     else:
-        child = subprocess.Popen(
-            args, env=cmd_env, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
-            cwd=cwd, universal_newlines=True)
-        (stdout, stderr) = child.communicate()
-        exit_code = child.wait()
+        with subprocess.Popen(args, env=cmd_env, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                              stderr=subprocess.PIPE, cwd=cwd, universal_newlines=True) as child:
+            stdout, stderr = child.communicate()
+            exit_code = child.wait()
         if exit_code != 0:
             raise Exception("Non-zero exit code: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======" %
                             (exit_code, stdout, stderr))
