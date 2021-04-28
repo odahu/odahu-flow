@@ -176,6 +176,7 @@ Try Delete deleted Deployment
 #############
 Try Get info not existing Model
     [Tags]                      model  negative
+    ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
     Call API and get Error      ${404ModelNotFound}  model get  base_url=${EDGE_URL}  url_prefix=/model/${DEPLOYMENT_NOT_EXIST}
 

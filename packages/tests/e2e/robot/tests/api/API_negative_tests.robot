@@ -53,7 +53,7 @@ Try Call API - Forbidden
 
 Try Call API - Forbidden.Model
     [Arguments]  ${command}  &{kwargs}
-    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY}  url=${kwargs.get("url")}${kwargs.pop("path_suffix")}
+    ${403 Forbidden}  format string  ${Model WrongStatusCode Template}  status code=403  data=${EMPTY}  url=${kwargs.get("base_url")}${kwargs.get("url_prefix")}${kwargs.pop("path_suffix")}
     Call API and get Error  ${403 Forbidden}  ${command}  &{kwargs}
 
 *** Test Cases ***
