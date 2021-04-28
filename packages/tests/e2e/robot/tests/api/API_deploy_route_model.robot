@@ -100,7 +100,7 @@ Get info about model
 
 Invoke model
     [Tags]                        model
-    ${result}                     Call API  base_url=${EDGE_URL}  url_prefix=/model/${MODEL}  token=${AUTH_TOKEN}  json_input=${REQUEST}
+    ${result}                     Call API  model post  base_url=${EDGE_URL}  url_prefix=/model/${MODEL}  token=${AUTH_TOKEN}  json_input=${REQUEST}
     ${expected response}          evaluate  ${REQUEST_RESPONSE}
     dictionaries should be equal  ${result}  ${expected response}
 
