@@ -27,7 +27,7 @@ import (
 
 const (
 	EmptySpecFieldErrorMessage = "%s must be non-empty"
-	IDLengthExceeded           = "ID length must be less oe equal to %d"
+	IDLengthExceeded           = "ID length must be less or equal to %d"
 )
 
 func validateRequiredFields(bis api_types.InferenceService) (err error) {
