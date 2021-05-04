@@ -568,7 +568,9 @@ config:
     # Node pools to run batch jobs
     nodePools: []
     # RClone image that will be used to sync data with object storage
-    rcloneImage: rclone/rclone
+    # This version is pinned because later versions seems to have an issue with rclone sync/copy a directory
+    # with multiple files: https://github.com/odahu/odahu-flow/issues/557
+    rcloneImage: rclone/rclone:1.51.0
     # Tools image
     toolsImage:
 

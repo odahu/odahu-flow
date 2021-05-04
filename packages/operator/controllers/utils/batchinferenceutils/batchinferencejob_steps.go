@@ -25,9 +25,9 @@ import (
 )
 
 const (
-	pathToOdahuToolsBin = "/opt/odahu-flow/odahu-tools"
-	toolsConfigVolume = "config"
-	workspacePath     = "/workspace"
+	pathToOdahuToolsBin   = "/opt/odahu-flow/odahu-tools"
+	toolsConfigVolume     = "config"
+	workspacePath         = "/workspace"
 	odahuModelPathEnvName = "ODAHU_MODEL_PATH"
 )
 
@@ -45,22 +45,22 @@ const (
 
 var (
 	toolsConfigVM = corev1.VolumeMount{
-		Name: toolsConfigVolume,
-		ReadOnly:         true,
-		MountPath:        path.Join(XDGConfigHome, "odahu", ".odahu-tools.yaml"),
-		SubPath:          ".odahu-tools.yaml",
+		Name:      toolsConfigVolume,
+		ReadOnly:  true,
+		MountPath: path.Join(XDGConfigHome, "odahu", ".odahu-tools.yaml"),
+		SubPath:   ".odahu-tools.yaml",
 	}
 )
 
 // paths
 var (
-	XDGConfigHome   = path.Join(workspacePath, "config")
+	XDGConfigHome = path.Join(workspacePath, "config")
 	// Dir where raw data should be synced
-	rawInputPath    = path.Join(workspacePath, "odahu-ws-raw-input")
+	rawInputPath = path.Join(workspacePath, "odahu-ws-raw-input")
 	// Dir where raw data should be copied after validation
-	odahuInputPath       = path.Join(workspacePath, "odahu-ws-input")
+	odahuInputPath = path.Join(workspacePath, "odahu-ws-input")
 	// Dir where raw model should be copied after validation and unzip
-	odahuModelPath  = path.Join(workspacePath, "odahu-ws-model")
+	odahuModelPath = path.Join(workspacePath, "odahu-ws-model")
 	// Dir where raw user output is expected
 	odahuRawOutputPath = path.Join(workspacePath, "odahu-ws-raw-output")
 	// Dir where raw user output is copied after validation
@@ -109,7 +109,7 @@ func GetConfigureRCloneStep(image string, res corev1.ResourceRequirements, conns
 			Args:         args,
 			Env:          []corev1.EnvVar{XDGConfigHomeEnv, ToolsConfigPathEnv},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
-			Resources: res,
+			Resources:    res,
 		},
 	}
 }
@@ -123,7 +123,7 @@ func GetSyncDataStep(
 	bucketName string,
 	inputPath string,
 	res corev1.ResourceRequirements,
-	) tektonv1beta1.Step {
+) tektonv1beta1.Step {
 	sourcePrefix := fmt.Sprintf("%s:%s", rcloneConfigName, bucketName)
 	source := path.Join(sourcePrefix, inputPath)
 	return tektonv1beta1.Step{
@@ -141,20 +141,20 @@ func GetSyncDataStep(
 // GetSyncModelStep return step that
 // syncs model from s3/gcs/azureblob bucket to workspace
 func GetObjectStorageModelSyncStep(image string, connName string,
-	modelPath string, res corev1.ResourceRequirements, ) tektonv1beta1.Step {
+	modelPath string, res corev1.ResourceRequirements) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:      StepSyncModel,
-			Image:     image,
-			Command:   []string{pathToOdahuToolsBin},
-			Args:      []string{
+			Name:    StepSyncModel,
+			Image:   image,
+			Command: []string{pathToOdahuToolsBin},
+			Args: []string{
 				"registry", "object-storage", "sync",
 				"--conn", connName,
 				"--remotePath", modelPath,
 				"--localPath", odahuModelPath},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
-			Env:       []corev1.EnvVar{ToolsConfigPathEnv},
-			Resources: res,
+			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
+			Resources:    res,
 		},
 	}
 }
@@ -182,10 +182,10 @@ func GetLogInputStep(image string, requestID string, res corev1.ResourceRequirem
 	modelName string, modelVersion string) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         StepLogInput,
-			Image:        image,
-			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "input", odahuInputPath,
+			Name:    StepLogInput,
+			Image:   image,
+			Command: []string{pathToOdahuToolsBin},
+			Args: []string{"batch", "log", "input", odahuInputPath,
 				"-m", modelName, "--version", modelVersion, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
@@ -206,12 +206,11 @@ func GetUserContainer(
 			Command:      command,
 			Args:         args,
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
-			Env: []corev1.EnvVar{OdahuInputPathEnv, OdahuOutputPathEnv, odahuModelPathEnv},
-			Resources: res,
+			Env:          []corev1.EnvVar{OdahuInputPathEnv, OdahuOutputPathEnv, odahuModelPathEnv},
+			Resources:    res,
 		},
 	}
 }
-
 
 // GetValidateOutputStep return step that
 // validates raw output according kubeflow prediction api (version 2) InferenceResponse object.
@@ -225,7 +224,7 @@ func GetValidateOutputStep(image string, res corev1.ResourceRequirements) tekton
 			Args:         []string{"batch", "validate", "output", "-s", odahuRawOutputPath, "-d", outputPath},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
-			Resources: res,
+			Resources:    res,
 		},
 	}
 }
@@ -236,14 +235,14 @@ func GetLogOutputStep(image string, requestID string, res corev1.ResourceRequire
 	modelName string, modelVersion string) tektonv1beta1.Step {
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         StepLogOutput,
-			Image:        image,
-			Command:      []string{pathToOdahuToolsBin},
-			Args:         []string{"batch", "log", "output", outputPath,
+			Name:    StepLogOutput,
+			Image:   image,
+			Command: []string{pathToOdahuToolsBin},
+			Args: []string{"batch", "log", "output", outputPath,
 				"-m", modelName, "--version", modelVersion, "-r", requestID},
 			VolumeMounts: []corev1.VolumeMount{toolsConfigVM},
 			Env:          []corev1.EnvVar{ToolsConfigPathEnv},
-			Resources: res,
+			Resources:    res,
 		},
 	}
 }
@@ -261,11 +260,11 @@ func GetSyncOutputStep(
 	dest := path.Join(prefix, remoteOutputPath)
 	return tektonv1beta1.Step{
 		Container: corev1.Container{
-			Name:         StepSyncOutput,
-			Image:        rcloneImage,
-			Command:      []string{"rclone"},
-			Args:         []string{"sync", "-P", outputPath, dest},
-			Env:          []corev1.EnvVar{XDGConfigHomeEnv},
+			Name:      StepSyncOutput,
+			Image:     rcloneImage,
+			Command:   []string{"rclone"},
+			Args:      []string{"copy", "-v", "-v", outputPath, dest},
+			Env:       []corev1.EnvVar{XDGConfigHomeEnv},
 			Resources: res,
 		},
 	}
