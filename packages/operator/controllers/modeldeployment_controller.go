@@ -28,8 +28,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/http"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
-	"go.uber.org/zap"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
+	"go.uber.org/zap"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -165,7 +165,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			deploymentIDLabel:       modelDeploymentCR.Name,
 			OdahuAuthorizationLabel: "enabled",
 		}
-		if modelDeploymentCR.Spec.RoleName != nil {  // Otherwise default ConfigMap will be mounted to container
+		if modelDeploymentCR.Spec.RoleName != nil { // Otherwise default ConfigMap will be mounted to container
 			templateLabelsToAdd[podPolicyLabel] = GetCMPolicyName(modelDeploymentCR)
 		}
 		templateAnnotationsToAdd := map[string]string{
@@ -270,7 +270,6 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 	newPolicyHash := modelDeploymentCR.Annotations[AppliedPolicyHashKey]
 	policyIsChanged := newPolicyHash != oldPolicyHash
 
-
 	if depSpecChanged || policyIsChanged {
 		if policyIsChanged {
 			log.Info("Policy hash was changed",
@@ -279,7 +278,7 @@ func (r *ModelDeploymentReconciler) ReconcileKnativeService(
 			)
 		}
 		if depSpecChanged {
-			log.Info("ModelDeployment spec was changed","old", lastAppliedMDSpec,
+			log.Info("ModelDeployment spec was changed", "old", lastAppliedMDSpec,
 				"new", modelDeploymentCR.Spec)
 		}
 
@@ -378,7 +377,7 @@ func (r *ModelDeploymentReconciler) reconcilePolicyCM(log *zap.SugaredLogger,
 		// We should delete custom policy if roleName is not set
 		cm := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:     GetCMPolicyName(modelDeploymentCR),
+				Name:      GetCMPolicyName(modelDeploymentCR),
 				Namespace: r.deploymentConfig.Namespace,
 			},
 		}
@@ -457,6 +456,10 @@ func (r *ModelDeploymentReconciler) reconcileModelMeta(log *zap.SugaredLogger,
 	modelDeploymentCR.Status.ModelName = servedModel.Metadata.ModelName
 	modelDeploymentCR.Status.ModelVersion = servedModel.Metadata.ModelVersion
 	return nil
+}
+
+func (r *ModelDeploymentReconciler) modelMetaIsSet(modelDeployment *odahuflowv1alpha1.ModelDeployment) bool {
+	return len(modelDeployment.Status.ModelName) > 0 && len(modelDeployment.Status.ModelVersion) > 0
 }
 
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
@@ -589,13 +592,18 @@ func (r *ModelDeploymentReconciler) Reconcile(request ctrl.Request) (ctrl.Result
 		return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
 	}
 
-	log.Info("Inspecting model metadata...")
-	if modelDeploymentCR.Status.AvailableReplicas > 0 {
-		err = r.reconcileModelMeta(log, modelDeploymentCR)
-		if err != nil {
-			log.Errorw("failed to inspect model", "error", err)
-			_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing)
-			return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
+	if !r.modelMetaIsSet(modelDeploymentCR) {
+		if modelDeploymentCR.Status.AvailableReplicas == 0 {
+			log.Warn("Failed to inspect model meta, 0 available replicas")
+		} else {
+			log.Info("Inspecting model metadata...")
+			err = r.reconcileModelMeta(log, modelDeploymentCR)
+
+			if err != nil {
+				log.Errorw("failed to inspect model", "error", err)
+				_ = r.reconcileStatus(log, modelDeploymentCR, odahuflowv1alpha1.ModelDeploymentStateProcessing)
+				return reconcile.Result{RequeueAfter: DefaultRequeueDelay}, nil
+			}
 		}
 	}
 
