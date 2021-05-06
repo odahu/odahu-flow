@@ -23,7 +23,7 @@ spec:
   # The training data for a ML script.
   data:
       # You can specify a connection name
-      - connName: wine
+      - connection: wine
         # Local path with file or dir
         localPath: mlflow/wine-quality/
         # Path to the dir or file in a bucket
@@ -49,5 +49,8 @@ spec:
     - name: TEST_ENV_KEY
       # The value of variable
       value: TEST_ENV_VALUE
-  # You can find list of all available connections on the left sidebar. You should specify one with git type
-  vcsName: <git-connection>
+  # You can find list of all available connections on the left sidebar. You should specify only one: with git type or
+  # with storage type
+  algorithmSource:
+    vcs: <git-connection>
+    objectStorage: <storage-connection>

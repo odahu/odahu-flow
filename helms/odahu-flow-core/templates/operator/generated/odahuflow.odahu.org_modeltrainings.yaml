@@ -15,8 +15,8 @@ spec:
   - JSONPath: .spec.toolchain
     name: Toolchain
     type: string
-  - JSONPath: .spec.vcsName
-    name: VCS name
+  - JSONPath: .spec.algorithmSource
+    name: Algorithm source
     type: string
   - JSONPath: .spec.model.name
     name: Model name
@@ -56,6 +56,28 @@ spec:
         spec:
           description: ModelTrainingSpec defines the desired state of ModelTraining
           properties:
+            algorithmSource:
+              description: AlgorithmSource for training
+              properties:
+                objectStorage:
+                  properties:
+                    connection:
+                      description: Connection name for training model source
+                      type: string
+                    path:
+                      description: Remote path in ObjectStorage
+                      type: string
+                  type: object
+                vcs:
+                  properties:
+                    connection:
+                      description: Connection name for training model source
+                      type: string
+                    reference:
+                      description: VCS Reference
+                      type: string
+                  type: object
+              type: object
             args:
               items:
                 type: string
@@ -64,7 +86,7 @@ spec:
               description: Input data for a training
               items:
                 properties:
-                  connName:
+                  connection:
                     description: Connection name for data
                     type: string
                   localPath:
@@ -74,7 +96,7 @@ spec:
                     description: Overwrite remote data path in connection
                     type: string
                 required:
-                - connName
+                - connection
                 - localPath
                 type: object
               type: array
@@ -132,9 +154,6 @@ spec:
                 will be stored. Permitted connection types are defined by specific
                 toolchain
               type: string
-            reference:
-              description: VCS Reference
-              type: string
             resources:
               description: Resources for model container The same format like k8s
                 uses for pod resources.
@@ -171,17 +190,14 @@ spec:
             toolchain:
               description: IntegrationName of toolchain
               type: string
-            vcsName:
-              description: Name of Connection resource. Must exists
-              type: string
             workDir:
               description: Directory with model scripts/files in a git repository
               type: string
           required:
+          - algorithmSource
           - entrypoint
           - model
           - toolchain
-          - vcsName
           type: object
         status:
           description: ModelTrainingStatus defines the observed state of ModelTraining

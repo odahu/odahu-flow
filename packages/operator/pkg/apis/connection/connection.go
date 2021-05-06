@@ -37,6 +37,11 @@ var (
 		S3Type, GcsType, AzureBlobType, GITType, DockerType, EcrType,
 	}
 	AllConnectionTypesSet = map[v1alpha1.ConnectionType]interface{}{}
+	ObjectStorageTypesSet = map[v1alpha1.ConnectionType]bool{
+		GcsType:       true,
+		S3Type:        true,
+		AzureBlobType: true,
+	}
 )
 
 func init() {

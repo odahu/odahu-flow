@@ -19,7 +19,6 @@ package training
 import (
 	"errors"
 	"fmt"
-	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
@@ -32,27 +31,26 @@ import (
 )
 
 const (
-	MtVcsNotExistsErrorMessage       = "cannot find VCS Connection"
-	EmptyModelNameErrorMessage       = "empty model.name"
-	EmptyModelVersionErrorMessage    = "empty model.version"
-	EmptyVcsNameMessageError         = "empty vcsName"
-	ValidationMtErrorMessage         = "Validation of model training is failed"
-	WrongVcsTypeErrorMessage         = "VCS connection must have the GIT type. You pass the connection of %s type"
-	EmptyDataBindingNameErrorMessage = "you should specify connection name for %d number of data binding"
-	EmptyDataBindingPathErrorMessage = "you should specify local path for %d number of data binding"
-	WrongDataBindingTypeErrorMessage = "%s data binding has wrong data type. Currently supported the following types" +
+	MtVcsNotExistsErrorMessage           = "cannot find VCS Connection"
+	MtObjectStorageNotExistsErrorMessage = "cannot find ObjectStorage Connection"
+	EmptyModelNameErrorMessage           = "empty model.name"
+	EmptyModelVersionErrorMessage        = "empty model.version"
+	ValidationMtErrorMessage             = "Validation of model training is failed"
+	WrongVcsTypeErrorMessage             = "VCS connection must have the GIT type. You pass the connection of %s type"
+	EmptyAlgorithmSourceNameMessageError = "both VCS and ObjectStorage names are empty"
+	MultipleAlgorithmSourceMessageError  = "both VCS and ObjectStorage names are specified, must be only one"
+	EmptyDataBindingNameErrorMessage     = "you should specify connection name for %d number of data binding"
+	EmptyDataBindingPathErrorMessage     = "you should specify local path for %d number of data binding"
+	WrongDataBindingTypeErrorMessage     = "%s data binding has wrong data type. Currently supported the following types" +
 		" of connections for data bindings: %v"
-	ToolchainEmptyErrorMessage = "empty toolchain parameter"
-	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
+	ToolchainEmptyErrorMessage         = "empty toolchain parameter"
+	WrongObjectStorageTypeErrorMessage = "%s object storage has wrong data type. Currently supported the following types" +
+		" of connections for object storage: %v"
+	UnknownNodeSelector = "node selector %v is not presented in ODAHU config"
 )
 
 var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
-	expectedConnectionDataTypes   = map[odahuflowv1alpha1.ConnectionType]bool{
-		connection.GcsType:       true,
-		connection.S3Type:        true,
-		connection.AzureBlobType: true,
-	}
 )
 
 type MtValidator struct {
@@ -79,7 +77,7 @@ func NewMtValidator(
 func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err error) {
 	err = multierr.Append(err, mtv.validateMainParams(mt))
 
-	err = multierr.Append(err, mtv.validateVCS(mt))
+	err = multierr.Append(err, mtv.validateAlgorithmSource(mt))
 
 	err = multierr.Append(err, mtv.validateMtData(mt))
 
@@ -168,28 +166,63 @@ func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error
 	return
 }
 
-func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
-	if len(mt.Spec.VCSName) == 0 {
-		err = multierr.Append(err, errors.New(EmptyVcsNameMessageError))
+func (mtv *MtValidator) validateAlgorithmSource(mt *training.ModelTraining) (err error) {
+	if len(mt.Spec.AlgorithmSource.VCS.Connection) != 0 && len(mt.Spec.AlgorithmSource.ObjectStorage.Connection) != 0 {
+		err = multierr.Append(err, errors.New(MultipleAlgorithmSourceMessageError))
 
 		return
 	}
 
-	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.VCSName); odahuErr != nil {
+	switch {
+	case len(mt.Spec.AlgorithmSource.VCS.Connection) != 0:
+		err = multierr.Append(err, mtv.validateVCS(mt))
+	case len(mt.Spec.AlgorithmSource.ObjectStorage.Connection) != 0:
+		err = multierr.Append(err, mtv.validateObjectStorage(mt))
+	default:
+		err = multierr.Append(err, errors.New(EmptyAlgorithmSourceNameMessageError))
+	}
+
+	return
+}
+
+func (mtv *MtValidator) validateVCS(mt *training.ModelTraining) (err error) {
+	if vcs, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.VCS.Connection); odahuErr != nil {
 		logMT.Error(err, MtVcsNotExistsErrorMessage)
 
 		err = multierr.Append(err, odahuErr)
-	} else if len(mt.Spec.Reference) == 0 {
+	} else if len(mt.Spec.AlgorithmSource.VCS.Reference) == 0 {
 		switch {
 		case vcs.Spec.Type != connection.GITType:
 			err = multierr.Append(err, fmt.Errorf(WrongVcsTypeErrorMessage, vcs.Spec.Type))
 		case len(vcs.Spec.Reference) != 0:
 			logMT.Info("VCS reference parameter is nil. Take the value from connection specification",
 				"name", mt.ID, "reference", vcs.Spec.Reference)
-			mt.Spec.Reference = vcs.Spec.Reference
+			mt.Spec.AlgorithmSource.VCS.Reference = vcs.Spec.Reference
 		default:
 			logMT.Info("Neither VCS connection or Training has reference specified, using VCS default branch")
 		}
+	}
+
+	return
+}
+
+func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err error) {
+	objStorage, odahuErr := mtv.connRepository.GetConnection(mt.Spec.AlgorithmSource.ObjectStorage.Connection)
+	if odahuErr != nil {
+		logMT.Error(err, MtObjectStorageNotExistsErrorMessage)
+
+		return odahuErr
+	}
+
+	if _, ok := connection.ObjectStorageTypesSet[objStorage.Spec.Type]; !ok {
+		return fmt.Errorf(
+			WrongObjectStorageTypeErrorMessage,
+			objStorage.ID, reflect.ValueOf(connection.ObjectStorageTypesSet).MapKeys(),
+		)
+	}
+
+	if len(mt.Spec.AlgorithmSource.ObjectStorage.Path) == 0 {
+		logMT.Info("Training path is not specified, using ObjectStorage root path")
 	}
 
 	return
@@ -214,10 +247,10 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 			continue
 		}
 
-		if _, ok := expectedConnectionDataTypes[conn.Spec.Type]; !ok {
+		if _, ok := connection.ObjectStorageTypesSet[conn.Spec.Type]; !ok {
 			err = multierr.Append(err, fmt.Errorf(
 				WrongDataBindingTypeErrorMessage,
-				conn.ID, reflect.ValueOf(expectedConnectionDataTypes).MapKeys(),
+				conn.ID, reflect.ValueOf(connection.ObjectStorageTypesSet).MapKeys(),
 			))
 		}
 

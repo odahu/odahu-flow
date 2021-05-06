@@ -27,12 +27,12 @@ import (
 
 const (
 	EmptySpecFieldErrorMessage = "%s must be non-empty"
+	IDLengthExceeded           = "ID length must be less or equal to %d"
 )
-
 
 func validateRequiredFields(bis api_types.InferenceService) (err error) {
 
-	idErr := validation.ValidateID(bis.ID)
+	idErr := validateShortID(bis.ID)
 	if idErr != nil {
 		err = multierr.Append(err, idErr)
 	}
@@ -44,7 +44,7 @@ func validateRequiredFields(bis api_types.InferenceService) (err error) {
 		err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "command"))
 	}
 	registry := bis.Spec.ModelRegistry
-	switch  {
+	switch {
 	case registry.Remote != nil:
 		if len(registry.Remote.ModelConnection) == 0 {
 			err = multierr.Append(err, fmt.Errorf(EmptySpecFieldErrorMessage, "modelRegistry.remote.modelConnection"))
@@ -58,13 +58,12 @@ func validateRequiredFields(bis api_types.InferenceService) (err error) {
 		}
 	default:
 		err = multierr.Append(err,
-			fmt.Errorf("whether modelRegistry.local.meta.name " +
+			fmt.Errorf("whether modelRegistry.local.meta.name "+
 				"or modelRegistry.local.meta.version must be defined for embedded models"))
 	}
 	if bis.Spec.ModelRegistry.Remote == nil && bis.Spec.ModelRegistry.Local == nil {
 		err = multierr.Append(err, fmt.Errorf("whether modelRegistry.local or modelRegistry.remote must be defined"))
 	}
-
 
 	if bis.Spec.Resources != nil {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(bis.Spec.Resources, "nvidia")
@@ -73,10 +72,17 @@ func validateRequiredFields(bis api_types.InferenceService) (err error) {
 		}
 	}
 
-
 	return err
 }
 
+// Since job ID is generated based on service ID, service ID max length is 10 chars less
+func validateShortID(id string) error {
+	maxIDLen := 53
+	if len(id) > maxIDLen {
+		return fmt.Errorf(IDLengthExceeded, maxIDLen)
+	}
+	return validation.ValidateID(id)
+}
 
 func ValidateCreateUpdate(bis api_types.InferenceService) (errs []error) {
 

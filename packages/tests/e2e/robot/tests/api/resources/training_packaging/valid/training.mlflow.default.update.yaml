@@ -10,7 +10,9 @@ spec:
     alpha: '1.0'
   workDir: mlflow/sklearn/wine
   entrypoint: main
-  vcsName: odahu-flow-examples
+  algorithmSource:
+    vcs:
+      connection: odahu-flow-examples
   outputConnection: models-output
   resources:
     limits:
@@ -20,5 +22,5 @@ spec:
       cpu: 3024m
       memory: 3024Mi
   data:
-    - connName: wine
+    - connection: wine
       localPath: mlflow/sklearn/wine/

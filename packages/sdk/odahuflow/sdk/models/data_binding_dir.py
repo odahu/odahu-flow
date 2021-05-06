@@ -15,29 +15,29 @@ class DataBindingDir(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, conn_name: str=None, local_path: str=None, remote_path: str=None):  # noqa: E501
+    def __init__(self, connection: str=None, local_path: str=None, remote_path: str=None):  # noqa: E501
         """DataBindingDir - a model defined in Swagger
 
-        :param conn_name: The conn_name of this DataBindingDir.  # noqa: E501
-        :type conn_name: str
+        :param connection: The connection of this DataBindingDir.  # noqa: E501
+        :type connection: str
         :param local_path: The local_path of this DataBindingDir.  # noqa: E501
         :type local_path: str
         :param remote_path: The remote_path of this DataBindingDir.  # noqa: E501
         :type remote_path: str
         """
         self.swagger_types = {
-            'conn_name': str,
+            'connection': str,
             'local_path': str,
             'remote_path': str
         }
 
         self.attribute_map = {
-            'conn_name': 'connName',
+            'connection': 'connection',
             'local_path': 'localPath',
             'remote_path': 'remotePath'
         }
 
-        self._conn_name = conn_name
+        self._connection = connection
         self._local_path = local_path
         self._remote_path = remote_path
 
@@ -53,27 +53,27 @@ class DataBindingDir(Model):
         return util.deserialize_model(dikt, cls)
 
     @property
-    def conn_name(self) -> str:
-        """Gets the conn_name of this DataBindingDir.
+    def connection(self) -> str:
+        """Gets the connection of this DataBindingDir.
 
         Connection name for data  # noqa: E501
 
-        :return: The conn_name of this DataBindingDir.
+        :return: The connection of this DataBindingDir.
         :rtype: str
         """
-        return self._conn_name
+        return self._connection
 
-    @conn_name.setter
-    def conn_name(self, conn_name: str):
-        """Sets the conn_name of this DataBindingDir.
+    @connection.setter
+    def connection(self, connection: str):
+        """Sets the connection of this DataBindingDir.
 
         Connection name for data  # noqa: E501
 
-        :param conn_name: The conn_name of this DataBindingDir.
-        :type conn_name: str
+        :param connection: The connection of this DataBindingDir.
+        :type connection: str
         """
 
-        self._conn_name = conn_name
+        self._connection = connection
 
     @property
     def local_path(self) -> str:

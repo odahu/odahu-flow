@@ -46,7 +46,7 @@ var (
 // Return commit id
 func (mt *ModelTrainer) cloneUserRepo(
 	k8sTraining *training.K8sTrainer, cloneDir string) (string, error) {
-	vcsConn := k8sTraining.VCS
+	vcsConn := k8sTraining.AlgorithmSourceConnection
 
 	err := ioutil.WriteFile(publicHostKeyFile, []byte(vcsConn.Spec.PublicKey), 0600)
 	if err != nil {
@@ -82,7 +82,7 @@ func (mt *ModelTrainer) cloneUserRepo(
 	}
 
 	var commitHash plumbing.Hash
-	referenceName := k8sTraining.ModelTraining.Spec.Reference
+	referenceName := k8sTraining.ModelTraining.Spec.AlgorithmSource.VCS.Reference
 	if len(referenceName) > 0 {
 		commitHash, err = mt.tryGetHash(repository, referenceName)
 		if err != nil {

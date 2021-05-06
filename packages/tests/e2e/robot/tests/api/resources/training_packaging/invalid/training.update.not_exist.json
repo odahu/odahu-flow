@@ -13,10 +13,14 @@
     },
     "workDir": ".",
     "entrypoint": "main",
-    "vcsName": "odahu-flow-examples",
+    "algorithmSource": {
+      "vcs": {
+        "connection": "odahu-flow-examples",
+        "reference": "develop"
+      }
+    },
     "outputConnection": "models-output",
     "image": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-robot-tests:1.2.0-b1599126332933",
-    "reference": "develop",
     "resources": {
       "limits": {
         "memory": "1024Mi"
@@ -27,7 +31,7 @@
     },
     "data": [
       {
-        "connName": "wine",
+        "connection": "wine",
         "localPath": "mlflow/sklearn/wine/"
       }
     ]

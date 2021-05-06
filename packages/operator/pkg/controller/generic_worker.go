@@ -68,7 +68,7 @@ func (r *GenericWorker) SyncSpecs(_ context.Context) error {
 
 	create, update, del, delDB, err := r.GetNotSynced()
 
-	if len(create) > 0 || len(update) > 0 || len(del) > 0|| len(delDB) > 0 {
+	if len(create) > 0 || len(update) > 0 || len(del) > 0 || len(delDB) > 0 {
 		log.Info(
 			"Get not synced entities",
 			"create", len(create), "update", len(update), "del", len(del), "delDB", len(delDB),
@@ -125,7 +125,7 @@ func (r *GenericWorker) GetNotSynced() (
 	toCreateInService []types.StorageEntity,
 	toUpdateInService []types.StorageEntity,
 	toDeleteInService []types.RuntimeEntity,
-	toDeleteInDB []types.StorageEntity, err error, ) {
+	toDeleteInDB []types.StorageEntity, err error) {
 
 	servEnsList, err := r.syncer.ListRuntime()
 	if err != nil {
@@ -167,15 +167,16 @@ func (r *GenericWorker) GetNotSynced() (
 			)
 			continue
 		}
-		if storeEn.IsFinished() && eq{
-			continue
-		}
 
 		if existsInService && !servEn.IsDeleting() && storeEn.HasDeletionMark() {
 			toDeleteInService = append(toDeleteInService, servEn)
 			continue
 		}
 		if existsInService && servEn.IsDeleting() && storeEn.HasDeletionMark() {
+			continue
+		}
+
+		if storeEn.IsFinished() && eq {
 			continue
 		}
 
@@ -192,7 +193,7 @@ func (r *GenericWorker) GetNotSynced() (
 	}
 	for _, servEn := range servEnsList {
 		if _, ok := storeEnsIndex[servEn.GetID()]; !ok {
-			toDeleteInService  = append(toDeleteInService, servEn)
+			toDeleteInService = append(toDeleteInService, servEn)
 		}
 	}
 

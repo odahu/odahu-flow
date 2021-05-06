@@ -25,7 +25,7 @@ import (
 
 type DataBindingDir struct {
 	// Connection name for data
-	Connection string `json:"connName"`
+	Connection string `json:"connection"`
 	// Local training path
 	LocalPath string `json:"localPath"`
 	// Overwrite remote data path in connection
@@ -39,6 +39,25 @@ type ModelIdentity struct {
 	Version string `json:"version"`
 	// Template of output artifact name
 	ArtifactNameTemplate string `json:"artifactNameTemplate,omitempty"`
+}
+
+type VCS struct {
+	// Connection name for training model source
+	Connection string `json:"connection,omitempty"`
+	// VCS Reference
+	Reference string `json:"reference,omitempty"`
+}
+
+type ObjectStorage struct {
+	// Connection name for training model source
+	Connection string `json:"connection,omitempty"`
+	// Remote path in ObjectStorage
+	Path string `json:"path,omitempty"`
+}
+
+type AlgorithmSource struct {
+	VCS           VCS           `json:"vcs,omitempty"`
+	ObjectStorage ObjectStorage `json:"objectStorage,omitempty"`
 }
 
 // ModelTrainingSpec defines the desired state of ModelTraining
@@ -56,15 +75,13 @@ type ModelTrainingSpec struct {
 	// Model training file. It can be python\bash script or jupiter notebook
 	Entrypoint          string   `json:"entrypoint"`
 	EntrypointArguments []string `json:"args,omitempty"`
-	// Name of Connection resource. Must exists
-	VCSName string `json:"vcsName"`
+	// AlgorithmSource for training
+	AlgorithmSource AlgorithmSource `json:"algorithmSource"`
 	// Name of Connection to storage where training output artifact will be stored.
 	// Permitted connection types are defined by specific toolchain
 	OutputConnection string `json:"outputConnection,omitempty"`
 	// Train image
 	Image string `json:"image,omitempty"`
-	// VCS Reference
-	Reference string `json:"reference,omitempty"`
 	// Resources for model container
 	// The same format like k8s uses for pod resources.
 	Resources *ResourceRequirements `json:"resources,omitempty"`
@@ -153,7 +170,7 @@ func (in *ModelTrainingStatus) Scan(value interface{}) error {
 // ModelTraining is the Schema for the modeltrainings API
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.state"
 // +kubebuilder:printcolumn:name="Toolchain",type="string",JSONPath=".spec.toolchain"
-// +kubebuilder:printcolumn:name="VCS name",type="string",JSONPath=".spec.vcsName"
+// +kubebuilder:printcolumn:name="Algorithm source",type="string",JSONPath=".spec.algorithmSource"
 // +kubebuilder:printcolumn:name="Model name",type="string",JSONPath=".spec.model.name"
 // +kubebuilder:printcolumn:name="Model version",type="string",JSONPath=".spec.model.version"
 // +kubebuilder:printcolumn:name="Model image",type="string",JSONPath=".spec.image"
