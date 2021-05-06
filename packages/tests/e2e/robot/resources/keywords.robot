@@ -135,8 +135,8 @@ E2E test setup
 
 E2E test teardown
     [Arguments]  ${example_id}
-    ${NO_CLEAN_UP_lower}  Evaluate  '${NO_CLEAN_UP}'.lower()
-    Pass Execution If  '${NO_CLEAN_UP_lower}' != 'false'  Suite Teardown is not executed
+    ${NO_CLEAN_UP_bool}  Convert To Boolean  ${NO_CLEAN_UP}
+    Pass Execution If  ${NO_CLEAN_UP_bool}  Suite Teardown is not executed
     Cleanup example resources  ${example_id}
     Remove file  ${LOCAL_CONFIG}
 
