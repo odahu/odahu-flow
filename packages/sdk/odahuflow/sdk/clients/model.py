@@ -21,7 +21,6 @@ import logging
 
 import requests
 from urllib3.exceptions import HTTPError
-from urllib.parse import urljoin
 
 import odahuflow.sdk.config
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
@@ -49,7 +48,7 @@ def calculate_url(base_url: str, model_route: str = None, model_deployment: str 
         raise ValueError("Base url is required")
 
     if url_prefix:
-        return urljoin(base_url, url_prefix)
+        return f'{base_url}{url_prefix}'
 
     if model_route:
         if mr_client is None:
