@@ -197,6 +197,12 @@ func newMtStub() *training.ModelTraining {
 					Reference:  testMtReference,
 				},
 			},
+			Data: []odahuflowv1alpha1.DataBindingDir{
+				{
+					Connection: testMtOutConnDefault,
+					LocalPath:  testMtDataPath,
+				},
+			},
 			Image:            testMtImage,
 			Resources:        &res,
 			OutputConnection: testMtOutConn,
