@@ -61,6 +61,12 @@ var (
 					Reference:  testVcsReference,
 				},
 			},
+			Data: []v1alpha1.DataBindingDir{
+				{
+					Connection: testMtOutConnDefault,
+					LocalPath:  testMtDataPath,
+				},
+			},
 			NodeSelector: cpuNodeSelector,
 		},
 	}

@@ -261,7 +261,7 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 
 	}
 
-	return
+	return nil
 }
 
 func (mtv *MtValidator) validateOutputConnection(mt *training.ModelTraining) (err error) {
