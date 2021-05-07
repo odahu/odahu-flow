@@ -127,6 +127,19 @@ Cleanup resource
     [Arguments]  ${entity type}  ${entity id}
     StrictShell  odahuflowctl --verbose ${entity type} delete --id ${entity id} --ignore-not-found
 
+E2E test setup
+    [Arguments]  ${example_id}
+    Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+    Login to the api and edge
+    Cleanup example resources  ${example_id}
+
+E2E test teardown
+    [Arguments]  ${example_id}
+    ${NO_CLEAN_UP_bool}  Convert To Boolean  ${NO_CLEAN_UP}
+    Pass Execution If  ${NO_CLEAN_UP_bool}  Suite Teardown is not executed
+    Cleanup example resources  ${example_id}
+    Remove file  ${LOCAL_CONFIG}
+
 Run example model
     [Arguments]  ${example_id}  ${manifests_dir}
     StrictShell  odahuflowctl --verbose train create -f ${manifests_dir}/training.odahuflow.yaml --id ${example_id}
