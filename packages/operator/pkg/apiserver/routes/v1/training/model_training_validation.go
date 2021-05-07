@@ -241,14 +241,12 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 
 		if len(dbd.Connection) == 0 {
 			err = multierr.Append(err, fmt.Errorf(EmptyDataBindingNameErrorMessage, i))
-
 			continue
 		}
 
 		conn, k8sErr := mtv.connRepository.GetConnection(dbd.Connection)
 		if k8sErr != nil {
 			err = multierr.Append(err, k8sErr)
-
 			continue
 		}
 
@@ -260,8 +258,7 @@ func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
 		}
 
 	}
-
-	return nil
+	return
 }
 
 func (mtv *MtValidator) validateOutputConnection(mt *training.ModelTraining) (err error) {
