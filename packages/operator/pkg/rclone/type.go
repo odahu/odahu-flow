@@ -138,9 +138,11 @@ func (os *ObjectStorage) Download(localPath, remotePath string) error {
 
 	if len(remotePath) == 0 {
 		remotePath = os.RemoteConfig.Path
+		log.Info("remotePath is empty, using path from remote's config", "remotePath", remotePath)
 	}
-
-	remoteFs, srcFileName, err := newFsFile(os.RemoteConfig.FsName + remotePath)
+	remoteWithPath := path.Join(os.RemoteConfig.FsName, remotePath)
+	log.Info("Joined remote name and path", "remoteWithPath", remoteWithPath)
+	remoteFs, srcFileName, err := newFsFile(remoteWithPath)
 	if err != nil {
 		return err
 	}
