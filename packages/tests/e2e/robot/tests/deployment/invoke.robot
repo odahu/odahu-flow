@@ -34,14 +34,17 @@ Refresh security tokens
 
 *** Test Cases ***
 Invoke. Empty jwt
-    [Documentation]  Suceeds if jwt is empty
+    [Documentation]  Trying to invoke model with empty jwt. Suceeds if config exists, fails if not
     [Teardown]  Login to the api and edge
-    # Ensure that next command will not use the config file
-    Remove File  ${LOCAL_CONFIG}
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
     ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --jwt ""
              Should be equal  ${res.rc}  ${0}
+
+    Remove File  ${LOCAL_CONFIG}
+
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --jwt ""
+             Should not be equal  ${res.rc}  ${0}
 
 Invoke. Empty model service url
     [Documentation]  Fails if model service url is empty
