@@ -62,37 +62,37 @@ Invoke two models
     Check model started  ${MD_SIMPLE_MODEL_1}
     Check model started  ${MD_SIMPLE_MODEL_2}
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --md ${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
-         Should be equal  ${res.rc}  ${0}
-         Should contain   ${res.stdout}  42
-
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
-         Should be equal  ${res.rc}  ${0}
-         Should contain   ${res.stdout}  42
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --md ${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --url-prefix /model/${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --md ${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
          Should be equal  ${res.rc}  ${0}
-
-    ${res}=  Shell  odahuflowctl --verbose model invoke --url-prefix /model/${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
-         Should be equal  ${res.rc}  ${0}
-
-    ${res}=  Shell  odahuflowctl --verbose model invoke --url-prefix /model/${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+         Should contain   ${res.stdout}  42
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --md ${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --url-prefix /model/${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json
+         Should be equal  ${res.rc}  ${0}
+
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json
+         Should be equal  ${res.rc}  ${0}
+
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --url ${EDGE_URL}/model/${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42
-    ${res}=  Shell  odahuflowctl --verbose model invoke --url ${EDGE_URL}/model/${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL_1} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+         Should be equal  ${res.rc}  ${0}
+         Should contain   ${res.stdout}  42
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL_2} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
          Should be equal  ${res.rc}  ${0}
          Should contain   ${res.stdout}  42

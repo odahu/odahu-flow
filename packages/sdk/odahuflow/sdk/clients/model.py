@@ -32,29 +32,27 @@ from odahuflow.sdk.utils import ensure_function_succeed
 LOGGER = logging.getLogger(__name__)
 
 
-def calculate_url(host: str, url: str = None, model_route: str = None, model_deployment: str = None,
+def calculate_url(base_url: str, model_route: str = None, model_deployment: str = None,
                   url_prefix: str = None, mr_client: ModelRouteClient = None):
     """
     Calculate url for model
 
-    :param host: edge host
-    :param url: full url to model api
+    :param base_url: base model server url
     :param model_route: model route name
     :param model_deployment: model deployment name. Default route URL will be returned
     :param url_prefix: model prefix
     :param mr_client: ModelRoute client to use
     :return: model url
     """
-    if url:
-        return url
+    if not base_url:
+        raise ValueError("Base url is required")
 
     if url_prefix:
-        LOGGER.debug('')
-        return f'{host}{url_prefix}'
+        return f'{base_url}{url_prefix}'
 
     if model_route:
         if mr_client is None:
-            mr_client = ModelRouteClient()
+            mr_client = ModelRouteClient(base_url=base_url)
 
         model_route = mr_client.get(model_route)
 
@@ -62,7 +60,7 @@ def calculate_url(host: str, url: str = None, model_route: str = None, model_dep
         return model_route.status.edge_url
 
     if model_deployment:
-        md_client = ModelDeploymentClient()
+        md_client = ModelDeploymentClient(base_url=base_url)
         model_route = md_client.get_default_route(model_deployment)
         LOGGER.debug('Found default model route: %s', model_route)
         return model_route.status.edge_url
@@ -76,7 +74,10 @@ class ModelClient:
     """
 
     def __init__(self,
-                 url=None,
+                 base_url,
+                 model_route=None,
+                 model_deployment=None,
+                 url_prefix=None,
                  token=None,
                  http_client=requests,
                  http_exception=requests.exceptions.RequestException,
@@ -87,8 +88,14 @@ class ModelClient:
         """
         Build client
 
-        :param url: base url
-        :type url: str
+        :param base_url: model base url
+        :type base_url: str
+        :param model_route: model route name
+        :type model_route: str
+        :param model_deployment: model deployment name
+        :type model_deployment: str
+        :param url_prefix: model url prefix
+        :type url_prefix: str
         :param token: API token value to use (default: None)
         :type token: str
         :param http_client: HTTP client (default: requests)
@@ -104,7 +111,8 @@ class ModelClient:
         :param issuer_url: url for credential login
         :type issuer_url: str
         """
-        self._url = url
+        self._url = calculate_url(base_url, model_route, model_deployment, url_prefix)
+        self._base_url = base_url
         self._http_client = http_client
         self._http_exception = http_exception
         self._timeout = timeout
@@ -116,12 +124,12 @@ class ModelClient:
             client_id=client_id,
             client_secret=client_secret,
             non_interactive=True,
-            base_url=url,
+            base_url=self._base_url,
             token=token,
             issuer_url=issuer_url
         )
 
-        LOGGER.debug('Model client params: %s, %s, %s, %s, %s', url, token, http_client, http_exception, timeout)
+        LOGGER.debug('Model client params: %s, %s, %s, %s, %s', self._url, token, http_client, http_exception, timeout)
 
     @property
     def api_url(self):
@@ -131,7 +139,6 @@ class ModelClient:
         :return: str -- api root url
         """
         return '{host}/api/model'.format(host=self._url)
-
 
     @property
     def info_url(self):

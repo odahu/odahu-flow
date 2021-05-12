@@ -181,7 +181,7 @@ Run Packaging
         StrictShell  docker container list -as -f id=${container_id.stdout}
 
         ${MODEL_HOST}    Get local model host
-        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --url ${MODEL_HOST}:${MODEL PORT} --json-file ${RES_DIR}/request.json
+        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --base-url ${MODEL_HOST} --url-prefix :${MODEL PORT} --json-file ${RES_DIR}/request.json
         ${expected response}          evaluate  json.loads('''${WINE_MODEL_RESULT}''')    json
         ${actual response}            evaluate  json.loads('''${result_model.stdout}''')    json
         dictionaries should be equal  ${actual response}  ${expected response}
