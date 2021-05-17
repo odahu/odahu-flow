@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 const connID = "some-id"
@@ -142,6 +143,8 @@ func (s *ConnectionServiceTestSuite) TestDeleteConnection() {
 
 func (s *ConnectionServiceTestSuite) TestUpdateConnection() {
 	originalConnection := stubConnection()
+	originalConnection.CreatedAt = time.Now()
+	originalConnection.UpdatedAt = originalConnection.CreatedAt
 	connectionForService := originalConnection
 
 	connectionForService.EncodeBase64Fields()
@@ -155,7 +158,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection() {
 	assert.Nil(s.T(), err)
 
 	// Check that connection was base64-decoded before sending to repo
-	assert.Equal(s.T(), originalConnection, s.mockRepo.UpdatedConnection)
+	assert.Equal(s.T(), originalConnection.Spec, s.mockRepo.UpdatedConnection.Spec)
+
+	s.Assert().Equal(originalConnection.CreatedAt, updatedConnection.CreatedAt)
+	s.Assert().True(originalConnection.UpdatedAt.Before(updatedConnection.UpdatedAt))
 
 	// Check that secrets are masked in result
 	assert.Equal(s.T(), connection.DecryptedDataMask, updatedConnection.Spec.KeyID)
@@ -202,23 +208,28 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection() {
 	connectionForService.EncodeBase64Fields()
 
 	s.mockRepo.
-		On("CreateConnection", mock.AnythingOfType("*connection.Connection")).
+		On("SaveConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(nil)
 
-	updatedConnection, err := s.connectionService.CreateConnection(connectionForService)
+	createdConnection, err := s.connectionService.CreateConnection(connectionForService)
 
-	assert.Nil(s.T(), err)
+	s.Assert().Nil(err)
 
 	// Check that connection was base64-decoded before sending to repo
-	assert.Equal(s.T(), originalConnection, s.mockRepo.CreatedConnection)
+	s.Assert().Equal(originalConnection.Spec, s.mockRepo.CreatedConnection.Spec)
+
+	// Check CreatedAt/UpdatedAt handled correctly
+	s.Assert().NotNil(createdConnection.CreatedAt)
+	s.Assert().Equal(createdConnection.UpdatedAt, createdConnection.CreatedAt)
+	s.Assert().True(createdConnection.CreatedAt.Before(time.Now()))
 
 	// Check that secrets are masked in result
-	assert.Equal(s.T(), connection.DecryptedDataMask, updatedConnection.Spec.KeyID)
-	assert.Equal(s.T(), connection.DecryptedDataMask, updatedConnection.Spec.KeySecret)
-	assert.Equal(s.T(), connection.DecryptedDataMask, updatedConnection.Spec.Password)
+	s.Assert().Equal(connection.DecryptedDataMask, createdConnection.Spec.KeyID)
+	s.Assert().Equal(connection.DecryptedDataMask, createdConnection.Spec.KeySecret)
+	s.Assert().Equal(connection.DecryptedDataMask, createdConnection.Spec.Password)
 	// Check that public key is base64-encoded
 	expectedPublicKey := base64.StdEncoding.EncodeToString([]byte(originalConnection.Spec.PublicKey))
-	assert.Equal(s.T(), expectedPublicKey, updatedConnection.Spec.PublicKey)
+	s.Assert().Equal(expectedPublicKey, createdConnection.Spec.PublicKey)
 }
 
 func (s *ConnectionServiceTestSuite) TestCreateConnection_DecodingFail() {
@@ -241,7 +252,7 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection_ErrorFromRepo() {
 	connectionForService.EncodeBase64Fields()
 
 	s.mockRepo.
-		On("CreateConnection", mock.AnythingOfType("*connection.Connection")).
+		On("SaveConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(errors.New("error from repo"))
 
 	createdConnection, err := s.connectionService.CreateConnection(connectionForService)

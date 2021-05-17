@@ -16,11 +16,18 @@
 
 package training
 
-import "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+import (
+	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
+	"time"
+)
 
 type ToolchainIntegration struct {
 	// Toolchain integration id
 	ID string `json:"id"`
+	// CreatedAt
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Toolchain integration specification
 	Spec v1alpha1.ToolchainIntegrationSpec `json:"spec,omitempty"`
 	// Toolchain integration status

@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	log = logf.Log.WithName("model-training--repository--postgres")
+	log       = logf.Log.WithName("model-training--repository--postgres")
 	txOptions = &sql.TxOptions{
 		Isolation: sql.LevelRepeatableRead,
 		ReadOnly:  false,
@@ -69,7 +69,7 @@ func (repo TrainingRepo) GetModelTraining(ctx context.Context, tx *sql.Tx, id st
 }
 
 func (repo TrainingRepo) GetModelTrainingList(
-	ctx context.Context, tx *sql.Tx, options ...filter.ListOption, ) ([]training.ModelTraining, error) {
+	ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]training.ModelTraining, error) {
 
 	var qrr utils.Querier
 	qrr = repo.DB
@@ -246,7 +246,7 @@ func (repo TrainingRepo) UpdateModelTrainingStatus(
 	return nil
 }
 
-func (repo TrainingRepo) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error {
+func (repo TrainingRepo) SaveModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error {
 
 	var qrr utils.Querier
 	qrr = repo.DB
@@ -268,7 +268,7 @@ func (repo TrainingRepo) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt
 	_, err = qrr.ExecContext(
 		ctx,
 		stmt,
-		args...
+		args...,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
@@ -280,7 +280,6 @@ func (repo TrainingRepo) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt
 	return nil
 
 }
-
 
 func (repo TrainingRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 	return repo.DB.BeginTx(ctx, txOptions)

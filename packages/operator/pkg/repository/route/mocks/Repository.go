@@ -44,7 +44,7 @@ func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 }
 
 // CreateModelRoute provides a mock function with given fields: ctx, tx, r
-func (_m *Repository) CreateModelRoute(ctx context.Context, tx *sql.Tx, r *deployment.ModelRoute) error {
+func (_m *Repository) SaveModelRoute(ctx context.Context, tx *sql.Tx, r *deployment.ModelRoute) error {
 	ret := _m.Called(ctx, tx, r)
 
 	var r0 error

@@ -22,7 +22,7 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
@@ -45,8 +45,8 @@ var (
 )
 
 type PackagingIntegrationController struct {
-	repository mp_repository.PackagingIntegrationRepository
-	validator  *PiValidator
+	service   packaging_integration.Service
+	validator *PiValidator
 }
 
 // @Summary Get a PackagingIntegration
@@ -63,7 +63,7 @@ type PackagingIntegrationController struct {
 func (pic *PackagingIntegrationController) getPackagingIntegration(c *gin.Context) {
 	piID := c.Param(IDPiURLParam)
 
-	pi, err := pic.repository.GetPackagingIntegration(piID)
+	pi, err := pic.service.GetPackagingIntegration(piID)
 	if err != nil {
 		logPi.Error(err, fmt.Sprintf("Retrieving %s packaging integration", piID))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
@@ -93,7 +93,7 @@ func (pic *PackagingIntegrationController) getAllPackagingIntegrations(c *gin.Co
 		return
 	}
 
-	piList, err := pic.repository.GetPackagingIntegrationList(
+	piList, err := pic.service.GetPackagingIntegrationList(
 		filter.Size(size),
 		filter.Page(page),
 	)
@@ -133,7 +133,7 @@ func (pic *PackagingIntegrationController) createPackagingIntegration(c *gin.Con
 		return
 	}
 
-	if err := pic.repository.CreatePackagingIntegration(&pi); err != nil {
+	if err := pic.service.CreatePackagingIntegration(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Creation of the packaging integration: %+v", pi))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
@@ -170,7 +170,7 @@ func (pic *PackagingIntegrationController) updatePackagingIntegration(c *gin.Con
 		return
 	}
 
-	if err := pic.repository.UpdatePackagingIntegration(&pi); err != nil {
+	if err := pic.service.UpdatePackagingIntegration(&pi); err != nil {
 		logPi.Error(err, fmt.Sprintf("Update of the packaging integration: %+v", pi))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
@@ -194,7 +194,7 @@ func (pic *PackagingIntegrationController) updatePackagingIntegration(c *gin.Con
 func (pic *PackagingIntegrationController) deletePackagingIntegration(c *gin.Context) {
 	piID := c.Param(IDPiURLParam)
 
-	if err := pic.repository.DeletePackagingIntegration(piID); err != nil {
+	if err := pic.service.DeletePackagingIntegration(piID); err != nil {
 		logPi.Error(err, fmt.Sprintf("Deletion of %s packaging integration is failed", piID))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 

@@ -22,6 +22,7 @@ import (
 	_ "github.com/lib/pq"
 	migrator_package "github.com/odahu/odahu-flow/packages/operator/pkg/database/migrators/postgres"
 	mt_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	"github.com/ory/dockertest"
 	dc "github.com/ory/dockertest/docker"
 	"github.com/stretchr/testify/suite"
@@ -31,8 +32,9 @@ import (
 
 type TIPostgresRouteSuite struct {
 	TIGenericRouteSuite
-	pool     *dockertest.Pool
-	resource *dockertest.Resource
+	pool      *dockertest.Pool
+	resource  *dockertest.Resource
+	tiService toolchain.Service
 }
 
 func (s *TIPostgresRouteSuite) SetupSuite() {
@@ -95,7 +97,8 @@ func (s *TIPostgresRouteSuite) SetupSuite() {
 		panic("Cannot migrate schema")
 	}
 
-	s.mtRepository = mt_postgres_repository.ToolchainRepo{DB: db}
+	tiRepository := mt_postgres_repository.ToolchainRepo{DB: db}
+	s.tiService = toolchain.NewService(tiRepository)
 }
 
 func (s *TIPostgresRouteSuite) TearDownSuite() {

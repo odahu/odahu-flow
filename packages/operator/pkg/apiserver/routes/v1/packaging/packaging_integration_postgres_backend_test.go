@@ -18,7 +18,7 @@ package packaging_test
 
 import (
 	_ "github.com/lib/pq"
-	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -28,10 +28,8 @@ type PIPostgresRouteSuite struct {
 }
 
 func (s *PIPostgresRouteSuite) SetupSuite() {
-
-	s.mpRepository = mp_postgres_repository.PackagingIntegrationRepository{DB: db}
+	s.piServiceMock = &packaging_integration.MockService{}
 }
-
 
 func TestPIPostgresRouteSuite(t *testing.T) {
 	suite.Run(t, new(PIPostgresRouteSuite))

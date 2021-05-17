@@ -28,7 +28,6 @@ import (
 	db_utils "github.com/odahu/odahu-flow/packages/operator/pkg/utils/db"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
 )
@@ -55,9 +54,8 @@ type EventPublisher interface {
 
 type serviceImpl struct {
 	// Repository that has "database/sql" underlying storage
-	repo repo.Repository
+	repo     repo.Repository
 	eventPub EventPublisher
-
 }
 
 func (s serviceImpl) GetModelRoute(ctx context.Context, id string) (*route.ModelRoute, error) {
@@ -91,7 +89,7 @@ func (s serviceImpl) DeleteModelRoute(ctx context.Context, id string) (err error
 	}
 
 	e := event.Event{EntityID: id, EventType: event.ModelRouteDeletedEventType,
-		EventGroup: event.ModelRouteEventGroup, Payload:    nil}
+		EventGroup: event.ModelRouteEventGroup, Payload: nil}
 	if err = s.eventPub.PublishEvent(ctx, tx, e); err != nil {
 		return
 	}
@@ -105,7 +103,7 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 	if err != nil {
 		return err
 	}
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	e := event.Event{
 		EntityID:   id,
@@ -122,8 +120,7 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute) (err error) {
 	md.UpdatedAt = time.Now()
 	md.DeletionMark = false
-	md.Status = v1alpha1.ModelRouteStatus{
-	}
+	md.Status = v1alpha1.ModelRouteStatus{}
 
 	var tx *sql.Tx
 	tx, err = s.repo.BeginTransaction(ctx)
@@ -212,7 +209,7 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 	if err != nil {
 		return err
 	}
-	defer func(){db_utils.FinishTx(tx, err, log)}()
+	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = time.Now()
@@ -223,14 +220,6 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 	md.Status = v1alpha1.ModelRouteStatus{
 		EdgeURL: "",
 		State:   "",
-		Modifiable: v1alpha1.Modifiable{
-			CreatedAt: &metav1.Time{
-				Time: time.Time{},
-			},
-			UpdatedAt: &metav1.Time{
-				Time: time.Time{},
-			},
-		},
 	}
 
 	e := event.Event{
@@ -243,10 +232,9 @@ func (s serviceImpl) CreateModelRoute(ctx context.Context, md *route.ModelRoute)
 		return err
 	}
 
-	return s.repo.CreateModelRoute(ctx, tx, md)
+	return s.repo.SaveModelRoute(ctx, tx, md)
 }
 
 func NewService(repo repo.Repository, eventPub EventPublisher) Service {
 	return &serviceImpl{repo: repo, eventPub: eventPub}
 }
-

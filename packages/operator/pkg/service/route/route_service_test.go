@@ -46,11 +46,11 @@ func TestSuiteRun(t *testing.T) {
 type TestSuite struct {
 	suite.Suite
 	mockRepo *mocks.Repository
-	service service.Service
-	db *sql.DB
-	dbMock sqlmock.Sqlmock
-	as *assert.Assertions
-	nilTx *sql.Tx
+	service  service.Service
+	db       *sql.DB
+	dbMock   sqlmock.Sqlmock
+	as       *assert.Assertions
+	nilTx    *sql.Tx
 	eMockPub *event_pub_mocks.EventPublisher
 }
 
@@ -166,7 +166,6 @@ func (s *TestSuite) TestUpdateModelRoute() {
 	ctx := context.Background()
 	en := newStubMT()
 
-
 	// Assume transaction commit
 	s.dbMock.ExpectBegin()
 	s.dbMock.ExpectCommit()
@@ -189,7 +188,6 @@ func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
 
 	ctx := context.Background()
 	en := newStubMT()
-
 
 	// Assume transaction commit
 	s.dbMock.ExpectBegin()
@@ -263,7 +261,6 @@ func (s *TestSuite) TestUpdateModelRouteStatusSpecTouched() {
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
-
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
 	newStatus.EdgeURL = "old"
@@ -295,7 +292,7 @@ func (s *TestSuite) TestCreateModelRoute() {
 	en := newStubMT()
 	ctx := context.Background()
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.mockRepo.On("CreateModelRoute", ctx, mockTx, en).Return(nil)
+	s.mockRepo.On("SaveModelRoute", ctx, mockTx, en).Return(nil)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.NoError(s.service.CreateModelRoute(ctx, en))
@@ -315,7 +312,7 @@ func (s *TestSuite) TestCreateModelRoute_CreatedAt() {
 
 	ctx := context.Background()
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.mockRepo.On("CreateModelRoute", ctx, mockTx, en).Return(nil)
+	s.mockRepo.On("SaveModelRoute", ctx, mockTx, en).Return(nil)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	timeBeforeCall := time.Now()
@@ -339,7 +336,7 @@ func (s *TestSuite) TestCreateModelRoute_Error() {
 	ctx := context.Background()
 	anyError := errors.New("any error")
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
-	s.mockRepo.On("CreateModelRoute", ctx, mockTx, en).Return(anyError)
+	s.mockRepo.On("SaveModelRoute", ctx, mockTx, en).Return(anyError)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
 
 	as.Error(s.service.CreateModelRoute(ctx, en))

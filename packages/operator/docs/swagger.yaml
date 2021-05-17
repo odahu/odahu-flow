@@ -85,8 +85,7 @@ definitions:
         description: Message is any message from runtime service about status of InferenceJob
         type: string
       podName:
-        description: PodName is a name of Pod in Kubernetes that is running under
-          the hood of InferenceJob
+        description: PodName is a name of Pod in Kubernetes that is running under the hood of InferenceJob
         type: string
       reason:
         description: |-
@@ -100,8 +99,7 @@ definitions:
   InferenceService:
     properties:
       createdAt:
-        description: When resource was created. Managed by system. Cannot be overridden
-          by User
+        description: When resource was created. Managed by system. Cannot be overridden by User
         type: string
       id:
         type: string
@@ -112,8 +110,7 @@ definitions:
         $ref: '#/definitions/InferenceServiceStatus'
         type: object
       updatedAt:
-        description: When resource was updated. Managed by system. Cannot be overridden
-          by User
+        description: When resource was updated. Managed by system. Cannot be overridden by User
         type: string
     type: object
   InferenceServiceSpec:
@@ -189,15 +186,13 @@ definitions:
     properties:
       webhook:
         $ref: '#/definitions/PredictorWebhookTrigger'
-        description: Webhook provides a REST API to execute InferenceJob that correspond
-          to this service
+        description: Webhook provides a REST API to execute InferenceJob that correspond to this service
         type: object
     type: object
   PredictorWebhookTrigger:
     properties:
       enabled:
-        description: Enabled. If True then it possible to run InferenceJob by creating
-          it using REST API
+        description: Enabled. If True then it possible to run InferenceJob by creating it using REST API
         type: boolean
     type: object
   APIBackendConfig:
@@ -252,8 +247,7 @@ definitions:
         description: Enable batch API/operator
         type: boolean
       namespace:
-        description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob
-          will be created
+        description: Kubernetes namespace, where BatchInferenceService and BatchInferenceJob will be created
         type: string
       nodePools:
         description: Node pools to run batch jobs
@@ -264,8 +258,7 @@ definitions:
         description: RClone image that will be used to sync data with object storage
         type: string
       serviceAccountName:
-        description: Specifies a ServiceAccount object that provides custom credentials
-          for executing the TaskRun
+        description: Specifies a ServiceAccount object that provides custom credentials for executing the TaskRun
         type: string
       timeout:
         description: Timeout for full batch process
@@ -293,8 +286,7 @@ definitions:
         description: Database connection string
         type: string
       externalUrls:
-        description: 'The collection of external urls, for example: metrics, edge,
-          service catalog and so on'
+        description: 'The collection of external urls, for example: metrics, edge, service catalog and so on'
         items:
           $ref: '#/definitions/ExternalUrl'
         type: array
@@ -383,8 +375,7 @@ definitions:
   ExternalUrl:
     properties:
       imageUrl:
-        description: Optional link to an image which represents a type of the resource,
-          for example the logo of Grafana
+        description: Optional link to an image which represents a type of the resource, for example the logo of Grafana
         type: string
       name:
         description: Human-readable name
@@ -408,8 +399,7 @@ definitions:
   ModelDeploymentConfig:
     properties:
       defaultDockerPullConnName:
-        description: Default connection ID which will be used if a user doesn't specify
-          it in a model deployment
+        description: Default connection ID which will be used if a user doesn't specify it in a model deployment
         type: string
       defaultResources:
         $ref: '#/definitions/ResourceRequirements'
@@ -588,24 +578,19 @@ definitions:
         description: BaseURL is a prefix to service catalog web server endpoints
         type: string
       debug:
-        description: 'enabled Debug increase logger verbosity and format. Default:
-          false'
+        description: 'enabled Debug increase logger verbosity and format. Default: false'
         type: boolean
       edgeHost:
-        description: ServiceCatalog set EdgeHost as Host header in requests to ML
-          servers
+        description: ServiceCatalog set EdgeHost as Host header in requests to ML servers
         type: string
       edgeURL:
-        description: ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute
-          prefix to EdgeURL path
+        description: ServiceCatalog uses EdgeURL to call MLServer by adding ModelRoute prefix to EdgeURL path
         type: string
       fetchTimeout:
-        description: FetchTimeout configures how often new events will be fetched.
-          Default 5 seconds.
+        description: FetchTimeout configures how often new events will be fetched. Default 5 seconds.
         type: integer
       workersCount:
-        description: 'WorkersCount configures how many workers will process events.
-          Default: 4'
+        description: 'WorkersCount configures how many workers will process events. Default: 4'
         type: integer
     type: object
   TrainerConfig:
@@ -654,6 +639,9 @@ definitions:
     type: object
   Connection:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
       id:
         description: Connection id
         type: string
@@ -665,6 +653,9 @@ definitions:
         $ref: '#/definitions/ConnectionStatus'
         description: Connection status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
     type: object
   ModelDeployment:
     properties:
@@ -847,15 +838,13 @@ definitions:
     properties:
       arguments:
         additionalProperties: true
-        description: List of arguments. This parameter depends on the specific packaging
-          integration
+        description: List of arguments. This parameter depends on the specific packaging integration
         type: object
       artifactName:
         description: Training output artifact name
         type: string
       image:
-        description: Image name. Packaging integration image will be used if this
-          parameters is missed
+        description: Image name. Packaging integration image will be used if this parameters is missed
         type: string
       integrationName:
         description: Packaging integration ID
@@ -877,8 +866,7 @@ definitions:
           The same format like k8s uses for pod resources.
         type: object
       targets:
-        description: List of targets. This parameter depends on the specific packaging
-          integration
+        description: List of targets. This parameter depends on the specific packaging integration
         items:
           $ref: '#/definitions/Target'
         type: array
@@ -895,6 +883,9 @@ definitions:
     type: object
   PackagingIntegration:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
       id:
         description: Packaging integration id
         type: string
@@ -906,6 +897,9 @@ definitions:
         $ref: '#/definitions/PackagingIntegrationStatus'
         description: Packaging integration status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
     type: object
   PackagingIntegrationSpec:
     properties:
@@ -920,8 +914,7 @@ definitions:
         type: boolean
       schema:
         $ref: '#/definitions/Schema'
-        description: Schema which describes targets and arguments for specific packaging
-          integration
+        description: Schema which describes targets and arguments for specific packaging integration
         type: object
     type: object
   Parameter:
@@ -1015,6 +1008,9 @@ definitions:
     type: object
   ToolchainIntegration:
     properties:
+      createdAt:
+        description: CreatedAt
+        type: string
       id:
         description: Toolchain integration id
         type: string
@@ -1026,6 +1022,9 @@ definitions:
         $ref: '#/definitions/ToolchainIntegrationStatus'
         description: Toolchain integration status
         type: object
+      updatedAt:
+        description: UpdatedAt
+        type: string
     type: object
   UserInfo:
     properties:
@@ -1090,15 +1089,11 @@ definitions:
     type: object
   ConnectionStatus:
     properties:
-      createdAt:
-        type: string
       secretName:
         description: Kubernetes secret name
         type: string
       serviceAccount:
         description: Kubernetes service account
-        type: string
-      updatedAt:
         type: string
     type: object
   DataBindingDir:
@@ -1142,19 +1137,16 @@ definitions:
         description: Model Docker image
         type: string
       imagePullConnID:
-        description: If pulling of your image requires authorization, then you should
-          specify the connection id
+        description: If pulling of your image requires authorization, then you should specify the connection id
         type: string
       livenessProbeInitialDelay:
         description: Initial delay for liveness probe of model pod
         type: integer
       maxReplicas:
-        description: Maximum number of pods for model. By default the max replicas
-          parameter equals 1.
+        description: Maximum number of pods for model. By default the max replicas parameter equals 1.
         type: integer
       minReplicas:
-        description: Minimum number of pods for model. By default the min replicas
-          parameter equals 0.
+        description: Minimum number of pods for model. By default the min replicas parameter equals 0.
         type: integer
       nodeSelector:
         additionalProperties:
@@ -1182,8 +1174,6 @@ definitions:
       availableReplicas:
         description: Number of available pods
         type: integer
-      createdAt:
-        type: string
       deployment:
         description: The model k8s deployment name
         type: string
@@ -1211,8 +1201,6 @@ definitions:
                            custom resource are wrong. For example, there is not a model
                            image in a Docker registry.
             "Ready" - A model was deployed successfully.
-        type: string
-      updatedAt:
         type: string
     type: object
   ModelDeploymentTarget:
@@ -1246,8 +1234,7 @@ definitions:
   ModelPackagingResult:
     properties:
       name:
-        description: Name of a result. It can be docker image, path to s3 artifact
-          and so on
+        description: Name of a result. It can be docker image, path to s3 artifact and so on
         type: string
       value:
         description: Specific value
@@ -1255,8 +1242,6 @@ definitions:
     type: object
   ModelPackagingStatus:
     properties:
-      createdAt:
-        type: string
       exitCode:
         description: Pod exit code
         type: integer
@@ -1276,8 +1261,6 @@ definitions:
         type: array
       state:
         description: Model Packaging State
-        type: string
-      updatedAt:
         type: string
     type: object
   ModelRouteSpec:
@@ -1301,15 +1284,11 @@ definitions:
     type: object
   ModelRouteStatus:
     properties:
-      createdAt:
-        type: string
       edgeUrl:
         description: Full url with prefix to a model deployment service
         type: string
       state:
         description: State of Model Route
-        type: string
-      updatedAt:
         type: string
     type: object
   ModelSource:
@@ -1339,12 +1318,10 @@ definitions:
           $ref: '#/definitions/DataBindingDir'
         type: array
       entrypoint:
-        description: Model training file. It can be python\bash script or jupiter
-          notebook
+        description: Model training file. It can be python\bash script or jupiter notebook
         type: string
       envs:
-        description: Custom environment variables that should be set before entrypoint
-          invocation.
+        description: Custom environment variables that should be set before entrypoint invocation.
         items:
           $ref: '#/definitions/EnvironmentVariable'
         type: array
@@ -1390,8 +1367,6 @@ definitions:
         items:
           $ref: '#/definitions/TrainingResult'
         type: array
-      createdAt:
-        type: string
       exitCode:
         description: Pod exit code
         type: integer
@@ -1407,8 +1382,6 @@ definitions:
       state:
         description: Model Packaging State
         type: string
-      updatedAt:
-        type: string
     type: object
   ObjectStorage:
     properties:
@@ -1420,11 +1393,6 @@ definitions:
         type: string
     type: object
   PackagingIntegrationStatus:
-    properties:
-      createdAt:
-        type: string
-      updatedAt:
-        type: string
     type: object
   RemoteModelSource:
     properties:
@@ -1493,11 +1461,6 @@ definitions:
         type: string
     type: object
   ToolchainIntegrationStatus:
-    properties:
-      createdAt:
-        type: string
-      updatedAt:
-        type: string
     type: object
   TrainingResult:
     properties:

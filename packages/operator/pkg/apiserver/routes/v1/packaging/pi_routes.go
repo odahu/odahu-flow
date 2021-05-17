@@ -18,14 +18,14 @@ package packaging
 
 import (
 	"github.com/gin-gonic/gin"
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 )
 
-func ConfigurePiRoutes(routeGroup *gin.RouterGroup, piRepository mp_repository.PackagingIntegrationRepository) {
+func ConfigurePiRoutes(routeGroup *gin.RouterGroup, piService packaging_integration.Service) {
 
 	piController := &PackagingIntegrationController{
-		repository: piRepository,
-		validator:  NewPiValidator(),
+		service:   piService,
+		validator: NewPiValidator(),
 	}
 
 	routeGroup.GET(GetPackagingIntegrationURL, piController.getPackagingIntegration)

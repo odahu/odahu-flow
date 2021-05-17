@@ -36,7 +36,7 @@ type Repository interface {
 	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
 	UpdateModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error
 	UpdateModelPackagingStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelPackagingStatus) error
-	CreateModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error
+	SaveModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }
 
@@ -45,7 +45,7 @@ type PackagingIntegrationRepository interface {
 	GetPackagingIntegrationList(options ...filter.ListOption) ([]packaging.PackagingIntegration, error)
 	DeletePackagingIntegration(id string) error
 	UpdatePackagingIntegration(md *packaging.PackagingIntegration) error
-	CreatePackagingIntegration(md *packaging.PackagingIntegration) error
+	SavePackagingIntegration(md *packaging.PackagingIntegration) error
 }
 
 type MPFilter struct {

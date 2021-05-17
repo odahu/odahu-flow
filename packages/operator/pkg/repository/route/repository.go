@@ -29,7 +29,7 @@ type Repository interface {
 	GetModelRouteList(ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]deployment.ModelRoute, error)
 	DeleteModelRoute(ctx context.Context, tx *sql.Tx, name string) error
 	UpdateModelRoute(ctx context.Context, tx *sql.Tx, md *deployment.ModelRoute) error
-	CreateModelRoute(ctx context.Context, tx *sql.Tx, r *deployment.ModelRoute) error
+	SaveModelRoute(ctx context.Context, tx *sql.Tx, r *deployment.ModelRoute) error
 	UpdateModelRouteStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelRouteStatus) error
 	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
@@ -38,8 +38,7 @@ type Repository interface {
 	IsDefault(ctx context.Context, id string, tx *sql.Tx) (bool, error)
 }
 
-
 type Filter struct {
-	Default	     []bool `name:"is_default" postgres:"is_default"`
-	MdID	     []string `name:"mdId" postgres:"spec->'modelDeployments'->0->>'mdName'"`
+	Default []bool   `name:"is_default" postgres:"is_default"`
+	MdID    []string `name:"mdId" postgres:"spec->'modelDeployments'->0->>'mdName'"`
 }

@@ -19,6 +19,7 @@ package packaging_test
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
 	"testing"
@@ -94,7 +95,7 @@ var (
 	}
 	validNodeSelector = map[string]string{"mode": "valid"}
 	validPackaging    = packaging.ModelPackaging{
-	    ID: "valid-id",
+		ID: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
@@ -118,7 +119,7 @@ type ModelPackagingValidationSuite struct {
 	g            *GomegaWithT
 	mpKubeClient kube_client.Client
 	mpRepo       mp_repository.Repository
-	mpiRepo      mp_repository.PackagingIntegrationRepository
+	piService    packaging_integration.Service
 	connRepo     conn_repository.Repository
 	validator    *pack_route.MpValidator
 }
@@ -132,7 +133,8 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 	s.mpKubeClient = kube_client.NewClient(testNamespace, testNamespace, kubeClient, cfg)
 
 	s.mpRepo = mp_post_repository.PackagingRepo{DB: db}
-	s.mpiRepo = mp_post_repository.PackagingIntegrationRepository{DB: db}
+	piRepo := mp_post_repository.PackagingIntegrationRepository{DB: db}
+	s.piService = packaging_integration.NewService(&piRepo)
 
 	s.connRepo = conn_k8s_repository.NewRepository(testNamespace, kubeClient)
 
@@ -140,13 +142,13 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 	packagingConfig.NodePools = append(packagingConfig.NodePools, config.NodePool{NodeSelector: validNodeSelector})
 
 	s.validator = pack_route.NewMpValidator(
-		s.mpiRepo,
+		s.piService,
 		s.connRepo,
 		packagingConfig,
 		config.NvidiaResourceName,
 	)
 
-	err := s.mpiRepo.CreatePackagingIntegration(&packaging.PackagingIntegration{
+	err := s.piService.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpValid,
 		Spec: packaging.PackagingIntegrationSpec{
 			Entrypoint:   piEntrypointMpValid,
@@ -161,7 +163,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		s.T().Fatal(err)
 	}
 
-	err = s.connRepo.CreateConnection(&connection.Connection{
+	err = s.connRepo.SaveConnection(&connection.Connection{
 		ID: connDockerTypeMpValid,
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.DockerType,
@@ -172,7 +174,7 @@ func (s *ModelPackagingValidationSuite) SetupSuite() {
 		s.T().Fatal(err)
 	}
 
-	err = s.connRepo.CreateConnection(&connection.Connection{
+	err = s.connRepo.SaveConnection(&connection.Connection{
 		ID: connS3TypeMpValid,
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.S3Type,
@@ -193,7 +195,7 @@ func (s *ModelPackagingValidationSuite) TearDownSuite() {
 		s.T().Fatal(err)
 	}
 
-	if err := s.mpiRepo.DeletePackagingIntegration(piIDMpValid); err != nil {
+	if err := s.piService.DeletePackagingIntegration(piIDMpValid); err != nil {
 		s.T().Fatal(err)
 	}
 }
@@ -352,7 +354,7 @@ func (s *ModelPackagingValidationSuite) TestMpRequiredTargets() {
 
 func (s *ModelPackagingValidationSuite) TestMpDefaultTargets() {
 	ti := &packaging.ModelPackaging{
-	    ID: "valid-id",
+		ID: "valid-id",
 		Spec: packaging.ModelPackagingSpec{
 			IntegrationName:  piIDMpValid,
 			ArtifactName:     "test",
@@ -496,7 +498,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 
 	// If configuration output connection is not set then user must specify it as ModelTraining parameter
 	err := pack_route.NewMpValidator(
-		s.mpiRepo,
+		s.piService,
 		s.connRepo,
 		config.NewDefaultModelPackagingConfig(),
 		config.NvidiaResourceName,
@@ -509,7 +511,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 	packConfig := config.NewDefaultModelPackagingConfig()
 	packConfig.OutputConnectionID = testMpOutConnDefault
 	_ = pack_route.NewMpValidator(
-		s.mpiRepo,
+		s.piService,
 		s.connRepo,
 		packConfig,
 		config.NvidiaResourceName,
@@ -522,7 +524,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 	packConfig.OutputConnectionID = "default-output-connection"
 	mp.Spec.OutputConnection = testMpOutConn
 	_ = pack_route.NewMpValidator(
-		s.mpiRepo,
+		s.piService,
 		s.connRepo,
 		config.NewDefaultModelPackagingConfig(),
 		config.NvidiaResourceName,
@@ -534,7 +536,7 @@ func (s *ModelPackagingValidationSuite) TestOutputConnection() {
 		Spec: packaging.ModelPackagingSpec{OutputConnection: testMpOutConnNotFound},
 	}
 	err = pack_route.NewMpValidator(
-		s.mpiRepo,
+		s.piService,
 		s.connRepo,
 		config.NewDefaultModelPackagingConfig(),
 		config.NvidiaResourceName,

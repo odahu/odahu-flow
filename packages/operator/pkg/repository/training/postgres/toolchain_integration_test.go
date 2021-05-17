@@ -29,9 +29,9 @@ func TestToolchainRepository(t *testing.T) {
 		},
 	}
 
-	g.Expect(tRepo.CreateToolchainIntegration(created)).NotTo(HaveOccurred())
+	g.Expect(tRepo.SaveToolchainIntegration(created)).NotTo(HaveOccurred())
 
-	g.Expect(tRepo.CreateToolchainIntegration(created)).To(And(
+	g.Expect(tRepo.SaveToolchainIntegration(created)).To(And(
 		HaveOccurred(),
 		MatchError(odahuErrors.AlreadyExistError{Entity: tiID}),
 	))

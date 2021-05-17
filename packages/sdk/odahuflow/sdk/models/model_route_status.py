@@ -15,36 +15,26 @@ class ModelRouteStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, edge_url: str=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(self, edge_url: str=None, state: str=None):  # noqa: E501
         """ModelRouteStatus - a model defined in Swagger
 
-        :param created_at: The created_at of this ModelRouteStatus.  # noqa: E501
-        :type created_at: str
         :param edge_url: The edge_url of this ModelRouteStatus.  # noqa: E501
         :type edge_url: str
         :param state: The state of this ModelRouteStatus.  # noqa: E501
         :type state: str
-        :param updated_at: The updated_at of this ModelRouteStatus.  # noqa: E501
-        :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
             'edge_url': str,
-            'state': str,
-            'updated_at': str
+            'state': str
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
             'edge_url': 'edgeUrl',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            'state': 'state'
         }
 
-        self._created_at = created_at
         self._edge_url = edge_url
         self._state = state
-        self._updated_at = updated_at
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelRouteStatus':
@@ -56,27 +46,6 @@ class ModelRouteStatus(Model):
         :rtype: ModelRouteStatus
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def created_at(self) -> str:
-        """Gets the created_at of this ModelRouteStatus.
-
-
-        :return: The created_at of this ModelRouteStatus.
-        :rtype: str
-        """
-        return self._created_at
-
-    @created_at.setter
-    def created_at(self, created_at: str):
-        """Sets the created_at of this ModelRouteStatus.
-
-
-        :param created_at: The created_at of this ModelRouteStatus.
-        :type created_at: str
-        """
-
-        self._created_at = created_at
 
     @property
     def edge_url(self) -> str:
@@ -123,24 +92,3 @@ class ModelRouteStatus(Model):
         """
 
         self._state = state
-
-    @property
-    def updated_at(self) -> str:
-        """Gets the updated_at of this ModelRouteStatus.
-
-
-        :return: The updated_at of this ModelRouteStatus.
-        :rtype: str
-        """
-        return self._updated_at
-
-    @updated_at.setter
-    def updated_at(self, updated_at: str):
-        """Sets the updated_at of this ModelRouteStatus.
-
-
-        :param updated_at: The updated_at of this ModelRouteStatus.
-        :type updated_at: str
-        """
-
-        self._updated_at = updated_at

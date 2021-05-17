@@ -21,36 +21,38 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
+	job_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/batch/job"
+	service_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/batch/service"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/configuration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
 	userinfo "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/user"
-	service_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/batch/service"
-	job_routes "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/batch/job"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
+	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/memory"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/vault"
+	batch_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/batch"
 	conn_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/connection"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
-	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
-	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
-	batch_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/batch"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
+	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
+	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	pack_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
-	train_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 
+	batch_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/batch/postgres"
 	conn_repo_type "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	deploy_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
-	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
-	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
-	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	batch_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/batch/postgres"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/outbox"
+	pack_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
+	route_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/route/postgres"
+	train_repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
 )
 
 func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql.DB, cfg config.Config) (err error) {
@@ -77,10 +79,12 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		return errors.New("unexpect connection repository type")
 	}
 
-
 	toolchainRepo := train_repo.ToolchainRepo{DB: db}
+	toolchainService := toolchain.NewService(toolchainRepo)
+
 	trainRepo := train_repo.TrainingRepo{DB: db}
 	piRepo := pack_repo.PackagingIntegrationRepository{DB: db}
+	piService := packaging_integration.NewService(&piRepo)
 	packRepo := pack_repo.PackagingRepo{DB: db}
 	deployRepo := deploy_repo.DeploymentRepo{DB: db}
 	routeRepo := route_repo.RouteRepo{DB: db}
@@ -108,7 +112,6 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	batchServiceService := batch_service.NewInferenceServiceService(batchServiceRepo)
 	batchJobService := batch_service.NewJobService(batchJobRepo, batchServiceRepo, connService)
 
-
 	connection.ConfigureRoutes(routeGroup, connService, utils.EvaluatePublicKey, cfg.Connection)
 
 	mdEventGetter := outbox.DeploymentEventGetter{DB: db}
@@ -119,9 +122,9 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 	packagingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Packaging.Enabled))
 	packaging.ConfigureRoutes(
 		packagingRouteGroup, packKubeClient, packService,
-		piRepo, connRepository, cfg.Packaging, cfg.Common.ResourceGPUName,
+		piService, connRepository, cfg.Packaging, cfg.Common.ResourceGPUName,
 	)
-	packaging.ConfigurePiRoutes(packagingRouteGroup, piRepo)
+	packaging.ConfigurePiRoutes(packagingRouteGroup, piService)
 
 	trainingRouteGroup := routeGroup.Group("", routes.DisableAPIMiddleware(cfg.Training.Enabled))
 
@@ -129,10 +132,10 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		trainingRouteGroup,
 		cfg.Training,
 		cfg.Common.ResourceGPUName,
-		trainService, toolchainRepo, connRepository, trainKubeClient)
+		trainService, toolchainService, connRepository, trainKubeClient)
 
 	training.ConfigureToolchainRoutes(
-		trainingRouteGroup, toolchainRepo,
+		trainingRouteGroup, toolchainService,
 	)
 
 	configuration.ConfigureRoutes(routeGroup, cfg)

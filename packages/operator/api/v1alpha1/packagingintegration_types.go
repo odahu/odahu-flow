@@ -49,12 +49,7 @@ type PackagingIntegrationSpec struct {
 }
 
 // PackagingIntegrationStatus defines the observed state of PackagingIntegration
-type PackagingIntegrationStatus struct {
-	// Info about create and update
-	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
-	Modifiable `json:",inline"`
-}
+type PackagingIntegrationStatus struct{}
 
 func (piStatus PackagingIntegrationStatus) Value() (driver.Value, error) {
 	return json.Marshal(piStatus)

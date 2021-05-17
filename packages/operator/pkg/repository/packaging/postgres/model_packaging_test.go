@@ -53,12 +53,12 @@ var (
 
 type MPRepositorySuite struct {
 	suite.Suite
-	rep       mp_repository.Repository
+	rep mp_repository.Repository
 }
 
 func generateMP() *packaging.ModelPackaging {
 	return &packaging.ModelPackaging{
-		ID: mpID,
+		ID:        mpID,
 		CreatedAt: time.Now().Round(time.Microsecond),
 		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: packaging.ModelPackagingSpec{
@@ -93,7 +93,7 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 
 	ctx := context.Background()
 
-	assert.NoError(s.T(), s.rep.CreateModelPackaging(ctx, nil, created))
+	assert.NoError(s.T(), s.rep.SaveModelPackaging(ctx, nil, created))
 
 	fetched, err := s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
@@ -116,20 +116,18 @@ func (s *MPRepositorySuite) TestModelPackagingRepository() {
 
 	newStatus := odahuflowv1alpha1.ModelPackagingStatus{PodName: "Some name"}
 	assert.NoError(s.T(), s.rep.UpdateModelPackagingStatus(ctx, nil, mpID, newStatus))
-	fetched, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
+	fetched, err = s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
 	assert.Exactly(s.T(), fetched.Status.PodName, "Some name")
 
 	assert.False(s.T(), fetched.DeletionMark)
-	assert.NoError(s.T(), s.rep.SetDeletionMark(ctx, nil,  mpID, true))
-	fetched, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
+	assert.NoError(s.T(), s.rep.SetDeletionMark(ctx, nil, mpID, true))
+	fetched, err = s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), fetched.DeletionMark)
 
-
-	assert.NoError(s.T(), s.rep.DeleteModelPackaging(ctx, nil,  mpID))
-	_, err = s.rep.GetModelPackaging(ctx, nil,  mpID)
+	assert.NoError(s.T(), s.rep.DeleteModelPackaging(ctx, nil, mpID))
+	_, err = s.rep.GetModelPackaging(ctx, nil, mpID)
 	assert.Error(s.T(), err)
 	assert.Exactly(s.T(), err, odahuErrors.NotFoundError{Entity: mpID})
 }
-

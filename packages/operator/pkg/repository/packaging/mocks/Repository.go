@@ -45,7 +45,7 @@ func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 }
 
 // CreateModelPackaging provides a mock function with given fields: ctx, tx, mp
-func (_m *Repository) CreateModelPackaging(ctx context.Context, tx *sql.Tx, mp *apispackaging.ModelPackaging) error {
+func (_m *Repository) SaveModelPackaging(ctx context.Context, tx *sql.Tx, mp *apispackaging.ModelPackaging) error {
 	ret := _m.Called(ctx, tx, mp)
 
 	var r0 error

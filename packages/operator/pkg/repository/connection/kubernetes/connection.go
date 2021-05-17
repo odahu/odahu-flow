@@ -26,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"time"
 )
 
 var (
@@ -169,7 +168,6 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 
 	// TODO: think about update, not replacing as for now
 	k8sConn.Spec = conn.Spec
-	k8sConn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sConn.ObjectMeta.Labels = transformToLabels(conn)
 
 	if err := kc.k8sClient.Update(context.TODO(), &k8sConn); err != nil {
@@ -183,7 +181,7 @@ func (kc *k8sConnectionRepository) UpdateConnection(conn *connection.Connection)
 	return nil
 }
 
-func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Connection) error {
+func (kc *k8sConnectionRepository) SaveConnection(connection *connection.Connection) error {
 	conn := &v1alpha1.Connection{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      connection.ID,
@@ -192,9 +190,6 @@ func (kc *k8sConnectionRepository) CreateConnection(connection *connection.Conne
 		},
 		Spec: connection.Spec,
 	}
-
-	conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := kc.k8sClient.Create(context.TODO(), conn); err != nil {
 		logC.Error(err, "ConnectionName creation error from k8s", "name", connection.ID)

@@ -45,13 +45,12 @@ func TestSuiteRun(t *testing.T) {
 type TestSuite struct {
 	suite.Suite
 	mockRepo *mocks.Repository
-	service service.Service
-	db *sql.DB
-	dbMock sqlmock.Sqlmock
-	as *assert.Assertions
-	nilTx *sql.Tx
+	service  service.Service
+	db       *sql.DB
+	dbMock   sqlmock.Sqlmock
+	as       *assert.Assertions
+	nilTx    *sql.Tx
 }
-
 
 func (s *TestSuite) SetupSuite() {
 	s.as = assert.New(s.T())
@@ -240,7 +239,7 @@ func (s *TestSuite) TestCreateModelTraining() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelTraining", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("SaveModelTraining", ctx, s.nilTx, en).Return(nil)
 	as.NoError(s.service.CreateModelTraining(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
 }
@@ -250,7 +249,7 @@ func (s *TestSuite) TestCreateModelTraining_CreatedAt() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelTraining", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("SaveModelTraining", ctx, s.nilTx, en).Return(nil)
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.CreateModelTraining(ctx, en))
 	// CreatedAt, UpdatedAt fields must be updated on now during the invocation
@@ -265,7 +264,7 @@ func (s *TestSuite) TestCreateModelTraining_Error() {
 	en := newStubMT()
 	ctx := context.Background()
 	anyError := errors.New("any error")
-	s.mockRepo.On("CreateModelTraining", ctx, s.nilTx, en).Return(anyError)
+	s.mockRepo.On("SaveModelTraining", ctx, s.nilTx, en).Return(anyError)
 
 	as.Error(s.service.CreateModelTraining(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())

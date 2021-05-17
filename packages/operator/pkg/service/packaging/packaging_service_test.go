@@ -45,13 +45,12 @@ func TestSuiteRun(t *testing.T) {
 type TestSuite struct {
 	suite.Suite
 	mockRepo *mocks.Repository
-	service service.Service
-	db *sql.DB
-	dbMock sqlmock.Sqlmock
-	as *assert.Assertions
-	nilTx *sql.Tx
+	service  service.Service
+	db       *sql.DB
+	dbMock   sqlmock.Sqlmock
+	as       *assert.Assertions
+	nilTx    *sql.Tx
 }
-
 
 func (s *TestSuite) SetupSuite() {
 	s.as = assert.New(s.T())
@@ -180,7 +179,6 @@ func (s *TestSuite) TestUpdateModelPackagingStatus() {
 	s.mockRepo.On("GetModelPackaging", ctx, mockTx, enID).Return(repoEn, nil)
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 
-
 	// Assume that repository return no error while set new status with not touched spec snapshot
 	newStatus := repoEn.Status
 	newStatus.PodName = "new Pod name"
@@ -237,7 +235,7 @@ func (s *TestSuite) TestCreateModelPackaging() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelPackaging", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("SaveModelPackaging", ctx, s.nilTx, en).Return(nil)
 
 	as.NoError(s.service.CreateModelPackaging(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -247,7 +245,7 @@ func (s *TestSuite) TestCreateModelPackaging_CreatedAt() {
 
 	en := newStubMT()
 	ctx := context.Background()
-	s.mockRepo.On("CreateModelPackaging", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("SaveModelPackaging", ctx, s.nilTx, en).Return(nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.CreateModelPackaging(ctx, en))
@@ -263,7 +261,7 @@ func (s *TestSuite) TestCreateModelPackaging_Error() {
 	en := newStubMT()
 	ctx := context.Background()
 	anyError := errors.New("any error")
-	s.mockRepo.On("CreateModelPackaging", ctx, s.nilTx, en).Return(anyError)
+	s.mockRepo.On("SaveModelPackaging", ctx, s.nilTx, en).Return(anyError)
 
 	as.Error(s.service.CreateModelPackaging(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())

@@ -7,8 +7,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 const (
@@ -113,7 +111,6 @@ func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegra
 	}
 
 	md.Status = oldTi.Status
-	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", toolchainIntegrationTable)
 	_, err = tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
@@ -123,10 +120,7 @@ func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegra
 	return nil
 }
 
-func (tr ToolchainRepo) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
-
-	md.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	md.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+func (tr ToolchainRepo) SaveToolchainIntegration(md *training.ToolchainIntegration) error {
 
 	_, err := tr.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", toolchainIntegrationTable),

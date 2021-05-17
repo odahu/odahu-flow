@@ -12,7 +12,7 @@ type TIStubClient struct {
 	db map[string]training.ToolchainIntegration
 }
 
-func NewTIStubClient() TIStubClient{
+func NewTIStubClient() TIStubClient {
 	return TIStubClient{
 		db: make(map[string]training.ToolchainIntegration),
 	}
@@ -48,19 +48,18 @@ func (t TIStubClient) UpdateToolchainIntegration(md *training.ToolchainIntegrati
 
 func (t TIStubClient) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
 	t.db[md.ID] = training.ToolchainIntegration{
-		ID:    md.ID,
-		Spec:  md.Spec,
+		ID:     md.ID,
+		Spec:   md.Spec,
 		Status: md.Status,
 	}
 	return nil
 }
 
-
 type PIStubClient struct {
 	db map[string]packaging.PackagingIntegration
 }
 
-func NewPIStubClient() PIStubClient{
+func NewPIStubClient() PIStubClient {
 	return PIStubClient{
 		db: make(map[string]packaging.PackagingIntegration),
 	}
@@ -100,10 +99,10 @@ func (p PIStubClient) UpdatePackagingIntegration(md *packaging.PackagingIntegrat
 	panic("implement me")
 }
 
-func (p PIStubClient) CreatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (p PIStubClient) SavePackagingIntegration(md *packaging.PackagingIntegration) error {
 	p.db[md.ID] = packaging.PackagingIntegration{
-		ID:    md.ID,
-		Spec:  md.Spec,
+		ID:     md.ID,
+		Spec:   md.Spec,
 		Status: md.Status,
 	}
 	return nil

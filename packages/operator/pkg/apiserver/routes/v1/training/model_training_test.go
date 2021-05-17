@@ -33,8 +33,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
@@ -54,11 +54,11 @@ type ModelTrainingRouteSuite struct {
 	g      *GomegaWithT
 	server *gin.Engine
 
-	trainService    mt_service.Service
-	toolchainRepo   mt_repository.ToolchainRepository
-	connRepo        conn_repository.Repository
-	kubeTrainClient kube_client.Client
-	k8sClient       client.Client
+	trainService     mt_service.Service
+	toolchainService toolchain.Service
+	connRepo         conn_repository.Repository
+	kubeTrainClient  kube_client.Client
+	k8sClient        client.Client
 }
 
 func (s *ModelTrainingRouteSuite) SetupSuite() {
@@ -66,13 +66,16 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	s.k8sClient = kubeClient
 
 	s.trainService = mt_service.NewService(mt_postgres_repository.TrainingRepo{DB: db})
-	s.toolchainRepo = mt_postgres_repository.ToolchainRepo{DB: db}
+
+	tiRepo := mt_postgres_repository.ToolchainRepo{DB: db}
+	s.toolchainService = toolchain.NewService(tiRepo)
+
 	s.kubeTrainClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 
 	s.connRepo = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient)
 
 	// Create the connection that will be used as the vcs param for a training.
-	if err := s.connRepo.CreateConnection(&connection.Connection{
+	if err := s.connRepo.SaveConnection(&connection.Connection{
 		ID: testMtVCSID,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
@@ -84,7 +87,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	}
 
 	// Create the toolchain integration that will be used for a training.
-	if err := s.toolchainRepo.CreateToolchainIntegration(&training.ToolchainIntegration{
+	if err := s.toolchainService.CreateToolchainIntegration(&training.ToolchainIntegration{
 		ID: testToolchainIntegrationID,
 		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
 			DefaultImage: testToolchainMtImage,
@@ -95,7 +98,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the outputConnection param for a training.
-	if err := s.connRepo.CreateConnection(&connection.Connection{
+	if err := s.connRepo.SaveConnection(&connection.Connection{
 		ID: testMtOutConn,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -106,7 +109,7 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the default outputConnection param for a training.
-	if err := s.connRepo.CreateConnection(&connection.Connection{
+	if err := s.connRepo.SaveConnection(&connection.Connection{
 		ID: testMtOutConnDefault,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -121,7 +124,7 @@ func (s *ModelTrainingRouteSuite) TearDownSuite() {
 
 	var errs []error
 
-	if err := s.toolchainRepo.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
+	if err := s.toolchainService.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
 		errs = append(errs, err)
 	}
 
@@ -160,7 +163,7 @@ func (s *ModelTrainingRouteSuite) registerHandlers(trainingConfig config.ModelTr
 
 	train_route.ConfigureRoutes(
 		trainGroup, trainingConfig, config.NvidiaResourceName,
-		s.trainService, s.toolchainRepo, s.connRepo, s.kubeTrainClient)
+		s.trainService, s.toolchainService, s.connRepo, s.kubeTrainClient)
 }
 
 func (s *ModelTrainingRouteSuite) newMultipleMtStubs() {

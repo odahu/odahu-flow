@@ -43,6 +43,7 @@ require (
 	github.com/swaggo/swag v1.5.0
 	github.com/tektoncd/pipeline v0.13.1-0.20200625065359-44f22a067b75
 	github.com/tinylib/msgp v1.1.0 // indirect
+	github.com/vektra/mockery/v2 v2.7.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0

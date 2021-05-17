@@ -3220,6 +3220,10 @@ var doc = `{
         "Connection": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Connection id",
                     "type": "string"
@@ -3233,6 +3237,10 @@ var doc = `{
                     "description": "Connection status",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -3520,6 +3528,10 @@ var doc = `{
         "PackagingIntegration": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Packaging integration id",
                     "type": "string"
@@ -3533,6 +3545,10 @@ var doc = `{
                     "description": "Packaging integration status",
                     "type": "object",
                     "$ref": "#/definitions/PackagingIntegrationStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -3684,6 +3700,10 @@ var doc = `{
         "ToolchainIntegration": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Toolchain integration id",
                     "type": "string"
@@ -3697,6 +3717,10 @@ var doc = `{
                     "description": "Toolchain integration status",
                     "type": "object",
                     "$ref": "#/definitions/ToolchainIntegrationStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -3780,18 +3804,12 @@ var doc = `{
         "ConnectionStatus": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "secretName": {
                     "description": "Kubernetes secret name",
                     "type": "string"
                 },
                 "serviceAccount": {
                     "description": "Kubernetes service account",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -3902,9 +3920,6 @@ var doc = `{
                     "description": "Number of available pods",
                     "type": "integer"
                 },
-                "createdAt": {
-                    "type": "string"
-                },
                 "deployment": {
                     "description": "The model k8s deployment name",
                     "type": "string"
@@ -3931,9 +3946,6 @@ var doc = `{
                 },
                 "state": {
                     "description": "The state of a model \n  \"Processing\" - A model was not deployed. Because some parameters of the\n                 custom resource are wrong. For example, there is not a model\n                 image in a Docker registry.\n  \"Ready\" - A model was deployed successfully.",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -3995,9 +4007,6 @@ var doc = `{
         "ModelPackagingStatus": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "exitCode": {
                     "description": "Pod exit code",
                     "type": "integer"
@@ -4023,9 +4032,6 @@ var doc = `{
                 },
                 "state": {
                     "description": "Model Packaging State",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4053,18 +4059,12 @@ var doc = `{
         "ModelRouteStatus": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "edgeUrl": {
                     "description": "Full url with prefix to a model deployment service",
                     "type": "string"
                 },
                 "state": {
                     "description": "State of Model Route",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4168,9 +4168,6 @@ var doc = `{
                         "$ref": "#/definitions/TrainingResult"
                     }
                 },
-                "createdAt": {
-                    "type": "string"
-                },
                 "exitCode": {
                     "description": "Pod exit code",
                     "type": "integer"
@@ -4190,9 +4187,6 @@ var doc = `{
                 "state": {
                     "description": "Model Packaging State",
                     "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
@@ -4210,15 +4204,7 @@ var doc = `{
             }
         },
         "PackagingIntegrationStatus": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "RemoteModelSource": {
             "type": "object",
@@ -4317,15 +4303,7 @@ var doc = `{
             }
         },
         "ToolchainIntegrationStatus": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "TrainingResult": {
             "type": "object",

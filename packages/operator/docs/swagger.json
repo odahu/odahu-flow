@@ -3204,6 +3204,10 @@
         "Connection": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Connection id",
                     "type": "string"
@@ -3217,6 +3221,10 @@
                     "description": "Connection status",
                     "type": "object",
                     "$ref": "#/definitions/ConnectionStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -3504,6 +3512,10 @@
         "PackagingIntegration": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Packaging integration id",
                     "type": "string"
@@ -3517,6 +3529,10 @@
                     "description": "Packaging integration status",
                     "type": "object",
                     "$ref": "#/definitions/PackagingIntegrationStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -3668,6 +3684,10 @@
         "ToolchainIntegration": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "description": "CreatedAt",
+                    "type": "string"
+                },
                 "id": {
                     "description": "Toolchain integration id",
                     "type": "string"
@@ -3681,6 +3701,10 @@
                     "description": "Toolchain integration status",
                     "type": "object",
                     "$ref": "#/definitions/ToolchainIntegrationStatus"
+                },
+                "updatedAt": {
+                    "description": "UpdatedAt",
+                    "type": "string"
                 }
             }
         },
@@ -3764,18 +3788,12 @@
         "ConnectionStatus": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "secretName": {
                     "description": "Kubernetes secret name",
                     "type": "string"
                 },
                 "serviceAccount": {
                     "description": "Kubernetes service account",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -3886,9 +3904,6 @@
                     "description": "Number of available pods",
                     "type": "integer"
                 },
-                "createdAt": {
-                    "type": "string"
-                },
                 "deployment": {
                     "description": "The model k8s deployment name",
                     "type": "string"
@@ -3915,9 +3930,6 @@
                 },
                 "state": {
                     "description": "The state of a model \n  \"Processing\" - A model was not deployed. Because some parameters of the\n                 custom resource are wrong. For example, there is not a model\n                 image in a Docker registry.\n  \"Ready\" - A model was deployed successfully.",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -3979,9 +3991,6 @@
         "ModelPackagingStatus": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "exitCode": {
                     "description": "Pod exit code",
                     "type": "integer"
@@ -4007,9 +4016,6 @@
                 },
                 "state": {
                     "description": "Model Packaging State",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4037,18 +4043,12 @@
         "ModelRouteStatus": {
             "type": "object",
             "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
                 "edgeUrl": {
                     "description": "Full url with prefix to a model deployment service",
                     "type": "string"
                 },
                 "state": {
                     "description": "State of Model Route",
-                    "type": "string"
-                },
-                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4152,9 +4152,6 @@
                         "$ref": "#/definitions/TrainingResult"
                     }
                 },
-                "createdAt": {
-                    "type": "string"
-                },
                 "exitCode": {
                     "description": "Pod exit code",
                     "type": "integer"
@@ -4174,9 +4171,6 @@
                 "state": {
                     "description": "Model Packaging State",
                     "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
@@ -4194,15 +4188,7 @@
             }
         },
         "PackagingIntegrationStatus": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "RemoteModelSource": {
             "type": "object",
@@ -4301,15 +4287,7 @@
             }
         },
         "ToolchainIntegrationStatus": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "TrainingResult": {
             "type": "object",

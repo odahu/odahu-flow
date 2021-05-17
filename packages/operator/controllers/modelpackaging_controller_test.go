@@ -132,7 +132,7 @@ func (s *ModelPackagingControllerSuite) SetupTest() {
 		s.g.Expect(mgr.Start(s.stopMgr)).NotTo(HaveOccurred())
 	}()
 
-	if err := s.stubPIClient.CreatePackagingIntegration(s.createPackagingIntegration()); err != nil {
+	if err := s.stubPIClient.SavePackagingIntegration(s.createPackagingIntegration()); err != nil {
 		s.T().Fatal(err)
 	}
 }

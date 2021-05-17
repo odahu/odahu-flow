@@ -14,13 +14,13 @@ import (
 )
 
 const (
-	ModelDeploymentTable = "odahu_operator_deployment"
-	ModelRouteTable = "odahu_operator_route"
+	ModelDeploymentTable        = "odahu_operator_deployment"
+	ModelRouteTable             = "odahu_operator_route"
 	uniqueViolationPostgresCode = pq.ErrorCode("23505") // unique_violation
 )
 
 var (
-	log = logf.Log.WithName("model-deployment--repository--postgres")
+	log       = logf.Log.WithName("model-deployment--repository--postgres")
 	MaxSize   = 500
 	FirstPage = 0
 	txOptions = &sql.TxOptions{
@@ -251,7 +251,7 @@ func (repo DeploymentRepo) UpdateModelDeploymentStatus(
 	return nil
 }
 
-func (repo DeploymentRepo) CreateModelDeployment(
+func (repo DeploymentRepo) SaveModelDeployment(
 	ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error {
 
 	var qrr utils.Querier
@@ -274,7 +274,7 @@ func (repo DeploymentRepo) CreateModelDeployment(
 	_, err = qrr.ExecContext(
 		ctx,
 		stmt,
-		args...
+		args...,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)

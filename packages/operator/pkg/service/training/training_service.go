@@ -21,8 +21,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	repo"github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
@@ -131,10 +131,9 @@ func (s serviceImpl) CreateModelTraining(ctx context.Context, mt *training.Model
 	mt.Status = v1alpha1.ModelTrainingStatus{
 		State: v1alpha1.ModelTrainingUnknown,
 	}
-	return s.repo.CreateModelTraining(ctx, nil, mt)
+	return s.repo.SaveModelTraining(ctx, nil, mt)
 }
 
 func NewService(repo repo.Repository) Service {
 	return &serviceImpl{repo: repo}
 }
-

@@ -16,13 +16,11 @@ class ModelTrainingStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, artifacts: List[TrainingResult]=None, created_at: str=None, exit_code: int=None, message: str=None, pod_name: str=None, reason: str=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(self, artifacts: List[TrainingResult]=None, exit_code: int=None, message: str=None, pod_name: str=None, reason: str=None, state: str=None):  # noqa: E501
         """ModelTrainingStatus - a model defined in Swagger
 
         :param artifacts: The artifacts of this ModelTrainingStatus.  # noqa: E501
         :type artifacts: List[TrainingResult]
-        :param created_at: The created_at of this ModelTrainingStatus.  # noqa: E501
-        :type created_at: str
         :param exit_code: The exit_code of this ModelTrainingStatus.  # noqa: E501
         :type exit_code: int
         :param message: The message of this ModelTrainingStatus.  # noqa: E501
@@ -33,39 +31,31 @@ class ModelTrainingStatus(Model):
         :type reason: str
         :param state: The state of this ModelTrainingStatus.  # noqa: E501
         :type state: str
-        :param updated_at: The updated_at of this ModelTrainingStatus.  # noqa: E501
-        :type updated_at: str
         """
         self.swagger_types = {
             'artifacts': List[TrainingResult],
-            'created_at': str,
             'exit_code': int,
             'message': str,
             'pod_name': str,
             'reason': str,
-            'state': str,
-            'updated_at': str
+            'state': str
         }
 
         self.attribute_map = {
             'artifacts': 'artifacts',
-            'created_at': 'createdAt',
             'exit_code': 'exitCode',
             'message': 'message',
             'pod_name': 'podName',
             'reason': 'reason',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            'state': 'state'
         }
 
         self._artifacts = artifacts
-        self._created_at = created_at
         self._exit_code = exit_code
         self._message = message
         self._pod_name = pod_name
         self._reason = reason
         self._state = state
-        self._updated_at = updated_at
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelTrainingStatus':
@@ -100,27 +90,6 @@ class ModelTrainingStatus(Model):
         """
 
         self._artifacts = artifacts
-
-    @property
-    def created_at(self) -> str:
-        """Gets the created_at of this ModelTrainingStatus.
-
-
-        :return: The created_at of this ModelTrainingStatus.
-        :rtype: str
-        """
-        return self._created_at
-
-    @created_at.setter
-    def created_at(self, created_at: str):
-        """Sets the created_at of this ModelTrainingStatus.
-
-
-        :param created_at: The created_at of this ModelTrainingStatus.
-        :type created_at: str
-        """
-
-        self._created_at = created_at
 
     @property
     def exit_code(self) -> int:
@@ -236,24 +205,3 @@ class ModelTrainingStatus(Model):
         """
 
         self._state = state
-
-    @property
-    def updated_at(self) -> str:
-        """Gets the updated_at of this ModelTrainingStatus.
-
-
-        :return: The updated_at of this ModelTrainingStatus.
-        :rtype: str
-        """
-        return self._updated_at
-
-    @updated_at.setter
-    def updated_at(self, updated_at: str):
-        """Sets the updated_at of this ModelTrainingStatus.
-
-
-        :param updated_at: The updated_at of this ModelTrainingStatus.
-        :type updated_at: str
-        """
-
-        self._updated_at = updated_at

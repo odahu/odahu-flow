@@ -35,7 +35,7 @@ type Repository interface {
 	DeleteModelDeployment(ctx context.Context, tx *sql.Tx, id string) error
 	UpdateModelDeployment(ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error
 	UpdateModelDeploymentStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelDeploymentStatus) error
-	CreateModelDeployment(ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error
+	SaveModelDeployment(ctx context.Context, tx *sql.Tx, md *deployment.ModelDeployment) error
 	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }

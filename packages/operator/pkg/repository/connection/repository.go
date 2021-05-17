@@ -29,7 +29,7 @@ type Repository interface {
 	GetConnectionList(options ...ListOption) ([]connection.Connection, error)
 	DeleteConnection(id string) error
 	UpdateConnection(connection *connection.Connection) error
-	CreateConnection(connection *connection.Connection) error
+	SaveConnection(connection *connection.Connection) error
 }
 
 type Filter struct {

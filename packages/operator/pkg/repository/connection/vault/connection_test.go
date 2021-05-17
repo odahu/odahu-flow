@@ -99,7 +99,7 @@ func (s *VaultConnRepoSuite) TestConnectionRepository() {
 		},
 	}
 
-	err := s.connRepo.CreateConnection(created)
+	err := s.connRepo.SaveConnection(created)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err := s.connRepo.GetConnection(connID)
