@@ -62,7 +62,7 @@ Invoke. Wrong token
 
     ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --base-url ${EDGE_URL} --token wrong
              Should not be equal  ${res.rc}  ${0}
-             Should contain       ${res.stderr}  401
+             Should contain       ${res.stderr}  Credentials are not correct
 
 Invoke. Pass parameters explicitly
     [Documentation]  Pass parameters explicitly
