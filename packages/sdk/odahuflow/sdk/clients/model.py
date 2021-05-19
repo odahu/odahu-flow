@@ -32,12 +32,13 @@ from odahuflow.sdk.utils import ensure_function_succeed
 LOGGER = logging.getLogger(__name__)
 
 
-def calculate_url(base_url: str, model_route: str = None, model_deployment: str = None,
+def calculate_url(base_url: str, token : str = None, model_route: str = None, model_deployment: str = None,
                   url_prefix: str = None, mr_client: ModelRouteClient = None):
     """
     Calculate url for model
 
     :param base_url: base model server url
+    :param token: model jwt token
     :param model_route: model route name
     :param model_deployment: model deployment name. Default route URL will be returned
     :param url_prefix: model prefix
@@ -52,7 +53,7 @@ def calculate_url(base_url: str, model_route: str = None, model_deployment: str 
 
     if model_route:
         if mr_client is None:
-            mr_client = ModelRouteClient(base_url=base_url)
+            mr_client = ModelRouteClient(base_url=base_url, token=token)
 
         model_route = mr_client.get(model_route)
 
@@ -60,12 +61,14 @@ def calculate_url(base_url: str, model_route: str = None, model_deployment: str 
         return model_route.status.edge_url
 
     if model_deployment:
-        md_client = ModelDeploymentClient(base_url=base_url)
+        md_client = ModelDeploymentClient(base_url=base_url, token=token)
         model_route = md_client.get_default_route(model_deployment)
         LOGGER.debug('Found default model route: %s', model_route)
         return model_route.status.edge_url
 
-    raise NotImplementedError("Cannot create a model url")
+    raise NotImplementedError(
+        "Cannot create a model url. Specify one of parameters: url prefix/model route/model deployment"
+    )
 
 
 class ModelClient:
@@ -111,7 +114,6 @@ class ModelClient:
         :param issuer_url: url for credential login
         :type issuer_url: str
         """
-        self._url = calculate_url(base_url, model_route, model_deployment, url_prefix)
         self._base_url = base_url
         self._http_client = http_client
         self._http_exception = http_exception
@@ -120,6 +122,7 @@ class ModelClient:
         token = token if token else odahuflow.sdk.config.API_TOKEN
         issuer_url = issuer_url if issuer_url else odahuflow.sdk.config.ISSUER_URL
 
+        self._url = calculate_url(base_url, token, model_route, model_deployment, url_prefix)
         self._authenticator = Authenticator(
             client_id=client_id,
             client_secret=client_secret,

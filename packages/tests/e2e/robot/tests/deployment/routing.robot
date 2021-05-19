@@ -110,7 +110,7 @@ Basic routing
     sleep  5s
 
     FOR    ${INDEX}    IN RANGE    1    20
-       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
     END
 
     Check model counter  ${MD_COUNTER_MODEL_1}
@@ -124,7 +124,7 @@ Basic mirroring
     sleep  5s
 
     FOR    ${INDEX}    IN RANGE    1    20
-       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
     END
 
     Check model counter  ${MD_COUNTER_MODEL_1}
@@ -138,7 +138,7 @@ Mirror to broken model
     sleep  5s
 
     FOR    ${INDEX}    IN RANGE    1    20
-       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --jwt ${AUTH_TOKEN}
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
     END
 
     Check model counter  ${MD_COUNTER_MODEL_1}

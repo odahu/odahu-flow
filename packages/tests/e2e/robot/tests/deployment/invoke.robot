@@ -33,17 +33,17 @@ Refresh security tokens
              Should be equal  ${res.rc}  ${0}
 
 *** Test Cases ***
-Invoke. Empty jwt
-    [Documentation]  Trying to invoke model with empty jwt. Suceeds if config exists, fails if not
+Invoke. Empty token
+    [Documentation]  Trying to invoke model with empty token. Suceeds if config exists, fails if not
     [Teardown]  Login to the api and edge
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --jwt ""
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --token ""
              Should be equal  ${res.rc}  ${0}
 
     Remove File  ${LOCAL_CONFIG}
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --jwt ""
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --token ""
              Should not be equal  ${res.rc}  ${0}
 
 Invoke. Empty model service url
@@ -52,15 +52,15 @@ Invoke. Empty model service url
     [Setup]     Remove File  ${LOCAL_CONFIG}
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --jwt "some_token"
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --token "some_token"
              Should not be equal  ${res.rc}      ${0}
              Should contain       ${res.stderr}  401
 
-Invoke. Wrong jwt
-    [Documentation]  Fails if jwt is wrong
+Invoke. Wrong token
+    [Documentation]  Fails if token is wrong
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --base-url ${EDGE_URL} --jwt wrong
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --base-url ${EDGE_URL} --token wrong
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  401
 
@@ -71,7 +71,7 @@ Invoke. Pass parameters explicitly
     Remove File  ${LOCAL_CONFIG}
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --base-url ${EDGE_URL} --jwt "${AUTH_TOKEN}"
+    ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --base-url ${EDGE_URL} --token "${AUTH_TOKEN}"
              Should be equal  ${res.rc}  ${0}
              Should contain   ${res.stdout}  42
 
