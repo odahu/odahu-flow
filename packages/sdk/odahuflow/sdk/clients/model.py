@@ -33,7 +33,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def calculate_url(base_url: str, token : str = None, model_route: str = None, model_deployment: str = None,
-                  url_prefix: str = None, mr_client: ModelRouteClient = None):
+                  url_prefix: str = None, client_id: str = '', client_secret: str = '', issuer_url: str = ''):
     """
     Calculate url for model
 
@@ -42,7 +42,9 @@ def calculate_url(base_url: str, token : str = None, model_route: str = None, mo
     :param model_route: model route name
     :param model_deployment: model deployment name. Default route URL will be returned
     :param url_prefix: model prefix
-    :param mr_client: ModelRoute client to use
+    :param client_id: client_id for Client Credentials OAuth2 flow
+    :param client_secret: client_secret for Client Credentials OAuth2 flow
+    :param issuer_url: url for credential login
     :return: model url
     """
     if not base_url:
@@ -52,8 +54,9 @@ def calculate_url(base_url: str, token : str = None, model_route: str = None, mo
         return f'{base_url}{url_prefix}'
 
     if model_route:
-        if mr_client is None:
-            mr_client = ModelRouteClient(base_url=base_url, token=token)
+        mr_client = ModelRouteClient(
+            base_url=base_url, token=token, client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
+        )
 
         model_route = mr_client.get(model_route)
 
@@ -61,13 +64,15 @@ def calculate_url(base_url: str, token : str = None, model_route: str = None, mo
         return model_route.status.edge_url
 
     if model_deployment:
-        md_client = ModelDeploymentClient(base_url=base_url, token=token)
+        md_client = ModelDeploymentClient(
+            base_url=base_url, token=token, client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
+        )
         model_route = md_client.get_default_route(model_deployment)
         LOGGER.debug('Found default model route: %s', model_route)
         return model_route.status.edge_url
 
-    raise NotImplementedError(
-        "Cannot create a model url. Specify one of parameters: url prefix/model route/model deployment"
+    raise ValueError(
+        "Cannot create a model url. Specify one of the arguments: url_prefix/model_route/model_deployment"
     )
 
 
@@ -122,7 +127,9 @@ class ModelClient:
         token = token if token else odahuflow.sdk.config.API_TOKEN
         issuer_url = issuer_url if issuer_url else odahuflow.sdk.config.ISSUER_URL
 
-        self._url = calculate_url(base_url, token, model_route, model_deployment, url_prefix)
+        self._url = calculate_url(
+            base_url, token, model_route, model_deployment, url_prefix, client_id, client_secret, issuer_url
+        )
         self._authenticator = Authenticator(
             client_id=client_id,
             client_secret=client_secret,

@@ -55,6 +55,11 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
         with open(json_file) as f:
             json_input = f.read()
 
+    if not (url_prefix or model_route or model_deployment):
+        raise ValueError(
+            'Cannot create a model url. Specify one of the options: --url-prefix/--model-route/--model-deployment'
+        )
+
     client = ModelClient(base_url, model_route, model_deployment, url_prefix, token)
 
     result = client.invoke(**json.loads(json_input))
@@ -75,6 +80,11 @@ def info(model_route: str, model_deployment: str, url_prefix: str, base_url: str
     \f
     :param client: Model HTTP Client
     """
+    if not (url_prefix or model_route or model_deployment):
+        raise ValueError(
+            'Cannot create a model url. Specify one of the options: --url-prefix/--model-route/--model-deployment'
+        )
+
     client = ModelClient(base_url, model_route, model_deployment, url_prefix, token)
 
     result = client.info()
