@@ -23,11 +23,12 @@ import click
 from click import pass_obj
 
 from odahuflow.cli.utils import click_utils
+from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
     IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import WrongHttpStatusCode
+from odahuflow.sdk.clients.api import WrongHttpStatusCode, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, READY_STATE
 
@@ -36,14 +37,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@auth_options
 @click.pass_context
-def route(ctx: click.core.Context, url: str, token: str):
+def route(ctx: click.core.Context, api_client: RemoteAPIClient):
     """
     Allow you to perform actions on routes
     """
-    ctx.obj = ModelRouteClient(url, token)
+    ctx.obj = ModelRouteClient.construct_from_other(api_client)
 
 
 @route.command()

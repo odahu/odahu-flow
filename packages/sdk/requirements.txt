@@ -1,10 +1,10 @@
 requests>=2.22.0
 urllib3>=1.24.3
-jinja2>=2.7.3
-pyyaml>=3.1.2
-aiohttp>=3.6.2
+jinja2>=2.11.3
+pyyaml>=5.4
+aiohttp>=3.7.4
 pydantic>=1.2
-dataclasses>=0.6
+dataclasses>=0.8
 typing-extensions>=3.6.5
 idna-ssl>=1.1.0
 docker>=4.2.0

@@ -23,6 +23,7 @@ import typing
 import click
 
 from odahuflow.cli.utils import click_utils
+from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import RemoteAPIClient
@@ -33,14 +34,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@auth_options
 @click.pass_context
-def bulk(ctx: click.core.Context, url: str, token: str):
+def bulk(ctx: click.core.Context, api_client: RemoteAPIClient):
     """
     Bulk operations on Odahuflow resources
     """
-    ctx.obj = RemoteAPIClient(url, token)
+    ctx.obj = api_client
 
 
 @bulk.command()

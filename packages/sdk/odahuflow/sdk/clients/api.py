@@ -242,6 +242,18 @@ class Authenticator:
     def token(self):
         return self._token
 
+    @property
+    def client_id(self):
+        return self._client_id
+
+    @property
+    def client_secret(self):
+        return self._client_secret
+
+    @property
+    def issuer_url(self):
+        return self._issuer_url
+
     def _login_with_refresh_token(self):
         login_result = do_refresh_token(odahuflow.sdk.config.API_REFRESH_TOKEN, odahuflow.sdk.config.API_ISSUING_URL)
         if not login_result:
@@ -410,7 +422,11 @@ class RemoteAPIClient:
         :return: self -- new client
         """
         return cls(
-            other.url_builder.base_url, other.authenticator.token,
+            base_url=other.url_builder.base_url,
+            token=other.authenticator.token,
+            client_id=other.authenticator.client_id,
+            client_secret=other.authenticator.client_secret,
+            issuer_url=other.authenticator.issuer_url,
             retries=other.retries, timeout=other.timeout
         )
 
