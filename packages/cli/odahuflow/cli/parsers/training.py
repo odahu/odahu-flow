@@ -31,7 +31,6 @@ from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, T
 from odahuflow.cli.utils.logs import print_logs
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, \
     validate_output_format
-from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, \
     APIConnectionException, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import \

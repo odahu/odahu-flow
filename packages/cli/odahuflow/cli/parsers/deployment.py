@@ -28,7 +28,6 @@ from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, T
     IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import DEFAULT_OUTPUT_FORMAT, format_output, validate_output_format
 from odahuflow.cli.utils.verifiers import positive_number
-from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.deployment import ModelDeployment, ModelDeploymentClient, READY_STATE, \

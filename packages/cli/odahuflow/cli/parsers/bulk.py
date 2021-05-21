@@ -25,7 +25,6 @@ import click
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.client import pass_obj
-from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import apply as api_aggregated_apply
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file, OdahuflowCloudResourceUpdatePair

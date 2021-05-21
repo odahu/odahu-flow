@@ -22,7 +22,6 @@ from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
-from odahuflow.sdk import config
 from odahuflow.sdk.clients.api import WrongHttpStatusCode, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient
