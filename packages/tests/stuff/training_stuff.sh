@@ -33,7 +33,7 @@ TEST_WINE_CONN_ID=wine
 TEST_CUSTOM_OUTPUT_FOLDER=test-custom-output-folder
 
 TEST_DATA_TI_ID=training-data-helper
-EXAMPLES_VERSION=$(jq '.examples_version' -r "${CLUSTER_PROFILE}")
+EXAMPLES_VERSION=$(jq '.examples.examples_version' -r "${CLUSTER_PROFILE}")
 CLOUD_PROVIDER="$(jq '.cloud.type' -r "${CLUSTER_PROFILE}")"
 BUCKET_NAME="$(jq '.data_bucket' -r "${CLUSTER_PROFILE}")"
 
