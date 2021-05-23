@@ -1,5 +1,5 @@
 kind: ToolchainIntegration
-id: mlflow-gpu-api-not-exist
+id: mlflow-api-not-exist
 spec:
   entrypoint: created
   defaultImage: created

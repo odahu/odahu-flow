@@ -1,11 +1,10 @@
 *** Variables ***
-${LOCAL_CONFIG}                     odahuflow/api_training_gpu_not-default
+${LOCAL_CONFIG}                     odahuflow/api_training_not-default
 ${RES_DIR}                          ${CURDIR}/resources/training_packaging
 ${TRAIN_MLFLOW_NOT_DEFAULT}         wine-mlflow-not-default
-${TRAIN_MLFLOW-GPU_NOT_DEFAULT}     reuters-classifier-mlflow-gpu-not-default
 
 *** Settings ***
-Documentation       API for not default training and on gpu node pools
+Documentation       API for not default training
 Resource            ../../resources/keywords.robot
 Resource            ./resources/keywords.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
@@ -23,12 +22,11 @@ Test Timeout        60 minutes
 *** Keywords ***
 Cleanup All Resources
     Cleanup resource  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
-    Cleanup resource  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
 *** Test Cases ***
 Check model trainings do not exist
     [Documentation]             should not contain training that has not been run
-    Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
+    Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
 Create Model Training, mlflow toolchain, not default
     ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.not_default.yaml
@@ -36,21 +34,6 @@ Create Model Training, mlflow toolchain, not default
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=@{exp_result}
     Get Logs                    training  ${TRAIN_MLFLOW_NOT_DEFAULT}
     Status State Should Be      ${result}  succeeded
-
-Create and Delete Model Training, mlflow-gpu toolchain, not default
-    [Documentation]             create model training with mlflow-gpu toolchain and not default values
-    ...                         cluster with GPU node pools enabled
-    Pass Execution If           not ${IS_GPU_ENABLED}  GPU node pools is not enabled on the cluster
-
-    ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow-gpu.not_default.yaml
-    @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW-GPU_NOT_DEFAULT}  exp_result=@{exp_result}
-    Get Logs                    training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
-    Status State Should Be      ${result}  succeeded
-
-    Command response list should contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
-    Call API                    training delete  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
-    Command response list should not contain id  training  ${TRAIN_MLFLOW-GPU_NOT_DEFAULT}
 
 Get Model Training by id
     ${result}                   Call API  training get id  ${TRAIN_MLFLOW_NOT_DEFAULT}

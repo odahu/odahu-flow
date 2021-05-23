@@ -2,8 +2,7 @@
 ${LOCAL_CONFIG}         odahuflow/api_toolchain
 ${RES_DIR}              ${CURDIR}/resources/toolchain
 ${MLFLOW}               mlflow-api-testing
-${MLFLOW_GPU}           mlflow-gpu-api-testing
-${MLFLOW_NOT_EXIST}     mlflow-gpu-api-not-exist
+${MLFLOW_NOT_EXIST}     mlflow-api-not-exist
 
 *** Settings ***
 Documentation       API of toolchains
@@ -24,23 +23,16 @@ Test Timeout        5 minutes
 *** Keywords ***
 Cleanup All Resources
     Cleanup resource  toolchain-integration  ${MLFLOW}
-    Cleanup resource  toolchain-integration  ${MLFLOW_GPU}
     Cleanup resource  toolchain-integration  ${MLFLOW_NOT_EXIST}
 
 *** Test Cases ***
 Get list of toolchains
     [Documentation]  check that toolchains that would be created do not exist now
-    Command response list should not contain id  toolchain  ${MLFLOW}  ${MLFLOW_GPU}
+    Command response list should not contain id  toolchain  ${MLFLOW}
 
 Create mlflow toolchain
     Call API                    toolchain post  ${RES_DIR}/valid/mlflow_create.yaml
     ${check}                    Call API  toolchain get id  ${MLFLOW}
-    Default Docker image should be equal  ${check}  created
-    Default Entrypoint should be equal  ${check}  created
-
-Create mlflow-gpu toolchain
-    Call API                    toolchain post  ${RES_DIR}/valid/mlflow-gpu_create.json
-    ${check}                    Call API  toolchain get id  ${MLFLOW_GPU}
     Default Docker image should be equal  ${check}  created
     Default Entrypoint should be equal  ${check}  created
 
@@ -51,31 +43,19 @@ Update mlflow toolchain
     Default Docker image should be equal  ${check}  updated
     Default Entrypoint should be equal  ${check}  updated
 
-Update mlflow-gpu toolchain
-    Call API                    toolchain put  ${RES_DIR}/valid/mlflow-gpu_update.yaml
-    ${check}                    Call API  toolchain get id  ${MLFLOW_GPU}
-    Default Docker image should be equal  ${check}  updated
-    Default Entrypoint should be equal  ${check}  updated
-
 Get updated list of toolchains
-    Command response list should contain id  toolchain  ${MLFLOW}  ${MLFLOW_GPU}
+    Command response list should contain id  toolchain  ${MLFLOW}
 
-Get mlflow and mlflow-gpu toolchains by id
+Get mlflow toolchains by id
     ${result}                   Call API  toolchain get id  ${MLFLOW}
     ID should be equal          ${result}  ${MLFLOW}
-    ${result}                   Call API  toolchain get id  ${MLFLOW_GPU}
-    ID should be equal          ${result}  ${MLFLOW_GPU}
 
 Delete mlflow toolchain
     ${result}                   Call API  toolchain delete  ${MLFLOW}
     should be equal             ${result.get('message')}  ToolchainIntegration ${MLFLOW} was deleted
 
-Delete mlflow-gpu toolchain
-    ${result}                   Call API  toolchain delete  ${MLFLOW_GPU}
-    should be equal             ${result.get('message')}  ToolchainIntegration ${MLFLOW_GPU} was deleted
-
 Check that toolchains do not exist
-    Command response list should not contain id  toolchain  ${MLFLOW}  ${MLFLOW_GPU}
+    Command response list should not contain id  toolchain  ${MLFLOW}
 
 #############################
 #    NEGATIVE TEST CASES    #
@@ -91,12 +71,12 @@ Try Create Toolchain that already exists
 Try Update not existing Toolchain
     [Tags]                      negative
     ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_NOT_EXIST}
-    Call API and get Error      ${404NotFound}  toolchain put  ${RES_DIR}/invalid/mlflow_gpu_update_not_exist.yaml
+    Call API and get Error      ${404NotFound}  toolchain put  ${RES_DIR}/invalid/mlflow_update_not_exist.yaml
 
 Try Update deleted Toolchain
     [Tags]                      negative
-    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_GPU}
-    Call API and get Error      ${404NotFound}  toolchain put  ${RES_DIR}/valid/mlflow-gpu_create.json
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW}
+    Call API and get Error      ${404NotFound}  toolchain put  ${RES_DIR}/valid/mlflow_create.yaml
 
 Try Get id not existing Toolchain
     [Tags]                      negative
@@ -115,5 +95,5 @@ Try Delete not existing Toolchain
 
 Try Delete deleted Toolchain
     [Tags]                      negative
-    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW_GPU}
-    Call API and get Error      ${404NotFound}  toolchain delete  ${MLFLOW_GPU}
+    ${404NotFound}              format string  ${404 NotFound Template}  ${MLFLOW}
+    Call API and get Error      ${404NotFound}  toolchain delete  ${MLFLOW}
