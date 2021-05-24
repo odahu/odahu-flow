@@ -98,9 +98,6 @@ spec:
         status:
           description: ModelPackagingStatus defines the observed state of ModelPackaging
           properties:
-            createdAt:
-              format: date-time
-              type: string
             exitCode:
               description: Pod exit code
               format: int32
@@ -132,9 +129,6 @@ spec:
               type: array
             state:
               description: Model Packaging State
-              type: string
-            updatedAt:
-              format: date-time
               type: string
           type: object
       type: object
