@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package packaging_integration
+package packaging_integration //nolint
 
 import (
 	"errors"
@@ -33,7 +33,7 @@ func TestSuiteRun(t *testing.T) {
 
 type TestSuite struct {
 	suite.Suite
-	piService  *service
+	piService  *PackagingIntegrationService
 	piRepoMock *mocks.PackagingIntegrationRepository
 }
 

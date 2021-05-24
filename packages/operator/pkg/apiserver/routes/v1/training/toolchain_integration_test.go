@@ -85,24 +85,6 @@ func newTiStub() *training.ToolchainIntegration {
 	}
 }
 
-func (s *TIGenericRouteSuite) newMultipleTiStubs() {
-	ti1 := &training.ToolchainIntegration{
-		ID: testToolchainIntegrationID1,
-		Spec: v1alpha1.ToolchainIntegrationSpec{
-			DefaultImage: testToolchainMtImage,
-		},
-	}
-	s.g.Expect(s.toolchainServiceMock.CreateToolchainIntegration(ti1)).NotTo(HaveOccurred())
-
-	ti2 := &training.ToolchainIntegration{
-		ID: testToolchainIntegrationID2,
-		Spec: v1alpha1.ToolchainIntegrationSpec{
-			DefaultImage: testToolchainMtImage,
-		},
-	}
-	s.g.Expect(s.toolchainServiceMock.CreateToolchainIntegration(ti2)).NotTo(HaveOccurred())
-}
-
 func (s *TIGenericRouteSuite) TestGetToolchainIntegration() {
 	ti := newTiStub()
 

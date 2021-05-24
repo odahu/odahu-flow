@@ -31,35 +31,35 @@ type Service interface {
 	DeleteToolchainIntegration(name string) error
 }
 
-func NewService(repo training2.ToolchainRepository) *toolchainService {
-	return &toolchainService{repo: repo}
+func NewService(repo training2.ToolchainRepository) *ToolchainService {
+	return &ToolchainService{repo: repo}
 }
 
-type toolchainService struct {
+type ToolchainService struct {
 	repo training2.ToolchainRepository
 }
 
-func (tis *toolchainService) GetToolchainIntegration(id string) (*training.ToolchainIntegration, error) {
+func (tis *ToolchainService) GetToolchainIntegration(id string) (*training.ToolchainIntegration, error) {
 	return tis.repo.GetToolchainIntegration(id)
 }
 
-func (tis *toolchainService) GetToolchainIntegrationList(options ...filter.ListOption) (
+func (tis *ToolchainService) GetToolchainIntegrationList(options ...filter.ListOption) (
 	[]training.ToolchainIntegration, error,
 ) {
 	return tis.repo.GetToolchainIntegrationList(options...)
 }
 
-func (tis *toolchainService) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tis *ToolchainService) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = md.CreatedAt
 	return tis.repo.SaveToolchainIntegration(md)
 }
 
-func (tis *toolchainService) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tis *ToolchainService) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
 	md.UpdatedAt = time.Now()
 	return tis.repo.UpdateToolchainIntegration(md)
 }
 
-func (tis *toolchainService) DeleteToolchainIntegration(id string) error {
+func (tis *ToolchainService) DeleteToolchainIntegration(id string) error {
 	return tis.repo.DeleteToolchainIntegration(id)
 }

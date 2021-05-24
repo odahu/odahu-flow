@@ -315,7 +315,7 @@ func (s *PackagingIntegrationRouteSuite) TestDisabledAPIGetAllPackagingIntegrati
 	s.piServiceMock.On("GetPackagingIntegrationList", mock.Anything, mock.Anything).Return(piList, nil)
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/packaging/integration"), nil)
+	req, err := http.NewRequest(http.MethodGet, "/packaging/integration", nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 

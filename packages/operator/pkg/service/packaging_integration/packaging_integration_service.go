@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package packaging_integration
+package packaging_integration //nolint
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
@@ -31,35 +31,35 @@ type Service interface {
 	DeletePackagingIntegration(id string) error
 }
 
-func NewService(repo packaging_repo.PackagingIntegrationRepository) *service {
-	return &service{repo: repo}
+func NewService(repo packaging_repo.PackagingIntegrationRepository) *PackagingIntegrationService {
+	return &PackagingIntegrationService{repo: repo}
 }
 
-type service struct {
+type PackagingIntegrationService struct {
 	repo packaging_repo.PackagingIntegrationRepository
 }
 
-func (pis *service) GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error) {
+func (pis *PackagingIntegrationService) GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error) {
 	return pis.repo.GetPackagingIntegration(id)
 }
 
-func (pis *service) GetPackagingIntegrationList(options ...filter.ListOption) (
+func (pis *PackagingIntegrationService) GetPackagingIntegrationList(options ...filter.ListOption) (
 	[]packaging.PackagingIntegration, error,
 ) {
 	return pis.repo.GetPackagingIntegrationList(options...)
 }
 
-func (pis *service) CreatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (pis *PackagingIntegrationService) CreatePackagingIntegration(md *packaging.PackagingIntegration) error {
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = md.CreatedAt
 	return pis.repo.SavePackagingIntegration(md)
 }
 
-func (pis *service) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
+func (pis *PackagingIntegrationService) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
 	md.UpdatedAt = time.Now()
 	return pis.repo.UpdatePackagingIntegration(md)
 }
 
-func (pis *service) DeletePackagingIntegration(id string) error {
+func (pis *PackagingIntegrationService) DeletePackagingIntegration(id string) error {
 	return pis.repo.DeletePackagingIntegration(id)
 }
