@@ -92,7 +92,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'CLUSTER_CONTEXT': data.get('cluster_context'),
                 'FEEDBACK_BUCKET': data.get('data_bucket'),
                 'TEST_BUCKET': data.get('data_bucket'),
-                'EXAMPLES_VERSION': data.get('examples_version'),
+                'EXAMPLES_VERSION': data.get('examples').get('examples_version'),
                 'CLOUD_TYPE': data['cloud']['type'],
                 'EDGE_URL': os.getenv('EDGE_URL', f'https://{host_base_domain}'),
                 API_URL_PARAM_NAME: os.getenv(API_URL_PARAM_NAME, f'https://{host_base_domain}'),

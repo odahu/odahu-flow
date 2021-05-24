@@ -11,9 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+from functools import wraps
 
 import click
 
+from odahuflow.sdk import config
+from odahuflow.sdk.clients.api import RemoteAPIClient
 
 ABBREVIATION = {
     "conn": "connection",
@@ -63,3 +66,26 @@ class AbbreviationGroup(BetterHelpGroup):
             return rv
 
         return click.Group.get_command(self, ctx, ABBREVIATION.get(cmd_name))
+
+
+def auth_options(handler_f):
+
+    @click.option('--url', help='API server host', default=config.API_URL)
+    @click.option('--client-id', help='Client ID for authorization', default=config.ODAHUFLOWCTL_OAUTH_CLIENT_ID)
+    @click.option('--client-secret', help='Client Secret for authorization',
+                  default=config.ODAHUFLOWCTL_OAUTH_CLIENT_SECRET)
+    @click.option('--issuer-url', help='Token Issuer URL (Identity Provider)', default=config.ISSUER_URL)
+    @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+    @wraps(handler_f)
+    def wrapper(*args, url, client_id, client_secret, issuer_url, token, **kwargs):
+        base_client = RemoteAPIClient(
+            base_url=url,
+            client_id=client_id,
+            client_secret=client_secret,
+            issuer_url=issuer_url,
+            token=token
+        )
+
+        handler_f(*args, api_client=base_client, **kwargs)
+
+    return wrapper

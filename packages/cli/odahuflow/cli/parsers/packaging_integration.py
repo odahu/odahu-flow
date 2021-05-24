@@ -18,11 +18,11 @@ import http
 import click
 
 from odahuflow.cli.utils import click_utils
+from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
-from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import WrongHttpStatusCode
+from odahuflow.sdk.clients.api import WrongHttpStatusCode, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient
 from odahuflow.sdk.models import PackagingIntegration
@@ -31,15 +31,14 @@ ID_AND_FILE_MISSED_ERROR_MESSAGE = 'You should provide a packaging integration I
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@auth_options
 @click.pass_context
-def packaging_integration(ctx: click.core.Context, url: str, token: str):
+def packaging_integration(ctx: click.core.Context, api_client: RemoteAPIClient):
     """
     Allow you to perform actions on packaging integration.\n
     Alias for the command is pi.
     """
-    ctx.obj = PackagingIntegrationClient(url, token)
+    ctx.obj = PackagingIntegrationClient.construct_from_other(api_client)
 
 
 @packaging_integration.command()

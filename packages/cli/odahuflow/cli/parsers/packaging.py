@@ -24,13 +24,13 @@ import click
 from requests import RequestException
 
 from odahuflow.cli.utils import click_utils
+from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, TIMEOUT_ERROR_MESSAGE, \
     IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.logs import print_logs
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
-from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, APIConnectionException
+from odahuflow.sdk.clients.api import EntityAlreadyExists, WrongHttpStatusCode, APIConnectionException, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.packaging import ModelPackaging, ModelPackagingClient, SUCCEEDED_STATE, FAILED_STATE
 
@@ -43,15 +43,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@auth_options
 @click.pass_context
-def packaging(ctx: click.core.Context, url: str, token: str):
+def packaging(ctx: click.core.Context, api_client: RemoteAPIClient):
     """
     Allow you to perform actions on packagings.\n
     Alias for the command is pack.
     """
-    ctx.obj = ModelPackagingClient(url, token)
+    ctx.obj = ModelPackagingClient.construct_from_other(api_client)
 
 
 @packaging.command()

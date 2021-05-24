@@ -18,27 +18,26 @@ import http
 import click
 
 from odahuflow.cli.utils import click_utils
+from odahuflow.cli.utils.click_utils import auth_options
 from odahuflow.cli.utils.client import pass_obj
 from odahuflow.cli.utils.error_handler import check_id_or_file_params_present, \
     IGNORE_NOT_FOUND_ERROR_MESSAGE
 from odahuflow.cli.utils.output import format_output, DEFAULT_OUTPUT_FORMAT, validate_output_format
-from odahuflow.sdk import config
-from odahuflow.sdk.clients.api import WrongHttpStatusCode
+from odahuflow.sdk.clients.api import WrongHttpStatusCode, RemoteAPIClient
 from odahuflow.sdk.clients.api_aggregated import parse_resources_file_with_one_item
 from odahuflow.sdk.clients.connection import ConnectionClient
 from odahuflow.sdk.models import Connection
 
 
 @click.group(cls=click_utils.BetterHelpGroup)
-@click.option('--url', help='API server host', default=config.API_URL)
-@click.option('--token', help='API server jwt token', default=config.API_TOKEN)
+@auth_options
 @click.pass_context
-def connection(ctx: click.core.Context, url: str, token: str):
+def connection(ctx: click.core.Context, api_client: RemoteAPIClient):
     """
     Allow you to perform actions on connections.\n
     Alias for the command is conn.
     """
-    ctx.obj = ConnectionClient(url, token)
+    ctx.obj = ConnectionClient.construct_from_other(api_client)
 
 
 @connection.command()
