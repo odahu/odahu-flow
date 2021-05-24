@@ -34,7 +34,7 @@ func TestSuiteRun(t *testing.T) {
 
 type TITestSuite struct {
 	suite.Suite
-	tiService  toolchain.Service
+	tiService  *toolchain.ToolchainService
 	tiRepoMock *toolchain_mock.ToolchainRepository
 }
 

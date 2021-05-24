@@ -49,13 +49,19 @@ import (
 	"testing"
 )
 
+type toolchainService interface {
+	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+	CreateToolchainIntegration(md *training.ToolchainIntegration) error
+	DeleteToolchainIntegration(name string) error
+}
+
 type ModelTrainingRouteSuite struct {
 	suite.Suite
 	g      *GomegaWithT
 	server *gin.Engine
 
 	trainService     mt_service.Service
-	toolchainService toolchain.Service
+	toolchainService toolchainService
 	connRepo         conn_repository.Repository
 	kubeTrainClient  kube_client.Client
 	k8sClient        client.Client

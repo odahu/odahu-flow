@@ -18,10 +18,9 @@ package packaging
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 )
 
-func ConfigurePiRoutes(routeGroup *gin.RouterGroup, piService packaging_integration.Service) {
+func ConfigurePiRoutes(routeGroup *gin.RouterGroup, piService packagingIntegrationService) {
 
 	piController := &PackagingIntegrationController{
 		service:   piService,

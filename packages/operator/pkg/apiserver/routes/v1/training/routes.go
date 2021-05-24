@@ -21,7 +21,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	mt_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 )
 
@@ -30,7 +29,7 @@ func ConfigureRoutes(
 	config config.ModelTrainingConfig,
 	gpuResourceName string,
 	trainService mt_service.Service,
-	toolchainService toolchain.Service,
+	toolchainService toolchainGetter,
 	connRepo conn_repository.Repository,
 	trainKubeClient mt_kube_client.Client) {
 

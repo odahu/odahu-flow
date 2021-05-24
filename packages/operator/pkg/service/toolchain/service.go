@@ -23,14 +23,6 @@ import (
 	"time"
 )
 
-type Service interface {
-	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
-	GetToolchainIntegrationList(options ...filter.ListOption) ([]training.ToolchainIntegration, error)
-	CreateToolchainIntegration(md *training.ToolchainIntegration) error
-	UpdateToolchainIntegration(md *training.ToolchainIntegration) error
-	DeleteToolchainIntegration(name string) error
-}
-
 func NewService(repo training2.ToolchainRepository) *ToolchainService {
 	return &ToolchainService{repo: repo}
 }

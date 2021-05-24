@@ -119,7 +119,7 @@ type ModelPackagingValidationSuite struct {
 	g            *GomegaWithT
 	mpKubeClient kube_client.Client
 	mpRepo       mp_repository.Repository
-	piService    packaging_integration.Service
+	piService    packagingIntegrationService
 	connRepo     conn_repository.Repository
 	validator    *pack_route.MpValidator
 }

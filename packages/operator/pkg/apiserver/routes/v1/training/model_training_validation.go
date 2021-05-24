@@ -24,7 +24,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
 	"reflect"
@@ -53,15 +52,19 @@ var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
 )
 
+type toolchainGetter interface {
+	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+}
+
 type MtValidator struct {
-	tiService       toolchain.Service
+	tiService       toolchainGetter
 	connRepository  conn_repository.Repository
 	gpuResourceName string
 	trainingConfig  config.ModelTrainingConfig
 }
 
 func NewMtValidator(
-	tiService toolchain.Service,
+	tiService toolchainGetter,
 	connRepository conn_repository.Repository,
 	trainingConfig config.ModelTrainingConfig,
 	gpuResourceName string,

@@ -22,7 +22,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
@@ -44,8 +43,16 @@ var (
 	emptyCache = map[string]int{}
 )
 
+type packagingIntegrationService interface {
+	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
+	GetPackagingIntegrationList(options ...filter.ListOption) ([]packaging.PackagingIntegration, error)
+	CreatePackagingIntegration(md *packaging.PackagingIntegration) error
+	UpdatePackagingIntegration(md *packaging.PackagingIntegration) error
+	DeletePackagingIntegration(id string) error
+}
+
 type PackagingIntegrationController struct {
-	service   packaging_integration.Service
+	service   packagingIntegrationService
 	validator *PiValidator
 }
 

@@ -22,7 +22,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
@@ -44,8 +43,16 @@ var (
 	emptyCache = map[string]int{}
 )
 
+type toolchainService interface {
+	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+	GetToolchainIntegrationList(options ...filter.ListOption) ([]training.ToolchainIntegration, error)
+	CreateToolchainIntegration(md *training.ToolchainIntegration) error
+	UpdateToolchainIntegration(md *training.ToolchainIntegration) error
+	DeleteToolchainIntegration(name string) error
+}
+
 type ToolchainIntegrationController struct {
-	service   toolchain.Service
+	service   toolchainService
 	validator *TiValidator
 }
 

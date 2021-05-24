@@ -23,14 +23,6 @@ import (
 	"time"
 )
 
-type Service interface {
-	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
-	GetPackagingIntegrationList(options ...filter.ListOption) ([]packaging.PackagingIntegration, error)
-	CreatePackagingIntegration(md *packaging.PackagingIntegration) error
-	UpdatePackagingIntegration(md *packaging.PackagingIntegration) error
-	DeletePackagingIntegration(id string) error
-}
-
 func NewService(repo packaging_repo.PackagingIntegrationRepository) *PackagingIntegrationService {
 	return &PackagingIntegrationService{repo: repo}
 }

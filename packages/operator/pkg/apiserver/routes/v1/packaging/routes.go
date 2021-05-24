@@ -22,14 +22,13 @@ import (
 	mp_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/packagingclient"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 )
 
 func ConfigureRoutes(
 	routeGroup *gin.RouterGroup,
 	packKubeClient mp_kube_client.Client,
 	packService mp_service.Service,
-	piService packaging_integration.Service,
+	piService packagingIntegrationService,
 	connRepo conn_repository.Repository,
 	config config.ModelPackagingConfig,
 	gpuResourceName string) {

@@ -70,7 +70,7 @@ type ModelTrainingValidationSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	validator      *train_route.MtValidator
-	tiService      toolchain.Service
+	tiService      toolchainService
 	connRepository conn_repository.Repository
 }
 

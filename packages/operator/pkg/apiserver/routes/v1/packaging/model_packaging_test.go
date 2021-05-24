@@ -37,6 +37,7 @@ import (
 	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -62,13 +63,21 @@ const (
 	testOutConnNotFound = "out-conn-not-found"
 )
 
+type packagingIntegrationService interface {
+	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
+	GetPackagingIntegrationList(options ...filter.ListOption) ([]packaging.PackagingIntegration, error)
+	CreatePackagingIntegration(md *packaging.PackagingIntegration) error
+	UpdatePackagingIntegration(md *packaging.PackagingIntegration) error
+	DeletePackagingIntegration(id string) error
+}
+
 type ModelPackagingRouteSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	server         *gin.Engine
 	packRepo       mp_repository.Repository
 	packService    mp_service.Service
-	piService      packaging_integration.Service
+	piService      packagingIntegrationService
 	kubePackClient kube_client.Client
 	connStorage    conn_repository.Repository
 	k8sClient      client.Client

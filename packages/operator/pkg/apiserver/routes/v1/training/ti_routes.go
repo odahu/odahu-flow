@@ -18,12 +18,11 @@ package training
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 )
 
 func ConfigureToolchainRoutes(
 	routeGroup *gin.RouterGroup,
-	tiService toolchain.Service,
+	tiService toolchainService,
 ) {
 
 	tiController := &ToolchainIntegrationController{

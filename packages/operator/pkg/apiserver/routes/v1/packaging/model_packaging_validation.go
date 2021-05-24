@@ -19,7 +19,6 @@ package packaging
 import (
 	"errors"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 	"reflect"
 
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
@@ -44,15 +43,19 @@ const (
 	UnknownNodeSelector                  = "node selector %v is not presented in ODAHU config"
 )
 
+type packagingIntegrationGetter interface {
+	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
+}
+
 type MpValidator struct {
-	piService       packaging_integration.Service
+	piService       packagingIntegrationGetter
 	connRepo        conn_repository.Repository
 	gpuResourceName string
 	packagingConfig config.ModelPackagingConfig
 }
 
 func NewMpValidator(
-	piService packaging_integration.Service,
+	piService packagingIntegrationGetter,
 	connRepo conn_repository.Repository,
 	packagingConfig config.ModelPackagingConfig,
 	gpuResourceName string,
