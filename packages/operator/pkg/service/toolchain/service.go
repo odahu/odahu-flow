@@ -23,35 +23,35 @@ import (
 	"time"
 )
 
-func NewService(repo training2.ToolchainRepository) *ToolchainService {
-	return &ToolchainService{repo: repo}
+func NewService(repo training2.ToolchainRepository) *Service {
+	return &Service{repo: repo}
 }
 
-type ToolchainService struct {
+type Service struct {
 	repo training2.ToolchainRepository
 }
 
-func (tis *ToolchainService) GetToolchainIntegration(id string) (*training.ToolchainIntegration, error) {
+func (tis *Service) GetToolchainIntegration(id string) (*training.ToolchainIntegration, error) {
 	return tis.repo.GetToolchainIntegration(id)
 }
 
-func (tis *ToolchainService) GetToolchainIntegrationList(options ...filter.ListOption) (
+func (tis *Service) GetToolchainIntegrationList(options ...filter.ListOption) (
 	[]training.ToolchainIntegration, error,
 ) {
 	return tis.repo.GetToolchainIntegrationList(options...)
 }
 
-func (tis *ToolchainService) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tis *Service) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = md.CreatedAt
 	return tis.repo.SaveToolchainIntegration(md)
 }
 
-func (tis *ToolchainService) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tis *Service) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
 	md.UpdatedAt = time.Now()
 	return tis.repo.UpdateToolchainIntegration(md)
 }
 
-func (tis *ToolchainService) DeleteToolchainIntegration(id string) error {
+func (tis *Service) DeleteToolchainIntegration(id string) error {
 	return tis.repo.DeleteToolchainIntegration(id)
 }
