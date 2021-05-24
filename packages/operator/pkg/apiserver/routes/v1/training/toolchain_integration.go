@@ -22,7 +22,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	"net/http"
@@ -44,9 +43,17 @@ var (
 	emptyCache = map[string]int{}
 )
 
+type toolchainService interface {
+	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+	GetToolchainIntegrationList(options ...filter.ListOption) ([]training.ToolchainIntegration, error)
+	CreateToolchainIntegration(md *training.ToolchainIntegration) error
+	UpdateToolchainIntegration(md *training.ToolchainIntegration) error
+	DeleteToolchainIntegration(name string) error
+}
+
 type ToolchainIntegrationController struct {
-	repository mt_repository.ToolchainRepository
-	validator  *TiValidator
+	service   toolchainService
+	validator *TiValidator
 }
 
 // @Summary Get a ToolchainIntegration
@@ -63,7 +70,7 @@ type ToolchainIntegrationController struct {
 func (tic *ToolchainIntegrationController) getToolchainIntegration(c *gin.Context) {
 	tiID := c.Param(IDTiURLParam)
 
-	ti, err := tic.repository.GetToolchainIntegration(tiID)
+	ti, err := tic.service.GetToolchainIntegration(tiID)
 	if err != nil {
 		logTI.Error(err, fmt.Sprintf("Retrieving %s toolchain integration", tiID))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
@@ -93,7 +100,7 @@ func (tic *ToolchainIntegrationController) getAllToolchainIntegrations(c *gin.Co
 		return
 	}
 
-	tiList, err := tic.repository.GetToolchainIntegrationList(
+	tiList, err := tic.service.GetToolchainIntegrationList(
 		filter.Size(size),
 		filter.Page(page),
 	)
@@ -133,7 +140,7 @@ func (tic *ToolchainIntegrationController) createToolchainIntegration(c *gin.Con
 		return
 	}
 
-	if err := tic.repository.CreateToolchainIntegration(&ti); err != nil {
+	if err := tic.service.CreateToolchainIntegration(&ti); err != nil {
 		logTI.Error(err, fmt.Sprintf("Creation of toolchain integration: %v", ti))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
@@ -170,7 +177,7 @@ func (tic *ToolchainIntegrationController) updateToolchainIntegration(c *gin.Con
 		return
 	}
 
-	if err := tic.repository.UpdateToolchainIntegration(&ti); err != nil {
+	if err := tic.service.UpdateToolchainIntegration(&ti); err != nil {
 		logTI.Error(err, fmt.Sprintf("Update of toolchain integration: %v", ti))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 
@@ -194,7 +201,7 @@ func (tic *ToolchainIntegrationController) updateToolchainIntegration(c *gin.Con
 func (tic *ToolchainIntegrationController) deleteToolchainIntegration(c *gin.Context) {
 	tiID := c.Param(IDTiURLParam)
 
-	if err := tic.repository.DeleteToolchainIntegration(tiID); err != nil {
+	if err := tic.service.DeleteToolchainIntegration(tiID); err != nil {
 		logTI.Error(err, fmt.Sprintf("Deletion of %s toolchain integration is failed", tiID))
 		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 

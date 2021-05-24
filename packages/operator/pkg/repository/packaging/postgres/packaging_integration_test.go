@@ -91,7 +91,7 @@ func TestPackagingRepository(t *testing.T) {
 		},
 	}
 
-	g.Expect(rep.CreatePackagingIntegration(created)).NotTo(HaveOccurred())
+	g.Expect(rep.SavePackagingIntegration(created)).NotTo(HaveOccurred())
 
 	fetched, err := rep.GetPackagingIntegration(piID)
 	g.Expect(err).NotTo(HaveOccurred())

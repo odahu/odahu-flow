@@ -10,13 +10,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"time"
 )
 
 const (
 	TagKey = "name"
 )
-
 
 var (
 	DefaultMDDeleteOption = metav1.DeletePropagationForeground
@@ -43,7 +41,6 @@ func NewClientWithOptions(namespace string, k8sClient client.Client,
 		mdDeleteOption: mdDeleteOption,
 	}
 }
-
 
 func mdTransformToLabels(md *deployment.ModelDeployment) map[string]string {
 	return map[string]string{
@@ -157,7 +154,6 @@ func (c *deployClient) UpdateModelDeployment(md *deployment.ModelDeployment) err
 	}
 
 	k8sMD.Spec = md.Spec
-	k8sMD.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sMD.ObjectMeta.Labels = mdTransformToLabels(md)
 
 	if err := c.k8sClient.Update(context.TODO(), &k8sMD); err != nil {
@@ -180,9 +176,6 @@ func (c *deployClient) CreateModelDeployment(md *deployment.ModelDeployment) err
 		},
 		Spec: md.Spec,
 	}
-
-	k8sMd.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	k8sMd.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := c.k8sClient.Create(context.TODO(), k8sMd); err != nil {
 		log.Error(err, "ModelDeployment creation error from k8s", "name", md.ID)
@@ -300,7 +293,6 @@ func (c *deployClient) UpdateModelRoute(route *deployment.ModelRoute) error {
 
 	// TODO: think about update, not replacing as for now
 	k8sMR.Spec = route.Spec
-	k8sMR.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := c.k8sClient.Update(context.TODO(), &k8sMR); err != nil {
 		log.Error(err, "Creation of the route", "name", route.ID)
@@ -322,9 +314,6 @@ func (c *deployClient) CreateModelRoute(route *deployment.ModelRoute) error {
 		Spec: route.Spec,
 	}
 
-	k8sRoute.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	k8sRoute.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
-
 	if err := c.k8sClient.Create(context.TODO(), k8sRoute); err != nil {
 		log.Error(err, "DataBinding creation error from k8s", "name", route.ID)
 
@@ -335,4 +324,3 @@ func (c *deployClient) CreateModelRoute(route *deployment.ModelRoute) error {
 
 	return nil
 }
-

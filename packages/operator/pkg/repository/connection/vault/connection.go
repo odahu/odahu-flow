@@ -3,17 +3,14 @@ package vault
 import (
 	"crypto/tls"
 	"encoding/json"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/http"
-	"path"
-	"time"
-
 	bank_vaults "github.com/banzaicloud/bank-vaults/pkg/sdk/vault"
 	vaultapi "github.com/hashicorp/vault/api"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	odahuflow_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
+	"net/http"
+	"path"
 )
 
 const (
@@ -156,7 +153,6 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) er
 	case err == nil:
 		// If err is not nil, then the connection already exists.
 		existedConn.Spec = conn.Spec
-		existedConn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 		err = vcr.createOrUpdateConnection(existedConn)
 		if err != nil {
 			conn.Status = existedConn.Status
@@ -169,7 +165,7 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) er
 	}
 }
 
-func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) error {
+func (vcr *vaultConnRepository) SaveConnection(conn *connection.Connection) error {
 	_, err := vcr.GetConnection(conn.ID)
 
 	switch {
@@ -177,8 +173,6 @@ func (vcr *vaultConnRepository) CreateConnection(conn *connection.Connection) er
 		// If err is nil, then the connection already exists.
 		return odahuflow_errors.AlreadyExistError{Entity: conn.ID}
 	case odahuflow_errors.IsNotFoundError(err):
-		conn.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-		conn.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 		return vcr.createOrUpdateConnection(conn)
 	default:
 		return err

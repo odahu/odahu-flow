@@ -20,23 +20,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
-	"net/http"
-	"net/http/httptest"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes"
 	pack_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
+	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 const (
@@ -92,13 +91,18 @@ var (
 
 type PackagingIntegrationRouteSuite struct {
 	suite.Suite
-	g            *GomegaWithT
-	server       *gin.Engine
-	mpRepository mp_repository.PackagingIntegrationRepository
+	g             *GomegaWithT
+	server        *gin.Engine
+	piServiceMock *packaging_integration.MockService
+}
+
+func TestPIGenericRouteSuite(t *testing.T) {
+	suite.Run(t, new(PackagingIntegrationRouteSuite))
 }
 
 func (s *PackagingIntegrationRouteSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
+	s.piServiceMock = &packaging_integration.MockService{}
 	s.registerHandlers(config.NewDefaultModelPackagingConfig())
 }
 
@@ -106,16 +110,7 @@ func (s *PackagingIntegrationRouteSuite) registerHandlers(packagingConfig config
 	s.server = gin.Default()
 	v1Group := s.server.Group("")
 	packGroup := v1Group.Group("", routes.DisableAPIMiddleware(packagingConfig.Enabled))
-	pack_route.ConfigurePiRoutes(packGroup, s.mpRepository)
-}
-
-func (s *PackagingIntegrationRouteSuite) TearDownTest() {
-	for _, piID := range []string{piID} {
-		err := s.mpRepository.DeletePackagingIntegration(piID)
-		if err != nil && !errors.IsNotFound(err) && !odahuErrors.IsNotFoundError(err) {
-			s.T().Fail()
-		}
-	}
+	pack_route.ConfigurePiRoutes(packGroup, s.piServiceMock)
 }
 
 func newPackagingIntegration() *packaging.PackagingIntegration {
@@ -135,7 +130,7 @@ func newPackagingIntegration() *packaging.PackagingIntegration {
 
 func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegration() {
 	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
+	s.piServiceMock.On("GetPackagingIntegration", pi.ID).Return(pi, nil)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/packaging/integration/%s", piID), nil)
@@ -151,8 +146,13 @@ func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegration() {
 }
 
 func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegrationNotFound() {
+	notFoundID := "not-found"
+	s.piServiceMock.
+		On("GetPackagingIntegration", notFoundID).
+		Return(nil, odahuErrors.NotFoundError{})
+
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, "/packaging/integration/not-found", nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/packaging/integration/%s", notFoundID), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
@@ -166,6 +166,9 @@ func (s *PackagingIntegrationRouteSuite) TestGetPackagingIntegrationNotFound() {
 
 func (s *PackagingIntegrationRouteSuite) TestCreatePackagingIntegration() {
 	piEntity := newPackagingIntegration()
+
+	s.piServiceMock.On("CreatePackagingIntegration", piEntity).Return(nil)
+
 	piEntityBody, err := json.Marshal(piEntity)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -181,43 +184,13 @@ func (s *PackagingIntegrationRouteSuite) TestCreatePackagingIntegration() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
 	s.g.Expect(piResponse.ID).Should(Equal(piEntity.ID))
 	s.g.Expect(piResponse.Spec).Should(Equal(piEntity.Spec))
-
-	pi, err := s.mpRepository.GetPackagingIntegration(piID)
-	s.g.Expect(err).ShouldNot(HaveOccurred())
-	s.g.Expect(pi.Spec).To(Equal(piEntity.Spec))
-}
-
-// CreatedAt and UpdatedAt field should automatically be updated after create request
-func (s *PackagingIntegrationRouteSuite) TestCreatePackagingIntegrationModifiable() {
-	newResource := newPackagingIntegration()
-
-	newResourceBody, err := json.Marshal(newResource)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	reqTime := routes.GetTimeNowTruncatedToSeconds()
-	w := httptest.NewRecorder()
-	req, err := http.NewRequest(
-		http.MethodPost, pack_route.CreatePackagingIntegrationURL, bytes.NewReader(newResourceBody),
-	)
-	s.g.Expect(err).NotTo(HaveOccurred())
-	s.server.ServeHTTP(w, req)
-
-	var resp packaging.ModelPackaging
-	err = json.Unmarshal(w.Body.Bytes(), &resp)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
-	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
-	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
-	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
-	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
-	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
-	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
 func (s *PackagingIntegrationRouteSuite) TestCreateDuplicatePackagingIntegration() {
 	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
+	s.piServiceMock.
+		On("CreatePackagingIntegration", pi).
+		Return(odahuErrors.AlreadyExistError{})
 
 	piEntityBody, err := json.Marshal(pi)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -236,11 +209,9 @@ func (s *PackagingIntegrationRouteSuite) TestCreateDuplicatePackagingIntegration
 }
 
 func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegration() {
-	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
-
 	piEntity := newPackagingIntegration()
-	piEntity.Spec.Entrypoint = "new-entrypoint"
+
+	s.piServiceMock.On("UpdatePackagingIntegration", piEntity).Return(nil)
 
 	piEntityBody, err := json.Marshal(piEntity)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -257,45 +228,13 @@ func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegration() {
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(piResponse.ID).Should(Equal(piEntity.ID))
 	s.g.Expect(piResponse.Spec).Should(Equal(piEntity.Spec))
-
-	pi, err = s.mpRepository.GetPackagingIntegration(piID)
-	s.g.Expect(err).NotTo(HaveOccurred())
-	s.g.Expect(pi.Spec).To(Equal(piEntity.Spec))
-}
-
-// UpdatedAt field should automatically be updated after update request
-func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegrationModifiable() {
-	resource := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(resource)).NotTo(HaveOccurred())
-
-	time.Sleep(1 * time.Second)
-
-	newResource := newPackagingIntegration()
-
-	newResourceBody, err := json.Marshal(newResource)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	reqTime := routes.GetTimeNowTruncatedToSeconds()
-	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodPut, pack_route.UpdatePackagingIntegrationURL, bytes.NewReader(newResourceBody))
-	s.g.Expect(err).NotTo(HaveOccurred())
-	s.server.ServeHTTP(w, req)
-
-	var respResource packaging.ModelPackaging
-	err = json.Unmarshal(w.Body.Bytes(), &respResource)
-	s.g.Expect(err).NotTo(HaveOccurred())
-
-	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(respResource.Status.CreatedAt).NotTo(BeNil())
-	createdAtWasNotUpdated := reqTime.After(respResource.Status.CreatedAt.Time)
-	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
-	s.g.Expect(respResource.Status.UpdatedAt).NotTo(BeNil())
-	updatedAtWasUpdated := reqTime.Before(respResource.Status.UpdatedAt) || reqTime.Equal(respResource.Status.UpdatedAt)
-	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 
 func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegrationNotFound() {
 	pi := newPackagingIntegration()
+
+	s.piServiceMock.On("UpdatePackagingIntegration", pi).Return(odahuErrors.NotFoundError{})
+
 	piEntityBody, err := json.Marshal(pi)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
@@ -314,7 +253,7 @@ func (s *PackagingIntegrationRouteSuite) TestUpdatePackagingIntegrationNotFound(
 
 func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegration() {
 	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
+	s.piServiceMock.On("DeletePackagingIntegration", pi.ID).Return(nil)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/packaging/integration/%s", piID), nil)
@@ -327,13 +266,11 @@ func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegration() {
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
 	s.g.Expect(result.Message).Should(ContainSubstring("was deleted"))
-
-	piList, err := s.mpRepository.GetPackagingIntegrationList()
-	s.g.Expect(err).NotTo(HaveOccurred())
-	s.g.Expect(piList).To(HaveLen(0))
 }
 
 func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegrationNotFound() {
+	s.piServiceMock.On("DeletePackagingIntegration", piID).Return(odahuErrors.NotFoundError{})
+
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("/packaging/integration/%s", piID), nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -347,13 +284,14 @@ func (s *PackagingIntegrationRouteSuite) TestDeletePackagingIntegrationNotFound(
 	s.g.Expect(result.Message).Should(ContainSubstring("not found"))
 }
 
+// GET methods still work despite disabled API
 func (s *PackagingIntegrationRouteSuite) TestDisabledAPIGetPackagingIntegration() {
 	packagingConfig := config.NewDefaultModelPackagingConfig()
 	packagingConfig.Enabled = false
 	s.registerHandlers(packagingConfig)
 
 	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
+	s.piServiceMock.On("GetPackagingIntegration", pi.ID).Return(pi, nil)
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/packaging/integration/%s", piID), nil)
@@ -373,20 +311,20 @@ func (s *PackagingIntegrationRouteSuite) TestDisabledAPIGetAllPackagingIntegrati
 	packagingConfig.Enabled = false
 	s.registerHandlers(packagingConfig)
 
-	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
+	piList := []packaging.PackagingIntegration{*newPackagingIntegration()}
+	s.piServiceMock.On("GetPackagingIntegrationList", mock.Anything, mock.Anything).Return(piList, nil)
 
 	w := httptest.NewRecorder()
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/packaging/integration/%s", piID), nil)
+	req, err := http.NewRequest(http.MethodGet, "/packaging/integration", nil)
 	s.g.Expect(err).NotTo(HaveOccurred())
 	s.server.ServeHTTP(w, req)
 
-	var result packaging.PackagingIntegration
+	var result []packaging.PackagingIntegration
 	err = json.Unmarshal(w.Body.Bytes(), &result)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result.Spec).Should(Equal(pi.Spec))
+	s.g.Expect(result).Should(Equal(piList))
 }
 
 func (s *PackagingIntegrationRouteSuite) TestDisabledAPICreatePackagingIntegration() {
@@ -395,7 +333,6 @@ func (s *PackagingIntegrationRouteSuite) TestDisabledAPICreatePackagingIntegrati
 	s.registerHandlers(packagingConfig)
 
 	pi := newPackagingIntegration()
-	s.g.Expect(s.mpRepository.CreatePackagingIntegration(pi)).NotTo(HaveOccurred())
 
 	piEntityBody, err := json.Marshal(pi)
 	s.g.Expect(err).NotTo(HaveOccurred())

@@ -40,7 +40,7 @@ func TestConnectionRepository(t *testing.T) {
 		},
 	}
 
-	err := c.CreateConnection(created)
+	err := c.SaveConnection(created)
 	g.Expect(err).NotTo(HaveOccurred())
 
 	fetched, err := c.GetConnection(connID)

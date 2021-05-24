@@ -14,21 +14,21 @@ import (
 )
 
 const (
-	ModelRouteTable = "odahu_operator_route"
+	ModelRouteTable             = "odahu_operator_route"
 	uniqueViolationPostgresCode = pq.ErrorCode("23505") // unique_violation
 
-	ClID = "id"
-	ClSpec = "spec"
-	ClStatus = "status"
-	ClDelMark = "deletionmark"
-	ClCreated = "created"
-	ClUpdated = "updated"
-	ClIsDefault = "is_default"
+	ClID          = "id"
+	ClSpec        = "spec"
+	ClStatus      = "status"
+	ClDelMark     = "deletionmark"
+	ClCreated     = "created"
+	ClUpdated     = "updated"
+	ClIsDefault   = "is_default"
 	ClFirstMDName = "spec->'modelDeployments'->0->>'mdName'"
 )
 
 var (
-	log = logf.Log.WithName("model-route--repository--postgres")
+	log       = logf.Log.WithName("model-route--repository--postgres")
 	MaxSize   = 500
 	FirstPage = 0
 	txOptions = &sql.TxOptions{
@@ -260,7 +260,7 @@ func (repo RouteRepo) UpdateModelRouteStatus(
 	return nil
 }
 
-func (repo RouteRepo) CreateModelRoute(
+func (repo RouteRepo) SaveModelRoute(
 	ctx context.Context, tx *sql.Tx, md *route.ModelRoute) error {
 
 	var qrr utils.Querier
@@ -283,7 +283,7 @@ func (repo RouteRepo) CreateModelRoute(
 	_, err = qrr.ExecContext(
 		ctx,
 		stmt,
-		args...
+		args...,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
@@ -295,7 +295,6 @@ func (repo RouteRepo) CreateModelRoute(
 	return nil
 
 }
-
 
 func (repo RouteRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 	return repo.DB.BeginTx(ctx, txOptions)
@@ -364,7 +363,7 @@ func (repo RouteRepo) IsDefault(ctx context.Context, id string, tx *sql.Tx) (boo
 		if err := rows.Scan(&isDefault); err != nil {
 			return false, err
 		}
-		return isDefault, nil  //nolint
+		return isDefault, nil //nolint
 	}
 
 	return false, odahuErrors.NotFoundError{Entity: id}

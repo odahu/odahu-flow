@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"go.uber.org/multierr"
+	"time"
 )
 
 const (
@@ -53,6 +54,10 @@ func init() {
 type Connection struct {
 	// Connection id
 	ID string `json:"id"`
+	// CreatedAt
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// Connection specification
 	Spec v1alpha1.ConnectionSpec `json:"spec"`
 	// Connection status

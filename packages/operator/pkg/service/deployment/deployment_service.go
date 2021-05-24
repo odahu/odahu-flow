@@ -259,10 +259,10 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	md.CreatedAt = time.Now()
-	md.UpdatedAt = time.Now()
+	md.UpdatedAt = md.CreatedAt
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelDeploymentStatus{}
-	err = s.repo.CreateModelDeployment(ctx, tx, md)
+	err = s.repo.SaveModelDeployment(ctx, tx, md)
 	if err != nil {
 		return
 	}
@@ -273,7 +273,7 @@ func (s serviceImpl) CreateModelDeployment(ctx context.Context, md *deployment.M
 	}
 	// Every Model deployment must have a default HTTP route that sends 100% of traffic to the model
 	defRoute := constructDefaultRoute(md.ID)
-	err = s.mrRepo.CreateModelRoute(ctx, tx, &defRoute)
+	err = s.mrRepo.SaveModelRoute(ctx, tx, &defRoute)
 	if err != nil {
 		return fmt.Errorf("unable to create default ModelRoute: %v", err)
 	}

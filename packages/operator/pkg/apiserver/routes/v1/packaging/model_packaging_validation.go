@@ -28,7 +28,6 @@ import (
 	odahuflowv1alpha1 "github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/xeipuuv/gojsonschema"
 	"go.uber.org/multierr"
@@ -44,21 +43,25 @@ const (
 	UnknownNodeSelector                  = "node selector %v is not presented in ODAHU config"
 )
 
+type packagingIntegrationGetter interface {
+	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
+}
+
 type MpValidator struct {
-	piRepo          mp_repository.PackagingIntegrationRepository
+	piService       packagingIntegrationGetter
 	connRepo        conn_repository.Repository
 	gpuResourceName string
 	packagingConfig config.ModelPackagingConfig
 }
 
 func NewMpValidator(
-	piRepo mp_repository.PackagingIntegrationRepository,
+	piService packagingIntegrationGetter,
 	connRepo conn_repository.Repository,
 	packagingConfig config.ModelPackagingConfig,
 	gpuResourceName string,
 ) *MpValidator {
 	return &MpValidator{
-		piRepo:          piRepo,
+		piService:       piService,
 		connRepo:        connRepo,
 		packagingConfig: packagingConfig,
 		gpuResourceName: gpuResourceName,
@@ -68,7 +71,7 @@ func NewMpValidator(
 // ValidateAndSetDefaultsPIRequired validates ModelPackaging fields using a corresponding PackagingIntegration
 func (mpv *MpValidator) ValidateAndSetDefaultsPIRequired(mp *packaging.ModelPackaging) (err error) {
 
-	pi, piErr := mpv.piRepo.GetPackagingIntegration(mp.Spec.IntegrationName)
+	pi, piErr := mpv.piService.GetPackagingIntegration(mp.Spec.IntegrationName)
 	switch {
 	case piErr == nil:
 		if len(mp.Spec.Image) == 0 {

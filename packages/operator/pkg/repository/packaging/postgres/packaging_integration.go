@@ -19,13 +19,10 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-	"time"
-
 	"github.com/lib/pq"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahuErrors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -42,7 +39,7 @@ type PackagingIntegrationRepository struct {
 	DB *sql.DB
 }
 
-func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
+func (pir *PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 	*packaging.PackagingIntegration, error,
 ) {
 
@@ -64,7 +61,7 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegration(name string) (
 
 }
 
-func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ...filter.ListOption) (
+func (pir *PackagingIntegrationRepository) GetPackagingIntegrationList(options ...filter.ListOption) (
 	[]packaging.PackagingIntegration, error,
 ) {
 
@@ -106,7 +103,7 @@ func (pir PackagingIntegrationRepository) GetPackagingIntegrationList(options ..
 
 }
 
-func (pir PackagingIntegrationRepository) DeletePackagingIntegration(name string) error {
+func (pir *PackagingIntegrationRepository) DeletePackagingIntegration(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	_, err := pir.GetPackagingIntegration(name)
@@ -124,7 +121,7 @@ func (pir PackagingIntegrationRepository) DeletePackagingIntegration(name string
 	return nil
 }
 
-func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packaging.PackagingIntegration) error {
+func (pir *PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
 	oldPi, err := pir.GetPackagingIntegration(pi.ID)
@@ -133,7 +130,6 @@ func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packagi
 	}
 
 	pi.Status = oldPi.Status
-	pi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", packagingIntegrationTable)
 	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.ID)
@@ -143,10 +139,7 @@ func (pir PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packagi
 	return nil
 }
 
-func (pir PackagingIntegrationRepository) CreatePackagingIntegration(pi *packaging.PackagingIntegration) error {
-
-	pi.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	pi.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
+func (pir *PackagingIntegrationRepository) SavePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
 	_, err := pir.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", packagingIntegrationTable),

@@ -25,8 +25,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -70,7 +70,7 @@ type ModelTrainingValidationSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	validator      *train_route.MtValidator
-	mtRepository   mt_repository.ToolchainRepository
+	tiService      toolchainService
 	connRepository conn_repository.Repository
 }
 
@@ -80,7 +80,8 @@ func (s *ModelTrainingValidationSuite) SetupTest() {
 
 func (s *ModelTrainingValidationSuite) SetupSuite() {
 
-	s.mtRepository = mt_post_repository.ToolchainRepo{DB: db}
+	tiRepo := mt_post_repository.ToolchainRepo{DB: db}
+	s.tiService = toolchain.NewService(tiRepo)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, kubeClient)
 
 	trainingConfig := config.NewDefaultModelTrainingConfig()
@@ -91,14 +92,14 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 	})
 
 	s.validator = train_route.NewMtValidator(
-		s.mtRepository,
+		s.tiService,
 		s.connRepository,
 		trainingConfig,
 		gpuResourceName,
 	)
 
 	// Create the connection that will be used as the vcs param for a training.
-	if err := s.connRepository.CreateConnection(&connection.Connection{
+	if err := s.connRepository.SaveConnection(&connection.Connection{
 		ID: testMtVCSID,
 		Spec: v1alpha1.ConnectionSpec{
 			Type:      connection.GITType,
@@ -110,7 +111,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the outputConnection param for a training.
-	if err := s.connRepository.CreateConnection(&connection.Connection{
+	if err := s.connRepository.SaveConnection(&connection.Connection{
 		ID: mtvOutputConnection,
 		Spec: v1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -121,7 +122,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 	}
 
 	// Create the toolchain integration that will be used for a training.
-	if err := s.mtRepository.CreateToolchainIntegration(&training.ToolchainIntegration{
+	if err := s.tiService.CreateToolchainIntegration(&training.ToolchainIntegration{
 		ID: testToolchainIntegrationID,
 		Spec: v1alpha1.ToolchainIntegrationSpec{
 			DefaultImage: testToolchainMtImage,
@@ -133,7 +134,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 }
 
 func (s *ModelTrainingValidationSuite) TearDownSuite() {
-	if err := s.mtRepository.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
+	if err := s.tiService.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
 		panic(err)
 	}
 
@@ -221,7 +222,7 @@ func (s *ModelTrainingValidationSuite) TestMtNotExplicitMTReference() {
 		},
 	}
 
-	err := s.connRepository.CreateConnection(conn)
+	err := s.connRepository.SaveConnection(conn)
 	s.g.Expect(err).Should(BeNil())
 	defer s.connRepository.DeleteConnection(conn.ID)
 
@@ -250,7 +251,7 @@ func (s *ModelTrainingValidationSuite) TestMtWrongVcsConnectionType() {
 		},
 	}
 
-	err := s.connRepository.CreateConnection(conn)
+	err := s.connRepository.SaveConnection(conn)
 	s.g.Expect(err).Should(BeNil())
 	defer s.connRepository.DeleteConnection(conn.ID)
 
@@ -277,7 +278,7 @@ func (s *ModelTrainingValidationSuite) TestMtWrongObjectStorageConnectionType() 
 		},
 	}
 
-	err := s.connRepository.CreateConnection(conn)
+	err := s.connRepository.SaveConnection(conn)
 	s.g.Expect(err).Should(BeNil())
 	defer s.connRepository.DeleteConnection(conn.ID)
 
@@ -565,7 +566,7 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection_NoDefault_NoParam() 
 		OutputConnectionID: "",
 	}
 	err := train_route.NewMtValidator(
-		s.mtRepository,
+		s.tiService,
 		s.connRepository,
 		testConfig,
 		gpuResourceName,
@@ -580,7 +581,7 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection_Default_NoParam() {
 
 	testConfig := config.ModelTrainingConfig{OutputConnectionID: testMtOutConnDefault}
 	_ = train_route.NewMtValidator(
-		s.mtRepository,
+		s.tiService,
 		s.connRepository,
 		testConfig,
 		gpuResourceName,
@@ -596,7 +597,7 @@ func (s *ModelTrainingValidationSuite) TestOutputConnection_Both_Default_Param()
 	s.g.Expect(mt.Spec.OutputConnection).Should(Equal(mtvOutputConnection))
 }
 
-// If connection repository doesn't contain connection with passed ID validation must raise NotFoundError
+// If connection service doesn't contain connection with passed ID validation must raise NotFoundError
 func (s *ModelTrainingValidationSuite) TestOutputConnection_ConnectionNotFound() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{OutputConnection: testMpOutConnNotFound},

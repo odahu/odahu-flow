@@ -61,10 +61,6 @@ type ConnectionStatus struct {
 	SecretName *string `json:"secretName,omitempty"`
 	// Kubernetes service account
 	ServiceAccountName *string `json:"serviceAccount,omitempty"`
-	// Info about create and update
-	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
-	Modifiable `json:",inline"`
 }
 
 // +kubebuilder:object:root=true

@@ -31,12 +31,12 @@ const (
 type Repository interface {
 	GetModelTraining(ctx context.Context, tx *sql.Tx, id string) (*training.ModelTraining, error)
 	GetModelTrainingList(
-		ctx context.Context, tx *sql.Tx, options ...filter.ListOption, ) ([]training.ModelTraining, error)
+		ctx context.Context, tx *sql.Tx, options ...filter.ListOption) ([]training.ModelTraining, error)
 	DeleteModelTraining(ctx context.Context, tx *sql.Tx, id string) error
 	SetDeletionMark(ctx context.Context, tx *sql.Tx, id string, value bool) error
 	UpdateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error
 	UpdateModelTrainingStatus(ctx context.Context, tx *sql.Tx, id string, s v1alpha1.ModelTrainingStatus) error
-	CreateModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error
+	SaveModelTraining(ctx context.Context, tx *sql.Tx, mt *training.ModelTraining) error
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }
 
@@ -45,7 +45,7 @@ type ToolchainRepository interface {
 	GetToolchainIntegrationList(options ...filter.ListOption) ([]training.ToolchainIntegration, error)
 	DeleteToolchainIntegration(name string) error
 	UpdateToolchainIntegration(md *training.ToolchainIntegration) error
-	CreateToolchainIntegration(md *training.ToolchainIntegration) error
+	SaveToolchainIntegration(md *training.ToolchainIntegration) error
 }
 
 type MTFilter struct {

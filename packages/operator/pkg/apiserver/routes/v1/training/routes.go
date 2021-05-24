@@ -19,9 +19,8 @@ package training
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
-	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	mt_kube_client "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient/trainingclient"
+	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
 )
 
@@ -30,7 +29,7 @@ func ConfigureRoutes(
 	config config.ModelTrainingConfig,
 	gpuResourceName string,
 	trainService mt_service.Service,
-	toolchainRepo mt_repository.ToolchainRepository,
+	toolchainService toolchainGetter,
 	connRepo conn_repository.Repository,
 	trainKubeClient mt_kube_client.Client) {
 
@@ -38,7 +37,7 @@ func ConfigureRoutes(
 		trainService: trainService,
 		kubeClient:   trainKubeClient,
 		validator: NewMtValidator(
-			toolchainRepo,
+			toolchainService,
 			connRepo,
 			config,
 			gpuResourceName,

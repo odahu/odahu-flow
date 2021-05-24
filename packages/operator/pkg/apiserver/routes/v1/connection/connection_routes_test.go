@@ -24,6 +24,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
@@ -384,7 +385,7 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable() {
 	newResourceBody, err := json.Marshal(newResource)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
-	reqTime := routes.GetTimeNowTruncatedToSeconds()
+	reqTime := time.Now()
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, conn_route.CreateConnectionURL, bytes.NewReader(newResourceBody))
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -395,11 +396,11 @@ func (s *ConnectionRouteGenericSuite) TestCreateConnectionModifiable() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusCreated))
-	s.g.Expect(resp.Status.CreatedAt).NotTo(BeNil())
-	createdAtWasNotUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(resp.CreatedAt).NotTo(BeNil())
+	createdAtWasNotUpdated := reqTime.Before(resp.CreatedAt) || reqTime.Equal(resp.CreatedAt)
 	s.g.Expect(createdAtWasNotUpdated).Should(Equal(true))
-	s.g.Expect(resp.Status.UpdatedAt).NotTo(BeNil())
-	updatedAtWasUpdated := reqTime.Before(resp.Status.CreatedAt) || reqTime.Equal(resp.Status.CreatedAt)
+	s.g.Expect(resp.UpdatedAt).NotTo(BeNil())
+	updatedAtWasUpdated := reqTime.Before(resp.CreatedAt) || reqTime.Equal(resp.CreatedAt)
 	s.g.Expect(updatedAtWasUpdated).Should(Equal(true))
 }
 

@@ -21,8 +21,8 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	hashutil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/hash"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"time"
@@ -131,10 +131,9 @@ func (s serviceImpl) CreateModelPackaging(ctx context.Context, mp *packaging.Mod
 	mp.Status = v1alpha1.ModelPackagingStatus{
 		State: v1alpha1.ModelPackagingUnknown,
 	}
-	return s.repo.CreateModelPackaging(ctx, nil, mp)
+	return s.repo.SaveModelPackaging(ctx, nil, mp)
 }
 
 func NewService(repo repo.Repository) Service {
 	return &serviceImpl{repo: repo}
 }
-

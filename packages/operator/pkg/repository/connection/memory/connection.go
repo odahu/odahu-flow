@@ -26,12 +26,11 @@ import (
 
 type repository struct {
 	mu *sync.Mutex
-	m map[string]*connection.Connection
+	m  map[string]*connection.Connection
 }
 
-
 // Not for Production! Development / Testing purposes only
-func NewRepository () conn_repository.Repository {
+func NewRepository() conn_repository.Repository {
 	return repository{
 		mu: &sync.Mutex{},
 		m:  make(map[string]*connection.Connection),
@@ -72,7 +71,7 @@ func (r repository) UpdateConnection(connection *connection.Connection) error {
 	return nil
 }
 
-func (r repository) CreateConnection(connection *connection.Connection) error {
+func (r repository) SaveConnection(connection *connection.Connection) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	r.m[connection.ID] = connection

@@ -83,13 +83,6 @@ spec:
           type: object
         status:
           description: PackagingIntegrationStatus defines the observed state of PackagingIntegration
-          properties:
-            createdAt:
-              format: date-time
-              type: string
-            updatedAt:
-              format: date-time
-              type: string
           type: object
       type: object
   version: v1alpha1

@@ -20,18 +20,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
-	"k8s.io/client-go/rest"
-	"time"
-
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/packaging"
 	kube_utils "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -229,7 +227,6 @@ func (c *packagingK8SClient) UpdateModelPackaging(mp *packaging.ModelPackaging) 
 	k8sMp.Status.Reason = nil
 	k8sMp.Status.Message = nil
 	k8sMp.Status.Results = []v1alpha1.ModelPackagingResult{}
-	k8sMp.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sMp.ObjectMeta.Labels = updatedK8sMpSpec.Labels
 
 	if err := c.k8sClient.Update(context.TODO(), &k8sMp); err != nil {
@@ -248,9 +245,6 @@ func (c *packagingK8SClient) CreateModelPackaging(mp *packaging.ModelPackaging) 
 	if err != nil {
 		return err
 	}
-
-	k8sMp.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	k8sMp.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := c.k8sClient.Create(context.TODO(), k8sMp); err != nil {
 		logMP.Error(err, "Model packaging creation error from k8s", "id", mp.ID)

@@ -18,17 +18,16 @@ package training
 
 import (
 	"github.com/gin-gonic/gin"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 )
 
 func ConfigureToolchainRoutes(
 	routeGroup *gin.RouterGroup,
-	mtiRepository mt_repository.ToolchainRepository,
+	tiService toolchainService,
 ) {
 
 	tiController := &ToolchainIntegrationController{
-		repository: mtiRepository,
-		validator:  NewTiValidator(),
+		service:   tiService,
+		validator: NewTiValidator(),
 	}
 
 	routeGroup.GET(GetToolchainIntegrationURL, tiController.getToolchainIntegration)

@@ -45,7 +45,7 @@ func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 }
 
 // CreateModelDeployment provides a mock function with given fields: ctx, tx, md
-func (_m *Repository) CreateModelDeployment(ctx context.Context, tx *sql.Tx, md *apisdeployment.ModelDeployment) error {
+func (_m *Repository) SaveModelDeployment(ctx context.Context, tx *sql.Tx, md *apisdeployment.ModelDeployment) error {
 	ret := _m.Called(ctx, tx, md)
 
 	var r0 error

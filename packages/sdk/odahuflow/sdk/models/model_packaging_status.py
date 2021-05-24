@@ -16,11 +16,9 @@ class ModelPackagingStatus(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, created_at: str=None, exit_code: int=None, message: str=None, pod_name: str=None, reason: str=None, results: List[ModelPackagingResult]=None, state: str=None, updated_at: str=None):  # noqa: E501
+    def __init__(self, exit_code: int=None, message: str=None, pod_name: str=None, reason: str=None, results: List[ModelPackagingResult]=None, state: str=None):  # noqa: E501
         """ModelPackagingStatus - a model defined in Swagger
 
-        :param created_at: The created_at of this ModelPackagingStatus.  # noqa: E501
-        :type created_at: str
         :param exit_code: The exit_code of this ModelPackagingStatus.  # noqa: E501
         :type exit_code: int
         :param message: The message of this ModelPackagingStatus.  # noqa: E501
@@ -33,39 +31,31 @@ class ModelPackagingStatus(Model):
         :type results: List[ModelPackagingResult]
         :param state: The state of this ModelPackagingStatus.  # noqa: E501
         :type state: str
-        :param updated_at: The updated_at of this ModelPackagingStatus.  # noqa: E501
-        :type updated_at: str
         """
         self.swagger_types = {
-            'created_at': str,
             'exit_code': int,
             'message': str,
             'pod_name': str,
             'reason': str,
             'results': List[ModelPackagingResult],
-            'state': str,
-            'updated_at': str
+            'state': str
         }
 
         self.attribute_map = {
-            'created_at': 'createdAt',
             'exit_code': 'exitCode',
             'message': 'message',
             'pod_name': 'podName',
             'reason': 'reason',
             'results': 'results',
-            'state': 'state',
-            'updated_at': 'updatedAt'
+            'state': 'state'
         }
 
-        self._created_at = created_at
         self._exit_code = exit_code
         self._message = message
         self._pod_name = pod_name
         self._reason = reason
         self._results = results
         self._state = state
-        self._updated_at = updated_at
 
     @classmethod
     def from_dict(cls, dikt) -> 'ModelPackagingStatus':
@@ -77,27 +67,6 @@ class ModelPackagingStatus(Model):
         :rtype: ModelPackagingStatus
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def created_at(self) -> str:
-        """Gets the created_at of this ModelPackagingStatus.
-
-
-        :return: The created_at of this ModelPackagingStatus.
-        :rtype: str
-        """
-        return self._created_at
-
-    @created_at.setter
-    def created_at(self, created_at: str):
-        """Sets the created_at of this ModelPackagingStatus.
-
-
-        :param created_at: The created_at of this ModelPackagingStatus.
-        :type created_at: str
-        """
-
-        self._created_at = created_at
 
     @property
     def exit_code(self) -> int:
@@ -236,24 +205,3 @@ class ModelPackagingStatus(Model):
         """
 
         self._state = state
-
-    @property
-    def updated_at(self) -> str:
-        """Gets the updated_at of this ModelPackagingStatus.
-
-
-        :return: The updated_at of this ModelPackagingStatus.
-        :rtype: str
-        """
-        return self._updated_at
-
-    @updated_at.setter
-    def updated_at(self, updated_at: str):
-        """Sets the updated_at of this ModelPackagingStatus.
-
-
-        :param updated_at: The updated_at of this ModelPackagingStatus.
-        :type updated_at: str
-        """
-
-        self._updated_at = updated_at

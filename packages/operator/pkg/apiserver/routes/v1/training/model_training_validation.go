@@ -23,7 +23,6 @@ import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
-	mt_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/repository/util/kubernetes"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
@@ -53,21 +52,25 @@ var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
 )
 
+type toolchainGetter interface {
+	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+}
+
 type MtValidator struct {
-	mtRepository    mt_repository.ToolchainRepository
+	tiService       toolchainGetter
 	connRepository  conn_repository.Repository
 	gpuResourceName string
 	trainingConfig  config.ModelTrainingConfig
 }
 
 func NewMtValidator(
-	mtRepository mt_repository.ToolchainRepository,
+	tiService toolchainGetter,
 	connRepository conn_repository.Repository,
 	trainingConfig config.ModelTrainingConfig,
 	gpuResourceName string,
 ) *MtValidator {
 	return &MtValidator{
-		mtRepository:    mtRepository,
+		tiService:       tiService,
 		connRepository:  connRepository,
 		trainingConfig:  trainingConfig,
 		gpuResourceName: gpuResourceName,
@@ -150,7 +153,7 @@ func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error
 		err = multierr.Append(err, errors.New("invalid training toolchain: "+labelErr.Error()))
 	}
 
-	toolchain, k8sErr := mtv.mtRepository.GetToolchainIntegration(mt.Spec.Toolchain)
+	toolchain, k8sErr := mtv.tiService.GetToolchainIntegration(mt.Spec.Toolchain)
 	if k8sErr != nil {
 		err = multierr.Append(err, k8sErr)
 

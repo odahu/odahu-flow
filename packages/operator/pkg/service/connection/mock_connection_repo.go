@@ -54,7 +54,7 @@ func (c *RepositoryMock) UpdateConnection(conn *connection.Connection) error {
 	return mockedResult.Error(0)
 }
 
-func (c *RepositoryMock) CreateConnection(conn *connection.Connection) error {
+func (c *RepositoryMock) SaveConnection(conn *connection.Connection) error {
 	// Remember the state on passed connection for assertions
 	c.CreatedConnection = *conn
 	mockedResult := c.Called(conn)

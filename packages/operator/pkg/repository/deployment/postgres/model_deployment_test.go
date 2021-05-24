@@ -22,7 +22,7 @@ func TestModelDeploymentRepository(t *testing.T) {
 
 	as := assert.New(t)
 	created := &deployment.ModelDeployment{
-		ID: mdID,
+		ID:        mdID,
 		CreatedAt: time.Now().Round(time.Microsecond),
 		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: v1alpha1.ModelDeploymentSpec{
@@ -30,9 +30,9 @@ func TestModelDeploymentRepository(t *testing.T) {
 		},
 	}
 
-	as.NoError(repo.CreateModelDeployment(context.Background(), nil, created))
+	as.NoError(repo.SaveModelDeployment(context.Background(), nil, created))
 
-	as.Exactly(repo.CreateModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{
+	as.Exactly(repo.SaveModelDeployment(context.Background(), nil, created), odahuErrors.AlreadyExistError{
 		Entity: mdID,
 	})
 
@@ -69,13 +69,12 @@ func TestModelDeploymentRepository(t *testing.T) {
 	as.NoError(err)
 	as.Len(tis, 1)
 
-
 	as.False(fetched.DeletionMark)
 	as.NoError(repo.SetDeletionMark(context.Background(), nil, mdID, true))
 	fetched, err = repo.GetModelDeployment(context.Background(), nil, mdID)
 	as.NoError(err)
 	as.True(fetched.DeletionMark)
-	
+
 	as.NoError(repo.DeleteModelDeployment(context.Background(), nil, mdID))
 	_, err = repo.GetModelDeployment(context.Background(), nil, mdID)
 

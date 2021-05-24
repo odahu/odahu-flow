@@ -45,7 +45,7 @@ func (_m *Repository) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 }
 
 // CreateModelTraining provides a mock function with given fields: ctx, tx, mt
-func (_m *Repository) CreateModelTraining(ctx context.Context, tx *sql.Tx, mt *apistraining.ModelTraining) error {
+func (_m *Repository) SaveModelTraining(ctx context.Context, tx *sql.Tx, mt *apistraining.ModelTraining) error {
 	ret := _m.Called(ctx, tx, mt)
 
 	var r0 error

@@ -82,10 +82,6 @@ type ModelDeploymentStatus struct {
 	ModelName string `json:"modelName,omitempty"`
 	// Model version discovered in ModelDeployment
 	ModelVersion string `json:"modelVersion,omitempty"`
-	// DEPRECATED Info about create and update
-	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
-	Modifiable `json:",inline"`
 }
 
 func (in ModelDeploymentSpec) Value() (driver.Value, error) {

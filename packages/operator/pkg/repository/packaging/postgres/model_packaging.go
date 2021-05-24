@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	log = logf.Log.WithName("model-packaging--repository--postgres")
+	log       = logf.Log.WithName("model-packaging--repository--postgres")
 	txOptions = &sql.TxOptions{
 		Isolation: sql.LevelRepeatableRead,
 		ReadOnly:  false,
@@ -243,7 +243,7 @@ func (repo PackagingRepo) UpdateModelPackagingStatus(
 	return nil
 }
 
-func (repo PackagingRepo) CreateModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error {
+func (repo PackagingRepo) SaveModelPackaging(ctx context.Context, tx *sql.Tx, mp *packaging.ModelPackaging) error {
 
 	var qrr utils.Querier
 	qrr = repo.DB
@@ -265,7 +265,7 @@ func (repo PackagingRepo) CreateModelPackaging(ctx context.Context, tx *sql.Tx, 
 	_, err = qrr.ExecContext(
 		ctx,
 		stmt,
-		args...
+		args...,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
@@ -281,4 +281,3 @@ func (repo PackagingRepo) CreateModelPackaging(ctx context.Context, tx *sql.Tx, 
 func (repo PackagingRepo) BeginTransaction(ctx context.Context) (*sql.Tx, error) {
 	return repo.DB.BeginTx(ctx, txOptions)
 }
-

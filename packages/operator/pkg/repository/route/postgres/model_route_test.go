@@ -22,7 +22,7 @@ func TestModelRouteRepository(t *testing.T) {
 
 	as := assert.New(t)
 	created := &deployment.ModelRoute{
-		ID: mrID,
+		ID:        mrID,
 		CreatedAt: time.Now().Round(time.Microsecond),
 		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: v1alpha1.ModelRouteSpec{
@@ -30,9 +30,9 @@ func TestModelRouteRepository(t *testing.T) {
 		},
 	}
 
-	as.NoError(repo.CreateModelRoute(context.Background(), nil, created))
+	as.NoError(repo.SaveModelRoute(context.Background(), nil, created))
 
-	as.Exactly(repo.CreateModelRoute(context.Background(), nil, created), odahuErrors.AlreadyExistError{Entity: mrID})
+	as.Exactly(repo.SaveModelRoute(context.Background(), nil, created), odahuErrors.AlreadyExistError{Entity: mrID})
 
 	fetched, err := repo.GetModelRoute(context.Background(), nil, mrID)
 	as.NoError(err)
@@ -66,7 +66,6 @@ func TestModelRouteRepository(t *testing.T) {
 	tis, err := repo.GetModelRouteList(context.Background(), nil)
 	as.NoError(err)
 	as.Len(tis, 1)
-
 
 	as.False(fetched.DeletionMark)
 	as.NoError(repo.SetDeletionMark(context.Background(), nil, mrID, true))

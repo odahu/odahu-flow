@@ -36,6 +36,8 @@ import (
 	mp_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging"
 	mp_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/packaging/postgres"
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -61,13 +63,21 @@ const (
 	testOutConnNotFound = "out-conn-not-found"
 )
 
+type packagingIntegrationService interface {
+	GetPackagingIntegration(id string) (*packaging.PackagingIntegration, error)
+	GetPackagingIntegrationList(options ...filter.ListOption) ([]packaging.PackagingIntegration, error)
+	CreatePackagingIntegration(md *packaging.PackagingIntegration) error
+	UpdatePackagingIntegration(md *packaging.PackagingIntegration) error
+	DeletePackagingIntegration(id string) error
+}
+
 type ModelPackagingRouteSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	server         *gin.Engine
 	packRepo       mp_repository.Repository
 	packService    mp_service.Service
-	piRepo         mp_repository.PackagingIntegrationRepository
+	piService      packagingIntegrationService
 	kubePackClient kube_client.Client
 	connStorage    conn_repository.Repository
 	k8sClient      client.Client
@@ -77,11 +87,12 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 
 	s.k8sClient = kubeClient
 	s.kubePackClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
-	s.piRepo = mp_postgres_repository.PackagingIntegrationRepository{DB: db}
+	piRepo := mp_postgres_repository.PackagingIntegrationRepository{DB: db}
+	s.piService = packaging_integration.NewService(&piRepo)
 	s.packRepo = mp_postgres_repository.PackagingRepo{DB: db}
 	s.packService = mp_service.NewService(s.packRepo)
 
-	err := s.piRepo.CreatePackagingIntegration(&packaging.PackagingIntegration{
+	err := s.piService.CreatePackagingIntegration(&packaging.PackagingIntegration{
 		ID: piIDMpRoute,
 		Spec: packaging.PackagingIntegrationSpec{
 			Entrypoint:   piEntrypointMpRoute,
@@ -95,7 +106,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 
 	s.connStorage = conn_k8s_repository.NewRepository(testNamespace, s.k8sClient)
 	// Create the connection that will be used as the outputConnection param for a training.
-	if err := s.connStorage.CreateConnection(&connection.Connection{
+	if err := s.connStorage.SaveConnection(&connection.Connection{
 		ID: testOutConn,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -105,7 +116,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 	}
 
 	// Create the connection that will be used as the default outputConnection param for a training.
-	if err := s.connStorage.CreateConnection(&connection.Connection{
+	if err := s.connStorage.SaveConnection(&connection.Connection{
 		ID: testOutConnDefault,
 		Spec: odahuflowv1alpha1.ConnectionSpec{
 			Type: connection.GcsType,
@@ -116,7 +127,7 @@ func (s *ModelPackagingRouteSuite) SetupSuite() {
 }
 
 func (s *ModelPackagingRouteSuite) TearDownSuite() {
-	if err := s.piRepo.DeletePackagingIntegration(piIDMpValid); err != nil {
+	if err := s.piService.DeletePackagingIntegration(piIDMpValid); err != nil {
 		s.T().Fatal(err)
 	}
 
@@ -135,7 +146,7 @@ func (s *ModelPackagingRouteSuite) registerHandlers(packagingConfig config.Model
 
 	pack_route.ConfigureRoutes(
 		packGroup, s.kubePackClient, s.packService,
-		s.piRepo, s.connStorage, packagingConfig,
+		s.piService, s.connStorage, packagingConfig,
 		config.NvidiaResourceName,
 	)
 }

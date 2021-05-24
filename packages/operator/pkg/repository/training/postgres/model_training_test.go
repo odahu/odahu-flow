@@ -28,7 +28,7 @@ func (s *Suite) SetupSuite() {
 
 func (s *Suite) TearDownTest() {
 	err := s.repo.DeleteModelTraining(context.Background(), nil, mtID)
-	if err != nil  && !odahuErrors.IsNotFoundError(err) {
+	if err != nil && !odahuErrors.IsNotFoundError(err) {
 		s.T().Fatal(err)
 	}
 }
@@ -44,7 +44,7 @@ func (s *Suite) TestModelTrainingRepository() {
 	g := NewGomegaWithT(s.T())
 
 	created := &training.ModelTraining{
-		ID: mtID,
+		ID:        mtID,
 		CreatedAt: time.Now().Round(time.Microsecond),
 		UpdatedAt: time.Now().Round(time.Microsecond),
 		Spec: v1alpha1.ModelTrainingSpec{
@@ -52,9 +52,9 @@ func (s *Suite) TestModelTrainingRepository() {
 		},
 	}
 
-	g.Expect(tRepo.CreateModelTraining(context.TODO(), nil, created)).NotTo(HaveOccurred())
+	g.Expect(tRepo.SaveModelTraining(context.TODO(), nil, created)).NotTo(HaveOccurred())
 
-	g.Expect(tRepo.CreateModelTraining(context.TODO(), nil, created)).To(And(
+	g.Expect(tRepo.SaveModelTraining(context.TODO(), nil, created)).To(And(
 		HaveOccurred(),
 		MatchError(odahuErrors.AlreadyExistError{Entity: mtID}),
 	))
@@ -67,7 +67,7 @@ func (s *Suite) TestModelTrainingRepository() {
 	g.Expect(fetched.UpdatedAt.Equal(created.UpdatedAt)).Should(BeTrue())
 
 	updated := &training.ModelTraining{
-		ID: mtID,
+		ID:        mtID,
 		UpdatedAt: created.CreatedAt.Add(time.Hour),
 		Spec: v1alpha1.ModelTrainingSpec{
 			WorkDir: "/foo-updated",

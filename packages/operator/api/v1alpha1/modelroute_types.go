@@ -55,10 +55,6 @@ type ModelRouteStatus struct {
 	EdgeURL string `json:"edgeUrl"`
 	// State of Model Route
 	State ModelRouteState `json:"state"`
-	// Info about create and update
-	//CreatedAt *metav1.Time `json:"createdAt,omitempty"`
-	//UpdatedAt *metav1.Time `json:"updatedAt,omitempty"`
-	Modifiable `json:",inline"`
 }
 
 func (in ModelRouteSpec) Value() (driver.Value, error) {
@@ -86,7 +82,6 @@ func (in *ModelRouteStatus) Scan(value interface{}) error {
 	res := json.Unmarshal(b, &in)
 	return res
 }
-
 
 // +kubebuilder:object:root=true
 

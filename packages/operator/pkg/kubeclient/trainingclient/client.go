@@ -22,16 +22,14 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	kube_utils "github.com/odahu/odahu-flow/packages/operator/pkg/kubeclient"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/odahuflow"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/utils/filter"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/rest"
-	"time"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 )
@@ -244,7 +242,6 @@ func (c *trainingK8SClient) UpdateModelTraining(mt *training.ModelTraining) erro
 	k8sMD.Status.ExitCode = nil
 	k8sMD.Status.Reason = nil
 	k8sMD.Status.Message = nil
-	k8sMD.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 	k8sMD.ObjectMeta.Labels = mtTransformToLabels(mt)
 
 	if err := c.k8sClient.Update(context.TODO(), &k8sMD); err != nil {
@@ -267,9 +264,6 @@ func (c *trainingK8SClient) CreateModelTraining(mt *training.ModelTraining) erro
 		},
 		Spec: mt.Spec,
 	}
-
-	k8sMd.Status.CreatedAt = &metav1.Time{Time: time.Now()}
-	k8sMd.Status.UpdatedAt = &metav1.Time{Time: time.Now()}
 
 	if err := c.k8sClient.Create(context.TODO(), k8sMd); err != nil {
 		logMT.Error(err, "StorageEntity creation error from k8s", "name", mt.ID)

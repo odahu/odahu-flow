@@ -52,13 +52,6 @@ spec:
           type: object
         status:
           description: ToolchainIntegrationStatus defines the observed state of ToolchainIntegration
-          properties:
-            createdAt:
-              format: date-time
-              type: string
-            updatedAt:
-              format: date-time
-              type: string
           type: object
       type: object
   version: v1alpha1
