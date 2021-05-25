@@ -25,26 +25,23 @@ from urllib3.exceptions import HTTPError
 import odahuflow.sdk.config
 from odahuflow.sdk.clients.deployment import ModelDeploymentClient
 from odahuflow.sdk.clients.route import ModelRouteClient
-from odahuflow.sdk.clients.api import Authenticator, IncorrectAuthorizationToken
+from odahuflow.sdk.clients.api import Authenticator, IncorrectAuthorizationToken, RemoteAPIClient
 from odahuflow.sdk.utils import ensure_function_succeed
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-def calculate_url(base_url: str, token : str = None, model_route: str = None, model_deployment: str = None,
-                  url_prefix: str = None, client_id: str = '', client_secret: str = '', issuer_url: str = ''):
+def calculate_url(base_url: str, api_client : RemoteAPIClient, model_route: str = None,
+                  model_deployment: str = None, url_prefix: str = None):
     """
     Calculate url for model
 
     :param base_url: base model server url
-    :param token: model jwt token
+    :param api_client: base api clent
     :param model_route: model route name
     :param model_deployment: model deployment name. Default route URL will be returned
     :param url_prefix: model prefix
-    :param client_id: client_id for Client Credentials OAuth2 flow
-    :param client_secret: client_secret for Client Credentials OAuth2 flow
-    :param issuer_url: url for credential login
     :return: model url
     """
     if not base_url:
@@ -54,9 +51,7 @@ def calculate_url(base_url: str, token : str = None, model_route: str = None, mo
         return f'{base_url}{url_prefix}'
 
     if model_route:
-        mr_client = ModelRouteClient(
-            base_url=base_url, token=token, client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
-        )
+        mr_client = ModelRouteClient.construct_from_other(api_client)
 
         model_route = mr_client.get(model_route)
 
@@ -64,9 +59,7 @@ def calculate_url(base_url: str, token : str = None, model_route: str = None, mo
         return model_route.status.edge_url
 
     if model_deployment:
-        md_client = ModelDeploymentClient(
-            base_url=base_url, token=token, client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
-        )
+        md_client = ModelDeploymentClient.construct_from_other(api_client)
         model_route = md_client.get_default_route(model_deployment)
         LOGGER.debug('Found default model route: %s', model_route)
         return model_route.status.edge_url
@@ -127,9 +120,11 @@ class ModelClient:
         token = token if token else odahuflow.sdk.config.API_TOKEN
         issuer_url = issuer_url if issuer_url else odahuflow.sdk.config.ISSUER_URL
 
-        self._url = calculate_url(
-            base_url, token, model_route, model_deployment, url_prefix, client_id, client_secret, issuer_url
+        api_client = RemoteAPIClient(
+            base_url=base_url, token=token, client_id=client_id, client_secret=client_secret, issuer_url=issuer_url
         )
+
+        self._url = calculate_url(base_url, api_client, model_route, model_deployment, url_prefix)
         self._authenticator = Authenticator(
             client_id=client_id,
             client_secret=client_secret,
