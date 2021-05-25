@@ -49,9 +49,25 @@ func (tis *Service) CreateToolchainIntegration(md *training.ToolchainIntegration
 
 func (tis *Service) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
 	md.UpdatedAt = time.Now()
+
+	// First try to check that row exists otherwise raise exception to fit interface
+	oldTi, err := tis.GetToolchainIntegration(md.ID)
+	if err != nil {
+		return err
+	}
+
+	md.Status = oldTi.Status
+	md.CreatedAt = oldTi.CreatedAt
+
 	return tis.repo.UpdateToolchainIntegration(md)
 }
 
 func (tis *Service) DeleteToolchainIntegration(id string) error {
+	// First try to check that row exists otherwise raise exception to fit interface
+	_, err := tis.GetToolchainIntegration(id)
+	if err != nil {
+		return err
+	}
+
 	return tis.repo.DeleteToolchainIntegration(id)
 }

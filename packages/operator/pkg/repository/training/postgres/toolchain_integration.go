@@ -85,17 +85,8 @@ func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption
 }
 
 func (tr ToolchainRepo) DeleteToolchainIntegration(name string) error {
-
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := tr.GetToolchainIntegration(name)
-	if err != nil {
-		return err
-	}
-
-	// If exists, delete it
-
 	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", toolchainIntegrationTable)
-	_, err = tr.DB.Exec(sqlStatement, name)
+	_, err := tr.DB.Exec(sqlStatement, name)
 	if err != nil {
 		return err
 	}
@@ -103,17 +94,8 @@ func (tr ToolchainRepo) DeleteToolchainIntegration(name string) error {
 }
 
 func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
-
-	// First try to check that row exists otherwise raise exception to fit interface
-	oldTi, err := tr.GetToolchainIntegration(md.ID)
-	if err != nil {
-		return err
-	}
-
-	md.Status = oldTi.Status
-
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", toolchainIntegrationTable)
-	_, err = tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
+	_, err := tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.ID)
 	if err != nil {
 		return err
 	}

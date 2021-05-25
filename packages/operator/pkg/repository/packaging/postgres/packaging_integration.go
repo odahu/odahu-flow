@@ -104,17 +104,8 @@ func (pir *PackagingIntegrationRepository) GetPackagingIntegrationList(options .
 }
 
 func (pir *PackagingIntegrationRepository) DeletePackagingIntegration(name string) error {
-
-	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := pir.GetPackagingIntegration(name)
-	if err != nil {
-		return err
-	}
-
-	// If exists, delete it
-
 	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", packagingIntegrationTable)
-	_, err = pir.DB.Exec(sqlStatement, name)
+	_, err := pir.DB.Exec(sqlStatement, name)
 	if err != nil {
 		return err
 	}
@@ -122,17 +113,8 @@ func (pir *PackagingIntegrationRepository) DeletePackagingIntegration(name strin
 }
 
 func (pir *PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packaging.PackagingIntegration) error {
-
-	// First try to check that row exists otherwise raise exception to fit interface
-	oldPi, err := pir.GetPackagingIntegration(pi.ID)
-	if err != nil {
-		return err
-	}
-
-	pi.Status = oldPi.Status
-
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", packagingIntegrationTable)
-	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.ID)
+	_, err := pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.ID)
 	if err != nil {
 		return err
 	}

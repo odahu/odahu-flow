@@ -41,17 +41,33 @@ func (pis *PackagingIntegrationService) GetPackagingIntegrationList(options ...f
 	return pis.repo.GetPackagingIntegrationList(options...)
 }
 
-func (pis *PackagingIntegrationService) CreatePackagingIntegration(md *packaging.PackagingIntegration) error {
-	md.CreatedAt = time.Now()
-	md.UpdatedAt = md.CreatedAt
-	return pis.repo.SavePackagingIntegration(md)
+func (pis *PackagingIntegrationService) CreatePackagingIntegration(pi *packaging.PackagingIntegration) error {
+	pi.CreatedAt = time.Now()
+	pi.UpdatedAt = pi.CreatedAt
+	return pis.repo.SavePackagingIntegration(pi)
 }
 
-func (pis *PackagingIntegrationService) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
-	md.UpdatedAt = time.Now()
-	return pis.repo.UpdatePackagingIntegration(md)
+func (pis *PackagingIntegrationService) UpdatePackagingIntegration(pi *packaging.PackagingIntegration) error {
+	pi.UpdatedAt = time.Now()
+
+	// First try to check that row exists otherwise raise exception to fit interface
+	oldPi, err := pis.GetPackagingIntegration(pi.ID)
+	if err != nil {
+		return err
+	}
+
+	pi.Status = oldPi.Status
+	pi.CreatedAt = oldPi.CreatedAt
+
+	return pis.repo.UpdatePackagingIntegration(pi)
 }
 
 func (pis *PackagingIntegrationService) DeletePackagingIntegration(id string) error {
+	// First try to check that row exists otherwise raise exception to fit interface
+	_, err := pis.GetPackagingIntegration(id)
+	if err != nil {
+		return err
+	}
+
 	return pis.repo.DeletePackagingIntegration(id)
 }

@@ -71,11 +71,22 @@ func (s *serviceImpl) GetConnectionList(options ...conn_repository.ListOption) (
 }
 
 func (s *serviceImpl) DeleteConnection(id string) error {
+	if _, err := s.repo.GetConnection(id); err != nil {
+		return err
+	}
+
 	return s.repo.DeleteConnection(id)
 }
 
 func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*connection.Connection, error) {
-	connection.UpdatedAt = time.Now()
+	existedConn, err := s.repo.GetConnection(connection.ID)
+
+	switch {
+	case errors.IsNotFoundError(err):
+		return nil, errors.NotFoundError{Entity: connection.ID}
+	case err != nil:
+		return nil, err
+	}
 
 	if err := connection.DecodeBase64Fields(); err != nil {
 		return nil, errors.InvalidEntityError{
@@ -84,17 +95,31 @@ func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*conne
 		}
 	}
 
-	err := s.repo.UpdateConnection(&connection)
+	existedConn.Spec = connection.Spec
+	existedConn.UpdatedAt = time.Now()
+	err = s.repo.UpdateConnection(existedConn)
 	if err != nil {
-		return nil, err
+		connection.Status = existedConn.Status
 	}
 
-	connection.DeleteSensitiveData()
-	connection.EncodeBase64Fields()
-	return &connection, err
+	existedConn.DeleteSensitiveData()
+	existedConn.EncodeBase64Fields()
+	return existedConn, err
 }
 
 func (s *serviceImpl) CreateConnection(connection connection.Connection) (*connection.Connection, error) {
+	_, err := s.repo.GetConnection(connection.ID)
+
+	switch {
+	case err == nil:
+		// If err is nil, then the connection already exists.
+		return nil, errors.AlreadyExistError{Entity: connection.ID}
+	case errors.IsNotFoundError(err):
+		// Good path
+	default:
+		return nil, err
+	}
+
 	connection.CreatedAt = time.Now()
 	connection.UpdatedAt = connection.CreatedAt
 
@@ -105,7 +130,7 @@ func (s *serviceImpl) CreateConnection(connection connection.Connection) (*conne
 		}
 	}
 
-	err := s.repo.SaveConnection(&connection)
+	err = s.repo.SaveConnection(&connection)
 	if err != nil {
 		return nil, err
 	}
