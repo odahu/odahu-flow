@@ -157,7 +157,7 @@ Run example model
     Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model info --md ${example_id}
     Wait Until Keyword Succeeds  1m  0 sec  StrictShell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json
 
-    ${res}=  Shell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json --jwt wrong-token
+    ${res}=  Shell  odahuflowctl model invoke --md ${example_id} --json-file ${manifests_dir}/request.json --token wrong-token
     should not be equal  ${res.rc}  0
 
     # --------- LOCAL COMMAND SECTION -----------

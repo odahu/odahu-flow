@@ -39,11 +39,11 @@ def model():
               help='Name of Model Deployment')
 @click.option('--base-url', default=config.API_URL, type=str, help='Base model server url')
 @click.option('--url-prefix', type=str, help='Url prefix of model server')
-@click.option('--jwt', type=str, default=config.API_TOKEN, help='Model jwt token')
+@click.option('--token', type=str, default=config.API_TOKEN, help='Model jwt token')
 @click.option('--json', 'json_input', type=str, help='Json parameter. For example: --json {"x": 2}')
 @click.option('--json-file', '--file', type=click.Path(exists=True), help='Path to json file')
 def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
-           base_url: str, jwt: str, json_file: str):
+           base_url: str, token: str, json_file: str):
     """
     Invoke model endpoint.
     \f
@@ -55,7 +55,12 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
         with open(json_file) as f:
             json_input = f.read()
 
-    client = ModelClient(base_url, model_route, model_deployment, url_prefix, jwt)
+    if not (url_prefix or model_route or model_deployment):
+        raise ValueError(
+            'Cannot create a model url. Specify one of the options: --url-prefix/--model-route/--model-deployment'
+        )
+
+    client = ModelClient(base_url, model_route, model_deployment, url_prefix, token)
 
     result = client.invoke(**json.loads(json_input))
 
@@ -68,14 +73,19 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
               help='Name of Model Deployment')
 @click.option('--base-url', default=config.API_URL, type=str, help='Base model server url')
 @click.option('--url-prefix', type=str, help='Url prefix of model server')
-@click.option('--jwt', type=str, default=config.API_TOKEN, help='Model jwt token')
-def info(model_route: str, model_deployment: str, url_prefix: str, base_url: str, jwt: str):
+@click.option('--token', type=str, default=config.API_TOKEN, help='Model jwt token')
+def info(model_route: str, model_deployment: str, url_prefix: str, base_url: str, token: str):
     """
     Get model information.
     \f
     :param client: Model HTTP Client
     """
-    client = ModelClient(base_url, model_route, model_deployment, url_prefix, jwt)
+    if not (url_prefix or model_route or model_deployment):
+        raise ValueError(
+            'Cannot create a model url. Specify one of the options: --url-prefix/--model-route/--model-deployment'
+        )
+
+    client = ModelClient(base_url, model_route, model_deployment, url_prefix, token)
 
     result = client.info()
 
