@@ -74,12 +74,12 @@ def login(api_host: str, token: str, client_id: str, client_secret: str, issuer:
 
     # validate
     if is_token_login and is_client_cred_login:
-        raise UsageError('You should use either --token or --client_id/--client_secret to login. '
+        raise UsageError('You should use either --token or --client-id/--client-secret to login. '
                          'Otherwise skipp all options to launch interactive login mode')
     if is_client_cred_login and (not client_id or not client_secret):
-        raise UsageError('You must pass both client_id and client_secret to client_credentials login')
+        raise UsageError('You must pass both --client-id and --client-secret to login with client credentials')
     if is_client_cred_login and not issuer:
-        raise UsageError('You must provide --issuer parameter to do client_credentials login. '
+        raise UsageError('You must provide --issuer parameter to login with client credentials. '
                          'Or set ISSUER_URL option in config file')
 
     # login

@@ -50,8 +50,8 @@ spec:
           args: ["
           {{- if .Values.security.mesh_authn -}}
             odahuflowctl login
-          --client_id {{ .Values.resource_uploader_sa.client_id }}
-          --client_secret {{ .Values.resource_uploader_sa.client_secret }}
+          --client-id {{ .Values.resource_uploader_sa.client_id }}
+          --client-secret {{ .Values.resource_uploader_sa.client_secret }}
           --issuer {{ .Values.oauth_oidc_issuer_url }}
           --url http://{{ .Release.Name }}-api.{{ .Release.Namespace }}.svc.cluster.local
           && {{ end -}}
