@@ -46,9 +46,9 @@ def _reset_credentials():
 @click.command()
 @click.option('--url', 'api_host', help='API server host', required=True)
 @click.option('--token', help='API server jwt token')
-@click.option('--client_id', help='client_id for OAuth2 Client Credentials flow')
-@click.option('--client_secret', help='client_secret for OAuth2 Client Credentials flow')
-@click.option('--issuer', help='OIDC Issuer URL')
+@click.option('--client-id', help='Client ID for OAuth2 Client Credentials flow')
+@click.option('--client-secret', help='Client secret for OAuth2 Client Credentials flow')
+@click.option('--issuer', help='Token Issuer URL (Identity Provider)')
 def login(api_host: str, token: str, client_id: str, client_secret: str, issuer: str):
     """
     Authorize on API endpoint.
