@@ -13,10 +13,12 @@
     "kind": "Connection",
     "id": "bulk-test-conn-2",
     "spec": {
-      "keySecret": "a2VrCg==",
-      "reference": "origin/develop",
-      "type": "git",
-      "uri": "git@github.com:odahu-flow-platform/odahuflow.git"
+      "type": "docker",
+      "uri": "gcr.io/or2-msq-epmd-legn-t1iylu/gke-dev04",
+      "username": "user",
+      "password": "cGFzc3dvcmQ=",
+      "description": "Default GCR docker repository for model packaging",
+      "webUILink": "https://gcr.io/some-project/some-name"
     }
   },
   {
@@ -63,6 +65,66 @@
         ]
       }
     }
+  },
+  {
+    "kind": "ModelTraining",
+    "id": "bulk-test-mt-1",
+    "spec": {
+      "model": {
+        "name": "bulk-test-mt-1",
+        "version": "test"
+      },
+      "toolchain": "mlflow",
+      "hyperParameters": {
+        "alpha": "1.0"
+      },
+      "workDir": "mlflow/sklearn/wine/",
+      "entrypoint": "main",
+      "algorithmSource": {
+        "vcs": {
+          "connection": "odahu-flow-examples",
+          "reference": "develop"
+        }
+      },
+      "outputConnection": "models-output",
+      "resources": {
+        "limits": {
+          "gpu": "",
+          "cpu": "2500m",
+          "memory": "2560Mi"
+        },
+        "requests": {
+          "gpu": "",
+          "cpu": "1250m",
+          "memory": "1280Mi"
+        }
+      },
+      "data": [
+        {
+          "connection": "models-output",
+          "localPath": "mlflow/sklearn/wine/",
+          "remotePath": "/input/"
+        }
+      ]
+    }
+  },
+  {
+    "kind": "ModelPackaging",
+    "id": "bulk-test-mp-1",
+    "spec": {
+      "artifactName": "simple-model.zip",
+      "integrationName": "docker-rest",
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "2Gi"
+        },
+        "requests": {
+          "cpu": "1",
+          "memory": "1Gi"
+        }
+      },
+      "outputConnection": "models-output"
+    }
   }
 ]
-

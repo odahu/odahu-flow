@@ -7,6 +7,8 @@ ${TI_1_ID}              bulk-test-ti-1
 ${TI_2_ID}              bulk-test-ti-2
 ${PI_1_ID}              bulk-test-pi-1
 ${TRAINING_1_NAME}      bulk-test-mt-1
+${PACKAGING_1_NAME}     bulk-test-mp-1
+${PACKAGING_2_NAME}     bulk-test-mp-2
 
 *** Settings ***
 Documentation       OdahuFlow's API operational check for bulk operations (with multiple resources)
@@ -16,11 +18,13 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Default Tags        cli  bulk
-Suite Setup         Run keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                               Login to the api and edge  AND
-...                               Cleanup resources
-Suite Teardown      Run keywords  Cleanup resources  AND
-...                               Remove File  ${LOCAL_CONFIG}
+Suite Setup         Run keywords
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  Cleanup resources
+Suite Teardown      Run keywords
+...                 Cleanup resources
+...                 AND  Remove File  ${LOCAL_CONFIG}
 
 *** Keywords ***
 Cleanup resources
@@ -30,30 +34,28 @@ Cleanup resources
     StrictShell  odahuflowctl --verbose ti delete --id ${TI_2_ID} --ignore-not-found
     StrictShell  odahuflowctl --verbose pi delete --id ${PI_1_ID} --ignore-not-found
     StrictShell  odahuflowctl --verbose train delete --id ${TRAINING_1_NAME} --ignore-not-found
+    StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_1_NAME} --ignore-not-found
+    StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_2_NAME} --ignore-not-found
 
 Check toolchain integration
     [Arguments]  ${name}
-    ${res}=  Shell  odahuflowctl --verbose ti get --id ${name}
-             Should be equal  ${res.rc}      ${0}
-             Should contain   ${res.stderr}  ${name}
+    ${res}=  StrictShell  odahuflowctl --verbose ti get --id ${name}
+             Should contain     ${res.stderr}  ${name}
 
 Check toolchain integration not exist
     [Arguments]  ${name}
-    ${res}=  Shell  odahuflowctl --verbose ti get --id ${name}
-             Should not be equal  ${res.rc}      ${0}
-             Should contain       ${res.stderr}  "${name}" is not found
+    ${res}=  FailedShell  odahuflowctl --verbose ti get --id ${name}
+             Should contain     ${res.stderr}  "${name}" is not found
 
 Check packaging integration
     [Arguments]  ${name}
-    ${res}=  Shell  odahuflowctl --verbose pi get --id ${name}
-             Should be equal  ${res.rc}      ${0}
-             Should contain   ${res.stderr}  ${name}
+    ${res}=  StrictShell  odahuflowctl --verbose pi get --id ${name}
+             Should contain     ${res.stderr}  ${name}
 
 Check packaging integration not exist
     [Arguments]  ${name}
-    ${res}=  Shell  odahuflowctl --verbose pi get --id ${name}
-             Should not be equal  ${res.rc}      ${0}
-             Should contain       ${res.stderr}  "${name}" is not found
+    ${res}=  FailedShell  odahuflowctl --verbose pi get --id ${name}
+             Should contain     ${res.stderr}  "${name}" is not found
 
 Check connection
     [Arguments]  ${name}
@@ -102,12 +104,12 @@ Template. Apply good profile, check resources and remove on teardown
     Check connection not exist               ${CONN_2_ID}
     Check toolchain integration not exist    ${TI_1_ID}
     Check packaging integration not exist    ${PI_1_ID}
-    Apply bulk file and check counters     ${file}  4  0  0
+    Apply bulk file and check counters     ${file}  6  0  0
     Check connection               ${CONN_1_ID}
     Check connection               ${CONN_2_ID}
     Check toolchain integration    ${TI_1_ID}
     Check packaging integration    ${PI_1_ID}
-    Remove bulk file and check counters    ${file}  0  0  4
+    Remove bulk file and check counters    ${file}  0  0  6
     Check connection not exist               ${CONN_1_ID}
     Check connection not exist               ${CONN_2_ID}
     Check toolchain integration not exist    ${TI_1_ID}
@@ -129,25 +131,25 @@ Apply changes on a good profile, remove on teardown
     Check toolchain integration not exist    ${TI_1_ID}
     Check toolchain integration not exist    ${TI_2_ID}
     Check packaging integration not exist    ${PI_1_ID}
-    Apply bulk file and check counters     correct.odahuflow.yaml     4  0  0
+    Apply bulk file and check counters     correct.odahuflow.yaml     6  0  0
     Check connection                         ${CONN_1_ID}
     Check connection                         ${CONN_2_ID}
     Check toolchain integration              ${TI_1_ID}
     Check toolchain integration not exist    ${TI_2_ID}
     Check packaging integration              ${PI_1_ID}
-    Apply bulk file and check counters     correct.odahuflow.yaml     0  4  0
+    Apply bulk file and check counters     correct.odahuflow.json     0  6  0
     Check connection                         ${CONN_1_ID}
     Check connection                         ${CONN_2_ID}
     Check toolchain integration              ${TI_1_ID}
     Check toolchain integration not exist    ${TI_2_ID}
     Check packaging integration              ${PI_1_ID}
-    Apply bulk file and check counters     correct-v2.odahuflow.yaml  1  4  0
+    Apply bulk file and check counters     correct-v2.odahuflow.yaml  2  6  0
     Check connection                         ${CONN_1_ID}
     Check connection                         ${CONN_2_ID}
     Check toolchain integration              ${TI_1_ID}
     Check toolchain integration              ${TI_2_ID}
     Check packaging integration              ${PI_1_ID}
-    Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  5
+    Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  8
     Check connection not exist               ${CONN_1_ID}
     Check connection not exist               ${CONN_2_ID}
     Check toolchain integration not exist    ${TI_1_ID}
