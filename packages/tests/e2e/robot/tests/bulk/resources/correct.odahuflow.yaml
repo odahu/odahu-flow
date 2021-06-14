@@ -89,5 +89,3 @@ spec:
       cpu: '1'
       memory: 1Gi
   outputConnection: models-output
----
-# add model deployment after refactoring of test setup script

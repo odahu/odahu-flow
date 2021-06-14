@@ -1,3 +1,6 @@
+# TODO
+# add model deployment to bulk tests after refactoring of test setup script
+
 *** Variables ***
 ${RES_DIR}              ${CURDIR}/resources
 ${LOCAL_CONFIG}         odahuflow/config_bulk_cli
@@ -37,13 +40,11 @@ Cleanup resources
     StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_1_NAME} --ignore-not-found
     StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_2_NAME} --ignore-not-found
 
-Check entity exists
-    [Arguments]  ${entity_type}  ${name}
+Check ${entity_type} exists - "${name}"
     ${res}=  StrictShell  odahuflowctl --verbose ${entity_type} get --id ${name}
         Should contain     ${res.stderr}  ${name}
 
-Check entity doesn't exist
-    [Arguments]  ${entity_type}  ${name}
+Check ${entity_type} doesn't exist - "${name}"
     ${res}=  FailedShell  odahuflowctl --verbose ${entity_type} get --id ${name}
         Should contain     ${res.stderr}  "${name}" is not found
 
@@ -78,26 +79,26 @@ Remove bulk file and check counters
 Template. Apply good profile, check resources and remove on teardown
     [Arguments]  ${file}
     [Teardown]  Cleanup resources
-    Check entity doesn't exist      connection  ${CONN_1_ID}
-    Check entity doesn't exist      connection  ${CONN_2_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_1_ID}
-    Check entity doesn't exist      packaging-integration  ${PI_1_ID}
-    Check entity doesn't exist      training  ${TRAINING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_1_NAME}
+    Check connection doesn't exist - "${CONN_1_ID}"
+    Check connection doesn't exist - "${CONN_2_ID}"
+    Check toolchain-integration doesn't exist - "${TI_1_ID}"
+    Check packaging-integration doesn't exist - "${PI_1_ID}"
+    Check training doesn't exist - "${TRAINING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_1_NAME}"
     Apply bulk file and check counters     ${file}  6  0  0
-    Check entity exists             connection  ${CONN_1_ID}
-    Check entity exists             connection  ${CONN_2_ID}
-    Check entity exists             toolchain-integration  ${TI_1_ID}
-    Check entity exists             packaging-integration  ${PI_1_ID}
-    Check entity exists             training  ${TRAINING_1_NAME}
-    Check entity exists             packaging  ${PACKAGING_1_NAME}
+    Check connection exists - "${CONN_1_ID}"
+    Check connection exists - "${CONN_2_ID}"
+    Check toolchain-integration exists - "${TI_1_ID}"
+    Check packaging-integration exists - "${PI_1_ID}"
+    Check training exists - "${TRAINING_1_NAME}"
+    Check packaging exists - "${PACKAGING_1_NAME}"
     Remove bulk file and check counters    ${file}  0  0  6
-    Check entity doesn't exist      connection  ${CONN_1_ID}
-    Check entity doesn't exist      connection  ${CONN_2_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_1_ID}
-    Check entity doesn't exist      packaging-integration  ${PI_1_ID}
-    Check entity doesn't exist      training  ${TRAINING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_1_NAME}
+    Check connection doesn't exist - "${CONN_1_ID}"
+    Check connection doesn't exist - "${CONN_2_ID}"
+    Check toolchain-integration doesn't exist - "${TI_1_ID}"
+    Check packaging-integration doesn't exist - "${PI_1_ID}"
+    Check training doesn't exist - "${TRAINING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_1_NAME}"
 
 *** Test Cases ***
 Apply good profile, check resources and remove on teardown
@@ -110,50 +111,50 @@ Apply good profile, check resources and remove on teardown
 Apply changes on a good profile, remove on teardown
     [Documentation]  Apply changes on a good profile, validate resources, remove on teardown
     [Teardown]  Cleanup resources
-    Check entity doesn't exist      connection  ${CONN_1_ID}
-    Check entity doesn't exist      connection  ${CONN_2_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_1_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_2_ID}
-    Check entity doesn't exist      packaging-integration  ${PI_1_ID}
-    Check entity doesn't exist      training  ${TRAINING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_2_NAME}
+    Check connection doesn't exist - "${CONN_1_ID}"
+    Check connection doesn't exist - "${CONN_2_ID}"
+    Check toolchain-integration doesn't exist - "${TI_1_ID}"
+    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check packaging-integration doesn't exist - "${PI_1_ID}"
+    Check training doesn't exist - "${TRAINING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_2_NAME}"
     Apply bulk file and check counters     correct.odahuflow.yaml     6  0  0
-    Check entity exists             connection  ${CONN_1_ID}
-    Check entity exists             connection  ${CONN_2_ID}
-    Check entity exists             toolchain-integration  ${TI_1_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_2_ID}
-    Check entity exists             packaging-integration  ${PI_1_ID}
-    Check entity exists             training  ${TRAINING_1_NAME}
-    Check entity exists             packaging  ${PACKAGING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_2_NAME}
+    Check connection exists - "${CONN_1_ID}"
+    Check connection exists - "${CONN_2_ID}"
+    Check toolchain-integration exists - "${TI_1_ID}"
+    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check packaging-integration exists - "${PI_1_ID}"
+    Check training exists - "${TRAINING_1_NAME}"
+    Check packaging exists - "${PACKAGING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_2_NAME}"
     Apply bulk file and check counters     correct.odahuflow.json     0  6  0
-    Check entity exists             connection  ${CONN_1_ID}
-    Check entity exists             connection  ${CONN_2_ID}
-    Check entity exists             toolchain-integration  ${TI_1_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_2_ID}
-    Check entity exists             packaging-integration  ${PI_1_ID}
-    Check entity exists             training  ${TRAINING_1_NAME}
-    Check entity exists             packaging  ${PACKAGING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_2_NAME}
+    Check connection exists - "${CONN_1_ID}"
+    Check connection exists - "${CONN_2_ID}"
+    Check toolchain-integration exists - "${TI_1_ID}"
+    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check packaging-integration exists - "${PI_1_ID}"
+    Check training exists - "${TRAINING_1_NAME}"
+    Check packaging exists - "${PACKAGING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_2_NAME}"
     Apply bulk file and check counters     correct-v2.odahuflow.yaml  2  6  0
-    Check entity exists             connection  ${CONN_1_ID}
-    Check entity exists             connection  ${CONN_2_ID}
-    Check entity exists             toolchain-integration  ${TI_1_ID}
-    Check entity exists             toolchain-integration  ${TI_2_ID}
-    Check entity exists             packaging-integration  ${PI_1_ID}
-    Check entity exists             training  ${TRAINING_1_NAME}
-    Check entity exists             packaging  ${PACKAGING_1_NAME}
-    Check entity exists             packaging  ${PACKAGING_2_NAME}
+    Check connection exists - "${CONN_1_ID}"
+    Check connection exists - "${CONN_2_ID}"
+    Check toolchain-integration exists - "${TI_1_ID}"
+    Check toolchain-integration exists - "${TI_2_ID}"
+    Check packaging-integration exists - "${PI_1_ID}"
+    Check training exists - "${TRAINING_1_NAME}"
+    Check packaging exists - "${PACKAGING_1_NAME}"
+    Check packaging exists - "${PACKAGING_2_NAME}"
     Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  8
-    Check entity doesn't exist      connection  ${CONN_1_ID}
-    Check entity doesn't exist      connection  ${CONN_2_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_1_ID}
-    Check entity doesn't exist      toolchain-integration  ${TI_2_ID}
-    Check entity doesn't exist      packaging-integration  ${PI_1_ID}
-    Check entity doesn't exist      training  ${TRAINING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_1_NAME}
-    Check entity doesn't exist      packaging  ${PACKAGING_2_NAME}
+    Check connection doesn't exist - "${CONN_1_ID}"
+    Check connection doesn't exist - "${CONN_2_ID}"
+    Check toolchain-integration doesn't exist - "${TI_1_ID}"
+    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check packaging-integration doesn't exist - "${PI_1_ID}"
+    Check training doesn't exist - "${TRAINING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_1_NAME}"
+    Check packaging doesn't exist - "${PACKAGING_2_NAME}"
 
 Try to apply profile with incorrect order
     [Documentation]  Try to apply profile with resources in incorrect order
