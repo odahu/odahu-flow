@@ -50,28 +50,24 @@ Check ${entity_type} doesn't exist - "${name}"
 
 Apply bulk file and check counters
     [Arguments]  ${file}  ${created}  ${changed}  ${deleted}
-    ${res}=  Shell  odahuflowctl --verbose bulk apply ${RES_DIR}/${file}
-             Should be equal  ${res.rc}      ${0}
+    ${res}=  StrictShell  odahuflowctl --verbose bulk apply ${RES_DIR}/${file}
              Run Keyword If   ${created} > 0  Should contain   ${res.stdout}  created resources: ${created}
              Run Keyword If   ${changed} > 0  Should contain   ${res.stdout}  changed resources: ${changed}
              Run Keyword If   ${deleted} > 0  Should contain   ${res.stdout}  deleted resources: ${deleted}
 
 Apply bulk file and check errors
     [Arguments]  ${file}  ${expected_error_message}
-    ${res}=  Shell  odahuflowctl --verbose bulk apply ${RES_DIR}/${file}
-             Should not be equal      ${res.rc}      ${0}
+    ${res}=  FailedShell  odahuflowctl --verbose bulk apply ${RES_DIR}/${file}
              Should contain       ${res.stdout}  ${expected_error_message}
 
 Apply bulk file and check parse errors
     [Arguments]  ${file}  ${expected_error_message}
-    ${res}=  Shell  odahuflowctl --verbose bulk apply ${RES_DIR}/${file}
-             Should not be equal      ${res.rc}      ${0}
+    ${res}=  FailedShell  odahuflowctl --verbose bulk apply ${RES_DIR}/${file}
              Should contain       ${res.stderr}  ${expected_error_message}
 
 Remove bulk file and check counters
     [Arguments]  ${file}  ${created}  ${changed}  ${deleted}
-    ${res}=  Shell  odahuflowctl --verbose bulk delete ${RES_DIR}/${file}
-             Should be equal  ${res.rc}      ${0}
+    ${res}=  StrictShell  odahuflowctl --verbose bulk delete ${RES_DIR}/${file}
              Run Keyword If   ${created} > 0  Should contain   ${res.stdout}  created resources: ${created}
              Run Keyword If   ${changed} > 0  Should contain   ${res.stdout}  changed resources: ${changed}
              Run Keyword If   ${deleted} > 0  Should contain   ${res.stdout}  removed resources: ${deleted}
