@@ -18,8 +18,7 @@ Force Tags          api  batch
 Test Timeout        15 minutes
 
 
-
-*** Test cases ***
+*** Test Cases ***
 Create Batch Service
     [Tags]                      batch
     [Documentation]             create batch service
@@ -34,7 +33,6 @@ Create Batch Job
     Status State Should Be      ${result}  succeeded
     ${result}                   check batch job response  ${RES_DIR}/inferencejob.yaml  ${RES_DIR}/output/response0.json
     Should Be True              ${result}
-
 
 Create Batch Service Packed Model
     [Tags]                      batch
