@@ -1,6 +1,3 @@
-# TODO
-# add model deployment to bulk tests after refactoring of test setup script
-
 *** Variables ***
 ${RES_DIR}              ${CURDIR}/resources
 ${LOCAL_CONFIG}         odahuflow/config_bulk_cli
@@ -12,6 +9,8 @@ ${PI_1_ID}              bulk-test-pi-1
 ${TRAINING_1_NAME}      bulk-test-mt-1
 ${PACKAGING_1_NAME}     bulk-test-mp-1
 ${PACKAGING_2_NAME}     bulk-test-mp-2
+${E2E_PACKAGING}        simple-model
+${DEPLOYMENT_1_NAME}    bulk-test-md-1
 
 *** Settings ***
 Documentation       OdahuFlow's API operational check for bulk operations (with multiple resources)
@@ -21,15 +20,23 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Default Tags        cli  bulk
-Suite Setup         Run keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
-...                 AND  Login to the api and edge
-...                 AND  Cleanup resources
+Suite Setup         Test Setup
 Suite Teardown      Run keywords
 ...                 Cleanup resources
 ...                 AND  Remove File  ${LOCAL_CONFIG}
 
 *** Keywords ***
+Test Setup
+    Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+    Login to the api and edge
+    Cleanup resources
+
+    # update image for model deployment
+    ${res}=  StrictShell  odahuflowctl pack get --id ${E2E_PACKAGING} -o 'jsonpath=$[0].spec.image'
+    StrictShell  yq w --inplace -d'6' ${RES_DIR}/correct.odahuflow.yaml 'spec.image' ${res.stdout}
+    StrictShell  yq w --inplace -d'8' ${RES_DIR}/correct-v2.odahuflow.yaml 'spec.image' ${res.stdout}
+    StrictShell  yq w --inplace -jP ${RES_DIR}/correct.odahuflow.json '[6].spec.image' ${res.stdout}
+
 Cleanup resources
     StrictShell  odahuflowctl --verbose conn delete --id ${CONN_1_ID} --ignore-not-found
     StrictShell  odahuflowctl --verbose conn delete --id ${CONN_2_ID} --ignore-not-found
@@ -39,13 +46,14 @@ Cleanup resources
     StrictShell  odahuflowctl --verbose train delete --id ${TRAINING_1_NAME} --ignore-not-found
     StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_1_NAME} --ignore-not-found
     StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_2_NAME} --ignore-not-found
+    StrictShell  odahuflowctl --verbose dep delete --id ${DEPLOYMENT_1_NAME} --ignore-not-found
 
 Check ${entity_type} exists - "${name}"
     ${res}=  StrictShell  odahuflowctl --verbose ${entity_type} get --id ${name}
         Should contain     ${res.stderr}  ${name}
 
 Check ${entity_type} doesn't exist - "${name}"
-    ${res}=  FailedShell  odahuflowctl --verbose ${entity_type} get --id ${name}
+    ${res}=  Wait Until Keyword Succeeds  5m  2s  FailedShell  odahuflowctl --verbose ${entity_type} get --id ${name}
         Should contain     ${res.stderr}  "${name}" is not found
 
 Apply bulk file and check counters
@@ -81,20 +89,23 @@ Template. Apply good profile, check resources and remove on teardown
     Check packaging-integration doesn't exist - "${PI_1_ID}"
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
-    Apply bulk file and check counters     ${file}  6  0  0
+    Check deployment doesn't exist - "${DEPLOYMENT_1_NAME}"
+    Apply bulk file and check counters     ${file}  7  0  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
     Check toolchain-integration exists - "${TI_1_ID}"
     Check packaging-integration exists - "${PI_1_ID}"
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
-    Remove bulk file and check counters    ${file}  0  0  6
+    Check deployment exists - "${DEPLOYMENT_1_NAME}"
+    Remove bulk file and check counters    ${file}  0  0  7
     Check connection doesn't exist - "${CONN_1_ID}"
     Check connection doesn't exist - "${CONN_2_ID}"
     Check toolchain-integration doesn't exist - "${TI_1_ID}"
     Check packaging-integration doesn't exist - "${PI_1_ID}"
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
+    Check deployment doesn't exist - "${DEPLOYMENT_1_NAME}"
 
 *** Test Cases ***
 Apply good profile, check resources and remove on teardown
@@ -115,7 +126,8 @@ Apply changes on a good profile, remove on teardown
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_2_NAME}"
-    Apply bulk file and check counters     correct.odahuflow.yaml     6  0  0
+    Check deployment doesn't exist - "${DEPLOYMENT_1_NAME}"
+    Apply bulk file and check counters     correct.odahuflow.yaml     7  0  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
     Check toolchain-integration exists - "${TI_1_ID}"
@@ -124,7 +136,8 @@ Apply changes on a good profile, remove on teardown
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_2_NAME}"
-    Apply bulk file and check counters     correct.odahuflow.json     0  6  0
+    Check deployment exists - "${DEPLOYMENT_1_NAME}"
+    Apply bulk file and check counters     correct.odahuflow.json     0  7  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
     Check toolchain-integration exists - "${TI_1_ID}"
@@ -133,7 +146,8 @@ Apply changes on a good profile, remove on teardown
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_2_NAME}"
-    Apply bulk file and check counters     correct-v2.odahuflow.yaml  2  6  0
+    Check deployment exists - "${DEPLOYMENT_1_NAME}"
+    Apply bulk file and check counters     correct-v2.odahuflow.yaml  2  7  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
     Check toolchain-integration exists - "${TI_1_ID}"
@@ -142,7 +156,8 @@ Apply changes on a good profile, remove on teardown
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
     Check packaging exists - "${PACKAGING_2_NAME}"
-    Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  8
+    Check deployment exists - "${DEPLOYMENT_1_NAME}"
+    Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  9
     Check connection doesn't exist - "${CONN_1_ID}"
     Check connection doesn't exist - "${CONN_2_ID}"
     Check toolchain-integration doesn't exist - "${TI_1_ID}"
@@ -151,6 +166,7 @@ Apply changes on a good profile, remove on teardown
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_2_NAME}"
+    Check deployment doesn't exist - "${DEPLOYMENT_1_NAME}"
 
 Try to apply profile with incorrect order
     [Documentation]  Try to apply profile with resources in incorrect order

@@ -126,5 +126,14 @@
       },
       "outputConnection": "models-output"
     }
+  },
+  {
+    "kind": "ModelDeployment",
+    "id": "bulk-test-md-1",
+    "spec": {
+      "image": null,
+      "predictor": "odahu-ml-server",
+      "imagePullConnID": "docker-ci"
+    }
   }
 ]

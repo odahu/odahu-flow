@@ -1,4 +1,3 @@
----
 kind: Connection
 id: bulk-test-conn-1
 spec:
@@ -75,3 +74,10 @@ id: bulk-test-mp-2
 spec:
   artifactName: simple-model.zip
   integrationName: docker-rest
+---
+kind: ModelDeployment
+id: bulk-test-md-1
+spec:
+  image:
+  predictor: odahu-ml-server
+  imagePullConnID: docker-ci
