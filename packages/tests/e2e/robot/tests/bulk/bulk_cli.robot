@@ -37,16 +37,20 @@ Test Setup
     StrictShell  yq w --inplace -d'8' ${RES_DIR}/correct-v2.odahuflow.yaml 'spec.image' ${res.stdout}
     StrictShell  yq w --inplace -jP ${RES_DIR}/correct.odahuflow.json '[6].spec.image' ${res.stdout}
 
+Remove ${entity_type} with id - "${name}"
+    StrictShell  odahuflowctl --verbose ${entity_type} delete --id ${name} --ignore-not-found
+
 Cleanup resources
-    StrictShell  odahuflowctl --verbose conn delete --id ${CONN_1_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose conn delete --id ${CONN_2_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose ti delete --id ${TI_1_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose ti delete --id ${TI_2_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose pi delete --id ${PI_1_ID} --ignore-not-found
-    StrictShell  odahuflowctl --verbose train delete --id ${TRAINING_1_NAME} --ignore-not-found
-    StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_1_NAME} --ignore-not-found
-    StrictShell  odahuflowctl --verbose pack delete --id ${PACKAGING_2_NAME} --ignore-not-found
-    StrictShell  odahuflowctl --verbose dep delete --id ${DEPLOYMENT_1_NAME} --ignore-not-found
+    Remove conn with id - "${CONN_1_ID}"
+    Remove conn with id - "${CONN_1_ID}"
+    Remove conn with id - "${CONN_2_ID}"
+    Remove ti with id - "${TI_1_ID}"
+    Remove ti with id - "${TI_2_ID}"
+    Remove pi with id - "${PI_1_ID}"
+    Remove train with id - "${TRAINING_1_NAME}"
+    Remove pack with id - "${PACKAGING_1_NAME}"
+    Remove pack with id - "${PACKAGING_2_NAME}"
+    Remove dep with id - "${DEPLOYMENT_1_NAME}"
 
 Check ${entity_type} exists - "${name}"
     ${res}=  StrictShell  odahuflowctl --verbose ${entity_type} get --id ${name}
