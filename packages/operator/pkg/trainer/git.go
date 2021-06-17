@@ -32,6 +32,7 @@ import (
 
 const (
 	publicHostKeyFile = "known_hosts"
+	commitInfoFile    = "commit_info.json"
 )
 
 var (
@@ -41,6 +42,10 @@ var (
 		"+refs/heads/*:refs/remotes/origin/*",
 	}
 )
+
+type CommitInfo struct {
+	CommitID string
+}
 
 // Clone repository and checkout user specific reference
 // Return commit id
