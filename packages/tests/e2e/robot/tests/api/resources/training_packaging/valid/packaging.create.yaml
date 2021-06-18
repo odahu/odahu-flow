@@ -6,3 +6,10 @@ spec:
     - connectionName: docker-ci  # Docker registry where output image will be stored
       name: docker-push
   integrationName: docker-cli
+  resources:
+    limits:
+      cpu: '4'
+      memory: 4Gi
+    requests:
+      cpu: '2'
+      memory: 2Gi
