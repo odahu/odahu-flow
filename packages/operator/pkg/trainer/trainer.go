@@ -193,13 +193,13 @@ func (mt *ModelTrainer) SaveResult() error {
 
 	commit := &CommitInfo{}
 	if k8sTraining.AlgorithmSourceConnection.Spec.Type == connection.GITType {
-		commitJsonFile, err := os.Open(commitInfoFile)
+		commitJSONFile, err := os.Open(commitInfoFile)
 		if err != nil {
 			return err
 		}
-		defer commitJsonFile.Close()
+		defer commitJSONFile.Close()
 
-		commitByteValue, err := ioutil.ReadAll(commitJsonFile)
+		commitByteValue, err := ioutil.ReadAll(commitJSONFile)
 		if err != nil {
 			return err
 		}
@@ -281,7 +281,7 @@ func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 			return err
 		}
 
-		_ = ioutil.WriteFile(commitInfoFile, fileBytes, 0644)
+		_ = ioutil.WriteFile(commitInfoFile, fileBytes, 0600)
 
 		mt.log.Info("The commit ID was saved", "commit_id", commitID)
 	case connection.ObjectStorageTypesSet[connType]:
