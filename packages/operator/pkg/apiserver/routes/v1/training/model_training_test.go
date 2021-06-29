@@ -671,6 +671,7 @@ func (s *ModelTrainingRouteSuite) TestUpdateMTResult() {
 	mtResult = &odahuflowv1alpha1.TrainingResult{
 		RunID:        runID,
 		ArtifactName: artifactName,
+		CommitID:     commitID,
 	}
 	expectedMPResultBody, err = json.Marshal(mtResult)
 	s.g.Expect(err).NotTo(HaveOccurred())

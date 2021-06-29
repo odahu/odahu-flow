@@ -149,7 +149,7 @@ func (r *ModelTrainingReconciler) calculateStateByTaskRun(
 			return err
 		}
 
-		trainingCR.Status.Artifacts = append(trainingCR.Status.Artifacts, *result)
+		trainingCR.Status.Artifacts = []odahuflowv1alpha1.TrainingResult{*result}
 	case corev1.ConditionFalse:
 		trainingCR.Status.State = odahuflowv1alpha1.ModelTrainingFailed
 		trainingCR.Status.Message = &lastCondition.Message
