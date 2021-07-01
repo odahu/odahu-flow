@@ -46,9 +46,9 @@ func (pir *PackagingIntegrationRepository) GetPackagingIntegration(name string) 
 	pi := new(packaging.PackagingIntegration)
 
 	err := pir.DB.QueryRow(
-		fmt.Sprintf("SELECT id, spec, status FROM %s WHERE id = $1", packagingIntegrationTable),
+		fmt.Sprintf("SELECT id, spec, status, created, updated FROM %s WHERE id = $1", packagingIntegrationTable),
 		name,
-	).Scan(&pi.ID, &pi.Spec, &pi.Status)
+	).Scan(&pi.ID, &pi.Spec, &pi.Status, &pi.CreatedAt, &pi.UpdatedAt)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -76,7 +76,7 @@ func (pir *PackagingIntegrationRepository) GetPackagingIntegrationList(options .
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	stmt := "SELECT id, spec, status FROM odahu_operator_packaging_integration ORDER BY id LIMIT $1 OFFSET $2"
+	stmt := "SELECT id, spec, status, created, updated FROM odahu_operator_packaging_integration ORDER BY id LIMIT $1 OFFSET $2"
 
 	rows, err := pir.DB.Query(stmt, *listOptions.Size, offset)
 
@@ -89,7 +89,7 @@ func (pir *PackagingIntegrationRepository) GetPackagingIntegrationList(options .
 
 	for rows.Next() {
 		pi := new(packaging.PackagingIntegration)
-		err := rows.Scan(&pi.ID, &pi.Spec, &pi.Status)
+		err := rows.Scan(&pi.ID, &pi.Spec, &pi.Status, &pi.CreatedAt, &pi.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -131,8 +131,8 @@ func (pir *PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packag
 
 	pi.Status = oldPi.Status
 
-	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2 WHERE id = $3", packagingIntegrationTable)
-	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.ID)
+	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2, updated = $3 WHERE id = $4", packagingIntegrationTable)
+	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.UpdatedAt, pi.ID)
 	if err != nil {
 		return err
 	}
@@ -142,8 +142,8 @@ func (pir *PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packag
 func (pir *PackagingIntegrationRepository) SavePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
 	_, err := pir.DB.Exec(
-		fmt.Sprintf("INSERT INTO %s (id, spec, status) VALUES($1, $2, $3)", packagingIntegrationTable),
-		pi.ID, pi.Spec, pi.Status,
+		fmt.Sprintf("INSERT INTO %s (id, spec, status, created, updated) VALUES($1, $2, $3, $4, $5)", packagingIntegrationTable),
+		pi.ID, pi.Spec, pi.Status, pi.CreatedAt, pi.UpdatedAt,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)

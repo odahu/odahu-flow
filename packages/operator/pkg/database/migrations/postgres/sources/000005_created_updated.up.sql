@@ -11,4 +11,12 @@ alter table odahu_operator_deployment
     add created timestamptz;
 alter table odahu_operator_deployment
     add updated timestamptz;
+alter table odahu_operator_toolchain_integration
+    add created timestamptz;
+alter table odahu_operator_toolchain_integration
+    add updated timestamptz;
+alter table odahu_operator_packaging_integration
+    add created timestamptz;
+alter table odahu_operator_packaging_integration
+    add updated timestamptz;
 COMMIT;
