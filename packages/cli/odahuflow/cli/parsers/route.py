@@ -72,7 +72,7 @@ def get(client: ModelRouteClient, mr_id: str, output_format: str):
 
 
 @route.command()
-@click.option('--mr-id', '--id', 'mr_id', help='Replace ModelRoute ID from manifest')
+@click.option('--mr-id', '--id', 'mr_id', help='Replace model route ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with model route')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')
@@ -108,7 +108,7 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
 
 
 @route.command()
-@click.option('--route-id', '--id', 'mr_id', help='Replace ModelRoute ID from manifest')
+@click.option('--route-id', '--id', 'mr_id', help='Replace model route ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with model route')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')

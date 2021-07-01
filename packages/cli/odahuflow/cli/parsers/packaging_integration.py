@@ -68,7 +68,7 @@ def get(client: PackagingIntegrationClient, pi_id: str, output_format: str):
 
 
 @packaging_integration.command()
-@click.option('--pi-id', '--id', help='Replace Packaging integration ID from manifest')
+@click.option('--pi-id', '--id', help='Replace packaging integration ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging integration')
 @click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
@@ -100,7 +100,7 @@ def create(client: PackagingIntegrationClient, pi_id: str, file: str, output_for
 
 
 @packaging_integration.command()
-@click.option('--pi-id', '--id', help='Replace Packaging integration ID from manifest')
+@click.option('--pi-id', '--id', help='Replace packaging integration ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging integration')
 @click.option('--output-format', '-o', 'output_format', help='Output format',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)

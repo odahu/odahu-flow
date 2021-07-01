@@ -83,7 +83,7 @@ def get(client: ModelDeploymentClient, md_id: str, output_format: str):
 
 
 @deployment.command()
-@click.option('--md-id', '--id', help='Replace Model deployment ID from manifest')
+@click.option('--md-id', '--id', help='Replace model deployment ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with deployment')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')
@@ -139,7 +139,7 @@ def create(client: ModelDeploymentClient, md_id: str, file: str, wait: bool, tim
 
 
 @deployment.command()
-@click.option('--md-id', '--id', help='Replace Model deployment ID from manifest')
+@click.option('--md-id', '--id', help='Replace model deployment ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with deployment')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')

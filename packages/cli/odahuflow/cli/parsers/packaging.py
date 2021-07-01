@@ -84,7 +84,7 @@ def get(client: ModelPackagingClient, pack_id: str, output_format: str):
 
 
 @packaging.command()
-@click.option('--pack-id', '--id', help='Replace Model packaging ID from manifest')
+@click.option('--pack-id', '--id', help='Replace model packaging ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')
@@ -140,7 +140,7 @@ def create(client: ModelPackagingClient, pack_id: str, file: str, wait: bool, ti
 
 
 @packaging.command()
-@click.option('--pack-id', '--id', help='Replace Model packaging ID from manifest')
+@click.option('--pack-id', '--id', help='Replace model packaging ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with packaging')
 @click.option('--wait/--no-wait', default=True,
               help='no wait until scale will be finished')
