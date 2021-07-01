@@ -74,7 +74,7 @@ def auth_options(handler_f):
     @click.option('--client-id', help='Client ID for authorization', default=config.ODAHUFLOWCTL_OAUTH_CLIENT_ID)
     @click.option('--client-secret', help='Client Secret for authorization',
                   default=config.ODAHUFLOWCTL_OAUTH_CLIENT_SECRET)
-    @click.option('--issuer', help='Token Issuer URL (Identity Provider)', default=config.ISSUER_URL)
+    @click.option('--issuer-url', help='Token Issuer URL (Identity Provider)', default=config.ISSUER_URL)
     @click.option('--token', help='API server jwt token', default=config.API_TOKEN)
     @wraps(handler_f)
     def wrapper(*args, url, client_id, client_secret, issuer_url, token, **kwargs):
