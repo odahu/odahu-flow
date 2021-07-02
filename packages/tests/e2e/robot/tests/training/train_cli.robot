@@ -38,9 +38,8 @@ Cleanup resources
 Train valid model
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
-    ${res}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
+    StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
     report training pods  ${training id}
-    should be equal  ${res.rc}  ${0}
 
 *** Test Cases ***
 Vaild downloading parameters

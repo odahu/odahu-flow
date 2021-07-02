@@ -102,10 +102,9 @@ func (c *trainingK8SClient) SaveModelTrainingResult(id string, result *v1alpha1.
 		if err := json.Unmarshal(resultBinary, oldResult); err != nil {
 			return err
 		}
+		oldResult.CommitID = result.CommitID
 
-		if len(result.CommitID) != 0 {
-			oldResult.CommitID = result.CommitID
-		}
+		// TODO: replace results without checking if not empty
 		if len(result.ArtifactName) != 0 {
 			oldResult.ArtifactName = result.ArtifactName
 		}

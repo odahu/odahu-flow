@@ -191,11 +191,30 @@ func (mt *ModelTrainer) SaveResult() error {
 		return err
 	}
 
+	commit := &CommitInfo{}
+	if k8sTraining.AlgorithmSourceConnection.Spec.Type == connection.GITType {
+		commitJSONFile, err := os.Open(commitInfoFile)
+		if err != nil {
+			return err
+		}
+		defer commitJSONFile.Close()
+
+		commitByteValue, err := ioutil.ReadAll(commitJSONFile)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(commitByteValue, &commit)
+		if err != nil {
+			return err
+		}
+	}
+
 	if err := mt.trainClient.SaveModelTrainingResult(
 		k8sTraining.ModelTraining.ID,
 		&odahuflowv1alpha1.TrainingResult{
 			RunID:        trainingDesc.Output["run_id"],
 			ArtifactName: outputZipName,
+			CommitID:     commit.CommitID,
 		},
 	); err != nil {
 		mt.log.Error(err, "Cannot save the training result")
@@ -254,6 +273,15 @@ func (mt *ModelTrainer) DownloadAlgorithm(k8sTraining *training.K8sTrainer) erro
 
 			return err
 		}
+		commit := &CommitInfo{
+			CommitID: commitID,
+		}
+		fileBytes, err := json.Marshal(commit)
+		if err != nil {
+			return err
+		}
+
+		_ = ioutil.WriteFile(commitInfoFile, fileBytes, 0600)
 
 		mt.log.Info("The commit ID was saved", "commit_id", commitID)
 	case connection.ObjectStorageTypesSet[connType]:

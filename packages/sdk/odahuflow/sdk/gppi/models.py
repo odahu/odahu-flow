@@ -33,6 +33,14 @@ class OdahuflowProjectManifestToolchain(pydantic.BaseModel):
     version: str
 
 
+class OdahuflowProjectManifestOutput(pydantic.BaseModel):
+    """
+    Odahuflow Project Manifest's Output description
+    """
+
+    run_id: str
+
+
 class OdahuflowProjectManifest(pydantic.BaseModel):
     """
     Odahuflow Project Manifest description class
@@ -42,3 +50,4 @@ class OdahuflowProjectManifest(pydantic.BaseModel):
     model: typing.Optional[OdahuflowProjectManifestModel]
     odahuflowVersion: typing.Optional[str]
     toolchain: typing.Optional[OdahuflowProjectManifestToolchain]
+    output: typing.Optional[OdahuflowProjectManifestOutput]

@@ -17,14 +17,13 @@ Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
-...                 StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
 Suite Teardown      Run Keywords
-...                 Remove Directory  ${RESULT_DIR}  recursive=True  AND
-...                 Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True  AND
-...                 Remove File  ${LOCAL_CONFIG}  AND
-...                 StrictShell  odahuflowctl logout
+...                 Remove Directory  ${RESULT_DIR}  recursive=True
+...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
+...                 AND  Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
@@ -41,7 +40,7 @@ Try Run Local Packaging
 
 *** Test Cases ***
 Run Valid Training with local & cluster specs
-    [Setup]     Shell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
     [Template]  Run Local Training
     # auth data     id      file/dir        output
     # local
@@ -64,7 +63,7 @@ Try Run and Fail invalid Packaging
     [Tags]  negative
     [Template]  Try Run Local Packaging
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     # missing required option
     Error: Missing option '--pack-id' / '--id'.
     ...  run --manifest-file ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR}/wine-cluster-1
@@ -91,7 +90,7 @@ Try Run and Fail invalid Packaging
 
 Run Valid Packaging with local & cluster specs
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
-    [Teardown]  Shell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
+    [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Local Packaging
     # id	file/dir	artifact path	artifact name	package-targets
     # local

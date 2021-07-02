@@ -1,4 +1,3 @@
----
 kind: Connection
 id: bulk-test-conn-1
 spec:
@@ -21,7 +20,15 @@ spec:
   additionalEnvironments:
     TEST: test
   defaultImage: image:123
-  entrypoint: "/binaty"
+  entrypoint: "/binary"
+---
+kind: ToolchainIntegration
+id: bulk-test-ti-2
+spec:
+  additionalEnvironments:
+    TEST: test
+  defaultImage: image:123
+  entrypoint: "/binary"
 ---
 kind: PackagingIntegration
 id: bulk-test-pi-1
@@ -44,10 +51,33 @@ spec:
         name: archive-storage
         required: false
 ---
-kind: ToolchainIntegration
-id: bulk-test-ti-2
+kind: ModelTraining
+id: bulk-test-mt-1
 spec:
-  additionalEnvironments:
-    TEST: test
-  defaultImage: image:123
-  entrypoint: "/binaty"
+  model:
+    name: bulk-test-mt-1
+    version: 'test'
+  toolchain: mlflow
+  algorithmSource:
+    vcs:
+      connection: odahu-flow-examples
+      reference: develop
+---
+kind: ModelPackaging
+id: bulk-test-mp-1
+spec:
+  artifactName: counter.zip
+  integrationName: docker-rest
+---
+kind: ModelPackaging
+id: bulk-test-mp-2
+spec:
+  artifactName: simple-model.zip
+  integrationName: docker-rest
+---
+kind: ModelDeployment
+id: bulk-test-md-1
+spec:
+  image:
+  predictor: odahu-ml-server
+  imagePullConnID: docker-ci

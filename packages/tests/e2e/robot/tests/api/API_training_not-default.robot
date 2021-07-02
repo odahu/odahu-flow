@@ -29,7 +29,7 @@ Check model trainings do not exist
     Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
 Create Model Training, mlflow toolchain, not default
-    ${result}                   Call API  training post  ${RES_DIR}/valid/training.mlflow.not_default.yaml
+    Call API  training post  ${RES_DIR}/valid/training.mlflow.not_default.yaml
     @{exp_result}               create list  succeeded  failed
     ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=@{exp_result}
     Get Logs                    training  ${TRAIN_MLFLOW_NOT_DEFAULT}
