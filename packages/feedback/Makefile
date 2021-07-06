@@ -1,4 +1,5 @@
 GO111MODULE=off
+LINTER_ADDITIONAL_ARGS=--timeout 5m
 
 all: help
 
