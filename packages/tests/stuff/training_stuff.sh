@@ -281,7 +281,7 @@ function local_setup() {
   wget -O "${LOCAL_TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
-  gcloud auth configure-docker
+  gcloud auth configure-docker --quiet
 
   if [ ! -x "$(command -v sponge)" ]; then
     printf "\nPlease install moreutils or sponge package to setup robot tests\n"

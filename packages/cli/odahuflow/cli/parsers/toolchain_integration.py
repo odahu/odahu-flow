@@ -67,7 +67,7 @@ def get(client: ToolchainIntegrationClient, ti_id: str, output_format: str):
 
 
 @toolchain_integration.command()
-@click.option('--ti-id', '--id', help='Toolchain integration ID')
+@click.option('--ti-id', '--id', help='Replace toolchain integration ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with toolchain integration')
 @click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
@@ -99,7 +99,7 @@ def create(client: ToolchainIntegrationClient, ti_id: str, file: str, output_for
 
 
 @toolchain_integration.command()
-@click.option('--ti-id', '--id', help='Toolchain integration ID')
+@click.option('--ti-id', '--id', help='Replace toolchain integration ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with toolchain integration')
 @click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)

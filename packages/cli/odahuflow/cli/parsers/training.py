@@ -89,7 +89,7 @@ def get(client: ModelTrainingClient, train_id: str, output_format: str):
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
+@click.option('--train-id', '--id', help='Replace model training ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True,
               help='Path to the file with training')
 @click.option('--wait/--no-wait', default=True,
@@ -140,7 +140,7 @@ def create(client: ModelTrainingClient, train_id: str, file: str, wait: bool,
 
 
 @training.command()
-@click.option('--train-id', '--id', help='Model training ID')
+@click.option('--train-id', '--id', help='Replace model training ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True,
               help='Path to the file with training')
 @click.option('--wait/--no-wait', default=True,
