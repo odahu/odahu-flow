@@ -58,7 +58,8 @@ func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	stmt := "SELECT id, spec, status, created, updated FROM odahu_operator_toolchain_integration ORDER BY id LIMIT $1 OFFSET $2"
+	stmt := "SELECT id, spec, status, created, updated " +
+		"FROM odahu_operator_toolchain_integration ORDER BY id LIMIT $1 OFFSET $2"
 
 	rows, err := tr.DB.Query(stmt, *listOptions.Size, offset)
 	if err != nil {
@@ -112,7 +113,8 @@ func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegra
 
 	md.Status = oldTi.Status
 
-	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2, updated = $3 WHERE id = $4", toolchainIntegrationTable)
+	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2, updated = $3 WHERE id = $4",
+		toolchainIntegrationTable)
 	_, err = tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.UpdatedAt, md.ID)
 	if err != nil {
 		return err
@@ -123,7 +125,8 @@ func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegra
 func (tr ToolchainRepo) SaveToolchainIntegration(md *training.ToolchainIntegration) error {
 
 	_, err := tr.DB.Exec(
-		fmt.Sprintf("INSERT INTO %s (id, spec, status, created, updated) VALUES($1, $2, $3, $4, $5)", toolchainIntegrationTable),
+		fmt.Sprintf("INSERT INTO %s (id, spec, status, created, updated) VALUES($1, $2, $3, $4, $5)",
+			toolchainIntegrationTable),
 		md.ID, md.Spec, md.Status, md.CreatedAt, md.UpdatedAt,
 	)
 	if err != nil {

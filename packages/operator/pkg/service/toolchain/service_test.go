@@ -107,10 +107,14 @@ func (s *TITestSuite) TestUpdateToolchainIntegration() {
 		On("UpdateToolchainIntegration", someTI).
 		Return(expectedErr)
 
+	s.tiRepoMock.
+		On("GetToolchainIntegration", someTI.ID).
+		Return(someTI, nil)
+
 	timeBeforeUpdate := time.Now()
 	err := s.tiService.UpdateToolchainIntegration(someTI)
 
-	actualPI := s.tiRepoMock.Calls[0].Arguments.Get(0).(*training3.ToolchainIntegration)
+	actualPI := s.tiRepoMock.Calls[1].Arguments.Get(0).(*training3.ToolchainIntegration)
 
 	s.Assert().Equal(someTI, actualPI)
 	s.Assert().Equal(err, expectedErr)

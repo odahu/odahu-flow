@@ -76,7 +76,8 @@ func (pir *PackagingIntegrationRepository) GetPackagingIntegrationList(options .
 
 	offset := *listOptions.Size * (*listOptions.Page)
 
-	stmt := "SELECT id, spec, status, created, updated FROM odahu_operator_packaging_integration ORDER BY id LIMIT $1 OFFSET $2"
+	stmt := "SELECT id, spec, status, created, updated " +
+		"FROM odahu_operator_packaging_integration ORDER BY id LIMIT $1 OFFSET $2"
 
 	rows, err := pir.DB.Query(stmt, *listOptions.Size, offset)
 
@@ -131,7 +132,8 @@ func (pir *PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packag
 
 	pi.Status = oldPi.Status
 
-	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2, updated = $3 WHERE id = $4", packagingIntegrationTable)
+	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2, updated = $3 WHERE id = $4",
+		packagingIntegrationTable)
 	_, err = pir.DB.Exec(sqlStatement, pi.Spec, pi.Status, pi.UpdatedAt, pi.ID)
 	if err != nil {
 		return err
@@ -142,7 +144,8 @@ func (pir *PackagingIntegrationRepository) UpdatePackagingIntegration(pi *packag
 func (pir *PackagingIntegrationRepository) SavePackagingIntegration(pi *packaging.PackagingIntegration) error {
 
 	_, err := pir.DB.Exec(
-		fmt.Sprintf("INSERT INTO %s (id, spec, status, created, updated) VALUES($1, $2, $3, $4, $5)", packagingIntegrationTable),
+		fmt.Sprintf("INSERT INTO %s (id, spec, status, created, updated) VALUES($1, $2, $3, $4, $5)",
+			packagingIntegrationTable),
 		pi.ID, pi.Spec, pi.Status, pi.CreatedAt, pi.UpdatedAt,
 	)
 	if err != nil {

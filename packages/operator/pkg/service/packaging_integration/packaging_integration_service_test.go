@@ -106,10 +106,14 @@ func (s *TestSuite) TestUpdatePackagingIntegration() {
 		On("UpdatePackagingIntegration", somePI).
 		Return(expectedErr)
 
+	s.piRepoMock.
+		On("GetPackagingIntegration", somePI.ID).
+		Return(somePI, nil)
+
 	timeBeforeUpdate := time.Now()
 	err := s.piService.UpdatePackagingIntegration(somePI)
 
-	actualPI := s.piRepoMock.Calls[0].Arguments.Get(0).(*packaging.PackagingIntegration)
+	actualPI := s.piRepoMock.Calls[1].Arguments.Get(0).(*packaging.PackagingIntegration)
 
 	s.Assert().Equal(somePI, actualPI)
 	s.Assert().Equal(err, expectedErr)
