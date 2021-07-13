@@ -22,7 +22,8 @@ from odahuflow.sdk.models.deployment_event import DeploymentEvent
 from odahuflow.sdk.models.edge_config import EdgeConfig
 from odahuflow.sdk.models.environment_variable import EnvironmentVariable
 from odahuflow.sdk.models.external_url import ExternalUrl
-from odahuflow.sdk.models.feedback import FeedbackModel
+from odahuflow.sdk.models.feedback_model_feedback import FeedbackModelFeedback
+from odahuflow.sdk.models.feedback_model_feedback_request import FeedbackModelFeedbackRequest
 from odahuflow.sdk.models.http_result import HTTPResult
 from odahuflow.sdk.models.inference_job import InferenceJob
 from odahuflow.sdk.models.inference_job_spec import InferenceJobSpec

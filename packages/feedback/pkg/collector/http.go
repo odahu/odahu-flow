@@ -36,10 +36,6 @@ const (
 	CfgPort = "port"
 )
 
-type FeedbackResponse struct {
-	Message commons_feedback.ModelFeedback `json:"message"`
-}
-
 func attachRoutes(router *gin.Engine) {
 	router.GET("/", handleIndex)
 	router.POST(feedbackUri, handleFeedbackEndpoint)

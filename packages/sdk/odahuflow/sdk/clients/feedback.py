@@ -19,7 +19,7 @@ API client
 
 from odahuflow.sdk.clients.api import RemoteAPIClient, AsyncRemoteAPIClient
 from odahuflow.sdk.definitions import FEEDBACK_URL
-from odahuflow.sdk.models import FeedbackModel
+from odahuflow.sdk.models import FeedbackModelFeedback
 
 
 class FeedbackClient(RemoteAPIClient):
@@ -43,7 +43,7 @@ class FeedbackClient(RemoteAPIClient):
             'request-id': request_id
         }
 
-        return FeedbackModel.from_dict(
+        return FeedbackModelFeedback.from_dict(
             self.query(FEEDBACK_URL, action='POST', payload=feedback, headers=headers)
         )
 
@@ -69,6 +69,6 @@ class AsyncFeedbackClient(AsyncRemoteAPIClient):
             'request-id': request_id
         }
 
-        return FeedbackModel.from_dict(
+        return FeedbackModelFeedback.from_dict(
             await self.query(FEEDBACK_URL, action='POST', payload=feedback, headers=headers)
         )
