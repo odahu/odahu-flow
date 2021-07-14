@@ -86,7 +86,7 @@ func ensureValidJSONResponse(t *testing.T, w *httptest.ResponseRecorder, expecte
 	headers := w.Header()
 	assert.Equal(t, "application/json; charset=utf-8", headers.Get("Content-Type"))
 
-	var response ModelFeedback
+	var response feedback_commons.ModelFeedback
 	assert.Nil(t, json.Unmarshal(w.Body.Bytes(), &response))
 	assert.Equal(t, expectedStructure, response)
 }

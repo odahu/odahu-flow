@@ -17,7 +17,7 @@
 package feedback
 
 import (
-	"odahu-commons/feedback"
+	_ "odahu-commons/feedback"
 )
 
 // Currently we can not aggregate swagger documentation from multiply services

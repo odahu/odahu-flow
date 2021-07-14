@@ -19,7 +19,6 @@ package collector
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/feedback/pkg/feedback"
-	commons_feedback "odahu-commons/feedback"
 	"github.com/spf13/viper"
 	"github.com/zsais/go-gin-prometheus"
 	"log"
