@@ -15,7 +15,6 @@ from odahuflow.sdk.clients.training import ModelTrainingClient
 from odahuflow.sdk.clients.batch_service import BatchInferenceServiceClient
 from odahuflow.sdk.clients.batch_job import BatchInferenceJobClient
 from odahuflow.sdk.clients.api import EntityAlreadyExists
-from odahuflow.sdk.clients.feedback import FeedbackClient
 from odahuflow.sdk.clients.user_info import UserInfoClient
 
 

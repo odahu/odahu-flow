@@ -27,7 +27,7 @@ class FeedbackClient(RemoteAPIClient):
     HTTP Feedback client
     """
 
-    def post(self, feedback: dict, model_name: str, model_version: str, request_id: str) -> FeedbackModel:
+    def post(self, feedback: dict, model_name: str, model_version: str, request_id: str) -> FeedbackModelFeedback:
         """
         Get Feedback from API server
 
@@ -53,7 +53,7 @@ class AsyncFeedbackClient(AsyncRemoteAPIClient):
     HTTP Feedback async client
     """
 
-    async def post(self, feedback: dict, model_name: str, model_version: str, request_id: str) -> FeedbackModel:
+    async def post(self, feedback: dict, model_name: str, model_version: str, request_id: str) -> FeedbackModelFeedback:
         """
         Get FeedbackModelFeedbackResponse from API server
 
