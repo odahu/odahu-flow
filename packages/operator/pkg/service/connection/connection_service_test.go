@@ -153,6 +153,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection() {
 		On("UpdateConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(nil)
 
+	s.mockRepo.
+		On("GetConnection", originalConnection.ID).
+		Return(&connectionForService, nil)
+
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
 	assert.Nil(s.T(), err)
@@ -179,6 +183,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection_DecodingFail() {
 	connectionForService.Spec.PublicKey = notBase64
 	connectionForService.Spec.KeyID = notBase64
 
+	s.mockRepo.
+		On("GetConnection", connectionForService.ID).
+		Return(&connectionForService, nil)
+
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
 	// Checks that service returns an InvalidEntityError if base64 decoding fails
@@ -194,6 +202,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection_ErrorFromRepo() {
 	s.mockRepo.
 		On("UpdateConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(errors.New("error from repo"))
+
+	s.mockRepo.
+		On("GetConnection", connectionForService.ID).
+		Return(&connectionForService, nil)
 
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 

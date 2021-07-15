@@ -153,6 +153,7 @@ func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) er
 	case err == nil:
 		// If err is not nil, then the connection already exists.
 		existedConn.Spec = conn.Spec
+		existedConn.UpdatedAt = conn.UpdatedAt
 		err = vcr.createOrUpdateConnection(existedConn)
 		if err != nil {
 			conn.Status = existedConn.Status
