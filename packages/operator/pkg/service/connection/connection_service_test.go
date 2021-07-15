@@ -153,6 +153,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection() {
 		On("UpdateConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(nil)
 
+	s.mockRepo.
+		On("GetConnection", originalConnection.ID, true).
+		Return(originalConnection, nil)
+
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
 	assert.Nil(s.T(), err)

@@ -76,6 +76,11 @@ func (s *serviceImpl) DeleteConnection(id string) error {
 
 func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*connection.Connection, error) {
 	connection.UpdatedAt = time.Now()
+	oldConnection, err := s.GetConnection(connection.ID, true)
+	if err != nil {
+		return nil, err
+	}
+	connection.CreatedAt = oldConnection.CreatedAt
 
 	if err := connection.DecodeBase64Fields(); err != nil {
 		return nil, errors.InvalidEntityError{
@@ -84,8 +89,7 @@ func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*conne
 		}
 	}
 
-	err := s.repo.UpdateConnection(&connection)
-	if err != nil {
+	if err := s.repo.UpdateConnection(&connection); err != nil {
 		return nil, err
 	}
 
