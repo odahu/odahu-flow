@@ -49,6 +49,11 @@ func (pis *PackagingIntegrationService) CreatePackagingIntegration(md *packaging
 
 func (pis *PackagingIntegrationService) UpdatePackagingIntegration(md *packaging.PackagingIntegration) error {
 	md.UpdatedAt = time.Now()
+	oldMd, err := pis.repo.GetPackagingIntegration(md.ID)
+	if err != nil {
+		return err
+	}
+	md.CreatedAt = oldMd.CreatedAt
 	return pis.repo.UpdatePackagingIntegration(md)
 }
 

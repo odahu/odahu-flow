@@ -49,6 +49,11 @@ func (tis *Service) CreateToolchainIntegration(md *training.ToolchainIntegration
 
 func (tis *Service) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
 	md.UpdatedAt = time.Now()
+	oldMd, err := tis.repo.GetToolchainIntegration(md.ID)
+	if err != nil {
+		return err
+	}
+	md.CreatedAt = oldMd.CreatedAt
 	return tis.repo.UpdateToolchainIntegration(md)
 }
 

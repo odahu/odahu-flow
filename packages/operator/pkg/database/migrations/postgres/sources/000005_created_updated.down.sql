@@ -5,4 +5,8 @@ alter table odahu_operator_packaging drop column created;
 alter table odahu_operator_packaging drop column updated;
 alter table odahu_operator_deployment drop column created;
 alter table odahu_operator_deployment drop column updated;
+alter table odahu_operator_packaging_integration drop column created;
+alter table odahu_operator_packaging_integration drop column updated;
+alter table odahu_operator_toolchain_integration drop column created;
+alter table odahu_operator_toolchain_integration drop column updated;
 COMMIT;
