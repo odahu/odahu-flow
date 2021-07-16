@@ -69,6 +69,11 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 
 func (s serviceImpl) UpdateModelTraining(ctx context.Context, mt *training.ModelTraining) error {
 	mt.UpdatedAt = time.Now()
+	oldMt, err := s.GetModelTraining(ctx, mt.ID)
+	if err != nil {
+		return err
+	}
+	mt.CreatedAt = oldMt.CreatedAt
 	mt.DeletionMark = false
 	mt.Status = v1alpha1.ModelTrainingStatus{
 		State: v1alpha1.ModelTrainingUnknown,
