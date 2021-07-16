@@ -86,7 +86,7 @@ func ensureValidJSONResponse(t *testing.T, w *httptest.ResponseRecorder, expecte
 	headers := w.Header()
 	assert.Equal(t, "application/json; charset=utf-8", headers.Get("Content-Type"))
 
-	var response FeedbackResponse
+	var response feedback_commons.ModelFeedback
 	assert.Nil(t, json.Unmarshal(w.Body.Bytes(), &response))
 	assert.Equal(t, expectedStructure, response)
 }
@@ -107,7 +107,7 @@ func TestSendFeedbackWithOnlyHeader(t *testing.T) {
 	req.Header.Set(feedback.ModelVersionHeaderKey, modelVersion)
 	router.ServeHTTP(w, req)
 
-	ensureValidJSONResponse(t, w, FeedbackResponse{Message: expectedMessage})
+	ensureValidJSONResponse(t, w, expectedMessage)
 	mocked.AssertExpectations(t)
 }
 

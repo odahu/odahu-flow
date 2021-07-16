@@ -772,7 +772,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/feedback.ModelFeedbackResponse"
+                            "$ref": "#/definitions/feedback.ModelFeedback"
                         }
                     }
                 }
@@ -3374,10 +3374,25 @@ var doc = `{
                 }
             }
         },
-        "feedback.ModelFeedbackRequest": {
-            "type": "object"
+        "feedback.ModelFeedback": {
+            "type": "object",
+            "properties": {
+                "modelName": {
+                    "type": "string"
+                },
+                "modelVersion": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "requestID": {
+                    "type": "string"
+                }
+            }
         },
-        "feedback.ModelFeedbackResponse": {
+        "feedback.ModelFeedbackRequest": {
             "type": "object"
         },
         "HTTPResult": {
