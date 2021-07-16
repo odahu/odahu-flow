@@ -69,6 +69,11 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 
 func (s serviceImpl) UpdateModelPackaging(ctx context.Context, mp *packaging.ModelPackaging) error {
 	mp.UpdatedAt = time.Now()
+	oldMp, err := s.GetModelPackaging(ctx, mp.ID)
+	if err != nil {
+		return err
+	}
+	mp.CreatedAt = oldMp.CreatedAt
 	mp.DeletionMark = false
 	mp.Status = v1alpha1.ModelPackagingStatus{
 		State: v1alpha1.ModelPackagingUnknown,

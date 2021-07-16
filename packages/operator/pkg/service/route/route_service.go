@@ -119,6 +119,11 @@ func (s serviceImpl) SetDeletionMark(ctx context.Context, id string, value bool)
 
 func (s serviceImpl) UpdateModelRoute(ctx context.Context, md *route.ModelRoute) (err error) {
 	md.UpdatedAt = time.Now()
+	oldMd, err := s.GetModelRoute(ctx, md.ID)
+	if err != nil {
+		return err
+	}
+	md.CreatedAt = oldMd.CreatedAt
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelRouteStatus{}
 

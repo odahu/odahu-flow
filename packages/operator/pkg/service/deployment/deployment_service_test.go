@@ -185,6 +185,7 @@ func (s *TestSuite) TestUpdateModelDeployment() {
 	s.mockRepo.On("BeginTransaction", ctx).Return(mockTx, nil)
 	s.mockRepo.On("UpdateModelDeployment", ctx, mockTx, en).Return(nil)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
+	s.mockRepo.On("GetModelDeployment", ctx, en.ID).Return(en, nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.UpdateModelDeployment(ctx, en))

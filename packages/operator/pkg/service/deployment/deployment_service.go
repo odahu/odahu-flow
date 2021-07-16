@@ -167,6 +167,11 @@ func (s serviceImpl) UpdateModelDeployment(ctx context.Context, md *deployment.M
 	defer func() { db_utils.FinishTx(tx, err, log) }()
 
 	md.UpdatedAt = time.Now()
+	oldMd, err := s.GetModelDeployment(ctx, md.ID)
+	if err != nil {
+		return err
+	}
+	md.CreatedAt = oldMd.CreatedAt
 	md.DeletionMark = false
 	md.Status = v1alpha1.ModelDeploymentStatus{}
 
