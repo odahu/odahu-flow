@@ -137,47 +137,16 @@ func (vcr *vaultConnRepository) GetConnectionList(
 }
 
 func (vcr *vaultConnRepository) DeleteConnection(connID string) error {
-	if _, err := vcr.GetConnection(connID); err != nil {
-		return err
-	}
-
 	_, err := vcr.vaultClient.Logical().Delete(vcr.getFullPath(connID))
-
 	return convertVaultErrToOdahuflowErr(err)
 }
 
 func (vcr *vaultConnRepository) UpdateConnection(conn *connection.Connection) error {
-	existedConn, err := vcr.GetConnection(conn.ID)
-
-	switch {
-	case err == nil:
-		// If err is not nil, then the connection already exists.
-		existedConn.Spec = conn.Spec
-		existedConn.UpdatedAt = conn.UpdatedAt
-		err = vcr.createOrUpdateConnection(existedConn)
-		if err != nil {
-			conn.Status = existedConn.Status
-		}
-		return err
-	case odahuflow_errors.IsNotFoundError(err):
-		return odahuflow_errors.NotFoundError{Entity: conn.ID}
-	default:
-		return err
-	}
+	return vcr.createOrUpdateConnection(conn)
 }
 
 func (vcr *vaultConnRepository) SaveConnection(conn *connection.Connection) error {
-	_, err := vcr.GetConnection(conn.ID)
-
-	switch {
-	case err == nil:
-		// If err is nil, then the connection already exists.
-		return odahuflow_errors.AlreadyExistError{Entity: conn.ID}
-	case odahuflow_errors.IsNotFoundError(err):
-		return vcr.createOrUpdateConnection(conn)
-	default:
-		return err
-	}
+	return vcr.createOrUpdateConnection(conn)
 }
 
 func (vcr *vaultConnRepository) createOrUpdateConnection(conn *connection.Connection) error {
