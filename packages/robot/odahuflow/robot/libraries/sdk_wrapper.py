@@ -15,6 +15,7 @@ from odahuflow.sdk.clients.training import ModelTrainingClient
 from odahuflow.sdk.clients.batch_service import BatchInferenceServiceClient
 from odahuflow.sdk.clients.batch_job import BatchInferenceJobClient
 from odahuflow.sdk.clients.api import EntityAlreadyExists
+from odahuflow.sdk.clients.user_info import UserInfoClient
 
 
 class Login:
@@ -245,6 +246,13 @@ class Toolchain:
     @staticmethod
     def toolchain_delete(ti_id: str):
         return ToolchainIntegrationClient().delete(ti_id)
+
+
+class UserInfo:
+
+    @staticmethod
+    def user_info_get():
+        return UserInfoClient().get()
 
 
 class Model:
