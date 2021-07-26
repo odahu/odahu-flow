@@ -79,7 +79,6 @@ func NewRequestCollector(
 					{
 						Name:        feedback.EnvoyInternalRoutingHeader,
 						PrefixMatch: feedback.EnvoyInternalRoutingHeaderPrefix,
-						InvertMatch: true,
 					},
 				}},
 			},
