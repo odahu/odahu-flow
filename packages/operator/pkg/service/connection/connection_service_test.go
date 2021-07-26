@@ -136,6 +136,8 @@ func (s *ConnectionServiceTestSuite) TestGetConnectionList_ErrorFromRepo() {
 // Tests that Service just proxies the call to repo
 func (s *ConnectionServiceTestSuite) TestDeleteConnection() {
 	errorFromRepo := errors.New("some error")
+	conn := stubConnection()
+	s.mockRepo.On("GetConnection", connID).Return(&conn, nil)
 	s.mockRepo.On("DeleteConnection", connID).Return(errorFromRepo)
 	err := s.connectionService.DeleteConnection(connID)
 	assert.Equal(s.T(), errorFromRepo, err)
@@ -152,6 +154,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection() {
 	s.mockRepo.
 		On("UpdateConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(nil)
+
+	s.mockRepo.
+		On("GetConnection", originalConnection.ID).
+		Return(&connectionForService, nil)
 
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
@@ -179,6 +185,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection_DecodingFail() {
 	connectionForService.Spec.PublicKey = notBase64
 	connectionForService.Spec.KeyID = notBase64
 
+	s.mockRepo.
+		On("GetConnection", connectionForService.ID).
+		Return(&connectionForService, nil)
+
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
 	// Checks that service returns an InvalidEntityError if base64 decoding fails
@@ -195,6 +205,10 @@ func (s *ConnectionServiceTestSuite) TestUpdateConnection_ErrorFromRepo() {
 		On("UpdateConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(errors.New("error from repo"))
 
+	s.mockRepo.
+		On("GetConnection", connectionForService.ID).
+		Return(&connectionForService, nil)
+
 	updatedConnection, err := s.connectionService.UpdateConnection(connectionForService)
 
 	assert.Nil(s.T(), updatedConnection)
@@ -207,6 +221,8 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection() {
 
 	connectionForService.EncodeBase64Fields()
 
+	s.mockRepo.On("GetConnection", connID).
+		Return(nil, errors.New("not found"))
 	s.mockRepo.
 		On("SaveConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(nil)
@@ -239,6 +255,9 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection_DecodingFail() {
 	connectionForService.Spec.PublicKey = notBase64
 	connectionForService.Spec.KeyID = notBase64
 
+	s.mockRepo.On("GetConnection", connID).
+		Return(nil, errors.New("not found"))
+
 	createdConnection, err := s.connectionService.CreateConnection(connectionForService)
 
 	// Checks that service returns an InvalidEntityError if base64 decoding fails
@@ -251,6 +270,9 @@ func (s *ConnectionServiceTestSuite) TestCreateConnection_ErrorFromRepo() {
 	connectionForService := stubConnection()
 	connectionForService.EncodeBase64Fields()
 
+	s.mockRepo.
+		On("GetConnection", connID).
+		Return(nil, errors.New("not found"))
 	s.mockRepo.
 		On("SaveConnection", mock.AnythingOfType("*connection.Connection")).
 		Return(errors.New("error from repo"))
