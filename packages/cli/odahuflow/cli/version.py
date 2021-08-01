@@ -19,7 +19,7 @@ Version file
 import click
 from odahuflow.sdk.version import __version__ as __sdk_version__
 
-__version__ = '1.5.0-rc7'
+__version__ = '1.5.0'
 
 
 @click.command()
