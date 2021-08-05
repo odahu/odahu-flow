@@ -25,7 +25,7 @@ Cleanup All Resources
 
 *** Test Cases ***
 Check model trainings do not exist
-    [Documentation]             should not contain training that has not been run
+    [Documentation]             check that the training to be created does not exist now
     Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
 
 Create Model Training, mlflow toolchain, not default
@@ -41,5 +41,6 @@ Get Model Training by id
 
 Delete Model Trainings and Check that Model Training do not exist
     Command response list should contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
-    Call API                    training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
+    ${result}                   Call API  training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
+    should be equal             ${result.get('message')}  Model training ${TRAIN_MLFLOW_NOT_DEFAULT} was deleted
     Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
