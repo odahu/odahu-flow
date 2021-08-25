@@ -117,7 +117,7 @@ Delete Model Trainings and Check that Model Training do not exist
     [Teardown]                  Cleanup resource  training  ${TRAIN_MLFLOW_DEFAULT}
     Command response list should contain id  training  ${TRAIN_MLFLOW_DEFAULT}
     ${result}                   Call API  training delete  ${TRAIN_MLFLOW_DEFAULT}
-    should be equal             ${result.get('message')}  Model training ${TRAIN_MLFLOW_DEFAULT} was deleted
+    should be equal             ${result}  Model training ${TRAIN_MLFLOW_DEFAULT} was deleted
     Command response list should not contain id  training  ${TRAIN_MLFLOW_DEFAULT}
 
 Delete Model Packaging and Check that Model Packaging does not exist
@@ -125,7 +125,7 @@ Delete Model Packaging and Check that Model Packaging does not exist
     [Teardown]                  Cleanup resource  packaging  ${PACKAGING}
     Command response list should contain id  packaging  ${PACKAGING}
     ${result}                   Call API  packaging delete  ${PACKAGING}
-    should be equal             ${result.get('message')}  Model packaging ${PACKAGING} was deleted
+    should be equal             ${result}  Model packaging ${PACKAGING} was deleted
     Command response list should not contain id  packaging  ${PACKAGING}
 
 #############################

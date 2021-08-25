@@ -42,5 +42,5 @@ Get Model Training by id
 Delete Model Trainings and Check that Model Training do not exist
     Command response list should contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
     ${result}                   Call API  training delete  ${TRAIN_MLFLOW_NOT_DEFAULT}
-    should be equal             ${result.get('message')}  Model training ${TRAIN_MLFLOW_NOT_DEFAULT} was deleted
+    should be equal             ${result}  Model training ${TRAIN_MLFLOW_NOT_DEFAULT} was deleted
     Command response list should not contain id  training  ${TRAIN_MLFLOW_NOT_DEFAULT}
