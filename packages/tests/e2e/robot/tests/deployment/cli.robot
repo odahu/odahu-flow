@@ -44,7 +44,7 @@ Deploy. Negative timeout parameter
              Should contain       ${res.stderr}  must be positive integer
 
 Missed the host parameter
-    [Documentation]  The inspect command must fail if it does not contain an api host
+    [Documentation]  The deploy command must fail if it does not contain an api host
     [Teardown]  Login to the api and edge
     [Setup]     Remove File  ${LOCAL_CONFIG}
     ${res}=  Shell  odahuflowctl --verbose dep --token "${AUTH_TOKEN}" get
@@ -52,15 +52,15 @@ Missed the host parameter
              Should contain       ${res.stderr}  Can not reach http://localhost:5000
 
 Wrong token
-    [Documentation]  The inspect command must fail if it does not contain a token
+    [Documentation]  The deploy command must fail if it has invalid token
     [Teardown]  Login to the api and edge
     [Setup]     Remove File  ${LOCAL_CONFIG}
     ${res}=  Shell  odahuflowctl --verbose dep --url ${API_URL} --token wrong-token get
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  Credentials are not correct
 
-Login. Override login values
-    [Documentation]  Command line parameters must be overrided by config parameters
+Login. Overwrite login values
+    [Documentation]  Command line parameters must overwrite config parameters
     [Teardown]  Login to the api and edge
     [Setup]     Remove File  ${LOCAL_CONFIG}
     ${res}=  Shell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"

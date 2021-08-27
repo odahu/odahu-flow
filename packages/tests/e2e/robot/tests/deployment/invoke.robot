@@ -52,7 +52,7 @@ Invoke. Empty model service url
     [Setup]     Remove File  ${LOCAL_CONFIG}
     StrictShell  odahuflowctl --verbose login --url ${API_URL} --token "${AUTH_TOKEN}"
 
-    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url ${EDGE_URL} --url-prefix /model/${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json --token "some_token"
+    ${res}=  Shell  odahuflowctl --verbose model invoke --base-url "" --json-file ${RES_DIR}/simple-model.request.json
              Should not be equal  ${res.rc}      ${0}
              Should contain       ${res.stderr}  401
 
@@ -75,14 +75,14 @@ Invoke. Pass parameters explicitly
              Should be equal  ${res.rc}  ${0}
              Should contain   ${res.stdout}  42
 
-Invoke. Pass parameters through config file
+Invoke. Pass request body through file
     [Documentation]  Pass parameters through config file
     Refresh security tokens
     ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json-file ${RES_DIR}/simple-model.request.json
              Should be equal  ${res.rc}  ${0}
              Should contain   ${res.stdout}  42
 
-Invoke. Pass model parameters using json
+Invoke. Pass request body through command line
     [Documentation]  Model parameters as json
     Refresh security tokens
     ${res}=  Shell  odahuflowctl --verbose model invoke --md ${MD_SIMPLE_MODEL} --json '{"columns": ["a","b"],"data": [[1.0,2.0]]}'
