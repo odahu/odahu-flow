@@ -80,6 +80,8 @@ Vaild data downloading parameters
 Invaild data downloading parameters
     [Documentation]  Verify various invalid combination of connection uri, remote path and local path parameters
     [Template]  Train invalid model
+    ${TRAIN_ID}-not-found-file              not_found_file.training.odahuflow.yaml
     ${TRAIN_ID}-not-found-remote-file       not_found_remote_file.training.odahuflow.yaml
     ${TRAIN_ID}-not-valid-dir-path          not_valid_dir_path.training.odahuflow.yaml
     ${TRAIN_ID}-not-valid-remote-dir        not_valid_remote_dir.training.odahuflow.yaml
+
