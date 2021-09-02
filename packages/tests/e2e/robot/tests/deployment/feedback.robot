@@ -84,8 +84,8 @@ Validate model API meta log entry POST arguments
     ${actual_post_args}=    Evaluate     json.loads("""${actual_post_args}""")    json
     Dictionaries Should Be Equal    ${actual_post_args}    ${excpected_values}
 
-Validate model API meta ID and version
-    [Documentation]  check that model API ID and version is correct
+Validate model API meta name and version
+    [Documentation]  check that model API response name and version are correct
     [Arguments]      ${log_entry}   ${excpected_model_name}   ${excpected_model_version}
     ${actual_model_name}=            Get From Dictionary       ${log_entry}     model_name
     ${actual_model_version}=       Get From Dictionary       ${log_entry}     model_version
@@ -142,8 +142,8 @@ Validate model feedback log entry params
     ${actual_post_args}=    Get From Dictionary       ${actual_payload}     json
     Dictionaries Should Be Equal    ${actual_post_args}    ${excpected_values}
 
-Validate model feedback ID and version
-    [Documentation]  check that model feedback ID and version is correct
+Validate model feedback name and version
+    [Documentation]  check that model feedback name and version are correct
     [Arguments]      ${log_entry}   ${excpected_model_name}   ${excpected_model_version}
     ${actual_model_name}=            Get From Dictionary       ${log_entry}     model_name
     ${actual_model_version}=       Get From Dictionary       ${log_entry}     model_version
@@ -165,7 +165,7 @@ Validate model feedback
     Validate model API meta log entry                   ${meta_log_entry}
     Validate model API meta log entry Request ID        ${meta_log_entry}   ${request_id}
     Validate model API meta log entry HTTP method       ${meta_log_entry}   POST
-    Validate model API meta ID and version              ${meta_log_entry}   ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}
+    Validate model API meta name and version              ${meta_log_entry}   ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}
     Validate model API meta log entry HTTP headers      ${meta_log_entry}
 
     ${body_log_locations}=             Get paths with lag  ${FEEDBACK_LOCATION_MODELS_RESP_LOG}  ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}  ${FEEDBACK_PARTITIONING_PATTERN}
@@ -219,7 +219,7 @@ Check model API feedback with request ID
     ${log_entry}=          Find log lines with content   ${log_locations}  ${request_id}  1  ${True}
     Validate model feedback log entry                   ${log_entry}
     Validate model feedback log entry Request ID        ${log_entry}   ${request_id}
-    Validate model feedback ID and version              ${log_entry}   ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}
+    Validate model feedback name and version              ${log_entry}   ${TEST_MODEL_NAME}  ${TEST_MODEL_VERSION}
 
     Validate model feedback log entry params            ${log_entry}   str=${str}  copies=${copies}
 
