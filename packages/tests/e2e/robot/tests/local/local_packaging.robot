@@ -24,8 +24,6 @@ Suite Teardown      Run Keywords
 ...                 Remove Directory  ${RESULT_DIR}  recursive=True
 ...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
 ...                 AND  Remove File  ${LOCAL_CONFIG}
-Test Setup          Login to the api and edge
-Test Teardown       Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
@@ -51,10 +49,10 @@ Run Valid Training with local & cluster specs when connected to cluster
     --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded
 
 Try Run and Fail Packaging with invalid credentials
+    [Template]  Try Run Local Packaging
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Local Packaging
     ${INVALID_CREDENTIALS_ERROR}    --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
     ${INVALID_URL_ERROR}            --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist

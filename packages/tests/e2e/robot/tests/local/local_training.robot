@@ -27,8 +27,6 @@ Suite Teardown      Run Keywords
 ...                 AND  Remove Directory  ${RESULT_DIR}  recursive=True
 ...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
 ...                 AND  Remove File  ${LOCAL_CONFIG}
-Test Setup          Login to the api and edge
-Test Teardown       Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
 Test Timeout        120 minutes
 
