@@ -13,14 +13,16 @@ Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
-Force Tags          cli  deployment  invoke  testing
-Suite Setup         Run Keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                               Login to the api and edge  AND
-...                               Cleanup resources  AND
-...                               Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml  AND
-...                               Check model started  ${MD_SIMPLE_MODEL}
-Suite Teardown      Run keywords  Cleanup resources  AND
-...                 Remove File  ${LOCAL_CONFIG}
+Force Tags          cli  deployment  invoke
+Suite Setup         Run Keywords
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  Cleanup resources
+...                 AND  Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml
+...                 AND  Check model started  ${MD_SIMPLE_MODEL}
+Suite Teardown      Run keywords
+...                 Cleanup resources
+...                 AND  Remove File  ${LOCAL_CONFIG}
 
 *** Keywords ***
 Validate invoke succeeded and result
@@ -63,7 +65,7 @@ Invoke. Empty model service url
 
     ${res}=  Shell  odahuflowctl --verbose model invoke --base-url "" --md "${MD_SIMPLE_MODEL}" --json-file ${RES_DIR}/simple-model.request.json
              Should not be equal  ${res.rc}      ${0}
-             Should contain       ${res.stderr}  401
+             Should contain       ${res.stderr}  ValueError: Base url is required
 
 Invoke. Wrong token
     [Documentation]  Fails if token is wrong
