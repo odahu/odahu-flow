@@ -4,7 +4,7 @@ ${LOCAL_CONFIG}        odahuflow/config_deployment_dep_undep
 ${MD_SIMPLE_MODEL}     simple-model-dep-undep
 
 *** Settings ***
-Documentation       OdahuFlow's API operational check
+Documentation       Test model deployment through CLI for normal operational processes
 Test Timeout        20 minutes
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot

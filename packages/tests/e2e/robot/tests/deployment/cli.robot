@@ -4,14 +4,14 @@ ${LOCAL_CONFIG}        odahuflow/config_deployment_cli
 ${MD_SIMPLE_MODEL}     simple-model-cli
 
 *** Settings ***
-Documentation       OdahuFlow's API operational check for operations on ModelDeployment resources
+Documentation       Negative tests for model deployment through CLI
 Test Timeout        20 minutes
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
-Force Tags          cli  deployment
+Force Tags          cli  deployment  negative
 Suite Setup         Run Keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                               Login to the api and edge  AND
 ...                               Cleanup resources

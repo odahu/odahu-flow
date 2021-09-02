@@ -94,6 +94,7 @@ Check model counter
                  Should be equal  ${res.rc}  ${0}
                  ${RESPONSE}=  evaluate  json.loads('''${res.stdout}''')  json
                  should be true  ${RESPONSE["prediction"][0][0]} > 0
+    [Return]  ${RESPONSE["prediction"][0][0]}
 
 *** Test Cases ***
 Getting of nonexistent Route by name
@@ -113,8 +114,11 @@ Basic routing
        Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
     END
 
-    Check model counter  ${MD_COUNTER_MODEL_1}
-    Check model counter  ${MD_COUNTER_MODEL_2}
+    ${counter_1_result}=  Check model counter  ${MD_COUNTER_MODEL_1}
+    ${counter_2_result}=  Check model counter  ${MD_COUNTER_MODEL_2}
+    ${couters_sum}=  Evaluate    int(${counter_1_result}) + int(${counter_2_result})
+
+    should be equal as integers  21  ${couters_sum}
 
 Basic mirroring
     [Documentation]  Route with mirroring
@@ -143,7 +147,7 @@ Mirror to broken model
 
     Check model counter  ${MD_COUNTER_MODEL_1}
 
-File with entitiy not found
+File with entity not found
     [Documentation]  Invoke Model Route commands with not existed file
     [Template]  File not found
     command=create
