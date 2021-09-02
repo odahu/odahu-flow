@@ -9,8 +9,9 @@ ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_training/training_output
 ${LOCAL_CONFIG}             odahuflow/local_training
 
 *** Settings ***
-Documentation       local run of trainings with specs on cluster and host
-...                 and packagings with specs on host, accent on traingings
+Documentation       Local run of trainings with specs on cluster and host
+...                 and packagings with specs on host, accent on trainings.
+...                 Validated that training and packaging can be run without (logout from) cluster
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
@@ -26,6 +27,8 @@ Suite Teardown      Run Keywords
 ...                 AND  Remove Directory  ${RESULT_DIR}  recursive=True
 ...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
 ...                 AND  Remove File  ${LOCAL_CONFIG}
+Test Setup          Login to the api and edge
+Test Teardown       Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  training
 Test Timeout        120 minutes
 
@@ -43,9 +46,9 @@ Run Local Packaging
 *** Test Cases ***
 Try Run and Fail Training with invalid credentials
     [Tags]   negative
-    [Setup]  StrictShell  odahuflowctl logout
-    [Teardown]  Login to the api and edge
     [Template]  Try Run Local Training
+    [Setup]  Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Login to the api and edge
     ${INVALID_CREDENTIALS_ERROR}    --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
     ${INVALID_URL_ERROR}            --url "invalid" --token "${AUTH_TOKEN}" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
@@ -69,21 +72,25 @@ Try Run and Fail invalid Training
     Error: Got error from server: entity "not-existing-training" is not found (status: 404)
     ...  run --train-id not-existing-training
 
-Run Valid Training with local & cluster specs
+Run Valid Training with local specs, logout from cluster
     [Template]  Run Local Training
+    [Setup]  Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Login to the api and edge
     # id	file/dir	output
-    # local
     run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.json --output-dir ${RESULT_DIR}
     run --train-id local-host-default-template -f "${ARTIFACT_DIR}/file/training.default.artifact.template.json"
     run --id "local id file with spaces" --manifest-file "${ARTIFACT_DIR}/file/training.json" --manifest-file "${ARTIFACT_DIR}/dir/training_cluster.yaml" --output ${RESULT_DIR}
-    # cluster
+
+Run Valid Training with specs on cluster
+    [Template]  Run Local Training
+    # id	file/dir	output
     run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${DEFAULT_RESULT_DIR}
     --url ${API_URL} --token "${AUTH_TOKEN}" run --train-id local-dir-cluster-artifact-hardcoded
 
 Run Valid Packaging with local spec, logout from cluster
-    [Setup]  StrictShell  odahuflowctl logout
-    [Teardown]  Login to the api and edge
     [Template]  Run Local Packaging
+    [Setup]  Remove File  ${LOCAL_CONFIG}
+    [Teardown]  Login to the api and edge
     # id	file/dir	artifact path	artifact name	package-targets
     run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets --disable-target docker-push
     run --pack-id local-dir-spec-targets --manifest-dir ${ARTIFACT_DIR}/dir --artifact-path ${RESULT_DIR} -a wine-local-1 --no-disable-package-targets --disable-target docker-push

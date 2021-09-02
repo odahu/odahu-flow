@@ -24,6 +24,8 @@ Suite Teardown      Run Keywords
 ...                 Remove Directory  ${RESULT_DIR}  recursive=True
 ...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
 ...                 AND  Remove File  ${LOCAL_CONFIG}
+Test Setup          Login to the api and edge
+Test Teardown       Remove File  ${LOCAL_CONFIG}
 Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
@@ -39,8 +41,7 @@ Try Run Local Packaging
         should contain  ${result}  ${error}
 
 *** Test Cases ***
-Run Valid Training with local & cluster specs
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
+Run Valid Training with local & cluster specs when connected to cluster
     [Template]  Run Local Training
     # auth data     id      file/dir        output
     # local
@@ -88,7 +89,7 @@ Try Run and Fail invalid Packaging
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
     ...  run --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-pull
 
-Run Valid Packaging with local & cluster specs
+Run Valid Packaging with local & cluster specs when connected to cluster
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Local Packaging
