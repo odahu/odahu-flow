@@ -45,7 +45,7 @@ Run Local Packaging
 Try Run and Fail Training with invalid credentials
     [Tags]   negative
     [Template]  Try Run Local Training
-    [Setup]  Remove File  ${LOCAL_CONFIG}
+    [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     ${INVALID_CREDENTIALS_ERROR}    --url "${API_URL}" --token "invalid" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     --url "${API_URL}" --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/training.json --id not-exist
@@ -72,7 +72,7 @@ Try Run and Fail invalid Training
 
 Run Valid Training with local specs, logout from cluster
     [Template]  Run Local Training
-    [Setup]  Remove File  ${LOCAL_CONFIG}
+    [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     # id	file/dir	output
     run --id local-dir-artifact-template -d "${ARTIFACT_DIR}/dir" --manifest-file ${ARTIFACT_DIR}/file/training.json --output-dir ${RESULT_DIR}
@@ -87,7 +87,7 @@ Run Valid Training with specs on cluster
 
 Run Valid Packaging with local spec, logout from cluster
     [Template]  Run Local Packaging
-    [Setup]  Remove File  ${LOCAL_CONFIG}
+    [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
     # id	file/dir	artifact path	artifact name	package-targets
     run --pack-id local-dir-spec-targets -d ${ARTIFACT_DIR}/dir --artifact-path ${DEFAULT_RESULT_DIR} --no-disable-package-targets --disable-target docker-push
