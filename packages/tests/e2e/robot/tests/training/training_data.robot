@@ -68,7 +68,7 @@ Train model that create invalid GPPI artifact
 
 *** Test Cases ***
 Vaild data downloading parameters
-    [Documentation]  Verify various valid combination of connection uri, remote path and local path parameters
+    [Documentation]  Verify various valid combination of remote path and local path parameters
     [Template]  Train valid model
     ${TRAIN_ID}-dir-to-dir                  dir_to_dir.training.odahuflow.yaml
     ${TRAIN_ID}-remote-dir-to-dir           remote_dir_to_dir.training.odahuflow.yaml
@@ -78,7 +78,7 @@ Vaild data downloading parameters
     ${TRAIN_ID}-remote-file-to-dir          remote_file_to_dir.training.odahuflow.yaml
 
 Invaild data downloading parameters
-    [Documentation]  Verify various invalid combination of connection uri, remote path and local path parameters
+    [Documentation]  Verify various invalid combination of remote path and local path parameters
     [Template]  Train invalid model
     ${TRAIN_ID}-not-found-remote-file       not_found_remote_file.training.odahuflow.yaml
     ${TRAIN_ID}-not-valid-dir-path          not_valid_dir_path.training.odahuflow.yaml
