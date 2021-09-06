@@ -41,7 +41,7 @@ def parse_model_training_entity(source_file: str) -> K8sTrainer:
     if not os.path.exists(source_file) or not os.path.isfile(source_file):
         raise ValueError(f'File {source_file} is not readable')
 
-    with open(source_file, 'r') as mt_file:
+    with open(source_file, 'r', encoding='utf-8') as mt_file:
         mt = mt_file.read()
 
         try:

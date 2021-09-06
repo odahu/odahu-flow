@@ -222,7 +222,7 @@ def predict(input_file: str, output_dir: str, output_file_name: str):
 
     prediction_mode = get_entrypoint().init()
 
-    with open(input_file) as fp:
+    with open(input_file, encoding='utf-8') as fp:
         parsed_data = json.load(fp)
 
     if prediction_mode == 'matrix':
@@ -231,7 +231,7 @@ def predict(input_file: str, output_dir: str, output_file_name: str):
         return build_error_response(f'Unknown model\'s return type: {prediction_mode}')
 
     res_fp = os.path.join(output_dir, output_file_name)
-    with open(res_fp, 'w') as fp:
+    with open(res_fp, 'w', encoding='utf-8') as fp:
         json.dump(response, fp, cls=get_json_output_serializer())
 
     print(f'Prediction is successful. Result file: {res_fp}')

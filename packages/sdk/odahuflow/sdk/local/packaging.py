@@ -21,7 +21,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def create_mp_config_file(config_dir: str, packager: K8sPackager) -> None:
-    with open(join(config_dir, PACKAGER_CONF_FILE_PATH), 'w') as f:
+    with open(join(config_dir, PACKAGER_CONF_FILE_PATH), 'w', encoding='utf-8') as f:
         packager_dict = packager.to_dict()
         json.dump(packager_dict, f)
 
@@ -29,7 +29,7 @@ def create_mp_config_file(config_dir: str, packager: K8sPackager) -> None:
 
 
 def read_mp_result_file(config_dir: str) -> Dict[str, Any]:
-    with open(join(config_dir, PACKAGER_RESULT_FILE_PATH)) as f:
+    with open(join(config_dir, PACKAGER_RESULT_FILE_PATH), encoding='utf-8') as f:
         return json.load(f)
 
 

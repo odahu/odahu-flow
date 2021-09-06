@@ -52,7 +52,7 @@ def invoke(json_input, model_route: str, model_deployment: str, url_prefix: str,
     :return: None
     """
     if json_file:
-        with open(json_file) as f:
+        with open(json_file, encoding='utf-8') as f:
             json_input = f.read()
 
     if not (url_prefix or model_route or model_deployment):
