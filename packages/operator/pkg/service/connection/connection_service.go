@@ -19,7 +19,7 @@ package connection
 import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/connection"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/errors"
+	odahu_errors "github.com/odahu/odahu-flow/packages/operator/pkg/errors"
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	"go.uber.org/multierr"
 	"time"
@@ -71,21 +71,28 @@ func (s *serviceImpl) GetConnectionList(options ...conn_repository.ListOption) (
 }
 
 func (s *serviceImpl) DeleteConnection(id string) error {
+	if _, err := s.GetConnection(id, false); err != nil {
+		return err
+	}
 	return s.repo.DeleteConnection(id)
 }
 
 func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*connection.Connection, error) {
+	oldConnection, err := s.GetConnection(connection.ID, true)
+	if err != nil {
+		return nil, err
+	}
+	connection.CreatedAt = oldConnection.CreatedAt
 	connection.UpdatedAt = time.Now()
 
 	if err := connection.DecodeBase64Fields(); err != nil {
-		return nil, errors.InvalidEntityError{
+		return nil, odahu_errors.InvalidEntityError{
 			Entity:           fmt.Sprintf("Connection %s", connection.ID),
 			ValidationErrors: multierr.Errors(err),
 		}
 	}
 
-	err := s.repo.UpdateConnection(&connection)
-	if err != nil {
+	if err := s.repo.UpdateConnection(&connection); err != nil {
 		return nil, err
 	}
 
@@ -95,11 +102,15 @@ func (s *serviceImpl) UpdateConnection(connection connection.Connection) (*conne
 }
 
 func (s *serviceImpl) CreateConnection(connection connection.Connection) (*connection.Connection, error) {
+	if _, err := s.repo.GetConnection(connection.ID); err == nil {
+		return nil, odahu_errors.AlreadyExistError{Entity: connection.ID}
+	}
+
 	connection.CreatedAt = time.Now()
 	connection.UpdatedAt = connection.CreatedAt
 
 	if err := connection.DecodeBase64Fields(); err != nil {
-		return nil, errors.InvalidEntityError{
+		return nil, odahu_errors.InvalidEntityError{
 			Entity:           fmt.Sprintf("Connection %s", connection.ID),
 			ValidationErrors: multierr.Errors(err),
 		}

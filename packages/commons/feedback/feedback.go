@@ -21,9 +21,8 @@ type ResponseBody struct {
 }
 
 type ModelFeedback struct {
-	RequestID    string                 `msg:"request_id"`
-	ModelVersion string                 `msg:"model_version"`
-	ModelName    string                 `msg:"model_name"`
-	Payload      map[string]interface{} `msg:"payload"`
+	RequestID    string                 `json:"requestID" msg:"request_id"`
+	ModelVersion string                 `json:"modelVersion" msg:"model_version"`
+	ModelName    string                 `json:"modelName" msg:"model_name"`
+	Payload      map[string]interface{} `json:"payload" msg:"payload"`
 }
-

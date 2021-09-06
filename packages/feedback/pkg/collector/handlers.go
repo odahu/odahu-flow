@@ -77,7 +77,7 @@ func handleFeedbackEndpoint(c *gin.Context) {
 		c.JSON(http.StatusBadGateway, gin.H{"error": "Cannot deliver message"})
 	} else {
 		collectedFeedback.Add(1)
-		c.JSON(http.StatusOK, FeedbackResponse{Message: message})
+		c.JSON(http.StatusOK, message)
 	}
 }
 

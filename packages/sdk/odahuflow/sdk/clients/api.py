@@ -152,10 +152,10 @@ class URLBuilder:
                              payload: Mapping[Any, Any] = None,
                              action: str = 'GET',
                              stream: bool = False,
-                             token: Optional[str] = None
-                             ) -> Dict[str, Any]:
+                             token: Optional[str] = None,
+                             headers: Dict[str, Any] = None) -> Dict[str, Any]:
         target_url = self.build_url(url_template)
-        headers = {}
+        headers = headers if headers else {}
         if token:
             headers['Authorization'] = f'Bearer {token}'
         if stream:
@@ -197,7 +197,8 @@ class Authenticator:
         :return:
         """
 
-        # We assume if there were redirects then credentials are out of date and we can refresh or build auth url
+        # We assume if there were redirects from different host
+        # then credentials are out of date and we can refresh or build auth url
 
         def not_authorized_resp_code():
             if hasattr(response, 'status_code'):
@@ -206,7 +207,13 @@ class Authenticator:
                 return response.status == 401
             return False
 
-        return bool(response.history) or not_authorized_resp_code()
+        def redirected_from_other_host():
+            if not response.history:
+                return False
+
+            return urlparse(response.history[-1].url).hostname != urlparse(response.url).hostname
+
+        return redirected_from_other_host() or not_authorized_resp_code()
 
     def login(self, url: str, limit_stack=False):
         """
@@ -437,7 +444,8 @@ class RemoteAPIClient:
                  stream: bool = False,
                  timeout: Optional[int] = None,
                  limit_stack: bool = False,
-                 client: requests.Session = None):
+                 client: requests.Session = None,
+                 headers: Dict[str, Any] = None):
         """
         Make HTTP request
 
@@ -447,11 +455,12 @@ class RemoteAPIClient:
         :param stream: use stream mode or not
         :param timeout: custom timeout in seconds (overrides default). 0 for disabling
         :param limit_stack: do not start refreshing token if it is possible
+        :param headers: HTTP headers
         :return: :py:class:`requests.Response` -- response
         """
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream,
-                                                               token=self.authenticator.token)
+                                                               token=self.authenticator.token, headers=headers)
         connection_timeout = self.timeout
 
         try:
@@ -473,33 +482,44 @@ class RemoteAPIClient:
                 action=action,
                 stream=stream,
                 timeout=timeout,
-                limit_stack=True
+                limit_stack=True,
+                headers=headers
             )
         else:
             return response
 
-    def query(self, url_template: str, payload: Mapping[Any, Any] = None, action: str = 'GET'):
+    def query(self,
+              url_template: str,
+              payload: Mapping[Any, Any] = None,
+              action: str = 'GET',
+              headers: Mapping[str, Any] = None):
         """
         Perform query to API server
 
         :param url_template: url template from odahuflow.const.api
         :param payload: payload (will be converted to JSON) or None
         :param action: HTTP method (GET, POST, PUT, DELETE)
+        :param headers: HTTP headers
         :return: dict[str, any] -- response content
         """
-        response = self._request(url_template, payload, action)
+        response = self._request(url_template, payload, action, headers=headers)
         return _handle_query_response(response.text, payload, response.status_code)
 
-    def stream(self, url_template: str, action: str = 'GET', params: Mapping[str, Any] = None) -> Iterator[str]:
+    def stream(self,
+               url_template: str,
+               action: str = 'GET',
+               params: Mapping[str, Any] = None,
+               headers: Mapping[str, Any] = None) -> Iterator[str]:
         """
         Perform query to API server
 
         :param url_template: url template from odahuflow.const.api
         :param params: payload (will be converted to JSON) or None
         :param action: HTTP method (GET, POST, PUT, DELETE)
+        :param headers: HTTP headers
         :return: response content
         """
-        response = self._request(url_template, payload=params, action=action, stream=True)
+        response = self._request(url_template, payload=params, action=action, stream=True, headers=headers)
 
         with response:
             if not response.ok:
@@ -553,7 +573,8 @@ class AsyncRemoteAPIClient:
             payload: Mapping[Any, Any] = None,
             action: str = 'GET',
             stream=False,
-            session: aiohttp.ClientSession = None
+            session: aiohttp.ClientSession = None,
+            headers: Dict[str, Any] = None
     ) -> AsyncIterable:
         """
         Perform async request to API server
@@ -563,12 +584,13 @@ class AsyncRemoteAPIClient:
         :param action: HTTP method (GET, POST, PUT, DELETE)
         :param stream: use stream mode or not
         :param session: aiohttp.Session for making response
+        :param headers: HTTP headers
         :return: AsyncIterable of data. If stream = False, only one line will be returned
         """
         assert session is not None
 
         request_kwargs = self.url_builder.build_request_kwargs(url_template, payload, action, stream=False,
-                                                               token=self.authenticator.token)
+                                                               token=self.authenticator.token, headers=headers)
         left_retries = self.retries
         raised_exception = None
         while left_retries > 0:
@@ -633,7 +655,11 @@ class AsyncRemoteAPIClient:
             yield pending
 
     async def _request_with_login(
-            self, url_template: str, payload: Mapping[Any, Any] = None, action: str = 'GET', stream=False
+            self,
+            url_template: str,
+            payload: Mapping[Any, Any] = None,
+            action: str = 'GET', stream=False,
+            headers: Dict[str, Any] = None
     ):
         """
         Perform async request to API server.
@@ -644,43 +670,56 @@ class AsyncRemoteAPIClient:
         :param payload: payload (will be converted to JSON) or None
         :param action: HTTP method (GET, POST, PUT, DELETE)
         :param stream: use stream mode or not
+        :param headers: HTTP headers
         :return: AsyncIterable of data. If stream = False, only one line will be returned
         """
         async with aiohttp.ClientSession(conn_timeout=self.timeout, trust_env=True) as session:
             try:
-                async for data in self._request(url_template, payload, action, stream, session):
+                async for data in self._request(url_template, payload, action, stream, session, headers):
                     yield data
             except LoginRequired:
                 self.authenticator.login(
                     self.url_builder.build_url(url_template)
                 )
-                async for data in self._request(url_template, payload, action, stream, session):
+                async for data in self._request(url_template, payload, action, stream, session, headers):
                     yield data
 
-    async def query(self, url_template: str, payload: Mapping[Any, Any] = None, action: str = 'GET') -> Any:
+    async def query(self,
+                    url_template: str,
+                    payload: Mapping[Any, Any] = None,
+                    action: str = 'GET',
+                    headers: Dict[str, Any] = None) -> Any:
         """
         Perform query to API server.
 
         :param url_template: url template from odahuflow.const.api
         :param payload: payload (will be converted to JSON) or None
         :param action: HTTP method (GET, POST, PUT, DELETE)
+        :param headers: HTTP headers
         :return: dict[str, any] -- response content
         """
         resp = None
-        async for res in self._request_with_login(url_template, payload, action, stream=False):
+        async for res in self._request_with_login(url_template, payload, action, stream=False, headers=headers):
             resp = res
         return resp
 
-    async def stream(self, url_template: str, action: str = 'GET', params: Mapping[str, Any] = None) -> AsyncIterable:
+    async def stream(self,
+                     url_template: str,
+                     action: str = 'GET',
+                     params: Mapping[str, Any] = None,
+                     headers: Dict[str, Any] = None) -> AsyncIterable:
         """
         Perform query to API server in stream mode
 
         :param url_template: url template from odahuflow.const.api
         :param action: HTTP method (GET, POST, PUT, DELETE)
         :param params: payload (will be converted to JSON) or None
+        :param headers: HTTP headers
         :return: async iterable that return response content line by line
         """
-        async for line in self._request_with_login(url_template, action=action, stream=True, payload=params):
+        async for line in self._request_with_login(
+                url_template, action=action, stream=True, payload=params, headers=headers
+        ):
             yield line
 
     async def info(self):
