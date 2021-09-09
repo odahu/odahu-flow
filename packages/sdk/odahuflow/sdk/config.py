@@ -102,7 +102,7 @@ def get_config_file_section(section=_DEFAULT_INI_SECTION, silent=False):
     _load_config_file()
     if not _INI_FILE_CONTENT:
         if silent:
-            return dict()
+            return {}
         else:
             raise Exception('Configuration file cannot be loaded')
 

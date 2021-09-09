@@ -80,7 +80,7 @@ def launch_training_container(trainer: K8sTrainer, output_dir: str) -> None:
 
 
 def create_mt_config_file(trainer: K8sTrainer) -> None:
-    with open(TRAINER_CONF_PATH, 'w') as f:
+    with open(TRAINER_CONF_PATH, 'w', encoding='utf-8') as f:
         trainer_dict = trainer.to_dict()
         json.dump(trainer_dict, f)
 

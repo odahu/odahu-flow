@@ -36,9 +36,9 @@ class BatchUtils:
         :param expected_output_path:
         :return:
         """
-        with open(expected_output_path, "r") as f:
+        with open(expected_output_path, "r", encoding='utf-8') as f:
             exp = json.load(f)
-        with open(manifest_path, "r") as f:
+        with open(manifest_path, "r", encoding='utf-8') as f:
             job: InferenceJob = parse_resources_file_with_one_item(manifest_path).resource
 
             base_name = os.path.basename(expected_output_path)

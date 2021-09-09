@@ -271,7 +271,7 @@ def validate_targets(
 @click.option('--manifest-dir', '-d', type=click.Path(), multiple=True,
               help='Path to a directory with ODAHU-flow manifest files')
 @click.option('--artifact-path', type=click.Path(),
-              help='Path to a training artifact')
+              help='Absolute path to a training artifact')
 @click.option('--artifact-name', '-a', type=str, help='Override artifact name from file')
 # TODO Breaking Changes: remove --disable-package-targets/--no-disable-package-targets' options
 @click.option('--disable-package-targets/--no-disable-package-targets', 'is_target_disabled',

@@ -46,5 +46,5 @@ class ExamplesLoader:
         # Create all intermediate-level directories
         makedirs(Path(result_file_path).parent, exist_ok=True)
 
-        with open(result_file_path, 'w') as f:
+        with open(result_file_path, 'w', encoding='utf-8') as f:
             f.write(resp.text)

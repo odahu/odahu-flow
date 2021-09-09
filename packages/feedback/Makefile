@@ -1,6 +1,7 @@
 GO111MODULE=off
 LINTER_ADDITIONAL_ARGS=--verbose -j 10 --timeout=20m0s
 
+
 all: help
 
 ## test: Run unit tests

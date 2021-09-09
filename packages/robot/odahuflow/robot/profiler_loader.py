@@ -74,7 +74,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
     if not os.path.exists(profile):
         raise Exception('Can\'t get profile - {} file not found'.format(profile))
 
-    with open(profile, 'r') as json_file:
+    with open(profile, 'r', encoding='utf-8') as json_file:
         data = json.load(json_file)
         variables = {}
 

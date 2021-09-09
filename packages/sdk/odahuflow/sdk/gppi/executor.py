@@ -92,7 +92,7 @@ def load_odahuflow_project_manifest(manifest_path) -> OdahuflowProjectManifest:
     if not manifest_file:
         raise Exception(f'Can not find manifest file {manifest_file}')
 
-    with open(manifest_file, 'r') as manifest_stream:
+    with open(manifest_file, 'r', encoding='utf-8') as manifest_stream:
         data = manifest_stream.read()
 
         try:

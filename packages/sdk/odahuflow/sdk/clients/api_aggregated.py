@@ -253,7 +253,7 @@ def parse_resources_file(path: str) -> OdahuflowCloudResourcesUpdateList:
     if not os.path.exists(path):
         raise FileNotFoundError(f'Resource file \'{path}\' not found')
 
-    with open(path, 'r') as data_stream:
+    with open(path, 'r', encoding='utf-8') as data_stream:
         return parse_stream(data_stream)
 
 

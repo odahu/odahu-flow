@@ -44,7 +44,8 @@ def connection(ctx: click.core.Context, api_client: RemoteAPIClient):
 @click.option('--conn-id', '--id', help='Connection ID')
 @click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
-@click.option('--decrypted', '-d', help='Flag means that connection sensitive data should be decrypted',
+@click.option('--decrypted', '-d', help='--id option required. '
+                                        'Flag means that connection sensitive data should be decrypted ',
               default=False, is_flag=True)
 @pass_obj
 def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: bool):
@@ -82,7 +83,7 @@ def get(client: ConnectionClient, conn_id: str, output_format: str, decrypted: b
 
 
 @connection.command()
-@click.option('--conn-id', '--id', help='Connection ID')
+@click.option('--conn-id', '--id', help='Replace connection ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with connection')
 @click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
@@ -115,7 +116,7 @@ def create(client: ConnectionClient, conn_id: str, file: str, output_format: str
 
 
 @connection.command()
-@click.option('--conn-id', '--id', help='Connection ID')
+@click.option('--conn-id', '--id', help='Replace connection ID from manifest')
 @click.option('--file', '-f', type=click.Path(), required=True, help='Path to the file with connection')
 @click.option('--output-format', '-o', 'output_format', help='Output format  [json|table|yaml|jsonpath]',
               default=DEFAULT_OUTPUT_FORMAT, callback=validate_output_format)
