@@ -30,7 +30,7 @@ def get_k8s_repository(variables):
     :type variables: dict
     :return: str -- k8s images repository
     """
-    return '{}'.format(variables['NEXUS_DOCKER_REPO'])
+    return f"{variables['NEXUS_DOCKER_REPO']}"
 
 
 def get_k8s_version():
@@ -42,7 +42,6 @@ def get_k8s_version():
     odahuflow_version = os.getenv(ODAHUFLOW_VERSION_ENVIRON_KEY)
 
     if not odahuflow_version:
-        raise Exception('Can\'t get version info: {} undefined'
-                        .format(ODAHUFLOW_VERSION_ENVIRON_KEY))
+        raise Exception(f'Can\'t get version info: {ODAHUFLOW_VERSION_ENVIRON_KEY} undefined')
 
-    return '{}'.format(odahuflow_version)
+    return f'{odahuflow_version}'

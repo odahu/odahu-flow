@@ -44,13 +44,13 @@ class Model:
         :param token: model API JWT token
         :return: dict -- response
         """
-        headers = {"Authorization": "Bearer {}".format(token)}
+        headers = {"Authorization": f"Bearer {token}".format()}
         if model_version:
-            url = '{}/api/model/{}/{}/info'.format(edge, model_name, model_version)
+            url = f'{edge}/api/model/{model_name}/{model_version}/info'
         else:
-            url = '{}/api/model/{}/info'.format(edge, model_name)
+            url = f'{edge}/api/model/{model_name}/info'
 
-        print('Requesting {} in GET mode'.format(url))
+        print(f'Requesting {url} in GET mode')
 
         response = requests.get(
             url,
@@ -58,7 +58,7 @@ class Model:
         )
 
         if response.status_code != 200:
-            raise Exception('Returned wrong status code: {}'.format(response.status_code))
+            raise Exception(f'Returned wrong status code: {response.status_code}')
 
         return response.json()
 
@@ -75,7 +75,7 @@ class Model:
         :return: dict -- response
         """
         headers = {
-            'Authorization': 'Bearer {}'.format(token),
+            'Authorization': f'Bearer {token}',
             odahuflow_headers.MODEL_REQUEST_ID: request_id,
             odahuflow_headers.MODEL_NAME: model_name,
             odahuflow_headers.MODEL_VERSION: model_version,
@@ -83,7 +83,7 @@ class Model:
 
         url = f'{edge}/api/v1/feedback/model/{md_name}/api/model'
 
-        print('Requesting {} with data = {} in POST mode'.format(url, payload))
+        print(f'Requesting {url} with data = {payload} in POST mode')
 
         response = requests.post(
             url,
@@ -107,13 +107,13 @@ class Model:
         :param payload: payload dict
         :return: dict -- response
         """
-        headers = {'Authorization': 'Bearer {}'.format(token)}
+        headers = {'Authorization': f'Bearer {token}'}
         if request_id:
             headers[odahuflow_headers.MODEL_REQUEST_ID] = request_id
 
         url = f'{edge}/model/{md_name}/api/model/invoke'
 
-        print('Requesting {} with data = {} in POST mode'.format(url, payload))
+        print(f'Requesting {url} with data = {payload} in POST mode')
 
         payload = {
             'data': [list(payload.values())],

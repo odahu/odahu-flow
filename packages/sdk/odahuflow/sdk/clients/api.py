@@ -294,7 +294,7 @@ class Authenticator:
     def _login_interactive_mode(self, url):
         self._interactive_login_finished.clear()
         target_url = get_authorization_redirect(url, self._after_login)
-        print('%s. \nPlease open %s' % (self._credentials_error_status, target_url))
+        print(f'{self._credentials_error_status}. \nPlease open {target_url}')
         self._interactive_login_finished.wait()
 
     @property
@@ -337,16 +337,15 @@ class Authenticator:
         """
         self._interactive_login_finished.set()
         self._update_config_with_new_oauth_config(login_result)
-        print('You have been authorized on endpoint %s as %s / %s' %
-              (self._base_url, login_result.user_name, login_result.user_email))
+        print(f'You have been authorized on endpoint {self._base_url} as'
+              f' {login_result.user_name} / {login_result.user_email}')
         sys.exit(0)
 
 
 def _handle_query_response(text: str, payload: Mapping[Any, Any], status_code: int) -> Dict:
     try:
         answer = json.loads(text)
-        LOGGER.debug('Got answer: {!r} with code {} for URL {!r}'
-                     .format(answer, status_code, payload))
+        LOGGER.debug(f'Got answer: {answer!r} with code {status_code} for URL {payload!r}')
     except ValueError:
         answer = {}
 
@@ -469,7 +468,7 @@ class RemoteAPIClient:
             else:
                 response = self.default_client.request(timeout=connection_timeout, stream=stream, **request_kwargs)
         except Exception as raised_exception:
-            raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
+            raise APIConnectionException(f'Can not reach {self._base_url}') from raised_exception
 
         if self.authenticator.login_required(response):
             try:
@@ -601,21 +600,21 @@ class AsyncRemoteAPIClient:
                         raise LoginRequired()
 
                     if stream:
-                        LOGGER.debug('Status code: "{}", Response: "<stream>"'.format(resp.status))
+                        LOGGER.debug(f'Status code: "{resp.status}", Response: "<stream>"')
                         async for line in self._handle_stream_response(resp):
                             yield line
                     else:
                         resp_text = await resp.text()
-                        LOGGER.debug('Status code: "{}", Response: "{}"'.format(resp.status, resp_text))
+                        LOGGER.debug(f'Status code: "{resp.status}", Response: "{resp_text}"')
                         data = _handle_query_response(resp_text, payload, resp.status)
                         yield data
                     break
             except aiohttp.ClientConnectionError as exception:
-                LOGGER.error('Failed to connect to {}: {}. Retrying'.format(self._base_url, exception))
+                LOGGER.error(f'Failed to connect to {self._base_url}: {exception}. Retrying')
                 raised_exception = exception
                 left_retries -= 1
         else:
-            raise APIConnectionException('Can not reach {}'.format(self._base_url)) from raised_exception
+            raise APIConnectionException(f'Can not reach {self._base_url}') from raised_exception
 
     @staticmethod
     async def _handle_stream_response(response: aiohttp.ClientResponse, chunk_size=500) -> AsyncIterable:

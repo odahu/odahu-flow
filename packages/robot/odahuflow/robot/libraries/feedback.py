@@ -95,11 +95,11 @@ class Feedback:
         def check_function():
             all_data = []
             for prefix in prefixes:
-                print('Analyzing prefix {}'.format(prefix))
+                print(f'Analyzing prefix {prefix}')
                 all_files = self._client.list_files(prefix=prefix,
                                                     limit=self.S3_LISTING_REQUEST_LIMIT)
                 for file in all_files:
-                    print('Analyzing file {}'.format(file))
+                    print(f'Analyzing file {file}')
                     content = self._client.read_file(file)
                     for line in content.splitlines():
                         if needle_substring in line:
@@ -113,7 +113,7 @@ class Feedback:
 
         result = wait_until(check_function, self.WAIT_FILE_TIME, self.WAIT_FILE_ITERATIONS)
         if not result:
-            raise Exception('{} log line(s) with {!r} has not been found'.format(required_count, needle_substring))
+            raise Exception(f'{required_count} log line(s) with {needle_substring!r} has not been found')
         if return_first_line:
             return result[0]
         else:

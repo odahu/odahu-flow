@@ -39,8 +39,7 @@ def build_configuration_and_files(configuration, temp_directory=None):
     for stream in ('stdout', 'stderr'):
         if stream not in configuration:
             _1, new_file = tempfile.mkstemp(prefix='robot.run_process.', dir=temp_directory)
-            print('Temporary file {!r} has been created for stream {!r}. Directory = {!r}'
-                  .format(new_file, stream, temp_directory))
+            print(f'Temporary file {new_file!r} has been created for stream {stream!r}. Directory = {temp_directory!r}')
             new_configuration[stream] = new_file
             new_files.append(new_file)
     return new_configuration, new_files
@@ -71,9 +70,9 @@ class Process(robot.libraries.Process.Process):
         finally:
             for temp_file in temporary_files:
                 try:
-                    print('Removing temporary file {!r}'.format(temp_file))
+                    print(f'Removing temporary file {temp_file!r}')
                     os.remove(temp_file)
                 except Exception as file_removal_exception:
-                    print('Cannot remove temporary file {!r}: {}'.format(temp_file, file_removal_exception))
+                    print(f'Cannot remove temporary file {temp_file!r}: {file_removal_exception}')
 
         return result

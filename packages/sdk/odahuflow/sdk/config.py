@@ -72,7 +72,7 @@ def _load_config_file():
     config_path = get_config_file_path()
     _INI_FILE_TRIED_TO_BE_LOADED = True
 
-    _LOGGER.debug('Trying to load configuration file {}'.format(config_path))
+    _LOGGER.debug(f'Trying to load configuration file {config_path}')
 
     try:
         if config_path.exists():
@@ -82,11 +82,11 @@ def _load_config_file():
             global _INI_FILE_CONTENT
             _INI_FILE_CONTENT = config
 
-            _LOGGER.debug('Configuration file {} has been loaded'.format(config_path))
+            _LOGGER.debug(f'Configuration file {config_path} has been loaded')
         else:
-            _LOGGER.debug('Cannot find configuration file {}'.format(config_path))
+            _LOGGER.debug(f'Cannot find configuration file {config_path}')
     except Exception as exc:
-        _LOGGER.exception('Cannot read config file {}'.format(config_path), exc_info=exc)
+        _LOGGER.exception(f'Cannot read config file {config_path}', exc_info=exc)
 
 
 def get_config_file_section(section=_DEFAULT_INI_SECTION, silent=False):
@@ -163,7 +163,7 @@ def update_config_file(section=_DEFAULT_INI_SECTION, **new_values):
             if section in content and key in content[section]:
                 del content[section][key]
 
-    with config_path.open('w') as config_file:
+    with config_path.open('w', encoding='utf-8') as config_file:
         content.write(config_file)
 
     _INI_FILE_TRIED_TO_BE_LOADED = True
@@ -171,7 +171,7 @@ def update_config_file(section=_DEFAULT_INI_SECTION, **new_values):
 
     reinitialize_variables()
 
-    _LOGGER.debug('Configuration file {} has been updated'.format(config_path))
+    _LOGGER.debug(f'Configuration file {config_path} has been updated')
 
 
 def _load_variable(name, cast_type=None, configurable_manually=True):

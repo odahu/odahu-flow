@@ -220,8 +220,8 @@ class K8s:
         deployment = apps_api.read_namespaced_deployment(deployment_name, namespace)
 
         if deployment.status.replicas != deployment.status.ready_replicas:
-            raise Exception("Deployment '%s' is not ready: %d/%d replicas are running"
-                            % (deployment_name, deployment.status.ready_replicas, deployment.status.replicas))
+            raise Exception(f"Deployment '{deployment_name}' is not ready: {deployment.status.ready_replicas}/"
+                            f"{deployment.status.replicas} replicas are running")
 
     def get_model_deployment(self, deployment_name, namespace):
         """
@@ -248,7 +248,7 @@ class K8s:
         """
         apps_api = kubernetes.client.AppsV1Api(_build_client())
         scale_data = apps_api.read_namespaced_deployment(deployment_name, namespace)
-        print("Scale data for {} in {} ns is {}".format(deployment_name, namespace, scale_data))
+        print(f"Scale data for {deployment_name} in {namespace} ns is {scale_data}")
         if scale_data is not None:
             return 0 if not scale_data.status.available_replicas else scale_data.status.available_replicas
         else:
@@ -283,11 +283,10 @@ class K8s:
             elapsed = time.time() - start
 
             if nodes_num == 0:
-                print('Scaled node was successfully unscaled after {} seconds'
-                      .format(elapsed))
+                print(f'Scaled node was successfully unscaled after {elapsed} seconds')
                 return
             elif elapsed > timeout > 0:
-                raise Exception('Node was not unscaled after {} seconds wait'.format(timeout))
+                raise Exception(f'Node was not unscaled after {timeout} seconds wait')
             else:
                 print(f'Current node count {nodes_num}. Sleep {sleep} seconds and try again')
                 time.sleep(sleep)

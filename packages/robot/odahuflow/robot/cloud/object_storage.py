@@ -99,7 +99,7 @@ class AWS_S3(ObjectStorage):
             obj = self._client.get_object(Bucket=self._bucket_name, Key=file_name)
             return obj['Body'].read().decode('utf-8')
         except self._client.exceptions.NoSuchKey as e:
-            raise Exception('File {} not found in bucket {}'.format(file_name, self._bucket_name)) from e
+            raise Exception(f'File {file_name} not found in bucket {self._bucket_name}') from e
 
 
 class GCP_CloudStorage(ObjectStorage):

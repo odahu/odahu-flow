@@ -57,11 +57,11 @@ def get_function_description(callable_object):
     """
     object_class_name = callable_object.__class__.__name__
     if not callable(callable_object):
-        return '<not callable object: {}>'.format(object_class_name)
+        return f'<not callable object: {object_class_name}>'
 
     object_name = callable_object.__name__
     module_name = inspect.getmodule(callable_object)
-    return '<{} {} in {}>'.format(object_class_name, object_name, module_name)
+    return f'<{object_class_name} {object_name} in {module_name}>'
 
 
 def ensure_function_succeed(function_to_call, retries, timeout, boolean_check=False):
@@ -81,7 +81,7 @@ def ensure_function_succeed(function_to_call, retries, timeout, boolean_check=Fa
     """
     function_description = get_function_description(function_to_call)
     for no in range(retries):
-        LOGGER.debug('Calling {}'.format(function_description))
+        LOGGER.debug(f'Calling {function_description}')
         result = function_to_call()
 
         if boolean_check:
@@ -92,10 +92,10 @@ def ensure_function_succeed(function_to_call, retries, timeout, boolean_check=Fa
                 return result
 
         if no < retries:
-            LOGGER.debug('Retry {}/{} was failed'.format(no + 1, retries))
+            LOGGER.debug(f'Retry {no + 1}/{retries} was failed')
         if no < retries - 1:
-            LOGGER.debug('Waiting {}s before next retry analysis'.format(timeout))
+            LOGGER.debug(f'Waiting {timeout}s before next retry analysis')
             time.sleep(timeout)
 
-    LOGGER.error('No retries left for function {}'.format(function_description))
+    LOGGER.error(f'No retries left for function {function_description}')
     return False if boolean_check else None
