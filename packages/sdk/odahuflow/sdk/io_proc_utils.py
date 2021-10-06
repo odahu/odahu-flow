@@ -48,5 +48,7 @@ def run(*args: str, cwd=None, stream_output: bool = True):
             stdout, stderr = child.communicate()
             exit_code = child.wait()
         if exit_code != 0:
-            raise Exception(f'Non-zero exit code: {exit_code}\n\nSTDOUT:\n{stdout}\n\nSTDERR:{stderr}\n ======')
+            raise Exception(f'Non-zero exit code: {exit_code}\n\n'
+                            f'STDOUT:\n{stdout}\n\n'
+                            f'STDERR:{stderr}\n ======')
         return exit_code, stdout, stderr

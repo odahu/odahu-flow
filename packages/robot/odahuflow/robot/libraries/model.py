@@ -44,7 +44,7 @@ class Model:
         :param token: model API JWT token
         :return: dict -- response
         """
-        headers = {"Authorization": f"Bearer {token}".format()}
+        headers = {"Authorization": f"Bearer {token}"}
         if model_version:
             url = f'{edge}/api/model/{model_name}/{model_version}/info'
         else:

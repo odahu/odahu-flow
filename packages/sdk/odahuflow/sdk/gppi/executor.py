@@ -231,7 +231,9 @@ class GPPITrainedModelBinary:
             _logger.info(f'use_current_env flag = False. Start to execute command in {self.exec_env}')
             exit_code, output, err_ = self.exec_env.execute(command, cwd=cwd, stream_output=stream_output)
 
-        _logger.info(f'Subprocess result: {exit_code}\n\nSTDOUT:\n{output}\n\nSTDERR:{err_}\n ======')
+        _logger.info(f'Subprocess result: {exit_code}\n\n'
+                     f'STDOUT:\n{output}\n\n'
+                     f'STDERR:{err_}\n ======')
 
         return output
 
