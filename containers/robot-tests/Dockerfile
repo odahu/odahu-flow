@@ -16,9 +16,11 @@
 
 FROM python:3.6.8
 # Install python package dependencies and cloud CLI tools
-RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common \
+RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common libgnutls-openssl27 libgnutls30 \
     make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 ca-certificates gnupg-agent && \
     DISTR=$(lsb_release -cs) && \
+    sed -ie 's/mozilla\/DST_Root_CA_X3\.crt/!mozilla\/DST_Root_CA_X3\.crt/' /etc/ca-certificates.conf && \
+    update-ca-certificates && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $DISTR stable" && \
     echo "deb http://packages.cloud.google.com/apt cloud-sdk-$DISTR main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -31,13 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
     apt-get install -y --no-install-recommends moreutils && \
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
-ENV CLI_RCLONE_VERSION=v1.52.3 \
+ENV RCLONE_VERSION=v1.52.3 \
     KUBECTL_VERSION=v1.16.10
 
 RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
-    wget -qO /tmp/rclone.zip "https://downloads.rclone.org/${CLI_RCLONE_VERSION}/rclone-${CLI_RCLONE_VERSION}-linux-amd64.zip" && \
+    wget -qO /tmp/rclone.zip "https://downloads.rclone.org/${RCLONE_VERSION}/rclone-${RCLONE_VERSION}-linux-amd64.zip" && \
     mkdir /tmp/rclone && unzip /tmp/rclone.zip -d /tmp/rclone && \
-    cp "/tmp/rclone/rclone-${CLI_RCLONE_VERSION}-linux-amd64/rclone" /usr/local/bin/rclone && \
+    cp "/tmp/rclone/rclone-${RCLONE_VERSION}-linux-amd64/rclone" /usr/local/bin/rclone && \
     chmod a+x /usr/local/bin/rclone /usr/local/bin/kubectl && \
     rm -rf /tmp/rclone*
 
