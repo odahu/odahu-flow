@@ -58,15 +58,15 @@ def _get_activate_conda_command(conda_env_name):
         conda_path = _get_conda_bin_executable("conda")
         activate_conda_env = ['source ' + os.path.dirname(conda_path) +
                               '/../etc/profile.d/conda.sh']
-        activate_conda_env += ["conda activate {0} 1>&2".format(conda_env_name)]
+        activate_conda_env += [f'conda activate {conda_env_name} 1>&2']
     else:
         activate_path = _get_conda_bin_executable("activate")
         # in case os name is not 'nt', we are not running on windows. It introduces
         # bash command otherwise.
-        if os.name != "nt":
-            activate_conda_env = ["source %s %s 1>&2" % (activate_path, conda_env_name)]
+        if os.name != 'nt':
+            activate_conda_env = [f'source {activate_path} {conda_env_name} 1>&2']
         else:
-            activate_conda_env = ["conda %s %s 1>&2" % (activate_path, conda_env_name)]
+            activate_conda_env = [f'conda {activate_path} {conda_env_name} 1>&2']
     return ' && '.join(activate_conda_env)
 
 
@@ -231,8 +231,9 @@ class GPPITrainedModelBinary:
             _logger.info(f'use_current_env flag = False. Start to execute command in {self.exec_env}')
             exit_code, output, err_ = self.exec_env.execute(command, cwd=cwd, stream_output=stream_output)
 
-        _logger.info('Subprocess result: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======' %
-                     (exit_code, output, err_))
+        _logger.info(f'Subprocess result: {exit_code}\n\n'
+                     f'STDOUT:\n{output}\n\n'
+                     f'STDERR:{err_}\n ======')
 
         return output
 

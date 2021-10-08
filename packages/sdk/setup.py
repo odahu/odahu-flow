@@ -35,7 +35,7 @@ def extract_version() -> str:
         if mo:
             return mo.group(1)
         else:
-            raise RuntimeError("Unable to find version string in %s." % (file_content,))
+            raise RuntimeError(f"Unable to find version string in {file_content}.")
 
 
 with open('requirements.txt', encoding='utf-8') as f:

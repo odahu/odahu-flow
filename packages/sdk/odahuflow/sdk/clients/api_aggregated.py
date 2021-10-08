@@ -106,7 +106,7 @@ def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteA
     elif isinstance(resource.resource, InferenceService):
         return BatchInferenceServiceClient.construct_from_other(api_client)
     else:
-        raise InvalidResourceType('{!r} is invalid resource '.format(resource.resource))
+        raise InvalidResourceType(f'{resource.resource!r} is invalid resource ')
 
 
 # pylint: disable=R0911
@@ -139,7 +139,7 @@ def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
     elif isinstance(resource.resource, InferenceService):
         return AsyncBatchInferenceServiceClient.construct_from_other(async_api_client)
     else:
-        raise InvalidResourceType('{!r} is invalid resource '.format(resource.resource))
+        raise InvalidResourceType(f'{resource.resource!r} is invalid resource ')
 
 
 def build_resource(declaration: dict) -> OdahuflowCloudResourceUpdatePair:
@@ -269,7 +269,7 @@ def parse_resources_file_with_one_item(path: str) -> OdahuflowCloudResourceUpdat
     """
     resources = parse_resources_file(path)
     if len(resources.changes) != 1:
-        raise Exception('{!r} should contain 1 item, but {!r} found'.format(path, len(resources)))
+        raise Exception(f'{path!r} should contain 1 item, but {len(resources)} found')
     return resources.changes[0]
 
 

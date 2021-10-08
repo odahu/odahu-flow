@@ -143,7 +143,7 @@ class ModelClient:
 
         :return: str -- api root url
         """
-        return '{host}/api/model'.format(host=self._url)
+        return f'{self._url}/api/model'
 
     @property
     def info_url(self):
@@ -152,7 +152,7 @@ class ModelClient:
 
         :return: str -- info url
         """
-        return self.api_url + '/info'
+        return f'{self.api_url}/info'
 
     @staticmethod
     def _parse_response(response):
@@ -175,8 +175,7 @@ class ModelClient:
 
         if not 200 <= response.status_code < 400:
             url = response.url if hasattr(response, 'url') else None
-            raise Exception('Wrong status code returned: {}. Data: "{}". URL: "{}"'
-                            .format(response.status_code, data, url))
+            raise Exception(f'Wrong status code returned: {response.status_code}. Data: "{data}". URL: "{url}"')
 
         return data
 
@@ -224,7 +223,7 @@ class ModelClient:
             try:
                 return client_method(url, **kwargs)
             except (self._http_exception, HTTPError) as e:
-                LOGGER.error('Failed to connect to {}: {}.'.format(url, e))
+                LOGGER.error(f'Failed to connect to {url}: {e}.')
 
         response = ensure_function_succeed(check_function, retries, sleep)
         if response is None:

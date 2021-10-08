@@ -72,11 +72,11 @@ def report_process_output(process_name, stream_name, stream):
     :return: None
     """
     if not stream:
-        LOGGER.info('Process {!r} has no {}'.format(process_name, stream_name))
+        LOGGER.info(f'Process {process_name!r} has no {stream_name}')
     else:
         if isinstance(stream, bytes):
             stream = stream.decode('utf-8')
-        LOGGER.info('Process {!r} has {} output:\n{}'.format(process_name, stream_name, stream))
+        LOGGER.info(f'Process {process_name!r} has {stream_name} output:\n{stream}')
 
 
 def kill_and_report_process(popen_object):
@@ -88,18 +88,18 @@ def kill_and_report_process(popen_object):
     :return: None
     """
     try:
-        LOGGER.debug('Killing process #{}'.format(popen_object.pid))
+        LOGGER.debug(f'Killing process #{popen_object.pid}')
         popen_object.kill()
 
         try:
             report_process_output(popen_object.args, 'stdout', popen_object.stdout.read())
             report_process_output(popen_object.args, 'stderr', popen_object.stderr.read())
         except Exception as gather_exception:
-            LOGGER.error('Cannot gather process #{} logs: {!r}'.format(popen_object.pid, gather_exception))
+            LOGGER.error(f'Cannot gather process #{popen_object.pid} logs: {gather_exception!r}')
     except ProcessLookupError:
-        LOGGER.error('Cannot find process by id #{}'.format(popen_object.pid))
+        LOGGER.error(f'Cannot find process by id #{popen_object.pid}')
     except Exception as kill_exception:
-        LOGGER.error('Cannot kill process: {!r}'.format(kill_exception))
+        LOGGER.error(f'Cannot kill process: {kill_exception!r}')
 
 
 def end_test(test, result):  # pylint: disable=W0613
@@ -120,16 +120,11 @@ def end_test(test, result):  # pylint: disable=W0613
                                 if process in all_results and all_results[process].rc is None]
 
             if active_processes:
-                LOGGER.info('Some hanging processes have been detected for failed test {!r}'.format(
-                    result.name
-                ))
+                LOGGER.info(f'Some hanging processes have been detected for failed test {result.name!r}')
 
                 for process in active_processes:
-                    LOGGER.info('Killing active process {!r} for test {!r} because of {!r}'.format(
-                        process.args,
-                        result.name,
-                        result.message
-                    ))
+                    LOGGER.info(f'Killing active process {process.args!r} for test {result.name!r} '
+                                f'because of {result.message!r}')
                     try:
                         with with_execution_time_limit(10):
                             kill_and_report_process(process)

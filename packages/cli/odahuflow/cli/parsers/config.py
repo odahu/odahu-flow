@@ -50,7 +50,7 @@ def config_set(key: str, value: str):
     _check_variable_exists_or_exit(variable_name)
 
     if not config.ALL_VARIABLES[variable_name].configurable_manually:
-        raise Exception('Variable {} is not configurable manually'.format(variable_name))
+        raise Exception(f'Variable {variable_name} is not configurable manually')
 
     config.update_config_file(**{variable_name: value})
 
@@ -123,7 +123,7 @@ def _check_variable_exists_or_exit(name: str):
     :param name: name of variable, case-sensitive
     """
     if name not in config.ALL_VARIABLES:
-        click.echo('Variable {!r} is unknown'.format(name))
+        click.echo(f'Variable {name!r} is unknown')
         sys.exit(1)
 
 
@@ -138,8 +138,8 @@ def _print_variable_information(name: str, show_secrets: bool = False):
     description = config.ALL_VARIABLES[name]
     current_value = getattr(config, name)
     is_secret = any(sub in name for sub in ('_PASSWORD', '_TOKEN', '_SECRET'))
-    click.echo('{} - {}\n  default: {!r}'.format(name, description.description, description.default))
+    click.echo(f'{name} - {description.description}\n  default: {description.default!r}')
     if current_value != description.default:
         if is_secret and not show_secrets:
             current_value = '****'
-        click.echo('  current: {!r}'.format(current_value))
+        click.echo(f'  current: {current_value!r}')

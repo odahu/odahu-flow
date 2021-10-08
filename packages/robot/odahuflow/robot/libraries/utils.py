@@ -70,7 +70,7 @@ class Utils:
             return socket.gethostbyname(domain)
         except socket.gaierror as exception:
             if exception.errno == -2:
-                raise Exception('Unknown domain name: {}'.format(domain)) from exception
+                raise Exception(f'Unknown domain name: {domain}') from exception
             else:
                 raise
 
@@ -97,7 +97,7 @@ class Utils:
                                 verify=False,
                                 auth=credentials)
         if response.status_code >= 400 or response.status_code < 200:
-            raise Exception('Returned wrong status code: {}'.format(response.status_code))
+            raise Exception(f'Returned wrong status code: {response.status_code}')
 
         response.close()
 
@@ -181,7 +181,7 @@ class Utils:
         for i in range(tries):
             try:
                 if token:
-                    headers = {"Authorization": "Bearer {}".format(token)}
+                    headers = {'Authorization': f'Bearer {token}'}
                     response = requests.get(url, timeout=10, headers=headers)
                 else:
                     response = requests.get(url, timeout=10)
@@ -189,9 +189,9 @@ class Utils:
                 if response.status_code == 200:
                     return response.text
                 elif i >= 5:
-                    raise Exception('Returned wrong status code: {}'.format(response.status_code))
+                    raise Exception(f'Returned wrong status code: {response.status_code}')
                 elif response.status_code >= 400 or response.status_code < 200:
-                    print('Response code = {}, sleep and try again'.format(response.status_code))
+                    print(f'Response code = {response.status_code}, sleep and try again')
                     time.sleep(3)
             except requests.exceptions.Timeout as e:
                 error = e
@@ -230,7 +230,7 @@ class Utils:
         :rtype: dict
         """
         if token:
-            headers = {"Authorization": "Bearer {}".format(token)}
+            headers = {'Authorization': f'Bearer {token}'}
             response = requests.get(url, timeout=10, headers=headers)
         else:
             response = requests.get(url, timeout=10)
@@ -320,7 +320,7 @@ class Utils:
             sleep_time = target_second - current_second
 
         if sleep_time:
-            print('Waiting {} second(s)'.format(sleep_time))
+            print(f'Waiting {sleep_time} second(s)')
             time.sleep(sleep_time)
 
         if time_template:

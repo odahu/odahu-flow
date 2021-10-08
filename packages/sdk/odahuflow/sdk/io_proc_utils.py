@@ -40,7 +40,7 @@ def run(*args: str, cwd=None, stream_output: bool = True):
         with subprocess.Popen(args, env=cmd_env, cwd=cwd, universal_newlines=True, stdin=subprocess.PIPE) as child:
             exit_code = child.wait()
         if exit_code != 0:
-            raise Exception("Non-zero exitcode: %s" % exit_code)
+            raise Exception(f'Non-zero exitcode: {exit_code}')
         return exit_code
     else:
         with subprocess.Popen(args, env=cmd_env, stdout=subprocess.PIPE, stdin=subprocess.PIPE,
@@ -48,6 +48,7 @@ def run(*args: str, cwd=None, stream_output: bool = True):
             stdout, stderr = child.communicate()
             exit_code = child.wait()
         if exit_code != 0:
-            raise Exception("Non-zero exit code: %s\n\nSTDOUT:\n%s\n\nSTDERR:%s\n ======" %
-                            (exit_code, stdout, stderr))
+            raise Exception(f'Non-zero exit code: {exit_code}\n\n'
+                            f'STDOUT:\n{stdout}\n\n'
+                            f'STDERR:{stderr}\n ======')
         return exit_code, stdout, stderr

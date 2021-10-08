@@ -70,9 +70,9 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
     profile = profile or os.getenv(CLUSTER_PROFILE)
 
     if not profile:
-        raise Exception('Can\'t get profile at path {}'.format(profile))
+        raise Exception(f'Can\'t get profile at path {profile}')
     if not os.path.exists(profile):
-        raise Exception('Can\'t get profile - {} file not found'.format(profile))
+        raise Exception(f'Can\'t get profile - {profile} file not found')
 
     with open(profile, 'r', encoding='utf-8') as json_file:
         data = json.load(json_file)
@@ -113,7 +113,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'ISSUER': data.get('oauth_oidc_issuer_url')
             }
         except Exception as err:
-            raise Exception("Can\'t get variable from cluster profile: {}".format(err)) from err
+            raise Exception(f'Can\'t get variable from cluster profile: {err}') from err
 
         try:
             client_id = test_sa_admin.client_id
@@ -131,7 +131,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
             else:
                 variables[AUTH_TOKEN_PARAM_NAME] = ''
         except Exception as err:
-            raise Exception("Can\'t get dex authentication data: {}".format(err)) from err
+            raise Exception(f'Can\'t get dex authentication data: {err}') from err
 
     # Increase retries and backoff for robot tests against defaults
     config.RETRY_ATTEMPTS = 10
