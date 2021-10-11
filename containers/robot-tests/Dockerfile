@@ -33,13 +33,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
     apt-get install -y --no-install-recommends moreutils && \
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
-ENV RCLONE_VERSION=v1.52.3 \
+ENV CLI_RCLONE_VERSION=v1.52.3 \
     KUBECTL_VERSION=v1.16.10
 
 RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
-    wget -qO /tmp/rclone.zip "https://downloads.rclone.org/${RCLONE_VERSION}/rclone-${RCLONE_VERSION}-linux-amd64.zip" && \
+    wget -qO /tmp/rclone.zip "https://downloads.rclone.org/${CLI_RCLONE_VERSION}/rclone-${CLI_RCLONE_VERSION}-linux-amd64.zip" && \
     mkdir /tmp/rclone && unzip /tmp/rclone.zip -d /tmp/rclone && \
-    cp "/tmp/rclone/rclone-${RCLONE_VERSION}-linux-amd64/rclone" /usr/local/bin/rclone && \
+    cp "/tmp/rclone/rclone-${CLI_RCLONE_VERSION}-linux-amd64/rclone" /usr/local/bin/rclone && \
     chmod a+x /usr/local/bin/rclone /usr/local/bin/kubectl && \
     rm -rf /tmp/rclone*
 
