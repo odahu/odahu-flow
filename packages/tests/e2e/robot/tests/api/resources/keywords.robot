@@ -96,7 +96,7 @@ CreatedAt and UpdatedAt times should not be equal
     should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
 Wait until command finishes and returns result
-    [Arguments]    ${command}    ${cycles}=120  ${sleep_time}=30s  ${entity}=  @{exp_result}=succeeded
+    [Arguments]    ${command}    ${entity}  @{exp_result}  ${cycles}=120  ${sleep_time}=30s
     FOR     ${i}    IN RANGE     ${cycles}
         ${result}                Call API  ${command} get id  ${entity}
         ${result_state}          evaluate  str('${result.status.state}' or '')
@@ -107,7 +107,7 @@ Wait until command finishes and returns result
     [Return]  ${result}
 
 Wait until delete finished
-    [Arguments]    ${command}    ${cycles}=60  ${sleep_time}=30s  ${entity}=  @{exp_result}=deleting
+    [Arguments]    ${command}    ${entity}  ${cycles}=60  ${sleep_time}=30s
     FOR     ${i}    IN RANGE     ${cycles}
         ${check}                 Check command response list contains id  ${command}  ${entity}
 
