@@ -30,8 +30,8 @@ Check model trainings do not exist
 
 Create Model Training, mlflow toolchain, not default
     Call API  training post  ${RES_DIR}/valid/training.mlflow.not_default.yaml
-    @{exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=@{exp_result}
+    ${exp_result}               create list  succeeded  failed
+    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_NOT_DEFAULT}  exp_result=${exp_result}
     Get Logs                    training  ${TRAIN_MLFLOW_NOT_DEFAULT}
     Status State Should Be      ${result}  succeeded
 
