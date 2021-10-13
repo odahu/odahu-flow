@@ -35,7 +35,7 @@ def render_template(template_name, values=None):
     :return: str rendered template
     """
     env = Environment(
-        loader=PackageLoader(__package__, 'templates'),
+        loader=PackageLoader(__package__, package_path='templates'),
         autoescape=select_autoescape(enabled_extensions=('tmpl'))
     )
 
