@@ -7,7 +7,7 @@ spec:
   model:
     name: test
     version: '1.0'
-  toolchain: mlflow
+  trainingIntegration: mlflow
   algorithmSource:
     vcs:
       connection: bulk-test-conn-1

@@ -73,7 +73,7 @@ func NewModelTrainer(
 //   1) It extracts the training entity from repository storage, for example, from the API server.
 //   2) It downloads the source code of model training.
 //   3) The setup function downloads all training data.
-//   4) Finally, it saves the training entity to allow an ML toolchain to use it.
+//   4) Finally, it saves the training entity to allow an ML trainer to use it.
 func (mt *ModelTrainer) Setup() (err error) {
 	// Extracts the training entity
 	k8sTraining, err := mt.getTraining()
@@ -112,7 +112,7 @@ func (mt *ModelTrainer) Setup() (err error) {
 
 	mt.log.Info("The training data was downloaded")
 
-	// TODO: We make available all connections to a toolchain script. Do we need it?
+	// TODO: We make available all connections to a trainer script. Do we need it?
 	mtBytes, err := json.Marshal(k8sTraining)
 	if err != nil {
 		mt.log.Error(err, "Marshaling of the training entity to JSON format failed.")

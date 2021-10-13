@@ -10,6 +10,6 @@ model:
   workDir: odahuflow_model
 output:
   run_id: fbf90f87da2d42c18afd4fc68aaac363
-toolchain:
+trainingIntegration:
   name: mlflow
   version: 1.0.0

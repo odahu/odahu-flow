@@ -29,18 +29,18 @@ import (
 )
 
 const (
-	pathToTrainerBin  = "/opt/odahu-flow/trainer"
-	workspacePath     = "/workspace"
-	outputDir         = "output"
-	configVolumeName  = "config"
-	configDir         = "/etc/odahuflow/"
-	configFileName    = "config.yaml"
-	configSecretName  = "odahu-flow-training-config" //nolint:gosec
+	pathToTrainerBin = "/opt/odahu-flow/trainer"
+	workspacePath    = "/workspace"
+	outputDir        = "output"
+	configVolumeName = "config"
+	configDir        = "/etc/odahuflow/"
+	configFileName   = "config.yaml"
+	configSecretName = "odahu-flow-training-config" //nolint:gosec
 )
 
 func (r *ModelTrainingReconciler) generateTrainerTaskSpec(
 	trainingCR *odahuflowv1alpha1.ModelTraining,
-	toolchainIntegration *training.ToolchainIntegration,
+	trainingIntegration *training.TrainingIntegration,
 ) (*tektonv1beta1.TaskSpec, error) {
 	mtResources, err := kubernetes.ConvertOdahuflowResourcesToK8s(trainingCR.Spec.Resources, r.gpuResourceName)
 	if err != nil {
@@ -54,7 +54,7 @@ func (r *ModelTrainingReconciler) generateTrainerTaskSpec(
 	return &tektonv1beta1.TaskSpec{
 		Steps: []tektonv1beta1.Step{
 			r.createInitTrainerStep(helperContainerResources, trainingCR.Name),
-			r.createMainTrainerStep(trainingCR, toolchainIntegration, &mtResources),
+			r.createMainTrainerStep(trainingCR, trainingIntegration, &mtResources),
 			r.createResultTrainerStep(helperContainerResources, trainingCR),
 		},
 		Volumes: []corev1.Volume{
@@ -102,7 +102,7 @@ func (r *ModelTrainingReconciler) createInitTrainerStep(
 
 func (r *ModelTrainingReconciler) createMainTrainerStep(
 	train *odahuflowv1alpha1.ModelTraining,
-	trainingIntegration *training.ToolchainIntegration,
+	trainingIntegration *training.TrainingIntegration,
 	trainResources *corev1.ResourceRequirements) tektonv1beta1.Step {
 
 	envs := make([]corev1.EnvVar, 0, len(trainingIntegration.Spec.AdditionalEnvironments)+len(train.Spec.CustomEnvs))
@@ -136,7 +136,6 @@ func (r *ModelTrainingReconciler) createMainTrainerStep(
 		},
 	}
 }
-
 
 func (r *ModelTrainingReconciler) createResultTrainerStep(
 	res corev1.ResourceRequirements, mt *odahuflowv1alpha1.ModelTraining,

@@ -34,8 +34,8 @@ import (
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_postgres_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/training_integration"
 	httputil "github.com/odahu/odahu-flow/packages/operator/pkg/utils/httputil"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -49,10 +49,10 @@ import (
 	"testing"
 )
 
-type toolchainService interface {
-	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
-	CreateToolchainIntegration(md *training.ToolchainIntegration) error
-	DeleteToolchainIntegration(name string) error
+type trainingIntegrationService interface {
+	GetTrainingIntegration(name string) (*training.TrainingIntegration, error)
+	CreateTrainingIntegration(md *training.TrainingIntegration) error
+	DeleteTrainingIntegration(name string) error
 }
 
 type ModelTrainingRouteSuite struct {
@@ -60,11 +60,11 @@ type ModelTrainingRouteSuite struct {
 	g      *GomegaWithT
 	server *gin.Engine
 
-	trainService     mt_service.Service
-	toolchainService toolchainService
-	connRepo         conn_repository.Repository
-	kubeTrainClient  kube_client.Client
-	k8sClient        client.Client
+	trainService               mt_service.Service
+	trainingIntegrationService trainingIntegrationService
+	connRepo                   conn_repository.Repository
+	kubeTrainClient            kube_client.Client
+	k8sClient                  client.Client
 }
 
 func (s *ModelTrainingRouteSuite) SetupSuite() {
@@ -73,8 +73,8 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 
 	s.trainService = mt_service.NewService(mt_postgres_repository.TrainingRepo{DB: db})
 
-	tiRepo := mt_postgres_repository.ToolchainRepo{DB: db}
-	s.toolchainService = toolchain.NewService(tiRepo)
+	tiRepo := mt_postgres_repository.TrainingIntegrationRepo{DB: db}
+	s.trainingIntegrationService = training_integration.NewService(tiRepo)
 
 	s.kubeTrainClient = kube_client.NewClient(testNamespace, testNamespace, s.k8sClient, cfg)
 
@@ -92,11 +92,11 @@ func (s *ModelTrainingRouteSuite) SetupSuite() {
 		panic(err)
 	}
 
-	// Create the toolchain integration that will be used for a training.
-	if err := s.toolchainService.CreateToolchainIntegration(&training.ToolchainIntegration{
-		ID: testToolchainIntegrationID,
-		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
-			DefaultImage: testToolchainMtImage,
+	// Create the training integration that will be used for a training.
+	if err := s.trainingIntegrationService.CreateTrainingIntegration(&training.TrainingIntegration{
+		ID: testTrainingIntegrationID,
+		Spec: odahuflowv1alpha1.TrainingIntegrationSpec{
+			DefaultImage: testTrainingIntegrationMtImage,
 		},
 	}); err != nil {
 		// If we get a panic that we have a test configuration problem
@@ -130,7 +130,7 @@ func (s *ModelTrainingRouteSuite) TearDownSuite() {
 
 	var errs []error
 
-	if err := s.toolchainService.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
+	if err := s.trainingIntegrationService.DeleteTrainingIntegration(testTrainingIntegrationID); err != nil {
 		errs = append(errs, err)
 	}
 
@@ -169,7 +169,7 @@ func (s *ModelTrainingRouteSuite) registerHandlers(trainingConfig config.ModelTr
 
 	train_route.ConfigureRoutes(
 		trainGroup, trainingConfig, config.NvidiaResourceName,
-		s.trainService, s.toolchainService, s.connRepo, s.kubeTrainClient)
+		s.trainService, s.trainingIntegrationService, s.connRepo, s.kubeTrainClient)
 }
 
 func (s *ModelTrainingRouteSuite) newMultipleMtStubs() {
@@ -198,8 +198,8 @@ func newMtStub() *training.ModelTraining {
 				Version:              testModelVersion1,
 				ArtifactNameTemplate: train_route.DefaultArtifactOutputTemplate,
 			},
-			Toolchain:  testToolchainIntegrationID,
-			Entrypoint: testMtEntrypoint,
+			TrainingIntegration: testTrainingIntegrationID,
+			Entrypoint:          testMtEntrypoint,
 			AlgorithmSource: odahuflowv1alpha1.AlgorithmSource{
 				VCS: odahuflowv1alpha1.VCS{
 					Connection: testMtVCSID,

@@ -77,7 +77,7 @@ func NewModelTrainingReconciler(
 		scheme:    mgr.GetScheme(),
 		trainKubeClient: kube_client.NewClient(
 			cfg.Training.Namespace,
-			cfg.Training.ToolchainIntegrationNamespace,
+			cfg.Training.TrainingIntegrationNamespace,
 			k8sClient,
 			mgr.GetConfig(),
 		),
@@ -194,15 +194,15 @@ func (r *ModelTrainingReconciler) calculateStateByPod(
 	return nil
 }
 
-func (r *ModelTrainingReconciler) getToolchainIntegration(trainingCR *odahuflowv1alpha1.ModelTraining) (
-	*training.ToolchainIntegration, error,
+func (r *ModelTrainingReconciler) getTrainingIntegration(trainingCR *odahuflowv1alpha1.ModelTraining) (
+	*training.TrainingIntegration, error,
 ) {
-	var ti *training.ToolchainIntegration
-	ti, err := r.trainAPIClient.GetToolchainIntegration(trainingCR.Spec.Toolchain)
+	var ti *training.TrainingIntegration
+	ti, err := r.trainAPIClient.GetTrainingIntegration(trainingCR.Spec.TrainingIntegration)
 	if err != nil {
 		return nil, err
 	}
-	return &training.ToolchainIntegration{Spec: ti.Spec}, nil
+	return &training.TrainingIntegration{Spec: ti.Spec}, nil
 }
 
 func (r *ModelTrainingReconciler) getTolerations(trainingCR *odahuflowv1alpha1.ModelTraining) []corev1.Toleration {
@@ -234,12 +234,12 @@ func (r *ModelTrainingReconciler) reconcileTaskRun(
 		return taskRun, nil
 	}
 
-	toolchainIntegration, err := r.getToolchainIntegration(trainingCR)
+	trainingIntegration, err := r.getTrainingIntegration(trainingCR)
 	if err != nil {
 		return nil, err
 	}
 
-	taskSpec, err := r.generateTrainerTaskSpec(trainingCR, toolchainIntegration)
+	taskSpec, err := r.generateTrainerTaskSpec(trainingCR, trainingIntegration)
 	if err != nil {
 		return nil, err
 	}
@@ -336,8 +336,8 @@ func isTrainingFinished(mt *odahuflowv1alpha1.ModelTraining) bool {
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=modeltrainings,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=modeltrainings/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=toolchainintegrations,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=toolchainintegrations/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=trainingintegrations,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=odahuflow.odahu.org,resources=trainingintegrations/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=events,verbs=create;patch
 
 func (r *ModelTrainingReconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {

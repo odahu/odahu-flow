@@ -80,7 +80,7 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 		return nil, err
 	}
 
-	ti, err := mt.trainClient.GetToolchainIntegration(modelTraining.Spec.Toolchain)
+	ti, err := mt.trainClient.GetTrainingIntegration(modelTraining.Spec.TrainingIntegration)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +93,6 @@ func (mt *ModelTrainer) getTraining() (*training.K8sTrainer, error) {
 			ID:   modelTraining.ID,
 			Spec: modelTraining.Spec,
 		},
-		ToolchainIntegration: ti,
+		TrainingIntegration: ti,
 	}, nil
 }

@@ -4,7 +4,7 @@ spec:
   model:
     name: test-algorithm-source
     version: "1.0"
-  toolchain: mlflow
+  trainingIntegration: mlflow
   hyperParameters:
     alpha: "1.0"
   workDir: wine

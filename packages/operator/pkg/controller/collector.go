@@ -28,7 +28,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-
 // Controller does not create InferenceJobs from API Server (only fetches them)
 // Thus connectionGetter is not used. We build dummy connectionGetter to init InferenceJobService
 type dummyConnGetter struct {
@@ -47,7 +46,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 		trainService := train_service.NewService(train_repo.TrainingRepo{DB: db})
 		trainKubeClient := train_kube_client.NewClient(
 			cfg.Training.Namespace,
-			cfg.Training.ToolchainIntegrationNamespace,
+			cfg.Training.TrainingIntegrationNamespace,
 			kClient,
 			kConfig,
 		)
@@ -77,7 +76,7 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 
 	if cfg.Deployment.Enabled {
 		depService := dep_service.NewService(deploy_repo.DeploymentRepo{DB: db}, route_repo.RouteRepo{DB: db},
-		outbox.EventPublisher{DB: db})
+			outbox.EventPublisher{DB: db})
 		deployKubeClient := deploy_kube_client.NewClient(cfg.Deployment.Namespace, kClient)
 
 		deployWorker := NewGenericWorker(
@@ -85,7 +84,6 @@ func SetupRunners(runMgr *WorkersManager, kubeMgr manager.Manager, db *sql.DB, c
 			deployment.NewAdapter(depService, deployKubeClient, kubeMgr),
 		)
 		runMgr.AddRunnable(&deployWorker)
-
 
 		routeService := route_service.NewService(route_repo.RouteRepo{DB: db}, outbox.EventPublisher{DB: db})
 

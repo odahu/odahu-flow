@@ -30,13 +30,13 @@ from odahuflow.cli.utils.error_handler import IGNORE_NOT_FOUND_ERROR_MESSAGE, \
 from odahuflow.cli.utils.output import JSON_OUTPUT_FORMAT, \
     JSONPATH_OUTPUT_FORMAT
 from odahuflow.sdk.clients.api import WrongHttpStatusCode
-from .data import ENTITY_ID, EntityTestData, ROUTER, DEPLOYMENT, PACKAGING_INTEGRATION, PACKAGING, TOOLCHAIN, TRAINING, \
-    CONNECTION, generate_entities_for_test
+from .data import ENTITY_ID, EntityTestData, ROUTER, DEPLOYMENT, PACKAGING_INTEGRATION, PACKAGING,\
+    TRAINING_INTEGRATION, TRAINING, CONNECTION, generate_entities_for_test
 
 ENTITY_TEST_DATA: typing.Dict[str, EntityTestData] = {
     "connection": CONNECTION,
     "training": TRAINING,
-    "toolchain": TOOLCHAIN,
+    "training_integration": TRAINING_INTEGRATION,
     "packaging": PACKAGING,
     "packaging_integration": PACKAGING_INTEGRATION,
     "deployments": DEPLOYMENT,

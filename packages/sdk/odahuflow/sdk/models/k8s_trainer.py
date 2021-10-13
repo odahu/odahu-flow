@@ -9,7 +9,7 @@ from odahuflow.sdk.models.base_model_ import Model
 from odahuflow.sdk.models.connection import Connection  # noqa: F401,E501
 from odahuflow.sdk.models.input_data_binding_dir import InputDataBindingDir  # noqa: F401,E501
 from odahuflow.sdk.models.model_training import ModelTraining  # noqa: F401,E501
-from odahuflow.sdk.models.toolchain_integration import ToolchainIntegration  # noqa: F401,E501
+from odahuflow.sdk.models.training_integration import TrainingIntegration  # noqa: F401,E501
 from odahuflow.sdk.models import util
 
 
@@ -19,7 +19,7 @@ class K8sTrainer(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, algorithm_source_connection: Connection=None, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, toolchain_integration: ToolchainIntegration=None):  # noqa: E501
+    def __init__(self, algorithm_source_connection: Connection=None, input_data: List[InputDataBindingDir]=None, model_training: ModelTraining=None, output_conn: Connection=None, training_integration: TrainingIntegration=None):  # noqa: E501
         """K8sTrainer - a model defined in Swagger
 
         :param algorithm_source_connection: The algorithm_source_connection of this K8sTrainer.  # noqa: E501
@@ -30,15 +30,15 @@ class K8sTrainer(Model):
         :type model_training: ModelTraining
         :param output_conn: The output_conn of this K8sTrainer.  # noqa: E501
         :type output_conn: Connection
-        :param toolchain_integration: The toolchain_integration of this K8sTrainer.  # noqa: E501
-        :type toolchain_integration: ToolchainIntegration
+        :param training_integration: The training_integration of this K8sTrainer.  # noqa: E501
+        :type training_integration: TrainingIntegration
         """
         self.swagger_types = {
             'algorithm_source_connection': Connection,
             'input_data': List[InputDataBindingDir],
             'model_training': ModelTraining,
             'output_conn': Connection,
-            'toolchain_integration': ToolchainIntegration
+            'training_integration': TrainingIntegration
         }
 
         self.attribute_map = {
@@ -46,14 +46,14 @@ class K8sTrainer(Model):
             'input_data': 'inputData',
             'model_training': 'modelTraining',
             'output_conn': 'outputConn',
-            'toolchain_integration': 'toolchainIntegration'
+            'training_integration': 'trainingIntegration'
         }
 
         self._algorithm_source_connection = algorithm_source_connection
         self._input_data = input_data
         self._model_training = model_training
         self._output_conn = output_conn
-        self._toolchain_integration = toolchain_integration
+        self._training_integration = training_integration
 
     @classmethod
     def from_dict(cls, dikt) -> 'K8sTrainer':
@@ -159,24 +159,24 @@ class K8sTrainer(Model):
         self._output_conn = output_conn
 
     @property
-    def toolchain_integration(self) -> ToolchainIntegration:
-        """Gets the toolchain_integration of this K8sTrainer.
+    def training_integration(self) -> TrainingIntegration:
+        """Gets the training_integration of this K8sTrainer.
 
-        Toolchain integration  # noqa: E501
+        Training integration  # noqa: E501
 
-        :return: The toolchain_integration of this K8sTrainer.
-        :rtype: ToolchainIntegration
+        :return: The training_integration of this K8sTrainer.
+        :rtype: TrainingIntegration
         """
-        return self._toolchain_integration
+        return self._training_integration
 
-    @toolchain_integration.setter
-    def toolchain_integration(self, toolchain_integration: ToolchainIntegration):
-        """Sets the toolchain_integration of this K8sTrainer.
+    @training_integration.setter
+    def training_integration(self, training_integration: TrainingIntegration):
+        """Sets the training_integration of this K8sTrainer.
 
-        Toolchain integration  # noqa: E501
+        Training integration  # noqa: E501
 
-        :param toolchain_integration: The toolchain_integration of this K8sTrainer.
-        :type toolchain_integration: ToolchainIntegration
+        :param training_integration: The training_integration of this K8sTrainer.
+        :type training_integration: TrainingIntegration
         """
 
-        self._toolchain_integration = toolchain_integration
+        self._training_integration = training_integration

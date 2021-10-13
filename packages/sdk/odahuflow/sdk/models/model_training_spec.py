@@ -20,7 +20,7 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, algorithm_source: AlgorithmSource=None, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, toolchain: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(self, algorithm_source: AlgorithmSource=None, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, training_integration: str=None, work_dir: str=None):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
         :param algorithm_source: The algorithm_source of this ModelTrainingSpec.  # noqa: E501
@@ -45,8 +45,8 @@ class ModelTrainingSpec(Model):
         :type output_connection: str
         :param resources: The resources of this ModelTrainingSpec.  # noqa: E501
         :type resources: ResourceRequirements
-        :param toolchain: The toolchain of this ModelTrainingSpec.  # noqa: E501
-        :type toolchain: str
+        :param training_integration: The training_integration of this ModelTrainingSpec.  # noqa: E501
+        :type training_integration: str
         :param work_dir: The work_dir of this ModelTrainingSpec.  # noqa: E501
         :type work_dir: str
         """
@@ -62,7 +62,7 @@ class ModelTrainingSpec(Model):
             'node_selector': Dict[str, str],
             'output_connection': str,
             'resources': ResourceRequirements,
-            'toolchain': str,
+            'training_integration': str,
             'work_dir': str
         }
 
@@ -78,7 +78,7 @@ class ModelTrainingSpec(Model):
             'node_selector': 'nodeSelector',
             'output_connection': 'outputConnection',
             'resources': 'resources',
-            'toolchain': 'toolchain',
+            'training_integration': 'trainingIntegration',
             'work_dir': 'workDir'
         }
 
@@ -93,7 +93,7 @@ class ModelTrainingSpec(Model):
         self._node_selector = node_selector
         self._output_connection = output_connection
         self._resources = resources
-        self._toolchain = toolchain
+        self._training_integration = training_integration
         self._work_dir = work_dir
 
     @classmethod
@@ -316,7 +316,7 @@ class ModelTrainingSpec(Model):
     def output_connection(self) -> str:
         """Gets the output_connection of this ModelTrainingSpec.
 
-        Name of Connection to storage where training output artifact will be stored. Permitted connection types are defined by specific toolchain  # noqa: E501
+        Name of Connection to storage where training output artifact will be stored. Permitted connection types are defined by specific training integration  # noqa: E501
 
         :return: The output_connection of this ModelTrainingSpec.
         :rtype: str
@@ -327,7 +327,7 @@ class ModelTrainingSpec(Model):
     def output_connection(self, output_connection: str):
         """Sets the output_connection of this ModelTrainingSpec.
 
-        Name of Connection to storage where training output artifact will be stored. Permitted connection types are defined by specific toolchain  # noqa: E501
+        Name of Connection to storage where training output artifact will be stored. Permitted connection types are defined by specific training integration  # noqa: E501
 
         :param output_connection: The output_connection of this ModelTrainingSpec.
         :type output_connection: str
@@ -359,27 +359,27 @@ class ModelTrainingSpec(Model):
         self._resources = resources
 
     @property
-    def toolchain(self) -> str:
-        """Gets the toolchain of this ModelTrainingSpec.
+    def training_integration(self) -> str:
+        """Gets the training_integration of this ModelTrainingSpec.
 
-        IntegrationName of toolchain  # noqa: E501
+        IntegrationName of trainer  # noqa: E501
 
-        :return: The toolchain of this ModelTrainingSpec.
+        :return: The training_integration of this ModelTrainingSpec.
         :rtype: str
         """
-        return self._toolchain
+        return self._training_integration
 
-    @toolchain.setter
-    def toolchain(self, toolchain: str):
-        """Sets the toolchain of this ModelTrainingSpec.
+    @training_integration.setter
+    def training_integration(self, training_integration: str):
+        """Sets the training_integration of this ModelTrainingSpec.
 
-        IntegrationName of toolchain  # noqa: E501
+        IntegrationName of trainer  # noqa: E501
 
-        :param toolchain: The toolchain of this ModelTrainingSpec.
-        :type toolchain: str
+        :param training_integration: The training_integration of this ModelTrainingSpec.
+        :type training_integration: str
         """
 
-        self._toolchain = toolchain
+        self._training_integration = training_integration
 
     @property
     def work_dir(self) -> str:

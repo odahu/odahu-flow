@@ -11,12 +11,12 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-from odahuflow.sdk.models import ModelTraining, ToolchainIntegration, ModelDeployment, ModelRoute, Connection, \
+from odahuflow.sdk.models import ModelTraining, TrainingIntegration, ModelDeployment, ModelRoute, Connection, \
     ModelPackaging, PackagingIntegration, InferenceService, InferenceJob
 
 ROOT_MODELS = {
     ModelTraining.__name__: ModelTraining,
-    ToolchainIntegration.__name__: ToolchainIntegration,
+    TrainingIntegration.__name__: TrainingIntegration,
     ModelDeployment.__name__: ModelDeployment,
     ModelRoute.__name__: ModelRoute,
     Connection.__name__: Connection,

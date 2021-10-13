@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package toolchain
+package training_integration
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
@@ -23,40 +23,40 @@ import (
 	"time"
 )
 
-func NewService(repo training2.ToolchainRepository) *Service {
+func NewService(repo training2.TrainingIntegrationRepository) *Service {
 	return &Service{repo: repo}
 }
 
 type Service struct {
-	repo training2.ToolchainRepository
+	repo training2.TrainingIntegrationRepository
 }
 
-func (tis *Service) GetToolchainIntegration(id string) (*training.ToolchainIntegration, error) {
-	return tis.repo.GetToolchainIntegration(id)
+func (tis *Service) GetTrainingIntegration(id string) (*training.TrainingIntegration, error) {
+	return tis.repo.GetTrainingIntegration(id)
 }
 
-func (tis *Service) GetToolchainIntegrationList(options ...filter.ListOption) (
-	[]training.ToolchainIntegration, error,
+func (tis *Service) GetTrainingIntegrationList(options ...filter.ListOption) (
+	[]training.TrainingIntegration, error,
 ) {
-	return tis.repo.GetToolchainIntegrationList(options...)
+	return tis.repo.GetTrainingIntegrationList(options...)
 }
 
-func (tis *Service) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tis *Service) CreateTrainingIntegration(md *training.TrainingIntegration) error {
 	md.CreatedAt = time.Now()
 	md.UpdatedAt = md.CreatedAt
-	return tis.repo.SaveToolchainIntegration(md)
+	return tis.repo.SaveTrainingIntegration(md)
 }
 
-func (tis *Service) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tis *Service) UpdateTrainingIntegration(md *training.TrainingIntegration) error {
 	md.UpdatedAt = time.Now()
-	oldMd, err := tis.repo.GetToolchainIntegration(md.ID)
+	oldMd, err := tis.repo.GetTrainingIntegration(md.ID)
 	if err != nil {
 		return err
 	}
 	md.CreatedAt = oldMd.CreatedAt
-	return tis.repo.UpdateToolchainIntegration(md)
+	return tis.repo.UpdateTrainingIntegration(md)
 }
 
-func (tis *Service) DeleteToolchainIntegration(id string) error {
-	return tis.repo.DeleteToolchainIntegration(id)
+func (tis *Service) DeleteTrainingIntegration(id string) error {
+	return tis.repo.DeleteTrainingIntegration(id)
 }

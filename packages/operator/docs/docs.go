@@ -475,7 +475,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Toolchain",
+                        "description": "TrainingIntegration",
                         "name": "type",
                         "in": "path"
                     },
@@ -1678,8 +1678,8 @@ var doc = `{
                     },
                     {
                         "type": "integer",
-                        "description": "Toolchain name",
-                        "name": "toolchain",
+                        "description": "TrainingIntegration name",
+                        "name": "training_integration",
                         "in": "path"
                     }
                 ],
@@ -2184,9 +2184,9 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/toolchain/integration": {
+        "/api/v1/training-integration": {
             "get": {
-                "description": "Get list of ToolchainIntegrations",
+                "description": "Get list of TrainingIntegrations",
                 "consumes": [
                     "application/json"
                 ],
@@ -2194,9 +2194,9 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Toolchain"
+                    "TrainingIntegration"
                 ],
-                "summary": "Get list of ToolchainIntegrations",
+                "summary": "Get list of TrainingIntegrations",
                 "parameters": [
                     {
                         "type": "integer",
@@ -2217,7 +2217,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ToolchainIntegration"
+                                "$ref": "#/definitions/TrainingIntegration"
                             }
                         }
                     },
@@ -2230,7 +2230,7 @@ var doc = `{
                 }
             },
             "put": {
-                "description": "Update a ToolchainIntegration. Results is updated ToolchainIntegration.",
+                "description": "Update a TrainingIntegration. Results is updated TrainingIntegration.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2238,17 +2238,17 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Toolchain"
+                    "TrainingIntegration"
                 ],
-                "summary": "Update a ToolchainIntegration",
+                "summary": "Update a TrainingIntegration",
                 "parameters": [
                     {
-                        "description": "Update a ToolchainIntegration",
+                        "description": "Update a TrainingIntegration",
                         "name": "ti",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ToolchainIntegration"
+                            "$ref": "#/definitions/TrainingIntegration"
                         }
                     }
                 ],
@@ -2256,7 +2256,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ToolchainIntegration"
+                            "$ref": "#/definitions/TrainingIntegration"
                         }
                     },
                     "400": {
@@ -2274,7 +2274,7 @@ var doc = `{
                 }
             },
             "post": {
-                "description": "Create a ToolchainIntegration. Results is created ToolchainIntegration.",
+                "description": "Create a TrainingIntegration. Results is created TrainingIntegration.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2282,17 +2282,17 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Toolchain"
+                    "TrainingIntegration"
                 ],
-                "summary": "Create a ToolchainIntegration",
+                "summary": "Create a TrainingIntegration",
                 "parameters": [
                     {
-                        "description": "Create a ToolchainIntegration",
+                        "description": "Create a TrainingIntegration",
                         "name": "ti",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ToolchainIntegration"
+                            "$ref": "#/definitions/TrainingIntegration"
                         }
                     }
                 ],
@@ -2300,7 +2300,7 @@ var doc = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/ToolchainIntegration"
+                            "$ref": "#/definitions/TrainingIntegration"
                         }
                     },
                     "400": {
@@ -2312,9 +2312,9 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/toolchain/integration/{id}": {
+        "/api/v1/training-integration/{id}": {
             "get": {
-                "description": "Get a ToolchainIntegration by id",
+                "description": "Get a TrainingIntegration by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -2322,13 +2322,13 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Toolchain"
+                    "TrainingIntegration"
                 ],
-                "summary": "Get a ToolchainIntegration",
+                "summary": "Get a TrainingIntegration",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ToolchainIntegration id",
+                        "description": "TrainingIntegration id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -2338,7 +2338,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ToolchainIntegration"
+                            "$ref": "#/definitions/TrainingIntegration"
                         }
                     },
                     "400": {
@@ -2356,7 +2356,7 @@ var doc = `{
                 }
             },
             "delete": {
-                "description": "Delete a ToolchainIntegration by id",
+                "description": "Delete a TrainingIntegration by id",
                 "consumes": [
                     "application/json"
                 ],
@@ -2364,13 +2364,13 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Toolchain"
+                    "TrainingIntegration"
                 ],
-                "summary": "Delete a ToolchainIntegration",
+                "summary": "Delete a TrainingIntegration",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "ToolchainIntegration id",
+                        "description": "TrainingIntegration id",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -3064,11 +3064,11 @@ var doc = `{
                     "description": "Kubernetes tolerations for model trainings pods",
                     "type": "string"
                 },
-                "toolchainIntegrationNamespace": {
+                "trainingIntegrationNamespace": {
                     "type": "string"
                 },
-                "toolchainIntegrationRepositoryType": {
-                    "description": "Storage backend for toolchain integrations. Available options:\n  * kubernetes\n  * postgres",
+                "trainingIntegrationRepositoryType": {
+                    "description": "Storage backend for training integrations. Available options:\n  * kubernetes\n  * postgres",
                     "type": "string"
                 }
             }
@@ -3678,10 +3678,10 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/Connection"
                 },
-                "toolchainIntegration": {
-                    "description": "Toolchain integration",
+                "trainingIntegration": {
+                    "description": "Training integration",
                     "type": "object",
-                    "$ref": "#/definitions/ToolchainIntegration"
+                    "$ref": "#/definitions/TrainingIntegration"
                 }
             }
         },
@@ -3712,7 +3712,7 @@ var doc = `{
                 }
             }
         },
-        "ToolchainIntegration": {
+        "TrainingIntegration": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3720,18 +3720,18 @@ var doc = `{
                     "type": "string"
                 },
                 "id": {
-                    "description": "Toolchain integration id",
+                    "description": "Training integration id",
                     "type": "string"
                 },
                 "spec": {
-                    "description": "Toolchain integration specification",
+                    "description": "Training integration specification",
                     "type": "object",
-                    "$ref": "#/definitions/ToolchainIntegrationSpec"
+                    "$ref": "#/definitions/TrainingIntegrationSpec"
                 },
                 "status": {
-                    "description": "Toolchain integration status",
+                    "description": "Training integration status",
                     "type": "object",
-                    "$ref": "#/definitions/ToolchainIntegrationStatus"
+                    "$ref": "#/definitions/TrainingIntegrationStatus"
                 },
                 "updatedAt": {
                     "description": "UpdatedAt",
@@ -4155,7 +4155,7 @@ var doc = `{
                     }
                 },
                 "outputConnection": {
-                    "description": "Name of Connection to storage where training output artifact will be stored.\nPermitted connection types are defined by specific toolchain",
+                    "description": "Name of Connection to storage where training output artifact will be stored.\nPermitted connection types are defined by specific training integration",
                     "type": "string"
                 },
                 "resources": {
@@ -4163,8 +4163,8 @@ var doc = `{
                     "type": "object",
                     "$ref": "#/definitions/ResourceRequirements"
                 },
-                "toolchain": {
-                    "description": "IntegrationName of toolchain",
+                "trainingIntegration": {
+                    "description": "IntegrationName of trainer",
                     "type": "string"
                 },
                 "workDir": {
@@ -4297,7 +4297,7 @@ var doc = `{
                 }
             }
         },
-        "ToolchainIntegrationSpec": {
+        "TrainingIntegrationSpec": {
             "type": "object",
             "properties": {
                 "additionalEnvironments": {
@@ -4317,7 +4317,7 @@ var doc = `{
                 }
             }
         },
-        "ToolchainIntegrationStatus": {
+        "TrainingIntegrationStatus": {
             "type": "object"
         },
         "TrainingResult": {

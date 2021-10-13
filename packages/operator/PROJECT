@@ -8,7 +8,7 @@ resources:
   kind: ModelTraining
   version: v1alpha1
 - group: odahuflow
-  kind: ToolchainIntegration
+  kind: TrainingIntegration
   version: v1alpha1
 - group: odahuflow
   kind: PackagingIntegration

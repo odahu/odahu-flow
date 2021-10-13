@@ -29,34 +29,34 @@ import (
 )
 
 const (
-	testNamespace               = "default"
-	testMtID                    = "test-mt"
-	testMtID1                   = "test-mt-id-1"
-	testMtID2                   = "test-mt-id-2"
-	testModelVersion1           = "1"
-	testModelVersion2           = "2"
-	testModelName               = "test_name"
-	testVcsReference            = "origin/develop123"
-	testToolchainIntegrationID  = "ti"
-	testToolchainIntegrationID1 = "ti-1"
-	testToolchainIntegrationID2 = "ti-2"
-	testMtEntrypoint            = "script.py"
-	testMtVCSID                 = "odahu-flow-test"
-	testToolchainMtImage        = "toolchain-image-test:123"
-	testMtImage                 = "image-test:123"
-	testMtReference             = "feat/123"
-	testModelNameFilter         = "model_name"
-	testModelVersionFilter      = "model_version"
-	testMtDataPath              = "data/path"
-	testMtOutConn               = "some-output-connection"
-	testMtOutConnDefault        = "default-output-connection"
-	testMpOutConnNotFound       = "out-conn-not-found"
+	testNamespace                  = "default"
+	testMtID                       = "test-mt"
+	testMtID1                      = "test-mt-id-1"
+	testMtID2                      = "test-mt-id-2"
+	testModelVersion1              = "1"
+	testModelVersion2              = "2"
+	testModelName                  = "test_name"
+	testVcsReference               = "origin/develop123"
+	testTrainingIntegrationID      = "ti"
+	testTrainingIntegrationID1     = "ti-1"
+	testTrainingIntegrationID2     = "ti-2"
+	testMtEntrypoint               = "script.py"
+	testMtVCSID                    = "odahu-flow-test"
+	testTrainingIntegrationMtImage = "training-integration-image-test:123"
+	testMtImage                    = "image-test:123"
+	testMtReference                = "feat/123"
+	testModelNameFilter            = "model_name"
+	testModelVersionFilter         = "model_version"
+	testMtDataPath                 = "data/path"
+	testMtOutConn                  = "some-output-connection"
+	testMtOutConnDefault           = "default-output-connection"
+	testMpOutConnNotFound          = "out-conn-not-found"
 )
 
 var (
-	db *sql.DB
+	db         *sql.DB
 	kubeClient client.Client
-	cfg *rest.Config
+	cfg        *rest.Config
 )
 
 func testMainWrapper(m *testing.M) int {

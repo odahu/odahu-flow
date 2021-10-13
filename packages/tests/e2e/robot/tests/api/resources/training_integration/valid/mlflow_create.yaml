@@ -1,4 +1,4 @@
-kind: ToolchainIntegration
+kind: TrainingIntegration
 id: mlflow-api-testing
 spec:
   entrypoint: created

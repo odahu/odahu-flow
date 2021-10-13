@@ -19,7 +19,7 @@ Test data for entity CLI commands
 import typing
 
 import click
-from odahuflow.cli.parsers import connection, training, toolchain_integration, packaging, packaging_integration, \
+from odahuflow.cli.parsers import connection, training, training_integration, packaging, packaging_integration, \
     deployment, route
 from odahuflow.sdk.clients.api import RemoteAPIClient
 from odahuflow.sdk.clients.connection import ConnectionClient
@@ -27,10 +27,10 @@ from odahuflow.sdk.clients.deployment import ModelDeploymentClient, READY_STATE
 from odahuflow.sdk.clients.packaging import ModelPackagingClient, SUCCEEDED_STATE
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient
 from odahuflow.sdk.clients.route import ModelRouteClient
-from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
+from odahuflow.sdk.clients.training_integration import TrainingIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
 from odahuflow.sdk.models import ModelTraining, Connection, ConnectionSpec, ModelTrainingSpec, ModelIdentity, \
-    ToolchainIntegration, ToolchainIntegrationSpec, ModelPackaging, ModelPackagingSpec, PackagingIntegration, \
+    TrainingIntegration, TrainingIntegrationSpec, ModelPackaging, ModelPackagingSpec, PackagingIntegration, \
     PackagingIntegrationSpec, ModelDeployment, ModelDeploymentSpec, ModelRoute, ModelRouteSpec, \
     ModelTrainingStatus, ModelPackagingStatus, ModelDeploymentStatus, ModelRouteStatus
 from odahuflow.sdk.models.base_model_ import Model
@@ -88,17 +88,17 @@ TRAINING = EntityTestData(
     'ModelTraining'
 )
 
-TOOLCHAIN = EntityTestData(
-    ToolchainIntegrationClient(),
-    ToolchainIntegration(
+TRAINING_INTEGRATION = EntityTestData(
+    TrainingIntegrationClient(),
+    TrainingIntegration(
         id=ENTITY_ID,
-        spec=ToolchainIntegrationSpec(
+        spec=TrainingIntegrationSpec(
             default_image="mock-image",
             entrypoint="default-entrypoint",
         ),
     ),
-    toolchain_integration.toolchain_integration,
-    'ToolchainIntegration',
+    training_integration.training_integration,
+    'TrainingIntegration',
 )
 
 PACKAGING = EntityTestData(

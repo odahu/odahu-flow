@@ -25,7 +25,7 @@ ABBREVIATION = {
     "pack": "packaging",
     "pi": "packaging-integration",
     "temp": "template",
-    "ti": "toolchain-integration",
+    "ti": "training-integration",
     "train": "training"
 }
 

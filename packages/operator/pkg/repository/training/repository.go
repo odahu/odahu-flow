@@ -40,16 +40,16 @@ type Repository interface {
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }
 
-type ToolchainRepository interface {
-	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
-	GetToolchainIntegrationList(options ...filter.ListOption) ([]training.ToolchainIntegration, error)
-	DeleteToolchainIntegration(name string) error
-	UpdateToolchainIntegration(md *training.ToolchainIntegration) error
-	SaveToolchainIntegration(md *training.ToolchainIntegration) error
+type TrainingIntegrationRepository interface {
+	GetTrainingIntegration(name string) (*training.TrainingIntegration, error)
+	GetTrainingIntegrationList(options ...filter.ListOption) ([]training.TrainingIntegration, error)
+	DeleteTrainingIntegration(name string) error
+	UpdateTrainingIntegration(md *training.TrainingIntegration) error
+	SaveTrainingIntegration(md *training.TrainingIntegration) error
 }
 
 type MTFilter struct {
-	Toolchain    []string `name:"toolchain" postgres:"spec->>'toolchain'"`
-	ModelName    []string `name:"model_name" postgres:"spec->'model'->>'name'"`
-	ModelVersion []string `name:"model_version" postgres:"spec->'model'->>'version'"`
+	TrainingIntegration []string `name:"training_integration" postgres:"spec->>'trainingIntegration'"`
+	ModelName           []string `name:"model_name" postgres:"spec->'model'->>'name'"`
+	ModelVersion        []string `name:"model_version" postgres:"spec->'model'->>'version'"`
 }

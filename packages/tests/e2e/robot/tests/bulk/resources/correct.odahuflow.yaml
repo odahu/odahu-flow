@@ -16,7 +16,7 @@ spec:
   description: Default GCR docker repository for model packaging
   webUILink: 'https://gcr.io/some-project/some-name'
 ---
-kind: ToolchainIntegration
+kind: TrainingIntegration
 id: bulk-test-ti-1
 spec:
   additionalEnvironments:
@@ -51,7 +51,7 @@ spec:
   model:
     name: bulk-test-mt-1
     version: 'test'
-  toolchain: mlflow
+  trainingIntegration: mlflow
   hyperParameters:
     alpha: '1.0'
   workDir: mlflow/sklearn/wine/

@@ -138,7 +138,7 @@ func (cc *controller) getDecryptedConnection(c *gin.Context) {
 // @Tags Connection
 // @Accept  json
 // @Produce  json
-// @Param type path string false "Toolchain"
+// @Param type path string false "TrainingIntegration"
 // @Param size path int false "Number of entities in a response"
 // @Param page path int false "Number of a page"
 // @Success 200 {array} connection.Connection

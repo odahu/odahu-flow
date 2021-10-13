@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	toolchainIntegrationTable   = "odahu_operator_toolchain_integration"
+	trainingIntegrationTable    = "odahu_operator_training_integration"
 	uniqueViolationPostgresCode = pq.ErrorCode("23505") // unique_violation
 )
 
@@ -19,16 +19,16 @@ var (
 	FirstPage = 0
 )
 
-type ToolchainRepo struct {
+type TrainingIntegrationRepo struct {
 	DB *sql.DB
 }
 
-func (tr ToolchainRepo) GetToolchainIntegration(name string) (*training.ToolchainIntegration, error) {
+func (tr TrainingIntegrationRepo) GetTrainingIntegration(name string) (*training.TrainingIntegration, error) {
 
-	ti := new(training.ToolchainIntegration)
+	ti := new(training.TrainingIntegration)
 
 	err := tr.DB.QueryRow(
-		fmt.Sprintf("SELECT id, spec, status, created, updated FROM %s WHERE id = $1", toolchainIntegrationTable),
+		fmt.Sprintf("SELECT id, spec, status, created, updated FROM %s WHERE id = $1", trainingIntegrationTable),
 		name,
 	).Scan(&ti.ID, &ti.Spec, &ti.Status, &ti.CreatedAt, &ti.UpdatedAt)
 
@@ -43,8 +43,8 @@ func (tr ToolchainRepo) GetToolchainIntegration(name string) (*training.Toolchai
 
 }
 
-func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption) (
-	[]training.ToolchainIntegration, error,
+func (tr TrainingIntegrationRepo) GetTrainingIntegrationList(options ...filter.ListOption) (
+	[]training.TrainingIntegration, error,
 ) {
 
 	listOptions := &filter.ListOptions{
@@ -59,7 +59,7 @@ func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption
 	offset := *listOptions.Size * (*listOptions.Page)
 
 	stmt := "SELECT id, spec, status, created, updated " +
-		"FROM odahu_operator_toolchain_integration ORDER BY id LIMIT $1 OFFSET $2"
+		"FROM odahu_operator_training_integration ORDER BY id LIMIT $1 OFFSET $2"
 
 	rows, err := tr.DB.Query(stmt, *listOptions.Size, offset)
 	if err != nil {
@@ -67,10 +67,10 @@ func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption
 	}
 	defer rows.Close()
 
-	var tis []training.ToolchainIntegration
+	var tis []training.TrainingIntegration
 
 	for rows.Next() {
-		ti := new(training.ToolchainIntegration)
+		ti := new(training.TrainingIntegration)
 		err := rows.Scan(&ti.ID, &ti.Spec, &ti.Status, &ti.CreatedAt, &ti.UpdatedAt)
 		if err != nil {
 			return nil, err
@@ -85,17 +85,17 @@ func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption
 
 }
 
-func (tr ToolchainRepo) DeleteToolchainIntegration(name string) error {
+func (tr TrainingIntegrationRepo) DeleteTrainingIntegration(name string) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
-	_, err := tr.GetToolchainIntegration(name)
+	_, err := tr.GetTrainingIntegration(name)
 	if err != nil {
 		return err
 	}
 
 	// If exists, delete it
 
-	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", toolchainIntegrationTable)
+	sqlStatement := fmt.Sprintf("DELETE FROM %s WHERE id = $1", trainingIntegrationTable)
 	_, err = tr.DB.Exec(sqlStatement, name)
 	if err != nil {
 		return err
@@ -103,10 +103,10 @@ func (tr ToolchainRepo) DeleteToolchainIntegration(name string) error {
 	return nil
 }
 
-func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tr TrainingIntegrationRepo) UpdateTrainingIntegration(md *training.TrainingIntegration) error {
 
 	// First try to check that row exists otherwise raise exception to fit interface
-	oldTi, err := tr.GetToolchainIntegration(md.ID)
+	oldTi, err := tr.GetTrainingIntegration(md.ID)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegra
 	md.Status = oldTi.Status
 
 	sqlStatement := fmt.Sprintf("UPDATE %s SET spec = $1, status = $2, updated = $3 WHERE id = $4",
-		toolchainIntegrationTable)
+		trainingIntegrationTable)
 	_, err = tr.DB.Exec(sqlStatement, md.Spec, md.Status, md.UpdatedAt, md.ID)
 	if err != nil {
 		return err
@@ -122,11 +122,11 @@ func (tr ToolchainRepo) UpdateToolchainIntegration(md *training.ToolchainIntegra
 	return nil
 }
 
-func (tr ToolchainRepo) SaveToolchainIntegration(md *training.ToolchainIntegration) error {
+func (tr TrainingIntegrationRepo) SaveTrainingIntegration(md *training.TrainingIntegration) error {
 
 	_, err := tr.DB.Exec(
 		fmt.Sprintf("INSERT INTO %s (id, spec, status, created, updated) VALUES($1, $2, $3, $4, $5)",
-			toolchainIntegrationTable),
+			trainingIntegrationTable),
 		md.ID, md.Spec, md.Status, md.CreatedAt, md.UpdatedAt,
 	)
 	if err != nil {

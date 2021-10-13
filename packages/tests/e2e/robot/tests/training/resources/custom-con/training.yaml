@@ -4,8 +4,8 @@ spec:
   model:
     name: test-training-data
     version: 1.0
-  # Toolchain integration name from TEST_DATA_TI_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
-  toolchain: training-data-helper
+  # Training integration name from TEST_DATA_TI_ID variable in "odahuflow/tests/stuff/training_stuff.sh" file
+  trainingIntegration: training-data-helper
   entrypoint: main
   workDir: "."
   hyperParameters:

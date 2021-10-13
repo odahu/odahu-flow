@@ -12,8 +12,8 @@ spec:
   - JSONPath: .status.state
     name: Status
     type: string
-  - JSONPath: .spec.toolchain
-    name: Toolchain
+  - JSONPath: .spec.trainingIntegration
+    name: TrainingIntegration
     type: string
   - JSONPath: .spec.algorithmSource
     name: Algorithm source
@@ -152,7 +152,7 @@ spec:
             outputConnection:
               description: Name of Connection to storage where training output artifact
                 will be stored. Permitted connection types are defined by specific
-                toolchain
+                training integration
               type: string
             resources:
               description: Resources for model container The same format like k8s
@@ -187,8 +187,8 @@ spec:
                       type: string
                   type: object
               type: object
-            toolchain:
-              description: IntegrationName of toolchain
+            trainingIntegration:
+              description: IntegrationName of trainer
               type: string
             workDir:
               description: Directory with model scripts/files in a git repository
@@ -197,7 +197,7 @@ spec:
           - algorithmSource
           - entrypoint
           - model
-          - toolchain
+          - trainingIntegration
           type: object
         status:
           description: ModelTrainingStatus defines the observed state of ModelTraining

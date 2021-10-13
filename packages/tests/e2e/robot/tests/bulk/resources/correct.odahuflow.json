@@ -23,7 +23,7 @@
   },
   {
     "id": "bulk-test-ti-1",
-    "kind": "ToolchainIntegration",
+    "kind": "TrainingIntegration",
     "spec": {
       "additionalEnvironments": {
         "TEST": "test"
@@ -74,7 +74,7 @@
         "name": "bulk-test-mt-1",
         "version": "test"
       },
-      "toolchain": "mlflow",
+      "trainingIntegration": "mlflow",
       "hyperParameters": {
         "alpha": "1.0"
       },

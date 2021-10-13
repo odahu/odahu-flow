@@ -1,6 +1,6 @@
 [
   {
-    "kind": "ToolchainIntegration",
+    "kind": "TrainingIntegration",
     "id": "mlflow",
     "spec": {
       "defaultImage": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:<tag>",
@@ -20,7 +20,7 @@
         "name": "wine-local",
         "version": 1
       },
-      "toolchain": "mlflow",
+      "trainingIntegration": "mlflow",
       "workDir": "packages/tests/e2e/robot/tests/local/resources/artifacts",
       "resources": {
         "limits": {

@@ -126,7 +126,7 @@ func start(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// Setup the training toolchain repository
+	// Setup the training integration repository
 	authCfg := odahuConfig.Operator.Auth
 
 	connAPI := conn_api_client.NewClient(

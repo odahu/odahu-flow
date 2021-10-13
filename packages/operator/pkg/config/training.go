@@ -32,8 +32,8 @@ var (
 
 type ModelTrainingConfig struct {
 	// Kubernetes namespace, where model trainings will be deployed
-	Namespace                     string `json:"namespace"`
-	ToolchainIntegrationNamespace string `json:"toolchainIntegrationNamespace"`
+	Namespace                    string `json:"namespace"`
+	TrainingIntegrationNamespace string `json:"trainingIntegrationNamespace"`
 	// Enable deployment API/operator
 	Enabled            bool   `json:"enabled"`
 	ServiceAccount     string `json:"serviceAccount"`
@@ -55,19 +55,19 @@ type ModelTrainingConfig struct {
 	// Default resources for training pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
 
-	// Storage backend for toolchain integrations. Available options:
+	// Storage backend for training integrations. Available options:
 	//   * kubernetes
 	//   * postgres
-	ToolchainIntegrationRepositoryType RepositoryType `json:"toolchainIntegrationRepositoryType"`
+	TrainingIntegrationRepositoryType RepositoryType `json:"trainingIntegrationRepositoryType"`
 }
 
 func NewDefaultModelTrainingConfig() ModelTrainingConfig {
 	return ModelTrainingConfig{
-		Namespace:                     "odahu-flow-training",
-		ToolchainIntegrationNamespace: "odahu-flow",
-		Enabled:                       true,
-		Timeout:                       4 * time.Hour,
-		ServiceAccount:                "odahu-flow-model-trainer",
+		Namespace:                    "odahu-flow-training",
+		TrainingIntegrationNamespace: "odahu-flow",
+		Enabled:                      true,
+		Timeout:                      4 * time.Hour,
+		ServiceAccount:               "odahu-flow-model-trainer",
 		// workaround https://github.com/spf13/viper/issues/761
 		ModelTrainerImage: os.Getenv("TRAINING_MODEL_TRAINER_IMAGE"),
 		DefaultResources: odahuflowv1alpha1.ResourceRequirements{
@@ -80,7 +80,7 @@ func NewDefaultModelTrainingConfig() ModelTrainingConfig {
 				Memory: &defaultTrainingMemoryLimit,
 			},
 		},
-		ToolchainIntegrationRepositoryType: RepositoryPostgresType,
+		TrainingIntegrationRepositoryType: RepositoryPostgresType,
 	}
 }
 

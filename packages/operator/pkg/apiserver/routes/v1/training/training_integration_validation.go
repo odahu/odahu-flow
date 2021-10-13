@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	ValidationTiErrorMessage      = "Validation of toolchain integration is failed"
+	ValidationTiErrorMessage      = "Validation of training integration is failed"
 	EmptyEntrypointErrorMessage   = "empty entrypoint"
 	EmptyDefaultImageErrorMessage = "empty defaultImage"
 )
@@ -37,7 +37,7 @@ func NewTiValidator() *TiValidator {
 	return &TiValidator{}
 }
 
-func (tiv *TiValidator) ValidatesAndSetDefaults(ti *training.ToolchainIntegration) (err error) {
+func (tiv *TiValidator) ValidatesAndSetDefaults(ti *training.TrainingIntegration) (err error) {
 	err = multierr.Append(err, validation.ValidateID(ti.ID))
 
 	if len(ti.Spec.Entrypoint) == 0 {

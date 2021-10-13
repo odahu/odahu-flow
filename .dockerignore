@@ -26,5 +26,4 @@
 !packages/sdk/**
 !packages/services/**
 !packages/tests/**
-!packages/toolchains/**
 !scripts/**

@@ -308,8 +308,8 @@ function local_setup() {
   local ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
   local pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
 
-  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" ".spec.defaultImage" "${ti_version}")
-  jq --arg image "${image}" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/toolchain_integration.json"
+  image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/training_integration.json" ".spec.defaultImage" "${ti_version}")
+  jq --arg image "${image}" '.spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/dir/training_integration.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/training_integration.json"
 
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/file/training.json" ".[0].spec.defaultImage" "${ti_version}")
   jq --arg image "$image" '.[0].spec.defaultImage=$image' "${LOCAL_TEST_DATA}/odahuflow/file/training.json" | sponge "${LOCAL_TEST_DATA}/odahuflow/file/training.json"
@@ -340,13 +340,13 @@ function local_cleanup() {
 }
 
 # Main entrypoint for setup command.
-# The function creates the model packagings and the toolchain integrations.
+# The function creates the model packagings and the training integrations.
 function setup() {
   for mp_id in "${MODEL_NAMES[@]}"; do
     pack_model "${mp_id}" &
   done
 
-  # Create training-data-helper toolchain integration
+  # Create training-data-helper training integration
   jq ".spec.defaultImage = \"${DOCKER_REGISTRY}/odahu-flow-robot-tests:${ODAHUFLOW_VERSION}\"" "${ODAHUFLOW_RESOURCES}/template.training_data_helper_ti.json" >"${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
   odahuflowctl ti delete -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json" --ignore-not-found
   odahuflowctl ti create -f "${ODAHUFLOW_RESOURCES}/training_data_helper_ti.json"
@@ -374,7 +374,7 @@ function setup() {
 }
 
 # Main entrypoint for cleanup command.
-# The function deletes the model packagings and the toolchain integrations and the pulled locally packager image
+# The function deletes the model packagings and the training integrations and the pulled locally packager image
 function cleanup() {
   for mp_id in "${MODEL_NAMES[@]}"; do
     cleanup_pack_model "${mp_id}" &

@@ -5,7 +5,7 @@ spec:
     name: wine-mlflow-not-default
     version: '1.0'
     artifactNameTemplate: 'wine-mlflow-not-default-1.0.zip'
-  toolchain: mlflow
+  trainingIntegration: mlflow
   hyperParameters:
     alpha: '1.0'
   workDir: mlflow/sklearn/wine

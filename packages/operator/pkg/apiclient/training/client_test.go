@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	training_api_client "github.com/odahu/odahu-flow/packages/operator/pkg/apiclient/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -43,12 +43,12 @@ var (
 				Version:              "model-version",
 				ArtifactNameTemplate: "",
 			},
-			Toolchain: "mlflow",
+			TrainingIntegration: "mlflow",
 		},
 	}
-	ti = &training.ToolchainIntegration{
+	ti = &training.TrainingIntegration{
 		ID: tiID,
-		Spec: v1alpha1.ToolchainIntegrationSpec{
+		Spec: v1alpha1.TrainingIntegrationSpec{
 			Entrypoint:   "/test/entrypoint",
 			DefaultImage: "default:image",
 		},
@@ -92,7 +92,7 @@ func (s *mtSuite) SetupSuite() {
 				// Must not be occurred
 				panic(err)
 			}
-		case "/api/v1/toolchain/integration/test-ti-id":
+		case "/api/v1/training-integration/test-ti-id":
 			if r.Method == http.MethodGet {
 				w.WriteHeader(http.StatusOK)
 				tiBytes, err := json.Marshal(ti)
@@ -141,14 +141,14 @@ func (s *mtSuite) TestModelTrainingNotFound() {
 	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }
 
-func (s *mtSuite) TestToolchainIntegrationGet() {
-	tiResult, err := s.mtHTTPClient.GetToolchainIntegration(tiID)
+func (s *mtSuite) TestTrainingIntegrationGet() {
+	tiResult, err := s.mtHTTPClient.GetTrainingIntegration(tiID)
 	s.g.Expect(err).ShouldNot(HaveOccurred())
 	s.g.Expect(ti).Should(Equal(tiResult))
 }
 
-func (s *mtSuite) TestToolchainIntegrationNotFound() {
-	_, err := s.mtHTTPClient.GetToolchainIntegration("ti-not-found")
+func (s *mtSuite) TestTrainingIntegrationNotFound() {
+	_, err := s.mtHTTPClient.GetTrainingIntegration("ti-not-found")
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring("not found"))
 }

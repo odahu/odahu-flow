@@ -81,10 +81,10 @@ from odahuflow.sdk.models.schema import Schema
 from odahuflow.sdk.models.service_catalog import ServiceCatalog
 from odahuflow.sdk.models.target import Target
 from odahuflow.sdk.models.target_schema import TargetSchema
-from odahuflow.sdk.models.toolchain_integration import ToolchainIntegration
-from odahuflow.sdk.models.toolchain_integration_spec import ToolchainIntegrationSpec
-from odahuflow.sdk.models.toolchain_integration_status import ToolchainIntegrationStatus
 from odahuflow.sdk.models.trainer_config import TrainerConfig
+from odahuflow.sdk.models.training_integration import TrainingIntegration
+from odahuflow.sdk.models.training_integration_spec import TrainingIntegrationSpec
+from odahuflow.sdk.models.training_integration_status import TrainingIntegrationStatus
 from odahuflow.sdk.models.training_result import TrainingResult
 from odahuflow.sdk.models.user_config import UserConfig
 from odahuflow.sdk.models.user_info import UserInfo

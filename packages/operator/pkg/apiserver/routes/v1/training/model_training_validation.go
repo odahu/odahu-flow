@@ -42,8 +42,8 @@ const (
 	EmptyDataBindingPathErrorMessage     = "you should specify local path for %d number of data binding"
 	WrongDataBindingTypeErrorMessage     = "%s data binding has wrong data type. Currently supported the following types" +
 		" of connections for data bindings: %v"
-	ToolchainEmptyErrorMessage         = "empty toolchain parameter"
-	WrongObjectStorageTypeErrorMessage = "%s object storage has wrong data type. Currently supported the following types" +
+	TrainingIntegrationEmptyErrorMessage = "empty training integration parameter"
+	WrongObjectStorageTypeErrorMessage   = "%s object storage has wrong data type. Currently supported the following types" +
 		" of connections for object storage: %v"
 	UnknownNodeSelector = "node selector %v is not presented in ODAHU config"
 )
@@ -52,19 +52,19 @@ var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
 )
 
-type toolchainGetter interface {
-	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+type trainingIntegrationGetter interface {
+	GetTrainingIntegration(name string) (*training.TrainingIntegration, error)
 }
 
 type MtValidator struct {
-	tiService       toolchainGetter
+	tiService       trainingIntegrationGetter
 	connRepository  conn_repository.Repository
 	gpuResourceName string
 	trainingConfig  config.ModelTrainingConfig
 }
 
 func NewMtValidator(
-	tiService toolchainGetter,
+	tiService trainingIntegrationGetter,
 	connRepository conn_repository.Repository,
 	trainingConfig config.ModelTrainingConfig,
 	gpuResourceName string,
@@ -84,7 +84,7 @@ func (mtv *MtValidator) ValidatesAndSetDefaults(mt *training.ModelTraining) (err
 
 	err = multierr.Append(err, mtv.validateMtData(mt))
 
-	err = multierr.Append(err, mtv.validateToolchain(mt))
+	err = multierr.Append(err, mtv.validateTrainingIntegration(mt))
 
 	err = multierr.Append(err, mtv.validateOutputConnection(mt))
 
@@ -142,18 +142,18 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 	return err
 }
 
-func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error) {
-	if len(mt.Spec.Toolchain) == 0 {
-		err = multierr.Append(err, errors.New(ToolchainEmptyErrorMessage))
+func (mtv *MtValidator) validateTrainingIntegration(mt *training.ModelTraining) (err error) {
+	if len(mt.Spec.TrainingIntegration) == 0 {
+		err = multierr.Append(err, errors.New(TrainingIntegrationEmptyErrorMessage))
 
 		return
 	}
 
-	if labelErr := validation.ValidateK8sLabel(mt.Spec.Toolchain); labelErr != nil {
-		err = multierr.Append(err, errors.New("invalid training toolchain: "+labelErr.Error()))
+	if labelErr := validation.ValidateK8sLabel(mt.Spec.TrainingIntegration); labelErr != nil {
+		err = multierr.Append(err, errors.New("invalid training integration: "+labelErr.Error()))
 	}
 
-	toolchain, k8sErr := mtv.tiService.GetToolchainIntegration(mt.Spec.Toolchain)
+	trainingIntegration, k8sErr := mtv.tiService.GetTrainingIntegration(mt.Spec.TrainingIntegration)
 	if k8sErr != nil {
 		err = multierr.Append(err, k8sErr)
 
@@ -161,9 +161,9 @@ func (mtv *MtValidator) validateToolchain(mt *training.ModelTraining) (err error
 	}
 
 	if len(mt.Spec.Image) == 0 {
-		logMT.Info("Toolchain image parameter is nil. Set the default value",
-			"name", mt.ID, "image", toolchain.Spec.DefaultImage)
-		mt.Spec.Image = toolchain.Spec.DefaultImage
+		logMT.Info("TrainingIntegration image parameter is nil. Set the default value",
+			"name", mt.ID, "image", trainingIntegration.Spec.DefaultImage)
+		mt.Spec.Image = trainingIntegration.Spec.DefaultImage
 	}
 
 	return

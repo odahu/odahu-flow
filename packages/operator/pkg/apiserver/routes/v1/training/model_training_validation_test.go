@@ -26,7 +26,7 @@ import (
 	conn_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection"
 	conn_k8s_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/connection/kubernetes"
 	mt_post_repository "github.com/odahu/odahu-flow/packages/operator/pkg/repository/training/postgres"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/training_integration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
@@ -53,8 +53,8 @@ var (
 				Name:    "model-name",
 				Version: "1",
 			},
-			OutputConnection: mtvOutputConnection,
-			Toolchain:        testToolchainIntegrationID,
+			OutputConnection:    mtvOutputConnection,
+			TrainingIntegration: testTrainingIntegrationID,
 			AlgorithmSource: v1alpha1.AlgorithmSource{
 				VCS: v1alpha1.VCS{
 					Connection: testMtVCSID,
@@ -70,7 +70,7 @@ type ModelTrainingValidationSuite struct {
 	suite.Suite
 	g              *GomegaWithT
 	validator      *train_route.MtValidator
-	tiService      toolchainService
+	tiService      trainingIntegrationService
 	connRepository conn_repository.Repository
 }
 
@@ -80,8 +80,8 @@ func (s *ModelTrainingValidationSuite) SetupTest() {
 
 func (s *ModelTrainingValidationSuite) SetupSuite() {
 
-	tiRepo := mt_post_repository.ToolchainRepo{DB: db}
-	s.tiService = toolchain.NewService(tiRepo)
+	tiRepo := mt_post_repository.TrainingIntegrationRepo{DB: db}
+	s.tiService = training_integration.NewService(tiRepo)
 	s.connRepository = conn_k8s_repository.NewRepository(testNamespace, kubeClient)
 
 	trainingConfig := config.NewDefaultModelTrainingConfig()
@@ -121,11 +121,11 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 		panic(err)
 	}
 
-	// Create the toolchain integration that will be used for a training.
-	if err := s.tiService.CreateToolchainIntegration(&training.ToolchainIntegration{
-		ID: testToolchainIntegrationID,
-		Spec: v1alpha1.ToolchainIntegrationSpec{
-			DefaultImage: testToolchainMtImage,
+	// Create the training integration that will be used for a training.
+	if err := s.tiService.CreateTrainingIntegration(&training.TrainingIntegration{
+		ID: testTrainingIntegrationID,
+		Spec: v1alpha1.TrainingIntegrationSpec{
+			DefaultImage: testTrainingIntegrationMtImage,
 		},
 	}); err != nil {
 		// If we get a panic that we have a test configuration problem
@@ -134,7 +134,7 @@ func (s *ModelTrainingValidationSuite) SetupSuite() {
 }
 
 func (s *ModelTrainingValidationSuite) TearDownSuite() {
-	if err := s.tiService.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
+	if err := s.tiService.DeleteTrainingIntegration(testTrainingIntegrationID); err != nil {
 		panic(err)
 	}
 
@@ -175,20 +175,20 @@ func (s *ModelTrainingValidationSuite) TestMtVcsReference() {
 func (s *ModelTrainingValidationSuite) TestMtMtImage() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			Toolchain: testToolchainIntegrationID,
+			TrainingIntegration: testTrainingIntegrationID,
 		},
 	}
 
 	_ = s.validator.ValidatesAndSetDefaults(mt)
-	s.g.Expect(mt.Spec.Image).To(Equal(testToolchainMtImage))
+	s.g.Expect(mt.Spec.Image).To(Equal(testTrainingIntegrationMtImage))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtMtImageExplicitly() {
 	image := "image-test"
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			Toolchain: testToolchainIntegrationID,
-			Image:     image,
+			TrainingIntegration: testTrainingIntegrationID,
+			Image:               image,
 		},
 	}
 
@@ -297,10 +297,10 @@ func (s *ModelTrainingValidationSuite) TestMtWrongObjectStorageConnectionType() 
 	s.g.Expect(err.Error()).To(ContainSubstring("object storage has wrong data type"))
 }
 
-func (s *ModelTrainingValidationSuite) TestMtToolchainType() {
+func (s *ModelTrainingValidationSuite) TestMtTrainingIntegrationType() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			Toolchain: "not-exists",
+			TrainingIntegration: "not-exists",
 		},
 	}
 
@@ -379,25 +379,25 @@ func (s *ModelTrainingValidationSuite) TestMtMultipleAlgorithmSourceName() {
 	s.g.Expect(err.Error()).To(ContainSubstring(train_route.MultipleAlgorithmSourceMessageError))
 }
 
-func (s *ModelTrainingValidationSuite) TestMtToolchainEmptyName() {
+func (s *ModelTrainingValidationSuite) TestMtTrainingIntegrationEmptyName() {
 	mt := &training.ModelTraining{
 		Spec: v1alpha1.ModelTrainingSpec{
-			Toolchain: "",
+			TrainingIntegration: "",
 		},
 	}
 
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
-	s.g.Expect(err.Error()).To(ContainSubstring(train_route.ToolchainEmptyErrorMessage))
+	s.g.Expect(err.Error()).To(ContainSubstring(train_route.TrainingIntegrationEmptyErrorMessage))
 }
 
-func (s *ModelTrainingValidationSuite) TestMtToolchain_invalid() {
+func (s *ModelTrainingValidationSuite) TestMtTrainingIntegration_invalid() {
 	mt := validTraining
-	mt.Spec.Toolchain = invalidK8sLabel
+	mt.Spec.TrainingIntegration = invalidK8sLabel
 
 	err := s.validator.ValidatesAndSetDefaults(&mt)
 	s.Assertions.Error(err)
-	s.Assertions.Contains(err.Error(), mt.Spec.Toolchain)
+	s.Assertions.Contains(err.Error(), mt.Spec.TrainingIntegration)
 }
 
 func (s *ModelTrainingValidationSuite) TestMtEmptyModelName() {

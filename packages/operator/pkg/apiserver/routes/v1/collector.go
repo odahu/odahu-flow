@@ -41,8 +41,8 @@ import (
 	mp_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/service/packaging_integration"
 	mr_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/route"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/service/toolchain"
 	mt_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/service/training_integration"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -79,8 +79,8 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		return errors.New("unexpect connection repository type")
 	}
 
-	toolchainRepo := train_repo.ToolchainRepo{DB: db}
-	toolchainService := toolchain.NewService(toolchainRepo)
+	trainingIntegrationRepo := train_repo.TrainingIntegrationRepo{DB: db}
+	trainingIntegrationService := training_integration.NewService(trainingIntegrationRepo)
 
 	trainRepo := train_repo.TrainingRepo{DB: db}
 	piRepo := pack_repo.PackagingIntegrationRepository{DB: db}
@@ -93,7 +93,7 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 
 	trainKubeClient := train_kube_client.NewClient(
 		cfg.Training.Namespace,
-		cfg.Training.ToolchainIntegrationNamespace,
+		cfg.Training.TrainingIntegrationNamespace,
 		k8sClient,
 		k8sConfig,
 	)
@@ -132,10 +132,10 @@ func SetupV1Routes(routeGroup *gin.RouterGroup, kubeMgr manager.Manager, db *sql
 		trainingRouteGroup,
 		cfg.Training,
 		cfg.Common.ResourceGPUName,
-		trainService, toolchainService, connRepository, trainKubeClient)
+		trainService, trainingIntegrationService, connRepository, trainKubeClient)
 
-	training.ConfigureToolchainRoutes(
-		trainingRouteGroup, toolchainService,
+	training.ConfigureTrainingIntegrationRoutes(
+		trainingRouteGroup, trainingIntegrationService,
 	)
 
 	configuration.ConfigureRoutes(routeGroup, cfg)

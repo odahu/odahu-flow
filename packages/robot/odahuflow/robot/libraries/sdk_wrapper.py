@@ -10,7 +10,7 @@ from odahuflow.sdk.clients.model import ModelClient
 from odahuflow.sdk.clients.packaging import ModelPackagingClient
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient
 from odahuflow.sdk.clients.route import ModelRouteClient
-from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
+from odahuflow.sdk.clients.training_integration import TrainingIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient
 from odahuflow.sdk.clients.batch_service import BatchInferenceServiceClient
 from odahuflow.sdk.clients.batch_job import BatchInferenceJobClient
@@ -223,29 +223,29 @@ class Packager:
         return PackagingIntegrationClient().delete(pi_id)
 
 
-class Toolchain:
+class TrainingIntegration:
 
     @staticmethod
-    def toolchain_get():
-        return ToolchainIntegrationClient().get_all()
+    def training_integration_get():
+        return TrainingIntegrationClient().get_all()
 
     @staticmethod
-    def toolchain_get_id(ti_id: str):
-        return ToolchainIntegrationClient().get(ti_id)
+    def training_integration_get_id(ti_id: str):
+        return TrainingIntegrationClient().get(ti_id)
 
     @staticmethod
-    def toolchain_put(payload_file):
+    def training_integration_put(payload_file):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ToolchainIntegrationClient().edit(api_object)
+        return TrainingIntegrationClient().edit(api_object)
 
     @staticmethod
-    def toolchain_post(payload_file):
+    def training_integration_post(payload_file):
         api_object = parse_resources_file_with_one_item(payload_file).resource
-        return ToolchainIntegrationClient().create(api_object)
+        return TrainingIntegrationClient().create(api_object)
 
     @staticmethod
-    def toolchain_delete(ti_id: str):
-        return ToolchainIntegrationClient().delete(ti_id)
+    def training_integration_delete(ti_id: str):
+        return TrainingIntegrationClient().delete(ti_id)
 
 
 class UserInfo:

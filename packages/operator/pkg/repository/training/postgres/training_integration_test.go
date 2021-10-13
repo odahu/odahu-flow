@@ -16,51 +16,51 @@ const (
 	tiNewEntrypoint = "new-test-entrypoint"
 )
 
-func TestToolchainRepository(t *testing.T) {
+func TestTrainingIntegrationRepository(t *testing.T) {
 
-	tRepo := postgres_repo.ToolchainRepo{DB: db}
+	tRepo := postgres_repo.TrainingIntegrationRepo{DB: db}
 
 	g := NewGomegaWithT(t)
 
-	created := &training.ToolchainIntegration{
+	created := &training.TrainingIntegration{
 		ID: tiID,
-		Spec: v1alpha1.ToolchainIntegrationSpec{
+		Spec: v1alpha1.TrainingIntegrationSpec{
 			Entrypoint: tiEntrypoint,
 		},
 	}
 
-	g.Expect(tRepo.SaveToolchainIntegration(created)).NotTo(HaveOccurred())
+	g.Expect(tRepo.SaveTrainingIntegration(created)).NotTo(HaveOccurred())
 
-	g.Expect(tRepo.SaveToolchainIntegration(created)).To(And(
+	g.Expect(tRepo.SaveTrainingIntegration(created)).To(And(
 		HaveOccurred(),
 		MatchError(odahuErrors.AlreadyExistError{Entity: tiID}),
 	))
 
-	fetched, err := tRepo.GetToolchainIntegration(tiID)
+	fetched, err := tRepo.GetTrainingIntegration(tiID)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(fetched.ID).To(Equal(created.ID))
 	g.Expect(fetched.Spec).To(Equal(created.Spec))
 
-	updated := &training.ToolchainIntegration{
+	updated := &training.TrainingIntegration{
 		ID: tiID,
-		Spec: v1alpha1.ToolchainIntegrationSpec{
+		Spec: v1alpha1.TrainingIntegrationSpec{
 			Entrypoint: tiNewEntrypoint,
 		},
 	}
-	g.Expect(tRepo.UpdateToolchainIntegration(updated)).NotTo(HaveOccurred())
+	g.Expect(tRepo.UpdateTrainingIntegration(updated)).NotTo(HaveOccurred())
 
-	fetched, err = tRepo.GetToolchainIntegration(tiID)
+	fetched, err = tRepo.GetTrainingIntegration(tiID)
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(fetched.ID).To(Equal(updated.ID))
 	g.Expect(fetched.Spec).To(Equal(updated.Spec))
 	g.Expect(fetched.Spec.Entrypoint).To(Equal(tiNewEntrypoint))
 
-	tis, err := tRepo.GetToolchainIntegrationList()
+	tis, err := tRepo.GetTrainingIntegrationList()
 	g.Expect(err).NotTo(HaveOccurred())
 	g.Expect(len(tis)).To(Equal(1))
 
-	g.Expect(tRepo.DeleteToolchainIntegration(tiID)).NotTo(HaveOccurred())
-	_, err = tRepo.GetToolchainIntegration(tiID)
+	g.Expect(tRepo.DeleteTrainingIntegration(tiID)).NotTo(HaveOccurred())
+	_, err = tRepo.GetTrainingIntegration(tiID)
 	g.Expect(err).To(And(
 		HaveOccurred(),
 		MatchError(odahuErrors.NotFoundError{Entity: tiID}),

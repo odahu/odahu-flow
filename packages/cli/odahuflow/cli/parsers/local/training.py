@@ -29,11 +29,11 @@ from odahuflow.sdk import config
 from odahuflow.sdk.clients.api_aggregated import \
     parse_resources_file, \
     parse_resources_dir, OdahuflowCloudResourceUpdatePair
-from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient
+from odahuflow.sdk.clients.training_integration import TrainingIntegrationClient
 from odahuflow.sdk.clients.training import ModelTraining, ModelTrainingClient
 from odahuflow.sdk.local.training import start_train, list_local_trainings, cleanup_local_artifacts, \
     cleanup_training_docker_containers
-from odahuflow.sdk.models import ToolchainIntegration, K8sTrainer
+from odahuflow.sdk.models import TrainingIntegration, K8sTrainer
 
 LOGGER = logging.getLogger(__name__)
 
@@ -136,10 +136,10 @@ def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], ma
     mt: Optional[ModelTraining] = None
 
     # find a training
-    toolchains: Dict[str, ToolchainIntegration] = {}
+    training_integrations: Dict[str, TrainingIntegration] = {}
     for entity in map(lambda x: x.resource, entities):
-        if isinstance(entity, ToolchainIntegration):
-            toolchains[entity.id] = entity
+        if isinstance(entity, TrainingIntegration):
+            training_integrations[entity.id] = entity
         elif isinstance(entity, ModelTraining) and entity.id == train_id:
             mt = entity
 
@@ -147,14 +147,14 @@ def run(client: ModelTrainingClient, train_id: str, manifest_file: List[str], ma
         click.echo(f'{train_id} training not found. Trying to retrieve it from API server')
         mt = client.get(train_id)
 
-    toolchain = toolchains.get(mt.spec.toolchain)
-    if not toolchain:
-        click.echo(f'{toolchain} toolchain not found. Trying to retrieve it from API server')
-        toolchain = ToolchainIntegrationClient.construct_from_other(client).get(mt.spec.toolchain)
+    training_integration = training_integrations.get(mt.spec.training_integration)
+    if not training_integration:
+        click.echo(f'{training_integration} training integration not found. Trying to retrieve it from API server')
+        training_integration = TrainingIntegrationClient.construct_from_other(client).get(mt.spec.training_integration)
 
     trainer = K8sTrainer(
         model_training=mt,
-        toolchain_integration=toolchain,
+        training_integration=training_integration,
     )
 
     start_train(trainer, output_dir)

@@ -19,7 +19,7 @@ Library             String
 Library             odahuflow.robot.libraries.sdk_wrapper.Login
 Library             odahuflow.robot.libraries.sdk_wrapper.Configuration
 Library             odahuflow.robot.libraries.sdk_wrapper.Connection
-Library             odahuflow.robot.libraries.sdk_wrapper.Toolchain
+Library             odahuflow.robot.libraries.sdk_wrapper.TrainingIntegration
 Library             odahuflow.robot.libraries.sdk_wrapper.Packager
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelTraining
 Library             odahuflow.robot.libraries.sdk_wrapper.ModelPackaging
@@ -86,11 +86,11 @@ Status Code 400 - Bad Request
     ...  connection post  ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
     ${400 BadRequest Template}  ${FailedConn} ${empty_uri}; ${ecr_empty_keyID_keySecret}
     ...  connection put   ${RES_DIR}/connection/invalid/ecr_no_required_parameters.json
-    # toolchains
+    # training integrations
     ${400 BadRequest Template}  ${FailedTI} ${TI_empty_entrypoint}; ${TI_empty_defaultImage}
-    ...  toolchain post  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.json
+    ...  training integration post  ${RES_DIR}/training_integration/invalid/training_integration_no_required_parameters.json
     ${400 BadRequest Template}  ${FailedTI} ${TI_empty_entrypoint}
-    ...  toolchain put  ${RES_DIR}/toolchain/invalid/toolchain_no_required_parameters.yaml
+    ...  training integration put  ${RES_DIR}/training_integration/invalid/training_integration_no_required_parameters.yaml
     # packagers
     ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager post  ${RES_DIR}/packager/invalid/cli_no_required_params.yaml
@@ -101,9 +101,9 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager put  ${RES_DIR}/packager/invalid/rest_no_required_params.json
     # model training
-    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${empty_toolchain}
+    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${empty_training_integration}
     ...  training post  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
-    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${empty_toolchain}
+    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${empty_training_integration}
     ...  training put  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
     # model packaging
     ${400 BadRequest Template}  ${FailedPack} ${empty_artifactName}; ${empty_integrationName}
@@ -128,10 +128,10 @@ Status Code 403 - Forbidden - Data Scientist
     [Teardown]  Remove File  ${LOCAL_CONFIG}
     # connection
     connection get id decrypted  ${VCS_CONNECTION}
-    # toolchains
-    toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
-    toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
-    toolchain delete  ${NOT_EXIST_ENTITY}
+    # training integrations
+    training integration post  ${RES_DIR}/training_integration/valid/mlflow_create.yaml
+    training integration put  ${RES_DIR}/training_integration/valid/mlflow_update.json
+    training integration delete  ${NOT_EXIST_ENTITY}
     # packagers
     packager post  ${RES_DIR}/packager/valid/docker_rest_create.json
     packager put  ${RES_DIR}/packager/valid/docker_rest_update.yaml
@@ -148,10 +148,10 @@ Status Code 403 - Forbidden - Viewer
     connection post  ${RES_DIR}/connection/valid/docker_connection_create.json
     connection put  ${RES_DIR}/connection/valid/git_connection_update.yaml
     connection delete  ${NOT_EXIST_ENTITY}
-    # toolchains
-    toolchain post  ${RES_DIR}/toolchain/valid/mlflow_create.yaml
-    toolchain put  ${RES_DIR}/toolchain/valid/mlflow_update.json
-    toolchain delete  ${NOT_EXIST_ENTITY}
+    # training integrations
+    training integration post  ${RES_DIR}/training_integration/valid/mlflow_create.yaml
+    training integration put  ${RES_DIR}/training_integration/valid/mlflow_update.json
+    training integration delete  ${NOT_EXIST_ENTITY}
     # packaging
     packaging post  ${RES_DIR}/training_packaging/valid/packaging.create.yaml
     packaging put  ${RES_DIR}/training_packaging/valid/packaging.create.yaml

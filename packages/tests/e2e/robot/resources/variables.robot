@@ -22,7 +22,7 @@ ${MP_SIMPLE_MODEL}                    simple-model
 ${MP_FAIL_MODEL}                      fail
 ${MP_COUNTER_MODEL}                   counter
 ${MP_FEEDBACK_MODEL}                  feedback
-${TOOLCHAIN_INTEGRATION}              mlflow
+${TRAINING_INTEGRATION}               mlflow
 ${PI_REST}                            docker-rest
 ${PI_CLI}                             docker-cli
 ${CONN_SECRET_MASK}                   *****
@@ -47,7 +47,7 @@ ${MissedToken}                      IncorrectAuthorizationToken: Credentials are
 
 # ---------------------------------  Validation checks  ---------------------------------
 ${FailedConn}       Validation of connection is failed:
-${FailedTI}         Validation of toolchain integration is failed:
+${FailedTI}         Validation of training integration is failed:
 ${FailedPI}         Validation of packaging integration is failed:
 ${FailedTrain}      Validation of model training is failed:
 ${FailedPack}       Validation of model packaging is failed:
@@ -62,7 +62,7 @@ ${s3_empty_keyID_keySecret}     s3 type requires that keyID and keySecret parame
 ${gcs_empty_keySecret}          gcs type requires that keySecret parameter must be non-empty
 ${azureblob_req_keySecret}      azureblob type requires that keySecret parameter contains HTTP endpoint with SAS Token
 ${ecr_empty_keyID_keySecret}    ecr type requires that keyID and keySecret parameters must be non-empty
-# ---------------------------------  toolchain  ---------------------------------
+# ---------------------------------  training integration  ---------------------------------
 ${TI_empty_entrypoint}          empty entrypoint
 ${TI_empty_defaultImage}        empty defaultImage
 # ---------------------------------  packager  ---------------------------------
@@ -72,7 +72,7 @@ ${PI_empty_defaultImage}        empty defaultImage
 ${empty_model_name}             empty model.name
 ${empty_model_version}          empty model.version
 ${empty_VCS_and_sorage}         both VCS and ObjectStorage names are empty
-${empty_toolchain}              empty toolchain parameter
+${empty_training_integration}              empty training integration parameter
 # ---------------------------------  packaging  ---------------------------------
 ${empty_artifactName}           empty artifactName
 ${empty_integrationName}        empty integrationName

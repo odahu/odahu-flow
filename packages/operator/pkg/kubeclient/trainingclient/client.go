@@ -54,9 +54,9 @@ var (
 
 func mtTransformToLabels(mt *training.ModelTraining) map[string]string {
 	return map[string]string{
-		"toolchain":     mt.Spec.Toolchain,
-		"model_name":    mt.Spec.Model.Name,
-		"model_version": mt.Spec.Model.Version,
+		"training_integration": mt.Spec.TrainingIntegration,
+		"model_name":           mt.Spec.Model.Name,
+		"model_version":        mt.Spec.Model.Version,
 	}
 }
 

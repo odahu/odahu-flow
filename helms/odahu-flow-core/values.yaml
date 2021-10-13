@@ -459,11 +459,11 @@ config:
       # Required value
       # Type: string
       # image: "odahu/odahu-flow-сli:latest"
-    # Storage backend for toolchain integrations. Available options:
+    # Storage backend for training integrations. Available options:
     #   * kubernetes
     #   * postgres
     # Type: string
-    toolchainIntegrationRepositoryType: kubernetes
+    trainingIntegrationRepositoryType: kubernetes
     # This section defines available training CPU node pools. A training request can have a nodeSelector,
     # that exactly matches a node pool to enforce the training to run on that node pool.
     # List of tags is just for user-friendly display on UI and basically optional.

@@ -23,8 +23,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ToolchainIntegrationSpec defines the desired state of ToolchainIntegration
-type ToolchainIntegrationSpec struct {
+// TrainingIntegrationSpec defines the desired state of TrainingIntegration
+type TrainingIntegrationSpec struct {
 	// Path to binary which starts a training process
 	Entrypoint string `json:"entrypoint"`
 	// Default training Docker image
@@ -33,14 +33,14 @@ type ToolchainIntegrationSpec struct {
 	AdditionalEnvironments map[string]string `json:"additionalEnvironments,omitempty"`
 }
 
-// ToolchainIntegrationStatus defines the observed state of ToolchainIntegration
-type ToolchainIntegrationStatus struct{}
+// TrainingIntegrationStatus defines the observed state of TrainingIntegration
+type TrainingIntegrationStatus struct{}
 
-func (tiSpec ToolchainIntegrationSpec) Value() (driver.Value, error) {
+func (tiSpec TrainingIntegrationSpec) Value() (driver.Value, error) {
 	return json.Marshal(tiSpec)
 }
 
-func (tiSpec *ToolchainIntegrationSpec) Scan(value interface{}) error {
+func (tiSpec *TrainingIntegrationSpec) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
@@ -49,11 +49,11 @@ func (tiSpec *ToolchainIntegrationSpec) Scan(value interface{}) error {
 	return res
 }
 
-func (tiStatus ToolchainIntegrationStatus) Value() (driver.Value, error) {
+func (tiStatus TrainingIntegrationStatus) Value() (driver.Value, error) {
 	return json.Marshal(tiStatus)
 }
 
-func (tiStatus *ToolchainIntegrationStatus) Scan(value interface{}) error {
+func (tiStatus *TrainingIntegrationStatus) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
@@ -64,24 +64,24 @@ func (tiStatus *ToolchainIntegrationStatus) Scan(value interface{}) error {
 
 // +kubebuilder:object:root=true
 
-// ToolchainIntegration is the Schema for the toolchainintegrations API
-type ToolchainIntegration struct {
+// TrainingIntegration is the Schema for the trainingintegrations API
+type TrainingIntegration struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ToolchainIntegrationSpec   `json:"spec,omitempty"`
-	Status ToolchainIntegrationStatus `json:"status,omitempty"`
+	Spec   TrainingIntegrationSpec   `json:"spec,omitempty"`
+	Status TrainingIntegrationStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ToolchainIntegrationList contains a list of ToolchainIntegration
-type ToolchainIntegrationList struct {
+// TrainingIntegrationList contains a list of TrainingIntegration
+type TrainingIntegrationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ToolchainIntegration `json:"items"`
+	Items           []TrainingIntegration `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ToolchainIntegration{}, &ToolchainIntegrationList{})
+	SchemeBuilder.Register(&TrainingIntegration{}, &TrainingIntegrationList{})
 }

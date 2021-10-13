@@ -24,9 +24,9 @@ class OdahuflowProjectManifestModel(pydantic.BaseModel):
     entrypoint: str
 
 
-class OdahuflowProjectManifestToolchain(pydantic.BaseModel):
+class OdahuflowProjectManifestTrainingIntegration(pydantic.BaseModel):
     """
-    Odahuflow Project Manifest's Toolchain description
+    Odahuflow Project Manifest's Training Integration description
     """
 
     name: str
@@ -49,5 +49,5 @@ class OdahuflowProjectManifest(pydantic.BaseModel):
     binaries: OdahuflowProjectManifestBinaries
     model: typing.Optional[OdahuflowProjectManifestModel]
     odahuflowVersion: typing.Optional[str]
-    toolchain: typing.Optional[OdahuflowProjectManifestToolchain]
+    training_integration: typing.Optional[OdahuflowProjectManifestTrainingIntegration]
     output: typing.Optional[OdahuflowProjectManifestOutput]

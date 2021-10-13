@@ -21,15 +21,15 @@ import (
 	"time"
 )
 
-type ToolchainIntegration struct {
-	// Toolchain integration id
+type TrainingIntegration struct {
+	// Training integration id
 	ID string `json:"id"`
 	// CreatedAt
 	CreatedAt time.Time `json:"createdAt,omitempty"`
 	// UpdatedAt
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
-	// Toolchain integration specification
-	Spec v1alpha1.ToolchainIntegrationSpec `json:"spec,omitempty"`
-	// Toolchain integration status
-	Status v1alpha1.ToolchainIntegrationStatus `json:"status,omitempty"`
+	// Training integration specification
+	Spec v1alpha1.TrainingIntegrationSpec `json:"spec,omitempty"`
+	// Training integration status
+	Status v1alpha1.TrainingIntegrationStatus `json:"status,omitempty"`
 }

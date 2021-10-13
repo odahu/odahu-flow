@@ -89,7 +89,7 @@ Template. Apply good profile, check resources and remove on teardown
     [Teardown]  Cleanup resources
     Check connection doesn't exist - "${CONN_1_ID}"
     Check connection doesn't exist - "${CONN_2_ID}"
-    Check toolchain-integration doesn't exist - "${TI_1_ID}"
+    Check training-integration doesn't exist - "${TI_1_ID}"
     Check packaging-integration doesn't exist - "${PI_1_ID}"
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
@@ -97,7 +97,7 @@ Template. Apply good profile, check resources and remove on teardown
     Apply bulk file and check counters     ${file}  7  0  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
-    Check toolchain-integration exists - "${TI_1_ID}"
+    Check training-integration exists - "${TI_1_ID}"
     Check packaging-integration exists - "${PI_1_ID}"
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
@@ -105,7 +105,7 @@ Template. Apply good profile, check resources and remove on teardown
     Remove bulk file and check counters    ${file}  0  0  7
     Check connection doesn't exist - "${CONN_1_ID}"
     Check connection doesn't exist - "${CONN_2_ID}"
-    Check toolchain-integration doesn't exist - "${TI_1_ID}"
+    Check training-integration doesn't exist - "${TI_1_ID}"
     Check packaging-integration doesn't exist - "${PI_1_ID}"
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
@@ -124,8 +124,8 @@ Apply changes on a good profile, remove on teardown
     [Teardown]  Cleanup resources
     Check connection doesn't exist - "${CONN_1_ID}"
     Check connection doesn't exist - "${CONN_2_ID}"
-    Check toolchain-integration doesn't exist - "${TI_1_ID}"
-    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check training-integration doesn't exist - "${TI_1_ID}"
+    Check training-integration doesn't exist - "${TI_2_ID}"
     Check packaging-integration doesn't exist - "${PI_1_ID}"
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"
@@ -134,8 +134,8 @@ Apply changes on a good profile, remove on teardown
     Apply bulk file and check counters     correct.odahuflow.yaml     7  0  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
-    Check toolchain-integration exists - "${TI_1_ID}"
-    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check training-integration exists - "${TI_1_ID}"
+    Check training-integration doesn't exist - "${TI_2_ID}"
     Check packaging-integration exists - "${PI_1_ID}"
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
@@ -144,8 +144,8 @@ Apply changes on a good profile, remove on teardown
     Apply bulk file and check counters     correct.odahuflow.json     0  7  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
-    Check toolchain-integration exists - "${TI_1_ID}"
-    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check training-integration exists - "${TI_1_ID}"
+    Check training-integration doesn't exist - "${TI_2_ID}"
     Check packaging-integration exists - "${PI_1_ID}"
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
@@ -154,8 +154,8 @@ Apply changes on a good profile, remove on teardown
     Apply bulk file and check counters     correct-v2.odahuflow.yaml  2  7  0
     Check connection exists - "${CONN_1_ID}"
     Check connection exists - "${CONN_2_ID}"
-    Check toolchain-integration exists - "${TI_1_ID}"
-    Check toolchain-integration exists - "${TI_2_ID}"
+    Check training-integration exists - "${TI_1_ID}"
+    Check training-integration exists - "${TI_2_ID}"
     Check packaging-integration exists - "${PI_1_ID}"
     Check training exists - "${TRAINING_1_NAME}"
     Check packaging exists - "${PACKAGING_1_NAME}"
@@ -164,8 +164,8 @@ Apply changes on a good profile, remove on teardown
     Remove bulk file and check counters    correct-v2.odahuflow.yaml  0  0  9
     Check connection doesn't exist - "${CONN_1_ID}"
     Check connection doesn't exist - "${CONN_2_ID}"
-    Check toolchain-integration doesn't exist - "${TI_1_ID}"
-    Check toolchain-integration doesn't exist - "${TI_2_ID}"
+    Check training-integration doesn't exist - "${TI_1_ID}"
+    Check training-integration doesn't exist - "${TI_2_ID}"
     Check packaging-integration doesn't exist - "${PI_1_ID}"
     Check training doesn't exist - "${TRAINING_1_NAME}"
     Check packaging doesn't exist - "${PACKAGING_1_NAME}"

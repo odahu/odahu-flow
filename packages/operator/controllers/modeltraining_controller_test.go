@@ -43,29 +43,29 @@ import (
 )
 
 const (
-	mtName                     = "test-mt"
-	testToolchainIntegrationID = "ti"
+	mtName                    = "test-mt"
+	testTrainingIntegrationID = "ti"
 
 	modelBuildImage = "model-image:builder"
-	toolchainImage  = "model-image:toolchain"
+	trainingImage   = "model-image:trainingIntegration"
 )
 
 var (
 	gpuNodeSelector = map[string]string{"gpu-key": "gpu-value"}
 	nodeSelector    = map[string]string{"node-key": "node-value"}
 
-	testResValue             = "5"
-	testToolchainIntegration = &training_apis.ToolchainIntegration{
-		ID: testToolchainIntegrationID,
-		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
-			DefaultImage: toolchainImage,
+	testResValue            = "5"
+	testTrainingIntegration = &training_apis.TrainingIntegration{
+		ID: testTrainingIntegrationID,
+		Spec: odahuflowv1alpha1.TrainingIntegrationSpec{
+			DefaultImage: trainingImage,
 		},
 	}
 	validTraining = odahuflowv1alpha1.ModelTraining{
 		ObjectMeta: metav1.ObjectMeta{Name: mtName, Namespace: testNamespace},
 		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			NodeSelector: nodeSelector,
-			Toolchain:    testToolchainIntegrationID,
+			NodeSelector:        nodeSelector,
+			TrainingIntegration: testTrainingIntegrationID,
 			Resources: &odahuflowv1alpha1.ResourceRequirements{
 				Limits: &odahuflowv1alpha1.ResourceList{
 					CPU: &testResValue,
@@ -105,14 +105,14 @@ func (s *ModelTrainingControllerSuite) SetupTest() {
 		s.g.Expect(mgr.Start(s.stopMgr)).NotTo(HaveOccurred())
 	}()
 
-	// Create the toolchain integration that will be used for a training.
-	if err := s.stubTIClient.CreateToolchainIntegration(testToolchainIntegration); err != nil {
+	// Create the training integration that will be used for a training.
+	if err := s.stubTIClient.CreateTrainingIntegration(testTrainingIntegration); err != nil {
 		s.T().Fatal(err)
 	}
 }
 
 func (s *ModelTrainingControllerSuite) initReconciler(trainingConfig config.ModelTrainingConfig) {
-	trainingConfig.ToolchainIntegrationNamespace = testNamespace
+	trainingConfig.TrainingIntegrationNamespace = testNamespace
 	trainingConfig.Namespace = testNamespace
 
 	cfg := config.NewDefaultConfig()
@@ -126,7 +126,7 @@ func (s *ModelTrainingControllerSuite) initReconciler(trainingConfig config.Mode
 
 func (s *ModelTrainingControllerSuite) TearDownTest() {
 
-	if err := s.stubTIClient.DeleteToolchainIntegration(testToolchainIntegrationID); err != nil {
+	if err := s.stubTIClient.DeleteTrainingIntegration(testTrainingIntegrationID); err != nil {
 		s.T().Fatal(err)
 	}
 
@@ -349,9 +349,9 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 
 	mt := newValidTraining()
 	mt.Spec = odahuflowv1alpha1.ModelTrainingSpec{
-		Image:     toolchainImage,
-		Resources: trainResources,
-		Toolchain: testToolchainIntegrationID,
+		Image:               trainingImage,
+		Resources:           trainResources,
+		TrainingIntegration: testTrainingIntegrationID,
 	}
 
 	err = s.k8sClient.Create(context.TODO(), mt)
@@ -384,10 +384,10 @@ func (s *ModelTrainingControllerSuite) TestTrainingStepConfiguration() {
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
 			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		case odahuflow.TrainerTrainStep:
-			s.g.Expect(step.Image).Should(Equal(toolchainImage))
+			s.g.Expect(step.Image).Should(Equal(trainingImage))
 			s.g.Expect(step.Resources).Should(Equal(k8sTrainerResources))
 		case odahuflow.TrainerValidationStep:
-			s.g.Expect(step.Image).Should(Equal(toolchainImage))
+			s.g.Expect(step.Image).Should(Equal(trainingImage))
 			s.g.Expect(step.Resources).Should(Equal(expectedHelperContainerResources))
 		case odahuflow.TrainerResultStep:
 			s.g.Expect(step.Image).Should(Equal(modelBuildImage))
@@ -409,7 +409,7 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 			Namespace: testNamespace,
 		},
 		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			Toolchain: testToolchainIntegrationID,
+			TrainingIntegration: testTrainingIntegrationID,
 		},
 	}
 
@@ -430,20 +430,20 @@ func (s *ModelTrainingControllerSuite) TestTrainingTimeout() {
 
 func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 	const (
-		trainingEnvKey    = "training-env-key"
-		trainingEnvValue  = "training-env-value"
-		toolchainEnvKey   = "toolchain-env-key"
-		toolchainEnvValue = "toolchain-env-value"
+		trainingEnvKey              = "training-env-key"
+		trainingEnvValue            = "training-env-value"
+		trainingIntegrationEnvKey   = "training-integrationenv-key"
+		trainingIntegrationEnvValue = "training-integration-env-value"
 	)
 
 	s.initReconciler(config.NewDefaultModelTrainingConfig())
 
-	ti := &training_apis.ToolchainIntegration{
-		ID: testToolchainIntegrationID,
-		Spec: odahuflowv1alpha1.ToolchainIntegrationSpec{
-			DefaultImage: toolchainImage,
+	ti := &training_apis.TrainingIntegration{
+		ID: testTrainingIntegrationID,
+		Spec: odahuflowv1alpha1.TrainingIntegrationSpec{
+			DefaultImage: trainingImage,
 			AdditionalEnvironments: map[string]string{
-				toolchainEnvKey: toolchainEnvValue,
+				trainingIntegrationEnvKey: trainingIntegrationEnvValue,
 			},
 		},
 	}
@@ -454,17 +454,17 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 			Namespace: testNamespace,
 		},
 		Spec: odahuflowv1alpha1.ModelTrainingSpec{
-			Toolchain: testToolchainIntegrationID,
+			TrainingIntegration: testTrainingIntegrationID,
 			CustomEnvs: []odahuflowv1alpha1.EnvironmentVariable{
 				{Name: trainingEnvKey, Value: trainingEnvValue},
 			},
 		},
 	}
 
-	// Recreate the toolchain integration
-	err := s.stubTIClient.DeleteToolchainIntegration(testToolchainIntegrationID)
+	// Recreate the training integration
+	err := s.stubTIClient.DeleteTrainingIntegration(testTrainingIntegrationID)
 	s.g.Expect(err).NotTo(HaveOccurred())
-	err = s.stubTIClient.CreateToolchainIntegration(ti)
+	err = s.stubTIClient.CreateTrainingIntegration(ti)
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	err = s.k8sClient.Create(context.TODO(), mt)
@@ -481,9 +481,9 @@ func (s *ModelTrainingControllerSuite) TestTrainingEnvs() {
 
 	// second container is the training container
 	envs := tr.Spec.TaskSpec.Steps[1].Env
-	// first envs must be toolchains envs, then training envs
+	// first envs must be training integrations envs, then training envs
 	s.g.Expect(envs).Should(Equal([]v1.EnvVar{
-		{Name: toolchainEnvKey, Value: toolchainEnvValue},
+		{Name: trainingIntegrationEnvKey, Value: trainingIntegrationEnvValue},
 		{Name: trainingEnvKey, Value: trainingEnvValue},
 	}))
 }

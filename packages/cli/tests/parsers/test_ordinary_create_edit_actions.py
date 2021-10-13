@@ -23,14 +23,14 @@ from click.testing import CliRunner
 from odahuflow.cli.utils.output import JSON_OUTPUT_FORMAT, \
     JSONPATH_OUTPUT_FORMAT
 
-from .data import ENTITY_ID, EntityTestData, PACKAGING_INTEGRATION, TOOLCHAIN, CONNECTION, \
+from .data import ENTITY_ID, EntityTestData, PACKAGING_INTEGRATION, TRAINING_INTEGRATION, CONNECTION, \
     generate_entities_for_test
 
 WRONG_OUTPUT_FORMAT = 'wrong-format'
 
 ENTITY_TEST_DATA: typing.Dict[str, EntityTestData] = {
     "connection": CONNECTION,
-    "toolchain": TOOLCHAIN,
+    "training_integration": TRAINING_INTEGRATION,
     "packaging_integration": PACKAGING_INTEGRATION,
 }
 

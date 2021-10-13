@@ -534,11 +534,11 @@ definitions:
       tolerations:
         description: Kubernetes tolerations for model trainings pods
         type: string
-      toolchainIntegrationNamespace:
+      trainingIntegrationNamespace:
         type: string
-      toolchainIntegrationRepositoryType:
+      trainingIntegrationRepositoryType:
         description: |-
-          Storage backend for toolchain integrations. Available options:
+          Storage backend for training integrations. Available options:
             * kubernetes
             * postgres
         type: string
@@ -1010,9 +1010,9 @@ definitions:
         $ref: '#/definitions/Connection'
         description: Connection for trained model artifact
         type: object
-      toolchainIntegration:
-        $ref: '#/definitions/ToolchainIntegration'
-        description: Toolchain integration
+      trainingIntegration:
+        $ref: '#/definitions/TrainingIntegration'
+        description: Training integration
         type: object
     type: object
   ModelTraining:
@@ -1035,21 +1035,21 @@ definitions:
         description: UpdatedAt
         type: string
     type: object
-  ToolchainIntegration:
+  TrainingIntegration:
     properties:
       createdAt:
         description: CreatedAt
         type: string
       id:
-        description: Toolchain integration id
+        description: Training integration id
         type: string
       spec:
-        $ref: '#/definitions/ToolchainIntegrationSpec'
-        description: Toolchain integration specification
+        $ref: '#/definitions/TrainingIntegrationSpec'
+        description: Training integration specification
         type: object
       status:
-        $ref: '#/definitions/ToolchainIntegrationStatus'
-        description: Toolchain integration status
+        $ref: '#/definitions/TrainingIntegrationStatus'
+        description: Training integration status
         type: object
       updatedAt:
         description: UpdatedAt
@@ -1383,7 +1383,7 @@ definitions:
       outputConnection:
         description: |-
           Name of Connection to storage where training output artifact will be stored.
-          Permitted connection types are defined by specific toolchain
+          Permitted connection types are defined by specific training integration
         type: string
       resources:
         $ref: '#/definitions/ResourceRequirements'
@@ -1391,8 +1391,8 @@ definitions:
           Resources for model container
           The same format like k8s uses for pod resources.
         type: object
-      toolchain:
-        description: IntegrationName of toolchain
+      trainingIntegration:
+        description: IntegrationName of trainer
         type: string
       workDir:
         description: Directory with model scripts/files in a git repository
@@ -1486,7 +1486,7 @@ definitions:
       required:
         type: boolean
     type: object
-  ToolchainIntegrationSpec:
+  TrainingIntegrationSpec:
     properties:
       additionalEnvironments:
         additionalProperties:
@@ -1500,7 +1500,7 @@ definitions:
         description: Path to binary which starts a training process
         type: string
     type: object
-  ToolchainIntegrationStatus:
+  TrainingIntegrationStatus:
     type: object
   TrainingResult:
     properties:
@@ -1823,7 +1823,7 @@ paths:
       - application/json
       description: Get list of Connections
       parameters:
-      - description: Toolchain
+      - description: TrainingIntegration
         in: path
         name: type
         type: string
@@ -2616,9 +2616,9 @@ paths:
         in: path
         name: model_version
         type: integer
-      - description: Toolchain name
+      - description: TrainingIntegration name
         in: path
-        name: toolchain
+        name: training_integration
         type: integer
       produces:
       - application/json
@@ -2954,11 +2954,11 @@ paths:
       summary: Get a PackagingIntegration
       tags:
       - Packager
-  /api/v1/toolchain/integration:
+  /api/v1/training-integration:
     get:
       consumes:
       - application/json
-      description: Get list of ToolchainIntegrations
+      description: Get list of TrainingIntegrations
       parameters:
       - description: Number of entities in a response
         in: path
@@ -2975,58 +2975,58 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/ToolchainIntegration'
+              $ref: '#/definitions/TrainingIntegration'
             type: array
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: Get list of ToolchainIntegrations
+      summary: Get list of TrainingIntegrations
       tags:
-      - Toolchain
+      - TrainingIntegration
     post:
       consumes:
       - application/json
-      description: Create a ToolchainIntegration. Results is created ToolchainIntegration.
+      description: Create a TrainingIntegration. Results is created TrainingIntegration.
       parameters:
-      - description: Create a ToolchainIntegration
+      - description: Create a TrainingIntegration
         in: body
         name: ti
         required: true
         schema:
-          $ref: '#/definitions/ToolchainIntegration'
+          $ref: '#/definitions/TrainingIntegration'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/ToolchainIntegration'
+            $ref: '#/definitions/TrainingIntegration'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: Create a ToolchainIntegration
+      summary: Create a TrainingIntegration
       tags:
-      - Toolchain
+      - TrainingIntegration
     put:
       consumes:
       - application/json
-      description: Update a ToolchainIntegration. Results is updated ToolchainIntegration.
+      description: Update a TrainingIntegration. Results is updated TrainingIntegration.
       parameters:
-      - description: Update a ToolchainIntegration
+      - description: Update a TrainingIntegration
         in: body
         name: ti
         required: true
         schema:
-          $ref: '#/definitions/ToolchainIntegration'
+          $ref: '#/definitions/TrainingIntegration'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ToolchainIntegration'
+            $ref: '#/definitions/TrainingIntegration'
         "400":
           description: Bad Request
           schema:
@@ -3035,16 +3035,16 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: Update a ToolchainIntegration
+      summary: Update a TrainingIntegration
       tags:
-      - Toolchain
-  /api/v1/toolchain/integration/{id}:
+      - TrainingIntegration
+  /api/v1/training-integration/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete a ToolchainIntegration by id
+      description: Delete a TrainingIntegration by id
       parameters:
-      - description: ToolchainIntegration id
+      - description: TrainingIntegration id
         in: path
         name: id
         required: true
@@ -3064,15 +3064,15 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: Delete a ToolchainIntegration
+      summary: Delete a TrainingIntegration
       tags:
-      - Toolchain
+      - TrainingIntegration
     get:
       consumes:
       - application/json
-      description: Get a ToolchainIntegration by id
+      description: Get a TrainingIntegration by id
       parameters:
-      - description: ToolchainIntegration id
+      - description: TrainingIntegration id
         in: path
         name: id
         required: true
@@ -3083,7 +3083,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ToolchainIntegration'
+            $ref: '#/definitions/TrainingIntegration'
         "400":
           description: Bad Request
           schema:
@@ -3092,9 +3092,9 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/HTTPResult'
-      summary: Get a ToolchainIntegration
+      summary: Get a TrainingIntegration
       tags:
-      - Toolchain
+      - TrainingIntegration
   /api/v1/user/info:
     get:
       consumes:

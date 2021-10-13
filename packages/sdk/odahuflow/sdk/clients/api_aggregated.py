@@ -31,12 +31,12 @@ from odahuflow.sdk.clients.deployment import ModelDeploymentClient, ModelDeploym
 from odahuflow.sdk.clients.packaging import ModelPackagingClient, AsyncModelPackagingClient
 from odahuflow.sdk.clients.packaging_integration import PackagingIntegrationClient, AsyncPackagingIntegrationClient
 from odahuflow.sdk.clients.route import ModelRoute, ModelRouteClient, AsyncModelRouteClient
-from odahuflow.sdk.clients.toolchain_integration import ToolchainIntegrationClient, AsyncToolchainIntegrationClient
+from odahuflow.sdk.clients.training_integration import TrainingIntegrationClient, AsyncTrainingIntegrationClient
 from odahuflow.sdk.clients.training import ModelTrainingClient, ModelTraining, AsyncModelTrainingClient
 from odahuflow.sdk.clients.batch_service import InferenceService, BatchInferenceServiceClient, \
     AsyncBatchInferenceServiceClient
 from odahuflow.sdk.clients.batch_job import InferenceJob, BatchInferenceJobClient, AsyncBatchInferenceJobClient
-from odahuflow.sdk.models import Connection, ToolchainIntegration, ModelPackaging, PackagingIntegration
+from odahuflow.sdk.models import Connection, TrainingIntegration, ModelPackaging, PackagingIntegration
 from odahuflow.sdk.root_models import ROOT_MODELS
 
 LOGGER = logging.getLogger(__name__)
@@ -93,8 +93,8 @@ def build_client(resource: OdahuflowCloudResourceUpdatePair, api_client: RemoteA
         return ModelDeploymentClient.construct_from_other(api_client)
     elif isinstance(resource.resource, Connection):
         return ConnectionClient.construct_from_other(api_client)
-    elif isinstance(resource.resource, ToolchainIntegration):
-        return ToolchainIntegrationClient.construct_from_other(api_client)
+    elif isinstance(resource.resource, TrainingIntegration):
+        return TrainingIntegrationClient.construct_from_other(api_client)
     elif isinstance(resource.resource, ModelRoute):
         return ModelRouteClient.construct_from_other(api_client)
     elif isinstance(resource.resource, ModelPackaging):
@@ -126,8 +126,8 @@ def build_async_client(resource: OdahuflowCloudResourceUpdatePair,
         return AsyncModelDeploymentClient.construct_from_other(async_api_client)
     elif isinstance(resource.resource, Connection):
         return AsyncConnectionClient.construct_from_other(async_api_client)
-    elif isinstance(resource.resource, ToolchainIntegration):
-        return AsyncToolchainIntegrationClient.construct_from_other(async_api_client)
+    elif isinstance(resource.resource, TrainingIntegration):
+        return AsyncTrainingIntegrationClient.construct_from_other(async_api_client)
     elif isinstance(resource.resource, ModelRoute):
         return AsyncModelRouteClient.construct_from_other(async_api_client)
     elif isinstance(resource.resource, ModelPackaging):

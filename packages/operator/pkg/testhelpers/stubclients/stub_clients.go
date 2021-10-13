@@ -9,12 +9,12 @@ import (
 )
 
 type TIStubClient struct {
-	db map[string]training.ToolchainIntegration
+	db map[string]training.TrainingIntegration
 }
 
 func NewTIStubClient() TIStubClient {
 	return TIStubClient{
-		db: make(map[string]training.ToolchainIntegration),
+		db: make(map[string]training.TrainingIntegration),
 	}
 }
 
@@ -26,7 +26,7 @@ func (t TIStubClient) SaveModelTrainingResult(id string, result *v1alpha1.Traini
 	panic("implement me")
 }
 
-func (t TIStubClient) GetToolchainIntegration(name string) (*training.ToolchainIntegration, error) {
+func (t TIStubClient) GetTrainingIntegration(name string) (*training.TrainingIntegration, error) {
 	entity, ok := t.db[name]
 	if !ok {
 		return nil, errors.NotFoundError{Entity: name}
@@ -34,20 +34,20 @@ func (t TIStubClient) GetToolchainIntegration(name string) (*training.ToolchainI
 	return &entity, nil
 }
 
-func (t TIStubClient) DeleteToolchainIntegration(name string) error {
-	if _, err := t.GetToolchainIntegration(name); err != nil {
+func (t TIStubClient) DeleteTrainingIntegration(name string) error {
+	if _, err := t.GetTrainingIntegration(name); err != nil {
 		return err
 	}
 	delete(t.db, name)
 	return nil
 }
 
-func (t TIStubClient) UpdateToolchainIntegration(md *training.ToolchainIntegration) error {
+func (t TIStubClient) UpdateTrainingIntegration(md *training.TrainingIntegration) error {
 	panic("implement me")
 }
 
-func (t TIStubClient) CreateToolchainIntegration(md *training.ToolchainIntegration) error {
-	t.db[md.ID] = training.ToolchainIntegration{
+func (t TIStubClient) CreateTrainingIntegration(md *training.TrainingIntegration) error {
+	t.db[md.ID] = training.TrainingIntegration{
 		ID:     md.ID,
 		Spec:   md.Spec,
 		Status: md.Status,

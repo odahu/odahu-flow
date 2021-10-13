@@ -102,7 +102,7 @@ func (mtc *ModelTrainingController) getMT(c *gin.Context) {
 // @Param page path int false "Number of a page"
 // @Param model_name path int false "Model name"
 // @Param model_version path int false "Model version"
-// @Param toolchain path int false "Toolchain name"
+// @Param training_integration path int false "TrainingIntegration name"
 // @Success 200 {array} training.ModelTraining
 // @Failure 400 {object} httputil.HTTPResult
 // @Router /api/v1/model/training [get]

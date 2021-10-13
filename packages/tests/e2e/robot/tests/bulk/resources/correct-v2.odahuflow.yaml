@@ -14,7 +14,7 @@ spec:
   type: git
   uri: git@github.com:odahu-flow-platform/odahuflow.git
 ---
-kind: ToolchainIntegration
+kind: TrainingIntegration
 id: bulk-test-ti-1
 spec:
   additionalEnvironments:
@@ -22,7 +22,7 @@ spec:
   defaultImage: image:123
   entrypoint: "/binary"
 ---
-kind: ToolchainIntegration
+kind: TrainingIntegration
 id: bulk-test-ti-2
 spec:
   additionalEnvironments:
@@ -57,7 +57,7 @@ spec:
   model:
     name: bulk-test-mt-1
     version: 'test'
-  toolchain: mlflow
+  trainingIntegration: mlflow
   algorithmSource:
     vcs:
       connection: odahu-flow-examples

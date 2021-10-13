@@ -353,7 +353,7 @@ def main():
         except ImportError as exc_info:
             raise ImportError(
                 'ImportError usually happens when you have not packed all required dependencies for your model.'
-                'Please see your Training Toolchain documentation to get more info about packing your '
+                'Please see your Training Integration documentation to get more info about packing your '
                 'model script dependencies'
             ) from exc_info
 

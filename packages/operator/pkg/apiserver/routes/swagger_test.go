@@ -80,5 +80,5 @@ func (s *SwaggerRouteSuite) TestAPISwaggerDefinition() {
 	s.g.Expect(w.Body.String()).Should(ContainSubstring("Connection"))
 	s.g.Expect(w.Body.String()).Should(ContainSubstring("put"))
 	s.g.Expect(w.Body.String()).Should(ContainSubstring("logs"))
-	s.g.Expect(w.Body.String()).Should(ContainSubstring("ToolchainIntegration"))
+	s.g.Expect(w.Body.String()).Should(ContainSubstring("TrainingIntegration"))
 }

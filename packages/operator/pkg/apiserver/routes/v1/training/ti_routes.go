@@ -20,19 +20,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ConfigureToolchainRoutes(
+func ConfigureTrainingIntegrationRoutes(
 	routeGroup *gin.RouterGroup,
-	tiService toolchainService,
+	tiService trainingIntegrationService,
 ) {
 
-	tiController := &ToolchainIntegrationController{
+	tiController := &TrainingIntegrationController{
 		service:   tiService,
 		validator: NewTiValidator(),
 	}
 
-	routeGroup.GET(GetToolchainIntegrationURL, tiController.getToolchainIntegration)
-	routeGroup.GET(GetAllToolchainIntegrationURL, tiController.getAllToolchainIntegrations)
-	routeGroup.POST(CreateToolchainIntegrationURL, tiController.createToolchainIntegration)
-	routeGroup.PUT(UpdateToolchainIntegrationURL, tiController.updateToolchainIntegration)
-	routeGroup.DELETE(DeleteToolchainIntegrationURL, tiController.deleteToolchainIntegration)
+	routeGroup.GET(GetTrainingIntegrationURL, tiController.getTrainingIntegration)
+	routeGroup.GET(GetAllTrainingIntegrationURL, tiController.getAllTrainingIntegrations)
+	routeGroup.POST(CreateTrainingIntegrationURL, tiController.createTrainingIntegration)
+	routeGroup.PUT(UpdateTrainingIntegrationURL, tiController.updateTrainingIntegration)
+	routeGroup.DELETE(DeleteTrainingIntegrationURL, tiController.deleteTrainingIntegration)
 }

@@ -49,12 +49,12 @@ def compile_artifact_name_template(go_template: str, context: TemplateContext) -
 def launch_training_container(trainer: K8sTrainer, output_dir: str) -> None:
     client = docker.from_env()
     container: Container = client.containers.run(
-        trainer.model_training.spec.image or trainer.toolchain_integration.spec.default_image,
+        trainer.model_training.spec.image or trainer.training_integration.spec.default_image,
         stderr=True,
         stdout=True,
         working_dir=WORKSPACE_PATH,
         command=[
-            trainer.toolchain_integration.spec.entrypoint,
+            trainer.training_integration.spec.entrypoint,
             "--verbose",
             "--mt",
             # specified path for Docker Linux Container ignoring OS

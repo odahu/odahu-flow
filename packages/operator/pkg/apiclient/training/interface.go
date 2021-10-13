@@ -8,5 +8,5 @@ import (
 type Client interface {
 	GetModelTraining(id string) (*training.ModelTraining, error)
 	SaveModelTrainingResult(id string, result *v1alpha1.TrainingResult) error
-	GetToolchainIntegration(name string) (*training.ToolchainIntegration, error)
+	GetTrainingIntegration(name string) (*training.TrainingIntegration, error)
 }

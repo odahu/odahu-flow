@@ -39,6 +39,6 @@ type K8sTrainer struct {
 	OutputConn *connection.Connection `json:"outputConn"`
 	// Model training
 	ModelTraining *ModelTraining `json:"modelTraining"`
-	// Toolchain integration
-	ToolchainIntegration *ToolchainIntegration `json:"toolchainIntegration"`
+	// Training integration
+	TrainingIntegration *TrainingIntegration `json:"trainingIntegration"`
 }

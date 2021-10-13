@@ -64,8 +64,8 @@ type AlgorithmSource struct {
 type ModelTrainingSpec struct {
 	// Model Identity
 	Model ModelIdentity `json:"model"`
-	// IntegrationName of toolchain
-	Toolchain string `json:"toolchain"`
+	// IntegrationName of trainer
+	TrainingIntegration string `json:"trainingIntegration"`
 	// Custom environment variables that should be set before entrypoint invocation.
 	CustomEnvs []EnvironmentVariable `json:"envs,omitempty"`
 	// Model training hyperParameters in parameter:value format
@@ -78,7 +78,7 @@ type ModelTrainingSpec struct {
 	// AlgorithmSource for training
 	AlgorithmSource AlgorithmSource `json:"algorithmSource"`
 	// Name of Connection to storage where training output artifact will be stored.
-	// Permitted connection types are defined by specific toolchain
+	// Permitted connection types are defined by specific training integration
 	OutputConnection string `json:"outputConnection,omitempty"`
 	// Train image
 	Image string `json:"image,omitempty"`
@@ -165,7 +165,7 @@ func (in *ModelTrainingStatus) Scan(value interface{}) error {
 
 // ModelTraining is the Schema for the modeltrainings API
 // +kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.state"
-// +kubebuilder:printcolumn:name="Toolchain",type="string",JSONPath=".spec.toolchain"
+// +kubebuilder:printcolumn:name="TrainingIntegration",type="string",JSONPath=".spec.trainingIntegration"
 // +kubebuilder:printcolumn:name="Algorithm source",type="string",JSONPath=".spec.algorithmSource"
 // +kubebuilder:printcolumn:name="Model name",type="string",JSONPath=".spec.model.name"
 // +kubebuilder:printcolumn:name="Model version",type="string",JSONPath=".spec.model.version"

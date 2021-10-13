@@ -13,7 +13,7 @@ from odahuflow.cli.parsers.local import training
 from odahuflow.sdk.gppi.executor import PROJECT_FILE
 from odahuflow.sdk.local import training as training_sdk
 from odahuflow.sdk.local.training import MODEL_OUTPUT_CONTAINER_PATH
-from odahuflow.sdk.models import ModelTraining, ToolchainIntegration, ModelTrainingSpec
+from odahuflow.sdk.models import ModelTraining, TrainingIntegration, ModelTrainingSpec
 
 
 def test_list_local_trainings(tmpdir):
@@ -62,19 +62,20 @@ def test_local_training_relative_output_dir(mocker: MockFixture, cli_runner: Cli
         temp_dir_path = pathlib.Path(temp_dir)
         training_yml = temp_dir_path / 'training.yml'
         training_yml.write_text(json.dumps(
-            {**ModelTraining(id='training1', spec=ModelTrainingSpec(toolchain='toolchain1')).to_dict(),
-             **{'kind': 'ModelTraining'}}))
+            {**ModelTraining(
+                id='training1', spec=ModelTrainingSpec(training_integration='training_integration1')
+            ).to_dict(), **{'kind': 'ModelTraining'}}))
 
-        toolchain_yml = temp_dir_path / 'toolchain.yml'
-        toolchain_yml.write_text(json.dumps({**ToolchainIntegration(id='toolchain1').to_dict(),
-                                             **{'kind': 'ToolchainIntegration'}}))
+        training_integration_yml = temp_dir_path / 'training_integration.yml'
+        training_integration_yml.write_text(json.dumps({**TrainingIntegration(id='training_integration1').to_dict(),
+                                             **{'kind': 'TrainingIntegration'}}))
 
         temp_dir_relative_path: str = os.path.relpath(temp_dir_path)
 
         result: Result = cli_runner.invoke(
             training.training_group,
             ['run', '--output-dir', temp_dir_relative_path, '--manifest-file', str(training_yml),
-             '--manifest-file', str(toolchain_yml), '--id', 'training1'],
+             '--manifest-file', str(training_integration_yml), '--id', 'training1'],
             obj=api_client)
 
         assert result.exit_code == 0, f'command invocation ended with exit code {result.exit_code}'

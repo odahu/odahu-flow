@@ -19,34 +19,34 @@ package training_test
 import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"
-	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	train_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/training"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-type ToolchainIntegrationValidationSuite struct {
+type TrainingIntegrationValidationSuite struct {
 	suite.Suite
 	g         *GomegaWithT
 	validator *train_route.TiValidator
 }
 
-func (s *ToolchainIntegrationValidationSuite) SetupTest() {
+func (s *TrainingIntegrationValidationSuite) SetupTest() {
 	s.g = NewGomegaWithT(s.T())
 }
 
-func (s *ToolchainIntegrationValidationSuite) SetupSuite() {
+func (s *TrainingIntegrationValidationSuite) SetupSuite() {
 	s.validator = train_route.NewTiValidator()
 }
 
-func TestToolchainIntegrationValidationSuite(t *testing.T) {
-	suite.Run(t, new(ToolchainIntegrationValidationSuite))
+func TestTrainingIntegrationValidationSuite(t *testing.T) {
+	suite.Run(t, new(TrainingIntegrationValidationSuite))
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestTiEntrypointEmpty() {
-	ti := &training.ToolchainIntegration{
-		Spec: v1alpha1.ToolchainIntegrationSpec{},
+func (s *TrainingIntegrationValidationSuite) TestTiEntrypointEmpty() {
+	ti := &training.TrainingIntegration{
+		Spec: v1alpha1.TrainingIntegrationSpec{},
 	}
 
 	err := s.validator.ValidatesAndSetDefaults(ti)
@@ -54,9 +54,9 @@ func (s *ToolchainIntegrationValidationSuite) TestTiEntrypointEmpty() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(train_route.EmptyEntrypointErrorMessage))
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestTiDefaultImageEmpty() {
-	ti := &training.ToolchainIntegration{
-		Spec: v1alpha1.ToolchainIntegrationSpec{},
+func (s *TrainingIntegrationValidationSuite) TestTiDefaultImageEmpty() {
+	ti := &training.TrainingIntegration{
+		Spec: v1alpha1.TrainingIntegrationSpec{},
 	}
 
 	err := s.validator.ValidatesAndSetDefaults(ti)
@@ -64,8 +64,8 @@ func (s *ToolchainIntegrationValidationSuite) TestTiDefaultImageEmpty() {
 	s.g.Expect(err.Error()).Should(ContainSubstring(train_route.EmptyDefaultImageErrorMessage))
 }
 
-func (s *ToolchainIntegrationValidationSuite) TestValidateID() {
-	ti := &training.ToolchainIntegration{
+func (s *TrainingIntegrationValidationSuite) TestValidateID() {
+	ti := &training.TrainingIntegration{
 		ID: "not-VALID-id-",
 	}
 

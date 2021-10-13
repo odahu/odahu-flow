@@ -1,9 +1,7 @@
 {
-  "kind": "ToolchainIntegration",
-  "id": "mlflow-api-testing",
+  "kind": "TrainingIntegration",
+  "id": "training-integration-json-no-required-params",
   "spec": {
-    "entrypoint": "updated",
-    "defaultImage": "updated",
     "additionalEnvironments": {
       "MLFLOW_TRACKING_URI": "http://mlflow.odahu-flow.svc.cluster.local"
     }

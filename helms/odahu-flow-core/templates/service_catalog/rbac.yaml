@@ -209,7 +209,7 @@ rules:
   - apiGroups:
       - odahuflow.odahu.org
     resources:
-      - toolchainintegrations
+      - trainingintegrations
     verbs:
       - get
       - list
@@ -221,7 +221,7 @@ rules:
   - apiGroups:
       - odahuflow.odahu.org
     resources:
-      - toolchainintegrations/status
+      - trainingintegrations/status
     verbs:
       - get
       - update

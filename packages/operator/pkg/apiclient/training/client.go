@@ -137,21 +137,21 @@ func (c *trainingAPIClient) SaveModelTrainingResult(
 	return nil
 }
 
-func (c *trainingAPIClient) GetToolchainIntegration(id string) (ti *training.ToolchainIntegration, err error) {
+func (c *trainingAPIClient) GetTrainingIntegration(id string) (ti *training.TrainingIntegration, err error) {
 	tiLogger := wrapMtLogger(id)
 
 	response, err := c.DoRequest(
 		http.MethodGet,
-		strings.Replace("/toolchain/integration/:id", ":id", id, 1),
+		strings.Replace("/training-integration/:id", ":id", id, 1),
 		nil,
 	)
 	if err != nil {
-		tiLogger.Error(err, "Retrieving of the toolchain integration from API failed")
+		tiLogger.Error(err, "Retrieving of the training integration from API failed")
 
 		return nil, err
 	}
 
-	ti = &training.ToolchainIntegration{}
+	ti = &training.TrainingIntegration{}
 	tiBytes, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		tiLogger.Error(err, "Read all data from API response")
@@ -161,7 +161,7 @@ func (c *trainingAPIClient) GetToolchainIntegration(id string) (ti *training.Too
 	defer func() {
 		bodyCloseError := response.Body.Close()
 		if bodyCloseError != nil {
-			tiLogger.Error(err, "Closing toolchain integration response body")
+			tiLogger.Error(err, "Closing training integration response body")
 		}
 	}()
 
@@ -171,11 +171,10 @@ func (c *trainingAPIClient) GetToolchainIntegration(id string) (ti *training.Too
 
 	err = json.Unmarshal(tiBytes, ti)
 	if err != nil {
-		tiLogger.Error(err, "Unmarshal the toolchain integration")
+		tiLogger.Error(err, "Unmarshal the training integration")
 
 		return nil, err
 	}
 
 	return ti, nil
 }
-

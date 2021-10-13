@@ -33,7 +33,7 @@ from odahuflow.cli.parsers.packaging_integration import packaging_integration
 from odahuflow.cli.parsers.route import route
 from odahuflow.cli.parsers.security import login, logout
 from odahuflow.cli.parsers.template import template
-from odahuflow.cli.parsers.toolchain_integration import toolchain_integration
+from odahuflow.cli.parsers.training_integration import training_integration
 from odahuflow.cli.parsers.training import training
 from odahuflow.cli.utils import click_utils
 from odahuflow.cli.utils.error_handler import cli_error_handler
@@ -51,7 +51,7 @@ COMMAND_GROUPS = [
     route,
     template,
     gppi,
-    toolchain_integration,
+    training_integration,
     training,
     login,
     logout,

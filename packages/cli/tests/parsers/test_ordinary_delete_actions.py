@@ -21,13 +21,13 @@ import pytest
 from click.testing import CliRunner
 from pytest_mock import MockFixture
 
-from .data import ENTITY_ID, EntityTestData, ROUTER, PACKAGING_INTEGRATION, PACKAGING, TOOLCHAIN, TRAINING, \
+from .data import ENTITY_ID, EntityTestData, ROUTER, PACKAGING_INTEGRATION, PACKAGING, TRAINING_INTEGRATION, TRAINING, \
     CONNECTION, generate_entities_for_test
 
 ENTITY_TEST_DATA: typing.Dict[str, EntityTestData] = {
     "connection": CONNECTION,
     "training": TRAINING,
-    "toolchain": TOOLCHAIN,
+    "training_integration": TRAINING_INTEGRATION,
     "packaging": PACKAGING,
     "packaging_integration": PACKAGING_INTEGRATION,
     "routes": ROUTER,

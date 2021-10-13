@@ -1,5 +1,5 @@
 {
-  "kind": "ToolchainIntegration",
+  "kind": "TrainingIntegration",
   "id": "training-data-helper",
   "spec": {
     "defaultImage": "stub-image",

@@ -135,7 +135,7 @@ def edit(client: PackagingIntegrationClient, pi_id: str, file: str, output_forma
 @click.option('--pi-id', '--id', help='Packaging integration ID')
 @click.option('--file', '-f', type=click.Path(), help='Path to the file with packaging integration')
 @click.option('--ignore-not-found/--not-ignore-not-found', default=False,
-              help='ignore if toolchain integration is not found')
+              help='ignore if training integration is not found')
 @pass_obj
 def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not_found: bool):
     """
@@ -152,7 +152,7 @@ def delete(client: PackagingIntegrationClient, pi_id: str, file: str, ignore_not
     :param client: Packaging integration HTTP client
     :param pi_id: Packaging integration ID
     :param file: Path to the file with only one packaging integration
-    :param ignore_not_found: ignore if toolchain integration is not found
+    :param ignore_not_found: ignore if training integration is not found
     """
     check_id_or_file_params_present(pi_id, file)
 

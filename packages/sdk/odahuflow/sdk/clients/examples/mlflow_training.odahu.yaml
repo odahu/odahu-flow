@@ -14,8 +14,8 @@ spec:
     #   Version - spec.model.version
     #   RandomUUID - a random UUID v4, for example be17d12d-df43-4588-99e7-56a0db3cad77
     artifactNameTemplate: {{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip
-  # You can find list of all available toolchains on the left sidebar
-  toolchain: mlflow
+  # You can find list of all available training integrations on the left sidebar
+  trainingIntegration: mlflow
   # Every mlflow MLProject file contains the list of entrypoint. You should choose one
   entrypoint: main
   # Working dir with your module

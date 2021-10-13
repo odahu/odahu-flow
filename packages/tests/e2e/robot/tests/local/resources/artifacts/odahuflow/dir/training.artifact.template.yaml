@@ -5,7 +5,7 @@ spec:
     name: wine-dir
     version: 1.0
     artifactNameTemplate: "{{ .Name }}-{{ .Version }}.zip"
-  toolchain: mlflow
+  trainingIntegration: mlflow
   entrypoint: main
   workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"
   hyperParameters:
