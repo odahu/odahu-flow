@@ -96,7 +96,7 @@ CreatedAt and UpdatedAt times should not be equal
     should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
 Wait until command finishes and returns result
-    [Arguments]    ${command}    ${entity}  @{exp_result}  ${cycles}=120  ${sleep_time}=30s
+    [Arguments]    ${command}    ${entity}  ${exp_result}  ${cycles}=120  ${sleep_time}=30s
     FOR     ${i}    IN RANGE     ${cycles}
         ${result}                Call API  ${command} get id  ${entity}
         ${result_state}          evaluate  str('${result.status.state}' or '')
