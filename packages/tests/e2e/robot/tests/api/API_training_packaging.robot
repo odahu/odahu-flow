@@ -50,8 +50,7 @@ Create Model Training, mlflow training, default
 Update Model Training, mlflow training, default
     [Tags]                      training
     Call API  training put  ${RES_DIR}/valid/training.mlflow.default.update.yaml
-    ${exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  training  entity=${TRAIN_MLFLOW_DEFAULT}
     wait until keyword succeeds  2m  2s    Get Logs  training  ${TRAIN_MLFLOW_DEFAULT}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}
@@ -81,8 +80,7 @@ Create packaging
     [Tags]                      packaging
     ${artifact_name}            Pick artifact name  ${TRAIN_MLFLOW_DEFAULT}
     Call API                    packaging post  ${RES_DIR}/valid/packaging.create.yaml  ${artifact_name}
-    ${exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  packaging  entity=${PACKAGING}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  packaging  entity=${PACKAGING}
     Get Logs                    packaging  ${PACKAGING}
     Status State Should Be      ${result}  succeeded
 
@@ -91,8 +89,7 @@ Update packaging
     Call API  packaging put     ${RES_DIR}/valid/packaging.update.yaml  ${TRAINING_ARTIFACT_NAME}
     ${result_pack}              Call API  packaging get id  ${PACKAGING}
     should be equal             ${result_pack.spec.integration_name}  docker-rest
-    ${exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  packaging  entity=${PACKAGING}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  packaging  entity=${PACKAGING}
     Get Logs                    packaging  ${PACKAGING}
     Status State Should Be      ${result}  succeeded
     CreatedAt and UpdatedAt times should not be equal  ${result}

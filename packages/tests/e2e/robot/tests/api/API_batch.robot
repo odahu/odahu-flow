@@ -28,8 +28,7 @@ Create Batch Job
     [Tags]                      batch
     [Documentation]             launch batch job
     ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob.yaml
-    ${exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}
     Status State Should Be      ${result}  succeeded
     ${result}                   check batch job response  ${RES_DIR}/inferencejob.yaml  ${RES_DIR}/output/response0.json
     Should Be True              ${result}
@@ -43,8 +42,7 @@ Create Batch Job Packed
     [Tags]                      batch
     [Documentation]             launch batch job
     ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob-packed.yaml
-    ${exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}
     Status State Should Be      ${result}  succeeded
     ${result}                   check batch job response  ${RES_DIR}/inferencejob-packed.yaml  ${RES_DIR}/output/response0.json
     Should Be True              ${result}
@@ -59,8 +57,7 @@ Create Batch Job Embedded
     [Tags]                      batch
     [Documentation]             launch batch job
     ${job_id}                   Call API  job post  ${RES_DIR}/inferencejob-embedded.yaml
-    ${exp_result}               create list  succeeded  failed
-    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}  exp_result=${exp_result}
+    ${result}                   Wait until command finishes and returns result  job  entity=${job_id}
     Status State Should Be      ${result}  succeeded
     ${result}                   check batch job response  ${RES_DIR}/inferencejob-embedded.yaml  ${RES_DIR}/output/response0.json
     Should Be True              ${result}

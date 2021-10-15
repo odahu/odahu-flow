@@ -3,6 +3,7 @@ Documentation       API keywords
 Library             Collections
 
 *** Variables ***
+@{API_KEYWORDS.EXP_RESULT}     succeeded  failed
 # Error Templates
 ${404 NotFound Template}        WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
 ${404 Model NotFoundTemplate}   Wrong status code returned: 404. Data: . URL: {}
@@ -96,7 +97,7 @@ CreatedAt and UpdatedAt times should not be equal
     should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
 
 Wait until command finishes and returns result
-    [Arguments]    ${command}    ${entity}  ${exp_result}  ${cycles}=120  ${sleep_time}=30s
+    [Arguments]    ${command}    ${entity}  ${exp_result}=${API_KEYWORDS.EXP_RESULT}  ${cycles}=120  ${sleep_time}=30s
     FOR     ${i}    IN RANGE     ${cycles}
         ${result}                Call API  ${command} get id  ${entity}
         ${result_state}          evaluate  str('${result.status.state}' or '')
