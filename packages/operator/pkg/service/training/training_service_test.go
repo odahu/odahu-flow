@@ -141,7 +141,7 @@ func (s *TestSuite) TestUpdateModelTraining() {
 	ctx := context.Background()
 	en := newStubMT()
 	s.mockRepo.On("UpdateModelTraining", ctx, s.nilTx, en).Return(nil)
-	s.mockRepo.On("GetModelTraining", ctx, en.ID).Return(en, nil)
+	s.mockRepo.On("GetModelTraining", ctx, s.nilTx, en.ID).Return(en, nil)
 
 	as.NoError(s.service.UpdateModelTraining(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -154,7 +154,7 @@ func (s *TestSuite) TestUpdateModelTraining_UpdatedAt() {
 	en := newStubMT()
 
 	s.mockRepo.On("UpdateModelTraining", ctx, s.nilTx, en).Return(nil)
-	s.mockRepo.On("GetModelTraining", ctx, en.ID).Return(en, nil)
+	s.mockRepo.On("GetModelTraining", ctx, s.nilTx, en.ID).Return(en, nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.UpdateModelTraining(ctx, en))
