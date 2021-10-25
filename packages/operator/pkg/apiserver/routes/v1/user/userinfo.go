@@ -18,7 +18,7 @@ package userinfo
 
 import (
 	"fmt"
-	request_jwt "github.com/dgrijalva/jwt-go/request"
+	request_jwt "github.com/golang-jwt/jwt/v4/request"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/user"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/utils"
