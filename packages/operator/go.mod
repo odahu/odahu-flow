@@ -13,7 +13,7 @@ require (
 	github.com/banzaicloud/bank-vaults/pkg/sdk v0.3.1
 	github.com/emicklei/go-restful v2.9.5+incompatible
 	github.com/fluent/fluent-logger-golang v1.4.0
-	github.com/gin-gonic/gin v1.6.2
+	github.com/gin-gonic/gin v1.7.0
 	github.com/go-logr/logr v0.1.0
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang-jwt/jwt/v4 v4.1.0
