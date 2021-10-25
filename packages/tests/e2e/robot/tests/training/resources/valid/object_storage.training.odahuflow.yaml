@@ -16,7 +16,7 @@ spec:
   outputConnection: models-output
   data:
     - connection: wine
-      localPath: mlflow/sklearn/wine/
+      localPath: wine/
   resources:
     limits:
       cpu: 4
