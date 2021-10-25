@@ -14,7 +14,7 @@
 #    limitations under the License.
 #
 
-FROM golang:1.14-alpine as builder
+FROM golang:1.17-alpine as builder
 
 ENV FEEDBACK_DIR="/go/src/github.com/odahu/odahu-flow/packages/feedback"
 WORKDIR "${FEEDBACK_DIR}"

@@ -68,7 +68,7 @@ matrix:
     ### OPERATOR ###
     ################
     - language: go
-      go: 1.14.x
+      go: 1.17.x
       before_script:
         - sudo apt-get update -qq
         - sudo apt-get install wget make gcc pigz
@@ -94,7 +94,7 @@ matrix:
     ### FEEDBACK AGGREGATOR ###
     ###########################
     - language: go
-      go: 1.14.x
+      go: 1.17.x
       before_script:
         - sudo apt-get update -qq
         - sudo apt-get install wget make gcc

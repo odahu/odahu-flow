@@ -17,7 +17,7 @@
 FROM ubuntu:18.04 as builder
 
 ENV OPERATOR_DIR="/app" \
-    PATH="$PATH:/go/bin:/usr/lib/go-1.14/bin" \
+    PATH="$PATH:/go/bin:/usr/lib/go-1.17/bin" \
     GOPATH="/go"
 
 WORKDIR "${OPERATOR_DIR}"
@@ -26,7 +26,7 @@ RUN apt-get update -qq && \
     apt-get install -y software-properties-common && \
     add-apt-repository -y ppa:longsleep/golang-backports && \
     apt-get update -qq && \
-    apt-get install -y git gcc make golang-1.14-go
+    apt-get install -y git gcc make golang-1.17-go
 
 COPY packages/commons ../commons
 COPY packages/operator ./
