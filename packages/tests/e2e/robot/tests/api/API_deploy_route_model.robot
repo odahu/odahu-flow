@@ -51,8 +51,9 @@ Custom Role Setup
     reload config
 
 *** Test Cases ***
-Check deployment doesn't exist
+Deployment's list doesn't contain not created deployments
     [Tags]                      deployment
+    [Documentation]             check that the deployment to be created does not exist now
     Command response list should not contain id  deployment  ${DEPLOYMENT}
 
 Create deployment
@@ -63,6 +64,9 @@ Create deployment
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Check model started         ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
+    ${default_route}            Call API  deployment get default route  ${MODEL}
+    ${result}                   Call API  route get id  ${default_route.id}
+    ID should be equal          ${result}  ${default_route.id}
 
 Update deployment
     [Tags]                      deployment
@@ -74,6 +78,9 @@ Update deployment
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Check model started  ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
+    ${default_route}            Call API  deployment get default route  ${MODEL}
+    ${result}                   Call API  route get id  ${default_route.id}
+    ID should be equal          ${result}  ${default_route.id}
     CreatedAt and UpdatedAt times should not be equal  ${result}
 
 Check by id that deployment exists
@@ -81,7 +88,10 @@ Check by id that deployment exists
     ${result}                   Call API  deployment get id  ${DEPLOYMENT}
     ID should be equal          ${result}  ${DEPLOYMENT}
 
-Check that list of routes contains
+Get updated list of deployments
+    Command response list should contain id  deployment  ${DEPLOYMENT}
+
+Get updated list of routes
     [Tags]                      route
     ${result}                   Call API  deployment get default route  ${MODEL}
     Command response list should contain id  route  ${result.id}
@@ -186,7 +196,7 @@ Try Get info deleted Model
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/info
     Call API and get Error      ${404ModelNotFound}  model get  base_url=${EDGE_URL}  url_prefix=/model/${DEPLOYMENT}
 
-Try Invoke not existing and deleted Model
+Try Invoke not existing Model
     [Tags]                      model  negative
     ${model_url}                Get model Url  ${DEPLOYMENT_NOT_EXIST}
     ${404ModelNotFound}         format string  ${404 Model NotFoundTemplate}  ${model_url}/api/model/invoke

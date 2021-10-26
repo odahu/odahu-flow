@@ -81,7 +81,7 @@ Creating of a connection
     ${res}=  Shell  odahuflowctl --verbose conn get --id ${CONN_MAIN_ID}
              Should contain   ${res.stdout}  ${CONN_MAIN_ID}
 
-Override id during creating of a connection
+Overwrite id during creating of a connection
     [Teardown]  Shell  odahuflowctl --verbose conn delete --id ${NEW_CONN_MAIN_ID} --ignore-not-found
     ${res}=  Shell  odahuflowctl --verbose conn create -f ${RES_DIR}/git.json --id ${NEW_CONN_MAIN_ID}
              Should be equal  ${res.rc}  ${0}
@@ -129,7 +129,7 @@ Editing of a connection
 
     Check conn  ${CONN_MAIN_ID}  git  ${CONN_NEW_REFENRECE}  ${CONN_NEW_CREDENTIAL}
 
-Override id during editing of a connection
+Overwrite id during editing of a connection
     [Teardown]  Shell  odahuflowctl --verbose conn delete --id ${NEW_CONN_MAIN_ID} --ignore-not-found
     ${res}=  Shell  odahuflowctl --verbose conn create --id ${NEW_CONN_MAIN_ID} -f ${RES_DIR}/git.json
              Should be equal  ${res.rc}  ${0}
