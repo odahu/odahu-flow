@@ -30,6 +30,10 @@ Cleanup All Resources
     Cleanup resource  connection  ${GIT_NOT_EXIST}
 
 *** Test Cases ***
+Connection's list doesn't contain not created Connections
+    [Documentation]             check that the connections to be created do not exist now
+    Command response list should not contain id  connection  ${GIT_VALID}  ${DOCKER_VALID}
+
 Create GIT connection
     [Documentation]  create git connection and check that one exists
     Call API                    connection post  ${RES_DIR}/valid/git_connection_create.yaml
@@ -65,6 +69,10 @@ Get Decrypted Docker connection
     [Documentation]  get decrypted Docker connection
     ${result}                   Call API  connection get id decrypted  ${DOCKER_VALID}
     Password connection should not be equal    ${result}  ${CONN_SECRET_MASK}
+
+Get the updated list of Connections
+    [Documentation]  list should contain connections that were created
+    Command response list should contain id  connection  ${GIT_VALID}  ${DOCKER_VALID}
 
 Delete GIT connection
     Call API                    connection delete  ${GIT_VALID}

@@ -26,8 +26,8 @@ Cleanup All Resources
     Cleanup resource  toolchain-integration  ${MLFLOW_NOT_EXIST}
 
 *** Test Cases ***
-Get list of toolchains
-    [Documentation]  check that toolchains that would be created do not exist now
+Toolchain's list doesn't contain not created toolchain integration
+    [Documentation]  check that the toolchain to be created does not exist now
     Command response list should not contain id  toolchain  ${MLFLOW}
 
 Create mlflow toolchain
@@ -50,11 +50,10 @@ Get mlflow toolchains by id
     ${result}                   Call API  toolchain get id  ${MLFLOW}
     ID should be equal          ${result}  ${MLFLOW}
 
-Delete mlflow toolchain
+Delete Toolchain Integration and Check that the one does not exist
+    Command response list should contain id  toolchain  ${MLFLOW}
     ${result}                   Call API  toolchain delete  ${MLFLOW}
     should be equal             ${result.get('message')}  ToolchainIntegration ${MLFLOW} was deleted
-
-Check that toolchains do not exist
     Command response list should not contain id  toolchain  ${MLFLOW}
 
 #############################

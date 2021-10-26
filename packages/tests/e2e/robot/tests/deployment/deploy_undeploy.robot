@@ -4,7 +4,7 @@ ${LOCAL_CONFIG}        odahuflow/config_deployment_dep_undep
 ${MD_SIMPLE_MODEL}     simple-model-dep-undep
 
 *** Settings ***
-Documentation       OdahuFlow's API operational check
+Documentation       Test model deployment through CLI for normal operational processes
 Test Timeout        20 minutes
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
@@ -31,7 +31,7 @@ File not found
                  Should contain       ${res.stderr}  Resource file 'wrong-file' not found
 
 *** Test Cases ***
-Check API deploy procedure
+Check deploy procedure
     [Documentation]  Try to deploy dummy model through API console
     [Teardown]  Cleanup resources
     Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml
@@ -39,7 +39,7 @@ Check API deploy procedure
     Check model started  ${MD_SIMPLE_MODEL}
 
 Update model deployment
-    [Documentation]  Check model deployment upgrade
+    [Documentation]  Check model deployment update
     [Teardown]  Cleanup resources
     Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL}

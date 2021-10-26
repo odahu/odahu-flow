@@ -39,8 +39,7 @@ Try Run Local Packaging
         should contain  ${result}  ${error}
 
 *** Test Cases ***
-Run Valid Training with local & cluster specs
-    [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
+Run Valid Training with local & cluster specs when connected to cluster
     [Template]  Run Local Training
     # auth data     id      file/dir        output
     # local
@@ -50,10 +49,10 @@ Run Valid Training with local & cluster specs
     --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded
 
 Try Run and Fail Packaging with invalid credentials
+    [Template]  Try Run Local Packaging
     [Tags]   negative
     [Setup]  StrictShell  odahuflowctl logout
     [Teardown]  Login to the api and edge
-    [Template]  Try Run Local Packaging
     ${INVALID_CREDENTIALS_ERROR}    --url ${API_URL} --token "invalid" run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
     ${MISSED_CREDENTIALS_ERROR}     --url ${API_URL} --token "${EMPTY}" run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
     ${INVALID_URL_ERROR}            --url "invalid" --token ${AUTH_TOKEN} run -f ${ARTIFACT_DIR}/file/packaging.json --id not-exist
@@ -88,7 +87,7 @@ Try Run and Fail invalid Packaging
     Exception: unauthorized: You don't have the needed permissions to perform this operation, and you may have invalid credentials.
     ...  run --id local-cluster-spec-targets --no-disable-package-targets --disable-target docker-pull
 
-Run Valid Packaging with local & cluster specs
+Run Valid Packaging with local & cluster specs when connected to cluster
     [Setup]     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Teardown]  StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/file/packaging_cluster.yaml
     [Template]  Run Local Packaging

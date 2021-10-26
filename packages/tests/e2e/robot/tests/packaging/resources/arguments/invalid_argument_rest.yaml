@@ -7,5 +7,8 @@ spec:
       name: docker-push
   arguments:
     timeout: "must be boolean"
+    port: "str"
+    workers: "str"
+    threads: "str"
   integrationName: docker-rest
 

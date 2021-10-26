@@ -28,8 +28,8 @@ Cleanup All Resources
     Cleanup resource  packaging-integration  ${DOCKER_NOT_EXIST}
 
 *** Test Cases ***
-Get list of packagers
-    [Documentation]  check that packagers that would be created do not exist now
+Packager's list doesn't contain not created packaging integration
+    [Documentation]  check that the packagers to be created do not exist now
     Command response list should not contain id  packager  ${DOCKER_CLI}  ${DOCKER_REST}
 
 Create Docker CLI packager

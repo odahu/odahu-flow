@@ -9,7 +9,7 @@ BUILD_PARAMS=
 ODAHUFLOW_VERSION=0.11.0
 CREDENTIAL_SECRETS=.secrets.yaml
 SANDBOX_PYTHON_TOOLCHAIN_IMAGE=
-ROBOT_FILES=**/*.robot
+ROBOT_FILES=**
 ROBOT_THREADS=6
 ROBOT_OPTIONS=-e disable
 NO_CLEAN_UP=False
@@ -237,7 +237,7 @@ cleanup-e2e-robot:
 
 ## e2e-robot: Run e2e robot tests
 e2e-robot:
-	pabot --verbose --processes ${ROBOT_THREADS} \
+	pabot --verbose --pabotlib --processes ${ROBOT_THREADS} \
 		  -v NO_CLEAN_UP:${NO_CLEAN_UP} \
 	      -v CLUSTER_PROFILE:${CLUSTER_PROFILE} \
 	      --listener odahuflow.robot.process_reporter \

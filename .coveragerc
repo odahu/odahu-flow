@@ -1,7 +1,6 @@
 [run]
 branch = True
-include = 
-          ./packages/*.go
+include =
           ./packages/cli/*.py
           ./packages/sdk/*.py
 omit =
