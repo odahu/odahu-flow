@@ -58,7 +58,7 @@ jobs:
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
-            mkdir -p workspace
+            mkdir workspace
             cp .coverage workspace
       - persist_to_workspace:
           root: workspace
@@ -106,10 +106,12 @@ jobs:
           command: |
             cd packages/operator
             make test
-            mkdir -p ~/workspace
+            echo $(pwd)
+            echo $HOME
+            mkdir ~/workspace
             cp operator-coverage.txt ~/workspace
       - persist_to_workspace:
-          root: workspace
+          root: ~/workspace
           paths:
             - go_operator_coverage
       - save_cache:
@@ -148,12 +150,12 @@ jobs:
           command: |
             cd packages/feedback
             make test
-            mkdir -p ~/workspace
+            mkdir ~/workspace
             cp feedback-coverage.txt ~/workspace
       - persist_to_workspace:
-          root: workspace
+          root: ~/workspace
           paths:
-            - go_feedback_coverage
+            - feedback-coverage.txt
   test_coverage:
     docker:
       - image: cimg/base:stable-20.04
