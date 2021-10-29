@@ -113,7 +113,7 @@ jobs:
       - persist_to_workspace:
           root: ~/workspace
           paths:
-            - go_operator_coverage
+            - operator-coverage.txt
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
