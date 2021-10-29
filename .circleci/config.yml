@@ -2,10 +2,7 @@ version: 2.1
 workflows:
   main:
     jobs:
-      - vulnerabilities
       - python
-      - operator
-      - feedback_aggregator
       - test_coverage:
           requires:
             - python
@@ -13,7 +10,6 @@ workflows:
           context:
             - hub.docker.com
           requires:
-            - vulnerabilities
             - test_coverage
 
 jobs:
@@ -172,15 +168,15 @@ jobs:
       - run:
           name: Python CLI & SDK coverage
           command: |
-             ./codecov -s /tmp/workspace/python_test_coverage -vF python
+             ./codecov -f /tmp/workspace/python_test_coverage/.coverage -vF python
       - run:
           name: Operator Go coverage
           command: |
-             ./codecov -s /tmp/workspace/go_operator_coverage -vF go,operator
+             ./codecov -f /tmp/workspace/go_operator_coverage -vF go,operator
       - run:
           name: Feedback Go coverage
           command: |
-             ./codecov -s /tmp/workspace/go_feedback_coverage -vF go,feedback
+             ./codecov -f /tmp/workspace/go_feedback_coverage -vF go,feedback
   build:
     docker:
       - image: cimg/base:2021.01
