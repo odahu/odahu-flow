@@ -40,7 +40,7 @@ test: generate manifests
 ## 				   don't add -race & -covermode=atomic options, test fails
 test-circle-ci: generate manifests
 	gotestsum --junitfile operator-report.xml -- \
-			  -coverprofile=operator-coverage.txt \
+			  -covermode=atomic -coverprofile=operator-coverage.txt \
 			  $(go list ./... | circleci tests split)
 
 ## build-operator: Build operator executable binary
