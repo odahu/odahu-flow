@@ -11,12 +11,12 @@ workflows:
             - python
             - operator
             - feedback_aggregator
-      # - build:
-      #     context:
-      #       - hub.docker.com
-      #     requires:
-      #       - vulnerabilities
-      #       - test_coverage
+      - build:
+          context:
+            - hub.docker.com
+          requires:
+            - vulnerabilities
+            - test_coverage
 jobs:
   vulnerabilities:
     docker:
