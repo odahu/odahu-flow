@@ -17,7 +17,6 @@ workflows:
       #     requires:
       #       - vulnerabilities
       #       - test_coverage
-
 jobs:
   vulnerabilities:
     docker:
