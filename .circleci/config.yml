@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.0
 jobs:
   vulnerabilities:
     docker:
@@ -39,6 +41,7 @@ jobs:
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
+            
             # Codecov uploader setup https://docs.codecov.com/docs/codecov-uploader
             curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
             curl -Os https://uploader.codecov.io/latest/linux/codecov
@@ -127,13 +130,8 @@ jobs:
           command: |
             cd packages/feedback
             make test
-            # Codecov uploader setup https://docs.codecov.com/docs/codecov-uploader
-            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-            shasum -a 256 -c codecov.SHA256SUM
+            
+            # Codecov uploader
             chmod +x codecov
             ./codecov -vF go
   build:
