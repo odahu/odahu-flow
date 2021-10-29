@@ -6,7 +6,7 @@ workflows:
       - python
       - operator
       - feedback_aggregator
-      - test:
+      - test_coverage:
           requires:
             - python
             - operator
@@ -16,7 +16,7 @@ workflows:
             - hub.docker.com
           requires:
             - vulnerabilities
-            - test
+            - test_coverage
 
 jobs:
   vulnerabilities:
@@ -58,6 +58,12 @@ jobs:
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
+            mkdir python_test_coverage
+            rsync .coverage python_test_coverage/
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - python_test_coverage
   operator:
     machine:
       image: ubuntu-2004:202010-01
@@ -100,6 +106,11 @@ jobs:
           command: |
             cd packages/operator
             make test
+            rsync operator-coverage.txt go_operator_coverage/
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - go_operator_coverage
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
@@ -136,10 +147,17 @@ jobs:
           command: |
             cd packages/feedback
             make test
-  test:
+            rsync feedback-coverage.txt go_feedback_coverage/
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - go_feedback_coverage
+  test_coverage:
     docker:
-      - image: cimg/base:2021.04
+      - image: cimg/base:stable-20.04
     steps:
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Prepare
           command: |
@@ -154,15 +172,15 @@ jobs:
       - run:
           name: Python CLI & SDK coverage
           command: |
-             ./codecov -vF python
+             ./codecov -s /tmp/workspace/python_test_coverage -vF python
       - run:
           name: Operator Go coverage
           command: |
-             ./codecov -s /home/circleci/go/src/github.com/odahu/odahu-flow/packages/operator -vF go,operator
+             ./codecov -s /tmp/workspace/go_operator_coverage -vF go,operator
       - run:
           name: Feedback Go coverage
           command: |
-             ./codecov -s /home/circleci/go/src/github.com/odahu/odahu-flow/packages/operator -vF go,feedback
+             ./codecov -s /tmp/workspace/go_feedback_coverage -vF go,feedback
   build:
     docker:
       - image: cimg/base:2021.01
