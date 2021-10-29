@@ -11,12 +11,12 @@ workflows:
             - python
             - operator
             - feedback_aggregator
-      - build:
-          context:
-            - hub.docker.com
-          requires:
-            - vulnerabilities
-            - test_coverage
+      # - build:
+      #     context:
+      #       - hub.docker.com
+      #     requires:
+      #       - vulnerabilities
+      #       - test_coverage
 jobs:
   vulnerabilities:
     docker:
@@ -105,12 +105,12 @@ jobs:
           command: |
             cd packages/operator
             make test
-            mkdir ~/workspace
-            cp operator-coverage.txt ~/workspace
+            mkdir ~/workspace/operator
+            cp -r . ~/workspace/operator
       - persist_to_workspace:
           root: ~/workspace
           paths:
-            - operator-coverage.txt
+            - .
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
@@ -147,12 +147,12 @@ jobs:
           command: |
             cd packages/feedback
             make test
-            mkdir ~/workspace
-            cp feedback-coverage.txt ~/workspace
+            mkdir ~/workspace/feedback
+            cp -r . ~/workspace/feedback
       - persist_to_workspace:
           root: ~/workspace
           paths:
-            - feedback-coverage.txt
+            - .
   test_coverage:
     docker:
       - image: cimg/base:stable-20.04
@@ -177,11 +177,11 @@ jobs:
       - run:
           name: Operator Go coverage
           command: |
-             ./codecov -f /tmp/workspace/operator-coverage.txt -vF go,operator
+             ./codecov -f /tmp/workspace/operator/operator-coverage.txt -vF go,operator
       - run:
           name: Feedback Go coverage
           command: |
-             ./codecov -f /tmp/workspace/feedback-coverage.txt -vF go,feedback
+             ./codecov -f /tmp/workspace/feedback/feedback-coverage.txt -vF go,feedback
   build:
     docker:
       - image: cimg/base:2021.01
