@@ -105,9 +105,7 @@ jobs:
           name: Test
           command: |
             cd packages/operator
-            make test
-            echo $(pwd)
-            echo $HOME
+            make test-circle-ci
             mkdir ~/workspace
             cp operator-coverage.txt ~/workspace
       - persist_to_workspace:
