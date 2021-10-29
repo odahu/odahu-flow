@@ -1,4 +1,24 @@
 version: 2.1
+workflows:
+  main:
+    jobs:
+      - vulnerabilities
+      - python
+      - operator
+      - feedback_aggregator
+      - build:
+          context:
+            - hub.docker.com
+          requires:
+            - vulnerabilities
+            - python
+            - operator
+            - feedback_aggregator
+            - test
+                requires:
+                - python
+                - operator
+                - feedback_aggregator
 jobs:
   vulnerabilities:
     docker:
@@ -131,20 +151,30 @@ jobs:
           command: |
             cd packages/feedback
             make lint
-      - run:
-          name: Test
-          command: |
-            cd packages/feedback
-            make test
-            # Codecov uploader setup https://docs.codecov.com/docs/codecov-uploader
-            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
-            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
-            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
-            shasum -a 256 -c codecov.SHA256SUM
-            chmod +x codecov
-            ./codecov -vF go
+  test:
+    - run:
+        name: Prepare
+        command: |
+          # Codecov uploader setup https://docs.codecov.com/docs/codecov-uploader
+          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          chmod +x codecov
+    - run:
+        name: Python coverage
+        command: |
+           ./codecov -vF python
+    - run:
+        name: Operator Go coverage
+        command: |
+           ./codecov -s /home/circleci/go/src/github.com/odahu/odahu-flow/packages/operator -vF go,operator
+    - run:
+        name: Feedback Go coverage
+        command: |
+           ./codecov -s /home/circleci/go/src/github.com/odahu/odahu-flow/packages/operator -vF go,feedback 
   build:
     docker:
       - image: cimg/base:2021.01
@@ -162,19 +192,3 @@ jobs:
       - run: make docker-build-model-trainer
       - run: make docker-build-model-packager
       - run: make docker-build-service-catalog
-
-workflows:
-  main:
-    jobs:
-      - vulnerabilities
-      - python
-      - operator
-      - feedback_aggregator
-      - build:
-          context:
-            - hub.docker.com
-          requires:
-            - vulnerabilities
-            - python
-            - operator
-            - feedback_aggregator
