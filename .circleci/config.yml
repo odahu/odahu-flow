@@ -106,8 +106,8 @@ jobs:
           command: |
             cd packages/operator
             make test
-            mkdir -p workspace/go_operator_coverage
-            cp operator-coverage.txt workspace/go_operator_coverage
+            mkdir -p /workspace/go_operator_coverage
+            cp operator-coverage.txt /workspace/go_operator_coverage
       - persist_to_workspace:
           root: workspace
           paths:
@@ -148,8 +148,8 @@ jobs:
           command: |
             cd packages/feedback
             make test
-            mkdir -p workspace/go_feedback_coverage
-            cp feedback-coverage.txt workspace/go_feedback_coverage
+            mkdir -p /workspace/go_feedback_coverage
+            cp feedback-coverage.txt /workspace/go_feedback_coverage
       - persist_to_workspace:
           root: workspace
           paths:
