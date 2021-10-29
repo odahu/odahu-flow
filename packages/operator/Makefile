@@ -31,17 +31,11 @@ endif
 all: help
 
 ## test: Run unit tests
-## 		 don't add -race & -covermode=atomic options, test fails
+## 		 don't add -race option, test fails
 test: generate manifests
 	gotestsum --junitfile operator-report.xml -- \
+			  -covermode=atomic \
 			  -coverprofile=operator-coverage.txt ./...
-
-## test-circle-ci: Run unit tests in parallel on CircleCI
-## 				   don't add -race & -covermode=atomic options, test fails
-test-circle-ci: generate manifests
-	go test -covermode=atomic \
-			-coverprofile=operator-coverage.txt \
-			-v $(go list ./... | circleci tests split)
 
 ## build-operator: Build operator executable binary
 build-operator: generate

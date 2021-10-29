@@ -104,7 +104,7 @@ jobs:
           name: Test
           command: |
             cd packages/operator
-            make test-circle-ci
+            make test
             mkdir ~/workspace
             cp operator-coverage.txt ~/workspace
       - persist_to_workspace:
@@ -162,8 +162,8 @@ jobs:
       - run:
           name: Prepare
           command: |
-            # Codecov uploader setup https://docs.codecov.com/docs/codecov-uploader
-            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+            # Codecov uploader https://docs.codecov.com/docs/codecov-uploader
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
             curl -Os https://uploader.codecov.io/latest/linux/codecov
             curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
             curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
