@@ -6,8 +6,8 @@ all: help
 
 ## test: Run unit tests
 test:
-	gotestsum -race -covermode=atomic \
-			  --junitfile feedback-report.xml -- \
+	gotestsum --junitfile feedback-report.xml -- \
+			  -race -covermode=atomic \
 			  -coverprofile=feedback-coverage.txt ./pkg/...
 
 ## build-all: Buld all services

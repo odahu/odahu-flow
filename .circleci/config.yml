@@ -59,7 +59,7 @@ jobs:
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
             mkdir python_test_coverage
-            rsync .coverage python_test_coverage/
+            cp .coverage python_test_coverage
       - persist_to_workspace:
           root: workspace
           paths:
@@ -106,7 +106,8 @@ jobs:
           command: |
             cd packages/operator
             make test
-            rsync operator-coverage.txt go_operator_coverage/
+            mkdir go_operator_coverage
+            cp operator-coverage.txt go_operator_coverage
       - persist_to_workspace:
           root: workspace
           paths:
@@ -147,7 +148,8 @@ jobs:
           command: |
             cd packages/feedback
             make test
-            rsync feedback-coverage.txt go_feedback_coverage/
+            mkdir go_feedback_coverage
+            cp feedback-coverage.txt go_feedback_coverage
       - persist_to_workspace:
           root: workspace
           paths:

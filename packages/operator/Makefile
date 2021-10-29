@@ -32,8 +32,8 @@ all: help
 
 ## help: Run unit tests
 test: generate manifests
-	gotestsum -race -covermode=atomic \
-			  --junitfile operator-report.xml -- \
+	gotestsum --junitfile operator-report.xml -- \
+			  -race -covermode=atomic \
 			  -coverprofile=operator-coverage.txt ./...
 
 ## build-operator: Build operator executable binary
