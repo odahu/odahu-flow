@@ -4,12 +4,12 @@ workflows:
     jobs:
       - vulnerabilities
       - python
-      # - operator
+      - operator
       - feedback_aggregator
       - test_coverage:
           requires:
             - python
-            # - operator
+            - operator
             - feedback_aggregator
       # - build:
       #     context:
