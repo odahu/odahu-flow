@@ -53,6 +53,11 @@ jobs:
           name: Lint
           command: |
             make python-lint
+      - run:
+          name: Test
+          command: |
+            source "$HOME/miniconda/etc/profile.d/conda.sh"
+            make python-unittests
   operator:
     machine:
       image: ubuntu-2004:202010-01
@@ -90,6 +95,11 @@ jobs:
           command: |
             cd packages/operator
             make lint
+      - run:
+          name: Test
+          command: |
+            cd packages/operator
+            make test
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
@@ -121,6 +131,11 @@ jobs:
           command: |
             cd packages/feedback
             make lint
+      - run:
+          name: Test
+          command: |
+            cd packages/feedback
+            make test
   test:
     docker:
       - image: cimg/base:2021.04
