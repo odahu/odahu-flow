@@ -221,7 +221,7 @@ python-unittests:
 	DEBUG=true VERBOSE=true \
 	pytest -s --cov --cov-branch \
 			  --cov-report term-missing \
-		  	  --cov-report html \
+		  	  --cov-report xml:coverage.xml \
 	          packages/cli packages/sdk
 
 ## setup-e2e-robot: Prepare a test data for the e2e robot tests
