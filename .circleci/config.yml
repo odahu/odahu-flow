@@ -45,12 +45,6 @@ jobs:
             make install-python-tests
             make install-python-linter
       - run:
-          name: Code coverage
-          command: |
-            source "$HOME/miniconda/etc/profile.d/conda.sh"
-            pip install codecov
-            pip install pytest-cov
-      - run:
           name: Lint
           command: |
             make python-lint
