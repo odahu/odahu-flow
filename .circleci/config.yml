@@ -3,14 +3,16 @@ workflows:
   main:
     jobs:
       - vulnerabilities
+      - test_coverage
       - python
+        requires:
+          - test_coverage
       - operator
+        requires:
+          - test_coverage
       - feedback_aggregator
-      - test_coverage:
-          requires:
-            - python
-            - operator
-            - feedback_aggregator
+        requires:
+          - test_coverage
       # - build:
       #     context:
       #       - hub.docker.com
@@ -52,17 +54,14 @@ jobs:
           name: Lint
           command: |
             make python-lint
+      - attach_workspace:
+          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
-            mkdir workspace
-            cp .coverage workspace
-      - persist_to_workspace:
-          root: workspace
-          paths:
-            - .coverage
+            /tmp/codecov-uploader/codecov -vF python
   operator:
     machine:
       image: ubuntu-2004:202010-01
@@ -100,17 +99,14 @@ jobs:
           command: |
             cd packages/operator
             make lint
+      - attach_workspace:
+          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             cd packages/operator
             make test
-            mkdir -p ~/workspace/operator
-            cp -r . ~/workspace/operator
-      - persist_to_workspace:
-          root: ~/workspace
-          paths:
-            - .
+            /tmp/codecov-uploader/codecov -vF go,operator
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
@@ -142,23 +138,18 @@ jobs:
           command: |
             cd packages/feedback
             make lint
+      - attach_workspace:
+          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             cd packages/feedback
             make test
-            mkdir -p ~/workspace/feedback
-            cp -r . ~/workspace/feedback
-      - persist_to_workspace:
-          root: ~/workspace
-          paths:
-            - .
+            /tmp/codecov-uploader/codecov -vF go,feedback
   test_coverage:
     docker:
       - image: cimg/base:stable-20.04
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
       - run:
           name: Prepare
           command: |
@@ -170,18 +161,10 @@ jobs:
             gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
             shasum -a 256 -c codecov.SHA256SUM
             chmod +x codecov
-      - run:
-          name: Python CLI & SDK coverage
-          command: |
-             ./codecov -f /tmp/workspace/.coverage -vF python
-      - run:
-          name: Operator Go coverage
-          command: |
-             ./codecov -f /tmp/workspace/operator/operator-coverage.txt -vF go,operator
-      - run:
-          name: Feedback Go coverage
-          command: |
-             ./codecov -f /tmp/workspace/feedback/feedback-coverage.txt -vF go,feedback
+      - persist_to_workspace:
+          root: .
+          paths:
+            - codecov
   build:
     docker:
       - image: cimg/base:2021.01
