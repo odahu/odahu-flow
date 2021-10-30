@@ -22,14 +22,14 @@ workflows:
 jobs:
   vulnerabilities:
     docker:
-      - image: circleci/python:3.6
+      - image: cimg/python:3.6
     steps:
       - checkout
       - run: sudo make install-vulnerabilities-checker
       - run: make check-vulnerabilities
   python:
     docker:
-      - image: circleci/python:3.6
+      - image: cimg/python:3.6
     steps:
       - checkout
       - run:
@@ -118,7 +118,7 @@ jobs:
             - /home/circleci/.cache/go-build
   feedback_aggregator:
     docker:
-      - image: circleci/golang:1.14
+      - image: cimg/go:1.17
     working_directory: /go/src/github.com/odahu/odahu-flow
     steps:
       - checkout
