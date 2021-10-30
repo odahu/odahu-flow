@@ -4,15 +4,15 @@ workflows:
     jobs:
       - vulnerabilities
       - test_coverage
-      - python
-        requires:
-          - test_coverage
-      - operator
-        requires:
-          - test_coverage
-      - feedback_aggregator
-        requires:
-          - test_coverage
+      - python:
+          requires:
+            - test_coverage
+      - operator:
+          requires:
+            - test_coverage
+      - feedback_aggregator:
+          requires:
+            - test_coverage
       # - build:
       #     context:
       #       - hub.docker.com
