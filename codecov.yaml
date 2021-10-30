@@ -1,9 +1,6 @@
 coverage:
   range: "80...100"
 
-codecov:
-  max_report_age: off
-
 parsers:
   gcov:
     branch_detection:
