@@ -61,7 +61,7 @@ jobs:
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
-            /tmp/codecov-uploader/codecov -vF python
+            /tmp/codecov-uploader/codecov -f .coverage -vF python
   operator:
     machine:
       image: ubuntu-2004:202010-01
@@ -167,7 +167,7 @@ jobs:
             - codecov
   build:
     docker:
-      - image: cimg/base:2021.01
+      - image: cimg/base:stable-20.04
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_TOKEN
