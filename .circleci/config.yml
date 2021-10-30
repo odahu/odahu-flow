@@ -55,7 +55,7 @@ jobs:
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
-            /tmp/codecov-uploader/codecov -f coverage.xml -vF python
+            /tmp/codecov-uploader/codecov -vF python
   operator:
     machine:
       image: ubuntu-2004:202010-01
