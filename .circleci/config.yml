@@ -18,7 +18,9 @@ workflows:
             - hub.docker.com
           requires:
             - vulnerabilities
-            - test_coverage
+            - python
+            - operator
+            - feedback_aggregator
 jobs:
   vulnerabilities:
     docker:
