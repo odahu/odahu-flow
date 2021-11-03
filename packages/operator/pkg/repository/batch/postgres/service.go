@@ -37,8 +37,6 @@ type BISRepo struct {
 	DB *sql.DB
 }
 
-
-
 func (r BISRepo) Create(ctx context.Context, tx *sql.Tx, bis api_types.InferenceService) (err error) {
 	var qrr utils.Querier
 	qrr = r.DB
@@ -60,7 +58,7 @@ func (r BISRepo) Create(ctx context.Context, tx *sql.Tx, bis api_types.Inference
 	_, err = qrr.ExecContext(
 		ctx,
 		stmt,
-		args...
+		args...,
 	)
 	if err != nil {
 		pqError, ok := err.(*pq.Error)
@@ -80,6 +78,8 @@ func (r BISRepo) Update(
 	if tx != nil {
 		qrr = tx
 	}
+
+	log.Info("DEBUGGING UPDATE", "ctd", bis.CreatedAt, "upd", bis.UpdatedAt)
 
 	stmt, args, err := sq.Update(BatchInferenceServiceTable).
 		Set("deletionmark", bis.DeletionMark).
@@ -140,7 +140,6 @@ func (r BISRepo) Delete(ctx context.Context, tx *sql.Tx, id string) (err error) 
 		}
 		return err
 	}
-
 
 	rows, err := result.RowsAffected()
 	if err != nil {
@@ -250,4 +249,3 @@ func (r BISRepo) Get(ctx context.Context, tx *sql.Tx, id string) (res api_types.
 		return res, nil
 	}
 }
-

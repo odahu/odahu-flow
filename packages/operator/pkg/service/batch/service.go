@@ -73,11 +73,6 @@ func (s *InferenceServiceService) Update(
 
 	bis.DeletionMark = false
 	bis.UpdatedAt = time.Now().UTC()
-	oldBis, err := s.Get(ctx, bis.ID)
-	if err != nil {
-		return err
-	}
-	bis.CreatedAt = oldBis.CreatedAt
 
 	// Validation
 	if errs := ValidateCreateUpdate(bis); len(errs) > 0 {
