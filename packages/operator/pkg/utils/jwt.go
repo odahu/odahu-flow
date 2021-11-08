@@ -19,7 +19,7 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/user"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 )
