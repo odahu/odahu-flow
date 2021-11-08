@@ -20,8 +20,9 @@ require (
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-memdb v1.0.4 // indirect
-	github.com/hashicorp/vault v1.6.6
-	github.com/hashicorp/vault/api v1.0.5-0.20201001211907-38d91b749c77
+	github.com/hashicorp/vault v1.4.2
+	github.com/hashicorp/vault/api v1.0.5-0.20200317185738-82f498082f02
+	github.com/hashicorp/vault/sdk v0.1.14-0.20200521112254-72d69106be02 // indirect
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
 	github.com/keybase/go-crypto v0.0.0-20190828182435-a05457805304 // indirect
 	github.com/lib/pq v1.8.0
