@@ -31,7 +31,6 @@ import (
 	"reflect"
 )
 
-
 const (
 	GetURL    = "/batch/service/:id"
 	ListURL   = "/batch/service"
@@ -54,10 +53,9 @@ func init() {
 	}
 }
 
-
 type Service interface {
 	Create(ctx context.Context, bis *batch.InferenceService) (err error)
-	Update(ctx context.Context, id string, bis batch.InferenceService) (err error)
+	Update(ctx context.Context, id string, bis *batch.InferenceService) (err error)
 	Delete(ctx context.Context, id string) (err error)
 	Get(ctx context.Context, id string) (res batch.InferenceService, err error)
 	List(ctx context.Context, options ...filter.ListOption) (res []batch.InferenceService, err error)
@@ -75,7 +73,6 @@ func SetupRoutes(routes gin.IRoutes, service Service) {
 	routes.PUT(PutURL, controller.Put)
 	routes.DELETE(DeleteURL, controller.Delete)
 }
-
 
 // @Summary Get an InferenceService
 // @Description Get an InferenceService by id
@@ -120,7 +117,7 @@ func (cr *controller) Get(c *gin.Context) {
 func (cr *controller) Post(c *gin.Context) {
 
 	var service batch.InferenceService
-	
+
 	ctx := c.Request.Context()
 	log := logutils.FromContext(ctx)
 
@@ -168,7 +165,7 @@ func (cr *controller) Put(c *gin.Context) {
 		return
 	}
 
-	err := cr.service.Update(ctx, service.ID, service)
+	err := cr.service.Update(ctx, service.ID, &service)
 	if err != nil {
 		code := errors.CalculateHTTPStatusCode(err)
 		if code == http.StatusInternalServerError {
@@ -178,9 +175,10 @@ func (cr *controller) Put(c *gin.Context) {
 		return
 	}
 
+	log.Info("DEBUGGING UPDATE", "ctd", service.CreatedAt, "upd", service.UpdatedAt)
+
 	c.JSON(http.StatusOK, service)
 }
-
 
 // @Summary Delete an InferenceService
 // @Description Delete an InferenceService
@@ -211,7 +209,6 @@ func (cr *controller) Delete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, httputil.HTTPResult{Message: fmt.Sprintf("Inference Service %s was deleted", serviceID)})
 }
-
 
 // @Summary List an InferenceService
 // @Description List an InferenceService
@@ -250,4 +247,3 @@ func (cr *controller) List(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
-

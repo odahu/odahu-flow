@@ -79,8 +79,6 @@ func (r BISRepo) Update(
 		qrr = tx
 	}
 
-	log.Info("DEBUGGING UPDATE", "ctd", bis.CreatedAt, "upd", bis.UpdatedAt)
-
 	stmt, args, err := sq.Update(BatchInferenceServiceTable).
 		Set("deletionmark", bis.DeletionMark).
 		Set("spec", bis.Spec).
