@@ -1,7 +1,5 @@
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-echo ${DIR}
 LOCAL_TEST_DATA="${DIR}/../resources/artifacts"
-echo${LOCAL_TEST_DATA}
 
 # array of image repos for local tests (in removal order)
 IMAGE_REPO=(
