@@ -1,9 +1,5 @@
 *** Variables ***
-${RES_DIR}                  ${CURDIR}/resources
-${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
 ${RESULT_DIR}               ${CURDIR}/local_pack_results
-
-${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 
 ${LOCAL_CONFIG}             odahuflow/local_packaging
@@ -13,18 +9,19 @@ Documentation       local run of trainings and packagings
 ...                 with specs on cluster and host, accent on packagings
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
+Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library             odahuflow.robot.libraries.utils.Utils
-Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
-...                 AND  Login to the api and edge
 ...                 AND  StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
+...                 AND  Login to the api and edge
+...                 AND  Run Setup Only Once  Local Setup
 Suite Teardown      Run Keywords
-...                 Remove Directory  ${RESULT_DIR}  recursive=True
+...                 Run Teardown Only Once  Local Cleanup
+...                 AND  Remove Directory  ${RESULT_DIR}  recursive=True
 ...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
 ...                 AND  Remove File  ${LOCAL_CONFIG}
-Force Tags          cli  local  packaging
+Force Tags          packaging
 Test Timeout        120 minutes
 
 *** Keywords ***

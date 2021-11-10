@@ -1,9 +1,5 @@
 *** Variables ***
-${RES_DIR}                  ${CURDIR}/resources
-${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
 ${RESULT_DIR}               ${CURDIR}/local_train_results
-
-${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_training/training_output
 
 ${LOCAL_CONFIG}             odahuflow/local_training
@@ -14,20 +10,19 @@ Documentation       Local run of trainings with specs on cluster and host
 ...                 Validated that training and packaging can be run without (logout from) cluster
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
+Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library             odahuflow.robot.libraries.utils.Utils
-Library             Collections
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 ...                 AND  StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
 ...                 AND  Login to the api and edge
-...                 AND  StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
+...                 AND  Run Setup Only Once  Local Setup
 Suite Teardown      Run Keywords
-...                 StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.yaml
+...                 Run Teardown Only Once  Local Cleanup
 ...                 AND  Remove Directory  ${RESULT_DIR}  recursive=True
 ...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
 ...                 AND  Remove File  ${LOCAL_CONFIG}
-Force Tags          cli  local  training
+Force Tags          training
 Test Timeout        120 minutes
 
 *** Keywords ***

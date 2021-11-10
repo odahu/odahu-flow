@@ -6,6 +6,7 @@ Library             String
 Library             OperatingSystem
 Library             Collections
 Library             DateTime
+Library             pabot.PabotLib
 Library             odahuflow.robot.libraries.k8s.K8s  ${ODAHUFLOW_NAMESPACE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.process.Process
@@ -161,6 +162,15 @@ Run example model
     should not be equal  ${res.rc}  0
 
     # --------- LOCAL COMMAND SECTION -----------
+Local Setup
+    StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
+    StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose setup
+
+Local Cleanup
+    StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
+
 Run Local Training
     [Arguments]  ${train options}
         ${result}  StrictShell  odahuflowctl --verbose local train ${train options}
@@ -181,7 +191,7 @@ Run Packaging
         StrictShell  docker container list -as -f id=${container_id.stdout}
 
         ${MODEL_HOST}    Get local model host
-        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --base-url ${MODEL_HOST} --url-prefix :${MODEL PORT} --json-file ${RES_DIR}/request.json
+        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --base-url ${MODEL_HOST} --url-prefix :${MODEL PORT} --json-file ${INPUT_FILE}
         ${expected response}          evaluate  json.loads('''${WINE_MODEL_RESULT}''')    json
         ${actual response}            evaluate  json.loads('''${result_model.stdout}''')    json
         dictionaries should be equal  ${actual response}  ${expected response}
