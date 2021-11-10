@@ -1,4 +1,26 @@
 version: 2.1
+workflows:
+  main:
+    jobs:
+      - vulnerabilities
+      - test_coverage
+      - python:
+          requires:
+            - test_coverage
+      - operator:
+          requires:
+            - test_coverage
+      - feedback_aggregator:
+          requires:
+            - test_coverage
+      - build:
+          context:
+            - hub.docker.com
+          requires:
+            - vulnerabilities
+            - python
+            - operator
+            - feedback_aggregator
 jobs:
   vulnerabilities:
     docker:
@@ -25,21 +47,17 @@ jobs:
             make install-python-tests
             make install-python-linter
       - run:
-          name: Code coverage
-          command: |
-            source "$HOME/miniconda/etc/profile.d/conda.sh"
-            pip install codecov
-            pip install pytest-cov
-      - run:
           name: Lint
           command: |
             make python-lint
+      - attach_workspace:
+          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             source "$HOME/miniconda/etc/profile.d/conda.sh"
             make python-unittests
-            bash <(curl -s https://codecov.io/bash) -cF python
+            /tmp/codecov-uploader/codecov -f coverage.xml -vF python
   operator:
     machine:
       image: ubuntu-2004:202010-01
@@ -77,12 +95,14 @@ jobs:
           command: |
             cd packages/operator
             make lint
+      - attach_workspace:
+          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             cd packages/operator
             make test
-            bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+            /tmp/codecov-uploader/codecov -vF go,operator
       - save_cache:
           key: v1-lint-cache-{{ .Branch }}
           paths:
@@ -114,15 +134,36 @@ jobs:
           command: |
             cd packages/feedback
             make lint
+      - attach_workspace:
+          at: /tmp/codecov-uploader
       - run:
           name: Test
           command: |
             cd packages/feedback
             make test
-            bash <(curl -s https://codecov.io/bash) -cF go # (for codecov)
+            /tmp/codecov-uploader/codecov -vF go,feedback
+  test_coverage:
+    docker:
+      - image: cimg/base:stable-20.04
+    steps:
+      - run:
+          name: Prepare
+          command: |
+            # Codecov uploader https://docs.codecov.com/docs/codecov-uploader
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+            shasum -a 256 -c codecov.SHA256SUM
+            chmod +x codecov
+      - persist_to_workspace:
+          root: .
+          paths:
+            - codecov
   build:
     docker:
-      - image: cimg/base:2021.01
+      - image: cimg/base:stable-20.04
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_TOKEN
@@ -137,19 +178,3 @@ jobs:
       - run: make docker-build-model-trainer
       - run: make docker-build-model-packager
       - run: make docker-build-service-catalog
-
-workflows:
-  main:
-    jobs:
-      - vulnerabilities
-      - python
-      - operator
-      - feedback_aggregator
-      - build:
-          context:
-            - hub.docker.com
-          requires:
-            - vulnerabilities
-            - python
-            - operator
-            - feedback_aggregator

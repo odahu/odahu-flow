@@ -30,9 +30,12 @@ endif
 
 all: help
 
-## help: Run unit tests
+## test: Run unit tests
+## 		 don't add -race option, test fails
 test: generate manifests
-	gotestsum --junitfile operator-report.xml -- -coverprofile=coverage.txt ./...
+	gotestsum --junitfile operator-report.xml -- \
+			  -covermode=atomic \
+			  -coverprofile=operator-coverage.txt ./...
 
 ## build-operator: Build operator executable binary
 build-operator: generate
