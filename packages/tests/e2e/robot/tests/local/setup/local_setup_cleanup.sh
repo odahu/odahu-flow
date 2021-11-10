@@ -3,6 +3,10 @@ LOCAL_TEST_DATA="${DIR}/../resources/artifacts"
 
 # array of image repos for local tests (in removal order)
 IMAGE_REPO=(
+  gcr.io/or2-msq-epmd-legn-t1iylu/gke-dev04/wine-local-1
+  gcr.io/or2-msq-epmd-legn-t1iylu/gke-dev04/wine-artifact-hardcoded-1
+  wine-local-1
+  wine-artifact-hardcoded-1
   odahu/odahu-flow-mlflow-toolchain
   odahu/odahu-flow-packagers
   odahu/odahu-flow-docker-packager-base
