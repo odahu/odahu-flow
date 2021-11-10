@@ -55,8 +55,7 @@ RUN wget --quiet ${MINICONDA_URL} -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    conda create --name ${ODAHU_CONDA_ENV_NAME} python --no-default-packages
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 
 # Install yq
 RUN wget https://github.com/mikefarah/yq/releases/download/3.3.0/yq_linux_amd64 -O /usr/bin/yq &&\
