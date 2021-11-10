@@ -11,16 +11,8 @@ Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
-...                 AND  StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
-...                 AND  Login to the api and edge
-...                 AND  Run Setup Only Once  Local Setup
-Suite Teardown      Run Keywords
-...                 Run Teardown Only Once  Local Cleanup
-...                 AND  Remove Directory  ${RESULT_DIR}  recursive=True
-...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
-...                 AND  Remove File  ${LOCAL_CONFIG}
+Suite Setup         Run Setup Only Once  Local Setup
+Suite Teardown      Run Teardown Only Once  Local Cleanup
 Force Tags          packaging
 Test Timeout        120 minutes
 

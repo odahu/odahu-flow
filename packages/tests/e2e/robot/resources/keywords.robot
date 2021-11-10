@@ -162,14 +162,26 @@ Run example model
     should not be equal  ${res.rc}  0
 
     # --------- LOCAL COMMAND SECTION -----------
+Cleanup local training resources
+    # specified in ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    StrictShell  odahuflowctl train delete --ignore-not-found --id local-dir-cluster-artifact-template
+    StrictShell  odahuflowctl train delete --ignore-not-found --id local-dir-cluster-artifact-hardcoded
+
 Local Setup
+    Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+    StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
+    Login to the api and edge
+    Cleanup local training resources
     StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
     StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
     StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose setup
 
 Local Cleanup
-    StrictShell  odahuflowctl --verbose bulk delete ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    Cleanup local training resources
     StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
+    Remove Directory  ${RESULT_DIR}  recursive=True
+    Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
+    Remove File  ${LOCAL_CONFIG}
 
 Run Local Training
     [Arguments]  ${train options}
