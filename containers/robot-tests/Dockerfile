@@ -45,7 +45,7 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
 
 RUN pip install --disable-pip-version-check --upgrade pip==21.0.1 pipenv==2018.10.13 awscli
 
-ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-4.7.12-Linux-x86_64.sh
+ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
     PATH="${PATH}:/opt/conda/bin" \
     ODAHU_CONDA_ENV_NAME=odahu_model
@@ -55,7 +55,8 @@ RUN wget --quiet ${MINICONDA_URL} -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh && \
     conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    conda create --name ${ODAHU_CONDA_ENV_NAME} python --no-default-packages
 
 # Install yq
 RUN wget https://github.com/mikefarah/yq/releases/download/3.3.0/yq_linux_amd64 -O /usr/bin/yq &&\
