@@ -205,48 +205,7 @@ function upload_test_algorithm() {
   tmp_odahu_example_dir=$(mktemp -d -t upload-test-algorithm-XXXXXXXXXX)
 
   git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
-
   copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/test_algorithm/wine/"
-
-  rm -rf "${tmp_odahu_example_dir}"
-}
-
-# Prepare for batch e2e test
-function setup_batch_examples() {
-  local git_url="https://github.com/odahu/odahu-examples.git"
-  local dir="batch-inference"
-  local tmp_odahu_example_dir=$(mktemp -d -t examples-XXXXXXXXXX)
-
-  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
-
-  # Build and predictor image
-  docker build ${tmp_odahu_example_dir}/batch-inference/predictor -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
-  docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
-
-  # Build and predictor image with embedded model
-  docker build ${tmp_odahu_example_dir}/batch-inference/predictor_embedded -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
-  docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
-
-  # Prepare test data by replacing image in spec of service and copying job manifest
-  yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice.yaml \
-    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice.yaml"
-  cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob.yaml "${DIR}/../e2e/robot/tests/api/resources/batch/inferencejob.yaml"
-
-  yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice-packed.yaml \
-    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice-packed.yaml"
-  cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob-packed.yaml "${DIR}/../e2e/robot/tests/api/resources/batch/inferencejob-packed.yaml"
-
-  # embedded
-  yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice-embedded.yaml \
-    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION} > "${DIR}/../e2e/robot/tests/api/resources/batch/inferenceservice-embedded.yaml"
-  cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob-embedded.yaml "${DIR}/../e2e/robot/tests/api/resources/batch/inferencejob-embedded.yaml"
-
-  cp -r ${tmp_odahu_example_dir}/batch-inference/output "${DIR}/../e2e/robot/tests/api/resources/batch/output/"
-  # Upload model and input data to object storage
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/input "${BUCKET_NAME}/test-data/batch_job_data/input"
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model "${BUCKET_NAME}/output/test-data/batch_job_data/model"
-  copy_to_cluster_bucket ${tmp_odahu_example_dir}/batch-inference/model.tar.gz "${BUCKET_NAME}/output/test-data/batch_job_data/"
-  # Clean tmp dir
   rm -rf "${tmp_odahu_example_dir}"
 }
 
@@ -276,10 +235,7 @@ function setup() {
   create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
 
   upload_test_dags
-
   wait_all_background_task
-
-  setup_batch_examples
   upload_test_algorithm
 }
 

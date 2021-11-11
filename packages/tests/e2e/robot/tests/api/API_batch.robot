@@ -2,7 +2,6 @@
 ${LOCAL_CONFIG}                     odahuflow/batch
 ${RES_DIR}                          ${CURDIR}/resources/batch
 
-
 *** Settings ***
 Documentation       API of batch
 Resource            ../../resources/keywords.robot
@@ -12,8 +11,9 @@ Library             odahuflow.robot.libraries.sdk_wrapper.InferenceService
 Library             odahuflow.robot.libraries.sdk_wrapper.InferenceJob
 Library             odahuflow.robot.libraries.batch.BatchUtils  ${CLOUD_TYPE}  ${TEST_BUCKET}  ${CLUSTER_NAME}
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  StrictShell  ${RES_DIR}/setup/batch_setup.sh
 Force Tags          api  batch
 Test Timeout        15 minutes
 
