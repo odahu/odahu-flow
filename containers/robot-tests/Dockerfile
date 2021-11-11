@@ -15,6 +15,10 @@
 #
 
 FROM python:3.6.8
+
+ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh
+ARG CONDA_ENV_PY_VERSION=3.9
+
 # Install python package dependencies and cloud CLI tools
 RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common libgnutls-openssl27 libgnutls30 \
     make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 ca-certificates gnupg-agent && \
@@ -45,7 +49,6 @@ RUN wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-r
 
 RUN pip install --disable-pip-version-check --upgrade pip==21.0.1 pipenv==2018.10.13 awscli
 
-ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
     PATH="${PATH}:/opt/conda/bin" \
     ODAHU_CONDA_ENV_NAME=odahu_model
@@ -56,7 +59,7 @@ RUN wget --quiet ${MINICONDA_URL} -O ~/miniconda.sh && \
     rm ~/miniconda.sh && \
     conda clean -tipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    conda create --name ${ODAHU_CONDA_ENV_NAME} python --no-default-packages
+    conda create --name ${ODAHU_CONDA_ENV_NAME} python=${CONDA_ENV_PY_VERSION} --no-default-packages
 
 # Install yq
 RUN wget https://github.com/mikefarah/yq/releases/download/3.3.0/yq_linux_amd64 -O /usr/bin/yq &&\
