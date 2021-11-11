@@ -13,7 +13,7 @@ Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Suite Setup         Run Setup Only Once  Local Setup
 Suite Teardown      Run Teardown Only Once  Local Cleanup
-Force Tags          packaging
+Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
 *** Keywords ***
