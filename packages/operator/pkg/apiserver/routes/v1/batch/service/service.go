@@ -175,8 +175,6 @@ func (cr *controller) Put(c *gin.Context) {
 		return
 	}
 
-	log.Info("DEBUGGING UPDATE", "ctd", service.CreatedAt, "upd", service.UpdatedAt)
-
 	c.JSON(http.StatusOK, service)
 }
 
