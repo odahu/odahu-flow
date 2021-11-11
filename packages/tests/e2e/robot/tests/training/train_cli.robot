@@ -1,5 +1,6 @@
 *** Variables ***
 ${RES_DIR}              ${CURDIR}/resources
+${SETUP_DIR}            ${CURDIR}/setup
 ${LOCAL_CONFIG}         odahuflow/config_training_training_cli
 ${TRAIN_ID}             test-algorithm-source
 ${TRAIN_STUFF_DIR}      ${CURDIR}/../../../../stuff
@@ -17,9 +18,10 @@ Library             odahuflow.robot.libraries.model.Model
 Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 Library             odahuflow.robot.libraries.examples_loader.ExamplesLoader  https://raw.githubusercontent.com/odahu/odahu-examples  ${EXAMPLES_VERSION}
 Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
-...                 Login to the api and edge  AND
-...                 Cleanup all resources
+...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+...                 AND  Login to the api and edge
+...                 AND  Cleanup all resources
+...                 AND  StrictShell  ${SETUP_DIR}/train_setup.sh
 Suite Teardown      Run Keywords
 ...                 Cleanup all resources  AND
 ...                 Remove file  ${LOCAL_CONFIG}

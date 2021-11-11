@@ -199,16 +199,6 @@ function upload_test_dags() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
-function upload_test_algorithm() {
-  git_url="https://github.com/odahu/odahu-examples.git"
-  algorithm_code_path=("mlflow/sklearn/wine/")
-  tmp_odahu_example_dir=$(mktemp -d -t upload-test-algorithm-XXXXXXXXXX)
-
-  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
-  copy_to_cluster_bucket "${tmp_odahu_example_dir}/${algorithm_code_path}" "${BUCKET_NAME}/test_algorithm/wine/"
-  rm -rf "${tmp_odahu_example_dir}"
-}
-
 # Main entrypoint for setup command.
 # The function creates the model packagings and the toolchain integrations.
 function setup() {
@@ -236,7 +226,7 @@ function setup() {
 
   upload_test_dags
   wait_all_background_task
-  upload_test_algorithm
+
 }
 
 # Main entrypoint for cleanup command.
