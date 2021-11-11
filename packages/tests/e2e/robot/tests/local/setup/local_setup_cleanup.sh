@@ -116,11 +116,9 @@ while [ "${1}" != "" ]; do
     shift
     ;;
   --help)
-    usage
     exit
     ;;
   *)
-    usage
     exit 1
     ;;
   esac
@@ -136,7 +134,6 @@ cleanup)
   ;;
 *)
   echo "Unexpected command: ${COMMAND}"
-  usage
   exit 1
   ;;
 esac
