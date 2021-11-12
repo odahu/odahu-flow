@@ -1,8 +1,11 @@
 *** Variables ***
+${LOCAL_CONFIG}             odahuflow/local_packaging
 ${RESULT_DIR}               ${CURDIR}/local_pack_results
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 
-${LOCAL_CONFIG}             odahuflow/local_packaging
+# training id from resources/artifacts/odahuflow/dir/training_cluster_pack.yaml file
+${TRAINING_ID_TEMPLATE}     local-pack-dir-cluster-artifact-template
+${TRAINING_ID_HARDCODED}    local-pack-dir-cluster-artifact-hardcoded
 
 *** Settings ***
 Documentation       local run of trainings and packagings
@@ -11,8 +14,8 @@ Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Suite Setup         Run Setup Only Once  Local Setup
-Suite Teardown      Run Teardown Only Once  Local Cleanup
+Suite Setup         Local Setup  ${ARTIFACT_DIR}/dir/training_cluster_pack.yaml  ${TRAINING_ID_TEMPLATE}  ${TRAINING_ID_HARDCODED}
+Suite Teardown      Local Cleanup  ${TRAINING_ID_TEMPLATE}  ${TRAINING_ID_HARDCODED}
 Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
@@ -34,8 +37,8 @@ Run Valid Training with local & cluster specs when connected to cluster
     # local
     run --id local-dir-artifact-template-pack -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
     # cluster
-    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${RESULT_DIR}
-    --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded
+    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id ${TRAINING_ID_TEMPLATE} --output ${RESULT_DIR}
+    --url ${API_URL} --token "${AUTH_TOKEN}" run --id ${TRAINING_ID_HARDCODED}
 
 Try Run and Fail Packaging with invalid credentials
     [Template]  Try Run Local Packaging

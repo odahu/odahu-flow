@@ -164,20 +164,26 @@ Run example model
     # --------- LOCAL COMMAND SECTION -----------
 Cleanup local training resources
     # specified in ${ARTIFACT_DIR}/dir/training_cluster.yaml
-    StrictShell  odahuflowctl train delete --ignore-not-found --id local-dir-cluster-artifact-template
-    StrictShell  odahuflowctl train delete --ignore-not-found --id local-dir-cluster-artifact-hardcoded
+    [Arguments]  ${training_1}  ${training_2}
+    StrictShell  odahuflowctl train delete --ignore-not-found --id ${training_1}
+    StrictShell  odahuflowctl train delete --ignore-not-found --id ${training_2}
 
 Local Setup
+    # ${training_file_path} - absolute path to training manifests
+    # ${training_1},  ${training_2} - trainings to remove from cluster
+    [Arguments]  ${training_file_path}  ${training_1}  ${training_2}
     Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
     StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
     Login to the api and edge
-    Cleanup local training resources
-    StrictShell  odahuflowctl --verbose bulk apply ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    Cleanup local training resources  ${training_1}  ${training_2}
+    StrictShell  odahuflowctl --verbose bulk apply ${training_file_path}
     StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
     StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose setup
 
 Local Cleanup
-    Cleanup local training resources
+    # ${training_1},  ${training_2} - trainings to remove from cluster
+    [Arguments]  ${training_1}  ${training_2}
+    Cleanup local training resources  ${training_1}  ${training_2}
     StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
     Remove Directory  ${RESULT_DIR}  recursive=True
     Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True

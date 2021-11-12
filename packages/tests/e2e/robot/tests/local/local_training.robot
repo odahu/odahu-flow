@@ -1,8 +1,11 @@
 *** Variables ***
+${LOCAL_CONFIG}             odahuflow/local_training
 ${RESULT_DIR}               ${CURDIR}/local_train_results
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_training/training_output
 
-${LOCAL_CONFIG}             odahuflow/local_training
+# training id from resources/artifacts/odahuflow/dir/training_cluster.yaml file
+${TRAINING_ID_TEMPLATE}     local-dir-cluster-artifact-template
+${TRAINING_ID_HARDCODED}    local-dir-cluster-artifact-hardcoded
 
 *** Settings ***
 Documentation       Local run of trainings with specs on cluster and host
@@ -12,8 +15,8 @@ Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
 Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Suite Setup         Run Setup Only Once  Local Setup
-Suite Teardown      Run Teardown Only Once  Local Cleanup
+Suite Setup         Local Setup  ${ARTIFACT_DIR}/dir/training_cluster.yaml  ${TRAINING_ID_TEMPLATE}  ${TRAINING_ID_HARDCODED}
+Suite Teardown      Local Cleanup  ${TRAINING_ID_TEMPLATE}  ${TRAINING_ID_HARDCODED}
 Force Tags          cli  local  training
 Test Timeout        120 minutes
 
@@ -69,8 +72,8 @@ Run Valid Training with local specs, logout from cluster
 Run Valid Training with specs on cluster
     [Template]  Run Local Training
     # id	file/dir	output
-    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${DEFAULT_RESULT_DIR}
-    --url ${API_URL} --token "${AUTH_TOKEN}" run --train-id local-dir-cluster-artifact-hardcoded
+    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id ${TRAINING_ID_TEMPLATE} --output ${DEFAULT_RESULT_DIR}
+    --url ${API_URL} --token "${AUTH_TOKEN}" run --train-id ${TRAINING_ID_HARDCODED}
 
 Run Valid Packaging with local spec, logout from cluster
     [Template]  Run Local Packaging
