@@ -60,4 +60,22 @@ function setup_batch_examples() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
+# The command line arguments parsing
+while [ "${1}" != "" ]; do
+  case "${1}" in
+  --docker-registry)
+    DOCKER_REGISTRY=${2}
+    shift 2
+    ;;
+  --help)
+    usage
+    exit
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+  esac
+done
+
 setup_batch_examples

@@ -13,7 +13,7 @@ Library             odahuflow.robot.libraries.batch.BatchUtils  ${CLOUD_TYPE}  $
 Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 ...                 AND  Login to the api and edge
-...                 AND  StrictShell  ${RES_DIR}/setup/batch_setup.sh
+...                 AND  StrictShell  ${RES_DIR}/setup/batch_setup.sh --docker-registry ${DOCKER_REGISTRY}
 Force Tags          api  batch
 Test Timeout        15 minutes
 
