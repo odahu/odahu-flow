@@ -30,25 +30,25 @@ function setup_batch_examples() {
   git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
 
   # Build and predictor image
-  docker build ${tmp_odahu_example_dir}/batch-inference/predictor -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
-  docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
+  docker build ${tmp_odahu_example_dir}/batch-inference/predictor -t ${PREDICTOR_BATCH_IMAGE}
+  docker push ${PREDICTOR_BATCH_IMAGE}
 
   # Build and predictor image with embedded model
-  docker build ${tmp_odahu_example_dir}/batch-inference/predictor_embedded -t ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
-  docker push ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
+  docker build ${tmp_odahu_example_dir}/batch-inference/predictor_embedded -t ${PREDICTOR_BATCH_IMAGE_EMBBEDED}
+  docker push ${PREDICTOR_BATCH_IMAGE_EMBBEDED}
 
   # Prepare test data by replacing image in spec of service and copying job manifest
   yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice.yaml \
-    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${BATCH_TEST_DATA}/inferenceservice.yaml"
+    'spec.image' ${PREDICTOR_BATCH_IMAGE} > "${BATCH_TEST_DATA}/inferenceservice.yaml"
   cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob.yaml "${BATCH_TEST_DATA}/inferencejob.yaml"
 
   yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice-packed.yaml \
-    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION} > "${BATCH_TEST_DATA}/inferenceservice-packed.yaml"
+    'spec.image' ${PREDICTOR_BATCH_IMAGE} > "${BATCH_TEST_DATA}/inferenceservice-packed.yaml"
   cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob-packed.yaml "${BATCH_TEST_DATA}/inferencejob-packed.yaml"
 
   # embedded
   yq w ${tmp_odahu_example_dir}/batch-inference/manifests/inferenceservice-embedded.yaml \
-    'spec.image' ${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION} > "${BATCH_TEST_DATA}/inferenceservice-embedded.yaml"
+    'spec.image' ${PREDICTOR_BATCH_IMAGE_EMBBEDED} > "${BATCH_TEST_DATA}/inferenceservice-embedded.yaml"
   cp ${tmp_odahu_example_dir}/batch-inference/manifests/inferencejob-embedded.yaml "${BATCH_TEST_DATA}/inferencejob-embedded.yaml"
 
   cp -r ${tmp_odahu_example_dir}/batch-inference/output "${BATCH_TEST_DATA}/output/"
@@ -60,9 +60,22 @@ function setup_batch_examples() {
   rm -rf "${tmp_odahu_example_dir}"
 }
 
+function cleanup_batch_examples() {
+    docker rmi ${PREDICTOR_BATCH_IMAGE}
+    docker rmi ${PREDICTOR_BATCH_IMAGE_EMBBEDED}
+}
+
 # The command line arguments parsing
 while [ "${1}" != "" ]; do
   case "${1}" in
+  setup)
+    shift
+    COMMAND=setup
+    ;;
+  cleanup)
+    shift
+    COMMAND=cleanup
+    ;;
   --docker-registry)
     DOCKER_REGISTRY=${2}
     shift 2
@@ -78,4 +91,21 @@ while [ "${1}" != "" ]; do
   esac
 done
 
-setup_batch_examples
+
+PREDICTOR_BATCH_IMAGE=${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test:${ODAHUFLOW_VERSION}
+PREDICTOR_BATCH_IMAGE_EMBBEDED=${DOCKER_REGISTRY}/odahu-flow-batch-predictor-test-embedded:${ODAHUFLOW_VERSION}
+
+
+# Main programm entrypoint
+case "${COMMAND}" in
+setup)
+  setup_batch_examples
+  ;;
+cleanup)
+  cleanup_batch_examples
+  ;;
+*)
+  echo "Unexpected command: ${COMMAND}"
+  exit 1
+  ;;
+esac
