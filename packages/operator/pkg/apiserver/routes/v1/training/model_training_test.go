@@ -209,6 +209,7 @@ func newMtStub() *training.ModelTraining {
 			Image:            testMtImage,
 			Resources:        &res,
 			OutputConnection: testMtOutConn,
+			WorkDir:          testWorkDir,
 		},
 	}
 }

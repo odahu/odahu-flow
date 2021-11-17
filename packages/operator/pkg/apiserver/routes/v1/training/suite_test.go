@@ -51,12 +51,13 @@ const (
 	testMtOutConn               = "some-output-connection"
 	testMtOutConnDefault        = "default-output-connection"
 	testMpOutConnNotFound       = "out-conn-not-found"
+	testWorkDir                 = "./"
 )
 
 var (
-	db *sql.DB
+	db         *sql.DB
 	kubeClient client.Client
-	cfg *rest.Config
+	cfg        *rest.Config
 )
 
 func testMainWrapper(m *testing.M) int {

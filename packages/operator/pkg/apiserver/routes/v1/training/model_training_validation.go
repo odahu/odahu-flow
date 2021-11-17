@@ -50,6 +50,7 @@ const (
 
 var (
 	DefaultArtifactOutputTemplate = "{{ .Name }}-{{ .Version }}-{{ .RandomUUID }}.zip"
+	DefaultWorkDir                = "./"
 )
 
 type toolchainGetter interface {
@@ -126,7 +127,7 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 
 	if len(mt.Spec.Model.ArtifactNameTemplate) == 0 {
 		logMT.Info("Artifact output template is empty. Set the default value",
-			"name", mt.ID, "artifact ame", DefaultArtifactOutputTemplate)
+			"name", mt.ID, "artifact name", DefaultArtifactOutputTemplate)
 		mt.Spec.Model.ArtifactNameTemplate = DefaultArtifactOutputTemplate
 	}
 
@@ -137,6 +138,12 @@ func (mtv *MtValidator) validateMainParams(mt *training.ModelTraining) (err erro
 	} else {
 		_, resValidationErr := kubernetes.ConvertOdahuflowResourcesToK8s(mt.Spec.Resources, mtv.gpuResourceName)
 		err = multierr.Append(err, resValidationErr)
+	}
+
+	if len(mt.Spec.WorkDir) == 0 {
+		logMT.Info("Working directory is empty. Set the default value",
+			"name", mt.ID, "WorkDir", DefaultWorkDir)
+		mt.Spec.WorkDir = DefaultWorkDir
 	}
 
 	return err
