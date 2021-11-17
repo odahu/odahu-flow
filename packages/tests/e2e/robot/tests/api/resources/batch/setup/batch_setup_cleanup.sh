@@ -80,12 +80,7 @@ while [ "${1}" != "" ]; do
     DOCKER_REGISTRY=${2}
     shift 2
     ;;
-  --help)
-    usage
-    exit
-    ;;
   *)
-    usage
     exit 1
     ;;
   esac

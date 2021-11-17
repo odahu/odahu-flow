@@ -9,7 +9,6 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TRAINED_ARTIFACTS_DIR="${DIR}/trained_artifacts"
 ODAHUFLOW_RESOURCES="${DIR}/odahuflow_resources"
 TEST_DATA="${DIR}/data"
-BATCH_TEST_DATA="${DIR}/../e2e/robot/tests/api/resources/batch"
 COMMAND=setup
 
 # Test connection points to the valid gppi archive
@@ -180,25 +179,6 @@ function create_test_data_connection() {
   rm "${conn_file}"
 }
 
-# Upload test dags from odahu-examples repository to the cluster dags object storage bucket
-function upload_test_dags() {
-  git_url="https://github.com/odahu/odahu-examples.git"
-  dag_dirs=("mlflow/sklearn/wine/airflow")
-  tmp_odahu_example_dir=$(mktemp -d -t upload-test-dags-XXXXXXXXXX)
-
-  git clone --branch "${EXAMPLES_VERSION}" "${git_url}" "${tmp_odahu_example_dir}"
-
-  local dag_bucket dag_bucket_path
-  dag_bucket="$(jq -r ".airflow.dag_bucket |= if . == null or . == \"\" then \"$BUCKET_NAME\" else . end | .airflow.dag_bucket" "${CLUSTER_PROFILE}")"
-  dag_bucket_path="$(jq -r '.airflow.dag_bucket_path |= if . == null or . == "" then "/dags" else . end | .airflow.dag_bucket_path' "${CLUSTER_PROFILE}")"
-
-  for dag_dir in "${dag_dirs[@]}"; do
-    copy_to_cluster_bucket "${tmp_odahu_example_dir}/${dag_dir}/" "${dag_bucket}${dag_bucket_path}/${dag_dir}/"
-  done
-
-  rm -rf "${tmp_odahu_example_dir}"
-}
-
 # Main entrypoint for setup command.
 # The function creates the model packagings and the toolchain integrations.
 function setup() {
@@ -224,7 +204,6 @@ function setup() {
   create_test_data_connection "${TEST_CUSTOM_OUTPUT_FOLDER}" "test-data/data/custom_output/"
   create_test_data_connection "${TEST_WINE_CONN_ID}" "test-data/data/wine-quality.csv"
 
-  upload_test_dags
   wait_all_background_task
 
 }
@@ -239,6 +218,8 @@ function cleanup() {
   odahuflowctl ti delete --id ${TEST_DATA_TI_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_DIR_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
+  odahuflowctl conn delete --id ${TEST_WINE_CONN_ID} --ignore-not-found
+  odahuflowctl conn delete --id ${TEST_CUSTOM_OUTPUT_FOLDER} --ignore-not-found
 
 }
 
