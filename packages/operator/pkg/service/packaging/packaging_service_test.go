@@ -141,6 +141,7 @@ func (s *TestSuite) TestUpdateModelPackaging() {
 	ctx := context.Background()
 	en := newStubMT()
 	s.mockRepo.On("UpdateModelPackaging", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("GetModelPackaging", ctx, s.nilTx, en.ID).Return(en, nil)
 
 	as.NoError(s.service.UpdateModelPackaging(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -152,6 +153,7 @@ func (s *TestSuite) TestUpdateModelPackaging_UpdatedAt() {
 	ctx := context.Background()
 	en := newStubMT()
 	s.mockRepo.On("UpdateModelPackaging", ctx, s.nilTx, en).Return(nil)
+	s.mockRepo.On("GetModelPackaging", ctx, s.nilTx, en.ID).Return(en, nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.UpdateModelPackaging(ctx, en))

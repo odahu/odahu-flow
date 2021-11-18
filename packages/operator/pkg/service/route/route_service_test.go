@@ -177,6 +177,7 @@ func (s *TestSuite) TestUpdateModelRoute() {
 	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
 	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
+	s.mockRepo.On("GetModelRoute", ctx, s.nilTx, en.ID).Return(en, nil)
 
 	as.NoError(s.service.UpdateModelRoute(ctx, en))
 	s.mockRepo.AssertExpectations(s.T())
@@ -200,6 +201,7 @@ func (s *TestSuite) TestUpdateModelRoute_UpdatedAt() {
 	s.mockRepo.On("IsDefault", ctx, enID, mockTx).Return(false, nil)
 	s.mockRepo.On("UpdateModelRoute", ctx, mockTx, en).Return(nil)
 	s.eMockPub.On("PublishEvent", ctx, mockTx, mock.Anything).Return(nil)
+	s.mockRepo.On("GetModelRoute", ctx, s.nilTx, en.ID).Return(en, nil)
 
 	timeBeforeCall := time.Now()
 	as.NoError(s.service.UpdateModelRoute(ctx, en))

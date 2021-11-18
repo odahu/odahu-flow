@@ -34,7 +34,6 @@ type InferenceServiceRepo interface {
 	Delete(ctx context.Context, tx *sql.Tx, id string) (err error)
 }
 
-
 type InferenceServiceService struct {
 	repo InferenceServiceRepo
 }
@@ -42,7 +41,6 @@ type InferenceServiceService struct {
 func NewInferenceServiceService(repo InferenceServiceRepo) *InferenceServiceService {
 	return &InferenceServiceService{repo: repo}
 }
-
 
 // Create creates api_types.InferenceService
 func (s *InferenceServiceService) Create(
@@ -69,17 +67,15 @@ func (s *InferenceServiceService) Create(
 	return err
 }
 
-
 // Update updates api_types.InferenceService
 func (s *InferenceServiceService) Update(
-	ctx context.Context, id string, bis api_types.InferenceService) (err error) {
-
+	ctx context.Context, id string, bis *api_types.InferenceService) (err error) {
 
 	bis.DeletionMark = false
 	bis.UpdatedAt = time.Now().UTC()
 
 	// Validation
-	if errs := ValidateCreateUpdate(bis); len(errs) > 0 {
+	if errs := ValidateCreateUpdate(*bis); len(errs) > 0 {
 		return odahuErrs.InvalidEntityError{
 			Entity:           bis.ID,
 			ValidationErrors: errs,
@@ -92,7 +88,7 @@ func (s *InferenceServiceService) Update(
 	}
 	bis.CreatedAt = old.CreatedAt
 
-	return s.repo.Update(ctx, nil, id, bis)
+	return s.repo.Update(ctx, nil, id, *bis)
 }
 
 func (s *InferenceServiceService) Delete(ctx context.Context, id string) (err error) {
@@ -107,5 +103,3 @@ func (s *InferenceServiceService) List(
 	ctx context.Context, options ...filter.ListOption) (res []api_types.InferenceService, err error) {
 	return s.repo.List(ctx, nil, options...)
 }
-
-

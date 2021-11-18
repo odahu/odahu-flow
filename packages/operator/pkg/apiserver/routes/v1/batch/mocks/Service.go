@@ -97,11 +97,11 @@ func (_m *Service) List(ctx context.Context, options ...filter.ListOption) ([]ba
 }
 
 // Update provides a mock function with given fields: ctx, id, bis
-func (_m *Service) Update(ctx context.Context, id string, bis batch.InferenceService) error {
+func (_m *Service) Update(ctx context.Context, id string, bis *batch.InferenceService) error {
 	ret := _m.Called(ctx, id, bis)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, batch.InferenceService) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, *batch.InferenceService) error); ok {
 		r0 = rf(ctx, id, bis)
 	} else {
 		r0 = ret.Error(0)
