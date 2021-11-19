@@ -6,6 +6,7 @@ Library             String
 Library             OperatingSystem
 Library             Collections
 Library             DateTime
+Library             pabot.PabotLib
 Library             odahuflow.robot.libraries.k8s.K8s  ${ODAHUFLOW_NAMESPACE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             odahuflow.robot.libraries.process.Process
@@ -161,6 +162,33 @@ Run example model
     should not be equal  ${res.rc}  0
 
     # --------- LOCAL COMMAND SECTION -----------
+Cleanup local training resources
+    # specified in ${ARTIFACT_DIR}/dir/training_cluster.yaml
+    [Arguments]  ${training_1}  ${training_2}
+    StrictShell  odahuflowctl train delete --ignore-not-found --id ${training_1}
+    StrictShell  odahuflowctl train delete --ignore-not-found --id ${training_2}
+
+Local Setup
+    # ${training_file_path} - absolute path to training manifests
+    # ${training_1},  ${training_2} - trainings to remove from cluster
+    [Arguments]  ${training_file_path}  ${training_1}  ${training_2}
+    Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
+    StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
+    Login to the api and edge
+    Cleanup local training resources  ${training_1}  ${training_2}
+    StrictShell  odahuflowctl --verbose bulk apply ${training_file_path}
+    StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
+    StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose setup
+
+Local Cleanup
+    # ${training_1},  ${training_2} - trainings to remove from cluster
+    [Arguments]  ${training_1}  ${training_2}
+    Cleanup local training resources  ${training_1}  ${training_2}
+    StrictShell  ${LOCAL_SETUP_DIR}/local_setup_cleanup.sh --verbose cleanup
+    Remove Directory  ${RESULT_DIR}  recursive=True
+    Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
+    Remove File  ${LOCAL_CONFIG}
+
 Run Local Training
     [Arguments]  ${train options}
         ${result}  StrictShell  odahuflowctl --verbose local train ${train options}
@@ -181,7 +209,7 @@ Run Packaging
         StrictShell  docker container list -as -f id=${container_id.stdout}
 
         ${MODEL_HOST}    Get local model host
-        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --base-url ${MODEL_HOST} --url-prefix :${MODEL PORT} --json-file ${RES_DIR}/request.json
+        ${result_model}  StrictShell  odahuflowctl --verbose model invoke --base-url ${MODEL_HOST} --url-prefix :${MODEL PORT} --json-file ${INPUT_FILE}
         ${expected response}          evaluate  json.loads('''${WINE_MODEL_RESULT}''')    json
         ${actual response}            evaluate  json.loads('''${result_model.stdout}''')    json
         dictionaries should be equal  ${actual response}  ${expected response}

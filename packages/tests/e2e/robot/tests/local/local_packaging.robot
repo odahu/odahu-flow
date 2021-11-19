@@ -1,29 +1,21 @@
 *** Variables ***
-${RES_DIR}                  ${CURDIR}/resources
-${ARTIFACT_DIR}             ${RES_DIR}/artifacts/odahuflow
+${LOCAL_CONFIG}             odahuflow/local_packaging
 ${RESULT_DIR}               ${CURDIR}/local_pack_results
-
-${INPUT_FILE}               ${RES_DIR}/request.json
 ${DEFAULT_RESULT_DIR}       ~/.odahuflow/local_packaging/training_output
 
-${LOCAL_CONFIG}             odahuflow/local_packaging
+# training id from resources/artifacts/odahuflow/dir/training_cluster_pack.yaml file
+${TRAINING_ID_TEMPLATE}     local-pack-dir-cluster-artifact-template
+${TRAINING_ID_HARDCODED}    local-pack-dir-cluster-artifact-hardcoded
 
 *** Settings ***
 Documentation       local run of trainings and packagings
 ...                 with specs on cluster and host, accent on packagings
 Resource            ../../resources/keywords.robot
 Resource            ../../resources/variables.robot
+Resource            ./variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
-Library             odahuflow.robot.libraries.utils.Utils
-Library             Collections
-Suite Setup         Run Keywords
-...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
-...                 AND  Login to the api and edge
-...                 AND  StrictShell  odahuflowctl --verbose config set LOCAL_MODEL_OUTPUT_DIR ${DEFAULT_RESULT_DIR}
-Suite Teardown      Run Keywords
-...                 Remove Directory  ${RESULT_DIR}  recursive=True
-...                 AND  Remove Directory  ${DEFAULT_RESULT_DIR}  recursive=True
-...                 AND  Remove File  ${LOCAL_CONFIG}
+Suite Setup         Local Setup  ${ARTIFACT_DIR}/dir/training_cluster_pack.yaml  ${TRAINING_ID_TEMPLATE}  ${TRAINING_ID_HARDCODED}
+Suite Teardown      Local Cleanup  ${TRAINING_ID_TEMPLATE}  ${TRAINING_ID_HARDCODED}
 Force Tags          cli  local  packaging
 Test Timeout        120 minutes
 
@@ -45,8 +37,8 @@ Run Valid Training with local & cluster specs when connected to cluster
     # local
     run --id local-dir-artifact-template-pack -d "${ARTIFACT_DIR}/dir" --output-dir ${RESULT_DIR}
     # cluster
-    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id local-dir-cluster-artifact-template --output ${RESULT_DIR}
-    --url ${API_URL} --token "${AUTH_TOKEN}" run --id local-dir-cluster-artifact-hardcoded
+    run -f ${ARTIFACT_DIR}/dir/packaging.yaml --id ${TRAINING_ID_TEMPLATE} --output ${RESULT_DIR}
+    --url ${API_URL} --token "${AUTH_TOKEN}" run --id ${TRAINING_ID_HARDCODED}
 
 Try Run and Fail Packaging with invalid credentials
     [Template]  Try Run Local Packaging

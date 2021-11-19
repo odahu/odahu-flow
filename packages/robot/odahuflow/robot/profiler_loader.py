@@ -90,6 +90,7 @@ def get_variables(profile=None) -> typing.Dict[str, str]:
                 'HOST_BASE_DOMAIN': host_base_domain,
                 'CLUSTER_NAME': data.get('cluster_name'),
                 'CLUSTER_CONTEXT': data.get('cluster_context'),
+                'DOCKER_REGISTRY': data.get('docker_repo'),
                 'FEEDBACK_BUCKET': data.get('data_bucket'),
                 'TEST_BUCKET': data.get('data_bucket'),
                 'EXAMPLES_VERSION': data.get('examples').get('examples_version'),

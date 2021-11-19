@@ -1,9 +1,10 @@
 *** Settings ***
-Documentation  Checking of airflow settings
-Test Timeout        60 minutes
-Resource            ../../resources/keywords.robot
-Library             odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
-Force Tags  airflow
+Documentation           Checking of airflow settings
+Resource        ../../resources/keywords.robot
+Library         odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
+Suite Setup     StrictShell  ${CURDIR}/resources/setup.sh
+Force Tags      airflow
+Test Timeout    60 minutes
 
 *** Variables ***
 ${TEST_DAG_RUN_IDS}  health_check,airflow-wine-from-yamls
