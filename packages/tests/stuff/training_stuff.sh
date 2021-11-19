@@ -277,7 +277,7 @@ function local_setup() {
   wget -O "${LOCAL_TEST_DATA}/../request.json" "${GIT_REPO_DATA}/mlflow/sklearn/wine/odahuflow/request.json"
   wget -O "${LOCAL_TEST_DATA}/MLproject" "${GIT_REPO_DATA}/mlflow/sklearn/wine/MLproject"
   wget -O "${LOCAL_TEST_DATA}/train.py" "${GIT_REPO_DATA}/mlflow/sklearn/wine/train.py"
-  wget -O "${LOCAL_TEST_DATA}/conda.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.yaml"
+  wget -O "${LOCAL_TEST_DATA}/conda.lock.linux-64.yaml" "${GIT_REPO_DATA}/mlflow/sklearn/wine/conda.lock.linux-64.yaml"
   wget -O "${LOCAL_TEST_DATA}/wine-quality.csv" "${GIT_REPO_DATA}/mlflow/sklearn/wine/data/wine-quality.csv"
 
   # configure Docker: https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud-helper
