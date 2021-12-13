@@ -44,7 +44,7 @@ Wine model
     ${infer_path}=  Catenate  SEPARATOR=/  ${model_path}  infer
 
     ${headers}=    Create Dictionary    Authorization=Bearer ${CONFIG}[API_TOKEN]
-    Create Session  odahu  headers=${headers}  url=${CONFIG}[API_URL]
+    Create Session  odahu  headers=${headers}  url=${CONFIG}[API_URL]  verify=${TRUE}
 
     Wait until keyword succeeds  30 min  10 sec  GET On Session  odahu  url=${model_path}
     Wait until keyword succeeds  1 min  10 sec  GET On Session  odahu  url=${readiness_path}
