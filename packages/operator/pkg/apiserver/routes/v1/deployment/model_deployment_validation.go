@@ -40,6 +40,7 @@ const (
 	LivenessProbeErrorMessage  = "livenessProbeInitialDelay must be non-negative integer"
 	UnknownNodeSelector        = "node selector %v is not presented in ODAHU config"
 	DefaultRolePrefix          = "role-"
+	MaxIDLengthErrorMessage    = "model deployment ID should not exceed 46 symbols"
 )
 
 var (
@@ -67,7 +68,12 @@ func NewModelDeploymentValidator(
 }
 
 func (mdv *ModelDeploymentValidator) ValidatesMDAndSetDefaults(md *deployment.ModelDeployment) (err error) {
-	err = multierr.Append(err, validation.ValidateID(md.ID))
+	if len(md.ID) > 46 {
+		//https://github.com/odahu/odahu-flow/issues/579
+		err = multierr.Append(err, errors.New(MaxIDLengthErrorMessage))
+	} else {
+		err = multierr.Append(err, validation.ValidateID(md.ID))
+	}
 
 	if len(md.Spec.Image) == 0 {
 		err = multierr.Append(err, errors.New(EmptyImageErrorMessage))
