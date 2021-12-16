@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
 	"go.uber.org/multierr"
@@ -35,6 +36,7 @@ const (
 	TotalWeightErrorMessage    = "total target weight does not equal 100"
 	URLPrefixSlashErrorMessage = "the URL prefix must start with slash"
 	ForbiddenPrefix            = "the URL prefix %s is forbidden"
+	InvalidCustomPrefix        = "custom URL prefix must start with %s"
 	ErrorMessageTemplate       = "%s: %s"
 	ValidationMrErrorMessage   = "Validation of model route is failed"
 )
@@ -44,6 +46,7 @@ var (
 	ForbiddenPrefixes = []string{
 		"/model", "/feedback",
 	}
+	odahuConfig = config.MustLoadConfig()
 )
 
 type MrValidator struct {
@@ -73,16 +76,20 @@ func (mrv *MrValidator) validateMainParameters(mr *deployment.ModelRoute) (err e
 		if !strings.HasPrefix(mr.Spec.URLPrefix, "/") {
 			err = multierr.Append(err, errors.New(URLPrefixSlashErrorMessage))
 		} else {
-			for _, prefix := range ForbiddenPrefixes {
-				if strings.HasPrefix(mr.Spec.URLPrefix, prefix) {
-					err = multierr.Append(err, fmt.Errorf(ForbiddenPrefix, prefix))
-					break
+			if !strings.HasPrefix(mr.Spec.URLPrefix, odahuConfig.Deployment.CustomRoutePrefix) {
+				err = multierr.Append(err, fmt.Errorf(InvalidCustomPrefix, odahuConfig.Deployment.CustomRoutePrefix))
+			} else {
+				for _, prefix := range ForbiddenPrefixes {
+					if strings.HasPrefix(mr.Spec.URLPrefix, prefix) {
+						err = multierr.Append(err, fmt.Errorf(ForbiddenPrefix, prefix))
+						break
+					}
 				}
 			}
 		}
 	}
 	if mr.Spec.Mirror != nil && len(*mr.Spec.Mirror) != 0 {
-		if _, k8sError := mrv.mdService.GetModelDeployment( context.TODO(), *mr.Spec.Mirror); k8sError != nil {
+		if _, k8sError := mrv.mdService.GetModelDeployment(context.TODO(), *mr.Spec.Mirror); k8sError != nil {
 			err = multierr.Append(err, k8sError)
 		}
 	}
@@ -101,7 +108,7 @@ func (mrv *MrValidator) validateModelDeploymentTargets(mr *deployment.ModelRoute
 	case 1:
 		mdt := mr.Spec.ModelDeploymentTargets[0]
 
-		if _, k8sError := mrv.mdService.GetModelDeployment(context.TODO(),  mdt.Name); k8sError != nil {
+		if _, k8sError := mrv.mdService.GetModelDeployment(context.TODO(), mdt.Name); k8sError != nil {
 			err = multierr.Append(err, k8sError)
 		}
 		if mdt.Weight == nil {
