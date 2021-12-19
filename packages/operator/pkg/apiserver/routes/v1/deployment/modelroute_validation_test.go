@@ -20,11 +20,12 @@ import (
 	"fmt"
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/deployment"
+	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
+	"github.com/odahu/odahu-flow/packages/operator/pkg/config"
+	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	md_service "github.com/odahu/odahu-flow/packages/operator/pkg/service/deployment"
 	"github.com/odahu/odahu-flow/packages/operator/pkg/validation"
-	dep_route "github.com/odahu/odahu-flow/packages/operator/pkg/apiserver/routes/v1/deployment"
 	"github.com/stretchr/testify/suite"
-	repo "github.com/odahu/odahu-flow/packages/operator/pkg/repository/deployment/postgres"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -32,8 +33,8 @@ import (
 
 type ModelRouteValidationSuite struct {
 	suite.Suite
-	g            *GomegaWithT
-	validator    *dep_route.MrValidator
+	g         *GomegaWithT
+	validator *dep_route.MrValidator
 }
 
 func (s *ModelRouteValidationSuite) SetupTest() {
@@ -211,33 +212,18 @@ func (s *ModelRouteValidationSuite) TestURLStartWithSlash() {
 	s.g.Expect(err.Error()).To(ContainSubstring(dep_route.URLPrefixSlashErrorMessage))
 }
 
-func (s *ModelRouteValidationSuite) TestForbiddenPrefixes() {
-	for _, prefix := range dep_route.ForbiddenPrefixes {
-		mr := &deployment.ModelRoute{
-			Spec: v1alpha1.ModelRouteSpec{
-				URLPrefix: fmt.Sprintf("%s/test/test", prefix),
-			},
-		}
-
-		err := s.validator.ValidatesAndSetDefaults(mr)
-		s.g.Expect(err).To(HaveOccurred())
-		s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(dep_route.ForbiddenPrefix, prefix)))
+func (s *ModelRouteValidationSuite) TestInvalidCustomUrlPrefix() {
+	mr := &deployment.ModelRoute{
+		Spec: v1alpha1.ModelRouteSpec{
+			URLPrefix: "/test/test",
+		},
 	}
-}
+	deploymentConfig := config.NewDefaultModelDeploymentConfig()
 
-func (s *ModelRouteValidationSuite) TestAllowForbiddenPrefixes() {
-	for _, prefix := range dep_route.ForbiddenPrefixes {
-		mr := &deployment.ModelRoute{
-			ID: mrID,
-			Spec: v1alpha1.ModelRouteSpec{
-				URLPrefix: fmt.Sprintf("%s/test/test", prefix),
-			},
-		}
-
-		err := s.validator.ValidatesAndSetDefaults(mr)
-		s.g.Expect(err).To(HaveOccurred())
-		s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(dep_route.ForbiddenPrefix, prefix)))
-	}
+	err := s.validator.ValidatesAndSetDefaults(mr)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).To(ContainSubstring(
+		fmt.Sprintf(dep_route.InvalidCustomPrefix, deploymentConfig.CustomRoutePrefix)))
 }
 
 func (s *ModelRouteValidationSuite) TestValidateID() {
@@ -249,3 +235,18 @@ func (s *ModelRouteValidationSuite) TestValidateID() {
 	s.g.Expect(err).Should(HaveOccurred())
 	s.g.Expect(err.Error()).Should(ContainSubstring(validation.ErrIDValidation.Error()))
 }
+
+// In current state Forbidden prefixes will fail anyway because of custom prefix validation
+//func (s *ModelRouteValidationSuite) TestForbiddenPrefixes() {
+//	for _, prefix := range dep_route.ForbiddenPrefixes {
+//		mr := &deployment.ModelRoute{
+//			Spec: v1alpha1.ModelRouteSpec{
+//				URLPrefix: fmt.Sprintf("%s/test/test", prefix),
+//			},
+//		}
+//
+//		err := s.validator.ValidatesAndSetDefaults(mr)
+//		s.g.Expect(err).To(HaveOccurred())
+//		s.g.Expect(err.Error()).To(ContainSubstring(fmt.Sprintf(dep_route.ForbiddenPrefix, prefix)))
+//	}
+//}
