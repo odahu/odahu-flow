@@ -14,14 +14,14 @@
 //    limitations under the License.
 //
 
-package training
+package training //nolint
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/api/v1alpha1"
 	"time"
 )
 
-type TrainingIntegration struct {
+type TrainingIntegration struct { //nolint
 	// Training integration id
 	ID string `json:"id"`
 	// CreatedAt

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package training_integration
+package training_integration //nolint
 
 import (
 	"github.com/odahu/odahu-flow/packages/operator/pkg/apis/training"

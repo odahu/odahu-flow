@@ -51,7 +51,7 @@ type trainingIntegrationService interface {
 	DeleteTrainingIntegration(name string) error
 }
 
-type TrainingIntegrationController struct {
+type TrainingIntegrationController struct { //nolint
 	service   trainingIntegrationService
 	validator *TiValidator
 }

@@ -40,7 +40,7 @@ type Repository interface {
 	BeginTransaction(ctx context.Context) (*sql.Tx, error)
 }
 
-type TrainingIntegrationRepository interface {
+type TrainingIntegrationRepository interface { //nolint
 	GetTrainingIntegration(name string) (*training.TrainingIntegration, error)
 	GetTrainingIntegrationList(options ...filter.ListOption) ([]training.TrainingIntegration, error)
 	DeleteTrainingIntegration(name string) error
