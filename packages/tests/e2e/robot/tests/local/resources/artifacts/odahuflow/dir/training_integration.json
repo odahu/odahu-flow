@@ -2,7 +2,7 @@
   "kind": "TrainingIntegration",
   "id": "mlflow",
   "spec": {
-    "defaultImage": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:<tag>",
+    "defaultImage": "gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-training-integration:<tag>",
     "entrypoint": "/opt/conda/bin/odahu-flow-mlflow-runner"
   }
 }

@@ -1,0 +1,3 @@
+BEGIN;
+alter table odahu_operator_toolchain_integration rename to odahu_training_training_integration;
+COMMIT;

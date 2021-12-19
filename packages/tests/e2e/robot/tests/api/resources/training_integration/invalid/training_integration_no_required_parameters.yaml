@@ -2,6 +2,6 @@ kind: TrainingIntegration
 id: training-integration-yaml-no-required-params
 spec:
   defaultImage: >-
-    gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain:latest
+    gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-training-integration:latest
   additionalEnvironments:
     MLFLOW_TRACKING_URI: 'http://mlflow.odahu-flow.svc.cluster.local'

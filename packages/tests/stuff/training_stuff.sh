@@ -15,10 +15,10 @@ COMMAND=setup
 
 # array of image repos for local tests (in removal order)
 IMAGE_REPO=(
-  odahu/odahu-flow-mlflow-toolchain
+  odahu/odahu-flow-mlflow-training-integration
   odahu/odahu-flow-packagers
   odahu/odahu-flow-docker-packager-base
-  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-toolchain
+  gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-mlflow-training-integration
   gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers
   gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-docker-packager-base
 )
@@ -305,7 +305,7 @@ function local_setup() {
     '.spec.uri=$uri | .spec.username=$username | .spec.password=$password' "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json" | jq "." | sponge "${LOCAL_TEST_DATA}/odahuflow/dir/docker-pull-target.json"
 
   ## docker image tags
-  local ti_version="$(jq -r .mlflow_toolchain_version "${CLUSTER_PROFILE}")"
+  local ti_version="$(jq -r .mlflow_training_integration "${CLUSTER_PROFILE}")"
   local pi_version="$(jq -r .packager_version "${CLUSTER_PROFILE}")"
 
   image=$(change_image_tag "${LOCAL_TEST_DATA}/odahuflow/dir/training_integration.json" ".spec.defaultImage" "${ti_version}")
