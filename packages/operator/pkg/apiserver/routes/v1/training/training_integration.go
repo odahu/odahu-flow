@@ -111,6 +111,7 @@ func (tic *TrainingIntegrationController) getAllTrainingIntegrations(c *gin.Cont
 		return
 	}
 
+	logTI.Info("!DEBUGGING!", "result", &tiList)
 	c.JSON(http.StatusOK, &tiList)
 }
 
