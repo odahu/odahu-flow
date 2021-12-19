@@ -386,7 +386,7 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 	mr := newStubMr()
 	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
-	newURL := "/new/url"
+	newURL := "/custom/new/url"
 	mrEntity := newStubMr()
 	mrEntity.Spec.URLPrefix = newURL
 
@@ -421,7 +421,7 @@ func (s *ModelRouteSuite) TestUpdateDefaultRoute() {
 
 	// API request
 
-	newURL := "/new/url"
+	newURL := "/custom/new/url"
 	mrEntity := newStubMr()
 	mrEntity.Spec.URLPrefix = newURL
 	mrEntity.ID = r
