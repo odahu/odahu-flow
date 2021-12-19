@@ -18,8 +18,8 @@
 // pkg/database/migrations/postgres/sources/000008_outbox.up.sql (210B)
 // pkg/database/migrations/postgres/sources/000009_batch.down.sql (756B)
 // pkg/database/migrations/postgres/sources/000009_batch.up.sql (1.313kB)
-// pkg/database/migrations/postgres/sources/000010_trainng_integration_down.sql (110B)
-// pkg/database/migrations/postgres/sources/000010_trainng_integration_up.sql (110B)
+// pkg/database/migrations/postgres/sources/000010_trainng_integration.down.sql (120B)
+// pkg/database/migrations/postgres/sources/000010_trainng_integration.up.sql (120B)
 
 package postgres
 
@@ -363,7 +363,7 @@ func _000007_default_routeUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000007_default_route.up.sql", size: 98, mode: os.FileMode(0664), modTime: time.Unix(1634714528, 0)}
+	info := bindataFileInfo{name: "000007_default_route.up.sql", size: 98, mode: os.FileMode(0664), modTime: time.Unix(1639929765, 0)}
 	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x58, 0x10, 0x24, 0xd8, 0xce, 0xbe, 0x3, 0x6, 0x60, 0x6e, 0xe5, 0x79, 0x9, 0xc8, 0x18, 0x61, 0x23, 0x7f, 0xde, 0x72, 0xdb, 0x35, 0x8, 0xad, 0x10, 0x9b, 0xcd, 0xf7, 0x80, 0xe1, 0x4b, 0xe1}}
 	return a, nil
 }
@@ -448,43 +448,43 @@ func _000009_batchUpSql() (*asset, error) {
 	return a, nil
 }
 
-var __000010_trainng_integration_downSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\xca\x31\x0a\xc3\x30\x0c\x05\xd0\xdd\xa7\xd0\x3d\xbc\xb5\x94\xe2\xc1\xed\xd2\xdd\xfc\x26\xc2\x16\x38\x52\x10\xca\xfd\xb3\x06\xb2\xbf\xc7\xeb\x5d\x3e\x39\x61\x06\x3b\x05\xfe\x93\xc9\x56\x8c\xa3\xd9\xce\x8e\x30\x6f\xe1\x10\x15\xed\x4d\x34\xb8\x3b\x42\x4c\xc9\x59\xb1\x31\x85\xdd\xb4\xd9\x5c\x06\x44\xaf\x3c\xa7\xe7\xb7\xd6\xf2\xcb\x67\x00\x00\x00\xff\xff\x7a\x7b\xf3\x02\x6e\x00\x00\x00")
+var __000010_trainng_integrationDownSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\xca\xb1\x0a\xc2\x40\x0c\x00\xd0\xbd\x5f\x91\xff\xb8\xe9\x2a\x51\x02\xbd\x16\xda\x0c\x6e\x47\xd0\xd2\x06\x24\x91\x10\xff\xdf\x55\x70\x7f\x23\xde\x68\x2e\x43\x9d\x18\x57\xe0\x3a\x4e\x08\x74\x05\xbc\xd3\xc6\x1b\xf8\x53\xce\x4f\xf7\xf7\x1e\x92\x1e\x3d\x43\xd4\xd4\x8e\xae\x96\xfb\x11\x92\xea\x06\x2b\xce\xb5\x21\xf0\xf2\xa7\xdd\x5f\x8f\x53\xd4\x7e\x79\x19\x2e\x4b\x6b\xc4\xe5\x1b\x00\x00\xff\xff\x63\xb0\x8c\xe2\x78\x00\x00\x00")
 
-func _000010_trainng_integration_downSqlBytes() ([]byte, error) {
+func _000010_trainng_integrationDownSqlBytes() ([]byte, error) {
 	return bindataRead(
-		__000010_trainng_integration_downSql,
-		"000010_trainng_integration_down.sql",
+		__000010_trainng_integrationDownSql,
+		"000010_trainng_integration.down.sql",
 	)
 }
 
-func _000010_trainng_integration_downSql() (*asset, error) {
-	bytes, err := _000010_trainng_integration_downSqlBytes()
+func _000010_trainng_integrationDownSql() (*asset, error) {
+	bytes, err := _000010_trainng_integrationDownSqlBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000010_trainng_integration_down.sql", size: 110, mode: os.FileMode(0664), modTime: time.Unix(1639916055, 0)}
-	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x4d, 0x6b, 0x14, 0xfd, 0xb7, 0xd1, 0xd6, 0xcd, 0xec, 0xe7, 0xd5, 0xbc, 0x19, 0xbd, 0xb7, 0x71, 0x9, 0x4a, 0x4a, 0x71, 0xf3, 0x16, 0x35, 0x2a, 0xd2, 0xb0, 0x7, 0x46, 0x7c, 0x96, 0xbd, 0x77}}
+	info := bindataFileInfo{name: "000010_trainng_integration.down.sql", size: 120, mode: os.FileMode(0664), modTime: time.Unix(1639930639, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x70, 0xfb, 0xd2, 0x6d, 0xad, 0x80, 0xf, 0x6f, 0x60, 0x17, 0x4a, 0x32, 0xe5, 0xdb, 0xa3, 0xdd, 0x93, 0x2b, 0xd2, 0xfb, 0xef, 0x3e, 0x19, 0xef, 0x65, 0x65, 0xeb, 0x5a, 0x97, 0x82, 0xc1, 0xef}}
 	return a, nil
 }
 
-var __000010_trainng_integration_upSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4c\xca\xb1\x0a\x42\x31\x0c\x05\xd0\xfd\x7d\x45\xfe\xa3\x9b\x22\xd2\xa1\xba\xb8\x97\xab\x86\x36\x50\x13\x09\xd7\xff\x77\x11\x7c\xdb\x19\xce\xe1\x74\xae\x97\xb2\x61\x51\x53\x88\xfb\x52\x89\x27\xe6\xa7\xc7\x5b\x13\x8c\xec\x8c\x58\x8f\x09\xf3\x6e\x4e\x1d\x09\x5a\xb8\xa4\x3a\x5e\x2a\x8c\x5f\x67\xc2\xdc\x7c\xfc\xb1\xdb\x65\x3b\x5e\x5b\xab\xb7\xf2\x0d\x00\x00\xff\xff\x5f\xa4\x8d\xef\x6e\x00\x00\x00")
+var __000010_trainng_integrationUpSql = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\xca\xb1\x0a\xc2\x40\x0c\x00\xd0\xbd\x5f\x91\xff\xb8\xe9\x2a\x51\x02\xbd\x16\xda\x0c\x6e\x47\xd0\xd2\x06\x24\x91\x10\xff\xdf\x55\x70\x7f\x23\xde\x68\x2e\x43\x9d\x18\x57\xe0\x3a\x4e\x08\x74\x05\xbc\xd3\xc6\x1b\xf8\x53\xce\x4f\xf7\xf7\x1e\x92\x1e\x3d\xdd\x5f\x8f\x53\xd4\xba\x5a\xee\x47\x48\xaa\x1b\xac\x38\xd7\x86\xc0\xcb\x1f\x0f\x51\x53\x3b\x7e\x75\x19\x2e\x4b\x6b\xc4\xe5\x1b\x00\x00\xff\xff\xfd\x6a\x2f\x8d\x78\x00\x00\x00")
 
-func _000010_trainng_integration_upSqlBytes() ([]byte, error) {
+func _000010_trainng_integrationUpSqlBytes() ([]byte, error) {
 	return bindataRead(
-		__000010_trainng_integration_upSql,
-		"000010_trainng_integration_up.sql",
+		__000010_trainng_integrationUpSql,
+		"000010_trainng_integration.up.sql",
 	)
 }
 
-func _000010_trainng_integration_upSql() (*asset, error) {
-	bytes, err := _000010_trainng_integration_upSqlBytes()
+func _000010_trainng_integrationUpSql() (*asset, error) {
+	bytes, err := _000010_trainng_integrationUpSqlBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "000010_trainng_integration_up.sql", size: 110, mode: os.FileMode(0664), modTime: time.Unix(1639916055, 0)}
-	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0xe3, 0x5f, 0xdd, 0xaa, 0xe1, 0x4f, 0x60, 0x83, 0xdc, 0x56, 0xad, 0xff, 0x4a, 0xc3, 0x7a, 0x45, 0xeb, 0x54, 0x62, 0xe4, 0x96, 0xac, 0xe3, 0xad, 0xb5, 0x7, 0x79, 0xf9, 0x31, 0x8d, 0x54, 0x4a}}
+	info := bindataFileInfo{name: "000010_trainng_integration.up.sql", size: 120, mode: os.FileMode(0664), modTime: time.Unix(1639930639, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0xdd, 0xdf, 0x95, 0xd6, 0x6a, 0x7c, 0x1b, 0xfa, 0xc, 0x23, 0xf, 0x86, 0xc3, 0x72, 0x61, 0x4b, 0x89, 0xf0, 0x1c, 0xb4, 0x56, 0xe8, 0xd6, 0xa0, 0x29, 0x1d, 0xc1, 0x94, 0xcb, 0x74, 0x62, 0x1e}}
 	return a, nil
 }
 
@@ -597,8 +597,8 @@ var _bindata = map[string]func() (*asset, error){
 	"000008_outbox.up.sql":                              _000008_outboxUpSql,
 	"000009_batch.down.sql":                             _000009_batchDownSql,
 	"000009_batch.up.sql":                               _000009_batchUpSql,
-	"000010_trainng_integration_down.sql":               _000010_trainng_integration_downSql,
-	"000010_trainng_integration_up.sql":                 _000010_trainng_integration_upSql,
+	"000010_trainng_integration.down.sql":               _000010_trainng_integrationDownSql,
+	"000010_trainng_integration.up.sql":                 _000010_trainng_integrationUpSql,
 }
 
 // AssetDebug is true if the assets were built with the debug flag enabled.
@@ -663,8 +663,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"000008_outbox.up.sql":                              {_000008_outboxUpSql, map[string]*bintree{}},
 	"000009_batch.down.sql":                             {_000009_batchDownSql, map[string]*bintree{}},
 	"000009_batch.up.sql":                               {_000009_batchUpSql, map[string]*bintree{}},
-	"000010_trainng_integration_down.sql":               {_000010_trainng_integration_downSql, map[string]*bintree{}},
-	"000010_trainng_integration_up.sql":                 {_000010_trainng_integration_upSql, map[string]*bintree{}},
+	"000010_trainng_integration.down.sql":               {_000010_trainng_integrationDownSql, map[string]*bintree{}},
+	"000010_trainng_integration.up.sql":                 {_000010_trainng_integrationUpSql, map[string]*bintree{}},
 }}
 
 // RestoreAsset restores an asset under the given directory.
