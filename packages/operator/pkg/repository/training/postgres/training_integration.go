@@ -69,6 +69,8 @@ func (tr TrainingIntegrationRepo) GetTrainingIntegrationList(options ...filter.L
 
 	var tis []training.TrainingIntegration
 
+	log.Info("!DEBUGGING1!", "result", tis, "&result", &tis)
+
 	for rows.Next() {
 		ti := new(training.TrainingIntegration)
 		err := rows.Scan(&ti.ID, &ti.Spec, &ti.Status, &ti.CreatedAt, &ti.UpdatedAt)
@@ -81,6 +83,7 @@ func (tr TrainingIntegrationRepo) GetTrainingIntegrationList(options ...filter.L
 	if err != nil {
 		return nil, err
 	}
+	log.Info("!DEBUGGING2", "result", tis, "&result", &tis)
 	return tis, nil
 
 }

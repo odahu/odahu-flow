@@ -115,6 +115,8 @@ func (repo TrainingRepo) GetModelTrainingList(
 
 	mts := make([]training.ModelTraining, 0)
 
+	log.Info("!DEBUGGING3!", "result", mts, "&result", &mts)
+
 	for rows.Next() {
 		mt := new(training.ModelTraining)
 		err := rows.Scan(&mt.ID, &mt.Spec, &mt.Status, &mt.DeletionMark, &mt.CreatedAt, &mt.UpdatedAt)
@@ -126,6 +128,7 @@ func (repo TrainingRepo) GetModelTrainingList(
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
+	log.Info("!DEBUGGING4!", "result", mts, "&result", &mts)
 	return mts, nil
 
 }

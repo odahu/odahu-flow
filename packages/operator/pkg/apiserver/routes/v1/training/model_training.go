@@ -126,7 +126,6 @@ func (mtc *ModelTrainingController) getAllMTs(c *gin.Context) {
 		return
 	}
 
-	logMT.Info("!DEBUGGING!", "result", &mtList)
 	c.JSON(http.StatusOK, &mtList)
 }
 
