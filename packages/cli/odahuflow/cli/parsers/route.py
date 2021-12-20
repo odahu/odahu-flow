@@ -104,7 +104,7 @@ def create(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout:
 
     click.echo(client.create(route_resource))
 
-    wait_operation_finish(timeout, wait, mr_id, client)
+    wait_operation_finish(timeout, wait, route_resource.id, client)
 
 
 @route.command()
@@ -140,7 +140,7 @@ def edit(client: ModelRouteClient, mr_id: str, file: str, wait: bool, timeout: i
 
     click.echo(client.edit(route_resource))
 
-    wait_operation_finish(timeout, wait, mr_id, client)
+    wait_operation_finish(timeout, wait, route_resource.id, client)
 
 
 @route.command()
