@@ -51,7 +51,8 @@ const (
 	S3TypeRoleNotSupportedErrorMessage = "s3 type does not support role parameter yet"
 	ECRTypeKeySecretEmptyErrorMessage  = "ecr type requires that keyID and keySecret parameters" +
 		" must be non-empty"
-	ECRTypeNotValidURI = "not valid uri for ecr type: %s"
+	ECRTypeNotValidURI     = "not valid uri for ecr type: %s"
+	ErrorConnectionIsVital = "vital connections cannot be deleted"
 )
 
 type PublicKeyEvaluator func(string) (string, error)
@@ -126,7 +127,7 @@ func (cv *ConnValidator) validateBase64Fields(conn *connection.Connection) error
 
 func (cv *ConnValidator) validateEcrType(conn *connection.Connection) (err error) {
 	// Try to parse URI
-	if conn.Spec.URI != "" {  // If URI is empty then skip extracting Registry and further logic
+	if conn.Spec.URI != "" { // If URI is empty then skip extracting Registry and further logic
 		registry, urlParsingErr := api.ExtractRegistry(conn.Spec.URI)
 		if urlParsingErr != nil {
 			err = multierr.Append(err, fmt.Errorf(ECRTypeNotValidURI, urlParsingErr.Error()))
@@ -214,4 +215,12 @@ func (cv *ConnValidator) validateGitType(conn *connection.Connection) (err error
 	}
 
 	return err
+}
+
+func (cv *ConnValidator) validateIsVital(conn *connection.Connection) (err error) {
+	if conn.Spec.Vital {
+		err = multierr.Append(err, errors.New(ErrorConnectionIsVital))
+	}
+
+	return
 }

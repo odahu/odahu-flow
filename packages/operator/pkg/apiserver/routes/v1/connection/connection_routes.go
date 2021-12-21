@@ -257,6 +257,19 @@ func (cc *controller) updateConnection(c *gin.Context) {
 // @Router /api/v1/connection/{id} [delete]
 func (cc *controller) deleteConnection(c *gin.Context) {
 	connID := c.Param(IDConnURLParam)
+	conn, err := cc.connService.GetConnection(connID, true)
+
+	if err != nil {
+		logC.Error(err, fmt.Sprintf("Failed to get %s connection", connID))
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
+		return
+	}
+
+	if err := cc.validator.validateIsVital(conn); err != nil {
+		logC.Error(err, fmt.Sprintf("Validation of %s connection is failed", connID))
+		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
+		return
+	}
 
 	if err := cc.connService.DeleteConnection(connID); err != nil {
 		logC.Error(err, fmt.Sprintf("Deletion of %s connection is failed", connID))
