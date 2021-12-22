@@ -24,7 +24,7 @@ def predict_on_matrix(input_matrix: List[List[Any]], provided_columns_names: Opt
     :param provided_columns_names: (Optional). Name of columns for provided matrix.
     :return: result matrix and result column names
     """
-    return np.ndarray([[42]]), ('result',)
+    return np.array([[42]]), ('result',)
 
 
 @functools.lru_cache()

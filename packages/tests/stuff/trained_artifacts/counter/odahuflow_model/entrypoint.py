@@ -29,7 +29,7 @@ def predict_on_matrix(input_matrix: List[List[Any]], provided_columns_names: Opt
     global COUNTER
     COUNTER += 1
 
-    return np.ndarray([[COUNTER]]), ('result',)
+    return np.array([[COUNTER]]), ('result',)
 
 
 @functools.lru_cache()
