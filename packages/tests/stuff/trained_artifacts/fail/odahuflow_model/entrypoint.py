@@ -1,6 +1,8 @@
 import functools
 from typing import Tuple, List, Dict, Any, Optional, Type
 
+import numpy as np
+
 
 def init() -> str:
     """
@@ -14,7 +16,7 @@ def init() -> str:
 
 
 def predict_on_matrix(input_matrix: List[List[Any]], provided_columns_names: Optional[List[str]] = None) \
-        -> Tuple[List[List[Any]], Tuple[str, ...]]:
+        -> Tuple[np.ndarray, Tuple[str, ...]]:
     """
     Make prediction on a Matrix of values
 
