@@ -5,6 +5,7 @@ ${MD_COUNTER_MODEL_1}       counter-model-route-1
 ${MD_COUNTER_MODEL_2}       counter-model-route-2
 ${MD_FAIL_MODEL}            fail-model-route
 ${TEST_MR_NAME}             test-route
+${BASIC_ROUTE}              basic-route
 ${TEST_MR_URL_PREFIX}       /custom/url
 
 *** Settings ***
@@ -31,6 +32,18 @@ Force Tags          cli  deployment  route
 Cleanup routes
     [Documentation]  Clean up all test routes
     StrictShell  odahuflowctl --verbose route delete --id ${TEST_MR_NAME} --ignore-not-found
+    StrictShell  odahuflowctl --verbose route delete --id ${BASIC_ROUTE} --ignore-not-found
+
+Create and check model route
+    [Arguments]  ${route_file_path}  ${model_route_parameter}=--mr ${model_route_id}  ${model_route_id}=
+    StrictShell  odahuflowctl --verbose route create ${model_route_id} -f ${route_file_path}
+
+    # TODO: For now we can't control virtual service readiness.
+    sleep  5s
+
+    FOR    ${INDEX}    IN RANGE    1    20
+       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke ${model_route_parameter} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
+    END
 
 Cleanup deployments
     [Documentation]  Clean up all test deployments
@@ -105,46 +118,22 @@ Getting of nonexistent Route by name
 
 Basic routing
     [Documentation]  Basic route
-    StrictShell  odahuflowctl --verbose route create --id ${TEST_MR_NAME} -f ${RES_DIR}/test-50-50-counter.route.odahuflow.yaml
-
-    # TODO: For now we can't control virtual service readiness.
-    sleep  5s
-
-    FOR    ${INDEX}    IN RANGE    1    20
-       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
-    END
+    Create and check model route  ${RES_DIR}/test-50-50-counter.route.odahuflow.yaml  --mr ${BASIC_ROUTE}
 
     ${counter_1_result}=  Check model counter  ${MD_COUNTER_MODEL_1}
     ${counter_2_result}=  Check model counter  ${MD_COUNTER_MODEL_2}
     ${couters_sum}=  Evaluate    int(${counter_1_result}) + int(${counter_2_result})
-
     should be equal as integers  21  ${couters_sum}
 
 Basic mirroring
     [Documentation]  Route with mirroring
-    StrictShell  odahuflowctl --verbose route create --id ${TEST_MR_NAME} -f ${RES_DIR}/test-counter-mirror.route.odahuflow.yaml
-
-    # TODO: For now we can't control virtual service readiness.
-    sleep  5s
-
-    FOR    ${INDEX}    IN RANGE    1    20
-       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
-    END
-
+    Create and check model route  ${RES_DIR}/test-counter-mirror.route.odahuflow.yaml  --mr ${TEST_MR_NAME}  --id ${TEST_MR_NAME}
     Check model counter  ${MD_COUNTER_MODEL_1}
     Check model counter  ${MD_COUNTER_MODEL_2}
 
 Mirror to broken model
     [Documentation]  Mirror traffic to broken model
-    StrictShell  odahuflowctl --verbose route create --id ${TEST_MR_NAME} -f ${RES_DIR}/test-fail-mirror.route.odahuflow.yaml
-
-    # TODO: For now we can't control virtual service readiness.
-    sleep  5s
-
-    FOR    ${INDEX}    IN RANGE    1    20
-       Wait Until Keyword Succeeds  2m  10 sec  StrictShell  odahuflowctl --verbose model invoke --url-prefix ${TEST_MR_URL_PREFIX} --json-file ${RES_DIR}/simple-model.request.json --token ${AUTH_TOKEN}
-    END
-
+    Create and check model route  ${RES_DIR}/test-fail-mirror.route.odahuflow.yaml  --url-prefix ${TEST_MR_URL_PREFIX}  --id ${TEST_MR_NAME}
     Check model counter  ${MD_COUNTER_MODEL_1}
 
 File with entity not found
