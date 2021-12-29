@@ -1,9 +1,10 @@
 *** Variables ***
-${RES_DIR}              ${CURDIR}/resources
-${SETUP_DIR}            ${CURDIR}/setup
-${LOCAL_CONFIG}         odahuflow/config_training_training_cli
-${TRAIN_ID}             test-algorithm-source
-${TRAIN_STUFF_DIR}      ${CURDIR}/../../../../stuff
+${RES_DIR}                  ${CURDIR}/resources
+${SETUP_DIR}                ${CURDIR}/setup
+${LOCAL_CONFIG}             odahuflow/config_training_training_cli
+${TRAIN_ID}                 test
+${TRAIN_STUFF_DIR}          ${CURDIR}/../../../../stuff
+@{WINE_MODEL_VALIDATION}    RMSE: 0.8107373707184711  MAE: 0.6241295925236751  R2: 0.15105362812007328
 
 
 *** Settings ***
@@ -25,7 +26,7 @@ Suite Setup         Run Keywords
 Suite Teardown      Run Keywords
 ...                 Cleanup all resources  AND
 ...                 Remove file  ${LOCAL_CONFIG}
-Force Tags          training  algorithm-source  cli
+Force Tags          training  cli
 
 *** Keywords ***
 Cleanup all resources
@@ -40,12 +41,22 @@ Cleanup resources
 Train valid model
     [Arguments]  ${training id}  ${training_file}
     [Teardown]  Cleanup resources  ${training id}
-    StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
+    ${result}=  StrictShell  odahuflowctl --verbose train create -f ${RES_DIR}/valid/${training_file} --id ${training id}
     report training pods  ${training id}
 
+    # validation for "wine" model
+    should contain any  ${result.stdout}  @{WINE_MODEL_VALIDATION}
+
 *** Test Cases ***
-Vaild downloading parameters
+Vaild algorithm source parameters
     [Documentation]  Verify valid algorithm sourcses
+    [Tags]  algorithm-source
     [Template]  Train valid model
-    ${TRAIN_ID}-vcs                   vcs.training.odahuflow.yaml
-    ${TRAIN_ID}-object-storage        object_storage.training.odahuflow.yaml
+    ${TRAIN_ID}-algorithm-source-vcs                 vcs.training.odahuflow.yaml
+    ${TRAIN_ID}-algorithm-source-object-storage      object_storage.training.odahuflow.yaml
+
+Validate default values of parameters
+    [Documentation]  Verify that default values of parameters
+    [Tags]  default-values
+    [Template]  Train valid model
+    ${TRAIN_ID}-object-storage-default-workdir     default_workdir.training.odahuflow.yaml
