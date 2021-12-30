@@ -1,5 +1,5 @@
 *** Variables ***
-${RES_DIR}              ${CURDIR}/resources
+${RES_DIR}              ${CURDIR}/resources/deployment/valid
 ${LOCAL_CONFIG}        odahuflow/config_deployment_dep_undep
 ${MD_SIMPLE_MODEL}     simple-model-dep-undep
 
