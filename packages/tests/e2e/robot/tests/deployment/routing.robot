@@ -1,5 +1,7 @@
 *** Variables ***
 ${RES_DIR}                  ${CURDIR}/resources
+${DEP_RES_DIR}              ${RES_DIR}/deployment
+${ROUTE_RES_DIR}            ${RES_DIR}/route
 ${LOCAL_CONFIG}             odahuflow/config_deployment_route
 ${MD_COUNTER_MODEL_1}       counter-model-route-1
 ${MD_COUNTER_MODEL_2}       counter-model-route-2
@@ -20,9 +22,9 @@ Library             Collections
 Suite Setup         Run keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                 Login to the api and edge  AND
 ...                 Cleanup resources  AND
-...                 Run API deploy from model packaging and check model started  ${MP_COUNTER_MODEL}   ${MD_COUNTER_MODEL_1}   ${RES_DIR}/min-replicas-0.deployment.odahuflow.yaml  AND
-...                 Run API deploy from model packaging and check model started  ${MP_COUNTER_MODEL}   ${MD_COUNTER_MODEL_2}   ${RES_DIR}/min-replicas-0.deployment.odahuflow.yaml  AND
-...                 Run API deploy from model packaging and check model started  ${MP_FAIL_MODEL}      ${MD_FAIL_MODEL}        ${RES_DIR}/min-replicas-0.deployment.odahuflow.yaml
+...                 Run API deploy from model packaging and check model started  ${MP_COUNTER_MODEL}   ${MD_COUNTER_MODEL_1}   ${DEP_RES_DIR}/valid/min-replicas-0.deployment.odahuflow.yaml  AND
+...                 Run API deploy from model packaging and check model started  ${MP_COUNTER_MODEL}   ${MD_COUNTER_MODEL_2}   ${DEP_RES_DIR}/valid/min-replicas-0.deployment.odahuflow.yaml  AND
+...                 Run API deploy from model packaging and check model started  ${MP_FAIL_MODEL}      ${MD_FAIL_MODEL}        ${DEP_RES_DIR}/valid/min-replicas-0.deployment.odahuflow.yaml
 Suite Teardown      Run keywords  Cleanup resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
 Test Teardown       Cleanup routes
@@ -118,7 +120,7 @@ Getting of nonexistent Route by name
 
 Basic routing
     [Documentation]  Basic route
-    Create and check model route  ${RES_DIR}/test-50-50-counter.route.odahuflow.yaml  --mr ${BASIC_ROUTE}
+    Create and check model route  ${ROUTE_RES_DIR}/test-50-50-counter.route.odahuflow.yaml  --mr ${BASIC_ROUTE}
 
     ${counter_1_result}=  Check model counter  ${MD_COUNTER_MODEL_1}
     ${counter_2_result}=  Check model counter  ${MD_COUNTER_MODEL_2}
@@ -127,13 +129,13 @@ Basic routing
 
 Basic mirroring
     [Documentation]  Route with mirroring
-    Create and check model route  ${RES_DIR}/test-counter-mirror.route.odahuflow.yaml  --mr ${TEST_MR_NAME}  --id ${TEST_MR_NAME}
+    Create and check model route  ${ROUTE_RES_DIR}/test-counter-mirror.route.odahuflow.yaml  --mr ${TEST_MR_NAME}  --id ${TEST_MR_NAME}
     Check model counter  ${MD_COUNTER_MODEL_1}
     Check model counter  ${MD_COUNTER_MODEL_2}
 
 Mirror to broken model
     [Documentation]  Mirror traffic to broken model
-    Create and check model route  ${RES_DIR}/test-fail-mirror.route.odahuflow.yaml  --url-prefix ${TEST_MR_URL_PREFIX}  --id ${TEST_MR_NAME}
+    Create and check model route  ${ROUTE_RES_DIR}/test-fail-mirror.route.odahuflow.yaml  --url-prefix ${TEST_MR_URL_PREFIX}  --id ${TEST_MR_NAME}
     Check model counter  ${MD_COUNTER_MODEL_1}
 
 File with entity not found
