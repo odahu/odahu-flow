@@ -96,10 +96,15 @@ Limits resources should be equal
     should be equal              ${result.spec.resources.limits.gpu}        ${GPU}
     should be equal              ${result.spec.resources.limits.memory}     ${MEMORY}
 
+CreatedAt and UpdatedAt times should be equal
+    [Arguments]              ${result}
+    log                      ${result}
+    should be equal          ${result.created_at}  ${result.updated_at}
+
 CreatedAt and UpdatedAt times should not be equal
-    [Arguments]                  ${result}
-    ${result_status}             Log Status  ${result}
-    should not be equal          ${result_status}.get('createdAt')  ${result_status}.get('updatedAt')
+    [Arguments]              ${result}
+    log                      ${result}
+    should not be equal      ${result.created_at}  ${result.updated_at}
 
 Wait until command finishes and returns result
     [Arguments]    ${command}    ${entity}  ${exp_result}=${API_KEYWORDS.EXP_RESULT}  ${cycles}=120  ${sleep_time}=30s
