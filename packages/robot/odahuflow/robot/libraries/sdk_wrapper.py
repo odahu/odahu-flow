@@ -82,8 +82,11 @@ class ModelDeployment:
         return ModelDeploymentClient().edit(api_object)
 
     @staticmethod
-    def deployment_post(payload_file, image=None):
+    def deployment_post(payload_file, *, id=None, image=None):
         api_object = parse_resources_file_with_one_item(payload_file).resource
+
+        if id:
+            api_object.id = id
 
         if image:
             api_object.spec.image = image

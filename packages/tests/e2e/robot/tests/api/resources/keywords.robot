@@ -5,14 +5,19 @@ Library             Collections
 *** Variables ***
 @{API_KEYWORDS.EXP_RESULT}     succeeded  failed
 # Error Templates
+${400 ModelDeploymentIdTooLong}        WrongHttpStatusCode: Got error from server: Validation of model deployment is failed:
+...                                    model deployment ID should not exceed 46 symbols (status: 400)
 ${404 NotFound Template}        WrongHttpStatusCode: Got error from server: entity "{}" is not found (status: 404)
 ${404 Model NotFoundTemplate}   Wrong status code returned: 404. Data: . URL: {}
 ${409 Conflict Template}        EntityAlreadyExists: Got error from server: entity "{}" already exists (status: 409)
 
 ${APIConnectionException}       APIConnectionException: Can not reach {base url}
-${IncorrectCredentials}         IncorrectClientCredentials: Client credentials are not correct.\nPlease check credentials and try again
-${IncorrectToken}               IncorrectAuthorizationToken: Credentials are not correct.\nPlease provide correct temporary token or disable non interactive mode
-${MissedToken}                  IncorrectAuthorizationToken: Credentials are missed.\nPlease provide correct temporary token or disable non interactive mode
+${IncorrectCredentials}         IncorrectClientCredentials: Client credentials are not correct.\n
+...                             Please check credentials and try again
+${IncorrectToken}               IncorrectAuthorizationToken: Credentials are not correct.\n
+...                             Please provide correct temporary token or disable non interactive mode
+${MissedToken}                  IncorrectAuthorizationToken: Credentials are missed.\n
+...                             Please provide correct temporary token or disable non interactive mode
 
 *** Keywords ***
 Call API
