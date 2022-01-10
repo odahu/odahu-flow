@@ -65,6 +65,7 @@ Create deployment
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Check model started         ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
+    CreatedAt and UpdatedAt times should be equal  ${result}
     ${default_route}            Call API  deployment get default route  ${MODEL}
     ${result}                   Call API  route get id  ${default_route.id}
     ID should be equal          ${result}  ${default_route.id}
@@ -75,11 +76,12 @@ Create Deployment with maximum allowed id
     [Teardown]                  Cleanup resource  deployment  model-deployment-id-46-characters-long-0123456
     ${image}                    Pick packaging image  ${PACKAGING}
     Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml
-    ...                         image=${image}  id=${DEPLOYMENT_46_CHARS_ID_LONG}
+    ...                         image=${image}  id_=${DEPLOYMENT_46_CHARS_ID_LONG}
     ${exp_result}               create List   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT_46_CHARS_ID_LONG}  exp_result=${exp_result}
     Check model started         ${DEPLOYMENT_46_CHARS_ID_LONG}
     Status State Should Be      ${result}  Ready
+    CreatedAt and UpdatedAt times should be equal  ${result}
 
 Update deployment
     [Tags]                      deployment
@@ -89,12 +91,12 @@ Update deployment
     should be equal             ${check_changes.spec.role_name}  test_updated
     ${exp_result}               create list   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
-    Check model started  ${DEPLOYMENT}
+    Check model started         ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
+    CreatedAt and UpdatedAt times should not be equal  ${result}
     ${default_route}            Call API  deployment get default route  ${MODEL}
     ${result}                   Call API  route get id  ${default_route.id}
     ID should be equal          ${result}  ${default_route.id}
-    CreatedAt and UpdatedAt times should not be equal  ${result}
 
 Check by id that deployment exists
     [Tags]                      deployment
@@ -169,7 +171,7 @@ Try Create Deployment with id longer than allowed
     [Tags]                      deployment  negative
     [Documentation]             the allowed id length is no more than 46 characters
     Call API and get Error      ${400 ModelDeploymentIdTooLong}  deployment post  ${RES_DIR}/valid/deployment.create.yaml
-    ...                         image=${PACKAGE_IMAGE_STUB}  id=model-deployment-id-47-characters-long-01234567
+    ...                         image=${PACKAGE_IMAGE_STUB}  id_=model-deployment-id-47-characters-long-01234567
 
 Try Update not existing Deployment
     [Tags]                      deployment  negative
