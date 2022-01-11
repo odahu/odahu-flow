@@ -7,7 +7,7 @@ Force Tags      airflow
 Test Timeout    60 minutes
 
 *** Variables ***
-${TEST_DAG_RUN_IDS}  health_check,airflow-wine-from-yamls
+${TEST_DAG_RUN_IDS}  health_check,airflow-wine-from-yamls,airflow-wine
 
 *** Test Cases ***
 Airflow DAG
