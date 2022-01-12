@@ -59,23 +59,27 @@ function wait_dags_finish() {
 
     while true; do
       # Extract a dag state from the following output json.
-      #[
-      # ...,
-      #  {
-      #    "dag_id": "health_check",
-      #    "dag_run_url": "/airflow/admin/airflow/graph?dag_id=health_check&execution_date=2020-09-16+09%3A55%3A00%2B00%3A00",
-      #    "execution_date": "2020-09-16T09:55:00+00:00",
-      #    "id": 43,
-      #    "run_id": "scheduled__2020-09-16T09:55:00+00:00",
-      #    "start_date": "2020-09-16T10:00:01.489937+00:00",
-      #    "state": "success"
-      #  }
-      #]
+      # {
+      #   "dag_runs": [
+      #     ...,
+      #     {
+      #       "conf": {},
+      #       "dag_id": "airflow-wine-from-yamls",
+      #       "dag_run_id": "airflow-wine-from-yamls-ci-1641988013",
+      #       "end_date": "2022-01-12T11:47:30.421802+00:00",
+      #       "execution_date": "2022-01-12T11:47:15.798530+00:00",
+      #       "external_trigger": true,
+      #       "start_date": "2022-01-12T11:47:15.803632+00:00",
+      #       "state": "running"
+      #     }
+      #   ],
+      #   "total_entries": ...
+      # }
       state=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
-      curl -X GET  http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs \
+      curl -X GET  http://localhost:8080/airflow/api/v1/dags/${dag_id}/dagRuns \
            -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' \
            -d "{\"run_id\": \"${dag_id}\"}" --silent \
-           | jq -r -c ".[] | select(.run_id == \"${dag_run_id}\") | .state")
+           | jq -r -c ".dag_runs[] | select(.dag_run_id==\"${dag_run_id}\") | .state")
       echo "${state}"
       case "${state}" in
       "success")
@@ -111,9 +115,9 @@ for dag_id in "${TEST_DAG_IDS[@]}"; do
 
   echo "Run the ${dag_run_id} of ${dag_id} dag"
   ${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
-  curl -X POST   http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs  \
+  curl -X POST   http://localhost:8080/airflow/api/v1/dags/${dag_id}/dagRuns  \
        -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json'  \
-       -d "{\"run_id\": \"${dag_run_id}\"}" --silent
+       -d "{\"dag_run_id\": \"${dag_run_id}\"}" --silent
 
 done
 
