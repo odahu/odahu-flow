@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation           Checking of airflow settings
+Documentation   Checking of airflow settings
 Resource        ../../resources/keywords.robot
 Library         odahuflow.robot.libraries.odahu_k8s_reporter.OdahuKubeReporter
 Suite Setup     StrictShell  ${CURDIR}/resources/setup.sh

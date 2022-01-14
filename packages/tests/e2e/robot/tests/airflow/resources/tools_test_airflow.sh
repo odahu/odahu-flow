@@ -50,6 +50,29 @@ function ReadArguments() {
   fi
 }
 
+function wait_dags_load() {
+  echo "Wait and check that DAGs are uploaded to the Airflow."
+
+  for dag_id in "${TEST_DAG_IDS[@]}"; do
+
+    echo "Checking ${dag_id} for readiness..."
+
+    while true; do
+      is_active=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
+        curl -X GET  http://localhost:8080/airflow/api/v1/dags/${dag_id} \
+             -H 'Cache-Control: no-cache' -H 'Content-Type: application/json' --silent \
+             | jq -r -c ".is_active")
+
+      if [ ${is_active} == "true" ]; then
+        echo "'${dag_id}' is ready"
+        break
+      fi
+    done
+  done
+
+  echo "DAGs are ready for runs."
+}
+
 function wait_dags_finish() {
   for i in "${!TEST_DAG_RUN_IDS[@]}"; do
     dag_run_id="${TEST_DAG_RUN_IDS[${i}]}"
@@ -60,26 +83,19 @@ function wait_dags_finish() {
     while true; do
       # Extract a dag state from the following output json.
       # {
-      #   "dag_runs": [
-      #     ...,
-      #     {
-      #       "conf": {},
-      #       "dag_id": "airflow-wine-from-yamls",
-      #       "dag_run_id": "airflow-wine-from-yamls-ci-1641988013",
-      #       "end_date": "2022-01-12T11:47:30.421802+00:00",
-      #       "execution_date": "2022-01-12T11:47:15.798530+00:00",
-      #       "external_trigger": true,
-      #       "start_date": "2022-01-12T11:47:15.803632+00:00",
-      #       "state": "running"
-      #     }
-      #   ],
-      #   "total_entries": ...
+      #   "conf": {},
+      #   "dag_id": "airflow-wine-from-yamls",
+      #   "dag_run_id": "airflow-wine-from-yamls-ci-1641988013",
+      #   "end_date": "2022-01-12T11:47:30.421802+00:00",
+      #   "execution_date": "2022-01-12T11:47:15.798530+00:00",
+      #   "external_trigger": true,
+      #   "start_date": "2022-01-12T11:47:15.803632+00:00",
+      #   "state": "running"
       # }
       state=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
-      curl -X GET  http://localhost:8080/airflow/api/v1/dags/${dag_id}/dagRuns \
-           -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' \
-           -d "{\"run_id\": \"${dag_id}\"}" --silent \
-           | jq -r -c ".dag_runs[] | select(.dag_run_id==\"${dag_run_id}\") | .state")
+      curl -X GET  http://localhost:8080/airflow/api/v1/dags/${dag_id}/dagRuns/${dag_run_id} \
+           -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' --silent \
+           | jq -r -c ".state")
       echo "${state}"
       case "${state}" in
       "success")
@@ -107,6 +123,8 @@ export TEST_DAG_RUN_IDS=()
 ReadArguments "$@"
 POD=$(${KUBECTL} get pods -l app=airflow -l component=web -n "${AIRFLOW_NAMESPACE}" -o jsonpath='{.items[0].metadata.name}')
 export POD
+
+wait_dags_load
 
 # Run all test dags
 for dag_id in "${TEST_DAG_IDS[@]}"; do
