@@ -74,6 +74,9 @@ function wait_dags_load() {
 }
 
 function wait_dags_finish() {
+  dag_states=()
+  exit_status=0
+
   for i in "${!TEST_DAG_RUN_IDS[@]}"; do
     dag_run_id="${TEST_DAG_RUN_IDS[${i}]}"
     dag_id="${TEST_DAG_IDS[${i}]}"
@@ -100,6 +103,7 @@ function wait_dags_finish() {
       case "${state}" in
       "success")
         echo "DAG run ${dag_run_id} finished"
+        dag_states+=("DAG run ${dag_run_id} finished with success.")
         break
         ;;
       "running")
@@ -108,15 +112,23 @@ function wait_dags_finish() {
         ;;
       "failed")
         echo "DAG run ${dag_run_id} failed"
-        exit 1
+        dag_states+=("DAG run ${dag_run_id} failed")
+        exit_status=1
+        break
         ;;
       *)
-        echo "${state} is unknown state of the ${dag_run_id} DAG"
-        exit 1
+        echo "'${state}' is unknown state of the ${dag_run_id} DAG"
+        dag_states+=("'${state}' is unknown state of the ${dag_run_id} DAG")
+        exit_status=1
+        break
         ;;
       esac
     done
   done
+
+  echo "Final states of the DAGs:"
+  printf '%s\n' "${dag_states[@]}"
+  exit ${exit_status}
 }
 
 export TEST_DAG_RUN_IDS=()
