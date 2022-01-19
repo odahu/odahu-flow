@@ -86,7 +86,7 @@ func (pir *PackagingIntegrationRepository) GetPackagingIntegrationList(options .
 	}
 	defer rows.Close()
 
-	var pis []packaging.PackagingIntegration
+	pis := make([]packaging.PackagingIntegration, 0)
 
 	for rows.Next() {
 		pi := new(packaging.PackagingIntegration)

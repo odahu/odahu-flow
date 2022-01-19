@@ -67,7 +67,7 @@ func (tr ToolchainRepo) GetToolchainIntegrationList(options ...filter.ListOption
 	}
 	defer rows.Close()
 
-	var tis []training.ToolchainIntegration
+	tis := make([]training.ToolchainIntegration, 0)
 
 	for rows.Next() {
 		ti := new(training.ToolchainIntegration)
