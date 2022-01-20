@@ -261,7 +261,7 @@ func (cc *controller) deleteConnection(c *gin.Context) {
 
 	if err != nil {
 		logC.Error(err, fmt.Sprintf("Failed to get %s connection", connID))
-		c.AbortWithStatusJSON(http.StatusBadRequest, httputil.HTTPResult{Message: err.Error()})
+		c.AbortWithStatusJSON(errors.CalculateHTTPStatusCode(err), httputil.HTTPResult{Message: err.Error()})
 		return
 	}
 

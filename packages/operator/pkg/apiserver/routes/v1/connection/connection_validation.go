@@ -52,7 +52,7 @@ const (
 	ECRTypeKeySecretEmptyErrorMessage  = "ecr type requires that keyID and keySecret parameters" +
 		" must be non-empty"
 	ECRTypeNotValidURI     = "not valid uri for ecr type: %s"
-	ErrorConnectionIsVital = "vital connections cannot be deleted"
+	ErrorConnectionIsVital = "%s connection is vital, it cannot be deleted"
 )
 
 type PublicKeyEvaluator func(string) (string, error)
@@ -219,7 +219,7 @@ func (cv *ConnValidator) validateGitType(conn *connection.Connection) (err error
 
 func (cv *ConnValidator) validateIsVital(conn *connection.Connection) (err error) {
 	if conn.Spec.Vital {
-		err = multierr.Append(err, errors.New(ErrorConnectionIsVital))
+		err = multierr.Append(err, fmt.Errorf(ErrorConnectionIsVital, conn.ID))
 	}
 
 	return
