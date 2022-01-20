@@ -50,7 +50,33 @@ function ReadArguments() {
   fi
 }
 
+function wait_dags_load() {
+  echo "Wait and check that DAGs are uploaded to the Airflow."
+
+  for dag_id in "${TEST_DAG_IDS[@]}"; do
+
+    echo "Checking ${dag_id} for readiness..."
+
+    while true; do
+      is_active=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
+        curl -X GET  http://localhost:8080/airflow/api/v1/dags/${dag_id} \
+             -H 'Cache-Control: no-cache' -H 'Content-Type: application/json' --silent \
+             | jq -r -c ".is_active")
+
+      if [ ${is_active} == "true" ]; then
+        echo "'${dag_id}' is ready"
+        break
+      fi
+    done
+  done
+
+  echo "DAGs are ready for runs."
+}
+
 function wait_dags_finish() {
+  dag_states=()
+  exit_status=0
+
   for i in "${!TEST_DAG_RUN_IDS[@]}"; do
     dag_run_id="${TEST_DAG_RUN_IDS[${i}]}"
     dag_id="${TEST_DAG_IDS[${i}]}"
@@ -59,27 +85,25 @@ function wait_dags_finish() {
 
     while true; do
       # Extract a dag state from the following output json.
-      #[
-      # ...,
-      #  {
-      #    "dag_id": "health_check",
-      #    "dag_run_url": "/airflow/admin/airflow/graph?dag_id=health_check&execution_date=2020-09-16+09%3A55%3A00%2B00%3A00",
-      #    "execution_date": "2020-09-16T09:55:00+00:00",
-      #    "id": 43,
-      #    "run_id": "scheduled__2020-09-16T09:55:00+00:00",
-      #    "start_date": "2020-09-16T10:00:01.489937+00:00",
-      #    "state": "success"
-      #  }
-      #]
+      # {
+      #   "conf": {},
+      #   "dag_id": "airflow-wine-from-yamls",
+      #   "dag_run_id": "airflow-wine-from-yamls-ci-1641988013",
+      #   "end_date": "2022-01-12T11:47:30.421802+00:00",
+      #   "execution_date": "2022-01-12T11:47:15.798530+00:00",
+      #   "external_trigger": true,
+      #   "start_date": "2022-01-12T11:47:15.803632+00:00",
+      #   "state": "running"
+      # }
       state=$(${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
-      curl -X GET  http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs \
-           -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' \
-           -d "{\"run_id\": \"${dag_id}\"}" --silent \
-           | jq -r -c ".[] | select(.run_id == \"${dag_run_id}\") | .state")
+      curl -X GET  http://localhost:8080/airflow/api/v1/dags/${dag_id}/dagRuns/${dag_run_id} \
+           -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json' --silent \
+           | jq -r -c ".state")
       echo "${state}"
       case "${state}" in
       "success")
         echo "DAG run ${dag_run_id} finished"
+        dag_states+=("DAG run ${dag_run_id} finished with success.")
         break
         ;;
       "running")
@@ -88,21 +112,31 @@ function wait_dags_finish() {
         ;;
       "failed")
         echo "DAG run ${dag_run_id} failed"
-        exit 1
+        dag_states+=("DAG run ${dag_run_id} failed")
+        exit_status=1
+        break
         ;;
       *)
-        echo "${state} is unknown state of the ${dag_run_id} DAG"
-        exit 1
+        echo "'${state}' is unknown state of the ${dag_run_id} DAG"
+        dag_states+=("'${state}' is unknown state of the ${dag_run_id} DAG")
+        exit_status=1
+        break
         ;;
       esac
     done
   done
+
+  echo "Final states of the DAGs:"
+  printf '%s\n' "${dag_states[@]}"
+  exit ${exit_status}
 }
 
 export TEST_DAG_RUN_IDS=()
 ReadArguments "$@"
 POD=$(${KUBECTL} get pods -l app=airflow -l component=web -n "${AIRFLOW_NAMESPACE}" -o jsonpath='{.items[0].metadata.name}')
 export POD
+
+wait_dags_load
 
 # Run all test dags
 for dag_id in "${TEST_DAG_IDS[@]}"; do
@@ -111,9 +145,9 @@ for dag_id in "${TEST_DAG_IDS[@]}"; do
 
   echo "Run the ${dag_run_id} of ${dag_id} dag"
   ${KUBECTL} exec "$POD" -n "${AIRFLOW_NAMESPACE}" -c "${AIRFLOW_WEB_CONTAINER_NAME}" -- \
-  curl -X POST   http://localhost:8080/airflow/api/experimental/dags/${dag_id}/dag_runs  \
+  curl -X POST   http://localhost:8080/airflow/api/v1/dags/${dag_id}/dagRuns  \
        -H 'Cache-Control: no-cache'   -H 'Content-Type: application/json'  \
-       -d "{\"run_id\": \"${dag_run_id}\"}" --silent
+       -d "{\"dag_run_id\": \"${dag_run_id}\"}" --silent
 
 done
 
