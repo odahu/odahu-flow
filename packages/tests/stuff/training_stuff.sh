@@ -171,7 +171,7 @@ function create_test_data_connection() {
 
   # Replaced the uri with the test data directory and added the kind field
   odahuflowctl conn get --id models-output --decrypted -o json |
-    conn_uri="${conn_uri}" jq '.[0].spec.uri = env.conn_uri | .[] | .kind = "Connection"' \
+    conn_uri="${conn_uri}" jq '.[0].spec.uri = env.conn_uri | .[] | .kind = "Connection" | del(.spec.vital)' \
       >"${conn_file}"
 
   odahuflowctl conn delete --id "${conn_id}" --ignore-not-found
