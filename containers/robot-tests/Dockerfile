@@ -33,7 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
     curl -s https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $DISTR main" | tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get -qqy update && \
-    apt-get install -y --no-install-recommends azure-cli google-cloud-sdk docker-ce-cli && \
+    apt-get install -y --no-install-recommends azure-cli=2.29 google-cloud-sdk docker-ce-cli && \
     apt-get install -y --no-install-recommends moreutils && \
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
