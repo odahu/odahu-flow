@@ -20,8 +20,9 @@ ARG MINICONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Lin
 ARG CONDA_ENV_PY_VERSION=3.9
 
 # Install python package dependencies and cloud CLI tools
-RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-https software-properties-common libgnutls-openssl27 libgnutls30 \
-    make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 ca-certificates gnupg-agent && \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl apt-transport-https lsb-release software-properties-common libgnutls-openssl27 libgnutls30 \
+    make build-essential zip libssl-dev libffi-dev zlib1g-dev libjpeg-dev git jq=1.5+dfsg-1.3 ca-certificates gnupg && \
     DISTR=$(lsb_release -cs) && \
     sed -ie 's/mozilla\/DST_Root_CA_X3\.crt/!mozilla\/DST_Root_CA_X3\.crt/' /etc/ca-certificates.conf && \
     update-ca-certificates && \
@@ -30,10 +31,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-transport-h
     echo "deb http://packages.cloud.google.com/apt cloud-sdk-$DISTR main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
     echo "deb http://packages.cloud.google.com/apt cloud-sdk-$DISTR main" | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
-    curl -s https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null && \
     echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $DISTR main" | tee /etc/apt/sources.list.d/azure-cli.list && \
     apt-get -qqy update && \
-    apt-get install -y --no-install-recommends azure-cli=2.29 google-cloud-sdk docker-ce-cli && \
+    apt-get install -y --no-install-recommends azure-cli=2.29.2-1~stretch google-cloud-sdk docker-ce-cli && \
     apt-get install -y --no-install-recommends moreutils && \
     apt-get clean all && rm -rf /var/lib/apt/lists/*
 
