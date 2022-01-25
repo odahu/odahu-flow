@@ -11,7 +11,7 @@ robotframework-requests==0.8.0
 pyyaml>=3.1.2
 google-cloud-storage>=1.18.0
 azure-storage-blob<=2.1.0
-azure-cli-core>=2.0.75
+azure-cli-core==2.29
 azure-mgmt-storage==2.0.0
 azure-core>=1.1.0
 chardet==3.0.4
