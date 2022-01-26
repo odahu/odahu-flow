@@ -97,6 +97,6 @@ func NewDefaultModelDeploymentConfig() ModelDeploymentConfig {
 				Memory: &defaultDeploymentMemoryLimit,
 			},
 		},
-		CustomRoutePrefix: "/custom",
+		CustomRoutePrefix: "/test/prefix",
 	}
 }
