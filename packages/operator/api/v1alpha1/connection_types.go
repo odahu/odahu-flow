@@ -51,6 +51,8 @@ type ConnectionSpec struct {
 	Description string `json:"description,omitempty"`
 	// Custom web UI link
 	WebUILink string `json:"webUILink,omitempty"`
+	// Is connection vital (vital connection cannot be deleted)
+	Vital bool `json:"vital,omitempty"`
 }
 
 type ConnectionType string
