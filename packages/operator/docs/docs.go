@@ -3810,6 +3810,10 @@ var doc = `{
                     "description": "Username",
                     "type": "string"
                 },
+                "vital": {
+                    "description": "Is connection vital (vital connection cannot be deleted)",
+                    "type": "boolean"
+                },
                 "webUILink": {
                     "description": "Custom web UI link",
                     "type": "string"

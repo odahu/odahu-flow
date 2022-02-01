@@ -15,7 +15,7 @@ class ConnectionSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, description: str=None, key_id: str=None, key_secret: str=None, password: str=None, public_key: str=None, reference: str=None, region: str=None, role: str=None, type: str=None, uri: str=None, username: str=None, web_ui_link: str=None):  # noqa: E501
+    def __init__(self, description: str=None, key_id: str=None, key_secret: str=None, password: str=None, public_key: str=None, reference: str=None, region: str=None, role: str=None, type: str=None, uri: str=None, username: str=None, vital: bool=None, web_ui_link: str=None):  # noqa: E501
         """ConnectionSpec - a model defined in Swagger
 
         :param description: The description of this ConnectionSpec.  # noqa: E501
@@ -40,6 +40,8 @@ class ConnectionSpec(Model):
         :type uri: str
         :param username: The username of this ConnectionSpec.  # noqa: E501
         :type username: str
+        :param vital: The vital of this ConnectionSpec.  # noqa: E501
+        :type vital: bool
         :param web_ui_link: The web_ui_link of this ConnectionSpec.  # noqa: E501
         :type web_ui_link: str
         """
@@ -55,6 +57,7 @@ class ConnectionSpec(Model):
             'type': str,
             'uri': str,
             'username': str,
+            'vital': bool,
             'web_ui_link': str
         }
 
@@ -70,6 +73,7 @@ class ConnectionSpec(Model):
             'type': 'type',
             'uri': 'uri',
             'username': 'username',
+            'vital': 'vital',
             'web_ui_link': 'webUILink'
         }
 
@@ -84,6 +88,7 @@ class ConnectionSpec(Model):
         self._type = type
         self._uri = uri
         self._username = username
+        self._vital = vital
         self._web_ui_link = web_ui_link
 
     @classmethod
@@ -349,6 +354,29 @@ class ConnectionSpec(Model):
         """
 
         self._username = username
+
+    @property
+    def vital(self) -> bool:
+        """Gets the vital of this ConnectionSpec.
+
+        Is connection vital (vital connection cannot be deleted)  # noqa: E501
+
+        :return: The vital of this ConnectionSpec.
+        :rtype: bool
+        """
+        return self._vital
+
+    @vital.setter
+    def vital(self, vital: bool):
+        """Sets the vital of this ConnectionSpec.
+
+        Is connection vital (vital connection cannot be deleted)  # noqa: E501
+
+        :param vital: The vital of this ConnectionSpec.
+        :type vital: bool
+        """
+
+        self._vital = vital
 
     @property
     def web_ui_link(self) -> str:
