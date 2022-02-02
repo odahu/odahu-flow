@@ -220,6 +220,7 @@ function cleanup() {
   odahuflowctl conn delete --id ${TEST_VALID_GPPI_ODAHU_FILE_ID} --ignore-not-found
   odahuflowctl conn delete --id ${TEST_CUSTOM_OUTPUT_FOLDER} --ignore-not-found
 
+  echo NO_CLEAN_UP=${NO_CLEAN_UP}
   if [ "${NO_CLEAN_UP}" = "false" ]; then
     odahuflowctl conn delete --id ${TEST_WINE_CONN_ID} --ignore-not-found
   fi
