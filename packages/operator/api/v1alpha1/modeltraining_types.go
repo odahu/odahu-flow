@@ -85,6 +85,8 @@ type ModelTrainingSpec struct {
 	// Resources for model container
 	// The same format like k8s uses for pod resources.
 	Resources *ResourceRequirements `json:"resources,omitempty"`
+	// Param used to skip data validation
+	DataNotRequired bool `json:"dataNotRequired"`
 	// Input data for a training
 	Data []DataBindingDir `json:"data,omitempty"`
 	// Node selector for specifying a node pool

@@ -38,6 +38,7 @@ const (
 	WrongVcsTypeErrorMessage             = "VCS connection must have the GIT type. You pass the connection of %s type"
 	EmptyAlgorithmSourceNameMessageError = "both VCS and ObjectStorage names are empty"
 	MultipleAlgorithmSourceMessageError  = "both VCS and ObjectStorage names are specified, must be only one"
+	EmptyDataBindingsErrorMessage        = "you should specify at least one data binding"
 	EmptyDataBindingNameErrorMessage     = "you should specify connection name for %d number of data binding"
 	EmptyDataBindingPathErrorMessage     = "you should specify local path for %d number of data binding"
 	WrongDataBindingTypeErrorMessage     = "%s data binding has wrong data type. Currently supported the following types" +
@@ -239,6 +240,10 @@ func (mtv *MtValidator) validateObjectStorage(mt *training.ModelTraining) (err e
 }
 
 func (mtv *MtValidator) validateMtData(mt *training.ModelTraining) (err error) {
+	if len(mt.Spec.Data) == 0 && !mt.Spec.DataNotRequired {
+		err = multierr.Append(err, errors.New(EmptyDataBindingsErrorMessage))
+	}
+
 	for i, dbd := range mt.Spec.Data {
 		if len(dbd.LocalPath) == 0 {
 			err = multierr.Append(err, fmt.Errorf(EmptyDataBindingPathErrorMessage, i))

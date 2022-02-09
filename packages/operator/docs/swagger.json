@@ -4108,6 +4108,10 @@
                         "$ref": "#/definitions/DataBindingDir"
                     }
                 },
+                "dataNotRequired": {
+                    "description": "Param used to skip data validation",
+                    "type": "boolean"
+                },
                 "entrypoint": {
                     "description": "Model training file. It can be python\\bash script or jupiter notebook",
                     "type": "string"
