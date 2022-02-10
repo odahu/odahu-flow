@@ -206,6 +206,7 @@ func newMtStub() *training.ModelTraining {
 					Reference:  testMtReference,
 				},
 			},
+			DataNotRequired:  true,
 			Image:            testMtImage,
 			Resources:        &res,
 			OutputConnection: testMtOutConn,
