@@ -199,6 +199,8 @@ func (mtc *ModelTrainingController) updateMT(c *gin.Context) {
 		return
 	}
 
+	logMT.Info("!!!DEBUG1!!!")
+
 	c.JSON(http.StatusOK, mt)
 }
 
