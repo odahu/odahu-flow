@@ -85,6 +85,8 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 	ctx context.Context, id string, status v1alpha1.ModelTrainingStatus, spec v1alpha1.ModelTrainingSpec,
 ) (err error) {
 
+	log.Info("!!!DEBUG2!!!")
+
 	tx, err := s.repo.BeginTransaction(ctx)
 	if err != nil {
 		return err
@@ -125,6 +127,8 @@ func (s serviceImpl) UpdateModelTrainingStatus(
 	if err != nil {
 		return err
 	}
+
+	log.Info("!!!DEBUG3!!!")
 
 	return err
 }
