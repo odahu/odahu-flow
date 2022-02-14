@@ -43,7 +43,7 @@ Run example model
 
 
 *** Test Cases ***
-Wine model
+Wine model for docker-cli packager
     Download file  mlflow/sklearn/wine/odahuflow/training.odahuflow.yaml  ${RES_DIR}/training.odahuflow.yaml
     Download file  mlflow/sklearn/wine/odahuflow/packaging.cli.odahuflow.yaml  ${RES_DIR}/packaging.cli.odahuflow.yaml
     Download file  mlflow/sklearn/wine/odahuflow/deployment.odahuflow.yaml  ${RES_DIR}/deployment.odahuflow.yaml
