@@ -25,7 +25,7 @@ require (
 	github.com/hashicorp/vault/sdk v0.1.14-0.20200521112254-72d69106be02 // indirect
 	github.com/hashicorp/yamux v0.0.0-20190923154419-df201c70410d // indirect
 	github.com/keybase/go-crypto v0.0.0-20190828182435-a05457805304 // indirect
-	github.com/lib/pq v1.2.0
+	github.com/lib/pq v1.10.4
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure v1.0.0
 	github.com/onsi/gomega v1.10.1
