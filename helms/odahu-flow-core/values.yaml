@@ -418,9 +418,6 @@ config:
     # Required value
     # Type: string
     namespace: odahu-flow-deployment
-    # Custom prefix for model deployments
-    # Type: string
-    customRoutePrefix: /custom
     # Security settings for model deployments
     security:
       # Default role name for model deployments
