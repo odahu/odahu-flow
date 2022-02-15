@@ -101,9 +101,9 @@ Status Code 400 - Bad Request
     ${400 BadRequest Template}  ${FailedPI} ${PI_empty_entrypoint}; ${PI_empty_defaultImage}
     ...  packager put  ${RES_DIR}/packager/invalid/rest_no_required_params.json
     # model training
-    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${empty_toolchain}
+    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${no_data_binding}; ${empty_toolchain}
     ...  training post  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
-    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${empty_toolchain}
+    ${400 BadRequest Template}  ${FailedTrain} ${empty_model_name}; ${empty_model_version}; ${empty_VCS_and_sorage}; ${no_data_binding}; ${empty_toolchain}
     ...  training put  ${RES_DIR}/training_packaging/invalid/training_no_required_params.yaml
     # model packaging
     ${400 BadRequest Template}  ${FailedPack} ${empty_artifactName}; ${empty_integrationName}
