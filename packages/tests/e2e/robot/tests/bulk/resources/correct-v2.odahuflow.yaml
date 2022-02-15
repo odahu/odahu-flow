@@ -58,10 +58,12 @@ spec:
     name: bulk-test-mt-1
     version: 'test'
   toolchain: mlflow
+  entrypoint: main
   algorithmSource:
     vcs:
       connection: odahu-flow-examples
       reference: develop
+  dataNotRequired: true
 ---
 kind: ModelPackaging
 id: bulk-test-mp-1
@@ -78,6 +80,6 @@ spec:
 kind: ModelDeployment
 id: bulk-test-md-1
 spec:
-  image:
+  image: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers:1.6.0-b1644879764289
   predictor: odahu-ml-server
   imagePullConnID: docker-ci
