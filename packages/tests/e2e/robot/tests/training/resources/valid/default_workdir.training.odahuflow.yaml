@@ -1,0 +1,25 @@
+kind: ModelTraining
+id: test-object-storage-default-workdir
+spec:
+  model:
+    name: test-default-workdir
+    version: "1.0"
+  toolchain: mlflow
+  hyperParameters:
+    alpha: "1.0"
+  entrypoint: main
+  algorithmSource:
+    objectStorage:
+      connection: models-output
+      path: /test_algorithm/wine
+  outputConnection: models-output
+  data:
+    - connection: wine
+      localPath: ./
+  resources:
+    limits:
+      cpu: 4
+      memory: 4Gi
+    requests:
+      cpu: 2
+      memory: 2Gi

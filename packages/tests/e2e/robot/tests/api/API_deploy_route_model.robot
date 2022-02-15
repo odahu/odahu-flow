@@ -5,6 +5,7 @@ ${RES_DIR}                          ${CURDIR}/resources/deploy_route_model
 ${PACKAGE_IMAGE_STUB}               packaging-image
 ${PACKAGING}                        simple-model
 ${DEPLOYMENT}                       wine-api-testing
+${DEPLOYMENT_46_CHARS_ID_LONG}      model-deployment-id-46-characters-long-0123456
 ${MODEL}                            ${DEPLOYMENT}
 ${DEPLOY_CUSTOM_ROLE}               api-test-custom-role
 ${MODEL_CUSTOM_ROLE}                ${DEPLOY_CUSTOM_ROLE}
@@ -59,29 +60,43 @@ Deployment's list doesn't contain not created deployments
 Create deployment
     [Tags]                      deployment
     ${image}                    Pick packaging image  ${PACKAGING}
-    Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${image}
+    Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml  image=${image}
     ${exp_result}               create List   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
     Check model started         ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
+    CreatedAt and UpdatedAt times should be equal  ${result}
     ${default_route}            Call API  deployment get default route  ${MODEL}
     ${result}                   Call API  route get id  ${default_route.id}
     ID should be equal          ${result}  ${default_route.id}
 
+Create Deployment with maximum allowed id
+    [Tags]                      deployment
+    [Documentation]             the allowed id length is no more than 46 characters
+    [Teardown]                  Cleanup resource  deployment  model-deployment-id-46-characters-long-0123456
+    ${image}                    Pick packaging image  ${PACKAGING}
+    Call API                    deployment post  ${RES_DIR}/valid/deployment.create.yaml
+    ...                         image=${image}  id_=${DEPLOYMENT_46_CHARS_ID_LONG}
+    ${exp_result}               create List   Ready
+    ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT_46_CHARS_ID_LONG}  exp_result=${exp_result}
+    Check model started         ${DEPLOYMENT_46_CHARS_ID_LONG}
+    Status State Should Be      ${result}  Ready
+    CreatedAt and UpdatedAt times should be equal  ${result}
+
 Update deployment
     [Tags]                      deployment
     ${image}                    Pick packaging image  ${PACKAGING}
-    Call API                    deployment put  ${RES_DIR}/valid/deployment.update.json  ${image}
+    Call API                    deployment put  ${RES_DIR}/valid/deployment.update.json  image=${image}
     ${check_changes}            Call API  deployment get id  ${DEPLOYMENT}
     should be equal             ${check_changes.spec.role_name}  test_updated
     ${exp_result}               create list   Ready
     ${result}                   Wait until command finishes and returns result  deployment  entity=${DEPLOYMENT}  exp_result=${exp_result}
-    Check model started  ${DEPLOYMENT}
+    Check model started         ${DEPLOYMENT}
     Status State Should Be      ${result}  Ready
+    CreatedAt and UpdatedAt times should not be equal  ${result}
     ${default_route}            Call API  deployment get default route  ${MODEL}
     ${result}                   Call API  route get id  ${default_route.id}
     ID should be equal          ${result}  ${default_route.id}
-    CreatedAt and UpdatedAt times should not be equal  ${result}
 
 Check by id that deployment exists
     [Tags]                      deployment
@@ -148,19 +163,25 @@ Try Create Deployment that already exists
     [Tags]                      deployment  negative
     [Setup]                     Cleanup resource  deployment  ${DEPLOYMENT}
     [Teardown]                  Cleanup resource  deployment  ${DEPLOYMENT}
-    Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  ${PACKAGE_IMAGE_STUB}
+    Call API                    deployment post  ${RES_DIR}/valid/deployment.update.json  image=${PACKAGE_IMAGE_STUB}
     ${EntityAlreadyExists}      format string  ${409 Conflict Template}  ${DEPLOYMENT}
-    Call API and get Error      ${EntityAlreadyExists}  deployment post  ${RES_DIR}/valid/deployment.create.yaml  ${PACKAGE_IMAGE_STUB}
+    Call API and get Error      ${EntityAlreadyExists}  deployment post  ${RES_DIR}/valid/deployment.create.yaml  image=${PACKAGE_IMAGE_STUB}
+
+Try Create Deployment with id longer than allowed
+    [Tags]                      deployment  negative
+    [Documentation]             the allowed id length is no more than 46 characters
+    Call API and get Error      ${400 ModelDeploymentIdTooLong}  deployment post  ${RES_DIR}/valid/deployment.create.yaml
+    ...                         image=${PACKAGE_IMAGE_STUB}  id_=model-deployment-id-47-characters-long-01234567
 
 Try Update not existing Deployment
     [Tags]                      deployment  negative
     ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT_NOT_EXIST}
-    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  ${PACKAGE_IMAGE_STUB}
+    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/invalid/deployment.update.not_exist.json  image=${PACKAGE_IMAGE_STUB}
 
 Try Update deleted Deployment
     [Tags]                      deployment  negative
     ${404NotFound}              format string  ${404 NotFound Template}  ${DEPLOYMENT}
-    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  ${PACKAGE_IMAGE_STUB}
+    Call API and get Error      ${404NotFound}  deployment put  ${RES_DIR}/valid/deployment.create.yaml  image=${PACKAGE_IMAGE_STUB}
 
 Try Get id not existing Deployment
     [Tags]                      deployment  negative

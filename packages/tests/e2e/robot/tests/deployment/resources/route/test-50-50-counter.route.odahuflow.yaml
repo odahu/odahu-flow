@@ -1,4 +1,5 @@
 kind: ModelRoute
+id: basic-route
 metadata:
   name: test-route
 spec:

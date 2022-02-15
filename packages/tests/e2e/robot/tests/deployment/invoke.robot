@@ -1,5 +1,6 @@
 *** Variables ***
 ${RES_DIR}             ${CURDIR}/resources
+${DEP_RES_DIR}         ${RES_DIR}/deployment
 ${LOCAL_CONFIG}        odahuflow/config_deployment_invoke
 ${MD_SIMPLE_MODEL}     simple-model-invoke
 ${MD_SIMPLE_MODEL_1}   simple-model-multiver-1
@@ -18,7 +19,7 @@ Suite Setup         Run Keywords
 ...                 Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}
 ...                 AND  Login to the api and edge
 ...                 AND  Cleanup resources
-...                 AND  Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${RES_DIR}/simple-model.deployment.odahuflow.yaml
+...                 AND  Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL}  ${DEP_RES_DIR}/valid/simple-model.deployment.odahuflow.yaml
 ...                 AND  Check model started  ${MD_SIMPLE_MODEL}
 Suite Teardown      Run keywords
 ...                 Cleanup resources
@@ -98,10 +99,10 @@ Invoke. Pass request body through command line
              Validate invoke succeeded and result  ${res}
 
 Invoke. Deploy 2 models with the same image and invoke
-    Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL_1}  ${RES_DIR}/simple-model-1.deployment.odahuflow.yaml
+    Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL_1}  ${DEP_RES_DIR}/valid/simple-model-1.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL_1}
 
-    Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL_2}  ${RES_DIR}/simple-model-2.deployment.odahuflow.yaml
+    Run API deploy from model packaging  ${MP_SIMPLE_MODEL}  ${MD_SIMPLE_MODEL_2}  ${DEP_RES_DIR}/valid/simple-model-2.deployment.odahuflow.yaml
     Check model started  ${MD_SIMPLE_MODEL_1}
     Check model started  ${MD_SIMPLE_MODEL_2}
 

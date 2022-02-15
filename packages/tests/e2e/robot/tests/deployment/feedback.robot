@@ -1,5 +1,5 @@
 *** Variables ***
-${RES_DIR}             ${CURDIR}/resources
+${RES_DIR}             ${CURDIR}/resources/deployment/valid
 ${LOCAL_CONFIG}        odahuflow/config_deployment_feedback
 ${MD_FEEDBACK_MODEL}   feedback-model
 ${TEST_MODEL_NAME}     feedback

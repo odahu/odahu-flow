@@ -1,5 +1,6 @@
 *** Variables ***
 ${RES_DIR}              ${CURDIR}/resources
+${DEP_RES_DIR}          ${RES_DIR}/deployment
 ${LOCAL_CONFIG}        odahuflow/config_deployment_cli
 ${MD_SIMPLE_MODEL}     simple-model-cli
 
@@ -11,12 +12,12 @@ Resource            ../../resources/variables.robot
 Variables           ../../load_variables_from_profiles.py    ${CLUSTER_PROFILE}
 Library             odahuflow.robot.libraries.utils.Utils
 Library             Collections
-Force Tags          cli  deployment  negative
 Suite Setup         Run Keywords  Set Environment Variable  ODAHUFLOW_CONFIG  ${LOCAL_CONFIG}  AND
 ...                               Login to the api and edge  AND
 ...                               Cleanup resources
 Suite Teardown      Run keywords  Cleanup resources  AND
 ...                 Remove File  ${LOCAL_CONFIG}
+Force Tags          cli  deployment  negative
 
 *** Keywords ***
 Cleanup resources
@@ -31,14 +32,14 @@ Undeploy. Nonexistent model service
 
 Deploy. Zero timeout parameter
     [Documentation]  The deploy command must fail if timeout parameter is zero
-    ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/custom-resources.deployment.odahuflow.yaml --timeout=0
+    ${res}=  Shell  odahuflowctl --verbose dep create -f ${DEP_RES_DIR}/valid/custom-resources.deployment.odahuflow.yaml --timeout=0
              report model deployment pods  simple-model
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  must be positive integer
 
 Deploy. Negative timeout parameter
     [Documentation]  The deploy command must fail if it contains negative timeout parameter
-    ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/custom-resources.deployment.odahuflow.yaml --timeout=-500
+    ${res}=  Shell  odahuflowctl --verbose dep create -f ${DEP_RES_DIR}/valid/custom-resources.deployment.odahuflow.yaml --timeout=-500
              report model deployment pods  simple-model
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  must be positive integer
@@ -72,7 +73,7 @@ Login. Overwrite login values
 
 Deploy fails when validation fails
     [Documentation]  Deploy fails when memory resource is incorect
-    ${res}=  Shell  odahuflowctl --verbose dep create -f ${RES_DIR}/validation-fail.deployment.odahuflow.yaml
+    ${res}=  Shell  odahuflowctl --verbose dep create -f ${DEP_RES_DIR}/invalid/validation-fail.deployment.odahuflow.yaml
              report model deployment pods  simple-model
              Should not be equal  ${res.rc}  ${0}
              Should contain       ${res.stderr}  maximum number of replicas parameter must not be less than minimum number of replicas parameter
