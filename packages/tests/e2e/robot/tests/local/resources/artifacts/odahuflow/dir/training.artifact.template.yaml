@@ -10,6 +10,7 @@ spec:
   workDir: "packages/tests/e2e/robot/tests/local/resources/artifacts"
   hyperParameters:
     alpha: "1.0"
+  dataNotRequired: true
   resources:
     limits:
       cpu: 1
