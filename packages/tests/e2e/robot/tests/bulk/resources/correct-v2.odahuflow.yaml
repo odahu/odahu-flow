@@ -80,6 +80,6 @@ spec:
 kind: ModelDeployment
 id: bulk-test-md-1
 spec:
-  image: gcr.io/or2-msq-epmd-legn-t1iylu/odahu/odahu-flow-packagers:1.6.0-b1644879764289
+  image:
   predictor: odahu-ml-server
   imagePullConnID: docker-ci
