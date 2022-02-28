@@ -50,7 +50,7 @@ const (
 	mrID  = "test-mr"
 	mrID1 = "test-mr1"
 	mrID2 = "test-mr2"
-	mrURL = "/test/url"
+	mrURL = "/custom/test/url"
 )
 
 type ModelRouteSuite struct {
@@ -213,7 +213,7 @@ func (s *ModelRouteSuite) TestGetAllModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(3))  // two defaults and one that we created
+	s.g.Expect(result).Should(HaveLen(3)) // two defaults and one that we created
 
 	ids := make([]string, len(result))
 	specs := make([]odahuflowv1alpha1.ModelRouteSpec, len(result))
@@ -386,7 +386,7 @@ func (s *ModelRouteSuite) TestUpdateMR() {
 	mr := newStubMr()
 	s.g.Expect(s.mrService.CreateModelRoute(context.Background(), mr)).NotTo(HaveOccurred())
 
-	newURL := "/new/url"
+	newURL := "/custom/new/url"
 	mrEntity := newStubMr()
 	mrEntity.Spec.URLPrefix = newURL
 
@@ -421,7 +421,7 @@ func (s *ModelRouteSuite) TestUpdateDefaultRoute() {
 
 	// API request
 
-	newURL := "/new/url"
+	newURL := "/custom/new/url"
 	mrEntity := newStubMr()
 	mrEntity.Spec.URLPrefix = newURL
 	mrEntity.ID = r
@@ -509,7 +509,7 @@ func (s *ModelRouteSuite) TestDeleteMR() {
 
 	mrList, err := s.mrService.GetModelRouteList(context.Background())
 	s.g.Expect(err).NotTo(HaveOccurred())
-	s.g.Expect(mrList).To(HaveLen(2))  // only suite default routes
+	s.g.Expect(mrList).To(HaveLen(2)) // only suite default routes
 }
 
 func (s *ModelRouteSuite) TestDeleteDefaultRoute() {
@@ -601,7 +601,7 @@ func (s *ModelRouteSuite) TestDisabledAPIGetAllModelRoutes() {
 	s.g.Expect(err).NotTo(HaveOccurred())
 
 	s.g.Expect(w.Code).Should(Equal(http.StatusOK))
-	s.g.Expect(result).Should(HaveLen(2))  // only suite deployments default routes
+	s.g.Expect(result).Should(HaveLen(2)) // only suite deployments default routes
 }
 
 func (s *ModelRouteSuite) TestDisabledAPICreateMR() {
@@ -673,11 +673,10 @@ func (s *ModelRouteSuite) TestDisabledAPIDeleteMR() {
 
 func (s *ModelRouteSuite) TestGetRouteEventsIncorrectCursor() {
 
-
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
 		http.MethodGet,
-		dep_route.EventsModelRouteURL + "?cursor=not-number",
+		dep_route.EventsModelRouteURL+"?cursor=not-number",
 		nil,
 	)
 	s.g.Expect(err).NotTo(HaveOccurred())
@@ -706,7 +705,6 @@ func (s *ModelRouteSuite) TestGetRouteEvents() {
 	}
 
 	s.mrEventsGetter.On("Get", mock.Anything, 0).Return(events, 5, nil)
-
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
@@ -742,11 +740,10 @@ func (s *ModelRouteSuite) TestGetRouteEventsWithCursor() {
 
 	s.mrEventsGetter.On("Get", mock.Anything, 6).Return(events, 9, nil)
 
-
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(
 		http.MethodGet,
-		dep_route.EventsModelRouteURL + "?cursor=6",
+		dep_route.EventsModelRouteURL+"?cursor=6",
 		nil,
 	)
 	s.g.Expect(err).NotTo(HaveOccurred())

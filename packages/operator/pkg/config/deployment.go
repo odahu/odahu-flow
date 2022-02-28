@@ -71,6 +71,8 @@ type ModelDeploymentConfig struct {
 	Istio       ModelDeploymentIstioConfig `json:"istio"`
 	// Default resources for deployment pods
 	DefaultResources odahuflowv1alpha1.ResourceRequirements `json:"defaultResources"`
+	// Custom Route prefix for model deployments
+	CustomRoutePrefix string `json:"customRoutePrefix"`
 }
 
 func NewDefaultModelDeploymentConfig() ModelDeploymentConfig {
@@ -95,5 +97,6 @@ func NewDefaultModelDeploymentConfig() ModelDeploymentConfig {
 				Memory: &defaultDeploymentMemoryLimit,
 			},
 		},
+		CustomRoutePrefix: "/custom",
 	}
 }
