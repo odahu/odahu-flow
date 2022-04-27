@@ -35,7 +35,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.10.0
 	github.com/rakyll/statik v0.1.6
-	github.com/rclone/rclone v1.53.0
+	github.com/rclone/rclone v1.53.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
@@ -43,7 +43,6 @@ require (
 	github.com/swaggo/swag v1.5.0
 	github.com/tektoncd/pipeline v0.13.1-0.20200625065359-44f22a067b75
 	github.com/tinylib/msgp v1.1.0 // indirect
-	github.com/vektra/mockery/v2 v2.7.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190809123943-df4f5c81cb3b // indirect
 	github.com/xeipuuv/gojsonschema v1.1.0
 	github.com/zsais/go-gin-prometheus v0.1.0
@@ -51,7 +50,6 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
-	golang.org/x/tools v0.0.0-20200820180210-c8f393745106
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.3.0
 	istio.io/api v0.0.0-20200512234804-e5412c253ffe
