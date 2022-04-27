@@ -20,7 +20,7 @@ class ModelTrainingSpec(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, algorithm_source: AlgorithmSource=None, args: List[str]=None, data: List[DataBindingDir]=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, toolchain: str=None, work_dir: str=None):  # noqa: E501
+    def __init__(self, algorithm_source: AlgorithmSource=None, args: List[str]=None, data: List[DataBindingDir]=None, data_not_required: bool=None, entrypoint: str=None, envs: List[EnvironmentVariable]=None, hyper_parameters: Dict[str, str]=None, image: str=None, model: ModelIdentity=None, node_selector: Dict[str, str]=None, output_connection: str=None, resources: ResourceRequirements=None, toolchain: str=None, work_dir: str=None):  # noqa: E501
         """ModelTrainingSpec - a model defined in Swagger
 
         :param algorithm_source: The algorithm_source of this ModelTrainingSpec.  # noqa: E501
@@ -29,6 +29,8 @@ class ModelTrainingSpec(Model):
         :type args: List[str]
         :param data: The data of this ModelTrainingSpec.  # noqa: E501
         :type data: List[DataBindingDir]
+        :param data_not_required: The data_not_required of this ModelTrainingSpec.  # noqa: E501
+        :type data_not_required: bool
         :param entrypoint: The entrypoint of this ModelTrainingSpec.  # noqa: E501
         :type entrypoint: str
         :param envs: The envs of this ModelTrainingSpec.  # noqa: E501
@@ -54,6 +56,7 @@ class ModelTrainingSpec(Model):
             'algorithm_source': AlgorithmSource,
             'args': List[str],
             'data': List[DataBindingDir],
+            'data_not_required': bool,
             'entrypoint': str,
             'envs': List[EnvironmentVariable],
             'hyper_parameters': Dict[str, str],
@@ -70,6 +73,7 @@ class ModelTrainingSpec(Model):
             'algorithm_source': 'algorithmSource',
             'args': 'args',
             'data': 'data',
+            'data_not_required': 'dataNotRequired',
             'entrypoint': 'entrypoint',
             'envs': 'envs',
             'hyper_parameters': 'hyperParameters',
@@ -85,6 +89,7 @@ class ModelTrainingSpec(Model):
         self._algorithm_source = algorithm_source
         self._args = args
         self._data = data
+        self._data_not_required = data_not_required
         self._entrypoint = entrypoint
         self._envs = envs
         self._hyper_parameters = hyper_parameters
@@ -173,6 +178,29 @@ class ModelTrainingSpec(Model):
         """
 
         self._data = data
+
+    @property
+    def data_not_required(self) -> bool:
+        """Gets the data_not_required of this ModelTrainingSpec.
+
+        Param used to skip data validation  # noqa: E501
+
+        :return: The data_not_required of this ModelTrainingSpec.
+        :rtype: bool
+        """
+        return self._data_not_required
+
+    @data_not_required.setter
+    def data_not_required(self, data_not_required: bool):
+        """Sets the data_not_required of this ModelTrainingSpec.
+
+        Param used to skip data validation  # noqa: E501
+
+        :param data_not_required: The data_not_required of this ModelTrainingSpec.
+        :type data_not_required: bool
+        """
+
+        self._data_not_required = data_not_required
 
     @property
     def entrypoint(self) -> str:

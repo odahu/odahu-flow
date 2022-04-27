@@ -73,6 +73,7 @@ ${empty_model_name}             empty model.name
 ${empty_model_version}          empty model.version
 ${empty_VCS_and_sorage}         both VCS and ObjectStorage names are empty
 ${empty_toolchain}              empty toolchain parameter
+${no_data_binding}              you should specify at least one data binding
 # ---------------------------------  packaging  ---------------------------------
 ${empty_artifactName}           empty artifactName
 ${empty_integrationName}        empty integrationName

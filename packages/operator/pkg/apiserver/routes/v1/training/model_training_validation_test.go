@@ -61,7 +61,8 @@ var (
 					Reference:  testVcsReference,
 				},
 			},
-			NodeSelector: cpuNodeSelector,
+			DataNotRequired: true,
+			NodeSelector:    cpuNodeSelector,
 		},
 	}
 )
@@ -446,6 +447,18 @@ func (s *ModelTrainingValidationSuite) TestMtGenerationOutputArtifactName() {
 	err := s.validator.ValidatesAndSetDefaults(mt)
 	s.g.Expect(err).To(HaveOccurred())
 	s.g.Expect(mt.Spec.Model.ArtifactNameTemplate).ShouldNot(BeEmpty())
+}
+
+func (s *ModelTrainingValidationSuite) TestMtEmptyDataList() {
+	mt := &training.ModelTraining{
+		Spec: v1alpha1.ModelTrainingSpec{
+			DataNotRequired: false,
+		},
+	}
+
+	err := s.validator.ValidatesAndSetDefaults(mt)
+	s.g.Expect(err).To(HaveOccurred())
+	s.g.Expect(err.Error()).Should(ContainSubstring(train_route.EmptyDataBindingsErrorMessage))
 }
 
 func (s *ModelTrainingValidationSuite) TestMtWrongDataType() {

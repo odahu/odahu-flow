@@ -1356,6 +1356,9 @@ definitions:
         items:
           $ref: '#/definitions/DataBindingDir'
         type: array
+      dataNotRequired:
+        description: Param used to skip data validation
+        type: boolean
       entrypoint:
         description: Model training file. It can be python\bash script or jupiter
           notebook

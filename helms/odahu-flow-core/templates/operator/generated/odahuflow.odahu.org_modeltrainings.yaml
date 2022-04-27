@@ -100,6 +100,9 @@ spec:
                 - localPath
                 type: object
               type: array
+            dataNotRequired:
+              description: Param used to skip data validation
+              type: boolean
             entrypoint:
               description: Model training file. It can be python\bash script or jupiter
                 notebook
@@ -195,6 +198,7 @@ spec:
               type: string
           required:
           - algorithmSource
+          - dataNotRequired
           - entrypoint
           - model
           - toolchain

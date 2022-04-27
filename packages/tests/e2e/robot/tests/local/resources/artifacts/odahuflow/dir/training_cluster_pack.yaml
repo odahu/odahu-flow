@@ -20,6 +20,7 @@ spec:
   algorithmSource:
     vcs:
       connection: odahu-flow-examples
+  dataNotRequired: true
 ---
 kind: ModelTraining
 id: local-pack-dir-cluster-artifact-hardcoded
@@ -43,3 +44,4 @@ spec:
   algorithmSource:
     vcs:
       connection: odahu-flow-examples
+  dataNotRequired: true

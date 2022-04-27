@@ -58,10 +58,12 @@ spec:
     name: bulk-test-mt-1
     version: 'test'
   toolchain: mlflow
+  entrypoint: main
   algorithmSource:
     vcs:
       connection: odahu-flow-examples
       reference: develop
+  dataNotRequired: true
 ---
 kind: ModelPackaging
 id: bulk-test-mp-1
